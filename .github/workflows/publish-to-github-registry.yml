@@ -1,9 +1,7 @@
 name: Build and publish docker image to GitHub Registry
 
 on:
-  push:
-    branches:
-    - master
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,7 +15,7 @@ jobs:
         uses: docker/setup-qemu-action@v1
         with:
           image: tonistiigi/binfmt:latest
-          platforms: arm64,arm,amd64,riscv64,ppc64le,s390x
+          platforms: arm64,arm,amd64
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to GitHub Registry
@@ -32,4 +30,4 @@ jobs:
           context: .
           platforms: linux/arm64,linux/amd64,linux/arm/v7
           push: true
-          tags: ghcr.io/rossonet/console-application:latest
+          tags: ghcr.io/rossonet/waldot:latest
