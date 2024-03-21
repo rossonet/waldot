@@ -17,14 +17,14 @@ plugins {
     id 'org.graalvm.buildtools.native' version '0.9.20'
 }
 
-description = "Rossonet template project for console applications"
-group = 'net.rossonet.agent'
-version = '0.0.3'
+description = "Strumenti per integrare sistemi di chatbot con RocketChat"
+group = 'net.rossonet.waldot'
+version = '0.0.1'
 
 ext {
     sourceCompatibility = 1.8
     mainClassName = "net.rossonet.agent.MainAgent"
-    mainPicocliCommandClass = "net.rossonet.cmd.commands.SystemInfoCommand"
+    mainPicocliCommandClass = "net.rossonet.agent.BotEngine"
     debianName = "${project.name}"
     packageName = "${project.name}"
     ossrhPassword = System.getenv('OSSRH_PASSWORD')
@@ -50,11 +50,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'application'
 
 dependencies {
-    implementation 'net.rossonet.commons:rossonet-helper:0.3.2'
-    implementation 'net.rossonet.commons.command:command-line-to-action:0.2.1'
-    annotationProcessor 'info.picocli:picocli-codegen:4.7.1'
-    implementation group: 'org.json', name: 'json', version: '20230227'
-    implementation 'org.yaml:snakeyaml:2.0'
+    implementation 'net.rossonet.commons:rossonet-helper:0.4.15'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '1.1.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
