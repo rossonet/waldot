@@ -1,7 +1,7 @@
 
 package net.rossonet.agent;
 
-import picocli.CommandLine;
+import org.rossonet.ext.picocli.CommandLine;
 
 /**
  * Classe main per avvio applicazione
