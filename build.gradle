@@ -14,7 +14,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.graalvm.buildtools.native' version '0.9.20'
+    id 'org.graalvm.buildtools.native' version '0.10.2'
 }
 
 description = "Strumenti per integrare sistemi di chatbot con RocketChat"
