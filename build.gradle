@@ -54,7 +54,7 @@ apply plugin: 'application'
 
 dependencies {
     implementation 'net.rossonet.commons:rossonet-helper:0.4.15'
-    implementation 'com.ibm.watson:ibm-watson:11.0.1'
+    implementation 'com.ibm.watson:ibm-watson:13.0.0'
     implementation group: 'net.rossonet', name: 'rocket-chat-rest-client', version: '0.2.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '1.1.2'
