@@ -1,9 +1,9 @@
-FROM ubuntu:20.04 as builder
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y openjdk-11-jdk
+FROM ubuntu:22.04 as builder
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y openjdk-17-jdk
 COPY . /workspace
 RUN cd /workspace && echo "build project" && ./gradlew clean distTar
 
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:17-jre
 ENTRYPOINT ["java"]
 CMD ["-cp","/app/lib/*","-XX:+UnlockExperimentalVMOptions","-Djava.net.preferIPv4Stack=true","-XshowSettings:vm","-Djava.security.egd=file:/dev/./urandom", "net.rossonet.agent.MainAgent"]
 RUN mkdir -p /app

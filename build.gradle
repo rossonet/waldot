@@ -6,7 +6,7 @@ buildscript {
     }
     dependencies {
         classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.1"
-        classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.2.0'
+        classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.9.1'
         classpath 'de.undercouch:gradle-download-task:5.6.0'
         classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
         classpath "com.palantir.gradle.docker:gradle-docker:0.36.0"
@@ -14,12 +14,12 @@ buildscript {
 }
 
 plugins {
-    id 'org.graalvm.buildtools.native' version '0.9.20'
+    id 'org.graalvm.buildtools.native' version '0.10.2'
 }
 
 description = "Strumenti per integrare sistemi di chatbot con RocketChat"
 group = 'net.rossonet.waldot'
-version = '0.0.1'
+version = '0.0.2'
 
 ext {
     sourceCompatibility = 1.8
@@ -36,6 +36,7 @@ repositories {
     maven {
        url "https://repo.craftyn.com/repository/snapshots/" 
     }
+    maven { url 'https://jitpack.io' }
 }
 
 apply plugin: 'com.palantir.docker'
@@ -53,6 +54,18 @@ apply plugin: 'maven-publish'
 apply plugin: 'application'
 
 dependencies {
+    implementation 'dev.langchain4j:langchain4j-ollama:0.34.0'
+    implementation 'dev.langchain4j:langchain4j-hugging-face:0.34.0'
+    implementation 'dev.langchain4j:langchain4j-neo4j:0.34.0'
+    implementation 'dev.langchain4j:langchain4j-easy-rag:0.34.0'
+    implementation 'dev.langchain4j:langchain4j-document-parser-apache-tika:0.34.0'
+    implementation 'dev.langchain4j:langchain4j-experimental-sql:0.34.0'
+    implementation 'dev.langchain4j:langchain4j-document-loader-amazon-s3:0.34.0'
+    implementation 'dev.langchain4j:langchain4j-web-search-engine-google-custom:0.34.0'
+    implementation 'dev.langchain4j:langchain4j-document-loader-github:0.34.0'
+    implementation 'org.fastily:jwiki:1.9.0'
+    implementation 'com.github.Asedem:OllamaJavaAPI:master-SNAPSHOT'
+    implementation 'org.neo4j.driver:neo4j-java-driver:5.22.0'
     implementation 'net.rossonet.commons:rossonet-helper:0.4.15'
     implementation 'com.ibm.watson:ibm-watson:11.0.1'
     implementation group: 'net.rossonet', name: 'rocket-chat-rest-client', version: '0.2.1'
