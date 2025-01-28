@@ -1,0 +1,102 @@
+/*
+ * Copyright (c) 2021 Fraunhofer-Gesellschaft zur Foerderung der angewandten Forschung e. V.
+ * Copyright (c) 2023, SAP SE or an SAP affiliate company
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package net.rossonet.study.aas4j;
+
+import java.util.Objects;
+
+import org.eclipse.digitaltwin.aas4j.v3.model.Key;
+import org.eclipse.digitaltwin.aas4j.v3.model.KeyTypes;
+import org.eclipse.digitaltwin.aas4j.v3.model.annotations.IRI;
+import org.eclipse.digitaltwin.aas4j.v3.model.builder.KeyBuilder;
+
+/**
+ * Default implementation of package org.eclipse.digitaltwin.aas4j.v3.model.Key
+ * 
+ * A key is a reference to an element by its ID.
+ */
+
+@IRI("aas:Key")
+public class OpcNodeKey implements Key {
+
+	/**
+	 * This builder class can be used to construct a OpcNodeKey bean.
+	 */
+	public static class Builder extends KeyBuilder<OpcNodeKey, Builder> {
+
+		@Override
+		protected Builder getSelf() {
+			return this;
+		}
+
+		@Override
+		protected OpcNodeKey newBuildingInstance() {
+			return new OpcNodeKey();
+		}
+	}
+
+	@IRI("https://admin-shell.io/aas/3/0/Key/type")
+	protected KeyTypes type;
+
+	@IRI("https://admin-shell.io/aas/3/0/Key/value")
+	protected String value;
+
+	public OpcNodeKey() {
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		} else if (obj == null) {
+			return false;
+		} else if (this.getClass() != obj.getClass()) {
+			return false;
+		} else {
+			final OpcNodeKey other = (OpcNodeKey) obj;
+			return Objects.equals(this.type, other.type) && Objects.equals(this.value, other.value);
+		}
+	}
+
+	@Override
+	public KeyTypes getType() {
+		return type;
+	}
+
+	@Override
+	public String getValue() {
+		return value;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.type, this.value);
+	}
+
+	@Override
+	public void setType(KeyTypes type) {
+		this.type = type;
+	}
+
+	@Override
+	public void setValue(String value) {
+		this.value = value;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("OpcNodeKey (" + "type=%s," + "value=%s," + ")", this.type, this.value);
+	}
+}

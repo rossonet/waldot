@@ -1,0 +1,8 @@
+rootProject.name = 'WaldOT'
+include 'waldot-api'
+include 'waldot-namespace'
+include 'waldot-app'
+include 'waldot-plugin-os'
+include 'waldot-plugin-bag'
+include 'waldot-console'
+include 'waldot-plugin-tinkerpop'

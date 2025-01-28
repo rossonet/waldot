@@ -1,0 +1,189 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.1"
+        classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.9.1'
+        classpath 'de.undercouch:gradle-download-task:5.6.0'
+        classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
+        classpath "com.palantir.gradle.docker:gradle-docker:0.36.0"
+    }
+}
+
+description = "WaldOT OpcUA namespace"
+group = 'net.rossonet.waldot'
+version = '0.1.0'
+
+ext {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+    mainClassName = "net.rossonet.agent.MainAgent"
+    mainPicocliCommandClass = "net.rossonet.agent.WaldotEngine"
+    debianName = "${project.name}"
+    packageName = "${project.name}"
+    ossrhPassword = System.getenv('OSSRH_PASSWORD')
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+       url "https://repo.craftyn.com/repository/snapshots/" 
+    }
+    maven { url 'https://jitpack.io' }
+}
+
+apply plugin: 'com.palantir.docker'
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'eclipse'
+apply plugin: "com.gorylenko.gradle-git-properties"
+apply plugin: 'jacoco'
+apply plugin: "com.netflix.nebula.ospackage"
+apply plugin: 'base'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'distribution'
+apply plugin: 'signing'
+apply plugin: 'maven-publish'
+apply plugin: 'application'
+
+dependencies {
+	api project(':waldot-api')
+    api 'org.json:json:20240303'
+    api 'org.yaml:snakeyaml:2.3'
+    api 'org.apache.commons:commons-jexl3:3.4.0'
+    api 'org.slf4j:jul-to-slf4j:2.0.16'
+    implementation 'org.slf4j:slf4j-simple:2.0.16'
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.2'
+    // OPCUA
+    implementation group: 'org.eclipse.milo', name: 'sdk-server', version: '0.6.14'
+    implementation group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.14'
+    implementation group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.14'
+    implementation group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
+    // gremlin
+    implementation group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
+    annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
+    //implementation 'ch.qos.logback:logback-classic:1.5.8'
+    //implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
+    // for AAS integration study
+    // AAS
+    //testImplementation 'org.eclipse.digitaltwin.aas4j:aas4j-model:1.0.3'
+    //testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-aasx', version: '1.0.0-milestone-04'
+    //testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-xml', version: '1.0.0-milestone-04'
+    //testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-json', version: '1.0.0-milestone-04'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
+    testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.0'
+    testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
+    testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
+}
+
+task eclipseClosedDependencies {}
+
+task eclipseClosedDependencies_ {}
+
+compileJava {
+    options.encoding = "UTF-8"
+    options.compilerArgs.addAll(['-XprintProcessorInfo'])
+}
+
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+task view { doLast { println "Working on project ${project.name} [ ${project.description} ]" } }
+
+jar {
+    enabled = true
+}
+
+jar.doLast { task ->
+	ant.checksum file: task.archivePath
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+gitProperties {
+    failOnNoGitDirectory = false
+    customProperty 'component', "${project.name}"
+    dateFormat = "yyyy-MM-dd HH:mm:ssZ"
+    dateFormatTimeZone = 'GMT'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+javadoc{
+    destinationDir = file("${project.buildDir}/docs/javadoc/${project.name}/")
+    failOnError=false
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication){
+            artifactId = "${project.name}"
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = "${project.name}"
+                description = "${project.description}"
+                url = 'https://app.rossonet.net/'
+                licenses {
+                    license {
+                        name = 'Apache-2.0 license'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'ar4k'
+                        name = 'Andrea Ambrosini'
+                        email = 'andrea.ambrosini@rossonet.org'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/rossonet/TemplateConsoleApplication.git'
+                    developerConnection = 'scm:git:ssh://github.com:rossonet/TemplateConsoleApplication.git'
+                    url = 'https://github.com/rossonet/TemplateConsoleApplication/tree/master'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            name = "sonatype"
+            credentials {
+                username "rossonet"
+                password "${ossrhPassword}"
+            }
+        }
+    }
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
