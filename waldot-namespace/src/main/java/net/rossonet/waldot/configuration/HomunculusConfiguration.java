@@ -18,26 +18,32 @@ public class HomunculusConfiguration extends HashMap<String, String> implements 
 	private HomunculusConfiguration() {
 	}
 
+	@Override
 	public String getAboutCommandDescription() {
 		return "info about this software";
 	}
 
+	@Override
 	public Boolean getAboutCommandExecutable() {
 		return true;
 	}
 
+	@Override
 	public String getAboutCommandLabel() {
 		return "about";
 	}
 
+	@Override
 	public Boolean getAboutCommandUserExecutable() {
 		return true;
 	}
 
+	@Override
 	public UInteger getAboutCommandUserWriteMask() {
 		return UInteger.MIN;
 	}
 
+	@Override
 	public UInteger getAboutCommandWriteMask() {
 		return UInteger.MIN;
 	}
@@ -62,30 +68,37 @@ public class HomunculusConfiguration extends HashMap<String, String> implements 
 		return "aas";
 	}
 
+	@Override
 	public URL getBootUrl() {
 		return null;
 	}
 
+	@Override
 	public String getExecCommandDescription() {
 		return "run system command";
 	}
 
+	@Override
 	public Boolean getExecCommandExecutable() {
 		return true;
 	}
 
+	@Override
 	public String getExecCommandLabel() {
 		return "exec";
 	}
 
+	@Override
 	public Boolean getExecCommandUserExecutable() {
 		return true;
 	}
 
+	@Override
 	public UInteger getExecCommandUserWriteMask() {
 		return UInteger.MIN;
 	}
 
+	@Override
 	public UInteger getExecCommandWriteMask() {
 		return UInteger.MIN;
 	}
@@ -100,28 +113,34 @@ public class HomunculusConfiguration extends HashMap<String, String> implements 
 		return "admin";
 	}
 
+	@Override
 	public String getHelpCommandDescription() {
 		return "list available commands";
 
 	}
 
+	@Override
 	public Boolean getHelpCommandExecutable() {
 		return true;
 	}
 
+	@Override
 	public String getHelpCommandLabel() {
 		return "help";
 	}
 
+	@Override
 	public Boolean getHelpCommandUserExecutable() {
 		return true;
 
 	}
 
+	@Override
 	public UInteger getHelpCommandUserWriteMask() {
 		return UInteger.MIN;
 	}
 
+	@Override
 	public UInteger getHelpCommandWriteMask() {
 		return UInteger.MIN;
 	}
@@ -141,6 +160,7 @@ public class HomunculusConfiguration extends HashMap<String, String> implements 
 		return "cmd";
 	}
 
+	@Override
 	public String getManagerNamespaceUri() {
 		return "urn:rossonet:waldot:engine";
 	}
@@ -160,50 +180,62 @@ public class HomunculusConfiguration extends HashMap<String, String> implements 
 		return "waldot";
 	}
 
+	@Override
 	public String getVersionCommandDescription() {
 		return "show software version";
 	}
 
+	@Override
 	public Boolean getVersionCommandExecutable() {
 		return true;
 	}
 
+	@Override
 	public String getVersionCommandLabel() {
 		return "version";
 	}
 
+	@Override
 	public Boolean getVersionCommandUserExecutable() {
 		return true;
 	}
 
+	@Override
 	public UInteger getVersionCommandUserWriteMask() {
 		return UInteger.MIN;
 	}
 
+	@Override
 	public UInteger getVersionCommandWriteMask() {
 		return UInteger.MIN;
 	}
 
+	@Override
 	public String getWaldotCommandDescription() {
 		return "run Gremlin query";
 	}
 
+	@Override
 	public Boolean getWaldotCommandExecutable() {
 		return true;
 	}
 
+	@Override
 	public String getWaldotCommandLabel() {
 		return "query";
 	}
 
+	@Override
 	public Boolean getWaldotCommandUserExecutable() {
 		return true;
 	}
 
+	@Override
 	public UInteger getWaldotCommandUserWriteMask() {
 		return UInteger.MIN;
 	}
 
+	@Override
 	public UInteger getWaldotCommandWriteMask() {
 		return UInteger.MIN;
 	}

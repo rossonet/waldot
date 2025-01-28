@@ -6,12 +6,12 @@ import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHan
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 
-import net.rossonet.waldot.namespaces.HomunculusNamespace;
+import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class AboutCommand extends AbstractOpcCommand {
 
-	public AboutCommand(HomunculusNamespace waldotNamespace) {
+	public AboutCommand(WaldotNamespace waldotNamespace) {
 		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
 				waldotNamespace.getConfiguration().getAboutCommandLabel(),
 				waldotNamespace.getConfiguration().getAboutCommandDescription(),

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler;
-import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler.InvocationContext;
 import org.eclipse.milo.opcua.sdk.server.api.methods.MethodInvocationHandler;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
@@ -17,8 +16,8 @@ import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
-import net.rossonet.waldot.namespaces.HomunculusNamespace;
 
 public abstract class AbstractOpcCommand extends OpcVertex implements WaldotCommand {
 
@@ -46,13 +45,12 @@ public abstract class AbstractOpcCommand extends OpcVertex implements WaldotComm
 
 	private final List<Argument> outputArguments = new ArrayList<>();
 
-	private final HomunculusNamespace waldotNamespace;
+	private final WaldotNamespace waldotNamespace;
 
 	private final UaMethodNode insideCommand;
 
-	public AbstractOpcCommand(WaldotGraph graph, HomunculusNamespace waldotNamespace, String command,
-			String description, UInteger writeMask, UInteger userWriteMask, Boolean executable,
-			Boolean userExecutable) {
+	public AbstractOpcCommand(WaldotGraph graph, WaldotNamespace waldotNamespace, String command, String description,
+			UInteger writeMask, UInteger userWriteMask, Boolean executable, Boolean userExecutable) {
 		super(graph, waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(command),
 				waldotNamespace.generateQualifiedName(command), LocalizedText.english(command),
 				LocalizedText.english(description), writeMask, userWriteMask, null, 0);
@@ -122,20 +120,12 @@ public abstract class AbstractOpcCommand extends OpcVertex implements WaldotComm
 
 	@Override
 	public Boolean isExecutable() {
-		// TODO Auto-generated method stub
-		return null;
+		return insideCommand.isExecutable();
 	}
 
 	@Override
 	public Boolean isUserExecutable() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String[] runCommand(InvocationContext invocationContext, String[] inputValues) {
-		// TODO Auto-generated method stub
-		return null;
+		return insideCommand.isUserExecutable();
 	}
 
 	// per dsl gremlin
@@ -147,25 +137,25 @@ public abstract class AbstractOpcCommand extends OpcVertex implements WaldotComm
 
 	@Override
 	public void setExecutable(Boolean executable) {
-		// TODO Auto-generated method stub
+		insideCommand.setExecutable(executable);
 
 	}
 
 	@Override
 	public void setInputArguments(Argument[] array) {
-		// TODO Auto-generated method stub
+		insideCommand.setInputArguments(array);
 
 	}
 
 	@Override
 	public void setOutputArguments(Argument[] array) {
-		// TODO Auto-generated method stub
+		insideCommand.setOutputArguments(array);
 
 	}
 
 	@Override
 	public void setUserExecutable(Boolean userExecutable) {
-		// TODO Auto-generated method stub
+		insideCommand.setUserExecutable(userExecutable);
 
 	}
 

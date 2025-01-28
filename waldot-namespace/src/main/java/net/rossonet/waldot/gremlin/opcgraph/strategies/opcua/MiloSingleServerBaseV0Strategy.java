@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
+import net.rossonet.waldot.api.annotation.WaldotMiloStrategy;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
@@ -63,6 +64,7 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
+@WaldotMiloStrategy
 public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 
 	private static final int DEFAULT_PRIORITY_VALUE = 100;
@@ -221,11 +223,11 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 			description = label;
 			logger.info(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
 		}
-		final OpcVertex vertex = new OpcVertex(waldotNamespace.getGremlinGraph(), waldotNamespace.getOpcUaNodeContext(),
-				nodeId, browseName, displayName, new LocalizedText(description), writeMask, userWriteMask,
-				eventNotifierActive, version);
-		waldotNamespace.getStorageManager().addNode(vertex);
 		NodeId typeDefinition = getTypeDefinition(propertyKeyValues);
+		final OpcVertex vertex = createVertexObject(typeDefinition, waldotNamespace.getGremlinGraph(),
+				waldotNamespace.getOpcUaNodeContext(), nodeId, browseName, displayName, new LocalizedText(description),
+				writeMask, userWriteMask, eventNotifierActive, version);
+		waldotNamespace.getStorageManager().addNode(vertex);
 		if (typeDefinition == null) {
 			typeDefinition = vertexTypeNode.getNodeId();
 			logger.info(TYPE_DEFINITION_PARAMETER + " not found in propertyKeyValues, using default type '{}'",
@@ -281,7 +283,8 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 			final QualifiedProperty<String> LABEL = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
 					LABEL_FIELD, labelRuleTypeNode.getNodeId().expanded(), ValueRanks.Scalar, String.class);
 			vertex.setProperty(LABEL, label);
-			waldotNamespace.getRulesEngine().registerOrUpdateRule(vertex.getNodeId(), label, condition, action, priority);
+			waldotNamespace.getRulesEngine().registerOrUpdateRule(vertex.getNodeId(), label, condition, action,
+					priority);
 		} else {
 			final String directory = getDirectory(propertyKeyValues);
 			if (directory == null || directory.isEmpty()) {
@@ -413,6 +416,14 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		return new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
 				waldotNamespace.generateNodeId(rootNode.getNodeId().getIdentifier().toString() + "/Variables"),
 				waldotNamespace.generateQualifiedName("Variables"), LocalizedText.english("Gremlin Variables"));
+	}
+
+	private OpcVertex createVertexObject(NodeId typeDefinition, final WaldotGraph graph, UaNodeContext context,
+			final NodeId nodeId, final QualifiedName browseName, LocalizedText displayName, LocalizedText description,
+			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier, long version) {
+		// TODO generare il giusto oggetto in funzione del nodeid
+		return new OpcVertex(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
+				eventNotifier, version);
 	}
 
 	private UaFolderNode createVerticesFolder() {

@@ -24,6 +24,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import com.google.common.eventbus.EventBus;
 
 import net.rossonet.waldot.api.NamespaceListener;
+import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 
@@ -92,6 +93,8 @@ public interface WaldotNamespace {
 
 	public UaNodeContext getOpcUaNodeContext();
 
+	Set<PluginListener> getPlugins();
+
 	public <DATA_TYPE> WaldotEdge getPropertyReference(WaldotProperty<DATA_TYPE> property);
 
 	public Map<NodeId, ReferenceType> getReferenceTypes();
@@ -134,6 +137,8 @@ public interface WaldotNamespace {
 
 	void registerMethodOutputArguments(WaldotCommand command, List<Argument> inputArguments);
 
+	void registerPlugin(PluginListener plugin);
+
 	void removeCommand(WaldotCommand command);
 
 	void removeEdge(NodeId expandedNodeId);
@@ -147,5 +152,7 @@ public interface WaldotNamespace {
 	void resetNameSpace();
 
 	Object runExpression(String expression);
+
+	void unregisterPlugin(PluginListener plugin);
 
 }

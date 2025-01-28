@@ -2,6 +2,7 @@ package net.rossonet.waldot.namespaces;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 
 import net.rossonet.waldot.api.NamespaceListener;
+import net.rossonet.waldot.api.PluginListener;
+import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.models.IdManager;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotEdge;
@@ -58,7 +61,7 @@ import net.rossonet.waldot.rules.DefaultRulesEngine;
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private final HomunculusConfiguration configuration;
+	private final WaldotConfiguration configuration;
 	private final DataTypeDictionaryManager dictionaryManager;
 	private final SubscriptionModel subscriptionModel;
 	private final OpcGraph gremlin;
@@ -70,6 +73,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final ConsoleStrategy consoleStrategy;
 	private final DefaultRulesEngine rulesEngine = new DefaultRulesEngine(this);
 	private final List<NamespaceListener> listeners = new ArrayList<>();
+	private final Set<PluginListener> plugins = new HashSet<>();
 
 	public HomunculusNamespace(OpcUaServer server, WaldotMappingStrategy opcMappingStrategy,
 			ConsoleStrategy consoleStrategy, HomunculusConfiguration configuration,
@@ -97,7 +101,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	}
 
-	// TODO sostituire con registrazione comando da plugin
+// TODO sostituire con registrazione comando da plugin
 	private void addBaseCommands() {
 		if (configuration.getWaldotCommandLabel() != null) {
 			registerCommand(new QueryCommand(this));
@@ -185,7 +189,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public HomunculusConfiguration getConfiguration() {
+	public WaldotConfiguration getConfiguration() {
 		return configuration;
 	}
 
@@ -263,6 +267,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public UaNodeContext getOpcUaNodeContext() {
 		return getNodeContext();
+	}
+
+	@Override
+	public Set<PluginListener> getPlugins() {
+		return plugins;
 	}
 
 	@Override
@@ -403,6 +412,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
+	public void registerPlugin(PluginListener plugin) {
+		plugins.add(plugin);
+	}
+
+	@Override
 	public void removeCommand(WaldotCommand command) {
 		opcMappingStrategy.removeCommand(command);
 		listeners.forEach(listener -> listener.onCommandRemoved(command));
@@ -460,6 +474,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		builder.append(", ");
 		builder.append("]");
 		return builder.toString();
+	}
+
+	@Override
+	public void unregisterPlugin(PluginListener plugin) {
+		plugins.remove(plugin);
 	}
 
 }

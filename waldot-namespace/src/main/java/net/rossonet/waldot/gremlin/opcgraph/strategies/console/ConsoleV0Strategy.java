@@ -3,11 +3,13 @@ package net.rossonet.waldot.gremlin.opcgraph.strategies.console;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.api.annotation.WaldotConsoleStrategy;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.rules.ExecutorHelper;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.jexl.JexlExecutorHelper;
 
+@WaldotConsoleStrategy
 public class ConsoleV0Strategy implements ConsoleStrategy {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private WaldotNamespace waldotNamespace;

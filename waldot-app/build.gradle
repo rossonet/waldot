@@ -56,21 +56,10 @@ apply plugin: 'application'
 
 dependencies {
 	api project(':waldot-namespace')
-    api 'org.json:json:20240303'
-    api 'org.yaml:snakeyaml:2.3'
-    api 'org.apache.commons:commons-jexl3:3.4.0'
-    api 'org.slf4j:jul-to-slf4j:2.0.16'
+	api project(':waldot-plugin-os')
+	api project(':waldot-plugin-bag')
+	api project(':waldot-plugin-tinkerpop')
     implementation 'org.slf4j:slf4j-simple:2.0.16'
-    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.2'
-    // OPCUA
-    implementation group: 'org.eclipse.milo', name: 'sdk-server', version: '0.6.14'
-    implementation group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.14'
-    implementation group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.14'
-    implementation group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
-    // gremlin
-    implementation group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
-    annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
-    //implementation 'ch.qos.logback:logback-classic:1.5.8'
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
     // for AAS integration study
     // AAS

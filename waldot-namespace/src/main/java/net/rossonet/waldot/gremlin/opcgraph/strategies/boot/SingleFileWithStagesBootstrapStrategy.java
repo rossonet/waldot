@@ -1,8 +1,10 @@
 package net.rossonet.waldot.gremlin.opcgraph.strategies.boot;
 
+import net.rossonet.waldot.api.annotation.WaldotBootStrategy;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.BootstrapProcedureStrategy;
 
+@WaldotBootStrategy
 public class SingleFileWithStagesBootstrapStrategy implements BootstrapProcedureStrategy {
 
 	@SuppressWarnings("unused")

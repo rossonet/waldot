@@ -59,21 +59,13 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:2.0.16'
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.2'
     // OPCUA
-    implementation group: 'org.eclipse.milo', name: 'sdk-server', version: '0.6.14'
-    implementation group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.14'
-    implementation group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.14'
-    implementation group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
+    api group: 'org.eclipse.milo', name: 'sdk-server', version: '0.6.15'
+    api group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.15'
+    api group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.15'
+    api group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
     // gremlin
-    implementation group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
+    api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
     annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
-    //implementation 'ch.qos.logback:logback-classic:1.5.8'
-    //implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
-    // for AAS integration study
-    // AAS
-    //testImplementation 'org.eclipse.digitaltwin.aas4j:aas4j-model:1.0.3'
-    //testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-aasx', version: '1.0.0-milestone-04'
-    //testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-xml', version: '1.0.0-milestone-04'
-    //testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-json', version: '1.0.0-milestone-04'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.0'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
