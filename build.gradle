@@ -6,10 +6,7 @@ buildscript {
     }
     dependencies {
         classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.1"
-        classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.9.1'
         classpath 'de.undercouch:gradle-download-task:5.6.0'
-        classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
-        classpath "com.palantir.gradle.docker:gradle-docker:0.36.0"
     }
 }
 
@@ -20,8 +17,6 @@ version = '0.1.0'
 ext {
     sourceCompatibility = 17
     targetCompatibility = 17
-    //mainClassName = "net.rossonet.agent.MainAgent"
-    //mainPicocliCommandClass = "net.rossonet.agent.WaldotEngine"
     debianName = "${project.name}"
     packageName = "${project.name}"
     ossrhPassword = System.getenv('OSSRH_PASSWORD')

@@ -30,13 +30,9 @@ java_pid*.hprof
 
 ### OUTPUT ###
 spring-shell.log
-Ar4kAgent
-ar4kAgent
-*.ar4k
 camel-test
 .attach_pid*
 *.keystore
-ar4k-agent.log
 logs/*
 npm-debug.log
 package-lock.json
@@ -69,7 +65,6 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
-vagrant/LabOpenShift/crc-linux-amd64.tar.xz
 
 tinkerpop-sink*
 tinkerpop-crew*

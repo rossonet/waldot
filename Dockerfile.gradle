@@ -1,6 +1,0 @@
-FROM eclipse-temurin:17-jre
-ENTRYPOINT ["java"]
-CMD ["-cp","/app/lib/*","-XX:+UnlockExperimentalVMOptions","-Djava.net.preferIPv4Stack=true","-XshowSettings:vm","-Djava.security.egd=file:/dev/./urandom", "net.rossonet.agent.MainAgent"]
-RUN mkdir -p /app
-COPY ./*.tar /tmp/
-RUN tar -xf /tmp/*.tar -C ./app --strip-components=1 && rm -rf /tmp/*.tar
