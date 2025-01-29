@@ -6,12 +6,12 @@ import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHan
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 
-import net.rossonet.waldot.namespaces.HomunculusNamespace;
+import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class QueryCommand extends AbstractOpcCommand {
 
-	public QueryCommand(HomunculusNamespace waldotNamespace) {
+	public QueryCommand(WaldotNamespace waldotNamespace) {
 		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
 				waldotNamespace.getConfiguration().getWaldotCommandLabel(),
 				waldotNamespace.getConfiguration().getWaldotCommandDescription(),
@@ -27,6 +27,11 @@ public class QueryCommand extends AbstractOpcCommand {
 				LocalizedText.english("command to execute"));
 		this.addReference(new Reference(this.getNodeId(), Identifiers.HasModellingRule,
 				Identifiers.ModellingRule_Mandatory.expanded(), true));
+	}
+
+	@Override
+	public Object clone() {
+		return new QueryCommand(this.waldotNamespace);
 	}
 
 	@Override

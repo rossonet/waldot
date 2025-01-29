@@ -6,12 +6,12 @@ import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHan
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 
-import net.rossonet.waldot.namespaces.HomunculusNamespace;
+import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class VersionCommand extends AbstractOpcCommand {
 
-	public VersionCommand(HomunculusNamespace waldotNamespace) {
+	public VersionCommand(WaldotNamespace waldotNamespace) {
 		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
 				waldotNamespace.getConfiguration().getVersionCommandLabel(),
 				waldotNamespace.getConfiguration().getVersionCommandDescription(),
@@ -25,6 +25,11 @@ public class VersionCommand extends AbstractOpcCommand {
 				LocalizedText.english("build version of the software"));
 		this.addReference(new Reference(this.getNodeId(), Identifiers.HasModellingRule,
 				Identifiers.ModellingRule_Mandatory.expanded(), true));
+	}
+
+	@Override
+	public Object clone() {
+		return new VersionCommand(this.waldotNamespace);
 	}
 
 	@Override

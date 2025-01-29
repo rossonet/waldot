@@ -27,8 +27,13 @@ public class AboutCommand extends AbstractOpcCommand {
 	}
 
 	@Override
+	public Object clone() {
+		return new AboutCommand(this.waldotNamespace);
+	}
+
+	@Override
 	public String[] runCommand(InvocationContext invocationContext, String[] inputValues) {
-		// TODO completare about command
+		// TODO Auto-generated method stub
 		return new String[] { "result of about command" };
 	}
 

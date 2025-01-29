@@ -71,8 +71,8 @@ public interface WaldotMappingStrategy {
 			public NodeId getNextId(final WaldotGraph graph) {
 				boolean found = false;
 				while (!found) {
-					final NodeId id = graph.getOpcNamespace().generateNodeId(graph.getGeneratedId().incrementAndGet());
-					if (!graph.getOpcNamespace().hasNodeId(id)) {
+					final NodeId id = graph.getWaldotNamespace().generateNodeId(graph.getGeneratedId().incrementAndGet());
+					if (!graph.getWaldotNamespace().hasNodeId(id)) {
 						found = true;
 						return id;
 					}
@@ -81,14 +81,14 @@ public interface WaldotMappingStrategy {
 			}
 
 			private NodeId getNodeIdFromNumber(final WaldotGraph graph, Integer nodeId) {
-				return graph.getOpcNamespace().generateNodeId("i=" + Integer.valueOf(nodeId));
+				return graph.getWaldotNamespace().generateNodeId("i=" + Integer.valueOf(nodeId));
 			}
 
 			private NodeId getNodeIdFromString(final WaldotGraph graph, String nodeId) {
 				try {
 					return NodeId.parse(nodeId);
 				} catch (final Exception e) {
-					return graph.getOpcNamespace().generateNodeId("s=" + nodeId);
+					return graph.getWaldotNamespace().generateNodeId("s=" + nodeId);
 				}
 			}
 

@@ -1,8 +1,9 @@
 
-package net.rossonet.waldot.gremlin.opcgraph.structure;
+package net.rossonet.waldot.opc;
 
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
@@ -20,7 +21,7 @@ public abstract class OpcElement extends UaObjectNode implements WaldotElement {
 		return new IllegalStateException(String.format("%s with id %s was removed.", clazz.getSimpleName(), id));
 	}
 
-	protected boolean removed = false;
+	private boolean removed = false;
 
 	protected long currentVersion;
 
@@ -35,6 +36,12 @@ public abstract class OpcElement extends UaObjectNode implements WaldotElement {
 			UByte eventNotifier, long version) {
 		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier);
 		currentVersion = version;
+	}
+
+	@Override
+	public void addComponent(WaldotElement waldotElement) {
+		super.addComponent((UaNode) waldotElement);
+
 	}
 
 	@Override
@@ -56,12 +63,29 @@ public abstract class OpcElement extends UaObjectNode implements WaldotElement {
 	}
 
 	@Override
+	public boolean isRemoved() {
+		return removed;
+	}
+
+	@Override
 	public String label() {
 		return getBrowseName().getName();
+	}
+
+	@Override
+	public void remove() {
+		this.removed = true;
+	}
+
+	@Override
+	public void removeComponent(WaldotElement waldotElement) {
+		super.removeComponent((UaNode) waldotElement);
+
 	}
 
 	@Override
 	public long version() {
 		return this.currentVersion;
 	}
+
 }

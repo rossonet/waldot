@@ -176,7 +176,7 @@ public class OpcGraph extends AbstractOpcGraph {
 	}
 
 	@Override
-	public WaldotNamespace getOpcNamespace() {
+	public WaldotNamespace getWaldotNamespace() {
 		return opcNamespace;
 	}
 

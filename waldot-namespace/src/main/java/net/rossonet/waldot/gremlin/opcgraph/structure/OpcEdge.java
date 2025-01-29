@@ -28,11 +28,11 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
+import net.rossonet.waldot.opc.OpcElement;
 
 public class OpcEdge extends OpcElement implements WaldotEdge {
 
-	@SuppressWarnings("unused")
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final WaldotGraph graph;
 
@@ -48,7 +48,7 @@ public class OpcEdge extends OpcElement implements WaldotEdge {
 	private OpcEdge(WaldotGraph graph, UaNodeContext context, final NodeId nodeId, final NodeId inVertexId,
 			final NodeId outVertexId, final String label, String description, UInteger writeMask,
 			UInteger userWriteMask, UByte eventNotifier, final long currentVersion) {
-		super(context, nodeId, graph.getOpcNamespace().generateQualifiedName(label), LocalizedText.english(label),
+		super(context, nodeId, graph.getWaldotNamespace().generateQualifiedName(label), LocalizedText.english(label),
 				LocalizedText.english(description), userWriteMask, userWriteMask, eventNotifier, currentVersion);
 		this.graph = graph;
 		this.allowNullPropertyValues = graph.features().edge().supportsNullPropertyValues();
@@ -56,15 +56,14 @@ public class OpcEdge extends OpcElement implements WaldotEdge {
 
 	@Override
 	public Object clone() {
-		final OpcEdge edge = new OpcEdge(graph, getNodeContext(), getNodeId(), inVertex().id(), outVertex().id(),
-				getBrowseName().getName(), getDescription().getText(), getWriteMask(), getUserWriteMask(),
-				getEventNotifier(), version());
+		final OpcEdge edge = new OpcEdge(graph(), getNodeId(), outVertex(), inVertex(), label(),
+				getDescription().getText(), getWriteMask(), getUserWriteMask(), getEventNotifier(), version());
 		return edge;
 	}
 
 	@Override
 	public WaldotNamespace getNamespace() {
-		return graph.getOpcNamespace();
+		return graph.getWaldotNamespace();
 	}
 
 	@Override
@@ -127,7 +126,7 @@ public class OpcEdge extends OpcElement implements WaldotEdge {
 	@SuppressWarnings({ "unchecked" })
 	@Override
 	public <V> Property<V> property(final String key) {
-		if (this.removed) {
+		if (this.isRemoved()) {
 			return Property.empty();
 		}
 		for (final WaldotProperty<Object> p : getProperties()) {
@@ -140,7 +139,7 @@ public class OpcEdge extends OpcElement implements WaldotEdge {
 
 	@Override
 	public <V> Property<V> property(final String key, final V value) {
-		if (this.removed) {
+		if (this.isRemoved()) {
 			throw elementAlreadyRemoved(Edge.class, getNodeId());
 		}
 		ElementHelper.validateProperty(key, value);
@@ -154,7 +153,7 @@ public class OpcEdge extends OpcElement implements WaldotEdge {
 	@Override
 	public void remove() {
 		getNamespace().removeEdge(this.id());
-		this.removed = true;
+		super.remove();
 	}
 
 	@Override
@@ -168,7 +167,7 @@ public class OpcEdge extends OpcElement implements WaldotEdge {
 
 	@Override
 	public Iterator<Vertex> vertices(final Direction direction) {
-		if (removed) {
+		if (isRemoved()) {
 			return Collections.emptyIterator();
 		}
 		switch (direction) {

@@ -202,13 +202,13 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 		for (int i = 0; i < edgeIds.length; i++) {
 			nodeIds[i] = vertexIdManager.convert(this, edgeIds[i]);
 		}
-		return createElementIterator(Edge.class, WaldotEdge.class, getOpcNamespace().getEdges(), edgeIdManager,
+		return createElementIterator(Edge.class, WaldotEdge.class, getWaldotNamespace().getEdges(), edgeIdManager,
 				nodeIds);
 	}
 
 	@Override
 	public int getEdgesCount() {
-		return getOpcNamespace().getEdgesCount();
+		return getWaldotNamespace().getEdgesCount();
 	}
 
 	@Override
@@ -217,11 +217,11 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 	}
 
 	@Override
-	public abstract WaldotNamespace getOpcNamespace();
+	public abstract WaldotNamespace getWaldotNamespace();
 
 	@Override
 	public int getVerticesCount() {
-		return getOpcNamespace().getVerticesCount();
+		return getWaldotNamespace().getVerticesCount();
 	}
 
 	///////////// GRAPH SPECIFIC INDEXING METHODS ///////////////
@@ -251,7 +251,7 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 
 	@Override
 	public void removeVertex(NodeId nodeId) {
-		getOpcNamespace().removeVertex(nodeId);
+		getWaldotNamespace().removeVertex(nodeId);
 
 	}
 
@@ -260,8 +260,8 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 
 	@Override
 	public String toString() {
-		return StringFactory.graphString(this, "vertices:" + this.getOpcNamespace().getVerticesCount() + " edges:"
-				+ this.getOpcNamespace().getEdgesCount());
+		return StringFactory.graphString(this, "vertices:" + this.getWaldotNamespace().getVerticesCount() + " edges:"
+				+ this.getWaldotNamespace().getEdgesCount());
 	}
 
 	@Override
@@ -269,12 +269,12 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 
 	@Override
 	public Variables variables() {
-		return getOpcNamespace().getVariables();
+		return getWaldotNamespace().getVariables();
 	}
 
 	@Override
 	public Vertex vertex(final NodeId vertexId) {
-		return getOpcNamespace().getVertexNode(edgeIdManager.convert(this, vertexId));
+		return getWaldotNamespace().getVertexNode(edgeIdManager.convert(this, vertexId));
 	}
 
 	@Override
@@ -283,7 +283,7 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 		for (int i = 0; i < vertexIds.length; i++) {
 			nodeIds[i] = vertexIdManager.convert(this, vertexIds[i]);
 		}
-		return createElementIterator(Vertex.class, WaldotVertex.class, getOpcNamespace().getVertices(), vertexIdManager,
+		return createElementIterator(Vertex.class, WaldotVertex.class, getWaldotNamespace().getVertices(), vertexIdManager,
 				nodeIds);
 	}
 }

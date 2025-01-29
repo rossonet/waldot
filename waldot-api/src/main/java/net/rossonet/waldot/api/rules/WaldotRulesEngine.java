@@ -2,7 +2,7 @@ package net.rossonet.waldot.api.rules;
 
 import java.util.Collection;
 
-import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
+import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
@@ -18,7 +18,7 @@ public interface WaldotRulesEngine {
 
 	void evaluateRuleForAttributeChanged(Rule rule, UaNode node, AttributeId attributeId, Object value);
 
-	void evaluateRuleForEvent(Rule rule, BaseEventTypeNode event);
+	void evaluateRuleForEvent(Rule rule, BaseEventType event);
 
 	void evaluateRuleForPropertyChanged(Rule rule, UaNode node, AttributeId attributeId, Object value);
 

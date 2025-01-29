@@ -40,7 +40,7 @@ public interface WaldotGraph extends Graph {
 				return convertedList.get(idManager.convert(this, iid));
 			}).iterator(), Objects::nonNull));
 		}
-		return (getOpcNamespace().inComputerMode()) ? (Iterator<T>) (cast.equals(Vertex.class)
+		return (getWaldotNamespace().inComputerMode()) ? (Iterator<T>) (cast.equals(Vertex.class)
 				? IteratorUtils.filter((Iterator<Vertex>) iterator, t -> getGraphComputerView().legalVertex(t))
 				: IteratorUtils.filter((Iterator<Edge>) iterator,
 						t -> getGraphComputerView().legalEdge(t.outVertex(), t)))
@@ -53,7 +53,7 @@ public interface WaldotGraph extends Graph {
 
 	WaldotGraphComputerView getGraphComputerView();
 
-	WaldotNamespace getOpcNamespace();
+	WaldotNamespace getWaldotNamespace();
 
 	int getVerticesCount();
 

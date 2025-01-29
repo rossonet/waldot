@@ -1,6 +1,6 @@
 package net.rossonet.waldot.rules;
 
-import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
+import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
@@ -39,9 +39,10 @@ public class DefaultRule implements Rule {
 	}
 
 	@Override
-	public void fireEvent(BaseEventTypeNode event) {
+	public void fireEvent(BaseEventType event) {
 		logger.info("for rule " + label + " event fired " + event);
 		waldotRulesEngine.evaluateRuleForEvent(this, event);
+
 	}
 
 	@Override

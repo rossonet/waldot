@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
@@ -44,16 +45,15 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
+import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.strategies.BootstrapProcedureStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.api.strategies.WaldotMappingStrategy;
 import net.rossonet.waldot.commands.AboutCommand;
-import net.rossonet.waldot.commands.ExecCommand;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.commands.VersionCommand;
 import net.rossonet.waldot.configuration.HomunculusConfiguration;
-import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcGraphComputerView;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.rules.DefaultRulesEngine;
@@ -64,14 +64,14 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final WaldotConfiguration configuration;
 	private final DataTypeDictionaryManager dictionaryManager;
 	private final SubscriptionModel subscriptionModel;
-	private final OpcGraph gremlin;
-	private OpcGraphComputerView graphComputerView;
+	private final WaldotGraph gremlin;
+	private WaldotGraphComputerView graphComputerView;
 	private final WaldotMappingStrategy opcMappingStrategy;
 	private final BootstrapProcedureStrategy bootstrapProcedureStrategy;
 	private final String[] bootstrapProcedure;
-	private final OpcGraphVariables opcGraphVariables;
+	private final Graph.Variables opcGraphVariables;
 	private final ConsoleStrategy consoleStrategy;
-	private final DefaultRulesEngine rulesEngine = new DefaultRulesEngine(this);
+	private final WaldotRulesEngine rulesEngine = new DefaultRulesEngine(this);
 	private final List<NamespaceListener> listeners = new ArrayList<>();
 	private final Set<PluginListener> plugins = new HashSet<>();
 
@@ -101,7 +101,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	}
 
-// TODO sostituire con registrazione comando da plugin
 	private void addBaseCommands() {
 		if (configuration.getWaldotCommandLabel() != null) {
 			registerCommand(new QueryCommand(this));
@@ -114,9 +113,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		}
 		if (configuration.getAboutCommandLabel() != null) {
 			registerCommand(new AboutCommand(this));
-		}
-		if (configuration.getExecCommandLabel() != null) {
-			registerCommand(new ExecCommand(this));
 		}
 	}
 
@@ -133,6 +129,12 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public WaldotVertex addVertex(NodeId nodeId, Object[] keyValues) {
 		return opcMappingStrategy.addVertex(nodeId, keyValues);
+	}
+
+	@Override
+	public void close() throws Exception {
+		plugins.forEach(plugin -> plugin.stop());
+
 	}
 
 	@Override
@@ -234,12 +236,12 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public OpcGraphComputerView getGraphComputerView() {
+	public WaldotGraphComputerView getGraphComputerView() {
 		return graphComputerView;
 	}
 
 	@Override
-	public OpcGraph getGremlinGraph() {
+	public WaldotGraph getGremlinGraph() {
 		return gremlin;
 	}
 
@@ -285,7 +287,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public DefaultRulesEngine getRulesEngine() {
+	public WaldotRulesEngine getRulesEngine() {
 		return rulesEngine;
 	}
 
@@ -296,7 +298,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public OpcGraphVariables getVariables() {
+	public Graph.Variables getVariables() {
 		return opcGraphVariables;
 	}
 
@@ -414,6 +416,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public void registerPlugin(PluginListener plugin) {
 		plugins.add(plugin);
+		plugin.initialize(this);
+		logger.info("Registering commands from plugin {}", plugin.getClass().getSimpleName());
+		plugin.getCommands().forEach(command -> registerCommand(command));
 	}
 
 	@Override
@@ -447,6 +452,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public void resetNameSpace() {
+		for (final PluginListener plugin : plugins) {
+			plugin.reset();
+		}
 		opcMappingStrategy.resetNameSpace();
 		logger.info("Bootstrap procedure completed");
 		listeners.forEach(listener -> listener.onNamespaceReset());
@@ -454,6 +462,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	private void runBootstrapProcedure() {
+		plugins.forEach(plugin -> plugin.start());
 		bootstrapProcedureStrategy.runBootstrapProcedure();
 		logger.info("Bootstrap procedure completed");
 		listeners.forEach(listener -> listener.onBootstrapProcedureCompleted());

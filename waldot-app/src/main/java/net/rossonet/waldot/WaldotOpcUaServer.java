@@ -6,6 +6,7 @@ import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USE
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_X509;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,8 +49,13 @@ import org.eclipse.milo.opcua.stack.server.security.DefaultServerCertificateVali
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.reflect.ClassPath;
+
+import net.rossonet.waldot.api.PluginListener;
+import net.rossonet.waldot.api.annotation.WaldotPlugin;
 import net.rossonet.waldot.api.configuration.OpcConfiguration;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
+import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
 import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
@@ -58,7 +64,6 @@ import net.rossonet.waldot.configuration.OpcUaConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileWithStagesBootstrapStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.ConsoleV0Strategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseV0Strategy;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.namespaces.HomunculusNamespace;
 import net.rossonet.waldot.utils.KeyStoreLoader;
 
@@ -87,7 +92,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 			final String boot[] = getBootFromUrl(configuration.getBootUrl());
 			managerNamespace = new HomunculusNamespace(server, new MiloSingleServerBaseV0Strategy(),
 					new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(), boot);
-
+			registerPluginsInNamespace();
 		} catch (final Exception e) {
 			logger.error("Error creating server", e);
 		}
@@ -235,13 +240,31 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		return configuration;
 	}
 
-	public OpcGraph getGremlinGraph() {
+	public WaldotGraph getGremlinGraph() {
 		return managerNamespace.getGremlinGraph();
 
 	}
 
 	public OpcUaServer getServer() {
 		return server;
+	}
+
+	private void registerPluginsInNamespace() throws IOException {
+		final ClassPath cp = ClassPath.from(Thread.currentThread().getContextClassLoader());
+		for (final ClassPath.ClassInfo classInfo : cp.getTopLevelClassesRecursive("net.rossonet.waldot")) {
+			final Class<?> clazz = classInfo.load();
+			if (clazz.isAnnotationPresent(WaldotPlugin.class)) {
+				logger.info("Found plugin: {}", clazz.getName());
+				try {
+					final PluginListener candidate = (PluginListener) clazz.getConstructor().newInstance();
+					managerNamespace.registerPlugin(candidate);
+				} catch (final Exception e) {
+					logger.error("Error creating plugin", e);
+				}
+
+			}
+		}
+
 	}
 
 	/**

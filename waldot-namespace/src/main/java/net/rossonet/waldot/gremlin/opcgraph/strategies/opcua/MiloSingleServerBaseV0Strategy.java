@@ -15,6 +15,8 @@ import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
@@ -22,7 +24,6 @@ import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.core.nodes.Node;
-import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
+import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotMiloStrategy;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotEdge;
@@ -118,7 +120,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	private UaVariableNode actionRuleTypeNode;
 	private UaVariableNode priorityRuleTypeNode;
 
-	private OpcGraphVariables opcGraphVariables;
+	private Graph.Variables opcGraphVariables;
 
 	private NodeId hasPropertyReferenceType;
 
@@ -399,7 +401,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 					opcVertex, key, value, context, nodeId, description, writeMask, userWriteMask, dataType, valueRank,
 					arrayDimensions, accessLevel, userAccessLevel, minimumSamplingInterval, historizing, false);
 			waldotNamespace.getStorageManager().addNode(property);
-			property.addAttributeObserver((AttributeObserver) opcVertex);
+			property.addAttributeObserver(opcVertex);
 			opcVertex.addReference(new Reference(opcVertex.getNodeId(), hasPropertyReferenceType,
 					property.getNodeId().expanded(), true));
 			return property;
@@ -421,7 +423,14 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	private OpcVertex createVertexObject(NodeId typeDefinition, final WaldotGraph graph, UaNodeContext context,
 			final NodeId nodeId, final QualifiedName browseName, LocalizedText displayName, LocalizedText description,
 			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier, long version) {
-		// TODO generare il giusto oggetto in funzione del nodeid
+		if (typeDefinition != null && waldotNamespace.hasNodeId(typeDefinition)) {
+			for (final PluginListener p : waldotNamespace.getPlugins()) {
+				if (p.containsObjectDefinition(typeDefinition)) {
+					return (OpcVertex) p.createVertexObject(typeDefinition, graph, context, nodeId, browseName,
+							displayName, description, writeMask, userWriteMask, eventNotifier, version);
+				}
+			}
+		}
 		return new OpcVertex(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
 				eventNotifier, version);
 	}
@@ -816,8 +825,13 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 				if (RULE_NODE_PARAMETER.equals(propertyKeyValues[i + 1].toString())) {
 					return ruleTypeNode.getNodeId();
 				} else if (DIRECTORY_PARAMETER.equals(propertyKeyValues[i + 1].toString())) {
-					return ruleTypeNode.getNodeId();
+					return Identifiers.FolderType;
 				} else {
+					for (final PluginListener p : waldotNamespace.getPlugins()) {
+						if (p.containsObjectLabel(propertyKeyValues[i + 1].toString())) {
+							return p.getObjectLabel(propertyKeyValues[i + 1].toString());
+						}
+					}
 					final String requestType = propertyKeyValues[i + 1].toString();
 					return NodeId.parse(requestType);
 				}
@@ -991,7 +1005,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	}
 
 	@Override
-	public OpcGraphVariables namespaceParametersToVariables() {
+	public Variables namespaceParametersToVariables() {
 		// logger.info("namespaceParametersToVariables");
 		if (opcGraphVariables == null) {
 			opcGraphVariables = new OpcGraphVariables(waldotNamespace);
@@ -1031,7 +1045,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		// FIXME rimuovere dalla cartella giusta
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
-		// FIXME rimuovere tutti i nodi OpcProperty collegati
+		// FIXME rimuovere tutti i nodi OpcVariable collegati
 
 	}
 
@@ -1052,7 +1066,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId).get();
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
-		// FIXME rimuovere tutti i nodi OpcProperty collegati
+		// FIXME rimuovere tutti i nodi OpcVariable collegati
 	}
 
 	@Override

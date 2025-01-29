@@ -1,25 +1,25 @@
 package net.rossonet.waldot.opc;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler;
-import org.eclipse.milo.opcua.sdk.server.api.methods.MethodInvocationHandler;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
+import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.apache.tinkerpop.gremlin.structure.Property;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
-import org.eclipse.milo.opcua.stack.core.UaException;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
+import net.rossonet.waldot.gremlin.opcgraph.structure.AbstractOpcGraph;
 
-public abstract class AbstractOpcCommand extends OpcVertex implements WaldotCommand {
+public abstract class AbstractOpcCommand extends OpcCommand implements WaldotCommand {
 
 	public enum VariableNodeTypes {
 		Boolean(Identifiers.Boolean), Byte(Identifiers.Byte), SByte(Identifiers.SByte), Integer(Identifiers.Integer),
@@ -41,23 +41,21 @@ public abstract class AbstractOpcCommand extends OpcVertex implements WaldotComm
 		}
 	}
 
-	private final List<Argument> inputArguments = new ArrayList<>();
+	protected final WaldotGraph graph;
+	protected final List<Argument> inputArguments = new ArrayList<>();
 
-	private final List<Argument> outputArguments = new ArrayList<>();
+	protected final List<Argument> outputArguments = new ArrayList<>();
 
-	private final WaldotNamespace waldotNamespace;
-
-	private final UaMethodNode insideCommand;
+	protected ByteString icon;
+	protected final WaldotNamespace waldotNamespace;
 
 	public AbstractOpcCommand(WaldotGraph graph, WaldotNamespace waldotNamespace, String command, String description,
 			UInteger writeMask, UInteger userWriteMask, Boolean executable, Boolean userExecutable) {
-		super(graph, waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(command),
-				waldotNamespace.generateQualifiedName(command), LocalizedText.english(command),
-				LocalizedText.english(description), writeMask, userWriteMask, null, 0);
-		insideCommand = new UaMethodNode(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(command),
+		super(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(command),
 				waldotNamespace.generateQualifiedName(command), LocalizedText.english(command),
 				LocalizedText.english(description), writeMask, userWriteMask, executable, userExecutable);
 		this.waldotNamespace = waldotNamespace;
+		this.graph = graph;
 	}
 
 	@Override
@@ -76,87 +74,49 @@ public abstract class AbstractOpcCommand extends OpcVertex implements WaldotComm
 		waldotNamespace.registerMethodOutputArguments(this, outputArguments);
 	}
 
-	@Override
-	public Argument[] getInputArguments() {
-		return inputArguments.toArray(new Argument[0]);
+	public WaldotGraph getGraph() {
+		return graph;
 	}
 
 	@Override
-	public MethodInvocationHandler getInvocationHandler() {
-		return new AbstractMethodInvocationHandler(insideCommand) {
-
-			@Override
-			public Argument[] getInputArguments() {
-				return inputArguments.toArray(new Argument[0]);
-			}
-
-			@Override
-			public Argument[] getOutputArguments() {
-				return outputArguments.toArray(new Argument[0]);
-			}
-
-			@Override
-			protected Variant[] invoke(InvocationContext invocationContext, Variant[] inputValues) throws UaException {
-				final String[] input = new String[inputValues.length];
-				for (int i = 0; i < inputValues.length; i++) {
-					input[i] = inputValues[i].getValue().toString();
-				}
-				final String[] runCommand = runCommand(invocationContext, input);
-				final Variant[] reply = new Variant[runCommand.length];
-				for (int i = 0; i < runCommand.length; i++) {
-					reply[i] = new Variant(runCommand[i]);
-				}
-				return reply;
-			}
-
-		};
-
+	public ByteString getIcon() {
+		return icon;
 	}
 
 	@Override
-	public Argument[] getOutputArguments() {
-		return outputArguments.toArray(new Argument[0]);
+	public WaldotNamespace getNamespace() {
+		return graph.getWaldotNamespace();
 	}
 
 	@Override
-	public Boolean isExecutable() {
-		return insideCommand.isExecutable();
+	public Graph graph() {
+		return this.graph;
 	}
 
 	@Override
-	public Boolean isUserExecutable() {
-		return insideCommand.isUserExecutable();
-	}
-
-	// per dsl gremlin
-	@Override
-	public Object runCommand(String[] methodInputs) {
-		// TODO Auto-generated method stub
-		return null;
+	public <V> Iterator<? extends Property<V>> properties(String... propertyKeys) {
+		return Collections.emptyIterator();
 	}
 
 	@Override
-	public void setExecutable(Boolean executable) {
-		insideCommand.setExecutable(executable);
+	public <V> Property<V> property(String key, V value) {
+		return Property.empty();
+	}
+
+	@Override
+	public Object[] runCommand(String[] methodInputs) {
+		return runCommand(null, methodInputs);
+	}
+
+	@Override
+	public void setIcon(ByteString icon) {
+		this.icon = icon;
 
 	}
 
 	@Override
-	public void setInputArguments(Argument[] array) {
-		insideCommand.setInputArguments(array);
-
-	}
-
-	@Override
-	public void setOutputArguments(Argument[] array) {
-		insideCommand.setOutputArguments(array);
-
-	}
-
-	@Override
-	public void setUserExecutable(Boolean userExecutable) {
-		insideCommand.setUserExecutable(userExecutable);
-
+	public String toString() {
+		return AbstractOpcGraph.V + AbstractOpcGraph.L_BRACKET + getNodeId().toParseableString();
 	}
 
 }

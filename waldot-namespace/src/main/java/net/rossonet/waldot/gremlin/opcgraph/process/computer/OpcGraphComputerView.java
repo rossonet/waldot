@@ -91,7 +91,7 @@ public final class OpcGraphComputerView implements WaldotGraphComputerView {
 	}
 
 	private void addPropertiesToOriginalGraph() {
-		graph.getOpcNamespace().dropGraphComputerView();
+		graph.getWaldotNamespace().dropGraphComputerView();
 		this.computeProperties.forEach((element, properties) -> {
 			properties.forEach((key, vertexProperties) -> {
 				vertexProperties.forEach(vertexProperty -> {

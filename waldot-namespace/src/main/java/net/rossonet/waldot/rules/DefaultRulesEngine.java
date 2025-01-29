@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
+import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
@@ -84,7 +84,7 @@ public class DefaultRulesEngine implements WaldotRulesEngine {
 	}
 
 	@Override
-	public void evaluateRuleForEvent(Rule defaultRule, BaseEventTypeNode event) {
+	public void evaluateRuleForEvent(Rule defaultRule, BaseEventType event) {
 		// TODO Auto-generated method stub
 
 	}

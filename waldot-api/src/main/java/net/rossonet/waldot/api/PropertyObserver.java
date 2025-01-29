@@ -5,5 +5,5 @@ import org.eclipse.milo.opcua.stack.core.AttributeId;
 
 public interface PropertyObserver {
 
-	void propertyChanged(UaNode node, AttributeId attributeId, Object value);
+	void propertyChanged(UaNode sourceNode, AttributeId attributeId, Object value);
 }

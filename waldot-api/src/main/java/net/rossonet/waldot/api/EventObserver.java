@@ -1,9 +1,9 @@
 package net.rossonet.waldot.api;
 
-import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
+import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
 
 public interface EventObserver {
 
-	void fireEvent(BaseEventTypeNode event);
+	void fireEvent(BaseEventType event);
 
 }

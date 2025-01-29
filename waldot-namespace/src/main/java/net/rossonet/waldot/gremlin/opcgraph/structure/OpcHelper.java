@@ -21,7 +21,7 @@ public final class OpcHelper {
 	 * advanced use cases.
 	 */
 	public static Map<NodeId, WaldotEdge> getEdges(final OpcGraph graph) {
-		return graph.getOpcNamespace().getEdges();
+		return graph.getWaldotNamespace().getEdges();
 	}
 
 	/*

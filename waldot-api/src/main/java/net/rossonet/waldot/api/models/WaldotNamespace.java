@@ -28,7 +28,7 @@ import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 
-public interface WaldotNamespace {
+public interface WaldotNamespace extends AutoCloseable {
 
 	WaldotEdge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex, String label, Object[] keyValues);
 
