@@ -101,7 +101,7 @@ public class BaseAgentTest {
 		System.out.println(waldot.runExpression("'16 - ' + g.traversal().V().toList()"));
 		waldot.runExpression("log.info('17 - prova log')");
 		System.out.flush();
-		Thread.sleep(60_000);
+		Thread.sleep(5_000);
 		for (int i = 1; i < 100; i++) {
 			final Vertex c = waldot.getGremlinGraph().addVertex("label", "nodo " + i, "number-test", i, "directory",
 					"catalogo " + i % 7);

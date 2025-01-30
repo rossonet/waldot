@@ -70,7 +70,7 @@ import net.rossonet.waldot.opc.AbstractOpcCommand;
 public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 
 	private static final int DEFAULT_PRIORITY_VALUE = 100;
-	private static final String DEFAULT_ACTION_VALUE = "'action fired'";
+	private static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
 	private static final String DEFAULT_CONDITION_VALUE = "true";
 
 	public static final String HAS_WALDOT_RULE = "HasRule";
@@ -285,8 +285,8 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 			final QualifiedProperty<String> LABEL = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
 					LABEL_FIELD, labelRuleTypeNode.getNodeId().expanded(), ValueRanks.Scalar, String.class);
 			vertex.setProperty(LABEL, label);
-			waldotNamespace.getRulesEngine().registerOrUpdateRule(vertex.getNodeId(), label, condition, action,
-					priority);
+			waldotNamespace.getRulesEngine().registerOrUpdateRule(vertex.getNodeId(), label, description, condition,
+					action, priority);
 		} else {
 			final String directory = getDirectory(propertyKeyValues);
 			if (directory == null || directory.isEmpty()) {

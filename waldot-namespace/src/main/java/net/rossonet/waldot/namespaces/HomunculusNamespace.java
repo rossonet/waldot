@@ -21,6 +21,7 @@ import org.eclipse.milo.opcua.sdk.server.api.ManagedNamespaceWithLifecycle;
 import org.eclipse.milo.opcua.sdk.server.api.MonitoredItem;
 import org.eclipse.milo.opcua.sdk.server.dtd.DataTypeDictionaryManager;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.sdk.server.nodes.factories.EventFactory;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.NamespaceTable;
 import org.eclipse.milo.opcua.stack.core.ReferenceType;
@@ -33,6 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
+import net.rossonet.waldot.TraceLogger;
+import net.rossonet.waldot.TraceLogger.ContexLogger;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
@@ -71,9 +74,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final String[] bootstrapProcedure;
 	private final Graph.Variables opcGraphVariables;
 	private final ConsoleStrategy consoleStrategy;
-	private final WaldotRulesEngine rulesEngine = new DefaultRulesEngine(this);
+	private final WaldotRulesEngine rulesEngine;
 	private final List<NamespaceListener> listeners = new ArrayList<>();
 	private final Set<PluginListener> plugins = new HashSet<>();
+	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
+	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
 
 	public HomunculusNamespace(OpcUaServer server, WaldotMappingStrategy opcMappingStrategy,
 			ConsoleStrategy consoleStrategy, HomunculusConfiguration configuration,
@@ -98,7 +103,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		logger.info("Namespace created");
 		listeners.forEach(listener -> listener.onNamespaceCreated(this));
 		bootstrapProcedureStrategy.initialize(this);
-
+		rulesEngine = new DefaultRulesEngine(this);
 	}
 
 	private void addBaseCommands() {
@@ -191,8 +196,19 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
+	public Object getCommandsAsFunction() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public WaldotConfiguration getConfiguration() {
 		return configuration;
+	}
+
+	@Override
+	public Logger getConsoleLogger() {
+		return consoleLogger;
 	}
 
 	@Override
@@ -233,6 +249,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public EventBus getEventBus() {
 		return getServer().getEventBus();
+	}
+
+	@Override
+	public EventFactory getEventFactory() {
+		return getServer().getEventFactory();
 	}
 
 	@Override
@@ -289,6 +310,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public WaldotRulesEngine getRulesEngine() {
 		return rulesEngine;
+	}
+
+	@Override
+	public Logger getRulesLogger() {
+		return rulesLogger;
 	}
 
 	@Override

@@ -21,11 +21,14 @@ public class DefaultRule implements Rule {
 
 	private final DefaultRulesEngine waldotRulesEngine;
 
-	public DefaultRule(DefaultRulesEngine waldotRulesEngine, NodeId rule, String label, String condition, String action,
-			int priority) {
+	private final String description;
+
+	public DefaultRule(DefaultRulesEngine waldotRulesEngine, NodeId rule, String label, String description,
+			String condition, String action, int priority) {
 		this.waldotRulesEngine = waldotRulesEngine;
 		this.nodeId = rule;
 		this.label = label;
+		this.description = description;
 		this.condition = condition;
 		this.action = action;
 		this.priority = priority;
@@ -53,6 +56,11 @@ public class DefaultRule implements Rule {
 	@Override
 	public String getCondition() {
 		return condition;
+	}
+
+	@Override
+	public String getDescription() {
+		return description;
 	}
 
 	@Override

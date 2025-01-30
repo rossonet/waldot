@@ -11,6 +11,7 @@ import net.rossonet.waldot.jexl.JexlExecutorHelper;
 
 @WaldotConsoleStrategy
 public class ConsoleV0Strategy implements ConsoleStrategy {
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private WaldotNamespace waldotNamespace;
 	private ExecutorHelper baseExecutor;
@@ -19,8 +20,9 @@ public class ConsoleV0Strategy implements ConsoleStrategy {
 	public void initialize(WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
 		baseExecutor = new JexlExecutorHelper();
-		baseExecutor.setFunctionObject("log", logger);
-		baseExecutor.setFunctionObject("g", this.waldotNamespace.getGremlinGraph());
+		baseExecutor.setFunctionObject(ConsoleStrategy.LOG_LABEL, waldotNamespace.getConsoleLogger());
+		baseExecutor.setFunctionObject(ConsoleStrategy.G_LABEL, waldotNamespace.getGremlinGraph());
+		baseExecutor.setFunctionObject(ConsoleStrategy.COMMANDS_LABEL, waldotNamespace.getCommandsAsFunction());
 		logger.info("ConsoleV0Strategy initialized");
 	}
 

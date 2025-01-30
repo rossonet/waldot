@@ -26,7 +26,8 @@ public interface WaldotRulesEngine {
 
 	void registerObserver(WaldotVertex eventVertex, NodeId ruleNodeId);
 
-	void registerOrUpdateRule(NodeId ruleNodeId, String label, String condition, String action, int priority);
+	void registerOrUpdateRule(NodeId ruleNodeId, String label, String description, String condition, String action,
+			int priority);
 
 	void removeListener(RuleListener listener);
 

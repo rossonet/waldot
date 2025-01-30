@@ -12,6 +12,8 @@ public interface Rule extends AttributeObserver, PropertyObserver, EventObserver
 
 	String getCondition();
 
+	String getDescription();
+
 	String getLabel();
 
 	NodeId getNodeId();

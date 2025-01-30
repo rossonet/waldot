@@ -14,12 +14,14 @@ import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager;
 import org.eclipse.milo.opcua.sdk.server.UaNodeManager;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.sdk.server.nodes.factories.EventFactory;
 import org.eclipse.milo.opcua.stack.core.NamespaceTable;
 import org.eclipse.milo.opcua.stack.core.ReferenceType;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
+import org.slf4j.Logger;
 
 import com.google.common.eventbus.EventBus;
 
@@ -59,7 +61,11 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	String[] getBootstrapProcedure();
 
+	Object getCommandsAsFunction();
+
 	WaldotConfiguration getConfiguration();
+
+	Logger getConsoleLogger();
 
 	WaldotVertex getEdgeInVertex(WaldotEdge edge);
 
@@ -76,6 +82,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	int getEdgesCount();
 
 	EventBus getEventBus();
+
+	EventFactory getEventFactory();
 
 	WaldotGraphComputerView getGraphComputerView();
 
@@ -100,6 +108,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	public Map<NodeId, ReferenceType> getReferenceTypes();
 
 	WaldotRulesEngine getRulesEngine();
+
+	Logger getRulesLogger();
 
 	UaNodeManager getStorageManager();
 
