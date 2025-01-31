@@ -10,15 +10,13 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
-import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.rules.ExecutorHelper;
 import net.rossonet.waldot.api.rules.Rule;
+import net.rossonet.waldot.api.rules.WaldotStepLogger;
 
 public class JexlExecutorHelper implements ExecutorHelper {
 
@@ -33,22 +31,29 @@ public class JexlExecutorHelper implements ExecutorHelper {
 		return j;
 	}
 
-	private JexlEngine jexl = generateEngine();
-
 	protected JexlPermissions classPermissions = new JexlPermissions.ClassPermissions();
-
-	protected final JexlContext jexlContext = new MapContext();
 
 	protected final Set<Class<?>> functionObjects = new HashSet<>();
 
+	private JexlEngine jexl = generateEngine();
+
+	protected final JexlContext jexlContext = new MapContext();
+
 	@Override
-	public boolean evaluateRule(WaldotNamespace waldotNamespace, Rule rule, EvaluationType evaluationType, UaNode node,
-			AttributeId attributeId, Object value, BaseEventType event) {
+	public boolean evaluateRule(WaldotNamespace waldotNamespace, Rule rule, WaldotStepLogger stepRegister) {
 		try {
+			// TODO: meccanismo per cache del compilato
+			final long startTime = System.currentTimeMillis();
 			final JexlScript compiled = jexl.createScript(rule.getCondition());
-			return (boolean) compiled.execute(jexlContext);
+			final long runnableStartTime = System.currentTimeMillis();
+			stepRegister.onConditionCompiled(runnableStartTime - startTime);
+			stepRegister.onBeforeConditionExecution(jexlContext);
+			final Object result = compiled.execute(jexlContext);
+			stepRegister.onAfterConditionExecution(runnableStartTime - startTime, result);
+			return (boolean) result;
 		} catch (final Exception e) {
 			LOGGER.error("Unable to evaluate rule: '" + rule.getCondition() + "'", e);
+			stepRegister.onConditionExecutionException(jexlContext, e);
 			return false;
 		}
 	}
@@ -56,6 +61,7 @@ public class JexlExecutorHelper implements ExecutorHelper {
 	@Override
 	public Object execute(String expression) {
 		try {
+			// TODO: meccanismo per cache del compilato
 			final JexlScript compiled = jexl.createScript(expression);
 			return compiled.execute(jexlContext);
 		} catch (final Exception e) {
@@ -65,13 +71,19 @@ public class JexlExecutorHelper implements ExecutorHelper {
 	}
 
 	@Override
-	public Object executeRule(WaldotNamespace waldotNamespace, Rule rule, EvaluationType attribute, UaNode node,
-			AttributeId attributeId, Object value, BaseEventType event) {
+	public Object executeRule(WaldotNamespace waldotNamespace, Rule rule, WaldotStepLogger stepRegister) {
 		try {
+			final long startTime = System.currentTimeMillis();
 			final JexlScript compiled = jexl.createScript(rule.getAction());
-			return compiled.execute(jexlContext);
+			final long runnableStartTime = System.currentTimeMillis();
+			stepRegister.onActionCompiled(runnableStartTime - startTime);
+			stepRegister.onBeforeActionExecution(jexlContext);
+			final Object result = compiled.execute(jexlContext);
+			stepRegister.onAfterActionExecution(runnableStartTime - startTime, result);
+			return result;
 		} catch (final Exception e) {
 			LOGGER.error("Unable to execute rule: '" + rule.getAction() + "'", e);
+			stepRegister.onActionExecutionException(jexlContext, e);
 			return null;
 		}
 

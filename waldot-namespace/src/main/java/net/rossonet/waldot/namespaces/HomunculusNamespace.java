@@ -59,6 +59,7 @@ import net.rossonet.waldot.commands.VersionCommand;
 import net.rossonet.waldot.configuration.HomunculusConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
+import net.rossonet.waldot.jexl.jexlWaldotCommandHelper;
 import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
@@ -68,7 +69,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final DataTypeDictionaryManager dictionaryManager;
 	private final SubscriptionModel subscriptionModel;
 	private final WaldotGraph gremlin;
-	private WaldotGraphComputerView graphComputerView;
 	private final WaldotMappingStrategy opcMappingStrategy;
 	private final BootstrapProcedureStrategy bootstrapProcedureStrategy;
 	private final String[] bootstrapProcedure;
@@ -79,6 +79,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final Set<PluginListener> plugins = new HashSet<>();
 	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
 	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
+	private final jexlWaldotCommandHelper jexlWaldotCommandHelper;
+
+	private WaldotGraphComputerView graphComputerView;
 
 	public HomunculusNamespace(OpcUaServer server, WaldotMappingStrategy opcMappingStrategy,
 			ConsoleStrategy consoleStrategy, HomunculusConfiguration configuration,
@@ -86,6 +89,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		super(server, configuration.getManagerNamespaceUri());
 		this.opcMappingStrategy = opcMappingStrategy;
 		this.consoleStrategy = consoleStrategy;
+		this.jexlWaldotCommandHelper = new jexlWaldotCommandHelper(this);
 		this.configuration = configuration;
 		this.bootstrapProcedureStrategy = bootstrapProcedureStrategy;
 		this.bootstrapProcedure = bootstrapProcedure;
@@ -197,8 +201,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public Object getCommandsAsFunction() {
-		// TODO Auto-generated method stub
-		return null;
+		return jexlWaldotCommandHelper;
 	}
 
 	@Override

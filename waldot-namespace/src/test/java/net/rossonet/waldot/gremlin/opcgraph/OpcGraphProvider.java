@@ -37,7 +37,7 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcProperty;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
-import net.rossonet.waldot.opc.OpcElement;
+import net.rossonet.waldot.opc.gremlin.GremlinElement;
 
 /**
  * @author Stephen Mallette (http://stephen.genoprime.com)
@@ -47,7 +47,7 @@ public class OpcGraphProvider extends AbstractGraphProvider {
 	private static final Set<Class> IMPLEMENTATION = new HashSet<Class>() {
 		{
 			add(OpcEdge.class);
-			add(OpcElement.class);
+			add(GremlinElement.class);
 			add(OpcGraph.class);
 			add(OpcGraphVariables.class);
 			add(OpcProperty.class);

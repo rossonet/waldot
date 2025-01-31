@@ -33,7 +33,7 @@ public class AboutCommand extends AbstractOpcCommand {
 
 	@Override
 	public String[] runCommand(InvocationContext invocationContext, String[] inputValues) {
-		// TODO Auto-generated method stub
+		// TODO completare comando about
 		return new String[] { "result of about command" };
 	}
 

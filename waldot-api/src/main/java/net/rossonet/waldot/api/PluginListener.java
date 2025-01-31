@@ -2,6 +2,7 @@ package net.rossonet.waldot.api;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
@@ -14,6 +15,7 @@ import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
+import net.rossonet.waldot.api.rules.Rule;
 
 public interface PluginListener {
 
@@ -37,6 +39,10 @@ public interface PluginListener {
 
 	default NodeId getObjectLabel(String typeDefinitionLabel) {
 		return null;
+	}
+
+	default Map<String, Rule> getRuleFunctions() {
+		return Collections.emptyMap();
 	}
 
 	void initialize(WaldotNamespace waldotNamespace);

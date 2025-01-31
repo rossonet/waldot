@@ -81,10 +81,10 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private OpcUaServer server;
-	private HomunculusNamespace managerNamespace;
 	private OpcConfiguration configuration;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private HomunculusNamespace managerNamespace;
+	private OpcUaServer server;
 
 	public WaldotOpcUaServer(HomunculusConfiguration configuration, OpcUaConfiguration serverConfiguration) {
 		try {
@@ -174,7 +174,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 						.setBindAddress(bindAddress).setHostname(hostname).setPath(configuration.getPath())
 						.setCertificate(certificate).addTokenPolicies(USER_TOKEN_POLICY_ANONYMOUS,
 								USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
-				// TODO gestire la configurazione delle policy da configurazione
+				// TODO gestire la configurazione delle policy da configurazione opc
 				final EndpointConfiguration.Builder noSecurityBuilder = builder.copy()
 						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(noSecurityBuilder));

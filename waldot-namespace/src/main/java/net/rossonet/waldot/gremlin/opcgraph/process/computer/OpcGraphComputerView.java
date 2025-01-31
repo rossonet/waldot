@@ -53,12 +53,12 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 // TODO capire come migliorare le performance su opc
 public final class OpcGraphComputerView implements WaldotGraphComputerView {
 
-	private final WaldotGraph graph;
 	protected final Map<String, VertexComputeKey> computeKeys;
 	private final Map<Element, Map<String, List<VertexProperty<?>>>> computeProperties;
-	private final Set<Object> legalVertices = new HashSet<>();
-	private final Map<Object, Set<Object>> legalEdges = new HashMap<>();
+	private final WaldotGraph graph;
 	private final GraphFilter graphFilter;
+	private final Map<Object, Set<Object>> legalEdges = new HashMap<>();
+	private final Set<Object> legalVertices = new HashSet<>();
 	private final Set<String> retainVertexProperties;
 
 	public OpcGraphComputerView(final WaldotGraph graph, final GraphFilter graphFilter,
@@ -109,7 +109,7 @@ public final class OpcGraphComputerView implements WaldotGraphComputerView {
 
 	@Override
 	public <V> VertexProperty<V> addProperty(Vertex opcVertex, String key, V value) {
-		// TODO Auto-generated method stub
+		// FIXME Completare Gremlin OLAP
 		return null;
 	}
 
@@ -200,7 +200,7 @@ public final class OpcGraphComputerView implements WaldotGraphComputerView {
 	}
 
 	private WaldotGraph open() {
-		// TODO Auto-generated method stub
+		// FIXME Completare Gremlin OLAP
 		return null;
 	}
 

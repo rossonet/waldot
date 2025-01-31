@@ -4,36 +4,45 @@ import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 
-import net.rossonet.waldot.api.rules.ExecutorHelper.EvaluationType;
+import net.rossonet.waldot.api.rules.CachedRuleRecord;
+import net.rossonet.waldot.api.rules.WaldotStepLogger;
 
 public interface RuleListener {
 
-	default void afterEvaluate(EvaluationType evaluationType, UaNode node, AttributeId attributeId, Object value,
-			BaseEventType event, boolean condition) {
+	default void afterEvaluate(WaldotStepLogger stepRegister, boolean condition) {
 	}
 
-	default void afterExecute(EvaluationType evaluationType, UaNode node, AttributeId attributeId, Object value,
-			BaseEventType event, Object executionResult) {
+	default void afterExecute(WaldotStepLogger stepRegister, Object executionResult) {
 	}
 
-	default boolean beforeEvaluate(EvaluationType evaluationType, UaNode node, AttributeId attributeId, Object value,
-			BaseEventType event) {
+	default boolean beforeEvaluate(WaldotStepLogger stepRegister) {
 		return true;
 	}
 
-	default void beforeExecute(EvaluationType evaluationType, UaNode node, AttributeId attributeId, Object value,
-			BaseEventType event) {
+	default void beforeExecute(WaldotStepLogger stepRegister) {
 	}
 
-	default void onEvaluationError(EvaluationType evaluationType, UaNode node, AttributeId attributeId, Object value,
-			BaseEventType event, Throwable exception) {
+	default void onActionError(WaldotStepLogger stepRegister, Throwable exception) {
 	}
 
-	default void onFailure(EvaluationType evaluationType, UaNode node, AttributeId attributeId, Object value,
-			BaseEventType event, Throwable exception) {
+	default void onAttributeChange(UaNode node, AttributeId attributeId, Object value) {
+
 	}
 
-	default void onSuccess(EvaluationType evaluationType, UaNode node, AttributeId attributeId, Object value,
-			BaseEventType event, boolean condition) {
+	default void onEvaluationError(WaldotStepLogger stepRegister, Throwable exception) {
+	}
+
+	default void onEventFired(UaNode node, BaseEventType event) {
+
+	}
+
+	default void onFactExpired(CachedRuleRecord expiredFact) {
+
+	}
+
+	default void onFailure(WaldotStepLogger stepRegister, Throwable exception) {
+	}
+
+	default void onSuccess(WaldotStepLogger stepRegister, boolean condition, Object executionResult) {
 	}
 }

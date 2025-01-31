@@ -1,5 +1,5 @@
 
-package net.rossonet.waldot.opc;
+package net.rossonet.waldot.opc.gremlin;
 
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
@@ -14,7 +14,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.api.models.WaldotElement;
 
-public abstract class OpcElement extends UaObjectNode implements WaldotElement {
+public abstract class GremlinElement extends UaObjectNode implements WaldotElement {
 
 	protected static IllegalStateException elementAlreadyRemoved(final Class<? extends Element> clazz,
 			final NodeId id) {
@@ -25,13 +25,13 @@ public abstract class OpcElement extends UaObjectNode implements WaldotElement {
 
 	protected long currentVersion;
 
-	protected OpcElement(UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
+	protected GremlinElement(UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
 			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask) {
 		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask);
 		currentVersion = -1;
 	}
 
-	protected OpcElement(UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
+	protected GremlinElement(UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
 			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
 			UByte eventNotifier, long version) {
 		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier);

@@ -9,25 +9,7 @@ public class WaldotTinkerPopPlugin implements PluginListener {
 
 	@Override
 	public void initialize(WaldotNamespace homunculusNamespace) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void reset() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void start() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void stop() {
-		// TODO Auto-generated method stub
+		// TODO completare plugin tinkerpop
 
 	}
 

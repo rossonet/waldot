@@ -23,13 +23,13 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcProperty;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
-import net.rossonet.waldot.opc.OpcElement;
+import net.rossonet.waldot.opc.gremlin.GremlinElement;
 
 public final class OpcGraphGremlinPlugin extends AbstractGremlinPlugin {
 	private static final String NAME = "tinkerpop.opcgraph";
 
 	private static final ImportCustomizer imports = DefaultImportCustomizer.build()
-			.addClassImports(OpcEdge.class, OpcElement.class, OpcFactory.class, OpcGraph.class, OpcGraphVariables.class,
+			.addClassImports(OpcEdge.class, GremlinElement.class, OpcFactory.class, OpcGraph.class, OpcGraphVariables.class,
 					OpcHelper.class, OpcIoRegistryV1.class, OpcIoRegistryV2.class, OpcIoRegistryV3.class,
 					OpcProperty.class, OpcVertex.class, OpcVertexProperty.class, OpcGraphComputer.class,
 					OpcGraphComputerView.class, OpcMapEmitter.class, OpcMemory.class, OpcMessenger.class,

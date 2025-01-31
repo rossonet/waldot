@@ -17,7 +17,6 @@ import picocli.CommandLine.Spec;
 		"JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",
 		"OS: ${os.name} ${os.version} ${os.arch}" }, description = "Start WaldOT server", footer = "powered by Rossonet s.c.a r.l.", showEndOfOptionsDelimiterInUsageHelp = true, showAtFileInUsageHelp = true)
 public class WaldotRunner implements Callable<Integer>, AutoCloseable {
-	// TODO completare avvio da linea di comando annotando la classe con picocli
 
 	public static void main(String[] args) {
 		final WaldotRunner waldotRunner = new WaldotRunner();
@@ -37,118 +36,122 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		}
 	}
 
-	@Spec
-	CommandSpec spec;
-
-	private WaldotOpcUaServer waldot;
-
-	protected int tcpBindPort;
-
-	protected String productUri;
-
-	protected String productName;
-
-	protected String path;
-
-	protected String manufacturerName;
-
-	protected int httpsBindPort;
-
-	protected String dnsAddressCertificateGenerator;
-
-	protected String bindHostname;
-
-	protected String bindAddresses;
-
-	protected String applicationName;
-
-	protected UInteger waldotCommandWriteMask;
-
-	protected UInteger waldotCommandUserWriteMask;
-
-	protected Boolean waldotCommandUserExecutable;
-
-	protected String waldotCommandLabel;
-
-	protected Boolean waldotCommandExecutable;
-
-	protected String waldotCommandDescription;
-
-	protected UInteger versionCommandWriteMask;
-
-	protected UInteger versionCommandUserWriteMask;
-
-	protected Boolean versionCommandUserExecutable;
-
-	protected String versionCommandLabel;
-
-	protected Boolean versionCommandExecutable;
-
-	protected String versionCommandDescription;
-
-	protected String rootNodeId;
-
-	protected String rootNodeDisplayName;
-
-	protected String rootNodeBrowseName;
-
-	protected String managerNamespaceUri;
-
-	protected String interfaceRootNodeId;
-
-	protected String interfaceRootNodeDisplayName;
-
-	protected String interfaceRootNodeBrowseName;
-
-	protected UInteger helpCommandWriteMask;
-
-	protected UInteger helpCommandUserWriteMask;
-
-	protected Boolean helpCommandUserExecutable;
-
-	protected String helpCommandLabel;
-
-	protected Boolean helpCommandExecutable;
-
-	protected String helpCommandDescription;
-
-	protected String factoryUsername;
-
-	protected String factoryPassword;
-
-	protected UInteger execCommandWriteMask;
-
-	protected UInteger execCommandUserWriteMask;
-
-	protected Boolean execCommandUserExecutable;
-
-	protected String execCommandLabel;
-
-	protected Boolean execCommandExecutable;
-
-	protected String execCommandDescription;
-
-	protected URL bootUrl;
-
-	protected String assetRootNodeId;
-
-	protected String assetRootNodeDisplayName;
-
-	protected String assetRootNodeBrowseName;
-
-	protected boolean anonymousAccessAllowed;
-
-	protected UInteger aboutCommandWriteMask;
-
-	protected UInteger aboutCommandUserWriteMask;
-
-	protected Boolean aboutCommandUserExecutable;
-
-	protected String aboutCommandLabel;
+	protected String aboutCommandDescription;
 
 	protected Boolean aboutCommandExecutable;
 
-	protected String aboutCommandDescription;
+	protected String aboutCommandLabel;
+
+	protected Boolean aboutCommandUserExecutable;
+
+	protected UInteger aboutCommandUserWriteMask;
+
+	protected UInteger aboutCommandWriteMask;
+
+	protected boolean anonymousAccessAllowed;
+
+	protected String applicationName;
+
+	protected String assetRootNodeBrowseName;
+
+	protected String assetRootNodeDisplayName;
+
+	protected String assetRootNodeId;
+
+	protected String bindAddresses;
+
+	protected String bindHostname;
+
+	protected URL bootUrl;
+
+	protected long defaultFactsValidDelayMs;
+
+	protected long defaultFactsValidUntilMs;
+
+	protected String dnsAddressCertificateGenerator;
+
+	protected String execCommandDescription;
+
+	protected Boolean execCommandExecutable;
+
+	protected String execCommandLabel;
+
+	protected Boolean execCommandUserExecutable;
+
+	protected UInteger execCommandUserWriteMask;
+
+	protected UInteger execCommandWriteMask;
+
+	protected String factoryPassword;
+
+	protected String factoryUsername;
+
+	protected String helpCommandDescription;
+
+	protected Boolean helpCommandExecutable;
+
+	protected String helpCommandLabel;
+
+	protected Boolean helpCommandUserExecutable;
+
+	protected UInteger helpCommandUserWriteMask;
+
+	protected UInteger helpCommandWriteMask;
+
+	protected int httpsBindPort;
+
+	protected String interfaceRootNodeBrowseName;
+
+	protected String interfaceRootNodeDisplayName;
+
+	protected String interfaceRootNodeId;
+
+	protected String managerNamespaceUri;
+
+	protected String manufacturerName;
+
+	protected String path;
+
+	protected String productName;
+
+	protected String productUri;
+
+	protected String rootNodeBrowseName;
+
+	protected String rootNodeDisplayName;
+
+	protected String rootNodeId;
+
+	@Spec
+	CommandSpec spec;
+
+	protected int tcpBindPort;
+
+	protected String versionCommandDescription;
+
+	protected Boolean versionCommandExecutable;
+
+	protected String versionCommandLabel;
+
+	protected Boolean versionCommandUserExecutable;
+
+	protected UInteger versionCommandUserWriteMask;
+
+	protected UInteger versionCommandWriteMask;
+
+	private WaldotOpcUaServer waldot;
+
+	protected String waldotCommandDescription;
+
+	protected Boolean waldotCommandExecutable;
+
+	protected String waldotCommandLabel;
+
+	protected Boolean waldotCommandUserExecutable;
+
+	protected UInteger waldotCommandUserWriteMask;
+
+	protected UInteger waldotCommandWriteMask;
 
 	@Override
 	public Integer call() throws Exception {
@@ -228,6 +231,14 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	public URL getBootUrl() {
 
 		return bootUrl;
+	}
+
+	public long getDefaultFactsValidDelayMs() {
+		return defaultFactsValidDelayMs;
+	}
+
+	public long getDefaultFactsValidUntilMs() {
+		return defaultFactsValidUntilMs;
 	}
 
 	public String getDnsAddressCertificateGenerator() {

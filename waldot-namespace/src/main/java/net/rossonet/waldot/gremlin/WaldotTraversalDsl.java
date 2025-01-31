@@ -12,7 +12,7 @@ public interface WaldotTraversalDsl<S, E> extends GraphTraversal.Admin<S, E> {
 		if (this instanceof AbstractOpcCommand) {
 			final AbstractOpcCommand thisAsAbstractWaldotCommand = ((AbstractOpcCommand) this);
 			final Object[] output = thisAsAbstractWaldotCommand.runCommand(methodInputs);
-			// TODO capire come iplementare la risposta con i dati di output dello script
+			// TODO capire come implementare la risposta con i dati di output dello script
 		}
 		throw new UnsupportedOperationException("Vertex is not a UaMethodNode");
 	}

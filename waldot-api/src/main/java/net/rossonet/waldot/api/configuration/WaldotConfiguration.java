@@ -30,6 +30,10 @@ public interface WaldotConfiguration extends Serializable, Map<String, String> {
 
 	URL getBootUrl();
 
+	long getDefaultFactsValidDelayMs();
+
+	long getDefaultFactsValidUntilMs();
+
 	String getExecCommandDescription();
 
 	Boolean getExecCommandExecutable();

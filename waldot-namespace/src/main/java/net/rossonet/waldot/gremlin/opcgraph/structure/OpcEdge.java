@@ -28,9 +28,9 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.opc.OpcElement;
+import net.rossonet.waldot.opc.gremlin.GremlinElement;
 
-public class OpcEdge extends OpcElement implements WaldotEdge {
+public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 

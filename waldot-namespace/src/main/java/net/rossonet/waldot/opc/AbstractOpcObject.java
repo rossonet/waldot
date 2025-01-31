@@ -38,8 +38,9 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.gremlin.opcgraph.structure.AbstractOpcGraph;
+import net.rossonet.waldot.opc.gremlin.GremlinElement;
 
-public abstract class AbstractOpcObject extends OpcElement implements WaldotVertex {
+public abstract class AbstractOpcObject extends GremlinElement implements WaldotVertex {
 
 	protected final WaldotGraph graph;
 
@@ -143,7 +144,7 @@ public abstract class AbstractOpcObject extends OpcElement implements WaldotVert
 	@Override
 	public void postEvent(BaseEventTypeNode event) {
 		getNamespace().getEventBus().post(event);
-		eventObservers.forEach(observer -> observer.fireEvent(event));
+		eventObservers.forEach(observer -> observer.fireEvent(this, event));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

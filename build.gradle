@@ -15,8 +15,8 @@ group = 'net.rossonet.waldot'
 version = '0.1.0'
 
 ext {
-    sourceCompatibility = 17
-    targetCompatibility = 17
+    sourceCompatibility = 21
+    targetCompatibility = 21
     debianName = "${project.name}"
     packageName = "${project.name}"
     ossrhPassword = System.getenv('OSSRH_PASSWORD')

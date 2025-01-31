@@ -1,51 +1,226 @@
 package net.rossonet.waldot.rules;
 
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
+import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.UaException;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.api.RuleListener;
+import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.api.rules.CachedRuleRecord;
 import net.rossonet.waldot.api.rules.Rule;
+import net.rossonet.waldot.api.rules.WaldotRuleThread;
+import net.rossonet.waldot.api.rules.WaldotRulesEngine;
+import net.rossonet.waldot.api.rules.WaldotStepLogger;
+import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
 
-public class DefaultRule implements Rule {
+public class DefaultRule extends OpcVertex implements Rule {
+	private class RuleRunner implements Callable<WaldotStepLogger> {
+
+		@Override
+		public WaldotStepLogger call() throws Exception {
+			dirty.set(false);
+			evaluate();
+			return Thread.currentThread() instanceof WaldotRuleThread
+					? ((WaldotRuleThread) Thread.currentThread()).getStepRegister()
+					: null;
+		}
+
+	}
+
+	private final String action;
+
+	private boolean clearFactsAfterExecution = true;
+	private final String condition;
+	private int delayBeforeEvaluation = 0;
+	private int delayBeforeExecute = 0;
+	private final AtomicBoolean dirty = new AtomicBoolean(false);
+	private final int executionTimeout = 0;
+	private final List<TimerCachedMemory> factsMemory = Collections.synchronizedList(new ArrayList<>());
+	private long factsValidDelayMs = 0;
+	private long factsValidUntilMs = 0;
+	private long lastRun = 0;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private final NodeId nodeId;
-	private final String condition;
-	private final String action;
+	private boolean parallelExecution = false;
 	private final int priority;
+	private int refractoryPeriodMs = 1000;
 
-	private final String label;
+	private final AtomicInteger threadCounter = new AtomicInteger(0);
+	private final WaldotRulesEngine waldotRulesEngine;
 
-	private final DefaultRulesEngine waldotRulesEngine;
-
-	private final String description;
-
-	public DefaultRule(DefaultRulesEngine waldotRulesEngine, NodeId rule, String label, String description,
-			String condition, String action, int priority) {
+	public DefaultRule(NodeId typeDefinition, final WaldotGraph graph, UaNodeContext context, final NodeId nodeId,
+			final QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
+			UInteger userWriteMask, UByte eventNotifier, long version, WaldotRulesEngine waldotRulesEngine,
+			String condition, String action, int priority, long factsValidUntilMs, long factsValidDelayMs) {
+		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
+				version);
 		this.waldotRulesEngine = waldotRulesEngine;
-		this.nodeId = rule;
-		this.label = label;
-		this.description = description;
 		this.condition = condition;
 		this.action = action;
 		this.priority = priority;
+		this.factsValidUntilMs = factsValidUntilMs;
+		this.factsValidDelayMs = factsValidDelayMs;
 	}
 
 	@Override
 	public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
-		logger.info("for rule " + label + " attribute changed node " + node.getNodeId() + " attributeId " + attributeId
-				+ " value " + value);
-		waldotRulesEngine.evaluateRuleForAttributeChanged(this, node, attributeId, value);
+		logger.info("for rule " + getBrowseName().getName() + " attribute changed node " + node.getNodeId()
+				+ " attributeId " + attributeId + " value " + value);
+		factsMemory.add(createCachedRuleRecord(node, attributeId, value));
+		changeState();
+		for (final RuleListener l : getListeners()) {
+			l.onAttributeChange(node, attributeId, value);
+		}
+	}
+
+	private void changeState() {
+		if (isParallelExecution() && getRunners() < 1) {
+			if (lastRun + getRefractoryPeriodMs() < System.currentTimeMillis()) {
+				logger.info("rule " + getBrowseName().getName() + " is in refractory period");
+				return;
+			}
+			dirty.set(true);
+		} else {
+			logger.info("rule " + getBrowseName().getName() + " is running");
+		}
 	}
 
 	@Override
-	public void fireEvent(BaseEventType event) {
-		logger.info("for rule " + label + " event fired " + event);
-		waldotRulesEngine.evaluateRuleForEvent(this, event);
+	public void clear() {
+		factsMemory.clear();
+	}
 
+	@Override
+	public void close() throws Exception {
+		clear();
+	}
+
+	private TimerCachedMemory createCachedRuleRecord(UaNode node, AttributeId attributeId, Object value) {
+		return new TimerCachedMemory(node.getNodeId(), getDefaultValidDelayMs(), getDefaultValidUntilMs(),
+				new DataUpdateFact(attributeId, value));
+	}
+
+	private TimerCachedMemory createCachedRuleRecord(UaNode node, BaseEventType event) {
+		return new TimerCachedMemory(node.getNodeId(), getDefaultValidDelayMs(), getDefaultValidUntilMs(),
+				new EventFact(event));
+	}
+
+	private void evaluate() {
+		if (Thread.currentThread() instanceof WaldotRuleThread) {
+			threadCounter.incrementAndGet();
+			final WaldotRuleThread waldotThread = (WaldotRuleThread) Thread.currentThread();
+			waldotThread.setRule(this);
+			final WaldotStepLogger stepRegister = waldotThread.getStepRegister();
+			try {
+				for (final RuleListener l : getListeners()) {
+					final boolean lr = l.beforeEvaluate(stepRegister);
+					if (!lr) {
+						logger.info("Rule evaluation stopped by listener");
+						stepRegister.onEvaluateStoppedByListener(l);
+						return;
+					}
+				}
+				if (getDelayBeforeEvaluation() > 0) {
+					Thread.sleep(getDelayBeforeEvaluation());
+				}
+				boolean conditionPassed = false;
+				try {
+					conditionPassed = runCheck(stepRegister);
+				} catch (final Throwable e) {
+					logger.error("Error evaluating rule", e);
+					conditionPassed = false;
+					getListeners().stream().forEach(l -> l.onEvaluationError(stepRegister, e));
+				}
+				final boolean resultCondition = conditionPassed;
+				getListeners().stream().forEach(l -> l.afterEvaluate(stepRegister, resultCondition));
+				if (resultCondition) {
+					if (getDelayBeforeExecute() > 0) {
+						Thread.sleep(getDelayBeforeExecute());
+					}
+					getListeners().stream().forEach(l -> l.beforeExecute(stepRegister));
+					try {
+						final Object executionResult = runAction(stepRegister);
+						getListeners().stream().forEach(l -> l.afterExecute(stepRegister, executionResult));
+						generateEvent(executionResult);
+						for (final RuleListener l : getListeners()) {
+							l.onSuccess(stepRegister, resultCondition, executionResult);
+						}
+					} catch (final Throwable e) {
+						logger.error("Error executing rule action", e);
+						getListeners().stream().forEach(l -> l.onActionError(stepRegister, e));
+					}
+				}
+				if (isClearFactsAfterExecution()) {
+					clear();
+				}
+				lastRun = System.currentTimeMillis();
+			} catch (final Throwable e) {
+				logger.error("Error evaluating rule", e);
+				getListeners().stream().forEach(l -> l.onFailure(stepRegister, e));
+			}
+			threadCounter.decrementAndGet();
+		} else {
+			logger.error("Rule evaluation must be run in a WaldotRuleThread");
+			getListeners().stream().forEach(l -> l.onFailure(null,
+					new IllegalStateException("Rule evaluation should be run in a WaldotRuleThread")));
+		}
+
+	}
+
+	@Override
+	public void fireEvent(UaNode node, BaseEventType event) {
+		logger.info("for rule " + getBrowseName().getName() + " event fired " + event);
+		factsMemory.add(createCachedRuleRecord(node, event));
+		changeState();
+		for (final RuleListener l : getListeners()) {
+			l.onEventFired(node, event);
+		}
+	}
+
+	private void generateEvent(Object executionResult) throws UaException {
+		final UUID randomUUID = UUID.randomUUID();
+		final BaseEventTypeNode eventNode = waldotRulesEngine.getNamespace().getEventFactory()
+				.createEvent(waldotRulesEngine.getNamespace().generateNodeId(randomUUID), Identifiers.BaseEventType);
+		eventNode.setBrowseName(waldotRulesEngine.getNamespace().generateQualifiedName("RuleFiredEvent"));
+		eventNode.setDisplayName(LocalizedText.english("RuleFiredEvent"));
+		eventNode.setEventId(ByteString.of(randomUUID.toString().getBytes()));
+		eventNode.setEventType(Identifiers.BaseEventType);
+		eventNode.setSourceNode(getNodeId());
+		eventNode.setSourceName(getBrowseName().getName());
+		eventNode.setTime(DateTime.now());
+		eventNode.setReceiveTime(DateTime.NULL_VALUE);
+		if (executionResult == null) {
+			eventNode.setMessage(LocalizedText.english("rule " + getBrowseName().getName() + " fired"));
+		} else {
+			eventNode.setMessage(LocalizedText
+					.english("rule " + getBrowseName().getName() + " fired with result " + executionResult));
+		}
+		eventNode.setSeverity(ushort(2));
+		postEvent(eventNode);
 	}
 
 	@Override
@@ -59,18 +234,59 @@ public class DefaultRule implements Rule {
 	}
 
 	@Override
-	public String getDescription() {
-		return description;
+	public long getDefaultValidDelayMs() {
+		return factsValidDelayMs;
 	}
 
 	@Override
-	public String getLabel() {
-		return label;
+	public long getDefaultValidUntilMs() {
+		return factsValidUntilMs;
 	}
 
 	@Override
-	public NodeId getNodeId() {
-		return nodeId;
+	public int getDelayBeforeEvaluation() {
+		return delayBeforeEvaluation;
+	}
+
+	@Override
+	public int getDelayBeforeExecute() {
+		return delayBeforeExecute;
+	}
+
+	@Override
+	public int getExecutionTimeout() {
+		return executionTimeout;
+	}
+
+	@Override
+	public Collection<CachedRuleRecord> getFacts() {
+		final Collection<CachedRuleRecord> reply = new ArrayList<>();
+		final List<TimerCachedMemory> toDelete = new ArrayList<>();
+		for (final TimerCachedMemory memoryFact : factsMemory) {
+			if (memoryFact.isValidNow()) {
+				reply.add(memoryFact);
+			}
+			if (memoryFact.isExpired()) {
+				toDelete.add(memoryFact);
+			}
+		}
+		for (final TimerCachedMemory expiredFact : toDelete) {
+			factsMemory.remove(expiredFact);
+			for (final RuleListener l : getListeners()) {
+				l.onFactExpired(expiredFact);
+			}
+		}
+		return reply;
+	}
+
+	@Override
+	public Collection<RuleListener> getListeners() {
+		return waldotRulesEngine.getListeners();
+	}
+
+	@Override
+	public RuleRunner getNewRunner() {
+		return new RuleRunner();
 	}
 
 	@Override
@@ -79,10 +295,74 @@ public class DefaultRule implements Rule {
 	}
 
 	@Override
+	public int getRefractoryPeriodMs() {
+		return refractoryPeriodMs;
+	}
+
+	@Override
+	public int getRunners() {
+		return threadCounter.get();
+	}
+
+	@Override
+	public String getThreadName() {
+		return "R[" + getNodeId() + "]";
+	}
+
+	@Override
+	public boolean isClearFactsAfterExecution() {
+		return clearFactsAfterExecution;
+	}
+
+	@Override
+	public boolean isDirty() {
+		return dirty.get();
+	}
+
+	@Override
+	public boolean isParallelExecution() {
+		return parallelExecution;
+	}
+
+	@Override
 	public void propertyChanged(UaNode node, AttributeId attributeId, Object value) {
-		logger.info("for rule " + label + " property changed node " + node.getNodeId() + " attributeId " + attributeId
-				+ " value " + value);
-		waldotRulesEngine.evaluateRuleForPropertyChanged(this, node, attributeId, value);
+		logger.info("for rule " + getBrowseName().getName() + " property changed node " + node.getNodeId()
+				+ " attributeId " + attributeId + " value " + value);
+		factsMemory.add(createCachedRuleRecord(node, attributeId, value));
+		changeState();
+	}
+
+	private Object runAction(WaldotStepLogger stepRegister) throws UaException {
+		return waldotRulesEngine.getJexlEngine().executeRule(waldotRulesEngine.getNamespace(), this, stepRegister);
+	}
+
+	private boolean runCheck(WaldotStepLogger stepRegister) {
+		return waldotRulesEngine.getJexlEngine().evaluateRule(waldotRulesEngine.getNamespace(), this, stepRegister);
+	}
+
+	@Override
+	public void setClearFactsAfterExecution(boolean clearFactsAfterExecution) {
+		this.clearFactsAfterExecution = clearFactsAfterExecution;
+	}
+
+	@Override
+	public void setDelayBeforeEvaluation(int delayBeforeEvaluation) {
+		this.delayBeforeEvaluation = delayBeforeEvaluation;
+	}
+
+	@Override
+	public void setDelayBeforeExecute(int delayBeforeExecute) {
+		this.delayBeforeExecute = delayBeforeExecute;
+	}
+
+	@Override
+	public void setParallelExecution(boolean parallelExecution) {
+		this.parallelExecution = parallelExecution;
+	}
+
+	@Override
+	public void setRefractoryPeriodMs(int refractoryPeriodMs) {
+		this.refractoryPeriodMs = refractoryPeriodMs;
 	}
 
 }

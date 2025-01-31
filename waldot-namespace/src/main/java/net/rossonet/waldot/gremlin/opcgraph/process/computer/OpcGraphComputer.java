@@ -35,11 +35,8 @@ import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
 import net.rossonet.waldot.api.models.WaldotGraphComputerView;
 import net.rossonet.waldot.gremlin.opcgraph.structure.AbstractOpcGraph;
 
-//TODO da implementare completamente la versione OLAP
-/**
- * @author Marko A. Rodriguez (http://markorodriguez.com)
- * @author Stephen Mallette (http://stephen.genoprime.com)
- */
+//FIXME da implementare completamente la versione OLAP
+
 public final class OpcGraphComputer implements GraphComputer {
 
 	private static class SynchronizedIterator<V> {
@@ -61,20 +58,7 @@ public final class OpcGraphComputer implements GraphComputer {
 		TraversalStrategies.GlobalCache.registerStrategies(OpcGraphComputer.class, TraversalStrategies.GlobalCache
 				.getStrategies(GraphComputer.class).clone().removeStrategies(GraphFilterStrategy.class));
 	}
-	private ResultGraph resultGraph = null;
-
-	private Persist persist = null;
-	private VertexProgram<?> vertexProgram;
-	private final AbstractOpcGraph graph;
-	private OpcMemory memory;
-	private final OpcMessageBoard messageBoard = new OpcMessageBoard();
-	private boolean executed = false;
-	private final Set<MapReduce> mapReducers = new HashSet<>();
-	private int workers = Runtime.getRuntime().availableProcessors();
-
-	private final GraphFilter graphFilter = new GraphFilter();
-
-	private final ThreadFactory threadFactoryBoss = new BasicThreadFactory.Builder()
+	private final ThreadFactory _threadFactoryBoss = new BasicThreadFactory.Builder()
 			.namingPattern(OpcGraphComputer.class.getSimpleName() + "-boss").build();
 
 	/**
@@ -82,7 +66,21 @@ public final class OpcGraphComputer implements GraphComputer {
 	 * {@link GraphComputer} is only used once for a {@link VertexProgram} a single
 	 * threaded executor is sufficient.
 	 */
-	private final ExecutorService computerService = Executors.newSingleThreadExecutor(threadFactoryBoss);
+	private final ExecutorService computerService = Executors.newSingleThreadExecutor(_threadFactoryBoss);
+	private boolean executed = false;
+	private final AbstractOpcGraph graph;
+	private final GraphFilter graphFilter = new GraphFilter();
+	private final Set<MapReduce> mapReducers = new HashSet<>();
+	private OpcMemory memory;
+	private final OpcMessageBoard messageBoard = new OpcMessageBoard();
+
+	private Persist persist = null;
+
+	private ResultGraph resultGraph = null;
+
+	private VertexProgram<?> vertexProgram;
+
+	private int workers = Runtime.getRuntime().availableProcessors();
 
 	public OpcGraphComputer(final AbstractOpcGraph graph) {
 		this.graph = graph;

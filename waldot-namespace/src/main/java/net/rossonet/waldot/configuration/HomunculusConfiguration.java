@@ -74,6 +74,16 @@ public class HomunculusConfiguration extends HashMap<String, String> implements 
 	}
 
 	@Override
+	public long getDefaultFactsValidDelayMs() {
+		return 0;
+	}
+
+	@Override
+	public long getDefaultFactsValidUntilMs() {
+		return 0;
+	}
+
+	@Override
 	public String getExecCommandDescription() {
 		return "run system command";
 	}

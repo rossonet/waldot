@@ -12,7 +12,7 @@ public class SingleFileWithStagesBootstrapStrategy implements BootstrapProcedure
 
 	@Override
 	public AgentStatus getAgentStatus() {
-		// TODO Auto-generated method stub
+		// FIXME completare boot strategy
 		return null;
 	}
 
@@ -24,7 +24,7 @@ public class SingleFileWithStagesBootstrapStrategy implements BootstrapProcedure
 
 	@Override
 	public void runBootstrapProcedure() {
-		// TODO Auto-generated method stub
+		// FIXME completare boot strategy
 
 	}
 
