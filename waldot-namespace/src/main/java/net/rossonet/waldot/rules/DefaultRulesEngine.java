@@ -52,7 +52,8 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 				}
 			}
 		}
-		rulesThreadManager = new RulesThreadManager(rules);
+		rulesThreadManager = new RulesThreadManager(rules, waldotNamespace.getRulesLogger());
+		rulesThreadManager.start();
 	}
 
 	@Override

@@ -34,8 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
-import net.rossonet.waldot.TraceLogger;
-import net.rossonet.waldot.TraceLogger.ContexLogger;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
@@ -60,6 +58,8 @@ import net.rossonet.waldot.configuration.HomunculusConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.jexl.jexlWaldotCommandHelper;
+import net.rossonet.waldot.logger.TraceLogger;
+import net.rossonet.waldot.logger.TraceLogger.ContexLogger;
 import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {

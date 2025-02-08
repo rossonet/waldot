@@ -28,7 +28,6 @@ My first goal is to pass TinkerPop's compliance tests, I want the logo...
 ## GitHub Actions
 
 [![Gradle Test](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml)
-[![Build and publish docker image to GitHub Registry](https://github.com/rossonet/waldot/actions/workflows/publish-to-github-registry.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/publish-to-github-registry.yml)
 
 ## Reference
 
