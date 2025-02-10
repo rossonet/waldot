@@ -32,4 +32,4 @@ jobs:
     - name: Publish with Gradle
       env:
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-      run: ./gradlew :waldot-api:publishing :waldot-namespace:publishing :waldot-plugin-os:publishing :waldot-plugin-bag:publishing :waldot-plugin-tinkerpop:publishing -Psigning.password=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} -Psigning.keyId=F6113733 -Psigning.secretKeyRingFile=/home/runner/.gnupg/private.key -Dorg.gradle.jvmargs="-Xms512M -Xmx4G"
+      run: ./gradlew :waldot-api:publish :waldot-namespace:publish :waldot-plugin-os:publish :waldot-plugin-bag:publish :waldot-plugin-tinkerpop:publish -Psigning.password=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} -Psigning.keyId=F6113733 -Psigning.secretKeyRingFile=/home/runner/.gnupg/private.key -Dorg.gradle.jvmargs="-Xms512M -Xmx4G"
