@@ -40,10 +40,11 @@ apply plugin: "com.netflix.nebula.ospackage"
 apply plugin: 'base'
 apply plugin: 'distribution'
 apply plugin: 'signing'
+apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 dependencies {
-	api project(':waldot-api')
+    api project(':waldot-api')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.0'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
