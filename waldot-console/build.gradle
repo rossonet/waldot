@@ -61,7 +61,7 @@ dependencies {
     // OPCUA
     implementation group: 'org.eclipse.milo', name: 'sdk-client', version: '0.6.14'
     implementation group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.15'
-    implementation group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.14'
+    implementation group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.15'
     implementation group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
     // picocli
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
