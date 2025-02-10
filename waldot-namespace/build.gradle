@@ -19,11 +19,10 @@ version = '0.1.1'
 ext {
     sourceCompatibility = 21
     targetCompatibility = 21
-    mainClassName = "net.rossonet.agent.MainAgent"
-    mainPicocliCommandClass = "net.rossonet.agent.WaldotEngine"
     debianName = "${project.name}"
     packageName = "${project.name}"
     ossrhPassword = System.getenv('OSSRH_PASSWORD')
+    ossrhUsername = System.getenv('OSSRH_USERNAME')
 }
 
 repositories {
@@ -164,7 +163,7 @@ publishing {
             url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             name = "sonatype"
             credentials {
-                username "rossonet"
+                username "${ossrhUsername}"
                 password "${ossrhPassword}"
             }
         }

@@ -18,7 +18,6 @@ ext {
     targetCompatibility = 21
     debianName = "${project.name}"
     packageName = "${project.name}"
-    ossrhPassword = System.getenv('OSSRH_PASSWORD')
 }
 
 repositories {
