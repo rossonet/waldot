@@ -18,11 +18,11 @@ plugins {
 
 description = "WaldOT Server Application"
 group = 'net.rossonet.waldot'
-version = '0.1.0'
+version = '0.1.1'
 
 ext {
-    sourceCompatibility = 17
-    targetCompatibility = 17
+    sourceCompatibility = 21
+    targetCompatibility = 21
     mainClassName = "net.rossonet.agent.MainAgent"
     mainPicocliCommandClass = "net.rossonet.agent.WaldotEngine"
     debianName = "${project.name}"
@@ -48,8 +48,6 @@ apply plugin: "com.netflix.nebula.ospackage"
 apply plugin: 'base'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'distribution'
-apply plugin: 'signing'
-apply plugin: 'maven-publish'
 apply plugin: 'application'
 
 dependencies {
@@ -182,64 +180,10 @@ task theiaIdeLocalBrowser(type: Exec) {
     commandLine 'xdg-open', 'http://localhost:3000'
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication){
-            artifactId = "${project.name}"
-            from components.java
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
-            }
-            pom {
-                name = "${project.name}"
-                description = "${project.description}"
-                url = 'https://app.rossonet.net/'
-                licenses {
-                    license {
-                        name = 'Apache-2.0 license'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'ar4k'
-                        name = 'Andrea Ambrosini'
-                        email = 'andrea.ambrosini@rossonet.org'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git://github.com/rossonet/TemplateConsoleApplication.git'
-                    developerConnection = 'scm:git:ssh://github.com:rossonet/TemplateConsoleApplication.git'
-                    url = 'https://github.com/rossonet/TemplateConsoleApplication/tree/master'
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            name = "sonatype"
-            credentials {
-                username "rossonet"
-                password "${ossrhPassword}"
-            }
-        }
-    }
-}
-
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }
 
 application {

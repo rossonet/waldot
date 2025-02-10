@@ -11,6 +11,7 @@ import picocli.CommandLine;
 public class MainAgent {
 	public static void main(final String... args) {
 		final int exitCode = new CommandLine(new WaldotRunner()).execute(args);
+		System.out.println("Exit code: " + exitCode);
 		System.exit(exitCode);
 	}
 }

@@ -15,7 +15,7 @@ import picocli.CommandLine.Spec;
 
 @Command(name = "WaldOT", mixinStandardHelpOptions = true, version = { "${COMMAND-NAME} 1.0",
 		"JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",
-		"OS: ${os.name} ${os.version} ${os.arch}" }, description = "Start WaldOT server", footer = "powered by Rossonet s.c.a r.l.", showEndOfOptionsDelimiterInUsageHelp = true, showAtFileInUsageHelp = true)
+		"OS: ${os.name} ${os.version} ${os.arch}" }, description = "WaldOT OPCUA server", footer = "powered by Rossonet s.c.a r.l.", showEndOfOptionsDelimiterInUsageHelp = true, showAtFileInUsageHelp = true)
 public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 
 	public static void main(String[] args) {

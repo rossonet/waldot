@@ -14,11 +14,11 @@ buildscript {
 
 description = "WaldOT OpcUA namespace"
 group = 'net.rossonet.waldot'
-version = '0.1.0'
+version = '0.1.1'
 
 ext {
-    sourceCompatibility = 17
-    targetCompatibility = 17
+    sourceCompatibility = 21
+    targetCompatibility = 21
     mainClassName = "net.rossonet.agent.MainAgent"
     mainPicocliCommandClass = "net.rossonet.agent.WaldotEngine"
     debianName = "${project.name}"
@@ -137,7 +137,7 @@ publishing {
             pom {
                 name = "${project.name}"
                 description = "${project.description}"
-                url = 'https://app.rossonet.net/'
+                url = 'https://www.rossonet.net/'
                 licenses {
                     license {
                         name = 'Apache-2.0 license'
@@ -148,13 +148,13 @@ publishing {
                     developer {
                         id = 'ar4k'
                         name = 'Andrea Ambrosini'
-                        email = 'andrea.ambrosini@rossonet.org'
+                        email = 'andrea.ambrosini@rossonet.com'
                     }
                 }
                 scm {
-                    connection = 'scm:git:git://github.com/rossonet/TemplateConsoleApplication.git'
-                    developerConnection = 'scm:git:ssh://github.com:rossonet/TemplateConsoleApplication.git'
-                    url = 'https://github.com/rossonet/TemplateConsoleApplication/tree/master'
+                    connection = 'scm:git:git://github.com/rossonet/waldot.git'
+                    developerConnection = 'scm:git:ssh://github.com:rossonet/waldot.git'
+                    url = 'https://github.com/rossonet/waldot/tree/master'
                 }
             }
         }

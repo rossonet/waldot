@@ -4,6 +4,8 @@
 
 experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org/gremlin.html) and [Eclipse Milo OPCUA library](https://projects.eclipse.org/projects/iot.milo)
 
+[Docker Hub page](https://hub.docker.com/r/rossonet/waldot)
+
 ## Logbook
 
 ### January 2025
@@ -28,6 +30,7 @@ My first goal is to pass TinkerPop's compliance tests, I want the logo...
 ## GitHub Actions
 
 [![Gradle Test](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml)
+[![Build and publish WaldOT docker image to Docker Hub](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml)
 
 ## Reference
 
