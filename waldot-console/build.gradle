@@ -52,7 +52,7 @@ apply plugin: 'application'
 
 dependencies {
     api project(':waldot-api')
-    api 'org.json:json:20240303'
+    api 'org.json:json:20250107'
     api 'org.yaml:snakeyaml:2.3'
     api 'org.apache.commons:commons-jexl3:3.4.0'
     api 'org.slf4j:jul-to-slf4j:2.0.16'
@@ -60,13 +60,13 @@ dependencies {
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.2'
     // OPCUA
     implementation group: 'org.eclipse.milo', name: 'sdk-client', version: '0.6.14'
-    implementation group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.14'
+    implementation group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.15'
     implementation group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.14'
     implementation group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
     // picocli
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
     testImplementation project(':waldot-app')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.0'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'

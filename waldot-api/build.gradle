@@ -51,7 +51,7 @@ dependencies {
     // gremlin
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
 
-    implementation 'org.json:json:20240303'
+    implementation 'org.json:json:20250107'
     implementation 'org.yaml:snakeyaml:2.3'
     implementation 'org.apache.commons:commons-jexl3:3.4.0'
     implementation 'org.slf4j:jul-to-slf4j:2.0.16'
@@ -59,14 +59,14 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.2'
     // OPCUA
     implementation group: 'org.eclipse.milo', name: 'sdk-server', version: '0.6.14'
-    implementation group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.14'
+    implementation group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.15'
     implementation group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.14'
     implementation group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
 
     annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
     //implementation 'ch.qos.logback:logback-classic:1.5.8'
     //implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.0'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
