@@ -137,7 +137,7 @@ publishing {
   }
   repositories {
     maven {
-      url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+      url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
       name = "sonatype"
       credentials {
         username "${project.ext.ossrhUsername}"
