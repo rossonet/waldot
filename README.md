@@ -22,6 +22,18 @@ My first goal is to pass TinkerPop's compliance tests, I want the logo...
 
 <small>[rif: https://tinkerpop.apache.org/docs/current/dev/provider/#graph-system-provider-requirements](https://tinkerpop.apache.org/docs/current/dev/provider/#graph-system-provider-requirements)</small>
 
+## Maven
+
+[WaldOT API](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-api)
+
+[WaldOT namespace](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-namespace)
+
+[WaldOT plugin OS](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-plugin-os)
+
+[WaldOT plugin bag](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-plugin-bag)
+
+[WaldOT plugin TinkerPop](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-plugin-tinkerpop)
+
 ## Code tools
 
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/rossonet/waldot)
