@@ -45,7 +45,6 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'distribution'
 apply plugin: 'signing'
 apply plugin: 'maven-publish'
-apply plugin: 'application'
 
 dependencies {
     api project(':waldot-api')
