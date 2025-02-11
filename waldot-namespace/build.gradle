@@ -120,41 +120,51 @@ javadoc{
     failOnError=false
 }
 
-uploadArchives {
+publishing {
+  publications {
+    mavenJava(MavenPublication){
+      artifactId = "${project.name}"
+      from components.java
+      versionMapping {
+        usage('java-api') {
+          fromResolutionOf('runtimeClasspath')
+        }
+        usage('java-runtime') {
+          fromResolutionResult()
+        }
+      }
+      pom {
+        name = "${project.name}"
+        description = "${project.description}"
+        url = 'https://www.rossonet.net/'
+        licenses {
+          license {
+            name = 'Apache-2.0 license'
+            url = 'https://www.apache.org/licenses/LICENSE-2.0'
+          }
+        }
+        developers {
+          developer {
+            id = 'ar4k'
+            name = 'Andrea Ambrosini'
+            email = 'andrea.ambrosini@rossonet.com'
+          }
+        }
+        scm {
+          connection = 'scm:git:git://github.com/rossonet/waldot.git'
+          developerConnection = 'scm:git:ssh://github.com:rossonet/waldot.git'
+          url = 'https://github.com/rossonet/waldot/tree/master'
+        }
+      }
+    }
+  }
   repositories {
-    mavenDeployer {
-
-      repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
-
-      pom.project {
-        name "${project.name}"
-        packaging 'jar'
-        description "${project.description}"
-        url 'https://www.rossonet.net/'
-		licenses {
-		    license {
-			name = 'Apache-2.0 license'
-			url = 'https://www.apache.org/licenses/LICENSE-2.0'
-		    }
-		}
-		developers {
-		    developer {
-			id = 'ar4k'
-			name = 'Andrea Ambrosini'
-			email = 'andrea.ambrosini@rossonet.com'
-		    }
-		}
-		scm {
-		    connection = 'scm:git:git://github.com/rossonet/waldot.git'
-		    developerConnection = 'scm:git:ssh://github.com:rossonet/waldot.git'
-		    url = 'https://github.com/rossonet/waldot/tree/master'
-		}
+    maven {
+      url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+      name = "sonatype"
+      credentials {
+        username "${project.ext.ossrhUsername}"
+        password "${project.ext.ossrhPassword}"
       }
     }
   }
