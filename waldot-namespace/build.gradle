@@ -67,7 +67,7 @@ dependencies {
     
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
-    testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.0'
+    testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
