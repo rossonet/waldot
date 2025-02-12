@@ -1,13 +1,10 @@
 package net.rossonet.waldot.gremlin.opcgraph.strategies.opcua;
 
-import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -28,8 +25,6 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaReferenceTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.ReferenceType;
@@ -75,9 +70,9 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	public static final Predicate<Reference> COMPONENT_OF_PREDICATE = (reference) -> reference.isInverse()
 			&& Identifiers.HasComponent.equals(reference.getReferenceTypeId());
 	public static final String CONDITION_FIELD = "Condition";
-	private static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
-	private static final String DEFAULT_CONDITION_VALUE = "true";
-	private static final int DEFAULT_PRIORITY_VALUE = 100;
+	public static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
+	public static final String DEFAULT_CONDITION_VALUE = "true";
+	public static final int DEFAULT_PRIORITY_VALUE = 100;
 	public static final String DESCRIPTION_PARAMETER = "description";
 	public static final String DIRECTORY_PARAMETER = "directory";
 	public static final String HAS_WALDOT_RULE = "HasRule";
@@ -87,42 +82,16 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	public static final String RULE_NODE_PARAMETER = "rule";
 	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
 
-	private UaVariableNode actionRuleTypeNode;
 	private UaFolderNode assetRootNode;
-	private UaVariableNode conditionRuleTypeNode;
 	private final Map<String, UaFolderNode> edgeDirectories = new HashMap<>();
-	private UaFolderNode edgesFolderNode;
-	private UaObjectTypeNode edgeTypeNode;
-	private final UByte eventNotifierActive = ubyte(1);
-	private final UByte eventNotifierDisable = ubyte(0);
-	private NodeId hasPropertyReferenceType;
-	private NodeId hasReferenceDescriptionReferenceType;
-	private NodeId hasSourceNodeReferenceType;
-	private NodeId hasTargetNodeReferenceType;
+
+	private final MiloSingleServerBaseV0FolderManager folderManager = new MiloSingleServerBaseV0FolderManager(this);
 	private UaObjectNode interfaceRootNode;
-	private UaObjectTypeNode interfaceTypeNode;
-	private UaVariableNode isForwardTypeNode;
-	private UaVariableNode labelEdgeTypeNode;
-	private UaVariableNode labelRuleTypeNode;
-	private UaVariableNode labelVertexTypeNode;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private Graph.Variables opcGraphVariables;
-	private UaVariableNode priorityRuleTypeNode;
-	private UaVariableNode referenceTypeTypeNode;
 	private UaFolderNode rootNode;
-	private final Map<String, UaFolderNode> rulesDirectories = new HashMap<>();
-	private UaFolderNode rulesFolderNode;
-	private UaObjectTypeNode ruleTypeNode;
-	private UaVariableNode sourceNodeTypeNode;
-	private UaVariableNode targetNodeTypeNode;
-	private final UInteger userWriteMask = UInteger.MIN;
-	private UaFolderNode variablesFolderNode;
-	private final int version = 0;
-	private final Map<String, UaFolderNode> vertexDirectories = new HashMap<>();
-	private UaObjectTypeNode vertexTypeNode;
-	private UaFolderNode verticesFolderNode;
-	private WaldotNamespace waldotNamespace;
-	private final UInteger writeMask = UInteger.MIN;
+
+	WaldotNamespace waldotNamespace;
 
 	@Override
 	public Edge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex, String label,
@@ -134,56 +103,70 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		}
 		final NodeId nodeId = waldotNamespace.generateNodeId(sourceVertex.getNodeId().getIdentifier() + ":"
 				+ elaboratedLabel + ":" + targetVertex.getNodeId().getIdentifier());
-		String description = getDescription(propertyKeyValues);
+		String description = getKeyValuesProperty(propertyKeyValues, DESCRIPTION_PARAMETER.toLowerCase());
 		if (description == null || description.isEmpty()) {
 			description = sourceVertex.getDescription().getText() + " -- " + label + " -> "
 					+ targetVertex.getDescription().getText();
 			logger.info(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
 		}
 		final OpcEdge edge = new OpcEdge(waldotNamespace.getGremlinGraph(), nodeId, sourceVertex, targetVertex,
-				elaboratedLabel, description, writeMask, userWriteMask, eventNotifierDisable, version);
+				elaboratedLabel, description, MiloSingleServerBaseV0ReferenceNodeBuilder.writeMask,
+				MiloSingleServerBaseV0ReferenceNodeBuilder.userWriteMask,
+				MiloSingleServerBaseV0ReferenceNodeBuilder.eventNotifierDisable,
+				MiloSingleServerBaseV0ReferenceNodeBuilder.version);
 		waldotNamespace.getStorageManager().addNode(edge);
-		final String directory = getDirectory(propertyKeyValues);
+		final String directory = getKeyValuesProperty(propertyKeyValues, DIRECTORY_PARAMETER.toLowerCase());
 		if (directory == null || directory.isEmpty()) {
-			edgesFolderNode.addOrganizes(edge);
+			folderManager.getEdgesFolderNode().addOrganizes(edge);
 		} else {
 			if (!edgeDirectories.containsKey(directory)) {
-				edgeDirectories.put(directory,
-						new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
-								waldotNamespace.generateNodeId(
-										edgesFolderNode.getNodeId().getIdentifier().toString() + "/" + directory),
-								waldotNamespace.generateQualifiedName(directory), LocalizedText.english(directory)));
+				edgeDirectories
+						.put(directory,
+								new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
+										waldotNamespace.generateNodeId(folderManager.getEdgesFolderNode().getNodeId()
+												.getIdentifier().toString() + "/" + directory),
+										waldotNamespace.generateQualifiedName(directory),
+										LocalizedText.english(directory)));
 				waldotNamespace.getStorageManager().addNode(edgeDirectories.get(directory));
-				edgesFolderNode.addOrganizes(edgeDirectories.get(directory));
+				folderManager.getEdgesFolderNode().addOrganizes(edgeDirectories.get(directory));
 			}
 			edgeDirectories.get(directory).addOrganizes(edge);
 		}
 		edge.addReference(new Reference(edge.getNodeId(), Identifiers.HasTypeDefinition,
-				edgeTypeNode.getNodeId().expanded(), true));
+				MiloSingleServerBaseV0ReferenceNodeBuilder.edgeTypeNode.getNodeId().expanded(), true));
 		final QualifiedProperty<String> LABEL = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
-				LABEL_FIELD, labelEdgeTypeNode.getNodeId().expanded(), ValueRanks.Scalar, String.class);
+				LABEL_FIELD, MiloSingleServerBaseV0ReferenceNodeBuilder.labelEdgeTypeNode.getNodeId().expanded(),
+				ValueRanks.Scalar, String.class);
 		edge.setProperty(LABEL, elaboratedLabel);
 		final QualifiedProperty<NodeId> SOURCE = new QualifiedProperty<NodeId>(waldotNamespace.getNamespaceUri(),
-				"SourceNode", sourceNodeTypeNode.getNodeId().expanded(), ValueRanks.Scalar, NodeId.class);
+				"SourceNode", MiloSingleServerBaseV0ReferenceNodeBuilder.sourceNodeTypeNode.getNodeId().expanded(),
+				ValueRanks.Scalar, NodeId.class);
 		edge.setProperty(SOURCE, sourceVertex.getNodeId());
 		final QualifiedProperty<NodeId> TARGET = new QualifiedProperty<NodeId>(waldotNamespace.getNamespaceUri(),
-				"TargetNode", targetNodeTypeNode.getNodeId().expanded(), ValueRanks.Scalar, NodeId.class);
+				"TargetNode", MiloSingleServerBaseV0ReferenceNodeBuilder.targetNodeTypeNode.getNodeId().expanded(),
+				ValueRanks.Scalar, NodeId.class);
 		edge.setProperty(TARGET, targetVertex.getNodeId());
 		edge.addReference(
-				new Reference(edge.getNodeId(), hasSourceNodeReferenceType, sourceVertex.getNodeId().expanded(), true));
+				new Reference(edge.getNodeId(), MiloSingleServerBaseV0ReferenceNodeBuilder.hasSourceNodeReferenceType,
+						sourceVertex.getNodeId().expanded(), true));
 		edge.addReference(
-				new Reference(edge.getNodeId(), hasTargetNodeReferenceType, targetVertex.getNodeId().expanded(), true));
-		sourceVertex.addReference(new Reference(sourceVertex.getNodeId(), hasReferenceDescriptionReferenceType,
+				new Reference(edge.getNodeId(), MiloSingleServerBaseV0ReferenceNodeBuilder.hasTargetNodeReferenceType,
+						targetVertex.getNodeId().expanded(), true));
+		sourceVertex.addReference(new Reference(sourceVertex.getNodeId(),
+				MiloSingleServerBaseV0ReferenceNodeBuilder.hasReferenceDescriptionReferenceType,
 				edge.getNodeId().expanded(), true));
-		targetVertex.addReference(new Reference(targetVertex.getNodeId(), hasReferenceDescriptionReferenceType,
+		targetVertex.addReference(new Reference(targetVertex.getNodeId(),
+				MiloSingleServerBaseV0ReferenceNodeBuilder.hasReferenceDescriptionReferenceType,
 				edge.getNodeId().expanded(), true));
 		final NodeId mainReferenceTypeNodeId = getOrCreateReferenceType(elaboratedLabel);
 		final QualifiedProperty<NodeId> REFERENCE_TYPE = new QualifiedProperty<NodeId>(
-				waldotNamespace.getNamespaceUri(), "ReferenceType", referenceTypeTypeNode.getNodeId().expanded(),
+				waldotNamespace.getNamespaceUri(), "ReferenceType",
+				MiloSingleServerBaseV0ReferenceNodeBuilder.referenceTypeTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, NodeId.class);
 		edge.setProperty(REFERENCE_TYPE, mainReferenceTypeNodeId);
 		final QualifiedProperty<Boolean> FORWARD = new QualifiedProperty<Boolean>(waldotNamespace.getNamespaceUri(),
-				"IsForward", isForwardTypeNode.getNodeId().expanded(), ValueRanks.Scalar, Boolean.class);
+				"IsForward", MiloSingleServerBaseV0ReferenceNodeBuilder.isForwardTypeNode.getNodeId().expanded(),
+				ValueRanks.Scalar, Boolean.class);
 		edge.setProperty(FORWARD, true);
 		sourceVertex.addReference(new Reference(sourceVertex.getNodeId(), mainReferenceTypeNodeId,
 				targetVertex.getNodeId().expanded(), true));
@@ -198,32 +181,32 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	@Override
 	public OpcVertex addVertex(NodeId nodeId, Object[] propertyKeyValues) {
 		ElementHelper.legalPropertyKeyValueArray(propertyKeyValues);
-		String label = getLabel(propertyKeyValues);
+		String label = getKeyValuesProperty(propertyKeyValues, LABEL_FIELD.toLowerCase());
 		if (label == null) {
 			label = "vertex";
 			logger.warn(LABEL_FIELD.toLowerCase() + " not found in propertyKeyValues, using default label '{}'", label);
 		}
 		final QualifiedName browseName = waldotNamespace.generateQualifiedName(label);
 		final LocalizedText displayName = new LocalizedText(label);
-		String description = getDescription(propertyKeyValues);
+		String description = getKeyValuesProperty(propertyKeyValues, DESCRIPTION_PARAMETER.toLowerCase());
 		if (description == null) {
 			description = label;
 			logger.info(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
 		}
 		NodeId typeDefinition = getTypeDefinition(propertyKeyValues);
 		if (typeDefinition == null) {
-			typeDefinition = vertexTypeNode.getNodeId();
+			typeDefinition = MiloSingleServerBaseV0ReferenceNodeBuilder.vertexTypeNode.getNodeId();
 			logger.info(TYPE_DEFINITION_PARAMETER + " not found in propertyKeyValues, using default type '{}'",
 					typeDefinition);
 		}
-		if (typeDefinition.equals(ruleTypeNode.getNodeId())) {
-			String action = getActionDefinition(propertyKeyValues);
+		if (typeDefinition.equals(MiloSingleServerBaseV0ReferenceNodeBuilder.ruleTypeNode.getNodeId())) {
+			String action = getKeyValuesProperty(propertyKeyValues, ACTION_FIELD.toLowerCase());
 			if (action == null) {
 				action = DEFAULT_ACTION_VALUE;
 				logger.warn(ACTION_FIELD.toLowerCase() + " not found in propertyKeyValues, using default action '{}'",
 						action);
 			}
-			String condition = getConditionDefinition(propertyKeyValues);
+			String condition = getKeyValuesProperty(propertyKeyValues, CONDITION_FIELD.toLowerCase());
 			if (condition == null) {
 				condition = DEFAULT_CONDITION_VALUE;
 				logger.warn(
@@ -239,39 +222,52 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 			}
 			final DefaultRule rule = createRuleObject(typeDefinition, waldotNamespace.getGremlinGraph(),
 					waldotNamespace.getOpcUaNodeContext(), nodeId, browseName, displayName,
-					new LocalizedText(description), writeMask, userWriteMask, eventNotifierActive, version,
-					waldotNamespace.getRulesEngine(), condition, action, priority);
+					new LocalizedText(description), MiloSingleServerBaseV0ReferenceNodeBuilder.writeMask,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.userWriteMask,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.eventNotifierActive,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.version, waldotNamespace.getRulesEngine(), condition,
+					action, priority);
 			waldotNamespace.getStorageManager().addNode(rule);
-			final String directory = getDirectory(propertyKeyValues);
+			final String directory = getKeyValuesProperty(propertyKeyValues, DIRECTORY_PARAMETER.toLowerCase());
 			if (directory == null || directory.isEmpty()) {
-				rulesFolderNode.addOrganizes(rule);
+				folderManager.getRulesFolderNode().addOrganizes(rule);
 			} else {
-				if (!rulesDirectories.containsKey(directory)) {
-					rulesDirectories.put(directory, new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
-							waldotNamespace.generateNodeId(
-									rulesFolderNode.getNodeId().getIdentifier().toString() + "/" + directory),
-							waldotNamespace.generateQualifiedName(directory), LocalizedText.english(directory)));
-					waldotNamespace.getStorageManager().addNode(rulesDirectories.get(directory));
-					rulesFolderNode.addOrganizes(rulesDirectories.get(directory));
+				if (!folderManager.getRulesDirectories().containsKey(directory)) {
+					folderManager.getRulesDirectories()
+							.put(directory,
+									new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
+											waldotNamespace.generateNodeId(folderManager.getRulesFolderNode()
+													.getNodeId().getIdentifier().toString() + "/" + directory),
+											waldotNamespace.generateQualifiedName(directory),
+											LocalizedText.english(directory)));
+					waldotNamespace.getStorageManager().addNode(folderManager.getRulesDirectories().get(directory));
+					folderManager.getRulesFolderNode().addOrganizes(folderManager.getRulesDirectories().get(directory));
 				}
-				rulesDirectories.get(directory).addOrganizes(rule);
+				folderManager.getRulesDirectories().get(directory).addOrganizes(rule);
 			}
 
 			final QualifiedProperty<String> ACTION = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
-					ACTION_FIELD, actionRuleTypeNode.getNodeId().expanded(), ValueRanks.Scalar, String.class);
+					ACTION_FIELD, MiloSingleServerBaseV0ReferenceNodeBuilder.actionRuleTypeNode.getNodeId().expanded(),
+					ValueRanks.Scalar, String.class);
 			rule.setProperty(ACTION, action);
 
 			final QualifiedProperty<String> CONDITION = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
-					CONDITION_FIELD, conditionRuleTypeNode.getNodeId().expanded(), ValueRanks.Scalar, String.class);
+					CONDITION_FIELD,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.conditionRuleTypeNode.getNodeId().expanded(),
+					ValueRanks.Scalar, String.class);
 			rule.setProperty(CONDITION, condition);
 
 			final QualifiedProperty<Integer> PRIORITY = new QualifiedProperty<Integer>(
-					waldotNamespace.getNamespaceUri(), PRIORITY_FIELD, priorityRuleTypeNode.getNodeId().expanded(),
+					waldotNamespace.getNamespaceUri(), PRIORITY_FIELD,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.priorityRuleTypeNode.getNodeId().expanded(),
 					ValueRanks.Scalar, Integer.class);
 			rule.setProperty(PRIORITY, priority);
+
 			final QualifiedProperty<String> LABEL = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
-					LABEL_FIELD, labelRuleTypeNode.getNodeId().expanded(), ValueRanks.Scalar, String.class);
+					LABEL_FIELD, MiloSingleServerBaseV0ReferenceNodeBuilder.labelRuleTypeNode.getNodeId().expanded(),
+					ValueRanks.Scalar, String.class);
 			rule.setProperty(LABEL, label);
+
 			waldotNamespace.getRulesEngine().registerOrUpdateRule(rule);
 			for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
 				if (propertyKeyValues[i] instanceof String && propertyKeyValues[i] != null) {
@@ -282,28 +278,37 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		} else {
 			final OpcVertex vertex = createVertexObject(typeDefinition, waldotNamespace.getGremlinGraph(),
 					waldotNamespace.getOpcUaNodeContext(), nodeId, browseName, displayName,
-					new LocalizedText(description), writeMask, userWriteMask, eventNotifierActive, version);
+					new LocalizedText(description), MiloSingleServerBaseV0ReferenceNodeBuilder.writeMask,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.userWriteMask,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.eventNotifierActive,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.version);
 			waldotNamespace.getStorageManager().addNode(vertex);
 			vertex.addReference(
 					new Reference(vertex.getNodeId(), Identifiers.HasTypeDefinition, typeDefinition.expanded(), true));
 
-			final String directory = getDirectory(propertyKeyValues);
+			final String directory = getKeyValuesProperty(propertyKeyValues, DIRECTORY_PARAMETER.toLowerCase());
 			if (directory == null || directory.isEmpty()) {
-				verticesFolderNode.addOrganizes(vertex);
+				folderManager.getVerticesFolderNode().addOrganizes(vertex);
 			} else {
-				if (!vertexDirectories.containsKey(directory)) {
-					vertexDirectories.put(directory, new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
-							waldotNamespace.generateNodeId(
-									verticesFolderNode.getNodeId().getIdentifier().toString() + "/" + directory),
-							waldotNamespace.generateQualifiedName(directory), LocalizedText.english(directory)));
-					waldotNamespace.getStorageManager().addNode(vertexDirectories.get(directory));
-					verticesFolderNode.addOrganizes(vertexDirectories.get(directory));
+				if (!folderManager.getVertexDirectories().containsKey(directory)) {
+					folderManager.getVertexDirectories()
+							.put(directory,
+									new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
+											waldotNamespace.generateNodeId(folderManager.getVerticesFolderNode()
+													.getNodeId().getIdentifier().toString() + "/" + directory),
+											waldotNamespace.generateQualifiedName(directory),
+											LocalizedText.english(directory)));
+					waldotNamespace.getStorageManager().addNode(folderManager.getVertexDirectories().get(directory));
+					folderManager.getVerticesFolderNode()
+							.addOrganizes(folderManager.getVertexDirectories().get(directory));
 				}
-				vertexDirectories.get(directory).addOrganizes(vertex);
+				folderManager.getVertexDirectories().get(directory).addOrganizes(vertex);
 			}
 			final QualifiedProperty<String> LABEL = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
-					LABEL_FIELD, labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar, String.class);
+					LABEL_FIELD, MiloSingleServerBaseV0ReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(),
+					ValueRanks.Scalar, String.class);
 			vertex.setProperty(LABEL, label);
+
 			for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
 				if (propertyKeyValues[i] instanceof String && propertyKeyValues[i] != null) {
 					createOrUpdateWaldotVertexProperty(vertex, (String) propertyKeyValues[i], propertyKeyValues[i + 1]);
@@ -312,12 +317,6 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 			return vertex;
 		}
 
-	}
-
-	private UaFolderNode createEdgesFolder() {
-		return new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
-				waldotNamespace.generateNodeId(rootNode.getNodeId().getIdentifier().toString() + "/Edges"),
-				waldotNamespace.generateQualifiedName("Edges"), LocalizedText.english("Gremlin Edges"));
 	}
 
 	@Override
@@ -361,7 +360,8 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 					value, context, nodeId, description, writeMask, userWriteMask, dataType, valueRank, arrayDimensions,
 					accessLevel, userAccessLevel, minimumSamplingInterval, historizing);
 			waldotNamespace.getStorageManager().addNode(property);
-			opcEdge.addReference(new Reference(opcEdge.getNodeId(), hasPropertyReferenceType,
+			opcEdge.addReference(new Reference(opcEdge.getNodeId(),
+					MiloSingleServerBaseV0ReferenceNodeBuilder.hasPropertyReferenceType,
 					property.getNodeId().expanded(), true));
 			return property;
 		}
@@ -400,7 +400,8 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 					arrayDimensions, accessLevel, userAccessLevel, minimumSamplingInterval, historizing, false);
 			waldotNamespace.getStorageManager().addNode(property);
 			property.addAttributeObserver(opcVertex);
-			opcVertex.addReference(new Reference(opcVertex.getNodeId(), hasPropertyReferenceType,
+			opcVertex.addReference(new Reference(opcVertex.getNodeId(),
+					MiloSingleServerBaseV0ReferenceNodeBuilder.hasPropertyReferenceType,
 					property.getNodeId().expanded(), true));
 			return property;
 		}
@@ -414,18 +415,6 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 				userWriteMask, eventNotifier, version, ruleEngine, condition, action, priority,
 				waldotNamespace.getConfiguration().getDefaultFactsValidUntilMs(),
 				waldotNamespace.getConfiguration().getDefaultFactsValidDelayMs());
-	}
-
-	private UaFolderNode createRulesFolder() {
-		return new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
-				waldotNamespace.generateNodeId(rootNode.getNodeId().getIdentifier().toString() + "/Rules"),
-				waldotNamespace.generateQualifiedName("Rules"), LocalizedText.english("WaldoOT Rules"));
-	}
-
-	private UaFolderNode createVariablesFolder() {
-		return new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
-				waldotNamespace.generateNodeId(rootNode.getNodeId().getIdentifier().toString() + "/Variables"),
-				waldotNamespace.generateQualifiedName("Variables"), LocalizedText.english("Gremlin Variables"));
 	}
 
 	private OpcVertex createVertexObject(NodeId typeDefinition, final WaldotGraph graph, UaNodeContext context,
@@ -443,249 +432,10 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 				eventNotifier, version);
 	}
 
-	private UaFolderNode createVerticesFolder() {
-		return new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
-				waldotNamespace.generateNodeId(rootNode.getNodeId().getIdentifier().toString() + "/Vertices"),
-				waldotNamespace.generateQualifiedName("Vertices"), LocalizedText.english("Gremlin Vertices"));
-	}
-
 	@Override
 	public void dropGraphComputerView() {
 		logger.info("dropGraphComputerView");
 		// TODO GraphComputerView
-	}
-
-	private void generateEdgeTypeNode() {
-		edgeTypeNode = UaObjectTypeNode.builder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/EdgeObjectType"))
-				.setBrowseName(waldotNamespace.generateQualifiedName("EdgeObjectType"))
-				.setDisplayName(LocalizedText.english("Gremlin Edge Node")).setIsAbstract(false).build();
-		labelEdgeTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/EdgeObjectType." + LABEL_FIELD))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName(LABEL_FIELD))
-				.setDisplayName(LocalizedText.english(LABEL_FIELD)).setDataType(Identifiers.String)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		labelEdgeTypeNode.addReference(new Reference(labelEdgeTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
-		labelEdgeTypeNode.setValue(new DataValue(new Variant("NaN")));
-		edgeTypeNode.addComponent(labelEdgeTypeNode);
-		sourceNodeTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/EdgeObjectType.SourceNode"))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName("SourceNode"))
-				.setDisplayName(LocalizedText.english("SourceNode")).setDataType(Identifiers.NodeId)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		sourceNodeTypeNode.addReference(new Reference(sourceNodeTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
-		sourceNodeTypeNode.setValue(new DataValue(new Variant(null)));
-		edgeTypeNode.addComponent(sourceNodeTypeNode);
-		targetNodeTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/EdgeObjectType.TargetNode"))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName("TargetNode"))
-				.setDisplayName(LocalizedText.english("TargetNode")).setDataType(Identifiers.NodeId)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		targetNodeTypeNode.addReference(new Reference(targetNodeTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
-		targetNodeTypeNode.setValue(new DataValue(new Variant(null)));
-		edgeTypeNode.addComponent(targetNodeTypeNode);
-		referenceTypeTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/EdgeObjectType.ReferenceType"))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName("ReferenceType"))
-				.setDisplayName(LocalizedText.english("ReferenceType")).setDataType(Identifiers.NodeId)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		referenceTypeTypeNode.addReference(new Reference(referenceTypeTypeNode.getNodeId(),
-				Identifiers.HasModellingRule, Identifiers.ModellingRule_Mandatory.expanded(), true));
-		referenceTypeTypeNode.setValue(new DataValue(new Variant(null)));
-		edgeTypeNode.addComponent(referenceTypeTypeNode);
-		isForwardTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/EdgeObjectType.IsForward"))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName("IsForward"))
-				.setDisplayName(LocalizedText.english("IsForward")).setDataType(Identifiers.Boolean)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		isForwardTypeNode.addReference(new Reference(isForwardTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
-		isForwardTypeNode.setValue(new DataValue(new Variant(true)));
-		edgeTypeNode.addComponent(isForwardTypeNode);
-		waldotNamespace.getStorageManager().addNode(labelEdgeTypeNode);
-		waldotNamespace.getStorageManager().addNode(sourceNodeTypeNode);
-		waldotNamespace.getStorageManager().addNode(targetNodeTypeNode);
-		waldotNamespace.getStorageManager().addNode(referenceTypeTypeNode);
-		waldotNamespace.getStorageManager().addNode(isForwardTypeNode);
-		waldotNamespace.getStorageManager().addNode(edgeTypeNode);
-		edgeTypeNode.addReference(new Reference(edgeTypeNode.getNodeId(), Identifiers.HasSubtype,
-				Identifiers.BaseObjectType.expanded(), false));
-		waldotNamespace.getNodeType().registerObjectType(edgeTypeNode.getNodeId(), UaObjectNode.class,
-				UaObjectNode::new);
-	}
-
-	private void generateInterfaceRootNode() {
-		interfaceTypeNode = UaObjectTypeNode.builder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("API"))
-				.setBrowseName(waldotNamespace.generateQualifiedName("API"))
-				.setDisplayName(LocalizedText.english("WaldOT API & Commands")).setIsAbstract(false).build();
-		waldotNamespace.getStorageManager().addNode(interfaceTypeNode);
-		interfaceTypeNode.addReference(new Reference(interfaceTypeNode.getNodeId(), Identifiers.HasSubtype,
-				Identifiers.BaseObjectType.expanded(), false));
-		waldotNamespace.getNodeType().registerObjectType(interfaceTypeNode.getNodeId(), UaObjectNode.class,
-				UaObjectNode::new);
-
-	}
-
-	private void generateRefereceNodes() {
-		generateVertexTypeNode();
-		generateEdgeTypeNode();
-		generateInterfaceRootNode();
-		generateRulesTypeNode();
-		hasReferenceDescriptionReferenceType = generateReferenceTypeNode("HasReferenceDescription", "ReferencedBy",
-				"Edge description with properties", Identifiers.NonHierarchicalReferences, false, false);
-		hasSourceNodeReferenceType = generateReferenceTypeNode("HasSourceNode", "IsSourceNodeFor",
-				"Source node for edge", Identifiers.NonHierarchicalReferences, false, false);
-		hasTargetNodeReferenceType = generateReferenceTypeNode("HasTargetNode", "IsTargetNodeFor",
-				"Target node for edge", Identifiers.NonHierarchicalReferences, false, false);
-		hasPropertyReferenceType = generateReferenceTypeNode("HasGremlinProperty", "IsPropertyOf",
-				"A property linked to an edge or vertex", Identifiers.Organizes, false, false);
-		hasPropertyReferenceType = generateReferenceTypeNode(HAS_WALDOT_RULE, "IsFiredBy", "A rule fired by the events",
-				Identifiers.HasComponent, false, false);
-	}
-
-	private NodeId generateReferenceTypeNode(String reference, String inverse, String description, NodeId subTypeId,
-			boolean isAbstract, boolean isSymmetric) {
-		final UaReferenceTypeNode refType = new UaReferenceTypeNode(waldotNamespace.getOpcUaNodeContext(),
-				waldotNamespace.generateNodeId(reference), waldotNamespace.generateQualifiedName(reference),
-				LocalizedText.english(reference), LocalizedText.english(description), UInteger.valueOf(0),
-				UInteger.valueOf(0), false, false, LocalizedText.english(inverse));
-		waldotNamespace.getStorageManager().addNode(refType);
-		refType.addReference(new Reference(refType.getNodeId(), Identifiers.HasSubtype, subTypeId.expanded(), false));
-		waldotNamespace.getReferenceTypes().put(refType.getNodeId(), new ReferenceType() {
-
-			@Override
-			public QualifiedName getBrowseName() {
-				return refType.getBrowseName();
-			}
-
-			@Override
-			public Optional<String> getInverseName() {
-				return Optional.of(inverse);
-			}
-
-			@Override
-			public NodeId getNodeId() {
-				return refType.getNodeId();
-			}
-
-			@Override
-			public Optional<NodeId> getSuperTypeId() {
-				return Optional.of(subTypeId);
-			}
-
-			@Override
-			public boolean isAbstract() {
-				return isAbstract;
-			}
-
-			@Override
-			public boolean isSymmetric() {
-				return isSymmetric;
-			}
-
-		});
-		return refType.getNodeId();
-	}
-
-	private void generateRulesTypeNode() {
-		ruleTypeNode = UaObjectTypeNode.builder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTRuleObjectType"))
-				.setBrowseName(waldotNamespace.generateQualifiedName("WaldOTRuleObjectType"))
-				.setDisplayName(LocalizedText.english("WaldOT Rule Node")).setIsAbstract(false).build();
-		labelRuleTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTRuleObjectType." + LABEL_FIELD))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName(LABEL_FIELD))
-				.setDisplayName(LocalizedText.english(LABEL_FIELD)).setDataType(Identifiers.String)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		labelRuleTypeNode.addReference(new Reference(labelRuleTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
-		labelRuleTypeNode.setValue(new DataValue(new Variant("NaN")));
-		ruleTypeNode.addComponent(labelRuleTypeNode);
-
-		conditionRuleTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTRuleObjectType." + CONDITION_FIELD))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName(CONDITION_FIELD))
-				.setDisplayName(LocalizedText.english(CONDITION_FIELD)).setDataType(Identifiers.String)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		conditionRuleTypeNode.addReference(new Reference(conditionRuleTypeNode.getNodeId(),
-				Identifiers.HasModellingRule, Identifiers.ModellingRule_Mandatory.expanded(), true));
-		conditionRuleTypeNode.setValue(new DataValue(new Variant(DEFAULT_CONDITION_VALUE)));
-		ruleTypeNode.addComponent(conditionRuleTypeNode);
-
-		actionRuleTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTRuleObjectType." + ACTION_FIELD))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName(ACTION_FIELD))
-				.setDisplayName(LocalizedText.english(ACTION_FIELD)).setDataType(Identifiers.String)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		actionRuleTypeNode.addReference(new Reference(actionRuleTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
-		actionRuleTypeNode.setValue(new DataValue(new Variant(DEFAULT_ACTION_VALUE)));
-		ruleTypeNode.addComponent(actionRuleTypeNode);
-
-		priorityRuleTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTRuleObjectType." + PRIORITY_FIELD))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName(PRIORITY_FIELD))
-				.setDisplayName(LocalizedText.english(PRIORITY_FIELD)).setDataType(Identifiers.Int32)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		priorityRuleTypeNode.addReference(new Reference(priorityRuleTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
-		priorityRuleTypeNode.setValue(new DataValue(new Variant(DEFAULT_PRIORITY_VALUE)));
-		ruleTypeNode.addComponent(priorityRuleTypeNode);
-
-		waldotNamespace.getStorageManager().addNode(labelRuleTypeNode);
-		waldotNamespace.getStorageManager().addNode(conditionRuleTypeNode);
-		waldotNamespace.getStorageManager().addNode(actionRuleTypeNode);
-		waldotNamespace.getStorageManager().addNode(priorityRuleTypeNode);
-		waldotNamespace.getStorageManager().addNode(ruleTypeNode);
-		ruleTypeNode.addReference(new Reference(ruleTypeNode.getNodeId(), Identifiers.HasSubtype,
-				Identifiers.BaseObjectType.expanded(), false));
-		waldotNamespace.getNodeType().registerObjectType(ruleTypeNode.getNodeId(), UaObjectNode.class,
-				UaObjectNode::new);
-	}
-
-	private void generateVertexTypeNode() {
-		vertexTypeNode = UaObjectTypeNode.builder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/VertexObjectType"))
-				.setBrowseName(waldotNamespace.generateQualifiedName("VertexObjectType"))
-				.setDisplayName(LocalizedText.english("Gremlin Vertex Node")).setIsAbstract(false).build();
-		labelVertexTypeNode = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/VertexObjectType." + LABEL_FIELD))
-				.setAccessLevel(AccessLevel.READ_WRITE)
-				.setBrowseName(waldotNamespace.generateQualifiedName(LABEL_FIELD))
-				.setDisplayName(LocalizedText.english(LABEL_FIELD)).setDataType(Identifiers.String)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		labelVertexTypeNode.addReference(new Reference(labelVertexTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
-		labelVertexTypeNode.setValue(new DataValue(new Variant("NaN")));
-		vertexTypeNode.addComponent(labelVertexTypeNode);
-		waldotNamespace.getStorageManager().addNode(labelVertexTypeNode);
-		waldotNamespace.getStorageManager().addNode(vertexTypeNode);
-		vertexTypeNode.addReference(new Reference(vertexTypeNode.getNodeId(), Identifiers.HasSubtype,
-				Identifiers.BaseObjectType.expanded(), false));
-		waldotNamespace.getNodeType().registerObjectType(vertexTypeNode.getNodeId(), UaObjectNode.class,
-				UaObjectNode::new);
-	}
-
-	private String getActionDefinition(Object[] propertyKeyValues) {
-		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
-			if (propertyKeyValues[i] instanceof String && ACTION_FIELD.toLowerCase().equals(propertyKeyValues[i])) {
-				return propertyKeyValues[i + 1].toString();
-			}
-		}
-		return null;
 	}
 
 	@Override
@@ -694,37 +444,11 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		return ImmutableMap.of();
 	}
 
-	private String getConditionDefinition(Object[] propertyKeyValues) {
-		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
-			if (propertyKeyValues[i] instanceof String && CONDITION_FIELD.toLowerCase().equals(propertyKeyValues[i])) {
-				return propertyKeyValues[i + 1].toString();
-			}
-		}
-		return null;
-	}
-
-	private String getDescription(Object[] propertyKeyValues) {
-		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
-			if (propertyKeyValues[i] instanceof String && DESCRIPTION_PARAMETER.equals(propertyKeyValues[i])) {
-				return propertyKeyValues[i + 1].toString();
-			}
-		}
-		return null;
-	}
-
-	private String getDirectory(Object[] propertyKeyValues) {
-		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
-			if (propertyKeyValues[i] instanceof String && DIRECTORY_PARAMETER.equals(propertyKeyValues[i])) {
-				return propertyKeyValues[i + 1].toString();
-			}
-		}
-		return null;
-	}
-
 	@Override
 	public WaldotVertex getEdgeInVertex(WaldotEdge edge) {
 		final QualifiedProperty<NodeId> TARGET = new QualifiedProperty<NodeId>(waldotNamespace.getNamespaceUri(),
-				"TargetNode", targetNodeTypeNode.getNodeId().expanded(), ValueRanks.Scalar, NodeId.class);
+				"TargetNode", MiloSingleServerBaseV0ReferenceNodeBuilder.targetNodeTypeNode.getNodeId().expanded(),
+				ValueRanks.Scalar, NodeId.class);
 		final NodeId nodeId = edge.getProperty(TARGET).get();
 		return (OpcVertex) waldotNamespace.getStorageManager().getNode(nodeId).get();
 	}
@@ -732,7 +456,8 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	@Override
 	public WaldotVertex getEdgeOutVertex(WaldotEdge edge) {
 		final QualifiedProperty<NodeId> SOURCE = new QualifiedProperty<NodeId>(waldotNamespace.getNamespaceUri(),
-				"SourceNode", sourceNodeTypeNode.getNodeId().expanded(), ValueRanks.Scalar, NodeId.class);
+				"SourceNode", MiloSingleServerBaseV0ReferenceNodeBuilder.sourceNodeTypeNode.getNodeId().expanded(),
+				ValueRanks.Scalar, NodeId.class);
 		final NodeId nodeId = edge.getProperty(SOURCE).get();
 		return (OpcVertex) waldotNamespace.getStorageManager().getNode(nodeId).get();
 	}
@@ -740,7 +465,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	@Override
 	public Map<NodeId, WaldotEdge> getEdges() {
 		final Map<NodeId, WaldotEdge> result = new HashMap<>();
-		for (final Node e : edgesFolderNode.getOrganizesNodes()) {
+		for (final Node e : folderManager.getEdgesFolderNode().getOrganizesNodes()) {
 			if (e instanceof WaldotEdge) {
 				result.put(e.getNodeId(), (WaldotEdge) e);
 			}
@@ -762,9 +487,9 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		return null;
 	}
 
-	private String getLabel(Object[] propertyKeyValues) {
+	private String getKeyValuesProperty(Object[] propertyKeyValues, String label) {
 		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
-			if (propertyKeyValues[i] instanceof String && LABEL_FIELD.toLowerCase().equals(propertyKeyValues[i])) {
+			if (propertyKeyValues[i] instanceof String && label.equals(propertyKeyValues[i])) {
 				return propertyKeyValues[i + 1].toString();
 			}
 		}
@@ -777,12 +502,13 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 				return r.getNodeId();
 			}
 		}
-		return generateReferenceTypeNode(label, "is a " + label + " of ", label + " reference type",
-				Identifiers.NonHierarchicalReferences, false, false);
+		return MiloSingleServerBaseV0ReferenceNodeBuilder.generateReferenceTypeNode(label, "is a " + label + " of ",
+				label + " reference type", Identifiers.NonHierarchicalReferences, false, false, waldotNamespace);
 	}
 
 	private NodeId getParameterNodeId(String key) {
-		return waldotNamespace.generateNodeId(variablesFolderNode.getNodeId().getIdentifier() + ":" + key);
+		return waldotNamespace
+				.generateNodeId(folderManager.getVariablesFolderNode().getNodeId().getIdentifier() + ":" + key);
 	}
 
 	private Integer getPriorityDefinition(Object[] propertyKeyValues) {
@@ -803,7 +529,8 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getProperties(WaldotEdge opcEdge) {
 		final List<WaldotProperty<DATA_TYPE>> result = new ArrayList<>();
 		for (final Reference p : opcEdge.getReferences()) {
-			if (p.isForward() && p.getReferenceTypeId().equals(hasPropertyReferenceType)) {
+			if (p.isForward() && p.getReferenceTypeId()
+					.equals(MiloSingleServerBaseV0ReferenceNodeBuilder.hasPropertyReferenceType)) {
 				result.add((WaldotProperty<DATA_TYPE>) waldotNamespace.getStorageManager()
 						.getNode(p.getTargetNodeId().toNodeId(waldotNamespace.getNamespaceTable()).get()).get());
 			}
@@ -822,11 +549,15 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		return null;
 	}
 
+	public UaFolderNode getRootNode() {
+		return rootNode;
+	}
+
 	private NodeId getTypeDefinition(Object[] propertyKeyValues) {
 		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
 			if (propertyKeyValues[i] instanceof String && TYPE_DEFINITION_PARAMETER.equals(propertyKeyValues[i])) {
 				if (RULE_NODE_PARAMETER.equals(propertyKeyValues[i + 1].toString())) {
-					return ruleTypeNode.getNodeId();
+					return MiloSingleServerBaseV0ReferenceNodeBuilder.ruleTypeNode.getNodeId();
 				} else if (DIRECTORY_PARAMETER.equals(propertyKeyValues[i + 1].toString())) {
 					return Identifiers.FolderType;
 				} else {
@@ -848,7 +579,8 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	public <DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(WaldotVertex opcVertex) {
 		final Map<String, WaldotVertexProperty<DATA_TYPE>> result = new HashMap<>();
 		for (final Reference p : opcVertex.getReferences()) {
-			if (p.isForward() && p.getReferenceTypeId().equals(hasPropertyReferenceType)) {
+			if (p.isForward() && p.getReferenceTypeId()
+					.equals(MiloSingleServerBaseV0ReferenceNodeBuilder.hasPropertyReferenceType)) {
 				final UaNode node = waldotNamespace.getStorageManager()
 						.getNode(p.getTargetNodeId().toNodeId(waldotNamespace.getNamespaceTable()).get()).get();
 				result.put(node.getBrowseName().getName(), (WaldotVertexProperty<DATA_TYPE>) node);
@@ -871,24 +603,24 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	@Override
 	public Map<NodeId, WaldotVertex> getVertices() {
 		final Map<NodeId, WaldotVertex> result = new HashMap<>();
-		for (final Node v : verticesFolderNode.getOrganizesNodes()) {
+		for (final Node v : folderManager.getVerticesFolderNode().getOrganizesNodes()) {
 			if (v instanceof Vertex) {
 				result.put(v.getNodeId(), (WaldotVertex) v);
 			}
 		}
-		for (final UaFolderNode f : vertexDirectories.values()) {
+		for (final UaFolderNode f : folderManager.getVertexDirectories().values()) {
 			for (final Node v : f.getOrganizesNodes()) {
 				if (v instanceof Vertex) {
 					result.put(v.getNodeId(), (WaldotVertex) v);
 				}
 			}
 		}
-		for (final Node v : rulesFolderNode.getOrganizesNodes()) {
+		for (final Node v : folderManager.getRulesFolderNode().getOrganizesNodes()) {
 			if (v instanceof Vertex) {
 				result.put(v.getNodeId(), (WaldotVertex) v);
 			}
 		}
-		for (final UaFolderNode f : rulesDirectories.values()) {
+		for (final UaFolderNode f : folderManager.getRulesDirectories().values()) {
 			for (final Node v : f.getOrganizesNodes()) {
 				if (v instanceof Vertex) {
 					result.put(v.getNodeId(), (WaldotVertex) v);
@@ -908,7 +640,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	@Override
 	public WaldotNamespace initialize(WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
-		generateRefereceNodes();
+		MiloSingleServerBaseV0ReferenceNodeBuilder.generateRefereceNodes(this);
 		rootNode = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
 				waldotNamespace.generateNodeId(waldotNamespace.getConfiguration().getRootNodeId()),
 				waldotNamespace.generateQualifiedName(waldotNamespace.getConfiguration().getRootNodeBrowseName()),
@@ -920,33 +652,21 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 						.generateQualifiedName(waldotNamespace.getConfiguration().getInterfaceRootNodeBrowseName()),
 				LocalizedText.english(waldotNamespace.getConfiguration().getInterfaceRootNodeDisplayName()));
 		interfaceRootNode.addReference(new Reference(interfaceRootNode.getNodeId(), Identifiers.HasTypeDefinition,
-				interfaceTypeNode.getNodeId().expanded(), true));
+				MiloSingleServerBaseV0ReferenceNodeBuilder.interfaceTypeNode.getNodeId().expanded(), true));
 		assetRootNode = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
 				waldotNamespace.generateNodeId(waldotNamespace.getConfiguration().getAssetRootNodeId()),
 				waldotNamespace.generateQualifiedName(waldotNamespace.getConfiguration().getAssetRootNodeBrowseName()),
 				LocalizedText.english(waldotNamespace.getConfiguration().getAssetRootNodeDisplayName()));
-
-		waldotNamespace.getStorageManager().addNode(rootNode);
+		waldotNamespace.getStorageManager().addNode(getRootNode());
 		waldotNamespace.getStorageManager().addNode(assetRootNode);
 		waldotNamespace.getStorageManager().addNode(interfaceRootNode);
-		rootNode.addReference(new Reference(rootNode.getNodeId(), Identifiers.Organizes,
+		getRootNode().addReference(new Reference(getRootNode().getNodeId(), Identifiers.Organizes,
 				Identifiers.ObjectsFolder.expanded(), false));
 		assetRootNode.addReference(new Reference(assetRootNode.getNodeId(), Identifiers.Organizes,
 				Identifiers.ObjectsFolder.expanded(), false));
 		interfaceRootNode.addReference(new Reference(interfaceRootNode.getNodeId(), Identifiers.Organizes,
 				Identifiers.ObjectsFolder.expanded(), false));
-		verticesFolderNode = createVerticesFolder();
-		waldotNamespace.getStorageManager().addNode(verticesFolderNode);
-		rootNode.addOrganizes(verticesFolderNode);
-		edgesFolderNode = createEdgesFolder();
-		waldotNamespace.getStorageManager().addNode(edgesFolderNode);
-		rootNode.addOrganizes(edgesFolderNode);
-		rulesFolderNode = createRulesFolder();
-		waldotNamespace.getStorageManager().addNode(rulesFolderNode);
-		rootNode.addOrganizes(rulesFolderNode);
-		variablesFolderNode = createVariablesFolder();
-		waldotNamespace.getStorageManager().addNode(variablesFolderNode);
-		rootNode.addOrganizes(variablesFolderNode);
+		folderManager.initialize();
 		return waldotNamespace;
 	}
 
@@ -964,7 +684,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	@Override
 	public Set<String> namespaceParametersKeySet() {
 		final Set<String> keySet = new HashSet<>();
-		for (final Node n : variablesFolderNode.getOrganizesNodes()) {
+		for (final Node n : folderManager.getVariablesFolderNode().getOrganizesNodes()) {
 			keySet.add(n.getBrowseName().getName());
 		}
 		return keySet;
@@ -980,7 +700,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 			final UaVariableNode property = new UaVariableNode(waldotNamespace.getOpcUaNodeContext(),
 					getParameterNodeId(key), waldotNamespace.generateQualifiedName(key), LocalizedText.english(key));
 			waldotNamespace.getStorageManager().addNode(property);
-			variablesFolderNode.addOrganizes(property);
+			folderManager.getVariablesFolderNode().addOrganizes(property);
 			property.setValue(new DataValue(new Variant(value)));
 		}
 
@@ -991,7 +711,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		if (waldotNamespace.hasNodeId(getParameterNodeId(key))) {
 			final UaVariableNode property = (UaVariableNode) waldotNamespace.getStorageManager()
 					.getNode(getParameterNodeId(key)).get();
-			variablesFolderNode.removeOrganizes(property);
+			folderManager.getVariablesFolderNode().removeOrganizes(property);
 			waldotNamespace.getStorageManager().removeNode(property.getNodeId());
 			property.delete();
 		}
