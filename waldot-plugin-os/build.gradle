@@ -14,7 +14,7 @@ buildscript {
 
 description = "WaldOT plugin Linux Manager"
 group = 'net.rossonet.waldot'
-version = '0.1.1'
+version = "${rootProject.version}"
 
 ext {
     sourceCompatibility = 21
