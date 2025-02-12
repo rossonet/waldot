@@ -1,5 +1,5 @@
 
-package net.rossonet.waldot.opc.gremlin;
+package net.rossonet.waldot.api.models.base;
 
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;

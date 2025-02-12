@@ -5,6 +5,7 @@ import org.apache.tinkerpop.gremlin.jsr223.AbstractGremlinPlugin;
 import org.apache.tinkerpop.gremlin.jsr223.DefaultImportCustomizer;
 import org.apache.tinkerpop.gremlin.jsr223.ImportCustomizer;
 
+import net.rossonet.waldot.api.models.base.GremlinElement;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcGraphComputer;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcGraphComputerView;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcMapEmitter;
@@ -23,7 +24,6 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcProperty;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
-import net.rossonet.waldot.opc.gremlin.GremlinElement;
 
 public final class OpcGraphGremlinPlugin extends AbstractGremlinPlugin {
 	private static final String NAME = "tinkerpop.opcgraph";

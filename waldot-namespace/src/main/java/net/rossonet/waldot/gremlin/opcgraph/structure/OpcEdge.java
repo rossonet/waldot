@@ -28,7 +28,7 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.opc.gremlin.GremlinElement;
+import net.rossonet.waldot.api.models.base.GremlinElement;
 
 public class OpcEdge extends GremlinElement implements WaldotEdge {
 

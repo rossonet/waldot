@@ -18,6 +18,16 @@ import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
 public interface WaldotGraph extends Graph {
+	public static final String ARROW = "->";
+	public static final String DASH = "-";
+	public static final String E = "e";
+	public static final String EMPTY_PROPERTY = "p[empty]";
+	public static final String EMPTY_VERTEX_PROPERTY = "vp[empty]";
+	public static final String L_BRACKET = "[";
+	public static final String P = "p";
+	public static final String R_BRACKET = "]";
+	public static final String V = "v";
+	public static final String VP = "vp";
 
 	default <T extends Element, W extends WaldotElement> Iterator<T> createElementIterator(final Class<T> cast,
 			final Class<W> clazz, final Map<NodeId, W> elements, final IdManager<?> idManager, final NodeId[] ids) {
@@ -53,9 +63,9 @@ public interface WaldotGraph extends Graph {
 
 	WaldotGraphComputerView getGraphComputerView();
 
-	WaldotNamespace getWaldotNamespace();
-
 	int getVerticesCount();
+
+	WaldotNamespace getWaldotNamespace();
 
 	void removeVertex(NodeId nodeId);
 

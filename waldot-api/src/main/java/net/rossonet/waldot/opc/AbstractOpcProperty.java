@@ -28,20 +28,19 @@ import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotProperty;
-import net.rossonet.waldot.gremlin.opcgraph.structure.AbstractOpcGraph;
-import net.rossonet.waldot.opc.gremlin.GremlinProperty;
+import net.rossonet.waldot.api.models.base.GremlinProperty;
 import net.rossonet.waldot.utils.LogHelper;
 
 public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
 		implements WaldotProperty<DATA_TYPE> {
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	protected boolean allowNullPropertyValues = false;
+	protected final List<EventObserver> eventObservers = new ArrayList<>();
+
 	protected final WaldotGraph graph;
 
-	protected boolean allowNullPropertyValues = false;
-
-	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
-	protected final List<EventObserver> eventObservers = new ArrayList<>();
 	private ByteString icon;
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 	private final WaldotEdge referenceEdge;
 
 	public AbstractOpcProperty(WaldotGraph graph, final WaldotEdge edge, final String key, final DATA_TYPE value,
@@ -130,11 +129,11 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 	@Override
 	public String toString() {
 		if (!isPresent()) {
-			return AbstractOpcGraph.EMPTY_PROPERTY;
+			return WaldotGraph.EMPTY_PROPERTY;
 		}
 		final String valueString = String.valueOf(value());
-		return AbstractOpcGraph.P + AbstractOpcGraph.L_BRACKET + getBrowseName().getName() + AbstractOpcGraph.ARROW
-				+ StringUtils.abbreviate(valueString, 20) + AbstractOpcGraph.R_BRACKET;
+		return WaldotGraph.P + WaldotGraph.L_BRACKET + getBrowseName().getName() + WaldotGraph.ARROW
+				+ StringUtils.abbreviate(valueString, 20) + WaldotGraph.R_BRACKET;
 	}
 
 	@SuppressWarnings("unchecked")

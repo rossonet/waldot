@@ -135,35 +135,24 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 		}
 	}
 
-	public static final String EMPTY_PROPERTY = "p[empty]";
-	public static final String EMPTY_VERTEX_PROPERTY = "vp[empty]";
-	public static final String V = "v";
-	public static final String P = "p";
-	public static final String VP = "vp";
-	public static final String E = "e";
-	public static final String DASH = "-";
-	public static final String ARROW = "->";
-	public static final String L_BRACKET = "[";
-	public static final String R_BRACKET = "]";
-
+	public static final String GREMLIN_OPCGRAPH_ALLOW_NULL_PROPERTY_VALUES = "gremlin.opcgraph.allowNullPropertyValues";
 	// TODO verificare implementabilità con OPC
 	public static final String GREMLIN_OPCGRAPH_DEFAULT_VERTEX_PROPERTY_CARDINALITY = "gremlin.opcgraph.defaultVertexPropertyCardinality";
-	public static final String GREMLIN_OPCGRAPH_ALLOW_NULL_PROPERTY_VALUES = "gremlin.opcgraph.allowNullPropertyValues";
 	public static final String GREMLIN_OPCGRAPH_SERVICE = "gremlin.opcgraph.service";
-
-	protected AtomicLong generatedId = new AtomicLong(120000L);
-
-	protected IdManager<NodeId> vertexIdManager = WaldotMappingStrategy.getNodeIdManager();
-	protected IdManager<NodeId> edgeIdManager = WaldotMappingStrategy.getNodeIdManager();
-	protected IdManager<NodeId> vertexPropertyIdManager = WaldotMappingStrategy.getNodeIdManager();
-
-	protected VertexProperty.Cardinality defaultVertexPropertyCardinality;
 
 	protected boolean allowNullPropertyValues;
 
+	protected Configuration configuration;
+	protected VertexProperty.Cardinality defaultVertexPropertyCardinality;
+	protected IdManager<NodeId> edgeIdManager = WaldotMappingStrategy.getNodeIdManager();
+
+	protected AtomicLong generatedId = new AtomicLong(120000L);
+
 	protected OpcServiceRegistry serviceRegistry;
 
-	protected Configuration configuration;
+	protected IdManager<NodeId> vertexIdManager = WaldotMappingStrategy.getNodeIdManager();
+
+	protected IdManager<NodeId> vertexPropertyIdManager = WaldotMappingStrategy.getNodeIdManager();
 
 	@Override
 	public abstract Vertex addVertex(final Object... keyValues);
@@ -217,12 +206,12 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 	}
 
 	@Override
-	public abstract WaldotNamespace getWaldotNamespace();
-
-	@Override
 	public int getVerticesCount() {
 		return getWaldotNamespace().getVerticesCount();
 	}
+
+	@Override
+	public abstract WaldotNamespace getWaldotNamespace();
 
 	///////////// GRAPH SPECIFIC INDEXING METHODS ///////////////
 
@@ -283,7 +272,7 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 		for (int i = 0; i < vertexIds.length; i++) {
 			nodeIds[i] = vertexIdManager.convert(this, vertexIds[i]);
 		}
-		return createElementIterator(Vertex.class, WaldotVertex.class, getWaldotNamespace().getVertices(), vertexIdManager,
-				nodeIds);
+		return createElementIterator(Vertex.class, WaldotVertex.class, getWaldotNamespace().getVertices(),
+				vertexIdManager, nodeIds);
 	}
 }

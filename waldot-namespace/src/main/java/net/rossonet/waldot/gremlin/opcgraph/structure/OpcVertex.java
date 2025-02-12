@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.opc.AbstractOpcObject;
+import net.rossonet.waldot.opc.AbstractOpcVertex;
 
-public class OpcVertex extends AbstractOpcObject implements WaldotVertex {
+public class OpcVertex extends AbstractOpcVertex implements WaldotVertex {
 	@SuppressWarnings("unused")
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 

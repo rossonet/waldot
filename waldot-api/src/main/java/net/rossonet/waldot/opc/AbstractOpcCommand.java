@@ -18,43 +18,87 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
+import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
 import net.rossonet.waldot.api.EventObserver;
 import net.rossonet.waldot.api.PropertyObserver;
+import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotEdge;
+import net.rossonet.waldot.api.models.WaldotElement;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotGraphComputerView;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
-import net.rossonet.waldot.gremlin.opcgraph.structure.AbstractOpcGraph;
-import net.rossonet.waldot.opc.gremlin.GremlinElement;
+import net.rossonet.waldot.api.models.base.GremlinCommandVertex;
 
-public abstract class AbstractOpcObject extends GremlinElement implements WaldotVertex {
+public abstract class AbstractOpcCommand extends GremlinCommandVertex implements WaldotCommand {
 
-	protected final WaldotGraph graph;
+	public enum VariableNodeTypes {
+		Boolean(Identifiers.Boolean), Byte(Identifiers.Byte), ByteString(Identifiers.ByteString),
+		DateTime(Identifiers.DateTime), Double(Identifiers.Double), Duration(Identifiers.Duration),
+		Float(Identifiers.Float), Guid(Identifiers.Guid), Int16(Identifiers.Int16), Int32(Identifiers.Int32),
+		Int64(Identifiers.Int64), Integer(Identifiers.Integer), LocalizedText(Identifiers.LocalizedText),
+		NodeId(Identifiers.NodeId), QualifiedName(Identifiers.QualifiedName), SByte(Identifiers.SByte),
+		String(Identifiers.String), UInt16(Identifiers.UInt16), UInt32(Identifiers.UInt32), UInt64(Identifiers.UInt64),
+		UInteger(Identifiers.UInteger), UtcTime(Identifiers.UtcTime), Variant(Identifiers.BaseDataType),
+		XmlElement(Identifiers.XmlElement);
+
+		private final NodeId nodeId;
+
+		VariableNodeTypes(NodeId nodeId) {
+			this.nodeId = nodeId;
+		}
+
+		public NodeId getNodeId() {
+			return nodeId;
+		}
+	}
+
+	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractOpcCommand.class);
 
 	protected boolean allowNullPropertyValues = false;
 
-	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 	protected final List<EventObserver> eventObservers = new ArrayList<>();
 
-	public AbstractOpcObject(final WaldotGraph graph, UaNodeContext context, final NodeId nodeId,
-			final QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
-			UInteger userWriteMask, UByte eventNotifier, long version) {
-		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier, version);
+	protected final WaldotGraph graph;
+
+	protected ByteString icon;
+
+	protected final List<Argument> inputArguments = new ArrayList<>();
+
+	protected final List<Argument> outputArguments = new ArrayList<>();
+
+	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
+
+	protected final WaldotNamespace waldotNamespace;
+
+	public AbstractOpcCommand(WaldotGraph graph, WaldotNamespace waldotNamespace, String command, String description,
+			UInteger writeMask, UInteger userWriteMask, Boolean executable, Boolean userExecutable) {
+		super(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(command),
+				waldotNamespace.generateQualifiedName(command), LocalizedText.english(command),
+				LocalizedText.english(description), writeMask, userWriteMask, executable, userExecutable);
+		this.waldotNamespace = waldotNamespace;
 		this.graph = graph;
-		this.allowNullPropertyValues = graph.features().vertex().supportsNullPropertyValues();
+	}
+
+	@Override
+	public void addComponent(WaldotElement waldotElement) {
+		LOGGER.warn("Adding component to command is not supported");
+
 	}
 
 	@Override
@@ -71,6 +115,22 @@ public abstract class AbstractOpcObject extends GremlinElement implements Waldot
 	@Override
 	public void addEventObserver(EventObserver eventObserver) {
 		eventObservers.add(eventObserver);
+	}
+
+	@Override
+	public void addInputArgument(String name, NodeId dataType, Integer valueRank, UInteger[] arrayDimensions,
+			LocalizedText description) {
+		final Argument arg = new Argument(name, dataType, valueRank, arrayDimensions, description);
+		inputArguments.add(arg);
+		waldotNamespace.registerMethodInputArgument(this, inputArguments);
+	}
+
+	@Override
+	public void addOutputArgument(String name, NodeId dataType, Integer valueRank, UInteger[] arrayDimensions,
+			LocalizedText description) {
+		final Argument arg = new Argument(name, dataType, valueRank, arrayDimensions, description);
+		outputArguments.add(arg);
+		waldotNamespace.registerMethodOutputArguments(this, outputArguments);
 	}
 
 	@Override
@@ -99,13 +159,37 @@ public abstract class AbstractOpcObject extends GremlinElement implements Waldot
 	}
 
 	@Override
+	public UaMethodNode findMethodNode(NodeId methodId) {
+		return null;
+	}
+
+	@Override
+	public UByte getEventNotifier() {
+		return UByte.valueOf(0);
+	}
+
+	@Override
 	public List<EventObserver> getEventObservers() {
-		return eventObservers;
+		return Collections.emptyList();
+	}
+
+	public WaldotGraph getGraph() {
+		return graph;
 	}
 
 	@Override
 	public WaldotGraphComputerView getGraphComputerView() {
-		return getNamespace().getGraphComputerView();
+		return null;
+	}
+
+	@Override
+	public ByteString getIcon() {
+		return icon;
+	}
+
+	@Override
+	public List<UaMethodNode> getMethodNodes() {
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -115,12 +199,12 @@ public abstract class AbstractOpcObject extends GremlinElement implements Waldot
 
 	@Override
 	public List<PropertyObserver> getPropertyObservers() {
-		return propertyObservers;
+		return Collections.emptyList();
 	}
 
 	@Override
 	public ImmutableMap<String, WaldotVertexProperty<Object>> getVertexProperties() {
-		return ImmutableMap.copyOf(getNamespace().getVertexProperties(this));
+		return ImmutableMap.of();
 	}
 
 	@Override
@@ -130,21 +214,13 @@ public abstract class AbstractOpcObject extends GremlinElement implements Waldot
 
 	@Override
 	public boolean inComputerMode() {
-		return getNamespace().inComputerMode();
-	}
-
-	@Override
-	public Set<String> keys() {
-		if (null == getVertexProperties()) {
-			return Collections.emptySet();
-		}
-		return inComputerMode() ? super.keys() : getVertexProperties().keySet();
+		return false;
 	}
 
 	@Override
 	public void postEvent(BaseEventTypeNode event) {
-		getNamespace().getEventBus().post(event);
-		eventObservers.forEach(observer -> observer.fireEvent(this, event));
+		LOGGER.warn("postEvent not implemented for Command");
+
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -230,30 +306,49 @@ public abstract class AbstractOpcObject extends GremlinElement implements Waldot
 	}
 
 	@Override
-	public void propertyChanged(UaNode node, AttributeId attributeId, Object value) {
-		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
+	public void propertyChanged(UaNode sourceNode, AttributeId attributeId, Object value) {
+		LOGGER.warn("propertyChanged not implemented for Command");
+
 	}
 
 	@Override
-	public void remove() {
-		this.graph.removeVertex(this.getNodeId());
-		super.remove();
+	public void removeComponent(WaldotElement waldotElement) {
+		LOGGER.warn("removeComponent not implemented for Command");
+
 	}
 
 	@Override
 	public void removeEventObserver(EventObserver observer) {
-		eventObservers.remove(observer);
+		LOGGER.warn("removeEventObserver not implemented for Command");
+
 	}
 
 	@Override
 	public void removePropertyObserver(PropertyObserver observer) {
-		propertyObservers.remove(observer);
+		LOGGER.warn("removePropertyObserver not implemented for Command");
+
+	}
+
+	@Override
+	public Object[] runCommand(String[] methodInputs) {
+		return runCommand(null, methodInputs);
+	}
+
+	@Override
+	public void setEventNotifier(UByte eventNotifier) {
+		LOGGER.warn("setEventNotifier not implemented for Command");
+
+	}
+
+	@Override
+	public void setIcon(ByteString icon) {
+		this.icon = icon;
+
 	}
 
 	@Override
 	public String toString() {
-		return AbstractOpcGraph.V + AbstractOpcGraph.L_BRACKET + getNodeId().toParseableString()
-				+ AbstractOpcGraph.R_BRACKET;
+		return WaldotGraph.V + WaldotGraph.L_BRACKET + getNodeId().toParseableString();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

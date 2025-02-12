@@ -1,4 +1,4 @@
-package net.rossonet.waldot.opc.gremlin;
+package net.rossonet.waldot.api.models.base;
 
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
@@ -10,7 +10,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.api.models.WaldotCommand;
-import net.rossonet.waldot.opc.OpcCommandInvocationHandler;
 
 public abstract class GremlinCommandVertex extends UaMethodNode implements WaldotCommand {
 
@@ -29,7 +28,7 @@ public abstract class GremlinCommandVertex extends UaMethodNode implements Waldo
 		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, executable,
 				userExecutable);
 		currentVersion = 0;
-		setInvocationHandler(new OpcCommandInvocationHandler(this));
+		setInvocationHandler(new CommandInvocationHandler(this));
 	}
 
 	@Override

@@ -31,19 +31,18 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
-import net.rossonet.waldot.gremlin.opcgraph.structure.AbstractOpcGraph;
-import net.rossonet.waldot.opc.gremlin.GremlinProperty;
+import net.rossonet.waldot.api.models.base.GremlinProperty;
 import net.rossonet.waldot.utils.LogHelper;
 
 public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
 		implements WaldotVertexProperty<DATA_TYPE> {
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	protected boolean allowNullPropertyValues = false;
 	protected final WaldotGraph graph;
 
-	protected boolean allowNullPropertyValues = false;
-
-	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 	private ByteString icon;
+
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 	private final WaldotVertex referenceVertex;
 
 	public AbstractOpcVertexProperty(WaldotGraph graph, final WaldotVertex vertex, final String key,
@@ -155,11 +154,11 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	@Override
 	public String toString() {
 		if (!isPresent()) {
-			return AbstractOpcGraph.EMPTY_VERTEX_PROPERTY;
+			return WaldotGraph.EMPTY_VERTEX_PROPERTY;
 		}
 		final String valueString = String.valueOf(value());
-		return AbstractOpcGraph.VP + AbstractOpcGraph.L_BRACKET + getBrowseName().getName() + AbstractOpcGraph.ARROW
-				+ StringUtils.abbreviate(valueString, 20) + AbstractOpcGraph.R_BRACKET;
+		return WaldotGraph.VP + WaldotGraph.L_BRACKET + getBrowseName().getName() + WaldotGraph.ARROW
+				+ StringUtils.abbreviate(valueString, 20) + WaldotGraph.R_BRACKET;
 	}
 
 	@SuppressWarnings("unchecked")
