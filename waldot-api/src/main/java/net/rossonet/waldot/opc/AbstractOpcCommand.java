@@ -179,7 +179,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	@Override
 	public WaldotGraphComputerView getGraphComputerView() {
-		return null;
+		return getNamespace().getGraphComputerView();
 	}
 
 	@Override
@@ -214,7 +214,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	@Override
 	public boolean inComputerMode() {
-		return false;
+		return getNamespace().inComputerMode();
 	}
 
 	@Override

@@ -54,7 +54,7 @@ import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.commands.VersionCommand;
-import net.rossonet.waldot.configuration.HomunculusConfiguration;
+import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.jexl.jexlWaldotCommandHelper;
@@ -84,7 +84,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private WaldotGraphComputerView graphComputerView;
 
 	public HomunculusNamespace(OpcUaServer server, WaldotMappingStrategy opcMappingStrategy,
-			ConsoleStrategy consoleStrategy, HomunculusConfiguration configuration,
+			ConsoleStrategy consoleStrategy, DefaultHomunculusConfiguration configuration,
 			BootstrapProcedureStrategy bootstrapProcedureStrategy, String[] bootstrapProcedure) {
 		super(server, configuration.getManagerNamespaceUri());
 		this.opcMappingStrategy = opcMappingStrategy;

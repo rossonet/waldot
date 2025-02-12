@@ -59,8 +59,8 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
 import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
-import net.rossonet.waldot.configuration.HomunculusConfiguration;
-import net.rossonet.waldot.configuration.OpcUaConfiguration;
+import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
+import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileWithStagesBootstrapStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.ConsoleV0Strategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseV0Strategy;
@@ -86,7 +86,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	private HomunculusNamespace managerNamespace;
 	private OpcUaServer server;
 
-	public WaldotOpcUaServer(HomunculusConfiguration configuration, OpcUaConfiguration serverConfiguration) {
+	public WaldotOpcUaServer(DefaultHomunculusConfiguration configuration, DefaultOpcUaConfiguration serverConfiguration) {
 		try {
 			server = create(serverConfiguration, configuration);
 			final String boot[] = getBootFromUrl(configuration.getBootUrl());

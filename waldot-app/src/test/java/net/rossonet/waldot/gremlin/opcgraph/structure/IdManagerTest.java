@@ -28,8 +28,8 @@ import org.junit.rules.ExpectedException;
 import net.rossonet.waldot.WaldotOpcUaServer;
 import net.rossonet.waldot.api.models.IdManager;
 import net.rossonet.waldot.api.strategies.WaldotMappingStrategy;
-import net.rossonet.waldot.configuration.HomunculusConfiguration;
-import net.rossonet.waldot.configuration.OpcUaConfiguration;
+import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
+import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
 
 /**
  * @author Stephen Mallette (http://stephen.genoprime.com)
@@ -39,8 +39,8 @@ public class IdManagerTest {
 	public ExpectedException exceptionRule = ExpectedException.none();
 
 	private WaldotOpcUaServer createWaldOT() {
-		final HomunculusConfiguration configuration = HomunculusConfiguration.getDefault();
-		final OpcUaConfiguration serverConfiguration = OpcUaConfiguration.getDefault();
+		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		return new WaldotOpcUaServer(configuration, serverConfiguration);
 
 	}

@@ -4,18 +4,18 @@ import java.util.HashMap;
 
 import net.rossonet.waldot.api.configuration.OpcConfiguration;
 
-public class OpcUaConfiguration extends HashMap<String, String> implements OpcConfiguration {
+public class DefaultOpcUaConfiguration extends HashMap<String, String> implements OpcConfiguration {
 
 	private static final long serialVersionUID = 1487462093576743910L;
 
 	public static int DEFAULT_TCP_BIND_PORT = 12686;
 	public static int DEFAULT_HTTPS_BIND_PORT = 8443;
 
-	public static OpcUaConfiguration getDefault() {
-		return new OpcUaConfiguration();
+	public static DefaultOpcUaConfiguration getDefault() {
+		return new DefaultOpcUaConfiguration();
 	}
 
-	private OpcUaConfiguration() {
+	private DefaultOpcUaConfiguration() {
 	}
 
 	@Override

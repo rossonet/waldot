@@ -7,15 +7,15 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 
-public class HomunculusConfiguration extends HashMap<String, String> implements WaldotConfiguration {
+public class DefaultHomunculusConfiguration extends HashMap<String, String> implements WaldotConfiguration {
 
 	private static final long serialVersionUID = 4132363257864835403L;
 
-	public static HomunculusConfiguration getDefault() {
-		return new HomunculusConfiguration();
+	public static DefaultHomunculusConfiguration getDefault() {
+		return new DefaultHomunculusConfiguration();
 	}
 
-	private HomunculusConfiguration() {
+	private DefaultHomunculusConfiguration() {
 	}
 
 	@Override

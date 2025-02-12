@@ -7,8 +7,8 @@ import java.util.concurrent.ExecutionException;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.WaldotOpcUaServer;
-import net.rossonet.waldot.configuration.HomunculusConfiguration;
-import net.rossonet.waldot.configuration.OpcUaConfiguration;
+import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
+import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
@@ -17,7 +17,7 @@ import picocli.CommandLine.Spec;
 		"JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",
 		"OS: ${os.name} ${os.version} ${os.arch}" }, description = "WaldOT OPCUA server", footer = "powered by Rossonet s.c.a r.l.", showEndOfOptionsDelimiterInUsageHelp = true, showAtFileInUsageHelp = true)
 public class WaldotRunner implements Callable<Integer>, AutoCloseable {
-
+// TODO: completare con annotazioni Picocli
 	public static void main(String[] args) {
 		final WaldotRunner waldotRunner = new WaldotRunner();
 		try {
@@ -436,8 +436,8 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	}
 
 	private void runWaldot() throws InterruptedException, ExecutionException {
-		final HomunculusConfiguration configuration = HomunculusConfiguration.getDefault();
-		final OpcUaConfiguration serverConfiguration = OpcUaConfiguration.getDefault();
+		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 
 			@Override

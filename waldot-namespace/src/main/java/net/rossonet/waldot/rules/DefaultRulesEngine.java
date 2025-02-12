@@ -2,10 +2,10 @@ package net.rossonet.waldot.rules;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	private final WaldotJexlRuleInterface jexlInterface;
 	private final List<RuleListener> listeners = new ArrayList<>();
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private final Map<NodeId, Rule> rules = new HashMap<>();
+	private final Map<NodeId, Rule> rules = new ConcurrentHashMap<>();
 	private final RulesThreadManager rulesThreadManager;
 	protected final WaldotNamespace waldotNamespace;
 

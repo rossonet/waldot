@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import net.rossonet.waldot.WaldotOpcUaServer;
-import net.rossonet.waldot.configuration.HomunculusConfiguration;
-import net.rossonet.waldot.configuration.OpcUaConfiguration;
+import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
+import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
 import net.rossonet.waldot.utils.LogHelper;
 
 @TestMethodOrder(OrderAnnotation.class)
@@ -22,8 +22,8 @@ public class BaseAgentTest {
 
 	@Test
 	public void runServerTwominutes() throws InterruptedException, ExecutionException {
-		final HomunculusConfiguration configuration = HomunculusConfiguration.getDefault();
-		final OpcUaConfiguration serverConfiguration = OpcUaConfiguration.getDefault();
+		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		waldot = new WaldotOpcUaServer(configuration, serverConfiguration);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -45,8 +45,8 @@ public class BaseAgentTest {
 	public void runSimpleQueryAndWaitTwominutes()
 			throws InterruptedException, ExecutionException, ConfigurationException {
 		LogHelper.changeJulLogLevel("fine");
-		final HomunculusConfiguration configuration = HomunculusConfiguration.getDefault();
-		final OpcUaConfiguration serverConfiguration = OpcUaConfiguration.getDefault();
+		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		waldot = new WaldotOpcUaServer(configuration, serverConfiguration);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override

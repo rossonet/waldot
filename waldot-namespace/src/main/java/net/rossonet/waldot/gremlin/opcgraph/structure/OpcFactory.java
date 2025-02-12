@@ -29,6 +29,7 @@ import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 
+//TODO: adeguare classe
 /**
  * Helps create a variety of different toy graphs for testing and learning
  * purposes.
