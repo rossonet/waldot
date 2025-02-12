@@ -59,7 +59,7 @@ dependencies {
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
     // for AAS integration study
     // AAS
-    testImplementation 'org.eclipse.digitaltwin.aas4j:aas4j-model:1.0.3'
+    testImplementation 'org.eclipse.digitaltwin.aas4j:aas4j-model:1.0.4'
     testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-aasx', version: '1.0.0-milestone-04'
     testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-xml', version: '1.0.0-milestone-04'
     testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-json', version: '1.0.0-milestone-04'
