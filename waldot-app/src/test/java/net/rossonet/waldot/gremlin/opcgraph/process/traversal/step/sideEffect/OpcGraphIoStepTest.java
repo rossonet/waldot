@@ -23,15 +23,20 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.tinkerpop.gremlin.TestHelper;
 import org.apache.tinkerpop.gremlin.process.traversal.IO;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.io.util.CustomId;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
+import net.rossonet.waldot.WaldotOpcUaServer;
+import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
+import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 
 /**
@@ -42,12 +47,17 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
  */
 public class OpcGraphIoStepTest {
 
-	private Graph graph;
 	private GraphTraversalSource g;
+	private Graph graph;
+	private WaldotOpcUaServer waldot;
 
 	@Before
-	public void setup() {
-		graph = OpcGraph.open();
+	public void setup() throws InterruptedException, ExecutionException {
+		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
+		waldot = new WaldotOpcUaServer(configuration, serverConfiguration);
+		waldot.startup().get();
+		graph = waldot.getGremlinGraph();
 		g = graph.traversal();
 	}
 
@@ -98,4 +108,12 @@ public class OpcGraphIoStepTest {
 
 		assertEquals(1, emptyG.V().has("custom", new CustomId("a", uuid)).count().next().intValue());
 	}
+
+	@After
+	public void tearDown() {
+		if (waldot != null) {
+			waldot.shutdown();
+		}
+	}
+
 }

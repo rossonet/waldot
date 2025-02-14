@@ -20,7 +20,6 @@ import org.eclipse.milo.opcua.stack.core.ReferenceType;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.slf4j.Logger;
 
 import com.google.common.eventbus.EventBus;
@@ -142,10 +141,6 @@ public interface WaldotNamespace extends AutoCloseable {
 	Variables namespaceParametersToVariables();
 
 	void registerCommand(WaldotCommand command);
-
-	void registerMethodInputArgument(WaldotCommand command, List<Argument> inputArguments);
-
-	void registerMethodOutputArguments(WaldotCommand command, List<Argument> inputArguments);
 
 	void registerPlugin(PluginListener plugin);
 

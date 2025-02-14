@@ -23,36 +23,36 @@ public class MiloSingleServerBaseV0FolderManager {
 	}
 
 	private UaFolderNode createEdgesFolder() {
-		return new UaFolderNode(miloSingleServerBaseV0Strategy.waldotNamespace.getOpcUaNodeContext(),
-				miloSingleServerBaseV0Strategy.waldotNamespace.generateNodeId(
+		return new UaFolderNode(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(
 						miloSingleServerBaseV0Strategy.getRootNode().getNodeId().getIdentifier().toString() + "/Edges"),
-				miloSingleServerBaseV0Strategy.waldotNamespace.generateQualifiedName("Edges"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Edges"),
 				LocalizedText.english("Gremlin Edges"));
 	}
 
 	private UaFolderNode createRulesFolder() {
-		return new UaFolderNode(miloSingleServerBaseV0Strategy.waldotNamespace.getOpcUaNodeContext(),
-				miloSingleServerBaseV0Strategy.waldotNamespace.generateNodeId(
+		return new UaFolderNode(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(
 						miloSingleServerBaseV0Strategy.getRootNode().getNodeId().getIdentifier().toString() + "/Rules"),
-				miloSingleServerBaseV0Strategy.waldotNamespace.generateQualifiedName("Rules"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Rules"),
 				LocalizedText.english("WaldoOT Rules"));
 	}
 
 	private UaFolderNode createVariablesFolder() {
-		return new UaFolderNode(miloSingleServerBaseV0Strategy.waldotNamespace.getOpcUaNodeContext(),
-				miloSingleServerBaseV0Strategy.waldotNamespace.generateNodeId(
+		return new UaFolderNode(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(
 						miloSingleServerBaseV0Strategy.getRootNode().getNodeId().getIdentifier().toString()
 								+ "/Variables"),
-				miloSingleServerBaseV0Strategy.waldotNamespace.generateQualifiedName("Variables"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Variables"),
 				LocalizedText.english("Gremlin Variables"));
 	}
 
 	private UaFolderNode createVerticesFolder() {
-		return new UaFolderNode(miloSingleServerBaseV0Strategy.waldotNamespace.getOpcUaNodeContext(),
-				miloSingleServerBaseV0Strategy.waldotNamespace.generateNodeId(
+		return new UaFolderNode(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(
 						miloSingleServerBaseV0Strategy.getRootNode().getNodeId().getIdentifier().toString()
 								+ "/Vertices"),
-				miloSingleServerBaseV0Strategy.waldotNamespace.generateQualifiedName("Vertices"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Vertices"),
 				LocalizedText.english("Gremlin Vertices"));
 	}
 
@@ -82,16 +82,16 @@ public class MiloSingleServerBaseV0FolderManager {
 
 	public void initialize() {
 		setVerticesFolderNode(createVerticesFolder());
-		miloSingleServerBaseV0Strategy.waldotNamespace.getStorageManager().addNode(getVerticesFolderNode());
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(getVerticesFolderNode());
 		miloSingleServerBaseV0Strategy.getRootNode().addOrganizes(getVerticesFolderNode());
 		setEdgesFolderNode(createEdgesFolder());
-		miloSingleServerBaseV0Strategy.waldotNamespace.getStorageManager().addNode(getEdgesFolderNode());
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(getEdgesFolderNode());
 		miloSingleServerBaseV0Strategy.getRootNode().addOrganizes(getEdgesFolderNode());
 		setRulesFolderNode(createRulesFolder());
-		miloSingleServerBaseV0Strategy.waldotNamespace.getStorageManager().addNode(getRulesFolderNode());
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(getRulesFolderNode());
 		miloSingleServerBaseV0Strategy.getRootNode().addOrganizes(getRulesFolderNode());
 		setVariablesFolderNode(createVariablesFolder());
-		miloSingleServerBaseV0Strategy.waldotNamespace.getStorageManager().addNode(getVariablesFolderNode());
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(getVariablesFolderNode());
 		miloSingleServerBaseV0Strategy.getRootNode().addOrganizes(getVariablesFolderNode());
 
 	}

@@ -87,7 +87,6 @@ public final class OpcFactory {
 	 */
 	public static OpcGraph createTheCrew() {
 		final Configuration conf = new BaseConfiguration();
-		// TODO: verifica compatibilita' lista
 		conf.setProperty(OpcGraph.GREMLIN_OPCGRAPH_DEFAULT_VERTEX_PROPERTY_CARDINALITY,
 				VertexProperty.Cardinality.list.name());
 		final OpcGraph g = OpcGraph.open(conf);

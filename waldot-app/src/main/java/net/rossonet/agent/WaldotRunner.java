@@ -435,7 +435,7 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		return waldotCommandWriteMask;
 	}
 
-	private void runWaldot() throws InterruptedException, ExecutionException {
+	public void runWaldot() throws InterruptedException, ExecutionException {
 		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
 		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		Runtime.getRuntime().addShutdownHook(new Thread() {

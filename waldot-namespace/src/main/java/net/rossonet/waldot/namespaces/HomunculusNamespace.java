@@ -28,7 +28,6 @@ import org.eclipse.milo.opcua.stack.core.ReferenceType;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,24 +63,24 @@ import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private final WaldotConfiguration configuration;
-	private final DataTypeDictionaryManager dictionaryManager;
-	private final SubscriptionModel subscriptionModel;
-	private final WaldotGraph gremlin;
-	private final WaldotMappingStrategy opcMappingStrategy;
-	private final BootstrapProcedureStrategy bootstrapProcedureStrategy;
 	private final String[] bootstrapProcedure;
-	private final Graph.Variables opcGraphVariables;
-	private final ConsoleStrategy consoleStrategy;
-	private final WaldotRulesEngine rulesEngine;
-	private final List<NamespaceListener> listeners = new ArrayList<>();
-	private final Set<PluginListener> plugins = new HashSet<>();
+	private final BootstrapProcedureStrategy bootstrapProcedureStrategy;
+	private final WaldotConfiguration configuration;
 	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
-	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
-	private final jexlWaldotCommandHelper jexlWaldotCommandHelper;
-
+	private final ConsoleStrategy consoleStrategy;
+	private final DataTypeDictionaryManager dictionaryManager;
 	private WaldotGraphComputerView graphComputerView;
+	private final WaldotGraph gremlin;
+	private final jexlWaldotCommandHelper jexlWaldotCommandHelper;
+	private final List<NamespaceListener> listeners = new ArrayList<>();
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private final Graph.Variables opcGraphVariables;
+	private final WaldotMappingStrategy opcMappingStrategy;
+	private final Set<PluginListener> plugins = new HashSet<>();
+	private final WaldotRulesEngine rulesEngine;
+	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
+
+	private final SubscriptionModel subscriptionModel;
 
 	public HomunculusNamespace(OpcUaServer server, WaldotMappingStrategy opcMappingStrategy,
 			ConsoleStrategy consoleStrategy, DefaultHomunculusConfiguration configuration,
@@ -426,20 +425,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	public void registerCommand(WaldotCommand command) {
 		opcMappingStrategy.registerCommand(command);
 		listeners.forEach(listener -> listener.onCommandRegistered(command));
-	}
-
-	@Override
-	// TODO verificare
-	public void registerMethodInputArgument(WaldotCommand waldotCommand, List<Argument> inputArguments) {
-		opcMappingStrategy.registerCommandInputArgument(waldotCommand, inputArguments);
-
-	}
-
-	@Override
-	// TODO verificare
-	public void registerMethodOutputArguments(WaldotCommand waldotCommand, List<Argument> inputArguments) {
-		opcMappingStrategy.registerCommandOutputArguments(waldotCommand, inputArguments);
-
 	}
 
 	@Override

@@ -20,22 +20,32 @@ package net.rossonet.waldot.gremlin.opcgraph.process.traversal.step.sideEffect;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.concurrent.ExecutionException;
+
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
+import net.rossonet.waldot.WaldotOpcUaServer;
+import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
+import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
 
 public class OpcGraphStepTest {
 
-	private Graph graph;
 	private GraphTraversalSource g;
+	private Graph graph;
+	private WaldotOpcUaServer waldot;
 
 	@Before
-	public void setup() {
-		graph = OpcGraph.open();
+	public void setup() throws InterruptedException, ExecutionException {
+		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
+		waldot = new WaldotOpcUaServer(configuration, serverConfiguration);
+		waldot.startup().get();
+		graph = waldot.getGremlinGraph();
 		g = graph.traversal();
 	}
 
@@ -51,6 +61,13 @@ public class OpcGraphStepTest {
 		g.addV("v1").property("age", 3).next();
 		final int count = g.V().has("age", P.gt(1)).count().next().intValue();
 		assertEquals(1, count);
+	}
+
+	@After
+	public void tearDown() {
+		if (waldot != null) {
+			waldot.shutdown();
+		}
 	}
 
 }

@@ -122,7 +122,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 			LocalizedText description) {
 		final Argument arg = new Argument(name, dataType, valueRank, arrayDimensions, description);
 		inputArguments.add(arg);
-		waldotNamespace.registerMethodInputArgument(this, inputArguments);
+		setInputArguments(inputArguments.toArray(new Argument[0]));
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 			LocalizedText description) {
 		final Argument arg = new Argument(name, dataType, valueRank, arrayDimensions, description);
 		outputArguments.add(arg);
-		waldotNamespace.registerMethodOutputArguments(this, outputArguments);
+		setOutputArguments(outputArguments.toArray(new Argument[0]));
 	}
 
 	@Override

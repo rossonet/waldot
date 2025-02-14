@@ -10,9 +10,6 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
-
-import com.google.common.collect.ImmutableMap;
 
 import net.rossonet.waldot.api.models.IdManager;
 import net.rossonet.waldot.api.models.WaldotCommand;
@@ -71,7 +68,8 @@ public interface WaldotMappingStrategy {
 			public NodeId getNextId(final WaldotGraph graph) {
 				boolean found = false;
 				while (!found) {
-					final NodeId id = graph.getWaldotNamespace().generateNodeId(graph.getGeneratedId().incrementAndGet());
+					final NodeId id = graph.getWaldotNamespace()
+							.generateNodeId(graph.getGeneratedId().incrementAndGet());
 					if (!graph.getWaldotNamespace().hasNodeId(id)) {
 						found = true;
 						return id;
@@ -110,8 +108,6 @@ public interface WaldotMappingStrategy {
 
 	void dropGraphComputerView();
 
-	ImmutableMap<String, WaldotCommand> getCommandRegistry();
-
 	WaldotVertex getEdgeInVertex(WaldotEdge opcEdge);
 
 	WaldotVertex getEdgeOutVertex(WaldotEdge opcEdge);
@@ -145,10 +141,6 @@ public interface WaldotMappingStrategy {
 	Graph.Variables namespaceParametersToVariables();
 
 	void registerCommand(WaldotCommand command);
-
-	void registerCommandInputArgument(WaldotCommand waldotCommand, List<Argument> inputArguments);
-
-	void registerCommandOutputArguments(WaldotCommand waldotCommand, List<Argument> outputArguments);
 
 	void removeCommand(WaldotCommand command);
 

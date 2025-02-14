@@ -37,11 +37,8 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotMiloStrategy;
@@ -91,7 +88,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	private Graph.Variables opcGraphVariables;
 	private UaFolderNode rootNode;
 
-	WaldotNamespace waldotNamespace;
+	private WaldotNamespace waldotNamespace;
 
 	@Override
 	public Edge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex, String label,
@@ -439,12 +436,6 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	}
 
 	@Override
-	public ImmutableMap<String, WaldotCommand> getCommandRegistry() {
-		// TODO registro dei comandi
-		return ImmutableMap.of();
-	}
-
-	@Override
 	public WaldotVertex getEdgeInVertex(WaldotEdge edge) {
 		final QualifiedProperty<NodeId> TARGET = new QualifiedProperty<NodeId>(waldotNamespace.getNamespaceUri(),
 				"TargetNode", MiloSingleServerBaseV0ReferenceNodeBuilder.targetNodeTypeNode.getNodeId().expanded(),
@@ -637,6 +628,10 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		return null;
 	}
 
+	public WaldotNamespace getWaldotNamespace() {
+		return waldotNamespace;
+	}
+
 	@Override
 	public WaldotNamespace initialize(WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
@@ -730,18 +725,6 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	public void registerCommand(WaldotCommand command) {
 		waldotNamespace.getStorageManager().addNode((AbstractOpcCommand) command);
 		interfaceRootNode.addComponent((AbstractOpcCommand) command);
-
-	}
-
-	@Override
-	public void registerCommandInputArgument(WaldotCommand waldotCommand, List<Argument> inputArguments) {
-		waldotCommand.setInputArguments(inputArguments.toArray(new Argument[0]));
-
-	}
-
-	@Override
-	public void registerCommandOutputArguments(WaldotCommand waldotCommand, List<Argument> outputArguments) {
-		waldotCommand.setOutputArguments(outputArguments.toArray(new Argument[0]));
 
 	}
 
