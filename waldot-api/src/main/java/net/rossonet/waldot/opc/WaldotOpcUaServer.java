@@ -1,4 +1,4 @@
-package net.rossonet.waldot;
+package net.rossonet.waldot.opc;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
@@ -53,18 +53,11 @@ import com.google.common.reflect.ClassPath;
 
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
+import net.rossonet.waldot.api.auth.WaldotAnonymousValidator;
 import net.rossonet.waldot.api.configuration.OpcConfiguration;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.models.WaldotGraph;
-import net.rossonet.waldot.auth.DefaultAnonymousValidator;
-import net.rossonet.waldot.auth.DefaultIdentityValidator;
-import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
-import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
-import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileWithStagesBootstrapStrategy;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.console.ConsoleV0Strategy;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseV0Strategy;
-import net.rossonet.waldot.namespaces.HomunculusNamespace;
+import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.utils.KeyStoreLoader;
 
 public class WaldotOpcUaServer implements AutoCloseable {
@@ -81,22 +74,29 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
-	private OpcConfiguration configuration;
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private HomunculusNamespace managerNamespace;
-	private OpcUaServer server;
+	private final WaldotAnonymousValidator anonymousValidator;
 
-	public WaldotOpcUaServer(DefaultHomunculusConfiguration configuration, DefaultOpcUaConfiguration serverConfiguration) {
+	private OpcConfiguration configuration;
+
+	private final UsernameIdentityValidator identityValidator;
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private WaldotNamespace managerNamespace;
+	private OpcUaServer server;
+	private final X509IdentityValidator x509IdentityValidator;
+
+	public WaldotOpcUaServer(WaldotConfiguration waldotConfiguration, OpcConfiguration serverConfiguration,
+			WaldotAnonymousValidator anonymousValidator, UsernameIdentityValidator identityValidator,
+			X509IdentityValidator x509IdentityValidator) {
+		this.configuration = serverConfiguration;
+		this.anonymousValidator = anonymousValidator;
+		this.identityValidator = identityValidator;
+		this.x509IdentityValidator = x509IdentityValidator;
 		try {
-			server = create(serverConfiguration, configuration);
-			final String boot[] = getBootFromUrl(configuration.getBootUrl());
-			managerNamespace = new HomunculusNamespace(server, new MiloSingleServerBaseV0Strategy(),
-					new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(), boot);
-			registerPluginsInNamespace();
+			server = create(configuration, anonymousValidator, identityValidator, x509IdentityValidator);
 		} catch (final Exception e) {
 			logger.error("Error creating server", e);
 		}
-
 	}
 
 	@SuppressWarnings("unused")
@@ -112,11 +112,17 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	@Override
 	public void close() {
-		shutdown();
+		if (server != null) {
+			try {
+				server.shutdown().get();
+			} catch (final InterruptedException | ExecutionException e) {
+				logger.error("Error shutting down server", e);
+			}
+		}
 	}
 
-	private OpcUaServer create(OpcConfiguration configuration, WaldotConfiguration homunculusConfiguration)
-			throws Exception {
+	private OpcUaServer create(OpcConfiguration configuration, WaldotAnonymousValidator anonymousValidator,
+			UsernameIdentityValidator identityValidator, X509IdentityValidator x509IdentityValidator) throws Exception {
 		this.configuration = configuration;
 		final Path securityTempDir = Paths.get(System.getProperty("java.io.tmpdir"), "server", "security");
 		Files.createDirectories(securityTempDir);
@@ -150,10 +156,6 @@ public class WaldotOpcUaServer implements AutoCloseable {
 						"certificate is missing the application URI"));
 
 		final Set<EndpointConfiguration> endpointConfigurations = createEndpointConfigurations(certificate);
-
-		final DefaultAnonymousValidator anonymousValidator = new DefaultAnonymousValidator(homunculusConfiguration);
-		final UsernameIdentityValidator identityValidator = new DefaultIdentityValidator(homunculusConfiguration);
-		final X509IdentityValidator x509IdentityValidator = new DefaultX509IdentityValidator(homunculusConfiguration);
 
 		return generateServerInstance(configuration, certificateManager, trustListManager, certificateValidator,
 				httpsKeyPair, httpsCertificate, applicationUri, endpointConfigurations, anonymousValidator,
@@ -229,6 +231,10 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		return new OpcUaServer(serverConfig);
 	}
 
+	public WaldotAnonymousValidator getAnonymousValidator() {
+		return anonymousValidator;
+	}
+
 	private String[] getBootFromUrl(URL url) {
 		// TODO completare con la capacità di leggere un file da URL tipo git:// http://
 		// file://
@@ -245,8 +251,16 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	}
 
+	public UsernameIdentityValidator getIdentityValidator() {
+		return identityValidator;
+	}
+
 	public OpcUaServer getServer() {
 		return server;
+	}
+
+	public X509IdentityValidator getX509IdentityValidator() {
+		return x509IdentityValidator;
 	}
 
 	private void registerPluginsInNamespace() throws IOException {
@@ -277,14 +291,16 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		return managerNamespace.runExpression(query);
 	}
 
-	public CompletableFuture<OpcUaServer> shutdown() {
-		managerNamespace.shutdown();
-		return server.shutdown();
-	}
-
-	public CompletableFuture<OpcUaServer> startup() {
-		managerNamespace.startup();
-		return server.startup();
+	public CompletableFuture<OpcUaServer> startup(WaldotNamespace waldotNamespace) {
+		try {
+			managerNamespace = waldotNamespace;
+			registerPluginsInNamespace();
+			managerNamespace.startup();
+			return server.startup();
+		} catch (final Exception e) {
+			logger.error("Error creating server", e);
+			return CompletableFuture.failedFuture(e);
+		}
 	}
 
 	public void waitCompletion() throws InterruptedException, ExecutionException {

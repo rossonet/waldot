@@ -158,6 +158,10 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	Object runExpression(String expression);
 
+	void shutdown();
+
+	void startup();
+
 	void unregisterPlugin(PluginListener plugin);
 
 }

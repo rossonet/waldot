@@ -130,6 +130,9 @@ public class OpcGraph extends AbstractOpcGraph {
 
 	@Override
 	public Vertex addVertex(final Object... keyValues) {
+		if (opcNamespace == null) {
+			throw new IllegalArgumentException("Namespace not set");
+		}
 		ElementHelper.legalPropertyKeyValueArray(keyValues);
 		NodeId nodeId = vertexIdManager.convert(this, ElementHelper.getIdValue(keyValues).orElse(null));
 		if (null != nodeId) {
@@ -145,6 +148,9 @@ public class OpcGraph extends AbstractOpcGraph {
 
 	@Override
 	public void clear() {
+		if (opcNamespace == null) {
+			throw new IllegalArgumentException("Namespace not set");
+		}
 		opcNamespace.resetNameSpace();
 	}
 
@@ -155,6 +161,9 @@ public class OpcGraph extends AbstractOpcGraph {
 
 	@Override
 	public WaldotGraphComputerView getGraphComputerView() {
+		if (opcNamespace == null) {
+			throw new IllegalArgumentException("Namespace not set");
+		}
 		return opcNamespace.getGraphComputerView();
 	}
 
@@ -170,6 +179,9 @@ public class OpcGraph extends AbstractOpcGraph {
 
 	@Override
 	public void setNamespace(WaldotNamespace waldotNamespace) {
+		if (waldotNamespace == null) {
+			throw new IllegalArgumentException("Namespace cannot be null");
+		}
 		this.opcNamespace = waldotNamespace;
 
 	}

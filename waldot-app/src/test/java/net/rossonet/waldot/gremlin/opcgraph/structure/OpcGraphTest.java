@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -91,6 +92,8 @@ import org.apache.tinkerpop.shaded.kryo.Serializer;
 import org.apache.tinkerpop.shaded.kryo.io.Input;
 import org.apache.tinkerpop.shaded.kryo.io.Output;
 import org.junit.jupiter.api.Test;
+
+import net.rossonet.waldot.api.models.WaldotGraph;
 
 /**
  * @author Marko A. Rodriguez (http://markorodriguez.com)
@@ -259,9 +262,12 @@ public class OpcGraphTest {
 	/**
 	 * Validating that mid-traversal hasId() also unwraps ids in lists in addition
 	 * to ids in arrays as per TINKERPOP-2863
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@Test
-	public void shouldCheckWithinListsOfIdsForMidTraversalHasId() {
+	public void shouldCheckWithinListsOfIdsForMidTraversalHasId() throws InterruptedException, ExecutionException {
 		final GraphTraversalSource g = OpcFactory.createModern().traversal();
 
 		final List<Vertex> expectedMidTraversal = g.V().has("name", "marko").outE("knows").inV().hasId(2, 4).toList();
@@ -277,7 +283,7 @@ public class OpcGraphTest {
 	 * arrays as per TINKERPOP-2863
 	 */
 	@Test
-	public void shouldCheckWithinListsOfIdsForStartStepHasId() {
+	public void shouldCheckWithinListsOfIdsForStartStepHasId() throws InterruptedException, ExecutionException {
 		final GraphTraversalSource g = OpcFactory.createModern().traversal();
 
 		final List<Vertex> expectedStartTraversal = g.V().hasId(1, 2).toList();
@@ -369,7 +375,7 @@ public class OpcGraphTest {
 	}
 
 	@Test
-	public void shouldOptionalUsingWithComputer() {
+	public void shouldOptionalUsingWithComputer() throws InterruptedException, ExecutionException {
 		// not all systems will have 3+ available processors (e.g. travis)
 		assumeThat(Runtime.getRuntime().availableProcessors(), greaterThan(2));
 
@@ -541,7 +547,7 @@ public class OpcGraphTest {
 	 * the testing of this particular problem originally noted in TINKERPOP-1992.
 	 */
 	@Test
-	public void shouldProperlyTimeReducingBarrierForProfile() {
+	public void shouldProperlyTimeReducingBarrierForProfile() throws InterruptedException, ExecutionException {
 		final GraphTraversalSource g = OpcFactory.createModern().traversal();
 
 		TraversalMetrics m = g.V().group().by().by(__.bothE().count()).profile().next();
@@ -556,7 +562,8 @@ public class OpcGraphTest {
 	}
 
 	@Test
-	public void shouldProvideClearErrorWhenFromOrToDoesNotResolveToVertex() {
+	public void shouldProvideClearErrorWhenFromOrToDoesNotResolveToVertex()
+			throws InterruptedException, ExecutionException {
 		final GraphTraversalSource g = OpcFactory.createModern().traversal();
 
 		try {
@@ -612,7 +619,7 @@ public class OpcGraphTest {
 	}
 
 	@Test
-	public void shouldProvideClearErrorWhenPuttingFromToInWrongSpot() {
+	public void shouldProvideClearErrorWhenPuttingFromToInWrongSpot() throws InterruptedException, ExecutionException {
 		final GraphTraversalSource g = OpcFactory.createModern().traversal();
 
 		try {
@@ -632,7 +639,8 @@ public class OpcGraphTest {
 	}
 
 	@Test
-	public void shouldProvideClearErrorWhenTryingToMutateEdgeWithCardinality() {
+	public void shouldProvideClearErrorWhenTryingToMutateEdgeWithCardinality()
+			throws InterruptedException, ExecutionException {
 		final GraphTraversalSource g = OpcFactory.createModern().traversal();
 
 		try {
@@ -801,7 +809,7 @@ public class OpcGraphTest {
 
 	@Test
 	public void shouldSerializeTinkerGraphToGraphSON() throws Exception {
-		final OpcGraph graph = OpcFactory.createModern();
+		final WaldotGraph graph = OpcFactory.createModern();
 		try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			graph.io(IoCore.graphson()).writer().create().writeObject(out, graph);
 			try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(out.toByteArray())) {
@@ -814,7 +822,7 @@ public class OpcGraphTest {
 
 	@Test
 	public void shouldSerializeTinkerGraphToGraphSONWithTypes() throws Exception {
-		final OpcGraph graph = OpcFactory.createModern();
+		final WaldotGraph graph = OpcFactory.createModern();
 		final Mapper<ObjectMapper> mapper = graph.io(IoCore.graphson()).mapper().typeInfo(TypeInfo.PARTIAL_TYPES)
 				.create();
 		try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -830,7 +838,7 @@ public class OpcGraphTest {
 
 	@Test
 	public void shouldSerializeTinkerGraphToGryo() throws Exception {
-		final OpcGraph graph = OpcFactory.createModern();
+		final WaldotGraph graph = OpcFactory.createModern();
 		try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			graph.io(IoCore.gryo()).writer().create().writeObject(out, graph);
 			final byte[] b = out.toByteArray();
@@ -844,7 +852,7 @@ public class OpcGraphTest {
 
 	@Test
 	public void shouldSerializeTinkerGraphWithMultiPropertiesToGraphSON() throws Exception {
-		final OpcGraph graph = OpcFactory.createTheCrew();
+		final WaldotGraph graph = OpcFactory.createTheCrew();
 		try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			graph.io(IoCore.graphson()).writer().create().writeObject(out, graph);
 			try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(out.toByteArray())) {
@@ -857,7 +865,7 @@ public class OpcGraphTest {
 
 	@Test
 	public void shouldSerializeTinkerGraphWithMultiPropertiesToGryo() throws Exception {
-		final OpcGraph graph = OpcFactory.createTheCrew();
+		final WaldotGraph graph = OpcFactory.createTheCrew();
 		try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			graph.io(IoCore.gryo()).writer().create().writeObject(out, graph);
 			final byte[] b = out.toByteArray();
@@ -1041,7 +1049,7 @@ public class OpcGraphTest {
 	}
 
 	@Test
-	public void shouldWorkWithoutIdentityStrategy() {
+	public void shouldWorkWithoutIdentityStrategy() throws InterruptedException, ExecutionException {
 		final Graph graph = OpcFactory.createModern();
 		final GraphTraversalSource g = traversal().withEmbedded(graph).withoutStrategies(IdentityRemovalStrategy.class);
 		final List<Map<String, Object>> result = g.V().match(__.as("a").out("knows").values("name").as("b")).identity()

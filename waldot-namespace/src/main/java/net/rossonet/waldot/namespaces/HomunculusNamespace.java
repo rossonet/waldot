@@ -1,5 +1,6 @@
 package net.rossonet.waldot.namespaces;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -14,7 +15,6 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager;
-import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.UaNodeManager;
 import org.eclipse.milo.opcua.sdk.server.api.DataItem;
 import org.eclipse.milo.opcua.sdk.server.api.ManagedNamespaceWithLifecycle;
@@ -59,6 +59,7 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.jexl.jexlWaldotCommandHelper;
 import net.rossonet.waldot.logger.TraceLogger;
 import net.rossonet.waldot.logger.TraceLogger.ContexLogger;
+import net.rossonet.waldot.opc.WaldotOpcUaServer;
 import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
@@ -82,18 +83,18 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	private final SubscriptionModel subscriptionModel;
 
-	public HomunculusNamespace(OpcUaServer server, WaldotMappingStrategy opcMappingStrategy,
+	public HomunculusNamespace(WaldotOpcUaServer server, WaldotMappingStrategy opcMappingStrategy,
 			ConsoleStrategy consoleStrategy, DefaultHomunculusConfiguration configuration,
-			BootstrapProcedureStrategy bootstrapProcedureStrategy, String[] bootstrapProcedure) {
-		super(server, configuration.getManagerNamespaceUri());
+			BootstrapProcedureStrategy bootstrapProcedureStrategy, URL bootstrapUrl) {
+		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.opcMappingStrategy = opcMappingStrategy;
 		this.consoleStrategy = consoleStrategy;
 		this.jexlWaldotCommandHelper = new jexlWaldotCommandHelper(this);
 		this.configuration = configuration;
 		this.bootstrapProcedureStrategy = bootstrapProcedureStrategy;
-		this.bootstrapProcedure = bootstrapProcedure;
+		this.bootstrapProcedure = getConfigurationfromUrl(bootstrapUrl);
 		opcGraphVariables = new OpcGraphVariables(this);
-		subscriptionModel = new SubscriptionModel(server, this);
+		subscriptionModel = new SubscriptionModel(server.getServer(), this);
 		dictionaryManager = new DataTypeDictionaryManager(getNodeContext(), configuration.getManagerNamespaceUri());
 		getLifecycleManager().addLifecycle(dictionaryManager);
 		getLifecycleManager().addLifecycle(subscriptionModel);
@@ -206,6 +207,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public WaldotConfiguration getConfiguration() {
 		return configuration;
+	}
+
+	private String[] getConfigurationfromUrl(URL bootstrapUrl) {
+		// TODO completare con il download del file di configurazione
+		return null;
 	}
 
 	@Override

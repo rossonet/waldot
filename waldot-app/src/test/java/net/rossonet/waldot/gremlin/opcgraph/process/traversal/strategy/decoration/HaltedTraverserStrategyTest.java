@@ -22,6 +22,7 @@ package net.rossonet.waldot.gremlin.opcgraph.process.traversal.strategy.decorati
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -56,7 +57,7 @@ public class HaltedTraverserStrategyTest {
 	}
 
 	@Test
-	public void shouldReturnDetachedElements() {
+	public void shouldReturnDetachedElements() throws InterruptedException, ExecutionException {
 		final Graph graph = OpcFactory.createModern();
 		final GraphTraversalSource g = graph.traversal().withComputer()
 				.withStrategies(HaltedTraverserStrategy.create(new MapConfiguration(new HashMap<String, Object>() {
@@ -81,7 +82,7 @@ public class HaltedTraverserStrategyTest {
 	}
 
 	@Test
-	public void shouldReturnReferenceElements() {
+	public void shouldReturnReferenceElements() throws InterruptedException, ExecutionException {
 		final Graph graph = OpcFactory.createModern();
 		GraphTraversalSource g = graph.traversal().withComputer().withStrategies(HaltedTraverserStrategy.reference());
 		g.V().out().forEachRemaining(vertex -> assertEquals(ReferenceVertex.class, vertex.getClass()));

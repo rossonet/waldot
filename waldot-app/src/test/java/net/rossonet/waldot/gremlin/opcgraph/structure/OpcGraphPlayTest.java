@@ -34,6 +34,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.valueM
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -56,6 +57,8 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.rossonet.waldot.api.models.WaldotGraph;
 
 /**
  * @author Stephen Mallette (http://stephen.genoprime.com)
@@ -86,7 +89,7 @@ public class OpcGraphPlayTest {
 
 	@Test
 	@Ignore
-	public void testBugs() {
+	public void testBugs() throws InterruptedException, ExecutionException {
 		final GraphTraversalSource g = OpcFactory.createModern().traversal();
 		final Object o1 = g.V().map(__.V(1));
 		System.out.println(g.V().as("a").both().as("b").dedup("a", "b").by(T.label).select("a", "b").explain());
@@ -212,7 +215,7 @@ public class OpcGraphPlayTest {
 		 * "/Users/marko/software/tinkerpop/tinkerpop3/data/grateful-dead.xml");
 		 */
 		// System.out.println(g.V().properties().key().groupCount().next());
-		final OpcGraph graph = OpcFactory.createModern();
+		final WaldotGraph graph = OpcFactory.createModern();
 		final GraphTraversalSource g = graph.traversal();
 		final List<Supplier<GraphTraversal<?, ?>>> traversals = Arrays.asList(() -> g.V().out().as("v")
 				.match(as("v").outE().count().as("outDegree"), as("v").inE().count().as("inDegree"))

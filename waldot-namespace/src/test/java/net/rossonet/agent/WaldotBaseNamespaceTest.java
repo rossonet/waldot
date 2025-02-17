@@ -15,21 +15,11 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.utils.LogHelper;
 
 @TestMethodOrder(OrderAnnotation.class)
-public class BaseAgentTest {
-
-	private WaldotGraph g;
-
-	private void create() throws InterruptedException, ExecutionException {
-		try {
-			g = OpcFactory.getOpcGraph();
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-	}
+public class WaldotBaseNamespaceTest {
 
 	@Test
 	public void runServerTwominutes() throws InterruptedException, ExecutionException {
-		create();
+		OpcFactory.getOpcGraph();
 		Thread.sleep(120_000);
 	}
 
@@ -37,7 +27,7 @@ public class BaseAgentTest {
 	public void runSimpleQueryAndWaitTwominutes()
 			throws InterruptedException, ExecutionException, ConfigurationException {
 		LogHelper.changeJulLogLevel("fine");
-		create();
+		final WaldotGraph g = OpcFactory.getOpcGraph();
 		Thread.sleep(2_000);
 		final Vertex v1 = g.addVertex("label", "PrimoVertice", "custom-data", "variable1", "number-test", 10);
 		System.out.println("1 - " + v1);

@@ -21,6 +21,7 @@ package net.rossonet.waldot.gremlin.opcgraph.structure;
 import static org.apache.tinkerpop.gremlin.structure.io.IoCore.gryo;
 
 import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.Configuration;
@@ -29,7 +30,18 @@ import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 
-//TODO: adeguare classe
+import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.auth.DefaultAnonymousValidator;
+import net.rossonet.waldot.auth.DefaultIdentityValidator;
+import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
+import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
+import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileWithStagesBootstrapStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.console.ConsoleV0Strategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseV0Strategy;
+import net.rossonet.waldot.namespaces.HomunculusNamespace;
+import net.rossonet.waldot.opc.WaldotOpcUaServer;
+
 /**
  * Helps create a variety of different toy graphs for testing and learning
  * purposes.
@@ -42,9 +54,12 @@ public final class OpcFactory {
 	/**
 	 * Create the "classic" graph which was the original toy graph from TinkerPop
 	 * 2.x.
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
-	public static OpcGraph createClassic() {
-		final OpcGraph g = getOpcGraph();
+	public static WaldotGraph createClassic() throws InterruptedException, ExecutionException {
+		final WaldotGraph g = getOpcGraph();
 		generateClassic(g);
 		return g;
 	}
@@ -53,9 +68,12 @@ public final class OpcFactory {
 	 * Creates the "grateful dead" graph which is a larger graph than most of the
 	 * toy graphs but has real-world structure and application and is therefore
 	 * useful for demonstrating more complex traversals.
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
-	public static OpcGraph createGratefulDead() {
-		final OpcGraph g = getOpcGraph();
+	public static WaldotGraph createGratefulDead() throws InterruptedException, ExecutionException {
+		final WaldotGraph g = getOpcGraph();
 		generateGratefulDead(g);
 		return g;
 	}
@@ -64,9 +82,12 @@ public final class OpcFactory {
 	 * Creates the "kitchen sink" graph which is a collection of structures (e.g.
 	 * self-loops) that aren't represented in other graphs and are useful for
 	 * various testing scenarios.
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
-	public static OpcGraph createKitchenSink() {
-		final OpcGraph g = getOpcGraph();
+	public static WaldotGraph createKitchenSink() throws InterruptedException, ExecutionException {
+		final WaldotGraph g = getOpcGraph();
 		generateKitchenSink(g);
 		return g;
 	}
@@ -74,9 +95,12 @@ public final class OpcFactory {
 	/**
 	 * Create the "modern" graph which has the same structure as the "classic" graph
 	 * from TinkerPop 2.x but includes 3.x features like vertex labels.
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
-	public static OpcGraph createModern() {
-		final OpcGraph g = getOpcGraph();
+	public static WaldotGraph createModern() throws InterruptedException, ExecutionException {
+		final WaldotGraph g = getOpcGraph();
 		generateModern(g);
 		return g;
 	}
@@ -85,11 +109,11 @@ public final class OpcFactory {
 	 * Create the "the crew" graph which is a TinkerPop 3.x toy graph showcasing
 	 * many 3.x features like meta-properties, multi-properties and graph variables.
 	 */
-	public static OpcGraph createTheCrew() {
+	public static WaldotGraph createTheCrew() {
 		final Configuration conf = new BaseConfiguration();
 		conf.setProperty(OpcGraph.GREMLIN_OPCGRAPH_DEFAULT_VERTEX_PROPERTY_CARDINALITY,
 				VertexProperty.Cardinality.list.name());
-		final OpcGraph g = OpcGraph.open(conf);
+		final WaldotGraph g = getOpcGraph(conf);
 		generateTheCrew(g);
 		return g;
 	}
@@ -97,7 +121,7 @@ public final class OpcFactory {
 	/**
 	 * Generate the graph in {@link #createClassic()} into an existing graph.
 	 */
-	public static void generateClassic(final AbstractOpcGraph g) {
+	public static void generateClassic(final WaldotGraph g) {
 		final Vertex marko = g.addVertex(T.id, 1, "name", "marko", "age", 29);
 		final Vertex vadas = g.addVertex(T.id, 2, "name", "vadas", "age", 27);
 		final Vertex lop = g.addVertex(T.id, 3, "name", "lop", "lang", "java");
@@ -115,7 +139,7 @@ public final class OpcFactory {
 	/**
 	 * Generate the graph in {@link #createGratefulDead()} into an existing graph.
 	 */
-	public static void generateGratefulDead(final AbstractOpcGraph graph) {
+	public static void generateGratefulDead(final WaldotGraph graph) {
 		final InputStream stream = OpcFactory.class.getResourceAsStream("grateful-dead.kryo");
 		try {
 			graph.io(gryo()).reader().create().readGraph(stream, graph);
@@ -127,7 +151,7 @@ public final class OpcFactory {
 	/**
 	 * Generate the graph in {@link #createKitchenSink()} into an existing graph.
 	 */
-	public static void generateKitchenSink(final AbstractOpcGraph graph) {
+	public static void generateKitchenSink(final WaldotGraph graph) {
 		final GraphTraversalSource g = graph.traversal();
 		g.addV("loops").property(T.id, 1000).property("name", "loop").as("me").addE("self").to("me")
 				.property(T.id, 1001).iterate();
@@ -139,7 +163,7 @@ public final class OpcFactory {
 	/**
 	 * Generate the graph in {@link #createModern()} into an existing graph.
 	 */
-	public static void generateModern(final AbstractOpcGraph g) {
+	public static void generateModern(final WaldotGraph g) {
 		final Vertex marko = g.addVertex(T.id, 1, T.label, "person");
 		marko.property("name", "marko", T.id, 0l);
 		marko.property("age", 29, T.id, 1l);
@@ -170,7 +194,7 @@ public final class OpcFactory {
 	/**
 	 * Generate the graph in {@link #createTheCrew()} into an existing graph.
 	 */
-	public static void generateTheCrew(final AbstractOpcGraph g) {
+	public static void generateTheCrew(final WaldotGraph g) {
 		final Vertex marko = g.addVertex(T.id, 1, T.label, "person", "name", "marko");
 		final Vertex stephen = g.addVertex(T.id, 7, T.label, "person", "name", "stephen");
 		final Vertex matthias = g.addVertex(T.id, 8, T.label, "person", "name", "matthias");
@@ -223,8 +247,33 @@ public final class OpcFactory {
 				"this graph was created to provide examples and test coverage for tinkerpop3 api advances");
 	}
 
-	private static OpcGraph getOpcGraph() {
-		return OpcGraph.open();
+	public static WaldotGraph getOpcGraph() throws InterruptedException, ExecutionException {
+		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
+		final WaldotOpcUaServer waldot = new WaldotOpcUaServer(configuration, serverConfiguration,
+				new DefaultAnonymousValidator(configuration), new DefaultIdentityValidator(configuration),
+				new DefaultX509IdentityValidator(configuration));
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				try {
+					if (waldot != null && waldot.getServer() != null) {
+						waldot.getServer().shutdown();
+					}
+				} catch (final Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseV0Strategy(),
+				new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(), null);
+		waldot.startup(namespace).get();
+		return waldot.getGremlinGraph();
+	}
+
+	private static WaldotGraph getOpcGraph(Configuration conf) {
+		// TODO verificare come usare la configurazione originale
+		return null;
 	}
 
 	private OpcFactory() {

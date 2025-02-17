@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.apache.commons.configuration2.BaseConfiguration;
@@ -38,6 +39,7 @@ import org.apache.tinkerpop.gremlin.structure.Element;
 import org.junit.AssumptionViolatedException;
 
 import io.cucumber.java.Scenario;
+import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcGraphComputer;
 import net.rossonet.waldot.gremlin.opcgraph.services.OpcDegreeCentralityFactory;
 import net.rossonet.waldot.gremlin.opcgraph.services.OpcTextSearchFactory;
@@ -160,11 +162,23 @@ public abstract class OpcWorld implements World {
 	 * {@link GraphTraversalSource} instances required by the Gherkin test suite.
 	 */
 	public static class TinkerGraphWorld extends OpcWorld {
-		private static final AbstractOpcGraph modern = registerTestServices(OpcFactory.createModern());
-		private static final AbstractOpcGraph classic = registerTestServices(OpcFactory.createClassic());
-		private static final AbstractOpcGraph crew = registerTestServices(OpcFactory.createTheCrew());
-		private static final AbstractOpcGraph sink = registerTestServices(OpcFactory.createKitchenSink());
-		private static final AbstractOpcGraph grateful = registerTestServices(OpcFactory.createGratefulDead());
+		private static WaldotGraph classic;
+		private static WaldotGraph crew;
+		private static WaldotGraph grateful;
+		private static WaldotGraph modern;
+		private static WaldotGraph sink;
+
+		static {
+			try {
+				classic = registerTestServices(OpcFactory.createClassic());
+				crew = registerTestServices(OpcFactory.createTheCrew());
+				grateful = registerTestServices(OpcFactory.createGratefulDead());
+				modern = registerTestServices(OpcFactory.createModern());
+				sink = registerTestServices(OpcFactory.createKitchenSink());
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
 
 		@Override
 		public GraphTraversalSource getGraphTraversalSource(final LoadGraphWith.GraphData graphData) {
@@ -198,11 +212,11 @@ public abstract class OpcWorld implements World {
 	 * {@link GraphTraversalSource} instances required by the Gherkin test suite.
 	 */
 	public static class TinkerTransactionGraphWorld extends OpcWorld {
-		private static final AbstractOpcGraph modern;
 		private static final AbstractOpcGraph classic;
 		private static final AbstractOpcGraph crew;
-		private static final AbstractOpcGraph sink;
 		private static final AbstractOpcGraph grateful;
+		private static final AbstractOpcGraph modern;
+		private static final AbstractOpcGraph sink;
 
 		static {
 			modern = OpcGraph.open();
@@ -273,10 +287,11 @@ public abstract class OpcWorld implements World {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected static AbstractOpcGraph registerTestServices(final AbstractOpcGraph graph) {
-		graph.getServiceRegistry().registerService(new OpcTextSearchFactory(graph));
-		graph.getServiceRegistry().registerService(new OpcDegreeCentralityFactory(graph));
-		return graph;
+	protected static WaldotGraph registerTestServices(final WaldotGraph waldotGraph) {
+		waldotGraph.getServiceRegistry().registerService(new OpcTextSearchFactory((AbstractOpcGraph) waldotGraph));
+		waldotGraph.getServiceRegistry()
+				.registerService(new OpcDegreeCentralityFactory((AbstractOpcGraph) waldotGraph));
+		return waldotGraph;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -34,6 +34,7 @@ import java.time.Year;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.Tree;
@@ -57,6 +58,8 @@ import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONWriter;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONXModuleV2;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.TypeInfo;
 import org.junit.jupiter.api.Test;
+
+import net.rossonet.waldot.api.models.WaldotGraph;
 
 public class OpcGraphGraphSONSerializerV2Test {
 
@@ -151,8 +154,8 @@ public class OpcGraphGraphSONSerializerV2Test {
 	}
 
 	@Test
-	public void deserializersTestsMetrics() {
-		final OpcGraph tg = OpcFactory.createModern();
+	public void deserializersTestsMetrics() throws InterruptedException, ExecutionException {
+		final WaldotGraph tg = OpcFactory.createModern();
 
 		final GraphWriter writer = getWriter(defaultMapperV2);
 		final GraphReader reader = getReader(defaultMapperV2);
@@ -179,8 +182,8 @@ public class OpcGraphGraphSONSerializerV2Test {
 	}
 
 	@Test
-	public void deserializersTestsPath() {
-		final OpcGraph tg = OpcFactory.createModern();
+	public void deserializersTestsPath() throws InterruptedException, ExecutionException {
+		final WaldotGraph tg = OpcFactory.createModern();
 
 		final GraphWriter writer = getWriter(defaultMapperV2);
 		final GraphReader reader = getReader(defaultMapperV2);
@@ -265,8 +268,8 @@ public class OpcGraphGraphSONSerializerV2Test {
 	}
 
 	@Test
-	public void deserializersTestsTraversalMetrics() {
-		final OpcGraph tg = OpcFactory.createModern();
+	public void deserializersTestsTraversalMetrics() throws InterruptedException, ExecutionException {
+		final WaldotGraph tg = OpcFactory.createModern();
 
 		final GraphWriter writer = getWriter(defaultMapperV2);
 		final GraphReader reader = getReader(defaultMapperV2);
@@ -290,8 +293,8 @@ public class OpcGraphGraphSONSerializerV2Test {
 
 	@Test
 	@org.junit.Ignore("https://issues.apache.org/jira/browse/TINKERPOP-1509")
-	public void deserializersTestsTree() {
-		final OpcGraph tg = OpcFactory.createModern();
+	public void deserializersTestsTree() throws InterruptedException, ExecutionException {
+		final WaldotGraph tg = OpcFactory.createModern();
 
 		final GraphWriter writer = getWriter(defaultMapperV2);
 		final GraphReader reader = getReader(defaultMapperV2);
@@ -378,9 +381,13 @@ public class OpcGraphGraphSONSerializerV2Test {
 	/**
 	 * Thorough types verification for Vertex ids, Vertex props, Edge ids, Edge
 	 * props
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@Test
-	public void shouldDeserializeGraphSONIntoTinkerGraphKeepingTypes() throws IOException {
+	public void shouldDeserializeGraphSONIntoTinkerGraphKeepingTypes()
+			throws IOException, InterruptedException, ExecutionException {
 		final GraphWriter writer = getWriter(defaultMapperV2);
 		final GraphReader reader = getReader(defaultMapperV2);
 
@@ -400,12 +407,16 @@ public class OpcGraphGraphSONSerializerV2Test {
 
 	/**
 	 * Checks that the graph has been fully ser/deser without types.
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@Test
-	public void shouldDeserializeGraphSONIntoTinkerGraphWithoutTypes() throws IOException {
+	public void shouldDeserializeGraphSONIntoTinkerGraphWithoutTypes()
+			throws IOException, InterruptedException, ExecutionException {
 		final GraphWriter writer = getWriter(noTypesMapperV2);
 		final GraphReader reader = getReader(noTypesMapperV2);
-		final OpcGraph baseModern = OpcFactory.createModern();
+		final WaldotGraph baseModern = OpcFactory.createModern();
 
 		try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			writer.writeGraph(out, baseModern);
@@ -418,12 +429,16 @@ public class OpcGraphGraphSONSerializerV2Test {
 
 	/**
 	 * Checks that the graph has been fully ser/deser with types.
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@Test
-	public void shouldDeserializeGraphSONIntoTinkerGraphWithPartialTypes() throws IOException {
+	public void shouldDeserializeGraphSONIntoTinkerGraphWithPartialTypes()
+			throws IOException, InterruptedException, ExecutionException {
 		final GraphWriter writer = getWriter(defaultMapperV2);
 		final GraphReader reader = getReader(defaultMapperV2);
-		final OpcGraph baseModern = OpcFactory.createModern();
+		final WaldotGraph baseModern = OpcFactory.createModern();
 
 		try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 			writer.writeGraph(out, baseModern);
@@ -498,9 +513,13 @@ public class OpcGraphGraphSONSerializerV2Test {
 
 	/**
 	 * Asserts the approximateGraphsChecks function fails when expected. Edge props.
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@Test
-	public void shouldLoseTypesWithGraphSONNoTypesForEdgeProps() throws IOException {
+	public void shouldLoseTypesWithGraphSONNoTypesForEdgeProps()
+			throws IOException, InterruptedException, ExecutionException {
 		final GraphWriter writer = getWriter(noTypesMapperV2);
 		final GraphReader reader = getReader(noTypesMapperV2);
 		final Graph sampleGraph1 = OpcFactory.createModern();
