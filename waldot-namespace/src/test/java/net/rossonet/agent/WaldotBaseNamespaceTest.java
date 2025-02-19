@@ -18,6 +18,24 @@ import net.rossonet.waldot.utils.LogHelper;
 public class WaldotBaseNamespaceTest {
 
 	@Test
+	public void runGratefulDeadTwominutes() throws InterruptedException, ExecutionException {
+		OpcFactory.createGratefulDead();
+		Thread.sleep(120_000);
+	}
+
+	@Test
+	public void runKitchenSinkTwominutes() throws InterruptedException, ExecutionException {
+		OpcFactory.createKitchenSink();
+		Thread.sleep(120_000);
+	}
+
+	@Test
+	public void runModernTwominutes() throws InterruptedException, ExecutionException {
+		OpcFactory.createModern();
+		Thread.sleep(120_000);
+	}
+
+	@Test
 	public void runServerTwominutes() throws InterruptedException, ExecutionException {
 		OpcFactory.getOpcGraph();
 		Thread.sleep(120_000);
@@ -77,6 +95,12 @@ public class WaldotBaseNamespaceTest {
 			System.out.println(
 					"b1" + i + " - " + g.traversal().V().hasLabel("PrimoVertice").next().property("number-test", i));
 		}
+	}
+
+	@Test
+	public void runTheCrewTwominutes() throws InterruptedException, ExecutionException {
+		OpcFactory.createTheCrew();
+		Thread.sleep(120_000);
 	}
 
 }

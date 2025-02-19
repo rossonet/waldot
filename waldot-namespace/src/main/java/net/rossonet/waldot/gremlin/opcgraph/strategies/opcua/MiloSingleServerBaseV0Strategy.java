@@ -574,7 +574,9 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 					.equals(MiloSingleServerBaseV0ReferenceNodeBuilder.hasPropertyReferenceType)) {
 				final UaNode node = waldotNamespace.getStorageManager()
 						.getNode(p.getTargetNodeId().toNodeId(waldotNamespace.getNamespaceTable()).get()).get();
-				result.put(node.getBrowseName().getName(), (WaldotVertexProperty<DATA_TYPE>) node);
+				if (node instanceof WaldotVertexProperty) {
+					result.put(node.getBrowseName().getName(), (WaldotVertexProperty<DATA_TYPE>) node);
+				}
 			}
 		}
 		return result;

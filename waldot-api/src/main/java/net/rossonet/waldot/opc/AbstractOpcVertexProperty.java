@@ -1,6 +1,7 @@
 package net.rossonet.waldot.opc;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -121,7 +122,7 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 
 	@Override
 	public <U> Iterator<Property<U>> properties(String... propertyKeys) {
-		return null;
+		return Collections.emptyIterator();
 	}
 
 	@Override

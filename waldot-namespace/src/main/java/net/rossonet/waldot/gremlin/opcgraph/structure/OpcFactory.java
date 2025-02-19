@@ -108,8 +108,11 @@ public final class OpcFactory {
 	/**
 	 * Create the "the crew" graph which is a TinkerPop 3.x toy graph showcasing
 	 * many 3.x features like meta-properties, multi-properties and graph variables.
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
-	public static WaldotGraph createTheCrew() {
+	public static WaldotGraph createTheCrew() throws InterruptedException, ExecutionException {
 		final Configuration conf = new BaseConfiguration();
 		conf.setProperty(OpcGraph.GREMLIN_OPCGRAPH_DEFAULT_VERTEX_PROPERTY_CARDINALITY,
 				VertexProperty.Cardinality.list.name());
@@ -271,9 +274,9 @@ public final class OpcFactory {
 		return waldot.getGremlinGraph();
 	}
 
-	private static WaldotGraph getOpcGraph(Configuration conf) {
+	private static WaldotGraph getOpcGraph(Configuration conf) throws InterruptedException, ExecutionException {
 		// TODO verificare come usare la configurazione originale
-		return null;
+		return getOpcGraph();
 	}
 
 	private OpcFactory() {

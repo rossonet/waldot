@@ -18,6 +18,13 @@
  */
 package net.rossonet.waldot.gremlin.opcgraph.structure;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -48,169 +55,173 @@ import org.apache.tinkerpop.shaded.kryo.Serializer;
 import org.apache.tinkerpop.shaded.kryo.io.Input;
 import org.apache.tinkerpop.shaded.kryo.io.Output;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 /**
- * An implementation of the {@link IoRegistry} interface that provides serializers with custom configurations for
- * implementation specific classes that might need to be serialized.  This registry allows a {@link OpcGraph} to
- * be serialized directly which is useful for moving small graphs around on the network.
+ * An implementation of the {@link IoRegistry} interface that provides
+ * serializers with custom configurations for implementation specific classes
+ * that might need to be serialized. This registry allows a {@link OpcGraph} to
+ * be serialized directly which is useful for moving small graphs around on the
+ * network.
  * <p/>
- * Most providers need not implement this kind of custom serializer as they will deal with much larger graphs that
- * wouldn't be practical to serialize in this fashion.  This is a bit of a special case for OpcGraph given its
- * in-memory status.  Typical implementations would create serializers for a complex vertex identifier or a
- * custom data class like a "geographic point".
+ * Most providers need not implement this kind of custom serializer as they will
+ * deal with much larger graphs that wouldn't be practical to serialize in this
+ * fashion. This is a bit of a special case for OpcGraph given its in-memory
+ * status. Typical implementations would create serializers for a complex vertex
+ * identifier or a custom data class like a "geographic point".
  *
  * @author Stephen Mallette (http://stephen.genoprime.com)
  */
 public final class OpcIoRegistryV3 extends AbstractIoRegistry {
 
-    private static final OpcIoRegistryV3 INSTANCE = new OpcIoRegistryV3();
+	/**
+	 * Provides a method to serialize an entire {@link OpcGraph} into itself for
+	 * Gryo. This is useful when shipping small graphs around through Gremlin
+	 * Server. Reuses the existing Kryo instance for serialization.
+	 */
+	final static class TinkerGraphGryoSerializer extends Serializer<OpcGraph> {
+		@Override
+		public OpcGraph read(final Kryo kryo, final Input input, final Class<OpcGraph> tinkerGraphClass) {
+			final Configuration conf = new BaseConfiguration();
+			conf.setProperty("gremlin.tinkergraph.defaultVertexPropertyCardinality", "list");
+			final OpcGraph graph = OpcGraph.open(conf);
+			final int len = input.readInt();
+			final byte[] bytes = input.readBytes(len);
+			try (final ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
+				GryoReader.build().mapper(() -> kryo).create().readGraph(stream, graph);
+			} catch (final Exception io) {
+				throw new RuntimeException(io);
+			}
 
-    private OpcIoRegistryV3() {
-        register(GryoIo.class, OpcGraph.class, new TinkerGraphGryoSerializer());
-        register(GraphSONIo.class, null, new TinkerModuleV2());
-    }
+			return graph;
+		}
 
-    public static OpcIoRegistryV3 instance() {
-        return INSTANCE;
-    }
+		@Override
+		public void write(final Kryo kryo, final Output output, final OpcGraph graph) {
+			try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+				GryoWriter.build().mapper(() -> kryo).create().writeGraph(stream, graph);
+				final byte[] bytes = stream.toByteArray();
+				output.writeInt(bytes.length);
+				output.write(bytes);
+			} catch (final Exception io) {
+				throw new RuntimeException(io);
+			}
+		}
+	}
 
-    /**
-     * Provides a method to serialize an entire {@link OpcGraph} into itself for Gryo.  This is useful when
-     * shipping small graphs around through Gremlin Server. Reuses the existing Kryo instance for serialization.
-     */
-    final static class TinkerGraphGryoSerializer extends Serializer<OpcGraph> {
-        @Override
-        public void write(final Kryo kryo, final Output output, final OpcGraph graph) {
-            try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
-                GryoWriter.build().mapper(() -> kryo).create().writeGraph(stream, graph);
-                final byte[] bytes = stream.toByteArray();
-                output.writeInt(bytes.length);
-                output.write(bytes);
-            } catch (Exception io) {
-                throw new RuntimeException(io);
-            }
-        }
+	/**
+	 * Deserializes the edge list format.
+	 */
+	static class TinkerGraphJacksonDeserializer extends StdDeserializer<OpcGraph> {
+		public TinkerGraphJacksonDeserializer() {
+			super(OpcGraph.class);
+		}
 
-        @Override
-        public OpcGraph read(final Kryo kryo, final Input input, final Class<OpcGraph> tinkerGraphClass) {
-            final Configuration conf = new BaseConfiguration();
-            conf.setProperty("gremlin.tinkergraph.defaultVertexPropertyCardinality", "list");
-            final OpcGraph graph = OpcGraph.open(conf);
-            final int len = input.readInt();
-            final byte[] bytes = input.readBytes(len);
-            try (final ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
-                GryoReader.build().mapper(() -> kryo).create().readGraph(stream, graph);
-            } catch (Exception io) {
-                throw new RuntimeException(io);
-            }
+		@Override
+		public OpcGraph deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext)
+				throws IOException, JsonProcessingException {
+			final Configuration conf = new BaseConfiguration();
+			conf.setProperty("gremlin.tinkergraph.defaultVertexPropertyCardinality", "list");
+			final OpcGraph graph = OpcGraph.open(conf);
 
-            return graph;
-        }
-    }
+			while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
+				if (jsonParser.getCurrentName().equals("vertices")) {
+					while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
+						if (jsonParser.currentToken() == JsonToken.START_OBJECT) {
+							final DetachedVertex v = (DetachedVertex) deserializationContext.readValue(jsonParser,
+									Vertex.class);
+							v.attach(Attachable.Method.getOrCreate(graph));
+						}
+					}
+				} else if (jsonParser.getCurrentName().equals("edges")) {
+					while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
+						if (jsonParser.currentToken() == JsonToken.START_OBJECT) {
+							final DetachedEdge e = (DetachedEdge) deserializationContext.readValue(jsonParser,
+									Edge.class);
+							e.attach(Attachable.Method.getOrCreate(graph));
+						}
+					}
+				}
+			}
 
-    /**
-     * Provides a method to serialize an entire {@link OpcGraph} into itself for GraphSON. This is useful when
-     * shipping small graphs around through Gremlin Server.
-     */
-    final static class TinkerModuleV2 extends TinkerPopJacksonModule {
-        public TinkerModuleV2() {
-            super("tinkergraph-2.0");
-            addSerializer(OpcGraph.class, new TinkerGraphJacksonSerializer());
-            addDeserializer(OpcGraph.class, new TinkerGraphJacksonDeserializer());
-        }
+			return graph;
+		}
+	}
 
-        @Override
-        public Map<Class, String> getTypeDefinitions() {
-            return new HashMap<Class, String>(){{
-                put(OpcGraph.class, "graph");
-            }};
-        }
+	/**
+	 * Serializes the graph into an edge list format. Edge list is a better choices
+	 * than adjacency list (which is typically standard from the {@link GraphReader}
+	 * and {@link GraphWriter} perspective) in this case because the use case for
+	 * this isn't around massive graphs. The use case is for "small" subgraphs that
+	 * are being shipped over the wire from Gremlin Server. Edge list format is a
+	 * bit easier for non-JVM languages to work with as a format and doesn't require
+	 * a cache for loading (as vertex labels are not serialized in adjacency list).
+	 */
+	final static class TinkerGraphJacksonSerializer extends StdScalarSerializer<OpcGraph> {
 
-        @Override
-        public String getTypeNamespace() {
-            return "tinker";
-        }
-    }
+		public TinkerGraphJacksonSerializer() {
+			super(OpcGraph.class);
+		}
 
-    /**
-     * Serializes the graph into an edge list format.  Edge list is a better choices than adjacency list (which is
-     * typically standard from the {@link GraphReader} and {@link GraphWriter} perspective) in this case because
-     * the use case for this isn't around massive graphs.  The use case is for "small" subgraphs that are being
-     * shipped over the wire from Gremlin Server. Edge list format is a bit easier for non-JVM languages to work
-     * with as a format and doesn't require a cache for loading (as vertex labels are not serialized in adjacency
-     * list).
-     */
-    final static class TinkerGraphJacksonSerializer extends StdScalarSerializer<OpcGraph> {
+		@Override
+		public void serialize(final OpcGraph graph, final JsonGenerator jsonGenerator,
+				final SerializerProvider serializerProvider) throws IOException {
+			jsonGenerator.writeStartObject();
+			jsonGenerator.writeFieldName(GraphSONTokens.VERTICES);
+			jsonGenerator.writeStartArray();
 
-        public TinkerGraphJacksonSerializer() {
-            super(OpcGraph.class);
-        }
+			final Iterator<Vertex> vertices = graph.vertices();
+			while (vertices.hasNext()) {
+				serializerProvider.defaultSerializeValue(vertices.next(), jsonGenerator);
+			}
 
-        @Override
-        public void serialize(final OpcGraph graph, final JsonGenerator jsonGenerator, final SerializerProvider serializerProvider)
-                throws IOException {
-            jsonGenerator.writeStartObject();
-            jsonGenerator.writeFieldName(GraphSONTokens.VERTICES);
-            jsonGenerator.writeStartArray();
+			jsonGenerator.writeEndArray();
+			jsonGenerator.writeFieldName(GraphSONTokens.EDGES);
+			jsonGenerator.writeStartArray();
 
-            final Iterator<Vertex> vertices = graph.vertices();
-            while (vertices.hasNext()) {
-                serializerProvider.defaultSerializeValue(vertices.next(), jsonGenerator);
-            }
+			final Iterator<Edge> edges = graph.edges();
+			while (edges.hasNext()) {
+				serializerProvider.defaultSerializeValue(edges.next(), jsonGenerator);
+			}
 
-            jsonGenerator.writeEndArray();
-            jsonGenerator.writeFieldName(GraphSONTokens.EDGES);
-            jsonGenerator.writeStartArray();
+			jsonGenerator.writeEndArray();
+			jsonGenerator.writeEndObject();
+		}
+	}
 
-            final Iterator<Edge> edges = graph.edges();
-            while (edges.hasNext()) {
-                serializerProvider.defaultSerializeValue(edges.next(), jsonGenerator);
-            }
+	/**
+	 * Provides a method to serialize an entire {@link OpcGraph} into itself for
+	 * GraphSON. This is useful when shipping small graphs around through Gremlin
+	 * Server.
+	 */
+	final static class TinkerModuleV2 extends TinkerPopJacksonModule {
+		public TinkerModuleV2() {
+			super("tinkergraph-2.0");
+			addSerializer(OpcGraph.class, new TinkerGraphJacksonSerializer());
+			addDeserializer(OpcGraph.class, new TinkerGraphJacksonDeserializer());
+		}
 
-            jsonGenerator.writeEndArray();
-            jsonGenerator.writeEndObject();
-        }
-    }
+		@Override
+		public Map<Class, String> getTypeDefinitions() {
+			return new HashMap<Class, String>() {
+				{
+					put(OpcGraph.class, "graph");
+				}
+			};
+		}
 
-    /**
-     * Deserializes the edge list format.
-     */
-    static class TinkerGraphJacksonDeserializer extends StdDeserializer<OpcGraph> {
-        public TinkerGraphJacksonDeserializer() {
-            super(OpcGraph.class);
-        }
+		@Override
+		public String getTypeNamespace() {
+			return "tinker";
+		}
+	}
 
-        @Override
-        public OpcGraph deserialize(final JsonParser jsonParser, final DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
-            final Configuration conf = new BaseConfiguration();
-            conf.setProperty("gremlin.tinkergraph.defaultVertexPropertyCardinality", "list");
-            final OpcGraph graph = OpcGraph.open(conf);
+	private static final OpcIoRegistryV3 INSTANCE = new OpcIoRegistryV3();
 
-            while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-                if (jsonParser.getCurrentName().equals("vertices")) {
-                    while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-                        if (jsonParser.currentToken() == JsonToken.START_OBJECT) {
-                            final DetachedVertex v = (DetachedVertex) deserializationContext.readValue(jsonParser, Vertex.class);
-                            v.attach(Attachable.Method.getOrCreate(graph));
-                        }
-                    }
-                } else if (jsonParser.getCurrentName().equals("edges")) {
-                    while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-                        if (jsonParser.currentToken() == JsonToken.START_OBJECT) {
-                            final DetachedEdge e = (DetachedEdge) deserializationContext.readValue(jsonParser, Edge.class);
-                            e.attach(Attachable.Method.getOrCreate(graph));
-                        }
-                    }
-                }
-            }
+	public static OpcIoRegistryV3 instance() {
+		return INSTANCE;
+	}
 
-            return graph;
-        }
-    }
+	private OpcIoRegistryV3() {
+		register(GryoIo.class, OpcGraph.class, new TinkerGraphGryoSerializer());
+		register(GraphSONIo.class, null, new TinkerModuleV2());
+	}
 }
