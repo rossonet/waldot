@@ -194,7 +194,7 @@ public final class OpcIoRegistryV3 extends AbstractIoRegistry {
 	 */
 	final static class TinkerModuleV2 extends TinkerPopJacksonModule {
 		public TinkerModuleV2() {
-			super("tinkergraph-2.0");
+			super("waldotgraph-2.0");
 			addSerializer(OpcGraph.class, new TinkerGraphJacksonSerializer());
 			addDeserializer(OpcGraph.class, new TinkerGraphJacksonDeserializer());
 		}

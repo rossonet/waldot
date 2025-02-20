@@ -55,13 +55,14 @@ public class WaldotTinkerPopPlugin implements PluginListener {
 						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3"));
 		final SerializerSettings settingSerializerBin = new SerializerSettings();
 		settingSerializerBin.className = GraphBinaryMessageSerializerV1.class.getName();
-		settingSerializerBin.config = Collections.singletonMap("ioRegistries",
-				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1",
-						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV2",
-						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3"));
+		settingSerializerBin.config = new HashMap<>();
+		settingSerializerBin.config.put("ioRegistries",
+				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1"));
+		settingSerializerBin.config.put("custom", List.of(
+				"org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;net.rossonet.waldot.gremlin.opcgraph.ser.NodeIdCustomTypeSerializer"));
 		overriddenSettings.serializers = new ArrayList<>();
-		overriddenSettings.serializers.add(settingSerializerJson);
 		overriddenSettings.serializers.add(settingSerializerBin);
+		overriddenSettings.serializers.add(settingSerializerJson);
 		WaldotTinkerPopPlugin.mainNamespace = waldotNamespace;
 		this.server = new WaldotGremlinServer(overriddenSettings);
 		try {

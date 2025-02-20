@@ -243,7 +243,7 @@ public final class OpcIoRegistryV1 extends AbstractIoRegistry {
 		private static final long serialVersionUID = -1945931945520735705L;
 
 		public TinkerModule() {
-			super("tinkergraph-1.0");
+			super("waldotgraph-1.0");
 			addSerializer(OpcGraph.class, new TinkerGraphJacksonSerializer());
 			addDeserializer(OpcGraph.class, new TinkerGraphJacksonDeserializer());
 		}
