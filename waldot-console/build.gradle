@@ -53,7 +53,7 @@ apply plugin: 'application'
 dependencies {
     api project(':waldot-api')
     api 'org.json:json:20250107'
-    api 'org.yaml:snakeyaml:2.3'
+    api 'org.yaml:snakeyaml:2.4'
     api 'org.apache.commons:commons-jexl3:3.4.0'
     api 'org.slf4j:jul-to-slf4j:2.0.16'
     implementation 'org.slf4j:slf4j-simple:2.0.16'
