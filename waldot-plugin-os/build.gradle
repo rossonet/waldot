@@ -44,7 +44,7 @@ apply plugin: 'maven-publish'
 
 dependencies {
     api project(':waldot-namespace')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.12.0'
