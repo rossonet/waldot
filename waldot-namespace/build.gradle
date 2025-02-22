@@ -48,10 +48,12 @@ apply plugin: 'maven-publish'
 
 dependencies {
     api project(':waldot-api')
+    // gremlin
+    api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
     api 'org.json:json:20250107'
     api 'org.yaml:snakeyaml:2.3'
     api 'org.apache.commons:commons-jexl3:3.4.0'
-    api 'org.slf4j:jul-to-slf4j:2.0.16'
+    implementation 'org.slf4j:jul-to-slf4j:2.0.16'
     implementation 'org.slf4j:slf4j-simple:2.0.16'
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.2'
     // OPCUA
@@ -59,12 +61,8 @@ dependencies {
     api group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.15'
     api group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.15'
     api group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
-    // gremlin
-    api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
+ 
     annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
-    // per history opcua
-    
-    
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
@@ -112,6 +110,7 @@ gitProperties {
 
 test {
     useJUnitPlatform()
+    applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
 }
 
 javadoc{

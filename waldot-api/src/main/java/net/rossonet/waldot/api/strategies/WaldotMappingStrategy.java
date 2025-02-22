@@ -68,8 +68,7 @@ public interface WaldotMappingStrategy {
 			public NodeId getNextId(final WaldotGraph graph) {
 				boolean found = false;
 				while (!found) {
-					final NodeId id = graph.getWaldotNamespace()
-							.generateNodeId(graph.getGeneratedId().incrementAndGet());
+					final NodeId id = graph.getWaldotNamespace().generateNodeId(graph.getGeneratedId());
 					if (!graph.getWaldotNamespace().hasNodeId(id)) {
 						found = true;
 						return id;

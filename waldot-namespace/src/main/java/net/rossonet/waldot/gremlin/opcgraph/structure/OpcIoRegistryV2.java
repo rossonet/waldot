@@ -110,10 +110,10 @@ public final class OpcIoRegistryV2 extends AbstractIoRegistry {
 	/**
 	 * Deserializes the edge list format.
 	 */
-	static class TinkerGraphJacksonDeserializer extends StdDeserializer<OpcGraph> {
+	static class OpcGraphJacksonDeserializer extends StdDeserializer<OpcGraph> {
 		private static final long serialVersionUID = -547898292613773691L;
 
-		public TinkerGraphJacksonDeserializer() {
+		public OpcGraphJacksonDeserializer() {
 			super(OpcGraph.class);
 		}
 
@@ -162,11 +162,11 @@ public final class OpcIoRegistryV2 extends AbstractIoRegistry {
 	 * bit easier for non-JVM languages to work with as a format and doesn't require
 	 * a cache for loading (as vertex labels are not serialized in adjacency list).
 	 */
-	final static class TinkerGraphJacksonSerializer extends StdScalarSerializer<OpcGraph> {
+	final static class OpcGraphJacksonSerializer extends StdScalarSerializer<OpcGraph> {
 
 		private static final long serialVersionUID = 9121133634962358357L;
 
-		public TinkerGraphJacksonSerializer() {
+		public OpcGraphJacksonSerializer() {
 			super(OpcGraph.class);
 		}
 
@@ -206,8 +206,8 @@ public final class OpcIoRegistryV2 extends AbstractIoRegistry {
 
 		public TinkerModuleV2() {
 			super("waldotgraph-2.0");
-			addSerializer(OpcGraph.class, new TinkerGraphJacksonSerializer());
-			addDeserializer(OpcGraph.class, new TinkerGraphJacksonDeserializer());
+			addSerializer(OpcGraph.class, new OpcGraphJacksonSerializer());
+			addDeserializer(OpcGraph.class, new OpcGraphJacksonDeserializer());
 		}
 
 		@Override

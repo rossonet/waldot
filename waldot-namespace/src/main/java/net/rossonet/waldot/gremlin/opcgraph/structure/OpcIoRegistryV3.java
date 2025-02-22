@@ -73,45 +73,10 @@ import org.apache.tinkerpop.shaded.kryo.io.Output;
 public final class OpcIoRegistryV3 extends AbstractIoRegistry {
 
 	/**
-	 * Provides a method to serialize an entire {@link OpcGraph} into itself for
-	 * Gryo. This is useful when shipping small graphs around through Gremlin
-	 * Server. Reuses the existing Kryo instance for serialization.
-	 */
-	final static class TinkerGraphGryoSerializer extends Serializer<OpcGraph> {
-		@Override
-		public OpcGraph read(final Kryo kryo, final Input input, final Class<OpcGraph> tinkerGraphClass) {
-			final Configuration conf = new BaseConfiguration();
-			conf.setProperty("gremlin.tinkergraph.defaultVertexPropertyCardinality", "list");
-			final OpcGraph graph = OpcGraph.open(conf);
-			final int len = input.readInt();
-			final byte[] bytes = input.readBytes(len);
-			try (final ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
-				GryoReader.build().mapper(() -> kryo).create().readGraph(stream, graph);
-			} catch (final Exception io) {
-				throw new RuntimeException(io);
-			}
-
-			return graph;
-		}
-
-		@Override
-		public void write(final Kryo kryo, final Output output, final OpcGraph graph) {
-			try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
-				GryoWriter.build().mapper(() -> kryo).create().writeGraph(stream, graph);
-				final byte[] bytes = stream.toByteArray();
-				output.writeInt(bytes.length);
-				output.write(bytes);
-			} catch (final Exception io) {
-				throw new RuntimeException(io);
-			}
-		}
-	}
-
-	/**
 	 * Deserializes the edge list format.
 	 */
-	static class TinkerGraphJacksonDeserializer extends StdDeserializer<OpcGraph> {
-		public TinkerGraphJacksonDeserializer() {
+	static class OpcGraphJacksonDeserializer extends StdDeserializer<OpcGraph> {
+		public OpcGraphJacksonDeserializer() {
 			super(OpcGraph.class);
 		}
 
@@ -155,9 +120,9 @@ public final class OpcIoRegistryV3 extends AbstractIoRegistry {
 	 * bit easier for non-JVM languages to work with as a format and doesn't require
 	 * a cache for loading (as vertex labels are not serialized in adjacency list).
 	 */
-	final static class TinkerGraphJacksonSerializer extends StdScalarSerializer<OpcGraph> {
+	final static class OpcGraphJacksonSerializer extends StdScalarSerializer<OpcGraph> {
 
-		public TinkerGraphJacksonSerializer() {
+		public OpcGraphJacksonSerializer() {
 			super(OpcGraph.class);
 		}
 
@@ -189,14 +154,51 @@ public final class OpcIoRegistryV3 extends AbstractIoRegistry {
 
 	/**
 	 * Provides a method to serialize an entire {@link OpcGraph} into itself for
+	 * Gryo. This is useful when shipping small graphs around through Gremlin
+	 * Server. Reuses the existing Kryo instance for serialization.
+	 */
+	final static class TinkerGraphGryoSerializer extends Serializer<OpcGraph> {
+		@Override
+		public OpcGraph read(final Kryo kryo, final Input input, final Class<OpcGraph> tinkerGraphClass) {
+			final Configuration conf = new BaseConfiguration();
+			conf.setProperty("gremlin.tinkergraph.defaultVertexPropertyCardinality", "list");
+			final OpcGraph graph = OpcGraph.open(conf);
+			final int len = input.readInt();
+			final byte[] bytes = input.readBytes(len);
+			try (final ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
+				GryoReader.build().mapper(() -> kryo).create().readGraph(stream, graph);
+			} catch (final Exception io) {
+				throw new RuntimeException(io);
+			}
+
+			return graph;
+		}
+
+		@Override
+		public void write(final Kryo kryo, final Output output, final OpcGraph graph) {
+			try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+				GryoWriter.build().mapper(() -> kryo).create().writeGraph(stream, graph);
+				final byte[] bytes = stream.toByteArray();
+				output.writeInt(bytes.length);
+				output.write(bytes);
+			} catch (final Exception io) {
+				throw new RuntimeException(io);
+			}
+		}
+	}
+
+	/**
+	 * Provides a method to serialize an entire {@link OpcGraph} into itself for
 	 * GraphSON. This is useful when shipping small graphs around through Gremlin
 	 * Server.
 	 */
 	final static class TinkerModuleV2 extends TinkerPopJacksonModule {
+		private static final long serialVersionUID = 3557519708906985715L;
+
 		public TinkerModuleV2() {
 			super("waldotgraph-2.0");
-			addSerializer(OpcGraph.class, new TinkerGraphJacksonSerializer());
-			addDeserializer(OpcGraph.class, new TinkerGraphJacksonDeserializer());
+			addSerializer(OpcGraph.class, new OpcGraphJacksonSerializer());
+			addDeserializer(OpcGraph.class, new OpcGraphJacksonDeserializer());
 		}
 
 		@Override

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
@@ -59,7 +58,7 @@ public interface WaldotGraph extends Graph {
 
 	int getEdgesCount();
 
-	AtomicLong getGeneratedId();
+	Long getGeneratedId();
 
 	WaldotGraphComputerView getGraphComputerView();
 

@@ -47,7 +47,6 @@ apply plugin: 'signing'
 apply plugin: 'maven-publish'
 
 dependencies {
-    implementation group: 'org.eclipse.milo', name: 'sdk-server', version: '0.6.15'
     // gremlin
     implementation group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
 

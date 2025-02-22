@@ -55,10 +55,10 @@ dependencies {
 	api project(':waldot-plugin-os')
 	api project(':waldot-plugin-bag')
 	api project(':waldot-plugin-tinkerpop')
+	implementation 'org.slf4j:jul-to-slf4j:2.0.16'
     implementation 'org.slf4j:slf4j-simple:2.0.16'
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
-    // for AAS integration study
-    // AAS
+
     testImplementation 'org.eclipse.digitaltwin.aas4j:aas4j-model:1.0.4'
     testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-aasx', version: '1.0.0-milestone-04'
     testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-xml', version: '1.0.0-milestone-04'
@@ -188,6 +188,7 @@ configurations {
 
 application {
     mainClass = "${mainClassName}"
+    applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
 }
 
 graalvmNative {

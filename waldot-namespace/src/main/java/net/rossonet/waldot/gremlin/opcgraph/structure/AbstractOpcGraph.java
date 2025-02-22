@@ -125,7 +125,7 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 	protected VertexProperty.Cardinality defaultVertexPropertyCardinality;
 	protected IdManager<NodeId> edgeIdManager = WaldotMappingStrategy.getNodeIdManager();
 
-	protected AtomicLong generatedId = new AtomicLong(120000L);
+	protected transient AtomicLong generatedId = new AtomicLong(120000L);
 
 	protected OpcServiceRegistry serviceRegistry;
 
@@ -180,8 +180,8 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 	}
 
 	@Override
-	public AtomicLong getGeneratedId() {
-		return generatedId;
+	public Long getGeneratedId() {
+		return generatedId.incrementAndGet();
 	}
 
 	@Override
