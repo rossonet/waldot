@@ -15,17 +15,24 @@ a.*.tmp
 *.crt
 *.key
 *.pem
-vagrant
+package.json
+pnpm-lock.yaml
+pnpmfile.js
+target/
+webpack.config.js
+webpack.generated.js
+frontend
+temp-test-*
+status.json
+gradle.properties
+trace/*
+java_pid*.hprof
 
 ### OUTPUT ###
 spring-shell.log
-Ar4kAgent
-ar4kAgent
-*.ar4k
 camel-test
 .attach_pid*
 *.keystore
-ar4k-agent.log
 logs/*
 npm-debug.log
 package-lock.json
@@ -58,3 +65,9 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+tinkerpop-sink*
+tinkerpop-crew*
+tinkerpop-classic*
+tinkerpop-modern*
+.git
