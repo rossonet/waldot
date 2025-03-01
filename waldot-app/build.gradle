@@ -51,11 +51,11 @@ apply plugin: 'distribution'
 apply plugin: 'application'
 
 dependencies {
-	api project(':waldot-namespace')
-	api project(':waldot-plugin-os')
-	api project(':waldot-plugin-bag')
-	api project(':waldot-plugin-tinkerpop')
-	implementation 'org.slf4j:jul-to-slf4j:2.0.16'
+    api project(':waldot-namespace')
+    api project(':waldot-plugin-os')
+    api project(':waldot-plugin-bag')
+    api project(':waldot-plugin-tinkerpop')
+    implementation 'org.slf4j:jul-to-slf4j:2.0.16'
     implementation 'org.slf4j:slf4j-simple:2.0.16'
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
 

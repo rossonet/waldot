@@ -44,6 +44,11 @@ apply plugin: 'maven-publish'
 
 dependencies {
     api project(':waldot-api')
+    implementation 'org.apache.flink:flink-java:1.20.1'
+    implementation 'org.apache.flink:flink-streaming-java:1.20.1'
+    implementation 'org.apache.flink:flink-connector-base:1.20.1'
+    implementation 'org.apache.flink:flink-table-api-java-bridge:1.20.1'
+    testImplementation 'org.apache.flink:flink-test-utils-junit:1.20.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
