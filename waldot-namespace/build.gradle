@@ -46,7 +46,7 @@ dependencies {
     api 'org.yaml:snakeyaml:2.4'
     api 'org.apache.commons:commons-jexl3:3.4.0'
     implementation 'org.slf4j:jul-to-slf4j:2.0.17'
-    implementation 'org.slf4j:slf4j-simple:2.0.16'
+    implementation 'org.slf4j:slf4j-simple:2.0.17'
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
     // OPCUA
     api group: 'org.eclipse.milo', name: 'sdk-server', version: '0.6.15'
