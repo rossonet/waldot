@@ -99,7 +99,6 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private EndpointConfiguration buildHttpsEndpoint(EndpointConfiguration.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.HTTPS_UABINARY)
 				.setBindPort(configuration.getHttpsBindPort()).build();
@@ -203,7 +202,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 						.setPath(configuration.getPath() + "/discovery").setSecurityPolicy(SecurityPolicy.None)
 						.setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(discoveryBuilder));
-				// endpointConfigurations.add(buildHttpsEndpoint(discoveryBuilder));
+				endpointConfigurations.add(buildHttpsEndpoint(discoveryBuilder));
 			}
 		}
 

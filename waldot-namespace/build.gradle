@@ -5,10 +5,6 @@ buildscript {
     }
     dependencies {
         classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.1"
-        classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.11.1'
-        classpath 'de.undercouch:gradle-download-task:5.6.0'
-        classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
-        classpath "com.palantir.gradle.docker:gradle-docker:0.36.0"
     }
 }
 
@@ -33,15 +29,11 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
-apply plugin: 'com.palantir.docker'
 apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'eclipse'
 apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: 'jacoco'
-apply plugin: "com.netflix.nebula.ospackage"
-apply plugin: 'base'
-apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'distribution'
 apply plugin: 'signing'
 apply plugin: 'maven-publish'
