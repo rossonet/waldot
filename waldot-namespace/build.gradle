@@ -40,26 +40,13 @@ apply plugin: 'maven-publish'
 
 dependencies {
     api project(':waldot-api')
-    // gremlin
-    api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
-    api 'org.json:json:20250107'
-    api 'org.yaml:snakeyaml:2.4'
-    api 'org.apache.commons:commons-jexl3:3.4.0'
-    implementation 'org.slf4j:jul-to-slf4j:2.0.17'
-    implementation 'org.slf4j:slf4j-simple:2.0.17'
-    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
-    // OPCUA
-    api group: 'org.eclipse.milo', name: 'sdk-server', version: '0.6.15'
-    api group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.15'
-    api group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.15'
-    api group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
- 
+    implementation project(':waldot-deps')
     annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.12.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
 }
 
 task eclipseClosedDependencies {}

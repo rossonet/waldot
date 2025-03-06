@@ -37,17 +37,18 @@ apply plugin: 'signing'
 apply plugin: 'maven-publish'
 
 dependencies {
+    implementation project(':waldot-deps')
     api project(':waldot-api')
     api 'org.rrd4j:rrd4j:3.9'
-    //implementation 'org.apache.flink:flink-java:1.20.1'
-    //implementation 'org.apache.flink:flink-streaming-java:1.20.1'
-    //implementation 'org.apache.flink:flink-connector-base:1.20.1'
-    //implementation 'org.apache.flink:flink-table-api-java-bridge:1.20.1'
-    //testImplementation 'org.apache.flink:flink-test-utils-junit:1.20.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0'
-    testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
+    //api 'org.apache.flink:flink-java:1.20.1'
+    //api 'org.apache.flink:flink-streaming-java:1.20.1'
+    //api 'org.apache.flink:flink-connector-base:1.20.1'
+    //api 'org.apache.flink:flink-table-api-java-bridge:1.20.1'
+    testImplementation 'org.apache.flink:flink-test-utils-junit:1.20.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
+    //testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.12.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
 }
 
 task eclipseClosedDependencies {}

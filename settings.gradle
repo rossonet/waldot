@@ -1,5 +1,6 @@
 rootProject.name = 'WaldOT'
 include 'waldot-api'
+include 'waldot-deps'
 include 'waldot-namespace'
 include 'waldot-app'
 include 'waldot-plugin-os'
