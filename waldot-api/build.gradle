@@ -4,7 +4,7 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.1"
+        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
     }
 }
 
