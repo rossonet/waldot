@@ -21,7 +21,6 @@ import org.rrd4j.graph.RrdGraphDef;
 
 public class RrdTests {
 
-	// private static final int TAG_NUMBER = 10000;
 	public static String rrdPath = "my.rrd";
 	private static final int STEPS = 12 * 60;
 	private static final int TAG_NUMBER = 10000;
