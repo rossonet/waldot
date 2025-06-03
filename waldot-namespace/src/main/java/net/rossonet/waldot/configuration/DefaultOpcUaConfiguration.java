@@ -6,10 +6,10 @@ import net.rossonet.waldot.api.configuration.OpcConfiguration;
 
 public class DefaultOpcUaConfiguration extends HashMap<String, String> implements OpcConfiguration {
 
-	private static final long serialVersionUID = 1487462093576743910L;
+	public static int DEFAULT_HTTPS_BIND_PORT = 8443;
 
 	public static int DEFAULT_TCP_BIND_PORT = 12686;
-	public static int DEFAULT_HTTPS_BIND_PORT = 8443;
+	private static final long serialVersionUID = 1487462093576743910L;
 
 	public static DefaultOpcUaConfiguration getDefault() {
 		return new DefaultOpcUaConfiguration();
@@ -25,7 +25,8 @@ public class DefaultOpcUaConfiguration extends HashMap<String, String> implement
 
 	@Override
 	public String getBindAddresses() {
-		return "127.0.0.1";
+		// return "127.0.0.1";
+		return "0.0.0.0";
 	}
 
 	@Override
