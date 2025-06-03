@@ -12,6 +12,8 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotGraphComputerView;
 import net.rossonet.waldot.api.models.WaldotNamespace;
@@ -30,7 +32,6 @@ import net.rossonet.waldot.gremlin.opcgraph.services.OpcServiceRegistry;
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_LIMITED_STANDARD)
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_LIMITED_COMPUTER)
 public class OpcGraph extends AbstractOpcGraph {
-
 	public class OpcGraphFeatures implements Features {
 		private final OpcGraphEdgeFeatures edgeFeatures;
 		@SuppressWarnings("unused")
@@ -116,6 +117,8 @@ public class OpcGraph extends AbstractOpcGraph {
 
 	private final OpcGraphFeatures features = new OpcGraphFeatures(this);
 
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+
 	private WaldotNamespace opcNamespace;
 
 	OpcGraph(final Configuration configuration) {
@@ -134,13 +137,16 @@ public class OpcGraph extends AbstractOpcGraph {
 			throw new IllegalArgumentException("Namespace not set");
 		}
 		ElementHelper.legalPropertyKeyValueArray(keyValues);
+		logger.info("Adding vertex with keyValues: {}", keyValues);
 		NodeId nodeId = vertexIdManager.convert(this, ElementHelper.getIdValue(keyValues).orElse(null));
+		logger.info("NodeId determined: {}", nodeId);
 		if (null != nodeId) {
 			if (opcNamespace.hasNodeId(nodeId)) {
 				throw Exceptions.vertexWithIdAlreadyExists(nodeId);
 			}
 		} else {
 			nodeId = vertexIdManager.getNextId(this);
+			logger.info("NodeId generated: {}", nodeId);
 		}
 		final WaldotVertex vertex = opcNamespace.addVertex(nodeId, keyValues);
 		return vertex;
