@@ -454,16 +454,16 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	private void runBootConfiguration(List<String> configuration) {
 		int num = 0;
 		for (final String line : configuration) {
-			num++;
-			if (line.startsWith("#") || line.isBlank()) {
+			if (line.startsWith("#") || line.isEmpty()) {
 				continue;
 			}
+			num++;
 			try {
 				final Object runExpression = waldot.runExpression(line);
 				if (runExpression != null) {
-					System.out.println("[" + num + "]: " + line + " ->\n" + runExpression);
+					System.out.println("[" + num + "]: " + line + " ->\n" + runExpression + "\n");
 				} else {
-					System.out.println("[" + num + "]: " + line + " -> no result");
+					System.out.println("[" + num + "]: " + line + " -> no result\n");
 				}
 			} catch (final Exception e) {
 				System.err.println("Error executing command '" + line + "': " + e.getMessage());
@@ -483,6 +483,7 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		final Path target = Path.of(getFileConfigurationPath());
 		if (Files.exists(target)) {
 			try {
+				System.out.println("\n\nBoot configuration file found at " + target.toAbsolutePath() + "\n\n");
 				runBootConfiguration(Files.readAllLines(target));
 			} catch (final Exception e) {
 				e.printStackTrace();

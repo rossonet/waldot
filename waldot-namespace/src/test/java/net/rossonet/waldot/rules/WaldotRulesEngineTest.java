@@ -28,7 +28,7 @@ public class WaldotRulesEngineTest {
 		final Vertex rule2 = g.addVertex("label", "rule1", "type-node-id", "rule");
 		test1.addEdge("fire", rule1);
 		test2.addEdge("fire", rule2);
-
+		Thread.sleep(60_000);
 	}
 
 }
