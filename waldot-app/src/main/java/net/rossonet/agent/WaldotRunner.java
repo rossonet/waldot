@@ -1,6 +1,9 @@
 package net.rossonet.agent;
 
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -92,6 +95,8 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	protected String factoryPassword;
 
 	protected String factoryUsername;
+
+	protected String fileConfigurationPath = MainAgent.DEFAULT_FILE_CONFIGURATION_PATH;
 
 	protected String helpCommandDescription;
 
@@ -292,6 +297,10 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		return factoryUsername;
 	}
 
+	public String getFileConfigurationPath() {
+		return fileConfigurationPath;
+	}
+
 	public String getHelpCommandDescription() {
 
 		return helpCommandDescription;
@@ -442,6 +451,27 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		return waldotCommandWriteMask;
 	}
 
+	private void runBootConfiguration(List<String> configuration) {
+		int num = 0;
+		for (final String line : configuration) {
+			num++;
+			if (line.startsWith("#") || line.isBlank()) {
+				continue;
+			}
+			try {
+				final Object runExpression = waldot.runExpression(line);
+				if (runExpression != null) {
+					System.out.println("[" + num + "]: " + line + " ->\n" + runExpression);
+				} else {
+					System.out.println("[" + num + "]: " + line + " -> no result");
+				}
+			} catch (final Exception e) {
+				System.err.println("Error executing command '" + line + "': " + e.getMessage());
+			}
+		}
+
+	}
+
 	public void runWaldot() throws InterruptedException, ExecutionException {
 		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
 		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
@@ -450,6 +480,16 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseV0Strategy(),
 				new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(), bootUrl);
 		waldot.startup(namespace).get();
+		final Path target = Path.of(getFileConfigurationPath());
+		if (Files.exists(target)) {
+			try {
+				runBootConfiguration(Files.readAllLines(target));
+			} catch (final Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("No boot configuration file found at " + target.toAbsolutePath());
+		}
 		waldot.waitCompletion();
 	}
 
@@ -543,6 +583,10 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 
 	public void setFactoryUsername(String factoryUsername) {
 		this.factoryUsername = factoryUsername;
+	}
+
+	public void setFileConfigurationPath(String fileConfigurationPath) {
+		this.fileConfigurationPath = fileConfigurationPath;
 	}
 
 	public void setHelpCommandDescription(String helpCommandDescription) {
