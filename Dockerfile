@@ -1,5 +1,4 @@
-FROM ubuntu:24.04 AS builder
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y openjdk-21-jdk
+FROM eclipse-temurin:21-jdk AS builder
 COPY . /workspace
 RUN cd /workspace && echo "build project" && ./gradlew clean :waldot-app:distTar -Dorg.gradle.daemon=false
 
