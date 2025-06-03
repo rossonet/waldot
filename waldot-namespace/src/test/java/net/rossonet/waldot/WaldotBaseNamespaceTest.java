@@ -47,6 +47,16 @@ public class WaldotBaseNamespaceTest {
 	}
 
 	@Test
+	public void runOneQueryAndWait() throws InterruptedException, ExecutionException, ConfigurationException {
+		LogHelper.changeJulLogLevel("fine");
+		final WaldotGraph g = OpcFactory.getOpcGraph();
+		Thread.sleep(2_000);
+		g.addVertex("label", "PrimoVertice", "id", "ciao", "custom-data", "variable1", "number-test", 10);
+		g.addVertex("label", "SecondoVertice", "id", 111, "custom-data", "variable1", "number-test", 10);
+		Thread.sleep(60_000);
+	}
+
+	@Test
 	public void runServerTwoMinutes() throws InterruptedException, ExecutionException {
 		OpcFactory.getOpcGraph();
 		Thread.sleep(120_000);

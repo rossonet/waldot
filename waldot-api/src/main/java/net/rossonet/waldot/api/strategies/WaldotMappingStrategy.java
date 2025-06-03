@@ -10,6 +10,7 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.api.models.IdManager;
 import net.rossonet.waldot.api.models.WaldotCommand;
@@ -78,14 +79,14 @@ public interface WaldotMappingStrategy {
 			}
 
 			private NodeId getNodeIdFromNumber(final WaldotGraph graph, Integer nodeId) {
-				return graph.getWaldotNamespace().generateNodeId("i=" + Integer.valueOf(nodeId));
+				return graph.getWaldotNamespace().generateNodeId(UInteger.valueOf(nodeId));
 			}
 
 			private NodeId getNodeIdFromString(final WaldotGraph graph, String nodeId) {
 				try {
 					return NodeId.parse(nodeId);
 				} catch (final Exception e) {
-					return graph.getWaldotNamespace().generateNodeId("s=" + nodeId);
+					return graph.getWaldotNamespace().generateNodeId(nodeId);
 				}
 			}
 

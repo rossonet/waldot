@@ -1,6 +1,7 @@
 package net.rossonet.waldot.gremlin.opcgraph.structure;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.Configuration;
@@ -107,6 +108,15 @@ public class OpcGraph extends AbstractOpcGraph {
 						.addStrategies(OpcGraphStepStrategy.instance(), OpcGraphCountStrategy.instance()));
 	}
 
+	public static Optional<Object> getIdValue(final Object... keyValues) {
+		for (int i = 0; i < keyValues.length; i = i + 2) {
+			if (keyValues[i].equals("id")) {
+				return Optional.ofNullable(keyValues[i + 1]);
+			}
+		}
+		return Optional.empty();
+	}
+
 	public static OpcGraph open() {
 		return open(EMPTY_CONFIGURATION);
 	}
@@ -137,8 +147,12 @@ public class OpcGraph extends AbstractOpcGraph {
 			throw new IllegalArgumentException("Namespace not set");
 		}
 		ElementHelper.legalPropertyKeyValueArray(keyValues);
-		logger.info("Adding vertex with keyValues: {}", keyValues);
-		NodeId nodeId = vertexIdManager.convert(this, ElementHelper.getIdValue(keyValues).orElse(null));
+		for (int i = 0; i < keyValues.length; i = i + 2) {
+			logger.info("Key: {}, Value: {}", keyValues[i], keyValues[i + 1]);
+		}
+		final Object readId = getIdValue(keyValues).orElse(null);
+		logger.debug("Read id: {}", readId);
+		NodeId nodeId = vertexIdManager.convert(this, readId);
 		logger.info("NodeId determined: {}", nodeId);
 		if (null != nodeId) {
 			if (opcNamespace.hasNodeId(nodeId)) {
