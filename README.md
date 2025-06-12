@@ -24,15 +24,7 @@ My first goal is to pass TinkerPop's compliance tests, I want the logo...
 
 ## Maven
 
-[WaldOT API](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-api)
-
-[WaldOT namespace](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-namespace)
-
-[WaldOT plugin OS](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-plugin-os)
-
-[WaldOT plugin bag](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-plugin-bag)
-
-[WaldOT plugin TinkerPop](https://central.sonatype.com/artifact/net.rossonet.waldot/waldot-plugin-tinkerpop)
+[WaldOT](https://mvnrepository.com/artifact/net.rossonet.waldot)
 
 ## Code tools
 
