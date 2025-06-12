@@ -54,7 +54,6 @@ dependencies {
     implementation project(':waldot-deps')
     implementation project(':waldot-namespace')
     implementation project(':waldot-plugin-os')
-    implementation project(':waldot-plugin-bag')
     implementation project(':waldot-plugin-tinkerpop')
 
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
