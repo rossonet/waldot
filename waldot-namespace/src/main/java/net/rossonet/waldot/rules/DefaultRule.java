@@ -98,8 +98,8 @@ public class DefaultRule extends OpcVertex implements Rule {
 	}
 
 	private void changeState() {
-		if (isParallelExecution() && getRunners() < 1) {
-			if (lastRun + getRefractoryPeriodMs() < System.currentTimeMillis()) {
+		if (isParallelExecution() || getRunners() < 1) {
+			if (lastRun != 0 && (lastRun + getRefractoryPeriodMs() < System.currentTimeMillis())) {
 				logger.info("rule " + getBrowseName().getName() + " is in refractory period");
 				return;
 			}

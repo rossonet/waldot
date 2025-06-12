@@ -148,7 +148,7 @@ public class OpcGraph extends AbstractOpcGraph {
 		}
 		ElementHelper.legalPropertyKeyValueArray(keyValues);
 		for (int i = 0; i < keyValues.length; i = i + 2) {
-			logger.info("Key: {}, Value: {}", keyValues[i], keyValues[i + 1]);
+			logger.debug("Key: {}, Value: {}", keyValues[i], keyValues[i + 1]);
 		}
 		final Object readId = getIdValue(keyValues).orElse(null);
 		logger.debug("Read id: {}", readId);

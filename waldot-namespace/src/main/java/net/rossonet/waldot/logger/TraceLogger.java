@@ -71,18 +71,28 @@ public class TraceLogger extends AbstractLogger {
 		case ERROR:
 			logger.error(messagePattern, arguments, throwable);
 			errorObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			warnObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			infoObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			debugObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			traceObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
 			break;
 		case WARN:
 			logger.warn(messagePattern, arguments, throwable);
 			warnObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			infoObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			debugObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			traceObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
 			break;
 		case INFO:
 			logger.info(messagePattern, arguments, throwable);
 			infoObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			debugObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			traceObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
 			break;
 		case DEBUG:
 			logger.debug(messagePattern, arguments, throwable);
 			debugObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
+			traceObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
 			break;
 		case TRACE:
 			logger.trace(messagePattern, arguments, throwable);
