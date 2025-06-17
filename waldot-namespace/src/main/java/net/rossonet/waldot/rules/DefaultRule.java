@@ -58,7 +58,7 @@ public class DefaultRule extends OpcVertex implements Rule {
 	private int delayBeforeEvaluation = 0;
 	private int delayBeforeExecute = 0;
 	private final AtomicBoolean dirty = new AtomicBoolean(false);
-	private final int executionTimeout = 0;
+	private final int executionTimeout = 1000;
 	private final List<TimerCachedMemory> factsMemory = Collections.synchronizedList(new ArrayList<>());
 	private long factsValidDelayMs = 0;
 	private long factsValidUntilMs = 0;

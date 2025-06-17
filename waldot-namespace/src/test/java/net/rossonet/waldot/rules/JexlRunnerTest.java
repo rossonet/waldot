@@ -1,4 +1,4 @@
-package net.rossonet.waldot;
+package net.rossonet.waldot.rules;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +32,10 @@ public class JexlRunnerTest {
 	public void simpleQueryTest() {
 
 		final ExecutorHelper executor = createExecutor();
-		System.out.println(executor.execute("'ciao'"));
+		System.out.println((boolean) executor.execute("true"));
 		System.out.flush();
 		final ExecutorHelper executor3 = createExecutor();
-		System.out.println(executor3.execute("list"));
+		System.out.println((boolean) executor3.execute("true"));
 		System.out.flush();
 		final ExecutorHelper executor4 = createExecutor();
 		System.out.println(executor4.execute("button"));

@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.naming.ConfigurationException;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ public class WaldotRulesEngineTest {
 
 		@Override
 		public void onEvent(final String messagePattern, final Object[] arguments, final Throwable throwable) {
-			System.out.println("LOGGER: " + messagePattern + " -> " + arguments + " [ "
+			System.out.println("TEST LOGGER OUTPUT: " + messagePattern + " -> " + arguments + " [ "
 					+ (throwable != null ? throwable.getMessage() : "") + " ] ");
 
 		}
@@ -33,21 +34,28 @@ public class WaldotRulesEngineTest {
 		LogHelper.changeJulLogLevel("fine");
 		final WaldotGraph g = OpcFactory.getOpcGraph();
 		((TraceLogger) g.getWaldotNamespace().getRulesLogger()).getDebugObservers().add(logger);
-		Thread.sleep(2_000);
 		final Vertex test1 = g.addVertex("label", "test1");
 		final Vertex test2 = g.addVertex("label", "test2");
-		final Vertex rule1 = g.addVertex("label", "rule1", "type-node-id", "rule", "condition", "true");
-		final Vertex rule2 = g.addVertex("label", "rule2", "type-node-id", "rule");
+		final Vertex rule1 = g.addVertex("label", "rule1", "type-node-id", "rule", "condition", "true", "action",
+				"let i = 33 ; log.info('!!! Rule 1 executed with ' + i);");
+		final Vertex rule2 = g.addVertex("label", "rule2", "type-node-id", "rule", "condition", "true");
 		test1.addEdge("fire", rule1);
 		test2.addEdge("fire", rule2);
 		rule1.addEdge("fire", rule2);
 		for (int counter = 0; counter < 100; counter++) {
-			Thread.sleep(5_000);
 			test1.property("inc", counter);
-			Thread.sleep(5_000);
+			Thread.sleep(5000);
 			test2.property("inc", counter * 2);
-			Thread.sleep(5_000);
+			Thread.sleep(5000);
 			test1.addEdge("link_" + counter, test2);
+			Thread.sleep(5000);
+			test1.property("inc", RandomUtils.nextInt(0, 100));
+			Thread.sleep(400);
+			test1.property("inc", RandomUtils.nextInt(0, 100));
+			Thread.sleep(200);
+			test1.property("inc", RandomUtils.nextInt(0, 100));
+			Thread.sleep(1000);
+			test1.property("inc", RandomUtils.nextInt(0, 100));
 		}
 		Thread.sleep(60_000);
 	}

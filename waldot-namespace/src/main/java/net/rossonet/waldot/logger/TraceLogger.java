@@ -30,7 +30,7 @@ public class TraceLogger extends AbstractLogger {
 	private final ContexLogger type;
 	private final List<LoggerListener> warnObservers = new ArrayList<>();
 
-	public TraceLogger(ContexLogger type) {
+	public TraceLogger(final ContexLogger type) {
 		this.type = type;
 		this.logger = LoggerFactory.getLogger(type.name());
 	}
@@ -65,8 +65,8 @@ public class TraceLogger extends AbstractLogger {
 	}
 
 	@Override
-	protected void handleNormalizedLoggingCall(Level level, Marker marker, String messagePattern, Object[] arguments,
-			Throwable throwable) {
+	protected void handleNormalizedLoggingCall(final Level level, final Marker marker, final String messagePattern,
+			final Object[] arguments, final Throwable throwable) {
 		switch (level) {
 		case ERROR:
 			logger.error(messagePattern, arguments, throwable);
@@ -84,6 +84,7 @@ public class TraceLogger extends AbstractLogger {
 			traceObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
 			break;
 		case INFO:
+			// logger.info(messagePattern);
 			logger.info(messagePattern, arguments, throwable);
 			infoObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
 			debugObservers.forEach(e -> e.onEvent(messagePattern, arguments, throwable));
@@ -113,7 +114,7 @@ public class TraceLogger extends AbstractLogger {
 	}
 
 	@Override
-	public boolean isDebugEnabled(Marker marker) {
+	public boolean isDebugEnabled(final Marker marker) {
 		return debug;
 	}
 
@@ -123,7 +124,7 @@ public class TraceLogger extends AbstractLogger {
 	}
 
 	@Override
-	public boolean isErrorEnabled(Marker marker) {
+	public boolean isErrorEnabled(final Marker marker) {
 		return true;
 	}
 
@@ -133,7 +134,7 @@ public class TraceLogger extends AbstractLogger {
 	}
 
 	@Override
-	public boolean isInfoEnabled(Marker marker) {
+	public boolean isInfoEnabled(final Marker marker) {
 		return true;
 	}
 
@@ -143,7 +144,7 @@ public class TraceLogger extends AbstractLogger {
 	}
 
 	@Override
-	public boolean isTraceEnabled(Marker marker) {
+	public boolean isTraceEnabled(final Marker marker) {
 		return debug;
 	}
 
@@ -153,11 +154,11 @@ public class TraceLogger extends AbstractLogger {
 	}
 
 	@Override
-	public boolean isWarnEnabled(Marker marker) {
+	public boolean isWarnEnabled(final Marker marker) {
 		return true;
 	}
 
-	public void setDebug(boolean debug) {
+	public void setDebug(final boolean debug) {
 		this.debug = debug;
 	}
 

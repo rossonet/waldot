@@ -22,11 +22,13 @@ public class JexlExecutorHelper implements ExecutorHelper {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(JexlExecutorHelper.class);
 
+	private static final boolean DEBUG_FLAG = true;
+
 	protected static JexlEngine generateEngine() {
 		// TODO: provare la restrizione dei permessi o la sandbox
 		// return new
 		// JexlBuilder().permissions(classPermissions).debug(true).silent(false).strict(false).create();
-		final JexlEngine j = new JexlBuilder().permissions(JexlPermissions.UNRESTRICTED).debug(false).silent(false)
+		final JexlEngine j = new JexlBuilder().permissions(JexlPermissions.UNRESTRICTED).debug(DEBUG_FLAG).silent(false)
 				.strict(true).create();
 		return j;
 	}
@@ -40,7 +42,8 @@ public class JexlExecutorHelper implements ExecutorHelper {
 	protected final JexlContext jexlContext = new MapContext();
 
 	@Override
-	public boolean evaluateRule(WaldotNamespace waldotNamespace, Rule rule, WaldotStepLogger stepRegister) {
+	public boolean evaluateRule(final WaldotNamespace waldotNamespace, final Rule rule,
+			final WaldotStepLogger stepRegister) {
 		try {
 			// TODO: meccanismo per cache del compilato
 			final long startTime = System.currentTimeMillis();
@@ -50,6 +53,7 @@ public class JexlExecutorHelper implements ExecutorHelper {
 			stepRegister.onBeforeConditionExecution(jexlContext);
 			final Object result = compiled.execute(jexlContext);
 			stepRegister.onAfterConditionExecution(runnableStartTime - startTime, result);
+			LOGGER.debug("Rule '{}' evaluated to {}", rule.getCondition(), result);
 			return (boolean) result;
 		} catch (final Exception e) {
 			LOGGER.error("Unable to evaluate rule: '" + rule.getCondition() + "'", e);
@@ -59,7 +63,7 @@ public class JexlExecutorHelper implements ExecutorHelper {
 	}
 
 	@Override
-	public Object execute(String expression) {
+	public Object execute(final String expression) {
 		try {
 			// TODO: meccanismo per cache del compilato
 			final JexlScript compiled = jexl.createScript(expression);
@@ -71,7 +75,8 @@ public class JexlExecutorHelper implements ExecutorHelper {
 	}
 
 	@Override
-	public Object executeRule(WaldotNamespace waldotNamespace, Rule rule, WaldotStepLogger stepRegister) {
+	public Object executeRule(final WaldotNamespace waldotNamespace, final Rule rule,
+			final WaldotStepLogger stepRegister) {
 		try {
 			final long startTime = System.currentTimeMillis();
 			final JexlScript compiled = jexl.createScript(rule.getAction());
@@ -80,6 +85,7 @@ public class JexlExecutorHelper implements ExecutorHelper {
 			stepRegister.onBeforeActionExecution(jexlContext);
 			final Object result = compiled.execute(jexlContext);
 			stepRegister.onAfterActionExecution(runnableStartTime - startTime, result);
+			LOGGER.debug("Rule '{}' executed with result: {}", rule.getAction(), result);
 			return result;
 		} catch (final Exception e) {
 			LOGGER.error("Unable to execute rule: '" + rule.getAction() + "'", e);
@@ -90,12 +96,12 @@ public class JexlExecutorHelper implements ExecutorHelper {
 	}
 
 	@Override
-	public void setContext(String id, Object context) {
+	public void setContext(final String id, final Object context) {
 		jexlContext.set(id, context);
 	}
 
 	@Override
-	public void setFunctionObject(String id, Object function) {
+	public void setFunctionObject(final String id, final Object function) {
 		jexlContext.set(id, function);
 		functionObjects.add(function.getClass());
 		classPermissions = new JexlPermissions.ClassPermissions(functionObjects.toArray(new Class<?>[0]));

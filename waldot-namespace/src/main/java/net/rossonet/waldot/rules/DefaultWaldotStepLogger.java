@@ -12,49 +12,50 @@ public class DefaultWaldotStepLogger implements WaldotStepLogger {
 	private final StringBuilder log = new StringBuilder();
 
 	@Override
-	public void onActionCompiled(long executionTimeMs) {
+	public void onActionCompiled(final long executionTimeMs) {
 		log.append(Instant.now().toString() + " - action compiled in ").append(executionTimeMs).append("ms\n");
 	}
 
 	@Override
-	public void onActionExecutionException(JexlContext jexlContext, Exception exception) {
+	public void onActionExecutionException(final JexlContext jexlContext, final Exception exception) {
 		log.append(Instant.now().toString() + " - action execution exception: ").append(exception.getMessage())
 				.append("\n");
 	}
 
 	@Override
-	public void onAfterActionExecution(long executionTimeMs, Object result) {
+	public void onAfterActionExecution(final long executionTimeMs, final Object result) {
 		log.append(Instant.now().toString() + " - action executed in ").append(executionTimeMs).append("ms\n");
 	}
 
 	@Override
-	public void onAfterConditionExecution(long executionTimeMs, Object result) {
-		log.append(Instant.now().toString() + " - condition executed in ").append(executionTimeMs).append("ms\n");
+	public void onAfterConditionExecution(final long executionTimeMs, final Object result) {
+		log.append(Instant.now().toString() + " - condition executed in ").append(executionTimeMs)
+				.append("ms with result ").append(result).append("\n");
 	}
 
 	@Override
-	public void onBeforeActionExecution(JexlContext jexlContext) {
+	public void onBeforeActionExecution(final JexlContext jexlContext) {
 		log.append(Instant.now().toString() + " - before action execution\n");
 	}
 
 	@Override
-	public void onBeforeConditionExecution(JexlContext jexlContext) {
+	public void onBeforeConditionExecution(final JexlContext jexlContext) {
 		log.append(Instant.now().toString() + " - before condition execution\n");
 	}
 
 	@Override
-	public void onConditionCompiled(long executionTimeMs) {
+	public void onConditionCompiled(final long executionTimeMs) {
 		log.append(Instant.now().toString() + " - condition compiled in ").append(executionTimeMs).append("ms\n");
 	}
 
 	@Override
-	public void onConditionExecutionException(JexlContext jexlContext, Exception exception) {
+	public void onConditionExecutionException(final JexlContext jexlContext, final Exception exception) {
 		log.append(Instant.now().toString() + " - condition execution exception: ").append(exception.getMessage())
 				.append("\n");
 	}
 
 	@Override
-	public void onEvaluateStoppedByListener(RuleListener listener) {
+	public void onEvaluateStoppedByListener(final RuleListener listener) {
 		log.append(Instant.now().toString() + " - evaluate stopped by listener " + listener + "\n");
 	}
 

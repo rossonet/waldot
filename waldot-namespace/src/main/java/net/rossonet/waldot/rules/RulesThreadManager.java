@@ -19,6 +19,8 @@ import net.rossonet.waldot.api.rules.WaldotStepLogger;
 
 public class RulesThreadManager implements AutoCloseable {
 
+	private static final long TIME_OUT_LOG_FUTURE = 100L;
+
 	private boolean active = true;
 
 	private final Thread controlThread;
@@ -70,7 +72,12 @@ public class RulesThreadManager implements AutoCloseable {
 			}
 			for (final Future<WaldotStepLogger> future : toRemove) {
 				try {
-					logSteps(future.get(100, TimeUnit.MILLISECONDS));
+					final WaldotStepLogger waldotStepRegister = future.get(TIME_OUT_LOG_FUTURE, TimeUnit.MILLISECONDS);
+					if (waldotStepRegister != null) {
+						logSteps(waldotStepRegister);
+					} else {
+						logger.warn("The step log is null for future: " + future);
+					}
 				} catch (final Exception e) {
 					logger.error("Error during the step log trascoding", e);
 				}
