@@ -31,7 +31,7 @@ public class RulesThreadManager implements AutoCloseable {
 
 	private final Map<Future<WaldotStepLogger>, Long> timeoutRunners = new HashMap<>();
 
-	public RulesThreadManager(Map<NodeId, Rule> rules, Logger logger) {
+	public RulesThreadManager(final Map<NodeId, Rule> rules, final Logger logger) {
 		this.logger = logger;
 		this.rules = rules;
 		executor = Executors.newThreadPerTaskExecutor(new DefaultThreadFactory());
@@ -104,7 +104,7 @@ public class RulesThreadManager implements AutoCloseable {
 		});
 	}
 
-	private void logSteps(WaldotStepLogger waldotStepRegister) {
+	private void logSteps(final WaldotStepLogger waldotStepRegister) {
 		logger.info(waldotStepRegister.toString());
 
 	}

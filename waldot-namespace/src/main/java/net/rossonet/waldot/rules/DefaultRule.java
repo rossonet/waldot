@@ -72,22 +72,24 @@ public class DefaultRule extends OpcVertex implements Rule {
 	private final AtomicInteger threadCounter = new AtomicInteger(0);
 	private final WaldotRulesEngine waldotRulesEngine;
 
-	public DefaultRule(NodeId typeDefinition, final WaldotGraph graph, UaNodeContext context, final NodeId nodeId,
-			final QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
-			UInteger userWriteMask, UByte eventNotifier, long version, WaldotRulesEngine waldotRulesEngine,
-			String condition, String action, int priority, long factsValidUntilMs, long factsValidDelayMs) {
+	public DefaultRule(final NodeId typeDefinition, final WaldotGraph graph, final UaNodeContext context,
+			final NodeId nodeId, final QualifiedName browseName, final LocalizedText displayName,
+			final LocalizedText description, final UInteger writeMask, final UInteger userWriteMask,
+			final UByte eventNotifier, final long version, final WaldotRulesEngine waldotRulesEngine,
+			final String condition, final String action, final int priority, final long factsValidUntilMs,
+			final long factsValidDelayMs) {
 		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
 				version);
 		this.waldotRulesEngine = waldotRulesEngine;
 		this.condition = condition;
 		this.action = action;
-		this.priority = priority;
+		this.priority = (priority > 0 && priority < 11) ? priority : 5;
 		this.factsValidUntilMs = factsValidUntilMs;
 		this.factsValidDelayMs = factsValidDelayMs;
 	}
 
 	@Override
-	public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
+	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		logger.info("for rule " + getBrowseName().getName() + " attribute changed node " + node.getNodeId()
 				+ " attributeId " + attributeId + " value " + value);
 		factsMemory.add(createCachedRuleRecord(node, attributeId, value));
@@ -99,8 +101,8 @@ public class DefaultRule extends OpcVertex implements Rule {
 
 	private void changeState() {
 		if (isParallelExecution() || getRunners() < 1) {
-			if (lastRun != 0 && (lastRun + getRefractoryPeriodMs() < System.currentTimeMillis())) {
-				logger.info("rule " + getBrowseName().getName() + " is in refractory period");
+			if (lastRun != 0 && (lastRun + getRefractoryPeriodMs() > System.currentTimeMillis())) {
+				logger.info("rule " + getBrowseName().getName() + " is in refractory period, last run at " + lastRun);
 				return;
 			}
 			dirty.set(true);
@@ -119,12 +121,13 @@ public class DefaultRule extends OpcVertex implements Rule {
 		clear();
 	}
 
-	private TimerCachedMemory createCachedRuleRecord(UaNode node, AttributeId attributeId, Object value) {
+	private TimerCachedMemory createCachedRuleRecord(final UaNode node, final AttributeId attributeId,
+			final Object value) {
 		return new TimerCachedMemory(node.getNodeId(), getDefaultValidDelayMs(), getDefaultValidUntilMs(),
 				new DataUpdateFact(attributeId, value));
 	}
 
-	private TimerCachedMemory createCachedRuleRecord(UaNode node, BaseEventType event) {
+	private TimerCachedMemory createCachedRuleRecord(final UaNode node, final BaseEventType event) {
 		return new TimerCachedMemory(node.getNodeId(), getDefaultValidDelayMs(), getDefaultValidUntilMs(),
 				new EventFact(event));
 	}
@@ -192,7 +195,7 @@ public class DefaultRule extends OpcVertex implements Rule {
 	}
 
 	@Override
-	public void fireEvent(UaNode node, BaseEventType event) {
+	public void fireEvent(final UaNode node, final BaseEventType event) {
 		logger.info("for rule " + getBrowseName().getName() + " event fired " + event);
 		factsMemory.add(createCachedRuleRecord(node, event));
 		changeState();
@@ -201,7 +204,7 @@ public class DefaultRule extends OpcVertex implements Rule {
 		}
 	}
 
-	private void generateEvent(Object executionResult) throws UaException {
+	private void generateEvent(final Object executionResult) throws UaException {
 		final UUID randomUUID = UUID.randomUUID();
 		final BaseEventTypeNode eventNode = waldotRulesEngine.getNamespace().getEventFactory()
 				.createEvent(waldotRulesEngine.getNamespace().generateNodeId(randomUUID), Identifiers.BaseEventType);
@@ -325,43 +328,43 @@ public class DefaultRule extends OpcVertex implements Rule {
 	}
 
 	@Override
-	public void propertyChanged(UaNode node, AttributeId attributeId, Object value) {
+	public void propertyChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		logger.info("for rule " + getBrowseName().getName() + " property changed node " + node.getNodeId()
 				+ " attributeId " + attributeId + " value " + value);
 		factsMemory.add(createCachedRuleRecord(node, attributeId, value));
 		changeState();
 	}
 
-	private Object runAction(WaldotStepLogger stepRegister) throws UaException {
+	private Object runAction(final WaldotStepLogger stepRegister) throws UaException {
 		return waldotRulesEngine.getJexlEngine().executeRule(waldotRulesEngine.getNamespace(), this, stepRegister);
 	}
 
-	private boolean runCheck(WaldotStepLogger stepRegister) {
+	private boolean runCheck(final WaldotStepLogger stepRegister) {
 		return waldotRulesEngine.getJexlEngine().evaluateRule(waldotRulesEngine.getNamespace(), this, stepRegister);
 	}
 
 	@Override
-	public void setClearFactsAfterExecution(boolean clearFactsAfterExecution) {
+	public void setClearFactsAfterExecution(final boolean clearFactsAfterExecution) {
 		this.clearFactsAfterExecution = clearFactsAfterExecution;
 	}
 
 	@Override
-	public void setDelayBeforeEvaluation(int delayBeforeEvaluation) {
+	public void setDelayBeforeEvaluation(final int delayBeforeEvaluation) {
 		this.delayBeforeEvaluation = delayBeforeEvaluation;
 	}
 
 	@Override
-	public void setDelayBeforeExecute(int delayBeforeExecute) {
+	public void setDelayBeforeExecute(final int delayBeforeExecute) {
 		this.delayBeforeExecute = delayBeforeExecute;
 	}
 
 	@Override
-	public void setParallelExecution(boolean parallelExecution) {
+	public void setParallelExecution(final boolean parallelExecution) {
 		this.parallelExecution = parallelExecution;
 	}
 
 	@Override
-	public void setRefractoryPeriodMs(int refractoryPeriodMs) {
+	public void setRefractoryPeriodMs(final int refractoryPeriodMs) {
 		this.refractoryPeriodMs = refractoryPeriodMs;
 	}
 

@@ -4,7 +4,7 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.1"
+        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
     }
 }
 
@@ -43,9 +43,10 @@ dependencies {
     api group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.15'
     api group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.15'
     api group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
+    testImplementation(platform('org.junit:junit-bom:5.13.1'))
+	testImplementation('org.junit.jupiter:junit-jupiter')
+	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 task eclipseClosedDependencies {}

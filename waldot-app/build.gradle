@@ -4,8 +4,8 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.1"
-        classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.11.1'
+        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
+        classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.11.2'
         classpath 'de.undercouch:gradle-download-task:5.6.0'
         classpath 'gradle.plugin.com.github.jengelman.gradle.plugins:shadow:7.0.0'
         classpath "com.palantir.gradle.docker:gradle-docker:0.36.0"
@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.graalvm.buildtools.native' version '0.10.5'
+    id 'org.graalvm.buildtools.native' version '0.10.6'
 }
 
 description = "WaldOT Server Application"
@@ -62,11 +62,12 @@ dependencies {
     testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-aasx', version: '1.0.0-milestone-04'
     testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-xml', version: '1.0.0-milestone-04'
     testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-json', version: '1.0.0-milestone-04'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.12.0'
+    testImplementation(platform('org.junit:junit-bom:5.13.1'))
+	testImplementation('org.junit.jupiter:junit-jupiter')
+	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 task eclipseClosedDependencies {}

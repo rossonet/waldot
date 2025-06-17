@@ -21,7 +21,7 @@ public class WaldotRulesEngineTest {
 	private final LoggerListener logger = new LoggerListener() {
 
 		@Override
-		public void onEvent(String messagePattern, Object[] arguments, Throwable throwable) {
+		public void onEvent(final String messagePattern, final Object[] arguments, final Throwable throwable) {
 			System.out.println("LOGGER: " + messagePattern + " -> " + arguments + " [ "
 					+ (throwable != null ? throwable.getMessage() : "") + " ] ");
 
@@ -29,8 +29,7 @@ public class WaldotRulesEngineTest {
 	};
 
 	@Test
-	public void runSimpleQueryAndWaitTwoMinutes()
-			throws InterruptedException, ExecutionException, ConfigurationException {
+	public void runSimpleRuleTest() throws InterruptedException, ExecutionException, ConfigurationException {
 		LogHelper.changeJulLogLevel("fine");
 		final WaldotGraph g = OpcFactory.getOpcGraph();
 		((TraceLogger) g.getWaldotNamespace().getRulesLogger()).getDebugObservers().add(logger);

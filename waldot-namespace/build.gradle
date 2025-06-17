@@ -4,7 +4,7 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.4.1"
+        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
     }
 }
 
@@ -42,11 +42,12 @@ dependencies {
     api project(':waldot-api')
     implementation project(':waldot-deps')
     annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
+    testImplementation(platform('org.junit:junit-bom:5.13.1'))
+	testImplementation('org.junit.jupiter:junit-jupiter')
+	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 task eclipseClosedDependencies {}
