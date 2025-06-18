@@ -16,6 +16,14 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * SystemCommandHelper is a utility class that provides methods to execute
+ * system commands and handle quoted strings in command lines. It includes a
+ * tokenizer for parsing quoted strings and a stream gobbler for consuming
+ * process output.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public class SystemCommandHelper {
 
 	public static class QuotedStringTokenizer {
@@ -27,7 +35,7 @@ public class SystemCommandHelper {
 
 		private int index;
 
-		public QuotedStringTokenizer(String line) {
+		public QuotedStringTokenizer(final String line) {
 			this.line = line.trim();
 			matcher = QUOTED_PATTERN.matcher(line);
 			while (!matcher.hitEnd()) {
@@ -68,7 +76,8 @@ public class SystemCommandHelper {
 		private final Consumer<String> consumer;
 		private final InputStream errorStream;
 
-		public StreamGobbler(InputStream inputStream, InputStream errorStream, Consumer<String> consumer) {
+		public StreamGobbler(final InputStream inputStream, final InputStream errorStream,
+				final Consumer<String> consumer) {
 			this.inputStream = inputStream;
 			this.errorStream = errorStream;
 			this.consumer = consumer;
@@ -83,8 +92,9 @@ public class SystemCommandHelper {
 
 	private final static Pattern QUOTED_PATTERN = Pattern.compile("\"([^\"]*)\"|(\\S+)");
 
-	public static void executeSystemCommandAndWait(File baseDirectory, String[] command, Consumer<String> consumer,
-			int timeoutMilliSeconds) throws IOException, InterruptedException, ExecutionException, TimeoutException {
+	public static void executeSystemCommandAndWait(final File baseDirectory, final String[] command,
+			final Consumer<String> consumer, final int timeoutMilliSeconds)
+			throws IOException, InterruptedException, ExecutionException, TimeoutException {
 		final ProcessBuilder builder = new ProcessBuilder();
 		builder.command(command);
 		builder.directory(baseDirectory);

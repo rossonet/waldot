@@ -66,7 +66,7 @@ public class DefaultWaldotStepLogger implements WaldotStepLogger {
 
 	@Override
 	public String toString() {
-		return log.toString();
+		return "\n" + log.toString();
 	}
 
 }

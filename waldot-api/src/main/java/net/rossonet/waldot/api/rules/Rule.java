@@ -7,6 +7,13 @@ import net.rossonet.waldot.api.EventObserver;
 import net.rossonet.waldot.api.RuleListener;
 import net.rossonet.waldot.api.models.WaldotVertex;
 
+/**
+ * Rule interface represents a rule in the Waldot system. It extends
+ * WaldotVertex and provides methods to manage rule execution, conditions,
+ * actions, and listeners.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public interface Rule extends WaldotVertex, AutoCloseable, EventObserver {
 
 	void clear();

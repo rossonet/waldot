@@ -14,7 +14,7 @@ import net.rossonet.waldot.api.LoggerListener;
 public class TraceLogger extends AbstractLogger {
 
 	public enum ContexLogger {
-		CONSOLE, RULES
+		CONSOLE, RULES, BOOT
 	}
 
 	private static final long serialVersionUID = 1831476351399997851L;

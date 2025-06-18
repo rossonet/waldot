@@ -18,77 +18,85 @@
  */
 package net.rossonet.waldot.api.models;
 
-import org.apache.tinkerpop.gremlin.structure.util.CloseableIterator;
-import org.apache.tinkerpop.gremlin.util.iterator.StoreIteratorCounter;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.apache.tinkerpop.gremlin.structure.util.CloseableIterator;
+import org.apache.tinkerpop.gremlin.util.iterator.StoreIteratorCounter;
+
 /**
- * Wrapper on top of Iterator representing a closable resource to the underlying storage.
+ * Wrapper on top of Iterator representing a closable resource to the underlying
+ * storage.
  *
- * This class also serves as a reference on how the providers can maintain a counter of the
- * underlying storage resources in their implementation. This counter in coordination with
- * gremlin-test suite can be used to detect cases when the query processor does not gracefully
- * release the underlying resources.
+ * This class also serves as a reference on how the providers can maintain a
+ * counter of the underlying storage resources in their implementation. This
+ * counter in coordination with gremlin-test suite can be used to detect cases
+ * when the query processor does not gracefully release the underlying
+ * resources.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public class WaldotGraphIterator<E> implements CloseableIterator<E> {
-    /**
-     * Original iterator which is wrapped by this class
-     */
-    private Iterator<E> orig;
-    private E next;
-    /**
-     * Represents if the iterator has been fully consumed
-     */
-    private boolean finished;
+	/**
+	 * Original iterator which is wrapped by this class
+	 */
+	private final Iterator<E> orig;
+	private E next;
+	/**
+	 * Represents if the iterator has been fully consumed
+	 */
+	private boolean finished;
 
-    public WaldotGraphIterator(final Iterator<E> orig) {
-        this.orig = orig;
-        StoreIteratorCounter.INSTANCE.increment();
-        finished = false;
-    }
+	public WaldotGraphIterator(final Iterator<E> orig) {
+		this.orig = orig;
+		StoreIteratorCounter.INSTANCE.increment();
+		finished = false;
+	}
 
-    @Override
-    public boolean hasNext() {
-        if (next != null) return true;
-        if (finished) return false;
+	@Override
+	public void close() {
+		if (!finished) {
+			StoreIteratorCounter.INSTANCE.decrement();
+		}
+		finished = true;
+	}
 
-        return tryComputeNext();
-    }
+	@Override
+	public boolean hasNext() {
+		if (next != null) {
+			return true;
+		}
+		if (finished) {
+			return false;
+		}
 
-    @Override
-    public E next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException();
-        }
+		return tryComputeNext();
+	}
 
-        final E ret = next;
+	@Override
+	public E next() {
+		if (!hasNext()) {
+			throw new NoSuchElementException();
+		}
 
-        // pre-fetch the next value. It is important to do this
-        // so that the underlying resource can be closed after reading the
-        // last value of the iterator.
-        tryComputeNext();
+		final E ret = next;
 
-        return ret;
-    }
+		// pre-fetch the next value. It is important to do this
+		// so that the underlying resource can be closed after reading the
+		// last value of the iterator.
+		tryComputeNext();
 
-    private boolean tryComputeNext() {
-        try {
-            next = orig.next();
-            return true;
-        } catch (NoSuchElementException ex) {
-            close();
-            next = null;
-            return false;
-        }
-    }
+		return ret;
+	}
 
-    @Override
-    public void close() {
-        if (!finished) {
-            StoreIteratorCounter.INSTANCE.decrement();
-        }
-        finished = true;
-    }
+	private boolean tryComputeNext() {
+		try {
+			next = orig.next();
+			return true;
+		} catch (final NoSuchElementException ex) {
+			close();
+			next = null;
+			return false;
+		}
+	}
 }

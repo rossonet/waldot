@@ -28,7 +28,16 @@ import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
+import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
+/**
+ * WaldotNamespace is an interface that defines the operations for managing a
+ * namespace in the Waldot graph model. It provides methods to add edges and
+ * vertices, manage properties, handle events, and interact with the graph
+ * computer view.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public interface WaldotNamespace extends AutoCloseable {
 
 	WaldotEdge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex, String label, Object[] keyValues);
@@ -58,7 +67,9 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	QualifiedName generateQualifiedName(String label);
 
-	String[] getBootstrapProcedure();
+	Logger getBootLogger();
+
+	String getBootstrapUrl();
 
 	Object getCommandsAsFunction();
 
@@ -96,9 +107,11 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	IdManager<NodeId> getNodeIdManager();
 
-	ObjectTypeManager getNodeType();
+	ObjectTypeManager getObjectTypeManager();
 
 	public UaNodeContext getOpcUaNodeContext();
+
+	WaldotOpcUaServer getOpcuaServer();
 
 	Set<PluginListener> getPlugins();
 

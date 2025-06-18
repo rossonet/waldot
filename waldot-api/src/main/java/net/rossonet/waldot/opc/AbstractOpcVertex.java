@@ -39,6 +39,14 @@ import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinElement;
 
+/**
+ * AbstractOpcVertex is an abstract class that implements the WaldotVertex
+ * interface. It provides common functionality for OPC UA vertices in the Waldot
+ * graph model, including property management, event handling, and edge
+ * management.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public abstract class AbstractOpcVertex extends GremlinElement implements WaldotVertex {
 
 	protected boolean allowNullPropertyValues = false;
@@ -48,9 +56,9 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	protected final WaldotGraph graph;
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 
-	public AbstractOpcVertex(final WaldotGraph graph, UaNodeContext context, final NodeId nodeId,
-			final QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
-			UInteger userWriteMask, UByte eventNotifier, long version) {
+	public AbstractOpcVertex(final WaldotGraph graph, final UaNodeContext context, final NodeId nodeId,
+			final QualifiedName browseName, final LocalizedText displayName, final LocalizedText description,
+			final UInteger writeMask, final UInteger userWriteMask, final UByte eventNotifier, final long version) {
 		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier, version);
 		this.graph = graph;
 		this.allowNullPropertyValues = graph.features().vertex().supportsNullPropertyValues();
@@ -68,18 +76,18 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	}
 
 	@Override
-	public void addEventObserver(EventObserver eventObserver) {
+	public void addEventObserver(final EventObserver eventObserver) {
 		eventObservers.add(eventObserver);
 	}
 
 	@Override
-	public void addPropertyObserver(PropertyObserver propertyObserver) {
+	public void addPropertyObserver(final PropertyObserver propertyObserver) {
 		propertyObservers.add(propertyObserver);
 
 	}
 
 	@Override
-	public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
+	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
 	}
 
@@ -141,7 +149,7 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	}
 
 	@Override
-	public void postEvent(BaseEventTypeNode event) {
+	public void postEvent(final BaseEventTypeNode event) {
 		getNamespace().getEventBus().post(event);
 		eventObservers.forEach(observer -> observer.fireEvent(this, event));
 	}
@@ -229,7 +237,7 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	}
 
 	@Override
-	public void propertyChanged(UaNode node, AttributeId attributeId, Object value) {
+	public void propertyChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
 	}
 
@@ -240,12 +248,12 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	}
 
 	@Override
-	public void removeEventObserver(EventObserver observer) {
+	public void removeEventObserver(final EventObserver observer) {
 		eventObservers.remove(observer);
 	}
 
 	@Override
-	public void removePropertyObserver(PropertyObserver observer) {
+	public void removePropertyObserver(final PropertyObserver observer) {
 		propertyObservers.remove(observer);
 	}
 

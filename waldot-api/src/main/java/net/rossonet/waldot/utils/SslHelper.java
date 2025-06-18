@@ -75,15 +75,12 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 
 /**
- * Need bouncycastle libs. This libs are not in the jar.
+ * SslHelper provides utility methods for handling SSL/TLS operations, including
+ * creating SSL contexts, generating certificate signing requests, and managing
+ * keystores.
  * 
- * implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version:
- * '1.76' implementation group: 'org.bouncycastle', name: 'bcpkix-jdk18on',
- * version: '1.76' implementation group: 'org.bouncycastle', name:
- * 'bcutil-jdk18on', version: '1.76'
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
- *
  */
 public class SslHelper {
 

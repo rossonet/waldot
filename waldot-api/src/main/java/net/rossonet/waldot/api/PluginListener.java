@@ -15,21 +15,28 @@ import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.api.rules.Rule;
 
+/**
+ * PluginListener interface for handling events related to Waldot plugins.
+ * Implementations of this interface should define how to handle plugin
+ * initialization, vertex creation, command retrieval, and rule functions.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public interface PluginListener {
 
-	default boolean containsObjectDefinition(NodeId typeDefinitionNodeId) {
+	default boolean containsObjectDefinition(final NodeId typeDefinitionNodeId) {
 		return false;
 	}
 
-	default boolean containsObjectLabel(String typeDefinitionLabel) {
+	default boolean containsObjectLabel(final String typeDefinitionLabel) {
 		return false;
 	}
 
-	default WaldotVertex createVertexObject(NodeId typeDefinitionNodeId, WaldotGraph graph, UaNodeContext context,
-			NodeId nodeId, QualifiedName browseName, LocalizedText displayName, LocalizedText description,
-			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier, long version) {
+	default WaldotVertex createVertexObject(final NodeId typeDefinitionNodeId, final WaldotGraph graph,
+			final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
+			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,
+			final UInteger userWriteMask, final UByte eventNotifier, final long version) {
 		return null;
 	}
 
@@ -37,11 +44,11 @@ public interface PluginListener {
 		return Collections.emptyList();
 	}
 
-	default NodeId getObjectLabel(String typeDefinitionLabel) {
+	default NodeId getObjectLabel(final String typeDefinitionLabel) {
 		return null;
 	}
 
-	default Map<String, Rule> getRuleFunctions() {
+	default Map<String, Object> getRuleFunctions() {
 		return Collections.emptyMap();
 	}
 

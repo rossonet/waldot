@@ -40,7 +40,7 @@ public class OpcGraph extends AbstractOpcGraph {
 		private final OpcGraphGraphFeatures graphFeatures;
 		private final OpcGraphVertexFeatures vertexFeatures;
 
-		private OpcGraphFeatures(AbstractOpcGraph graph) {
+		private OpcGraphFeatures(final AbstractOpcGraph graph) {
 			this.graph = graph;
 			graphFeatures = new OpcGraphGraphFeatures();
 			edgeFeatures = new OpcGraphEdgeFeatures(graph);
@@ -167,11 +167,8 @@ public class OpcGraph extends AbstractOpcGraph {
 	}
 
 	@Override
-	public void clear() {
-		if (opcNamespace == null) {
-			throw new IllegalArgumentException("Namespace not set");
-		}
-		opcNamespace.resetNameSpace();
+	public void closeProcedure() {
+		logger.info("opc graph closed");
 	}
 
 	@Override
@@ -198,7 +195,7 @@ public class OpcGraph extends AbstractOpcGraph {
 	}
 
 	@Override
-	public void setNamespace(WaldotNamespace waldotNamespace) {
+	public void setNamespace(final WaldotNamespace waldotNamespace) {
 		if (waldotNamespace == null) {
 			throw new IllegalArgumentException("Namespace cannot be null");
 		}

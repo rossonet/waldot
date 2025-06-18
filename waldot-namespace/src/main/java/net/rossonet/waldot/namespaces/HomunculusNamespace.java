@@ -1,6 +1,5 @@
 package net.rossonet.waldot.namespaces;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -52,7 +51,6 @@ import net.rossonet.waldot.api.strategies.WaldotMappingStrategy;
 import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
-import net.rossonet.waldot.commands.VersionCommand;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
@@ -64,10 +62,10 @@ import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
-	private final String[] bootstrapProcedure;
 	private final BootstrapProcedureStrategy bootstrapProcedureStrategy;
 	private final WaldotConfiguration configuration;
 	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
+	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
 	private final ConsoleStrategy consoleStrategy;
 	private final DataTypeDictionaryManager dictionaryManager;
 	private WaldotGraphComputerView graphComputerView;
@@ -82,17 +80,20 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
 
 	private final SubscriptionModel subscriptionModel;
+	private final String bootstrapUrl;
+	private WaldotOpcUaServer waldotOpcUaServer;
 
-	public HomunculusNamespace(WaldotOpcUaServer server, WaldotMappingStrategy opcMappingStrategy,
-			ConsoleStrategy consoleStrategy, DefaultHomunculusConfiguration configuration,
-			BootstrapProcedureStrategy bootstrapProcedureStrategy, URL bootstrapUrl) {
+	public HomunculusNamespace(final WaldotOpcUaServer server, final WaldotMappingStrategy opcMappingStrategy,
+			final ConsoleStrategy consoleStrategy, final DefaultHomunculusConfiguration configuration,
+			final BootstrapProcedureStrategy bootstrapProcedureStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
+		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
 		this.consoleStrategy = consoleStrategy;
 		this.jexlWaldotCommandHelper = new jexlWaldotCommandHelper(this);
 		this.configuration = configuration;
 		this.bootstrapProcedureStrategy = bootstrapProcedureStrategy;
-		this.bootstrapProcedure = getConfigurationfromUrl(bootstrapUrl);
+		this.bootstrapUrl = bootstrapUrl;
 		opcGraphVariables = new OpcGraphVariables(this);
 		subscriptionModel = new SubscriptionModel(server.getServer(), this);
 		dictionaryManager = new DataTypeDictionaryManager(getNodeContext(), configuration.getManagerNamespaceUri());
@@ -114,9 +115,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		if (configuration.getWaldotCommandLabel() != null) {
 			registerCommand(new QueryCommand(this));
 		}
-		if (configuration.getVersionCommandLabel() != null) {
-			registerCommand(new VersionCommand(this));
-		}
 		if (configuration.getHelpCommandLabel() != null) {
 			registerCommand(new HelpCommand(this));
 		}
@@ -126,17 +124,18 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public WaldotEdge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex, String label, Object[] keyValues) {
+	public WaldotEdge addEdge(final WaldotVertex sourceVertex, final WaldotVertex targetVertex, final String label,
+			final Object[] keyValues) {
 		return (WaldotEdge) opcMappingStrategy.addEdge(sourceVertex, targetVertex, label, keyValues);
 	}
 
 	@Override
-	public void addListener(NamespaceListener listener) {
+	public void addListener(final NamespaceListener listener) {
 		listeners.add(listener);
 	}
 
 	@Override
-	public WaldotVertex addVertex(NodeId nodeId, Object[] keyValues) {
+	public WaldotVertex addVertex(final NodeId nodeId, final Object[] keyValues) {
 		return opcMappingStrategy.addVertex(nodeId, keyValues);
 	}
 
@@ -147,20 +146,20 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public WaldotGraphComputerView createGraphComputerView(WaldotGraph graph, GraphFilter graphFilter,
-			Set<VertexComputeKey> object) {
+	public WaldotGraphComputerView createGraphComputerView(final WaldotGraph graph, final GraphFilter graphFilter,
+			final Set<VertexComputeKey> object) {
 		return opcMappingStrategy.createGraphComputerView(graph, graphFilter, object);
 	}
 
 	@Override
-	public <DATA_TYPE> WaldotProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(WaldotEdge waldotEdge, String key,
-			DATA_TYPE value) {
+	public <DATA_TYPE> WaldotProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(final WaldotEdge waldotEdge,
+			final String key, final DATA_TYPE value) {
 		return opcMappingStrategy.createOrUpdateWaldotEdgeProperty(waldotEdge, key, value);
 	}
 
 	@Override
-	public <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(WaldotVertex opcVertex,
-			String key, DATA_TYPE value) {
+	public <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(final WaldotVertex opcVertex,
+			final String key, final DATA_TYPE value) {
 		return opcMappingStrategy.createOrUpdateWaldotVertexProperty(opcVertex, key, value);
 	}
 
@@ -170,33 +169,38 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public NodeId generateNodeId(Long nodeId) {
+	public NodeId generateNodeId(final Long nodeId) {
 		return newNodeId(nodeId);
 	}
 
 	@Override
-	public NodeId generateNodeId(String nodeId) {
+	public NodeId generateNodeId(final String nodeId) {
 		return newNodeId(nodeId);
 	}
 
 	@Override
-	public NodeId generateNodeId(UInteger nodeId) {
+	public NodeId generateNodeId(final UInteger nodeId) {
 		return newNodeId(nodeId);
 	}
 
 	@Override
-	public NodeId generateNodeId(UUID nodeId) {
+	public NodeId generateNodeId(final UUID nodeId) {
 		return newNodeId(nodeId);
 	}
 
 	@Override
-	public QualifiedName generateQualifiedName(String text) {
+	public QualifiedName generateQualifiedName(final String text) {
 		return newQualifiedName(text);
 	}
 
 	@Override
-	public String[] getBootstrapProcedure() {
-		return bootstrapProcedure;
+	public Logger getBootLogger() {
+		return bootLogger;
+	}
+
+	@Override
+	public String getBootstrapUrl() {
+		return bootstrapUrl;
 	}
 
 	@Override
@@ -209,33 +213,28 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		return configuration;
 	}
 
-	private String[] getConfigurationfromUrl(URL bootstrapUrl) {
-		// TODO completare con il download del file di configurazione
-		return null;
-	}
-
 	@Override
 	public Logger getConsoleLogger() {
 		return consoleLogger;
 	}
 
 	@Override
-	public WaldotVertex getEdgeInVertex(WaldotEdge opcWaldotEdge) {
+	public WaldotVertex getEdgeInVertex(final WaldotEdge opcWaldotEdge) {
 		return opcMappingStrategy.getEdgeInVertex(opcWaldotEdge);
 	}
 
 	@Override
-	public WaldotEdge getEdgeNode(NodeId nodeId) {
+	public WaldotEdge getEdgeNode(final NodeId nodeId) {
 		return getEdges().get(nodeId);
 	}
 
 	@Override
-	public WaldotVertex getEdgeOutVertex(WaldotEdge waldotEdge) {
+	public WaldotVertex getEdgeOutVertex(final WaldotEdge waldotEdge) {
 		return opcMappingStrategy.getEdgeOutVertex(waldotEdge);
 	}
 
 	@Override
-	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getEdgeProperties(WaldotEdge waldotEdge) {
+	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getEdgeProperties(final WaldotEdge waldotEdge) {
 		return opcMappingStrategy.getProperties(waldotEdge);
 	}
 
@@ -245,7 +244,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public Map<NodeId, WaldotEdge> getEdges(WaldotVertex vertex, Direction direction, String[] edgeLabels) {
+	public Map<NodeId, WaldotEdge> getEdges(final WaldotVertex vertex, final Direction direction,
+			final String[] edgeLabels) {
 		return opcMappingStrategy.getEdges(vertex, direction, edgeLabels);
 	}
 
@@ -290,7 +290,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public ObjectTypeManager getNodeType() {
+	public ObjectTypeManager getObjectTypeManager() {
 		return getServer().getObjectTypeManager();
 
 	}
@@ -301,12 +301,17 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
+	public WaldotOpcUaServer getOpcuaServer() {
+		return waldotOpcUaServer;
+	}
+
+	@Override
 	public Set<PluginListener> getPlugins() {
 		return plugins;
 	}
 
 	@Override
-	public <DATA_TYPE> WaldotEdge getPropertyReference(WaldotProperty<DATA_TYPE> opcProperty) {
+	public <DATA_TYPE> WaldotEdge getPropertyReference(final WaldotProperty<DATA_TYPE> opcProperty) {
 		return opcMappingStrategy.getPropertyReference(opcProperty);
 	}
 
@@ -337,17 +342,18 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public WaldotVertex getVertexNode(NodeId nodeId) {
+	public WaldotVertex getVertexNode(final NodeId nodeId) {
 		return getVertices().get(nodeId);
 	}
 
 	@Override
-	public <DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(WaldotVertex opcVertex) {
+	public <DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(final WaldotVertex opcVertex) {
 		return opcMappingStrategy.getVertexProperties(opcVertex);
 	}
 
 	@Override
-	public <DATA_TYPE> WaldotVertex getVertexPropertyReference(WaldotVertexProperty<DATA_TYPE> opcVertexProperty) {
+	public <DATA_TYPE> WaldotVertex getVertexPropertyReference(
+			final WaldotVertexProperty<DATA_TYPE> opcVertexProperty) {
 		return opcMappingStrategy.getVertexPropertyReference(opcVertexProperty);
 	}
 
@@ -357,7 +363,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public Map<NodeId, WaldotVertex> getVertices(WaldotVertex opcVertex, Direction direction, String[] edgeLabels) {
+	public Map<NodeId, WaldotVertex> getVertices(final WaldotVertex opcVertex, final Direction direction,
+			final String[] edgeLabels) {
 		return opcMappingStrategy.getVertices(opcVertex, direction, edgeLabels);
 	}
 
@@ -367,7 +374,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public boolean hasNodeId(NodeId nodeId) {
+	public boolean hasNodeId(final NodeId nodeId) {
 		return getNodeManager().containsNode(nodeId);
 	}
 
@@ -377,7 +384,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public Object namespaceParametersGet(String key) {
+	public Object namespaceParametersGet(final String key) {
 		return opcMappingStrategy.namespaceParametersGet(key);
 	}
 
@@ -387,13 +394,13 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public void namespaceParametersPut(String key, Object value) {
+	public void namespaceParametersPut(final String key, final Object value) {
 		opcMappingStrategy.namespaceParametersPut(key, value);
 
 	}
 
 	@Override
-	public void namespaceParametersRemove(String key) {
+	public void namespaceParametersRemove(final String key) {
 		opcMappingStrategy.namespaceParametersRemove(key);
 
 	}
@@ -404,37 +411,37 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public void onDataItemsCreated(List<DataItem> dataItems) {
+	public void onDataItemsCreated(final List<DataItem> dataItems) {
 		subscriptionModel.onDataItemsCreated(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsCreated(dataItems));
 	}
 
 	@Override
-	public void onDataItemsDeleted(List<DataItem> dataItems) {
+	public void onDataItemsDeleted(final List<DataItem> dataItems) {
 		subscriptionModel.onDataItemsDeleted(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsDeleted(dataItems));
 	}
 
 	@Override
-	public void onDataItemsModified(List<DataItem> dataItems) {
+	public void onDataItemsModified(final List<DataItem> dataItems) {
 		subscriptionModel.onDataItemsModified(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsModified(dataItems));
 	}
 
 	@Override
-	public void onMonitoringModeChanged(List<MonitoredItem> monitoredItems) {
+	public void onMonitoringModeChanged(final List<MonitoredItem> monitoredItems) {
 		subscriptionModel.onMonitoringModeChanged(monitoredItems);
 		listeners.forEach(listener -> listener.onMonitoringModeChanged(monitoredItems));
 	}
 
 	@Override
-	public void registerCommand(WaldotCommand command) {
+	public void registerCommand(final WaldotCommand command) {
 		opcMappingStrategy.registerCommand(command);
 		listeners.forEach(listener -> listener.onCommandRegistered(command));
 	}
 
 	@Override
-	public void registerPlugin(PluginListener plugin) {
+	public void registerPlugin(final PluginListener plugin) {
 		plugins.add(plugin);
 		plugin.initialize(this);
 		logger.info("Registering commands from plugin {}", plugin.getClass().getSimpleName());
@@ -442,30 +449,30 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public void removeCommand(WaldotCommand command) {
+	public void removeCommand(final WaldotCommand command) {
 		opcMappingStrategy.removeCommand(command);
 		listeners.forEach(listener -> listener.onCommandRemoved(command));
 	}
 
 	@Override
-	public void removeEdge(NodeId expandedNodeId) {
+	public void removeEdge(final NodeId expandedNodeId) {
 		opcMappingStrategy.removeEdge(expandedNodeId);
 
 	}
 
 	@Override
-	public void removeListener(NamespaceListener listener) {
+	public void removeListener(final NamespaceListener listener) {
 		listeners.remove(listener);
 	}
 
 	@Override
-	public void removeVertex(NodeId nodeId) {
+	public void removeVertex(final NodeId nodeId) {
 		opcMappingStrategy.removeVertex(nodeId);
 
 	}
 
 	@Override
-	public void removeVertexProperty(NodeId nodeId) {
+	public void removeVertexProperty(final NodeId nodeId) {
 		opcMappingStrategy.removeVertexProperty(nodeId);
 
 	}
@@ -476,21 +483,25 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 			plugin.reset();
 		}
 		opcMappingStrategy.resetNameSpace();
-		logger.info("Bootstrap procedure completed");
+		logger.info("Namespace reset done");
 		listeners.forEach(listener -> listener.onNamespaceReset());
+		logger.info("Running bootstrap procedure after reset");
 		runBootstrapProcedure();
 	}
 
 	private void runBootstrapProcedure() {
 		plugins.forEach(plugin -> plugin.start());
 		bootstrapProcedureStrategy.runBootstrapProcedure();
-		logger.info("Bootstrap procedure completed");
 		listeners.forEach(listener -> listener.onBootstrapProcedureCompleted());
 	}
 
 	@Override
-	public Object runExpression(String expression) {
+	public Object runExpression(final String expression) {
 		return consoleStrategy.runExpression(expression);
+	}
+
+	public void setOpcuaServer(final WaldotOpcUaServer opcuaServer) {
+		this.waldotOpcUaServer = opcuaServer;
 	}
 
 	@Override
@@ -506,7 +517,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public void unregisterPlugin(PluginListener plugin) {
+	public void unregisterPlugin(final PluginListener plugin) {
 		plugins.remove(plugin);
 	}
 

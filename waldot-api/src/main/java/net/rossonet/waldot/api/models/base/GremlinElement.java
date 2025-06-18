@@ -14,6 +14,14 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.api.models.WaldotElement;
 
+/**
+ * GremlinElement is an abstract class that extends UaObjectNode and implements
+ * WaldotElement. It provides a base implementation for elements in the Waldot
+ * graph model, including methods for managing components, versioning, and
+ * removal status.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public abstract class GremlinElement extends UaObjectNode implements WaldotElement {
 
 	protected static IllegalStateException elementAlreadyRemoved(final Class<? extends Element> clazz,
@@ -25,21 +33,22 @@ public abstract class GremlinElement extends UaObjectNode implements WaldotEleme
 
 	protected long currentVersion;
 
-	protected GremlinElement(UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask) {
+	protected GremlinElement(final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
+			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,
+			final UInteger userWriteMask) {
 		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask);
 		currentVersion = -1;
 	}
 
-	protected GremlinElement(UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-			UByte eventNotifier, long version) {
+	protected GremlinElement(final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
+			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,
+			final UInteger userWriteMask, final UByte eventNotifier, final long version) {
 		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier);
 		currentVersion = version;
 	}
 
 	@Override
-	public void addComponent(WaldotElement waldotElement) {
+	public void addComponent(final WaldotElement waldotElement) {
 		super.addComponent((UaNode) waldotElement);
 
 	}
@@ -78,7 +87,7 @@ public abstract class GremlinElement extends UaObjectNode implements WaldotEleme
 	}
 
 	@Override
-	public void removeComponent(WaldotElement waldotElement) {
+	public void removeComponent(final WaldotElement waldotElement) {
 		super.removeComponent((UaNode) waldotElement);
 
 	}

@@ -17,10 +17,17 @@ import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.utils.SystemCommandHelper;
 import net.rossonet.waldot.utils.SystemCommandHelper.QuotedStringTokenizer;
 
+/**
+ * ExecCommand is an implementation of AbstractOpcCommand that allows the
+ * execution of system commands. It provides input arguments for the command,
+ * directory, and timeout, and outputs the command's output and error messages.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public class ExecCommand extends AbstractOpcCommand {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	public ExecCommand(WaldotNamespace waldotNamespace) {
+	public ExecCommand(final WaldotNamespace waldotNamespace) {
 		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
 				waldotNamespace.getConfiguration().getExecCommandLabel(),
 				waldotNamespace.getConfiguration().getExecCommandDescription(),
@@ -48,7 +55,7 @@ public class ExecCommand extends AbstractOpcCommand {
 	}
 
 	@Override
-	public String[] runCommand(InvocationContext invocationContext, String[] inputValues) {
+	public String[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
 		try {
 			String command = "echo no command set";
 			String directory = "/tmp";
@@ -73,7 +80,7 @@ public class ExecCommand extends AbstractOpcCommand {
 			final StringBuilder sb = new StringBuilder();
 			final Consumer<String> consumer = new Consumer<String>() {
 				@Override
-				public void accept(String line) {
+				public void accept(final String line) {
 					sb.append(line + System.lineSeparator());
 				}
 			};

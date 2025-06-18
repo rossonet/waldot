@@ -33,7 +33,7 @@ My first goal is to pass TinkerPop's compliance tests, I want the logo...
 
 ## GitHub Actions
 
-[![Gradle Test](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml)
+[![WaldOT Library Test](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml)
 [![Build and publish WaldOT docker image to Docker Hub](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml)
 [![Publish Java artifacts to Maven Central](https://github.com/rossonet/waldot/actions/workflows/publish-to-maven.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/publish-to-maven.yml)
 

@@ -33,6 +33,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
+/**
+ * KeyStoreLoader is a utility class that loads or generates a PKCS12 KeyStore
+ * containing a self-signed server certificate and private key. It provides
+ * methods to retrieve the server's certificate chain and key pair.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public class KeyStoreLoader {
 
 	private static final Pattern IP_ADDR_PATTERN = Pattern
@@ -59,7 +66,7 @@ public class KeyStoreLoader {
 		return serverKeyPair;
 	}
 
-	public KeyStoreLoader load(Path baseDir) throws Exception {
+	public KeyStoreLoader load(final Path baseDir) throws Exception {
 		final KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
 		final File serverKeyStore = baseDir.resolve("example-server.pfx").toFile();

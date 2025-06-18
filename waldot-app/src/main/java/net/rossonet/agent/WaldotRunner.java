@@ -1,13 +1,11 @@
 package net.rossonet.agent;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
 import net.rossonet.waldot.auth.DefaultIdentityValidator;
@@ -23,16 +21,25 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
+/**
+ * WaldotRunner is the main class for running the WaldOT OPCUA server. It uses
+ * Picocli for command-line interface management and provides methods to start
+ * the server and execute commands.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
+ */
 @Command(name = "WaldOT", mixinStandardHelpOptions = true, version = { "${COMMAND-NAME} 1.0",
 		"JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",
 		"OS: ${os.name} ${os.version} ${os.arch}" }, description = "WaldOT OPCUA server", footer = "powered by Rossonet s.c.a r.l.", showEndOfOptionsDelimiterInUsageHelp = true, showAtFileInUsageHelp = true)
 public class WaldotRunner implements Callable<Integer>, AutoCloseable {
-// TODO: completare con annotazioni Picocli
-	public static void main(String[] args) {
+	private static final Logger logger = LoggerFactory.getLogger("WaldOT runner");
+
+	// TODO: completare con annotazioni Picocli
+	public static void main(final String[] args) {
 		final WaldotRunner waldotRunner = new WaldotRunner();
 		try {
 			waldotRunner.runWaldot();
-			System.out.println("bye, bye from WaldOT");
+			logger.info("bye, bye from WaldOT");
 			System.exit(0);
 		} catch (final Exception e) {
 			if (waldotRunner != null) {
@@ -72,7 +79,7 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 
 	protected String bindHostname;
 
-	protected URL bootUrl;
+	protected String bootUrl = MainAgent.DEFAULT_FILE_CONFIGURATION_PATH;
 
 	protected long defaultFactsValidDelayMs;
 
@@ -96,13 +103,13 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 
 	protected String factoryUsername;
 
-	protected String fileConfigurationPath = MainAgent.DEFAULT_FILE_CONFIGURATION_PATH;
-
 	protected String helpCommandDescription;
 
 	protected Boolean helpCommandExecutable;
 
 	protected String helpCommandLabel;
+
+	protected String helpDirectory;
 
 	protected Boolean helpCommandUserExecutable;
 
@@ -138,18 +145,6 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	CommandSpec spec;
 
 	protected int tcpBindPort;
-
-	protected String versionCommandDescription;
-
-	protected Boolean versionCommandExecutable;
-
-	protected String versionCommandLabel;
-
-	protected Boolean versionCommandUserExecutable;
-
-	protected UInteger versionCommandUserWriteMask;
-
-	protected UInteger versionCommandWriteMask;
 
 	private WaldotOpcUaServer waldot;
 
@@ -240,8 +235,7 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		return bindHostname;
 	}
 
-	public URL getBootUrl() {
-
+	public String getBootUrl() {
 		return bootUrl;
 	}
 
@@ -297,10 +291,6 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		return factoryUsername;
 	}
 
-	public String getFileConfigurationPath() {
-		return fileConfigurationPath;
-	}
-
 	public String getHelpCommandDescription() {
 
 		return helpCommandDescription;
@@ -329,6 +319,11 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	public UInteger getHelpCommandWriteMask() {
 
 		return helpCommandWriteMask;
+	}
+
+	public String getHelpDirectory() {
+
+		return helpDirectory;
 	}
 
 	public int getHttpsBindPort() {
@@ -390,36 +385,6 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		return tcpBindPort;
 	}
 
-	public String getVersionCommandDescription() {
-
-		return versionCommandDescription;
-	}
-
-	public Boolean getVersionCommandExecutable() {
-
-		return versionCommandExecutable;
-	}
-
-	public String getVersionCommandLabel() {
-
-		return versionCommandLabel;
-	}
-
-	public Boolean getVersionCommandUserExecutable() {
-
-		return versionCommandUserExecutable;
-	}
-
-	public UInteger getVersionCommandUserWriteMask() {
-
-		return versionCommandUserWriteMask;
-	}
-
-	public UInteger getVersionCommandWriteMask() {
-
-		return versionCommandWriteMask;
-	}
-
 	public WaldotOpcUaServer getWaldot() {
 		return waldot;
 	}
@@ -451,28 +416,9 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		return waldotCommandWriteMask;
 	}
 
-	private void runBootConfiguration(List<String> configuration) {
-		int num = 0;
-		for (final String line : configuration) {
-			if (line.startsWith("#") || line.isEmpty()) {
-				continue;
-			}
-			num++;
-			try {
-				final Object runExpression = waldot.runExpression(line);
-				if (runExpression != null) {
-					System.out.println("[" + num + "]: " + line + " ->\n" + runExpression + "\n");
-				} else {
-					System.out.println("[" + num + "]: " + line + " -> no result\n");
-				}
-			} catch (final Exception e) {
-				System.err.println("Error executing command '" + line + "': " + e.getMessage());
-			}
-		}
-
-	}
-
 	public void runWaldot() throws InterruptedException, ExecutionException {
+		Thread.currentThread().setName("WaldOT Agent");
+		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
 		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		waldot = new WaldotOpcUaServer(configuration, serverConfiguration, new DefaultAnonymousValidator(configuration),
@@ -480,237 +426,202 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseV0Strategy(),
 				new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(), bootUrl);
 		waldot.startup(namespace).get();
-		final Path target = Path.of(getFileConfigurationPath());
-		if (Files.exists(target)) {
-			try {
-				System.out.println("\n\nBoot configuration file found at " + target.toAbsolutePath() + "\n\n");
-				runBootConfiguration(Files.readAllLines(target));
-			} catch (final Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			System.out.println("No boot configuration file found at " + target.toAbsolutePath());
-		}
 		waldot.waitCompletion();
 	}
 
-	public void setAboutCommandDescription(String aboutCommandDescription) {
+	public void setAboutCommandDescription(final String aboutCommandDescription) {
 		this.aboutCommandDescription = aboutCommandDescription;
 	}
 
-	public void setAboutCommandExecutable(Boolean aboutCommandExecutable) {
+	public void setAboutCommandExecutable(final Boolean aboutCommandExecutable) {
 		this.aboutCommandExecutable = aboutCommandExecutable;
 	}
 
-	public void setAboutCommandLabel(String aboutCommandLabel) {
+	public void setAboutCommandLabel(final String aboutCommandLabel) {
 		this.aboutCommandLabel = aboutCommandLabel;
 	}
 
-	public void setAboutCommandUserExecutable(Boolean aboutCommandUserExecutable) {
+	public void setAboutCommandUserExecutable(final Boolean aboutCommandUserExecutable) {
 		this.aboutCommandUserExecutable = aboutCommandUserExecutable;
 	}
 
-	public void setAboutCommandUserWriteMask(UInteger aboutCommandUserWriteMask) {
+	public void setAboutCommandUserWriteMask(final UInteger aboutCommandUserWriteMask) {
 		this.aboutCommandUserWriteMask = aboutCommandUserWriteMask;
 	}
 
-	public void setAboutCommandWriteMask(UInteger aboutCommandWriteMask) {
+	public void setAboutCommandWriteMask(final UInteger aboutCommandWriteMask) {
 		this.aboutCommandWriteMask = aboutCommandWriteMask;
 	}
 
-	public void setAnonymousAccessAllowed(boolean anonymousAccessAllowed) {
+	public void setAnonymousAccessAllowed(final boolean anonymousAccessAllowed) {
 		this.anonymousAccessAllowed = anonymousAccessAllowed;
 	}
 
-	public void setApplicationName(String applicationName) {
+	public void setApplicationName(final String applicationName) {
 		this.applicationName = applicationName;
 	}
 
-	public void setAssetRootNodeBrowseName(String assetRootNodeBrowseName) {
+	public void setAssetRootNodeBrowseName(final String assetRootNodeBrowseName) {
 		this.assetRootNodeBrowseName = assetRootNodeBrowseName;
 	}
 
-	public void setAssetRootNodeDisplayName(String assetRootNodeDisplayName) {
+	public void setAssetRootNodeDisplayName(final String assetRootNodeDisplayName) {
 		this.assetRootNodeDisplayName = assetRootNodeDisplayName;
 	}
 
-	public void setAssetRootNodeId(String assetRootNodeId) {
+	public void setAssetRootNodeId(final String assetRootNodeId) {
 		this.assetRootNodeId = assetRootNodeId;
 	}
 
-	public void setBindAddresses(String bindAddresses) {
+	public void setBindAddresses(final String bindAddresses) {
 		this.bindAddresses = bindAddresses;
 	}
 
-	public void setBindHostname(String bindHostname) {
+	public void setBindHostname(final String bindHostname) {
 		this.bindHostname = bindHostname;
 	}
 
-	public void setBootUrl(URL bootUrl) {
+	public void setBootUrl(final String bootUrl) {
 		this.bootUrl = bootUrl;
 	}
 
-	public void setDnsAddressCertificateGenerator(String dnsAddressCertificateGenerator) {
+	public void setDnsAddressCertificateGenerator(final String dnsAddressCertificateGenerator) {
 		this.dnsAddressCertificateGenerator = dnsAddressCertificateGenerator;
 	}
 
-	public void setExecCommandDescription(String execCommandDescription) {
+	public void setExecCommandDescription(final String execCommandDescription) {
 		this.execCommandDescription = execCommandDescription;
 	}
 
-	public void setExecCommandExecutable(Boolean execCommandExecutable) {
+	public void setExecCommandExecutable(final Boolean execCommandExecutable) {
 		this.execCommandExecutable = execCommandExecutable;
 	}
 
-	public void setExecCommandLabel(String execCommandLabel) {
+	public void setExecCommandLabel(final String execCommandLabel) {
 		this.execCommandLabel = execCommandLabel;
 	}
 
-	public void setExecCommandUserExecutable(Boolean execCommandUserExecutable) {
+	public void setExecCommandUserExecutable(final Boolean execCommandUserExecutable) {
 		this.execCommandUserExecutable = execCommandUserExecutable;
 	}
 
-	public void setExecCommandUserWriteMask(UInteger execCommandUserWriteMask) {
+	public void setExecCommandUserWriteMask(final UInteger execCommandUserWriteMask) {
 		this.execCommandUserWriteMask = execCommandUserWriteMask;
 	}
 
-	public void setExecCommandWriteMask(UInteger execCommandWriteMask) {
+	public void setExecCommandWriteMask(final UInteger execCommandWriteMask) {
 		this.execCommandWriteMask = execCommandWriteMask;
 	}
 
-	public void setFactoryPassword(String factoryPassword) {
+	public void setFactoryPassword(final String factoryPassword) {
 		this.factoryPassword = factoryPassword;
 	}
 
-	public void setFactoryUsername(String factoryUsername) {
+	public void setFactoryUsername(final String factoryUsername) {
 		this.factoryUsername = factoryUsername;
 	}
 
-	public void setFileConfigurationPath(String fileConfigurationPath) {
-		this.fileConfigurationPath = fileConfigurationPath;
-	}
-
-	public void setHelpCommandDescription(String helpCommandDescription) {
+	public void setHelpCommandDescription(final String helpCommandDescription) {
 		this.helpCommandDescription = helpCommandDescription;
 	}
 
-	public void setHelpCommandExecutable(Boolean helpCommandExecutable) {
+	public void setHelpCommandExecutable(final Boolean helpCommandExecutable) {
 		this.helpCommandExecutable = helpCommandExecutable;
 	}
 
-	public void setHelpCommandLabel(String helpCommandLabel) {
+	public void setHelpCommandLabel(final String helpCommandLabel) {
 		this.helpCommandLabel = helpCommandLabel;
 	}
 
-	public void setHelpCommandUserExecutable(Boolean helpCommandUserExecutable) {
+	public void setHelpCommandUserExecutable(final Boolean helpCommandUserExecutable) {
 		this.helpCommandUserExecutable = helpCommandUserExecutable;
 	}
 
-	public void setHelpCommandUserWriteMask(UInteger helpCommandUserWriteMask) {
+	public void setHelpCommandUserWriteMask(final UInteger helpCommandUserWriteMask) {
 		this.helpCommandUserWriteMask = helpCommandUserWriteMask;
 	}
 
-	public void setHelpCommandWriteMask(UInteger helpCommandWriteMask) {
+	public void setHelpCommandWriteMask(final UInteger helpCommandWriteMask) {
 		this.helpCommandWriteMask = helpCommandWriteMask;
 	}
 
-	public void setHttpsBindPort(int httpsBindPort) {
+	public void setHelpDirectory(final String helpDirectory) {
+		this.helpDirectory = helpDirectory;
+	}
+
+	public void setHttpsBindPort(final int httpsBindPort) {
 		this.httpsBindPort = httpsBindPort;
 	}
 
-	public void setInterfaceRootNodeBrowseName(String interfaceRootNodeBrowseName) {
+	public void setInterfaceRootNodeBrowseName(final String interfaceRootNodeBrowseName) {
 		this.interfaceRootNodeBrowseName = interfaceRootNodeBrowseName;
 	}
 
-	public void setInterfaceRootNodeDisplayName(String interfaceRootNodeDisplayName) {
+	public void setInterfaceRootNodeDisplayName(final String interfaceRootNodeDisplayName) {
 		this.interfaceRootNodeDisplayName = interfaceRootNodeDisplayName;
 	}
 
-	public void setInterfaceRootNodeId(String interfaceRootNodeId) {
+	public void setInterfaceRootNodeId(final String interfaceRootNodeId) {
 		this.interfaceRootNodeId = interfaceRootNodeId;
 	}
 
-	public void setManagerNamespaceUri(String managerNamespaceUri) {
+	public void setManagerNamespaceUri(final String managerNamespaceUri) {
 		this.managerNamespaceUri = managerNamespaceUri;
 	}
 
-	public void setManufacturerName(String manufacturerName) {
+	public void setManufacturerName(final String manufacturerName) {
 		this.manufacturerName = manufacturerName;
 	}
 
-	public void setPath(String path) {
+	public void setPath(final String path) {
 		this.path = path;
 	}
 
-	public void setProductName(String productName) {
+	public void setProductName(final String productName) {
 		this.productName = productName;
 	}
 
-	public void setProductUri(String productUri) {
+	public void setProductUri(final String productUri) {
 		this.productUri = productUri;
 	}
 
-	public void setRootNodeBrowseName(String rootNodeBrowseName) {
+	public void setRootNodeBrowseName(final String rootNodeBrowseName) {
 		this.rootNodeBrowseName = rootNodeBrowseName;
 	}
 
-	public void setRootNodeDisplayName(String rootNodeDisplayName) {
+	public void setRootNodeDisplayName(final String rootNodeDisplayName) {
 		this.rootNodeDisplayName = rootNodeDisplayName;
 	}
 
-	public void setRootNodeId(String rootNodeId) {
+	public void setRootNodeId(final String rootNodeId) {
 		this.rootNodeId = rootNodeId;
 	}
 
-	public void setTcpBindPort(int tcpBindPort) {
+	public void setTcpBindPort(final int tcpBindPort) {
 		this.tcpBindPort = tcpBindPort;
 	}
 
-	public void setVersionCommandDescription(String versionCommandDescription) {
-		this.versionCommandDescription = versionCommandDescription;
-	}
-
-	public void setVersionCommandExecutable(Boolean versionCommandExecutable) {
-		this.versionCommandExecutable = versionCommandExecutable;
-	}
-
-	public void setVersionCommandLabel(String versionCommandLabel) {
-		this.versionCommandLabel = versionCommandLabel;
-	}
-
-	public void setVersionCommandUserExecutable(Boolean versionCommandUserExecutable) {
-		this.versionCommandUserExecutable = versionCommandUserExecutable;
-	}
-
-	public void setVersionCommandUserWriteMask(UInteger versionCommandUserWriteMask) {
-		this.versionCommandUserWriteMask = versionCommandUserWriteMask;
-	}
-
-	public void setVersionCommandWriteMask(UInteger versionCommandWriteMask) {
-		this.versionCommandWriteMask = versionCommandWriteMask;
-	}
-
-	public void setWaldotCommandDescription(String waldotCommandDescription) {
+	public void setWaldotCommandDescription(final String waldotCommandDescription) {
 		this.waldotCommandDescription = waldotCommandDescription;
 	}
 
-	public void setWaldotCommandExecutable(Boolean waldotCommandExecutable) {
+	public void setWaldotCommandExecutable(final Boolean waldotCommandExecutable) {
 		this.waldotCommandExecutable = waldotCommandExecutable;
 	}
 
-	public void setWaldotCommandLabel(String waldotCommandLabel) {
+	public void setWaldotCommandLabel(final String waldotCommandLabel) {
 		this.waldotCommandLabel = waldotCommandLabel;
 	}
 
-	public void setWaldotCommandUserExecutable(Boolean waldotCommandUserExecutable) {
+	public void setWaldotCommandUserExecutable(final Boolean waldotCommandUserExecutable) {
 		this.waldotCommandUserExecutable = waldotCommandUserExecutable;
 	}
 
-	public void setWaldotCommandUserWriteMask(UInteger waldotCommandUserWriteMask) {
+	public void setWaldotCommandUserWriteMask(final UInteger waldotCommandUserWriteMask) {
 		this.waldotCommandUserWriteMask = waldotCommandUserWriteMask;
 	}
 
-	public void setWaldotCommandWriteMask(UInteger waldotCommandWriteMask) {
+	public void setWaldotCommandWriteMask(final UInteger waldotCommandWriteMask) {
 		this.waldotCommandWriteMask = waldotCommandWriteMask;
 	}
 

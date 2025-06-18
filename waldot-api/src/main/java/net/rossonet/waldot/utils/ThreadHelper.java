@@ -8,6 +8,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * ThreadHelper is a utility class that provides methods to run tasks with a
+ * timeout. It allows you to execute a Callable or Runnable with a specified
+ * timeout, throwing an exception if the task does not complete within the
+ * allotted time.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public final class ThreadHelper {
 
 	public static <RETURN_TYPE> RETURN_TYPE runWithTimeout(final Callable<RETURN_TYPE> callable, final long timeout,

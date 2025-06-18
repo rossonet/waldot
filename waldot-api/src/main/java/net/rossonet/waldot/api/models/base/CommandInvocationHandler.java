@@ -8,9 +8,17 @@ import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
 import net.rossonet.waldot.api.models.WaldotCommand;
 
+/**
+ * CommandInvocationHandler is a class that extends
+ * AbstractMethodInvocationHandler and implements the invocation logic for
+ * WaldotCommand methods. It handles the input and output arguments, invoking
+ * the command with the provided input values.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public class CommandInvocationHandler extends AbstractMethodInvocationHandler {
 
-	public CommandInvocationHandler(UaMethodNode method) {
+	public CommandInvocationHandler(final UaMethodNode method) {
 		super(method);
 	}
 
@@ -27,7 +35,8 @@ public class CommandInvocationHandler extends AbstractMethodInvocationHandler {
 	}
 
 	@Override
-	protected Variant[] invoke(InvocationContext invocationContext, Variant[] inputValues) throws UaException {
+	protected Variant[] invoke(final InvocationContext invocationContext, final Variant[] inputValues)
+			throws UaException {
 		final String[] inputStrings = new String[inputValues.length];
 		for (int i = 0; i < inputValues.length; i++) {
 			if (inputValues[i].getValue() != null) {

@@ -45,6 +45,14 @@ import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinCommandVertex;
 
+/**
+ * AbstractOpcCommand is an abstract class that extends GremlinCommandVertex and
+ * implements WaldotCommand. It provides a base implementation for OPC commands
+ * in the Waldot graph model, including methods for managing input and output
+ * arguments, event observers, and property observers.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public abstract class AbstractOpcCommand extends GremlinCommandVertex implements WaldotCommand {
 
 	public enum VariableNodeTypes {
@@ -59,7 +67,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 		private final NodeId nodeId;
 
-		VariableNodeTypes(NodeId nodeId) {
+		VariableNodeTypes(final NodeId nodeId) {
 			this.nodeId = nodeId;
 		}
 
@@ -86,8 +94,9 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	protected final WaldotNamespace waldotNamespace;
 
-	public AbstractOpcCommand(WaldotGraph graph, WaldotNamespace waldotNamespace, String command, String description,
-			UInteger writeMask, UInteger userWriteMask, Boolean executable, Boolean userExecutable) {
+	public AbstractOpcCommand(final WaldotGraph graph, final WaldotNamespace waldotNamespace, final String command,
+			final String description, final UInteger writeMask, final UInteger userWriteMask, final Boolean executable,
+			final Boolean userExecutable) {
 		super(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(command),
 				waldotNamespace.generateQualifiedName(command), LocalizedText.english(command),
 				LocalizedText.english(description), writeMask, userWriteMask, executable, userExecutable);
@@ -96,7 +105,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
-	public void addComponent(WaldotElement waldotElement) {
+	public void addComponent(final WaldotElement waldotElement) {
 		LOGGER.warn("Adding component to command is not supported");
 
 	}
@@ -113,34 +122,34 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
-	public void addEventObserver(EventObserver eventObserver) {
+	public void addEventObserver(final EventObserver eventObserver) {
 		eventObservers.add(eventObserver);
 	}
 
 	@Override
-	public void addInputArgument(String name, NodeId dataType, Integer valueRank, UInteger[] arrayDimensions,
-			LocalizedText description) {
+	public void addInputArgument(final String name, final NodeId dataType, final Integer valueRank,
+			final UInteger[] arrayDimensions, final LocalizedText description) {
 		final Argument arg = new Argument(name, dataType, valueRank, arrayDimensions, description);
 		inputArguments.add(arg);
 		setInputArguments(inputArguments.toArray(new Argument[0]));
 	}
 
 	@Override
-	public void addOutputArgument(String name, NodeId dataType, Integer valueRank, UInteger[] arrayDimensions,
-			LocalizedText description) {
+	public void addOutputArgument(final String name, final NodeId dataType, final Integer valueRank,
+			final UInteger[] arrayDimensions, final LocalizedText description) {
 		final Argument arg = new Argument(name, dataType, valueRank, arrayDimensions, description);
 		outputArguments.add(arg);
 		setOutputArguments(outputArguments.toArray(new Argument[0]));
 	}
 
 	@Override
-	public void addPropertyObserver(PropertyObserver propertyObserver) {
+	public void addPropertyObserver(final PropertyObserver propertyObserver) {
 		propertyObservers.add(propertyObserver);
 
 	}
 
 	@Override
-	public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
+	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
 	}
 
@@ -159,7 +168,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
-	public UaMethodNode findMethodNode(NodeId methodId) {
+	public UaMethodNode findMethodNode(final NodeId methodId) {
 		return null;
 	}
 
@@ -218,7 +227,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
-	public void postEvent(BaseEventTypeNode event) {
+	public void postEvent(final BaseEventTypeNode event) {
 		LOGGER.warn("postEvent not implemented for Command");
 
 	}
@@ -306,42 +315,42 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
-	public void propertyChanged(UaNode sourceNode, AttributeId attributeId, Object value) {
+	public void propertyChanged(final UaNode sourceNode, final AttributeId attributeId, final Object value) {
 		LOGGER.warn("propertyChanged not implemented for Command");
 
 	}
 
 	@Override
-	public void removeComponent(WaldotElement waldotElement) {
+	public void removeComponent(final WaldotElement waldotElement) {
 		LOGGER.warn("removeComponent not implemented for Command");
 
 	}
 
 	@Override
-	public void removeEventObserver(EventObserver observer) {
+	public void removeEventObserver(final EventObserver observer) {
 		LOGGER.warn("removeEventObserver not implemented for Command");
 
 	}
 
 	@Override
-	public void removePropertyObserver(PropertyObserver observer) {
+	public void removePropertyObserver(final PropertyObserver observer) {
 		LOGGER.warn("removePropertyObserver not implemented for Command");
 
 	}
 
 	@Override
-	public Object[] runCommand(String[] methodInputs) {
+	public Object[] runCommand(final String[] methodInputs) {
 		return runCommand(null, methodInputs);
 	}
 
 	@Override
-	public void setEventNotifier(UByte eventNotifier) {
+	public void setEventNotifier(final UByte eventNotifier) {
 		LOGGER.warn("setEventNotifier not implemented for Command");
 
 	}
 
 	@Override
-	public void setIcon(ByteString icon) {
+	public void setIcon(final ByteString icon) {
 		this.icon = icon;
 
 	}

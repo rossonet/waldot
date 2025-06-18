@@ -120,7 +120,6 @@ java {
 
 gitProperties {
     failOnNoGitDirectory = false
-    customProperty 'component', "${project.name}"
     dateFormat = "yyyy-MM-dd HH:mm:ssZ"
     dateFormatTimeZone = 'GMT'
 }

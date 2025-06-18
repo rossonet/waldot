@@ -2,7 +2,15 @@ package net.rossonet.waldot.api.rules;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
-public interface ExecutorHelper {
+/**
+ * ExecutorHelper is an interface that provides methods for evaluating rules,
+ * executing expressions, and managing contexts and function objects within a
+ * WaldotNamespace. It defines the contract for rule evaluation and execution in
+ * the Waldot framework.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
+public interface ExecutorHelper extends AutoCloseable {
 
 	public enum EvaluationType {
 		ATTRIBUTE, EVENT, PROPERTY

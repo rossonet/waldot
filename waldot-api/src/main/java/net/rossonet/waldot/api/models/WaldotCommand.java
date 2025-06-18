@@ -10,6 +10,14 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
+/**
+ * WaldotCommand is an interface that extends WaldotVertex, MethodNode, and
+ * UaServerNode. It defines the structure and behavior of a command in the
+ * Waldot system, including methods for adding input and output arguments,
+ * running the command, and managing its properties.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public interface WaldotCommand extends WaldotVertex, MethodNode, UaServerNode {
 	void addInputArgument(String name, NodeId dataType, Integer valueRank, UInteger[] arrayDimensions,
 			LocalizedText description);

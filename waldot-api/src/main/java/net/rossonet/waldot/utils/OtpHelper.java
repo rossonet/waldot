@@ -24,12 +24,12 @@ import java.util.Random;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-/*
- *
- * @author Andrea Ambrosini
- *
- *         Classe helper per la gestione delle password OTP.
- *         https://datatracker.ietf.org/doc/html/rfc6238
+/**
+ * OtpHelper provides methods to generate and validate TOTP (Time-based One-Time
+ * Password) codes. It supports HMAC-SHA1, HMAC-SHA256, and HMAC-SHA512
+ * algorithms. reference: https://datatracker.ietf.org/doc/html/rfc6238
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public final class OtpHelper {
 	private final static int[] DIGITS_POWER = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
@@ -97,8 +97,9 @@ public final class OtpHelper {
 	private static byte[] hexStr2Bytes(final String hex) {
 		final byte[] bArray = new BigInteger("10" + hex, 16).toByteArray();
 		final byte[] ret = new byte[bArray.length - 1];
-		for (int i = 0; i < ret.length; i++)
+		for (int i = 0; i < ret.length; i++) {
 			ret[i] = bArray[i + 1];
+		}
 		return ret;
 	}
 

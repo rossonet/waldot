@@ -6,6 +6,14 @@ import java.util.Map;
 
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
+/**
+ * WaldotConfiguration is an interface that defines the configuration settings
+ * for the Waldot Agent. It extends Serializable and Map<String, String> to
+ * allow for easy serialization and access to configuration properties.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ *
+ */
 public interface WaldotConfiguration extends Serializable, Map<String, String> {
 
 	String getAboutCommandDescription();
@@ -62,6 +70,8 @@ public interface WaldotConfiguration extends Serializable, Map<String, String> {
 
 	UInteger getHelpCommandWriteMask();
 
+	String getHelpDirectoryPath();
+
 	String getInterfaceRootNodeBrowseName();
 
 	String getInterfaceRootNodeDisplayName();
@@ -75,18 +85,6 @@ public interface WaldotConfiguration extends Serializable, Map<String, String> {
 	String getRootNodeDisplayName();
 
 	String getRootNodeId();
-
-	String getVersionCommandDescription();
-
-	Boolean getVersionCommandExecutable();
-
-	String getVersionCommandLabel();
-
-	Boolean getVersionCommandUserExecutable();
-
-	UInteger getVersionCommandUserWriteMask();
-
-	UInteger getVersionCommandWriteMask();
 
 	String getWaldotCommandDescription();
 

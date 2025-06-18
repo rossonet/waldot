@@ -31,6 +31,15 @@ import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.base.GremlinProperty;
 import net.rossonet.waldot.utils.LogHelper;
 
+/**
+ * AbstractOpcProperty is an abstract class that implements WaldotProperty and
+ * extends GremlinProperty. It provides a base implementation for OPC properties
+ * in the Waldot graph model, including methods for managing property values,
+ * icons, and event observers.
+ * 
+ * @param <DATA_TYPE> the type of data stored in the property
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
 		implements WaldotProperty<DATA_TYPE> {
 	protected boolean allowNullPropertyValues = false;
@@ -43,10 +52,11 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 	private final WaldotEdge referenceEdge;
 
-	public AbstractOpcProperty(WaldotGraph graph, final WaldotEdge edge, final String key, final DATA_TYPE value,
-			UaNodeContext context, NodeId nodeId, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-			NodeId dataType, Integer valueRank, UInteger[] arrayDimensions, UByte accessLevel, UByte userAccessLevel,
-			Double minimumSamplingInterval, boolean historizing) {
+	public AbstractOpcProperty(final WaldotGraph graph, final WaldotEdge edge, final String key, final DATA_TYPE value,
+			final UaNodeContext context, final NodeId nodeId, final LocalizedText description, final UInteger writeMask,
+			final UInteger userWriteMask, final NodeId dataType, final Integer valueRank,
+			final UInteger[] arrayDimensions, final UByte accessLevel, final UByte userAccessLevel,
+			final Double minimumSamplingInterval, final boolean historizing) {
 		super(graph, key, value, context, nodeId, description, writeMask, userWriteMask, dataType, valueRank,
 				arrayDimensions, accessLevel, userAccessLevel, minimumSamplingInterval, historizing);
 		this.graph = graph;
@@ -106,12 +116,12 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 	}
 
 	@Override
-	public <V> Iterator<? extends Property<V>> properties(String... propertyKeys) {
+	public <V> Iterator<? extends Property<V>> properties(final String... propertyKeys) {
 		return Collections.emptyIterator();
 	}
 
 	@Override
-	public <V> Property<V> property(String key, V value) {
+	public <V> Property<V> property(final String key, final V value) {
 		return Property.empty();
 	}
 
@@ -121,7 +131,7 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 	}
 
 	@Override
-	public void setIcon(ByteString icon) {
+	public void setIcon(final ByteString icon) {
 		this.icon = icon;
 
 	}

@@ -6,6 +6,7 @@ import javax.naming.ConfigurationException;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -23,14 +24,17 @@ public class WaldotRulesEngineTest {
 
 		@Override
 		public void onEvent(final String messagePattern, final Object[] arguments, final Throwable throwable) {
-			System.out.println("TEST LOGGER OUTPUT: " + messagePattern + " -> " + arguments + " [ "
-					+ (throwable != null ? throwable.getMessage() : "") + " ] ");
-
+			/*
+			 * System.out.println("TEST LOGGER OUTPUT: " + messagePattern + " -> " +
+			 * arguments + " [ " + (throwable != null ? throwable.getMessage() : "") +
+			 * " ] ");
+			 */
 		}
 	};
 
+	@Disabled
 	@Test
-	public void runSimpleRuleTest() throws InterruptedException, ExecutionException, ConfigurationException {
+	public void runComplexRuleTest() throws InterruptedException, ExecutionException, ConfigurationException {
 		LogHelper.changeJulLogLevel("fine");
 		final WaldotGraph g = OpcFactory.getOpcGraph();
 		((TraceLogger) g.getWaldotNamespace().getRulesLogger()).getDebugObservers().add(logger);

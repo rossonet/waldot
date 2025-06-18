@@ -21,6 +21,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * NetworkHelper provides utility methods for network-related operations such as
+ * checking port availability, validating IP addresses and MAC addresses, and
+ * retrieving network interface information.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public final class NetworkHelper {
 
 	private final static Long[] SUBNET_MASK = new Long[] { 4294934528L, 4294950912L, 4294959104L, 4294963200L,
@@ -43,7 +50,8 @@ public final class NetworkHelper {
 		return !portTaken;
 	}
 
-	public static boolean checkTcpPort(SocketAddress inetSocketAddress, int socketTimeoutSeconds) throws IOException {
+	public static boolean checkTcpPort(final SocketAddress inetSocketAddress, final int socketTimeoutSeconds)
+			throws IOException {
 		final AtomicBoolean ok = new AtomicBoolean(false);
 		try {
 			ThreadHelper.runWithTimeout(new Runnable() {

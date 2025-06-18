@@ -35,6 +35,15 @@ import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinProperty;
 import net.rossonet.waldot.utils.LogHelper;
 
+/**
+ * AbstractOpcVertexProperty is an abstract class that implements the
+ * WaldotVertexProperty interface. It provides a base implementation for vertex
+ * properties in the Waldot graph model, including methods for managing property
+ * values, observers, and interactions with the WaldotGraph.
+ * 
+ * @param <DATA_TYPE> the type of data stored in the vertex property
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
 		implements WaldotVertexProperty<DATA_TYPE> {
 	protected boolean allowNullPropertyValues = false;
@@ -46,10 +55,11 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 	private final WaldotVertex referenceVertex;
 
-	public AbstractOpcVertexProperty(WaldotGraph graph, final WaldotVertex vertex, final String key,
-			final DATA_TYPE value, UaNodeContext context, NodeId nodeId, LocalizedText description, UInteger writeMask,
-			UInteger userWriteMask, NodeId dataType, Integer valueRank, UInteger[] arrayDimensions, UByte accessLevel,
-			UByte userAccessLevel, Double minimumSamplingInterval, boolean historizing) {
+	public AbstractOpcVertexProperty(final WaldotGraph graph, final WaldotVertex vertex, final String key,
+			final DATA_TYPE value, final UaNodeContext context, final NodeId nodeId, final LocalizedText description,
+			final UInteger writeMask, final UInteger userWriteMask, final NodeId dataType, final Integer valueRank,
+			final UInteger[] arrayDimensions, final UByte accessLevel, final UByte userAccessLevel,
+			final Double minimumSamplingInterval, final boolean historizing) {
 		super(graph, key, value, context, nodeId, description, writeMask, userWriteMask, dataType, valueRank,
 				arrayDimensions, accessLevel, userAccessLevel, minimumSamplingInterval, historizing);
 		this.referenceVertex = vertex;
@@ -70,7 +80,7 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	}
 
 	@Override
-	public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
+	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		// not implemented
 		throw new UnsupportedOperationException("Method not implemented.");
 	}
@@ -121,7 +131,7 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	}
 
 	@Override
-	public <U> Iterator<Property<U>> properties(String... propertyKeys) {
+	public <U> Iterator<Property<U>> properties(final String... propertyKeys) {
 		return Collections.emptyIterator();
 	}
 
@@ -131,12 +141,12 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	}
 
 	@Override
-	public <V> Property<V> property(String key, V value) {
+	public <V> Property<V> property(final String key, final V value) {
 		return Property.empty();
 	}
 
 	@Override
-	public void propertyChanged(UaNode sourceNode, AttributeId attributeId, Object value) {
+	public void propertyChanged(final UaNode sourceNode, final AttributeId attributeId, final Object value) {
 		propertyObservers.forEach(observer -> observer.propertyChanged(sourceNode, attributeId, value));
 
 	}
@@ -147,7 +157,7 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	}
 
 	@Override
-	public void setIcon(ByteString icon) {
+	public void setIcon(final ByteString icon) {
 		this.icon = icon;
 
 	}

@@ -1,17 +1,27 @@
 package net.rossonet.waldot.commands;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler.InvocationContext;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class HelpCommand extends AbstractOpcCommand {
+	private static final String TXT = ".txt";
+	private static final String INDEX_TXT = "index" + TXT;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	public HelpCommand(WaldotNamespace waldotNamespace) {
+	public HelpCommand(final WaldotNamespace waldotNamespace) {
 		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
 				waldotNamespace.getConfiguration().getHelpCommandLabel(),
 				waldotNamespace.getConfiguration().getHelpCommandDescription(),
@@ -33,9 +43,32 @@ public class HelpCommand extends AbstractOpcCommand {
 	}
 
 	@Override
-	public String[] runCommand(InvocationContext invocationContext, String[] inputValues) {
-		// TODO completare help
-		return new String[] { "result of help command" };
+	public String[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
+		Path target;
+		if (inputValues != null && inputValues.length > 0 && inputValues[0] != null && !inputValues[0].isEmpty()) {
+			target = Path.of(getNamespace().getConfiguration().getHelpDirectoryPath(), inputValues[0] + TXT);
+		} else {
+			target = Path.of(getNamespace().getConfiguration().getHelpDirectoryPath(), INDEX_TXT);
+		}
+		if (Files.exists(target)) {
+			try {
+				final List<String> lines = Files.readAllLines(target);
+				if (lines.isEmpty()) {
+					return new String[] { "Help file is empty: " + target.toString(), "" };
+				} else {
+					final StringBuilder output = new StringBuilder();
+					for (final String line : lines) {
+						output.append(line).append(System.lineSeparator());
+					}
+					return new String[] { output.toString(), "" };
+				}
+			} catch (final IOException e) {
+				logger.error("Error reading help file: {}", target, e);
+				return new String[] { "Error reading help file: " + target.toString(), e.getMessage() };
+			}
+		} else {
+			return new String[] { "Help file not found: " + target.toString(), "" };
+		}
 	}
 
 }

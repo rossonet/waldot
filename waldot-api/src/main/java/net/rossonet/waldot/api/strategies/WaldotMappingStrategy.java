@@ -22,6 +22,14 @@ import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 
+/**
+ * WaldotMappingStrategy is an interface that defines the operations for mapping
+ * and managing vertices, edges, and properties in the Waldot graph model. It
+ * provides methods to add edges and vertices, create or update properties,
+ * manage graph computer views, and handle namespace parameters.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public interface WaldotMappingStrategy {
 
 	static IdManager<NodeId> getNodeIdManager() {
@@ -78,11 +86,11 @@ public interface WaldotMappingStrategy {
 				return null;
 			}
 
-			private NodeId getNodeIdFromNumber(final WaldotGraph graph, Integer nodeId) {
+			private NodeId getNodeIdFromNumber(final WaldotGraph graph, final Integer nodeId) {
 				return graph.getWaldotNamespace().generateNodeId(UInteger.valueOf(nodeId));
 			}
 
-			private NodeId getNodeIdFromString(final WaldotGraph graph, String nodeId) {
+			private NodeId getNodeIdFromString(final WaldotGraph graph, final String nodeId) {
 				try {
 					return NodeId.parse(nodeId);
 				} catch (final Exception e) {

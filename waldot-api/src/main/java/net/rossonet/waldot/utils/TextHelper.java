@@ -27,6 +27,14 @@ import org.json.JSONObject;
 
 import net.rossonet.waldot.utils.text.PlaceHolder;
 
+/**
+ * TextHelper provides utility methods for text manipulation, encryption, and
+ * decryption. It includes methods for handling placeholders in text, converting
+ * byte arrays to hex strings, and performing encryption and decryption using a
+ * specified algorithm.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public final class TextHelper {
 
 	private static String encryptionAlgorithm = "AES";

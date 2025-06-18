@@ -1,12 +1,16 @@
 FROM eclipse-temurin:21-jdk AS builder
 COPY . /workspace
-RUN cd /workspace && echo "build project" && ./gradlew clean :waldot-app:distTar -Dorg.gradle.daemon=false
+RUN cd /workspace && echo "build project" && ./gradlew clean waldot-app:generateGitProperties waldot-app:distTar -Dorg.gradle.daemon=false
 
 FROM eclipse-temurin:21-jre-alpine AS initial
 RUN apk update
 RUN apk upgrade
 RUN apk add rrdtool
 RUN mkdir -p /app
+RUN mkdir -p /app/help
+COPY ./docker/HELP.txt /app/help/index.txt
+RUN echo "Andrea Ambrosini - Rossonet s.c.a r.l." > /app/help/author.txt
+COPY ./LICENSE /app/help/license.txt
 COPY --from=builder /workspace/waldot-app/build/distributions/*.tar /tmp/
 RUN tar -xf /tmp/*.tar -C ./app --strip-components=1 && rm -rf /tmp/*.tar
 

@@ -1,4 +1,4 @@
-package net.rossonet.waldot;
+package net.rossonet.waldot.tinkerpop;
 
 import org.apache.tinkerpop.gremlin.server.Settings;
 import org.apache.tinkerpop.gremlin.server.util.DefaultGraphManager;

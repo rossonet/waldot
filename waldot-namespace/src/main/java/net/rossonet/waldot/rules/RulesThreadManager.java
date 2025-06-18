@@ -62,6 +62,7 @@ public class RulesThreadManager implements AutoCloseable {
 			for (final Entry<Future<WaldotStepLogger>, Long> runner : timeoutRunners.entrySet()) {
 				if (runner.getValue() < currentTime) {
 					runner.getKey().cancel(true);
+					logger.warn("Rule execution timeout");
 				}
 			}
 			final Set<Future<WaldotStepLogger>> toRemove = new HashSet<>();
@@ -97,7 +98,7 @@ public class RulesThreadManager implements AutoCloseable {
 		return new Thread(new Runnable() {
 			@Override
 			public void run() {
-				Thread.currentThread().setName("RulesThreadManager");
+				Thread.currentThread().setName("Rules Engine");
 				Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 				while (active) {
 					try {

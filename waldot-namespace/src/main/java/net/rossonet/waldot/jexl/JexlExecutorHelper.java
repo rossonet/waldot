@@ -1,7 +1,9 @@
 
 package net.rossonet.waldot.jexl;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.jexl3.JexlBuilder;
@@ -17,10 +19,11 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.rules.ExecutorHelper;
 import net.rossonet.waldot.api.rules.Rule;
 import net.rossonet.waldot.api.rules.WaldotStepLogger;
+import net.rossonet.waldot.utils.LogHelper;
 
 public class JexlExecutorHelper implements ExecutorHelper {
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger(JexlExecutorHelper.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger("JEXEL EXECUTOR");
 
 	private static final boolean DEBUG_FLAG = true;
 
@@ -41,22 +44,40 @@ public class JexlExecutorHelper implements ExecutorHelper {
 
 	protected final JexlContext jexlContext = new MapContext();
 
+	protected transient Map<String, JexlScript> compiledConditions = new HashMap<>();
+	protected transient Map<String, JexlScript> compiledActions = new HashMap<>();
+
+	@Override
+	public void close() throws Exception {
+		compiledConditions.clear();
+		compiledActions.clear();
+		jexl.clearCache();
+		jexl = null;
+	}
+
 	@Override
 	public boolean evaluateRule(final WaldotNamespace waldotNamespace, final Rule rule,
 			final WaldotStepLogger stepRegister) {
 		try {
-			// TODO: meccanismo per cache del compilato
 			final long startTime = System.currentTimeMillis();
-			final JexlScript compiled = jexl.createScript(rule.getCondition());
+			boolean compiledJob = false;
+			if (!compiledConditions.containsKey(rule.getCondition())) {
+				final JexlScript compiled = jexl.createScript(rule.getCondition());
+				compiledConditions.put(rule.getCondition(), compiled);
+				compiledJob = true;
+			}
 			final long runnableStartTime = System.currentTimeMillis();
-			stepRegister.onConditionCompiled(runnableStartTime - startTime);
+			if (compiledJob) {
+				stepRegister.onConditionCompiled(runnableStartTime - startTime);
+			}
 			stepRegister.onBeforeConditionExecution(jexlContext);
-			final Object result = compiled.execute(jexlContext);
+			final Object result = compiledConditions.get(rule.getCondition()).execute(jexlContext);
 			stepRegister.onAfterConditionExecution(runnableStartTime - startTime, result);
 			LOGGER.debug("Rule '{}' evaluated to {}", rule.getCondition(), result);
 			return (boolean) result;
 		} catch (final Exception e) {
-			LOGGER.error("Unable to evaluate rule: '" + rule.getCondition() + "'", e);
+			LOGGER.error(
+					"Unable to evaluate rule: '" + rule.getCondition() + "\n" + LogHelper.stackTraceToString(e, 4));
 			stepRegister.onConditionExecutionException(jexlContext, e);
 			return false;
 		}
@@ -65,11 +86,11 @@ public class JexlExecutorHelper implements ExecutorHelper {
 	@Override
 	public Object execute(final String expression) {
 		try {
-			// TODO: meccanismo per cache del compilato
 			final JexlScript compiled = jexl.createScript(expression);
 			return compiled.execute(jexlContext);
 		} catch (final Exception e) {
-			LOGGER.error("Unable to execute expression: '" + expression + "'", e);
+			LOGGER.error("Unable to execute expression: '" + expression + "' > " + e.getMessage() + "\n"
+					+ LogHelper.stackTraceToString(e, 4));
 			throw e;
 		}
 	}
@@ -79,16 +100,24 @@ public class JexlExecutorHelper implements ExecutorHelper {
 			final WaldotStepLogger stepRegister) {
 		try {
 			final long startTime = System.currentTimeMillis();
-			final JexlScript compiled = jexl.createScript(rule.getAction());
+
+			boolean compiledJob = false;
+			if (!compiledActions.containsKey(rule.getAction())) {
+				final JexlScript compiled = jexl.createScript(rule.getAction());
+				compiledActions.put(rule.getAction(), compiled);
+				compiledJob = true;
+			}
 			final long runnableStartTime = System.currentTimeMillis();
-			stepRegister.onActionCompiled(runnableStartTime - startTime);
+			if (compiledJob) {
+				stepRegister.onActionCompiled(runnableStartTime - startTime);
+			}
 			stepRegister.onBeforeActionExecution(jexlContext);
-			final Object result = compiled.execute(jexlContext);
+			final Object result = compiledActions.get(rule.getAction()).execute(jexlContext);
 			stepRegister.onAfterActionExecution(runnableStartTime - startTime, result);
 			LOGGER.debug("Rule '{}' executed with result: {}", rule.getAction(), result);
 			return result;
 		} catch (final Exception e) {
-			LOGGER.error("Unable to execute rule: '" + rule.getAction() + "'", e);
+			LOGGER.error("Unable to execute rule: '" + rule.getAction() + "\n" + LogHelper.stackTraceToString(e, 4));
 			stepRegister.onActionExecutionException(jexlContext, e);
 			return null;
 		}

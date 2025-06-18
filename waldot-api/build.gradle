@@ -3,9 +3,6 @@ buildscript {
         mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
     }
-    dependencies {
-        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
-    }
 }
 
 
@@ -31,7 +28,6 @@ repositories {
 apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'eclipse'
-apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: 'jacoco'
 apply plugin: 'distribution'
 apply plugin: 'signing'
@@ -76,13 +72,6 @@ jar.doLast { task ->
 java {
     withJavadocJar()
     withSourcesJar()
-}
-
-gitProperties {
-    failOnNoGitDirectory = false
-    customProperty 'component', "${project.name}"
-    dateFormat = "yyyy-MM-dd HH:mm:ssZ"
-    dateFormatTimeZone = 'GMT'
 }
 
 test {

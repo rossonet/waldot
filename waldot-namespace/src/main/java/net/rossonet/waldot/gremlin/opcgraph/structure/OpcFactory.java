@@ -269,12 +269,13 @@ public final class OpcFactory {
 			}
 		});
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseV0Strategy(),
-				new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(), null);
+				new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(),
+				"file:///tmp/boot.conf");
 		waldot.startup(namespace).get();
 		return waldot.getGremlinGraph();
 	}
 
-	private static WaldotGraph getOpcGraph(Configuration conf) throws InterruptedException, ExecutionException {
+	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {
 		// TODO verificare come usare la configurazione originale
 		return getOpcGraph();
 	}

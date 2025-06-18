@@ -16,7 +16,14 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
-public interface WaldotGraph extends Graph {
+/**
+ * WaldotGraph is an interface that extends Graph and provides methods to manage
+ * the Waldot graph structure, including retrieving vertices and edges, managing
+ * namespaces, and handling graph computer views.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
+public interface WaldotGraph extends Graph, AutoCloseable {
 	public static final String ARROW = "->";
 	public static final String DASH = "-";
 	public static final String E = "e";

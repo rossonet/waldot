@@ -1,4 +1,4 @@
-package net.rossonet.waldot.gremlin.opcgraph.ser;
+package net.rossonet.waldot.gremlin.opcgraph.serializer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

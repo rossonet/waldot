@@ -7,7 +7,6 @@ import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USE
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,6 +59,12 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.utils.KeyStoreLoader;
 
+/**
+ * WaldotOpcUaServer is the main class for the Waldot OPC UA server. It handles
+ * the server configuration, endpoint creation, and plugin registration.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public class WaldotOpcUaServer implements AutoCloseable {
 
 	static {
@@ -85,9 +90,9 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	private OpcUaServer server;
 	private final X509IdentityValidator x509IdentityValidator;
 
-	public WaldotOpcUaServer(WaldotConfiguration waldotConfiguration, OpcConfiguration serverConfiguration,
-			WaldotAnonymousValidator anonymousValidator, UsernameIdentityValidator identityValidator,
-			X509IdentityValidator x509IdentityValidator) {
+	public WaldotOpcUaServer(final WaldotConfiguration waldotConfiguration, final OpcConfiguration serverConfiguration,
+			final WaldotAnonymousValidator anonymousValidator, final UsernameIdentityValidator identityValidator,
+			final X509IdentityValidator x509IdentityValidator) {
 		this.configuration = serverConfiguration;
 		this.anonymousValidator = anonymousValidator;
 		this.identityValidator = identityValidator;
@@ -99,12 +104,12 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
-	private EndpointConfiguration buildHttpsEndpoint(EndpointConfiguration.Builder base) {
+	private EndpointConfiguration buildHttpsEndpoint(final EndpointConfiguration.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.HTTPS_UABINARY)
 				.setBindPort(configuration.getHttpsBindPort()).build();
 	}
 
-	private EndpointConfiguration buildTcpEndpoint(EndpointConfiguration.Builder base) {
+	private EndpointConfiguration buildTcpEndpoint(final EndpointConfiguration.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.TCP_UASC_UABINARY)
 				.setBindPort(configuration.getTcpBindPort()).build();
 	}
@@ -114,14 +119,16 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		if (server != null) {
 			try {
 				server.shutdown().get();
+				logger.info("OPCUA Server shutdown completed");
 			} catch (final InterruptedException | ExecutionException e) {
 				logger.error("Error shutting down server", e);
 			}
 		}
 	}
 
-	private OpcUaServer create(OpcConfiguration configuration, WaldotAnonymousValidator anonymousValidator,
-			UsernameIdentityValidator identityValidator, X509IdentityValidator x509IdentityValidator) throws Exception {
+	private OpcUaServer create(final OpcConfiguration configuration, final WaldotAnonymousValidator anonymousValidator,
+			final UsernameIdentityValidator identityValidator, final X509IdentityValidator x509IdentityValidator)
+			throws Exception {
 		this.configuration = configuration;
 		final Path securityTempDir = Paths.get(System.getProperty("java.io.tmpdir"), "server", "security");
 		Files.createDirectories(securityTempDir);
@@ -162,7 +169,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	}
 
-	private Set<EndpointConfiguration> createEndpointConfigurations(X509Certificate certificate) {
+	private Set<EndpointConfiguration> createEndpointConfigurations(final X509Certificate certificate) {
 		final Set<EndpointConfiguration> endpointConfigurations = new LinkedHashSet<>();
 		final List<String> bindAddresses = newArrayList();
 		bindAddresses.add(configuration.getBindAddresses());
@@ -209,7 +216,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		return endpointConfigurations;
 	}
 
-	private OpcUaServer generateServerInstance(OpcConfiguration configuration,
+	private OpcUaServer generateServerInstance(final OpcConfiguration configuration,
 			final DefaultCertificateManager certificateManager, final DefaultTrustListManager trustListManager,
 			final DefaultServerCertificateValidator certificateValidator, final KeyPair httpsKeyPair,
 			final X509Certificate httpsCertificate, final String applicationUri,
@@ -232,13 +239,6 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	public WaldotAnonymousValidator getAnonymousValidator() {
 		return anonymousValidator;
-	}
-
-	private String[] getBootFromUrl(URL url) {
-		// TODO completare con la capacità di leggere un file da URL tipo git:// http://
-		// file://
-		// etc...
-		return new String[] {};
 	}
 
 	public OpcConfiguration getConfiguration() {
@@ -286,11 +286,11 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	 * @param query
 	 * @return
 	 */
-	public Object runExpression(String query) {
+	public Object runExpression(final String query) {
 		return managerNamespace.runExpression(query);
 	}
 
-	public CompletableFuture<OpcUaServer> startup(WaldotNamespace waldotNamespace) {
+	public CompletableFuture<OpcUaServer> startup(final WaldotNamespace waldotNamespace) {
 		try {
 			managerNamespace = waldotNamespace;
 			registerPluginsInNamespace();

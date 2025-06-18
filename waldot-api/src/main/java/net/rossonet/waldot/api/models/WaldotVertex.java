@@ -15,6 +15,14 @@ import com.google.common.collect.ImmutableMap;
 import net.rossonet.waldot.api.EventObserver;
 import net.rossonet.waldot.api.PropertyObserver;
 
+/**
+ * WaldotVertex is an interface that extends Vertex, WaldotElement,
+ * BaseObjectType, AttributeObserver, and PropertyObserver. It represents a
+ * vertex in the Waldot graph model, providing methods to manage attributes,
+ * properties, and events.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType, AttributeObserver, PropertyObserver {
 
 	void addAttributeObserver(AttributeObserver observer);

@@ -11,6 +11,13 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.api.models.WaldotCommand;
 
+/**
+ * GremlinCommandVertex is an abstract class that extends UaMethodNode and
+ * implements WaldotCommand. It represents a command vertex in the Waldot graph
+ * model, providing methods to manage command execution and versioning.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public abstract class GremlinCommandVertex extends UaMethodNode implements WaldotCommand {
 
 	protected static IllegalStateException elementAlreadyRemoved(final Class<? extends Element> clazz,
@@ -22,9 +29,9 @@ public abstract class GremlinCommandVertex extends UaMethodNode implements Waldo
 
 	private boolean removed = false;
 
-	protected GremlinCommandVertex(UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-			Boolean executable, Boolean userExecutable) {
+	protected GremlinCommandVertex(final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
+			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,
+			final UInteger userWriteMask, final Boolean executable, final Boolean userExecutable) {
 		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, executable,
 				userExecutable);
 		currentVersion = 0;

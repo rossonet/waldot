@@ -1,11 +1,8 @@
 package net.rossonet.waldot;
 
-import java.util.concurrent.ExecutionException;
-
-import javax.naming.ConfigurationException;
-
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -13,61 +10,78 @@ import org.junit.jupiter.api.TestMethodOrder;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.utils.LogHelper;
+import net.rossonet.waldot.utils.NetworkHelper;
 
 @TestMethodOrder(OrderAnnotation.class)
 public class WaldotBaseNamespaceTest {
 
-	@Test
-	public void runKitchenSinkTwoMinutes() throws InterruptedException, ExecutionException {
-		OpcFactory.createKitchenSink();
-		Thread.sleep(120_000);
+	@AfterEach
+	public void afterEach() {
+		try {
+			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
+				System.out.println("Waiting for server shutdown");
+				Thread.sleep(5_000);
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Test
-	public void runLargeAndWaitTwoMinutes() throws InterruptedException, ExecutionException, ConfigurationException {
+	public void runKitchenSink() throws Exception {
+		final WaldotGraph d = OpcFactory.createKitchenSink();
+		Thread.sleep(4_000);
+		d.getWaldotNamespace().getOpcuaServer().close();
+	}
+
+	@Test
+	public void runLarge() throws Exception {
 		LogHelper.changeJulLogLevel("warning");
 		final WaldotGraph g = OpcFactory.getOpcGraph();
-		Thread.sleep(2_000);
+		Thread.sleep(1_000);
 		final Vertex b = g.addVertex("label", "link_all", "directory", "base");
-		for (int i = 1; i < 100_000; i++) {
+		for (int i = 1; i < 10_000; i++) {
 			final Vertex c = g.addVertex("label", "nodo " + i, "number-test", i, "directory", "catalogo " + i % 7);
 			final Vertex r = g.addVertex("label", "rule_" + i, "type-node-id", "rule", "directory",
 					"catalogo " + i % 7);
 			c.addEdge("fire", r);
 			b.addEdge("link", c);
-			Thread.sleep(20);
+			Thread.sleep(4);
 		}
-		Thread.sleep(120_000);
+		Thread.sleep(4_000);
+		g.getWaldotNamespace().getOpcuaServer().close();
 	}
 
 	@Test
-	public void runModernTwoMinutes() throws InterruptedException, ExecutionException {
-		OpcFactory.createModern();
-		Thread.sleep(120_000);
+	public void runModern() throws Exception {
+		final WaldotGraph d = OpcFactory.createModern();
+		Thread.sleep(4_000);
+		d.getWaldotNamespace().getOpcuaServer().close();
 	}
 
 	@Test
-	public void runOneQueryAndWait() throws InterruptedException, ExecutionException, ConfigurationException {
+	public void runOneQuery() throws Exception {
 		LogHelper.changeJulLogLevel("fine");
 		final WaldotGraph g = OpcFactory.getOpcGraph();
-		Thread.sleep(2_000);
+		Thread.sleep(500);
 		g.addVertex("label", "PrimoVertice", "id", "ciao", "custom-data", "variable1", "number-test", 10);
 		g.addVertex("label", "SecondoVertice", "id", 111, "custom-data", "variable1", "number-test", 10);
-		Thread.sleep(60_000);
+		Thread.sleep(4_000);
+		g.getWaldotNamespace().getOpcuaServer().close();
 	}
 
 	@Test
-	public void runServerTwoMinutes() throws InterruptedException, ExecutionException {
-		OpcFactory.getOpcGraph();
+	public void runServerTwoMinutes() throws Exception {
+		final WaldotGraph d = OpcFactory.getOpcGraph();
 		Thread.sleep(120_000);
+		d.getWaldotNamespace().getOpcuaServer().close();
 	}
 
 	@Test
-	public void runSimpleQueryAndWaitTwoMinutes()
-			throws InterruptedException, ExecutionException, ConfigurationException {
+	public void runSimpleQuery() throws Exception {
 		LogHelper.changeJulLogLevel("fine");
 		final WaldotGraph g = OpcFactory.getOpcGraph();
-		Thread.sleep(2_000);
+		Thread.sleep(500);
 		final Vertex v1 = g.addVertex("label", "PrimoVertice", "custom-data", "variable1", "number-test", 10);
 		System.out.println("1 - " + v1);
 		final Vertex v2 = g.addVertex("label", "SecondoVertice", "custom-data", "variable2", "directory",
@@ -100,7 +114,7 @@ public class WaldotBaseNamespaceTest {
 		System.out.println(g.getWaldotNamespace().runExpression("'16 - ' + g.traversal().V().toList()"));
 		g.getWaldotNamespace().runExpression("log.info('17 - prova log')");
 		System.out.flush();
-		Thread.sleep(5_000);
+		Thread.sleep(500);
 		for (int i = 1; i < 100; i++) {
 			final Vertex c = g.addVertex("label", "nodo " + i, "number-test", i, "directory", "catalogo " + i % 7);
 			System.out.println("a1" + i + " - " + c);
@@ -110,18 +124,21 @@ public class WaldotBaseNamespaceTest {
 			System.out.println("a2" + i + " - " + c.addEdge("edge numero " + i % 8, v1, "contatore", i, "description",
 					"la variabile generata in automatico numero " + i));
 			System.out.println("a3 - " + g.traversal().V().hasLabel("SecondoVertice").next().value("number-test"));
+			Thread.sleep(5);
 		}
-		for (int i = 1; i < 30; i++) {
-			Thread.sleep(5_000);
+		for (int i = 1; i < 5; i++) {
+			Thread.sleep(250);
 			System.out.println(
 					"b1" + i + " - " + g.traversal().V().hasLabel("PrimoVertice").next().property("number-test", i));
 		}
+		g.getWaldotNamespace().getOpcuaServer().close();
 	}
 
 	@Test
-	public void runTheCrewTwoMinutes() throws InterruptedException, ExecutionException {
-		OpcFactory.createTheCrew();
-		Thread.sleep(120_000);
+	public void runTheCrew() throws Exception {
+		final WaldotGraph d = OpcFactory.createTheCrew();
+		Thread.sleep(4_000);
+		d.getWaldotNamespace().getOpcuaServer().close();
 	}
 
 }

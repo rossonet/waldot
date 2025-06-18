@@ -31,7 +31,7 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	private final RulesThreadManager rulesThreadManager;
 	protected final WaldotNamespace waldotNamespace;
 
-	public DefaultRulesEngine(WaldotNamespace waldotNamespace) {
+	public DefaultRulesEngine(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
 		jexlInterface = new WaldotJexlRuleInterface(this);
 		jexlEngine.setFunctionObject(ConsoleStrategy.G_LABEL, waldotNamespace.getGremlinGraph());
@@ -39,7 +39,7 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 		jexlEngine.setFunctionObject(ConsoleStrategy.COMMANDS_LABEL, waldotNamespace.getCommandsAsFunction());
 		jexlEngine.setFunctionObject(ConsoleStrategy.CTX_LABEL, jexlInterface);
 		for (final PluginListener p : waldotNamespace.getPlugins()) {
-			for (final Entry<String, Rule> f : p.getRuleFunctions().entrySet()) {
+			for (final Entry<String, Object> f : p.getRuleFunctions().entrySet()) {
 				if (f.getKey() != null && f.getValue() != null) {
 					if (ConsoleStrategy.G_LABEL.equals(f.getKey()) || ConsoleStrategy.LOG_LABEL.equals(f.getKey())
 							|| ConsoleStrategy.COMMANDS_LABEL.equals(f.getKey())
@@ -57,7 +57,7 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	}
 
 	@Override
-	public void addListener(RuleListener listener) {
+	public void addListener(final RuleListener listener) {
 		listeners.add(listener);
 	}
 
@@ -68,7 +68,7 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	}
 
 	@Override
-	public void deregisterRule(NodeId ruleNodeId) {
+	public void deregisterRule(final NodeId ruleNodeId) {
 		rules.remove(ruleNodeId);
 	}
 
@@ -88,7 +88,7 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	}
 
 	@Override
-	public void registerObserver(WaldotVertex eventVertex, NodeId ruleNodeId) {
+	public void registerObserver(final WaldotVertex eventVertex, final NodeId ruleNodeId) {
 		if (rules.containsKey(ruleNodeId)) {
 			eventVertex.addAttributeObserver(rules.get(ruleNodeId));
 			eventVertex.addPropertyObserver(rules.get(ruleNodeId));
@@ -100,12 +100,12 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	}
 
 	@Override
-	public void registerOrUpdateRule(Rule rule) {
+	public void registerOrUpdateRule(final Rule rule) {
 		rules.put(rule.getNodeId(), rule);
 	}
 
 	@Override
-	public void removeListener(RuleListener listener) {
+	public void removeListener(final RuleListener listener) {
 		listeners.remove(listener);
 	}
 

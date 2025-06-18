@@ -10,6 +10,14 @@ import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 
+/**
+ * WaldotGraphComputerView is an interface that provides methods to interact
+ * with the graph computer view of a Waldot graph. It allows adding properties,
+ * retrieving properties, checking edge and vertex legality, processing result
+ * graphs, and removing properties.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public interface WaldotGraphComputerView {
 
 	<V> VertexProperty<V> addProperty(Vertex vertex, String key, V value);

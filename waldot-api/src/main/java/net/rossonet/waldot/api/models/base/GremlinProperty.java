@@ -15,6 +15,14 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import net.rossonet.waldot.api.models.WaldotElement;
 import net.rossonet.waldot.api.models.WaldotGraph;
 
+/**
+ * GremlinProperty is an abstract class that extends UaVariableNode and
+ * implements WaldotElement. It represents a property in the Waldot graph model,
+ * providing methods to manage its state, versioning, and removal.
+ * 
+ * @param <DATA_TYPE> the type of data stored in the property
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implements WaldotElement {
 
 	protected static IllegalStateException elementAlreadyRemoved(final Class<? extends Element> clazz,
@@ -26,10 +34,11 @@ public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implemen
 
 	protected long currentVersion;
 
-	protected GremlinProperty(WaldotGraph graph, final String key, final DATA_TYPE value, UaNodeContext context,
-			NodeId nodeId, LocalizedText description, UInteger writeMask, UInteger userWriteMask, NodeId dataType,
-			Integer valueRank, UInteger[] arrayDimensions, UByte accessLevel, UByte userAccessLevel,
-			Double minimumSamplingInterval, boolean historizing) {
+	protected GremlinProperty(final WaldotGraph graph, final String key, final DATA_TYPE value,
+			final UaNodeContext context, final NodeId nodeId, final LocalizedText description, final UInteger writeMask,
+			final UInteger userWriteMask, final NodeId dataType, final Integer valueRank,
+			final UInteger[] arrayDimensions, final UByte accessLevel, final UByte userAccessLevel,
+			final Double minimumSamplingInterval, final boolean historizing) {
 		super(context, nodeId, QualifiedName.parse(key), LocalizedText.english(key), description, writeMask,
 				userWriteMask, null, dataType, valueRank, arrayDimensions, accessLevel, userAccessLevel,
 				minimumSamplingInterval, historizing);
@@ -37,7 +46,7 @@ public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implemen
 	}
 
 	@Override
-	public void addComponent(WaldotElement waldotElement) {
+	public void addComponent(final WaldotElement waldotElement) {
 		super.addComponent((UaNode) waldotElement);
 
 	}
@@ -77,7 +86,7 @@ public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implemen
 	}
 
 	@Override
-	public void removeComponent(WaldotElement waldotElement) {
+	public void removeComponent(final WaldotElement waldotElement) {
 		super.removeComponent((UaNode) waldotElement);
 
 	}

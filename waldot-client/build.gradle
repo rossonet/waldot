@@ -81,8 +81,8 @@ java {
 }
 
 gitProperties {
+    dotGitDirectory = project.rootProject.layout.projectDirectory.dir(".git")
     failOnNoGitDirectory = false
-    customProperty 'component', "${project.name}"
     dateFormat = "yyyy-MM-dd HH:mm:ssZ"
     dateFormatTimeZone = 'GMT'
 }

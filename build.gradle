@@ -30,6 +30,13 @@ repositories {
 apply plugin: 'eclipse'
 apply plugin: "com.gorylenko.gradle-git-properties"
 
+gitProperties {
+    dotGitDirectory = project.rootProject.layout.projectDirectory.dir(".git")
+    failOnNoGitDirectory = false
+    dateFormat = "yyyy-MM-dd HH:mm:ssZ"
+    dateFormatTimeZone = 'GMT'
+}
+
 task eclipseClosedDependencies {}
 
 task eclipseClosedDependencies_ {}
@@ -42,13 +49,6 @@ eclipse {
 }
 
 task view { doLast { println "Working on project ${project.name} [ ${project.description} ]" } }
-
-gitProperties {
-    failOnNoGitDirectory = false
-    customProperty 'component', "${project.name}"
-    dateFormat = "yyyy-MM-dd HH:mm:ssZ"
-    dateFormatTimeZone = 'GMT'
-}
 
 task theiaIdeBackend(type: Exec) {
     workingDir "./"

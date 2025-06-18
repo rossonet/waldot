@@ -18,7 +18,17 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.tinkerpop.WaldotGraphManager;
+import net.rossonet.waldot.tinkerpop.WaldotGremlinServer;
 
+/**
+ * WaldotTinkerPopPlugin is a plugin for the Waldot framework that integrates
+ * with TinkerPop's Gremlin Server. It initializes the server with specific
+ * settings and serializers, allowing for interaction with Waldot's graph
+ * structure.
+ * 
+ * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 @WaldotPlugin
 public class WaldotTinkerPopPlugin implements PluginListener {
 	static WaldotNamespace mainNamespace;
@@ -30,7 +40,7 @@ public class WaldotTinkerPopPlugin implements PluginListener {
 	private WaldotNamespace waldotNamespace;
 
 	@Override
-	public void initialize(WaldotNamespace waldotNamespace) {
+	public void initialize(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
 		logger.info("Initializing Waldot TinkerPop Plugin");
 	}
@@ -66,7 +76,7 @@ public class WaldotTinkerPopPlugin implements PluginListener {
 		WaldotTinkerPopPlugin.mainNamespace = waldotNamespace;
 		this.server = new WaldotGremlinServer(overriddenSettings);
 		try {
-			server.start().get();
+			server.start();// .get();
 			logger.info("Gremlin Server started: " + server.toString());
 		} catch (final Exception e) {
 			logger.error("Failed to start Gremlin Server", e);

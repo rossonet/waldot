@@ -3,6 +3,7 @@ package net.rossonet.waldot.configuration;
 import java.net.URL;
 import java.util.HashMap;
 
+import org.eclipse.milo.opcua.sdk.core.WriteMask;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
@@ -40,12 +41,12 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public UInteger getAboutCommandUserWriteMask() {
-		return UInteger.MIN;
+		return UInteger.valueOf(WriteMask.Executable.getValue());
 	}
 
 	@Override
 	public UInteger getAboutCommandWriteMask() {
-		return UInteger.MIN;
+		return UInteger.valueOf(WriteMask.Executable.getValue());
 	}
 
 	@Override
@@ -60,7 +61,7 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public String getAssetRootNodeDisplayName() {
-		return "Asset Administration Shell & I4.0 API";
+		return "Asset Administration";
 	}
 
 	@Override
@@ -105,12 +106,12 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public UInteger getExecCommandUserWriteMask() {
-		return UInteger.MIN;
+		return UInteger.valueOf(WriteMask.Executable.getValue());
 	}
 
 	@Override
 	public UInteger getExecCommandWriteMask() {
-		return UInteger.MIN;
+		return UInteger.valueOf(WriteMask.Executable.getValue());
 	}
 
 	@Override
@@ -147,12 +148,17 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public UInteger getHelpCommandUserWriteMask() {
-		return UInteger.MIN;
+		return UInteger.valueOf(WriteMask.Executable.getValue());
 	}
 
 	@Override
 	public UInteger getHelpCommandWriteMask() {
-		return UInteger.MIN;
+		return UInteger.valueOf(WriteMask.Executable.getValue());
+	}
+
+	@Override
+	public String getHelpDirectoryPath() {
+		return "/app/help";
 	}
 
 	@Override
@@ -191,36 +197,6 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 	}
 
 	@Override
-	public String getVersionCommandDescription() {
-		return "show software version";
-	}
-
-	@Override
-	public Boolean getVersionCommandExecutable() {
-		return true;
-	}
-
-	@Override
-	public String getVersionCommandLabel() {
-		return "version";
-	}
-
-	@Override
-	public Boolean getVersionCommandUserExecutable() {
-		return true;
-	}
-
-	@Override
-	public UInteger getVersionCommandUserWriteMask() {
-		return UInteger.MIN;
-	}
-
-	@Override
-	public UInteger getVersionCommandWriteMask() {
-		return UInteger.MIN;
-	}
-
-	@Override
 	public String getWaldotCommandDescription() {
 		return "run Gremlin query";
 	}
@@ -242,12 +218,12 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public UInteger getWaldotCommandUserWriteMask() {
-		return UInteger.MIN;
+		return UInteger.valueOf(WriteMask.Executable.getValue());
 	}
 
 	@Override
 	public UInteger getWaldotCommandWriteMask() {
-		return UInteger.MIN;
+		return UInteger.valueOf(WriteMask.Executable.getValue());
 	}
 
 }

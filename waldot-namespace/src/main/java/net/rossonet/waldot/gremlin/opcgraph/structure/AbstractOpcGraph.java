@@ -136,11 +136,11 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 	@Override
 	public abstract Vertex addVertex(final Object... keyValues);
 
-	public abstract void clear();
+	public abstract void closeProcedure();
 
 	@Override
 	public void close() {
-		clear();
+		closeProcedure();
 		serviceRegistry.close();
 	}
 
