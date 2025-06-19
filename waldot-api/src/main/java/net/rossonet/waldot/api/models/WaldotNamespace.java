@@ -13,6 +13,7 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager;
 import org.eclipse.milo.opcua.sdk.server.UaNodeManager;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.factories.EventFactory;
 import org.eclipse.milo.opcua.stack.core.NamespaceTable;
@@ -24,10 +25,14 @@ import org.slf4j.Logger;
 
 import com.google.common.eventbus.EventBus;
 
+import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
+import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
+import net.rossonet.waldot.api.strategies.WaldotAgentManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 /**
@@ -66,6 +71,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	NodeId generateNodeId(UUID nodeId);
 
 	QualifiedName generateQualifiedName(String label);
+
+	WaldotAgentManagementStrategy getAgentManagementStrategy();
 
 	Logger getBootLogger();
 
@@ -152,6 +159,12 @@ public interface WaldotNamespace extends AutoCloseable {
 	void namespaceParametersRemove(String key);
 
 	Variables namespaceParametersToVariables();
+
+	void opcuaUpdateEvent(UaNode sourceNode);
+
+	void registerAgentValidators(AgentRegisterAnonymousValidator agentAnonymousValidator,
+			AgentRegisterUsernameIdentityValidator agentIdentityValidator,
+			AgentRegisterX509IdentityValidator agentX509IdentityValidator);
 
 	void registerCommand(WaldotCommand command);
 

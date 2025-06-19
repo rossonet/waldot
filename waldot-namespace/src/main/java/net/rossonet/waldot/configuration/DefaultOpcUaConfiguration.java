@@ -2,6 +2,8 @@ package net.rossonet.waldot.configuration;
 
 import java.util.HashMap;
 
+import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
+
 import net.rossonet.waldot.api.configuration.OpcConfiguration;
 
 public class DefaultOpcUaConfiguration extends HashMap<String, String> implements OpcConfiguration {
@@ -20,7 +22,7 @@ public class DefaultOpcUaConfiguration extends HashMap<String, String> implement
 
 	@Override
 	public String getApplicationName() {
-		return "WaldOT opcua server";
+		return "WaldOT OPCUA server";
 	}
 
 	@Override
@@ -32,6 +34,18 @@ public class DefaultOpcUaConfiguration extends HashMap<String, String> implement
 	@Override
 	public String getBindHostname() {
 		return "127.0.0.1";
+	}
+
+	@Override
+	public DateTime getBuildDate() {
+		// TODO Auto-generated method stub
+		return DateTime.now();
+	}
+
+	@Override
+	public String getBuildNumber() {
+		// TODO Auto-generated method stub
+		return "test1";
 	}
 
 	@Override

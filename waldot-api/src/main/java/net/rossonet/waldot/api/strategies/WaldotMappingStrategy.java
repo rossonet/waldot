@@ -9,6 +9,7 @@ import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.eclipse.milo.opcua.sdk.core.nodes.Node;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
@@ -159,5 +160,7 @@ public interface WaldotMappingStrategy {
 	void removeVertexProperty(NodeId nodeId);
 
 	void resetNameSpace();
+
+	void updateEventGenerator(Node sourceNode);
 
 }

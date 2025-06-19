@@ -34,7 +34,22 @@ public class AboutCommand extends AbstractOpcCommand {
 	private static final String LONG_LABEL_LICENSE_URL = "URL of the license of the software";
 	private static final String LABEL_REPOSITORY_URL = "repository URL";
 	private static final String LONG_LABEL_REPOSITORY_URL = "URL of the repository of the software";
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private final static Logger logger = LoggerFactory.getLogger(AboutCommand.class);
+
+	private static Properties loadProperties(final String propertiesFilename) {
+		final Properties prop = new Properties();
+		final ClassLoader loader = AboutCommand.class.getClassLoader();
+		try (InputStream stream = loader.getResourceAsStream(propertiesFilename)) {
+			if (stream == null) {
+				throw new FileNotFoundException("git properties file not found");
+			}
+			prop.load(stream);
+		} catch (final IOException e) {
+			logger.error("loading git parameters: " + e.getMessage());
+		}
+		return prop;
+	}
+
 	private final List<String> aboutReplyList = new ArrayList<>();
 
 	public AboutCommand(final WaldotNamespace waldotNamespace) {
@@ -75,20 +90,6 @@ public class AboutCommand extends AbstractOpcCommand {
 	@Override
 	public Object clone() {
 		return new AboutCommand(this.waldotNamespace);
-	}
-
-	private Properties loadProperties(final String propertiesFilename) {
-		final Properties prop = new Properties();
-		final ClassLoader loader = AboutCommand.class.getClassLoader();
-		try (InputStream stream = loader.getResourceAsStream(propertiesFilename)) {
-			if (stream == null) {
-				throw new FileNotFoundException("git properties file not found");
-			}
-			prop.load(stream);
-		} catch (final IOException e) {
-			logger.error("loading git parameters: " + e.getMessage());
-		}
-		return prop;
 	}
 
 	@Override

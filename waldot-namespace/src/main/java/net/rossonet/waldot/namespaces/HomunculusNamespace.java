@@ -19,6 +19,7 @@ import org.eclipse.milo.opcua.sdk.server.api.DataItem;
 import org.eclipse.milo.opcua.sdk.server.api.ManagedNamespaceWithLifecycle;
 import org.eclipse.milo.opcua.sdk.server.api.MonitoredItem;
 import org.eclipse.milo.opcua.sdk.server.dtd.DataTypeDictionaryManager;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.factories.EventFactory;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
@@ -32,6 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
+import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
+import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
@@ -47,6 +51,7 @@ import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.strategies.BootstrapProcedureStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
+import net.rossonet.waldot.api.strategies.WaldotAgentManagementStrategy;
 import net.rossonet.waldot.api.strategies.WaldotMappingStrategy;
 import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
@@ -82,10 +87,15 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final SubscriptionModel subscriptionModel;
 	private final String bootstrapUrl;
 	private WaldotOpcUaServer waldotOpcUaServer;
+	private AgentRegisterAnonymousValidator agentAnonymousValidator;
+	private AgentRegisterUsernameIdentityValidator agentIdentityValidator;
+	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
+	private final WaldotAgentManagementStrategy agentManagementStrategy;
 
 	public HomunculusNamespace(final WaldotOpcUaServer server, final WaldotMappingStrategy opcMappingStrategy,
 			final ConsoleStrategy consoleStrategy, final DefaultHomunculusConfiguration configuration,
-			final BootstrapProcedureStrategy bootstrapProcedureStrategy, final String bootstrapUrl) {
+			final BootstrapProcedureStrategy bootstrapProcedureStrategy,
+			final WaldotAgentManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
@@ -93,6 +103,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		this.jexlWaldotCommandHelper = new jexlWaldotCommandHelper(this);
 		this.configuration = configuration;
 		this.bootstrapProcedureStrategy = bootstrapProcedureStrategy;
+		this.agentManagementStrategy = agentManagementStrategy;
 		this.bootstrapUrl = bootstrapUrl;
 		opcGraphVariables = new OpcGraphVariables(this);
 		subscriptionModel = new SubscriptionModel(server.getServer(), this);
@@ -102,6 +113,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		getLifecycleManager().addStartupTask(this::runBootstrapProcedure);
 		gremlin = OpcGraph.open();
 		gremlin.setNamespace(this);
+		agentManagementStrategy.initialize(this);
 		opcMappingStrategy.initialize(this);
 		consoleStrategy.initialize(this);
 		addBaseCommands();
@@ -191,6 +203,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public QualifiedName generateQualifiedName(final String text) {
 		return newQualifiedName(text);
+	}
+
+	@Override
+	public WaldotAgentManagementStrategy getAgentManagementStrategy() {
+		return agentManagementStrategy;
 	}
 
 	@Override
@@ -432,6 +449,22 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	public void onMonitoringModeChanged(final List<MonitoredItem> monitoredItems) {
 		subscriptionModel.onMonitoringModeChanged(monitoredItems);
 		listeners.forEach(listener -> listener.onMonitoringModeChanged(monitoredItems));
+	}
+
+	@Override
+	public void opcuaUpdateEvent(final UaNode sourceNode) {
+		opcMappingStrategy.updateEventGenerator(sourceNode);
+
+	}
+
+	@Override
+	public void registerAgentValidators(final AgentRegisterAnonymousValidator agentAnonymousValidator,
+			final AgentRegisterUsernameIdentityValidator agentIdentityValidator,
+			final AgentRegisterX509IdentityValidator agentX509IdentityValidator) {
+		this.agentAnonymousValidator = agentAnonymousValidator;
+		this.agentIdentityValidator = agentIdentityValidator;
+		this.agentX509IdentityValidator = agentX509IdentityValidator;
+		agentManagementStrategy.activate(agentAnonymousValidator, agentIdentityValidator, agentX509IdentityValidator);
 	}
 
 	@Override

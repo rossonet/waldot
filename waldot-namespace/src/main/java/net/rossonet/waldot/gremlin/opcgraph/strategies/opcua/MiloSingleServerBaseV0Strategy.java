@@ -1,11 +1,14 @@
 package net.rossonet.waldot.gremlin.opcgraph.strategies.opcua;
 
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
@@ -21,6 +24,7 @@ import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.core.nodes.Node;
+import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
@@ -28,6 +32,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.ReferenceType;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
@@ -79,6 +84,11 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 	public static final String PRIORITY_FIELD = "Priority";
 	public static final String RULE_NODE_PARAMETER = "rule";
 	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
+	private static final int DEFAULT_DELAY_BEFORE_EVALUATION = 0;
+	private static final int DEFAULT_DELAY_BEFORE_EXECUTE = 0;
+	private static final boolean DEFAULT_CLEAR_FACTS_AFTER_EXECUTION = false;
+	private static final int DEFAULT_REFACTORY_PERIOD_MS = 0;
+	private static final boolean DEFAULT_PARALLEL_EXECUTION = false;
 
 	private UaFolderNode assetRootNode;
 	private final Map<String, UaFolderNode> edgeDirectories = new HashMap<>();
@@ -110,6 +120,7 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 			logger.info(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
 		}
 		// create the edge
+		// FIXME parametrizzare tutto per la creazione dell'edge
 		final OpcEdge edge = new OpcEdge(waldotNamespace.getGremlinGraph(), nodeId, sourceVertex, targetVertex,
 				elaboratedLabel, description, MiloSingleServerBaseV0ReferenceNodeBuilder.writeMask,
 				MiloSingleServerBaseV0ReferenceNodeBuilder.userWriteMask,
@@ -191,7 +202,12 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 					propertyKeyValues);
 		} else {
 			// if typeDefinition is not a rule, create a vertex
-			return createVertex(nodeId, typeDefinition, label, description, browseName, displayName, propertyKeyValues);
+			// FIXME parametrizzare tutto per la creazione del vertice
+			return createVertex(nodeId, typeDefinition, label, description, browseName, displayName, propertyKeyValues,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.writeMask,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.userWriteMask,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.eventNotifierActive,
+					MiloSingleServerBaseV0ReferenceNodeBuilder.version);
 		}
 
 	}
@@ -322,13 +338,11 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 
 	private OpcVertex createVertex(final NodeId nodeId, final NodeId typeDefinition, final String label,
 			final String description, final QualifiedName browseName, final LocalizedText displayName,
-			final Object[] propertyKeyValues) {
+			final Object[] propertyKeyValues, final UInteger writeMask, final UInteger userWriteMask,
+			final UByte eventNotifierActive, final long version) {
 		final OpcVertex vertex = createVertexObject(typeDefinition, waldotNamespace.getGremlinGraph(),
 				waldotNamespace.getOpcUaNodeContext(), nodeId, browseName, displayName, new LocalizedText(description),
-				MiloSingleServerBaseV0ReferenceNodeBuilder.writeMask,
-				MiloSingleServerBaseV0ReferenceNodeBuilder.userWriteMask,
-				MiloSingleServerBaseV0ReferenceNodeBuilder.eventNotifierActive,
-				MiloSingleServerBaseV0ReferenceNodeBuilder.version);
+				writeMask, userWriteMask, eventNotifierActive, version);
 		waldotNamespace.getStorageManager().addNode(vertex);
 		vertex.addReference(
 				new Reference(vertex.getNodeId(), Identifiers.HasTypeDefinition, typeDefinition.expanded(), true));
@@ -390,6 +404,12 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 				MiloSingleServerBaseV0ReferenceNodeBuilder.eventNotifierActive,
 				MiloSingleServerBaseV0ReferenceNodeBuilder.version, waldotNamespace.getRulesEngine(), condition, action,
 				priority);
+		// FIXME parametrizzare tutto per la creazione della regola
+		rule.setDelayBeforeEvaluation(DEFAULT_DELAY_BEFORE_EVALUATION);
+		rule.setDelayBeforeExecute(DEFAULT_DELAY_BEFORE_EXECUTE);
+		rule.setClearFactsAfterExecution(DEFAULT_CLEAR_FACTS_AFTER_EXECUTION);
+		rule.setRefractoryPeriodMs(DEFAULT_REFACTORY_PERIOD_MS);
+		rule.setParallelExecution(DEFAULT_PARALLEL_EXECUTION);
 		waldotNamespace.getStorageManager().addNode(rule);
 		checkDirectoryParameterAndLinkNode(propertyKeyValues, rule, folderManager.getRulesFolderNode(),
 				folderManager.getRulesDirectories());
@@ -649,9 +669,11 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 				waldotNamespace.generateNodeId(waldotNamespace.getConfiguration().getAssetRootNodeId()),
 				waldotNamespace.generateQualifiedName(waldotNamespace.getConfiguration().getAssetRootNodeBrowseName()),
 				LocalizedText.english(waldotNamespace.getConfiguration().getAssetRootNodeDisplayName()));
+		waldotNamespace.getAgentManagementStrategy().generateAssetFolders(assetRootNode);
 		waldotNamespace.getStorageManager().addNode(getRootNode());
 		waldotNamespace.getStorageManager().addNode(assetRootNode);
 		waldotNamespace.getStorageManager().addNode(interfaceRootNode);
+
 		getRootNode().addReference(new Reference(getRootNode().getNodeId(), Identifiers.Organizes,
 				Identifiers.ObjectsFolder.expanded(), false));
 		assetRootNode.addReference(new Reference(assetRootNode.getNodeId(), Identifiers.Organizes,
@@ -781,6 +803,33 @@ public class MiloSingleServerBaseV0Strategy implements WaldotMappingStrategy {
 		logger.info("resetNameSpace");
 		// FIXME cancellare tutto...
 
+	}
+
+	@Override
+	public void updateEventGenerator(final Node sourceNode) {
+
+		try {
+			final BaseEventTypeNode eventNode = waldotNamespace.getOpcuaServer().getServer().getEventFactory()
+					.createEvent(waldotNamespace.generateNodeId(UUID.randomUUID()),
+							Identifiers.BaseModelChangeEventType);
+
+			eventNode.setBrowseName(new QualifiedName(1, "foo"));
+			eventNode.setDisplayName(LocalizedText.english("foo"));
+			eventNode.setEventId(ByteString.of(new byte[] { 0, 1, 2, 3 }));
+			eventNode.setEventType(Identifiers.BaseEventType);
+			eventNode.setSourceNode(sourceNode.getNodeId());
+			eventNode.setSourceName(sourceNode.getDisplayName().getText());
+			eventNode.setTime(DateTime.now());
+			eventNode.setReceiveTime(DateTime.NULL_VALUE);
+			eventNode.setMessage(LocalizedText.english("object model updated"));
+			eventNode.setSeverity(ushort(2));
+
+			waldotNamespace.getOpcuaServer().getServer().getEventBus().post(eventNode);
+
+			eventNode.delete();
+		} catch (final Throwable e) {
+			logger.error("Error creating EventNode: {}", e.getMessage(), e);
+		}
 	}
 
 }

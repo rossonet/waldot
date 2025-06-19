@@ -3,6 +3,8 @@ package net.rossonet.waldot.api.configuration;
 import java.io.Serializable;
 import java.util.Map;
 
+import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
+
 /**
  * OpcConfiguration is an interface that defines the configuration settings for
  * an OPC server. It extends Serializable and Map<String, String> to allow for
@@ -17,6 +19,10 @@ public interface OpcConfiguration extends Serializable, Map<String, String> {
 	String getBindAddresses();
 
 	String getBindHostname();
+
+	DateTime getBuildDate();
+
+	String getBuildNumber();
 
 	String getDnsAddressCertificateGenerator();
 

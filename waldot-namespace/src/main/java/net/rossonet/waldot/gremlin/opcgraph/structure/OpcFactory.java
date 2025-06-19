@@ -36,6 +36,7 @@ import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.agent.BaseAgentManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileWithStagesBootstrapStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.ConsoleV0Strategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseV0Strategy;
@@ -270,7 +271,7 @@ public final class OpcFactory {
 		});
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseV0Strategy(),
 				new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(),
-				"file:///tmp/boot.conf");
+				new BaseAgentManagementStrategy(), "file:///tmp/boot.conf");
 		waldot.startup(namespace).get();
 		return waldot.getGremlinGraph();
 	}

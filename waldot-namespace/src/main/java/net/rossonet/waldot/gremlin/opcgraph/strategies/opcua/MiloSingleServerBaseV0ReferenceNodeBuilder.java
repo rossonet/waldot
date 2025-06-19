@@ -129,8 +129,8 @@ public class MiloSingleServerBaseV0ReferenceNodeBuilder {
 		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(edgeTypeNode);
 		edgeTypeNode.addReference(new Reference(edgeTypeNode.getNodeId(), Identifiers.HasSubtype,
 				Identifiers.BaseObjectType.expanded(), false));
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getObjectTypeManager().registerObjectType(edgeTypeNode.getNodeId(),
-				UaObjectNode.class, UaObjectNode::new);
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getObjectTypeManager()
+				.registerObjectType(edgeTypeNode.getNodeId(), UaObjectNode.class, UaObjectNode::new);
 	}
 
 	private static void generateInterfaceRootNode(final MiloSingleServerBaseV0Strategy miloSingleServerBaseV0Strategy) {
@@ -162,7 +162,7 @@ public class MiloSingleServerBaseV0ReferenceNodeBuilder {
 				"Target node for edge", Identifiers.NonHierarchicalReferences, false, false,
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
 		hasPropertyReferenceType = generateReferenceTypeNode("HasGremlinProperty", "IsPropertyOf",
-				"A property linked to an edge or vertex", Identifiers.Organizes, false, false,
+				"A property linked to an edge or vertex", Identifiers.HasComponent, false, false,
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
 		hasPropertyReferenceType = generateReferenceTypeNode(MiloSingleServerBaseV0Strategy.HAS_WALDOT_RULE,
 				"IsFiredBy", "A rule fired by the events", Identifiers.HasComponent, false, false,
@@ -287,8 +287,8 @@ public class MiloSingleServerBaseV0ReferenceNodeBuilder {
 		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(ruleTypeNode);
 		ruleTypeNode.addReference(new Reference(ruleTypeNode.getNodeId(), Identifiers.HasSubtype,
 				Identifiers.BaseObjectType.expanded(), false));
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getObjectTypeManager().registerObjectType(ruleTypeNode.getNodeId(),
-				UaObjectNode.class, UaObjectNode::new);
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getObjectTypeManager()
+				.registerObjectType(ruleTypeNode.getNodeId(), UaObjectNode.class, UaObjectNode::new);
 	}
 
 	private static void generateVertexTypeNode(final MiloSingleServerBaseV0Strategy miloSingleServerBaseV0Strategy) {
@@ -316,8 +316,8 @@ public class MiloSingleServerBaseV0ReferenceNodeBuilder {
 		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(vertexTypeNode);
 		vertexTypeNode.addReference(new Reference(vertexTypeNode.getNodeId(), Identifiers.HasSubtype,
 				Identifiers.BaseObjectType.expanded(), false));
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getObjectTypeManager().registerObjectType(vertexTypeNode.getNodeId(),
-				UaObjectNode.class, UaObjectNode::new);
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getObjectTypeManager()
+				.registerObjectType(vertexTypeNode.getNodeId(), UaObjectNode.class, UaObjectNode::new);
 	}
 
 }

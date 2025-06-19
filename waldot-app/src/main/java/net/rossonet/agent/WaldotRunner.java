@@ -12,6 +12,7 @@ import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.agent.BaseAgentManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileWithStagesBootstrapStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.ConsoleV0Strategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseV0Strategy;
@@ -424,7 +425,8 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		waldot = new WaldotOpcUaServer(configuration, serverConfiguration, new DefaultAnonymousValidator(configuration),
 				new DefaultIdentityValidator(configuration), new DefaultX509IdentityValidator(configuration));
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseV0Strategy(),
-				new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(), bootUrl);
+				new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(),
+				new BaseAgentManagementStrategy(), bootUrl);
 		waldot.startup(namespace).get();
 		waldot.waitCompletion();
 	}

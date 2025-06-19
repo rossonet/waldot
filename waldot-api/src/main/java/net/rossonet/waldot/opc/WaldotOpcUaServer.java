@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
+import org.eclipse.milo.opcua.sdk.server.identity.AbstractIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.IdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.UsernameIdentityValidator;
@@ -35,7 +36,6 @@ import org.eclipse.milo.opcua.stack.core.security.DefaultCertificateManager;
 import org.eclipse.milo.opcua.stack.core.security.DefaultTrustListManager;
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.transport.TransportProfile;
-import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
@@ -50,8 +50,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.reflect.ClassPath;
 
+import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
+import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
+import net.rossonet.waldot.api.auth.FactoryPasswordValidator;
 import net.rossonet.waldot.api.auth.WaldotAnonymousValidator;
 import net.rossonet.waldot.api.configuration.OpcConfiguration;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
@@ -67,6 +71,10 @@ import net.rossonet.waldot.utils.KeyStoreLoader;
  */
 public class WaldotOpcUaServer implements AutoCloseable {
 
+	public static final String REGISTER_PATH = "/register";
+
+	public static final String PLUGINS_BASE_SEARCH_PACKAGE = "net.rossonet.waldot";
+
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
 		Security.addProvider(new BouncyCastleProvider());
@@ -79,16 +87,26 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
-	private final WaldotAnonymousValidator anonymousValidator;
+	private final AbstractIdentityValidator<String> anonymousValidator;
 
 	private OpcConfiguration configuration;
 
 	private final UsernameIdentityValidator identityValidator;
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+
 	private WaldotNamespace managerNamespace;
+
 	private OpcUaServer server;
+
 	private final X509IdentityValidator x509IdentityValidator;
+	private final AgentRegisterAnonymousValidator agentAnonymousValidator;
+
+	private final AgentRegisterUsernameIdentityValidator agentIdentityValidator;
+
+	private final AgentRegisterX509IdentityValidator agentX509IdentityValidator;
+
+	private final WaldotConfiguration waldotConfiguration;
 
 	public WaldotOpcUaServer(final WaldotConfiguration waldotConfiguration, final OpcConfiguration serverConfiguration,
 			final WaldotAnonymousValidator anonymousValidator, final UsernameIdentityValidator identityValidator,
@@ -97,6 +115,12 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		this.anonymousValidator = anonymousValidator;
 		this.identityValidator = identityValidator;
 		this.x509IdentityValidator = x509IdentityValidator;
+		this.waldotConfiguration = waldotConfiguration;
+		agentAnonymousValidator = new AgentRegisterAnonymousValidator(this);
+
+		agentIdentityValidator = new AgentRegisterUsernameIdentityValidator(this, new FactoryPasswordValidator());
+
+		agentX509IdentityValidator = new AgentRegisterX509IdentityValidator(this);
 		try {
 			server = create(configuration, anonymousValidator, identityValidator, x509IdentityValidator);
 		} catch (final Exception e) {
@@ -210,6 +234,11 @@ public class WaldotOpcUaServer implements AutoCloseable {
 						.setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(discoveryBuilder));
 				endpointConfigurations.add(buildHttpsEndpoint(discoveryBuilder));
+				final EndpointConfiguration.Builder registerBuilder = builder.copy()
+						.setPath(configuration.getPath() + REGISTER_PATH).setSecurityPolicy(SecurityPolicy.None)
+						.setSecurityMode(MessageSecurityMode.None);
+				endpointConfigurations.add(buildTcpEndpoint(registerBuilder));
+				endpointConfigurations.add(buildHttpsEndpoint(registerBuilder));
 			}
 		}
 
@@ -227,17 +256,19 @@ public class WaldotOpcUaServer implements AutoCloseable {
 				.setApplicationName(LocalizedText.english(configuration.getApplicationName()))
 				.setEndpoints(endpointConfigurations)
 				.setBuildInfo(new BuildInfo(configuration.getProductUri(), configuration.getManufacturerName(),
-						configuration.getProductName(), OpcUaServer.SDK_VERSION, "", DateTime.now()))
+						configuration.getProductName(), OpcUaServer.SDK_VERSION, configuration.getBuildNumber(),
+						configuration.getBuildDate()))
 				.setCertificateManager(certificateManager).setTrustListManager(trustListManager)
 				.setCertificateValidator(certificateValidator).setHttpsKeyPair(httpsKeyPair)
 				.setHttpsCertificateChain(new X509Certificate[] { httpsCertificate })
-				.setIdentityValidator(
-						new CompositeValidator(anonymousValidator, identityValidator, x509IdentityValidator))
+				.setIdentityValidator(new CompositeValidator(agentAnonymousValidator, agentIdentityValidator,
+						agentX509IdentityValidator, anonymousValidator, identityValidator, x509IdentityValidator))
 				.setProductUri(configuration.getProductUri()).build();
-		return new OpcUaServer(serverConfig);
+		final OpcUaServer opcUaServer = new OpcUaServer(serverConfig);
+		return opcUaServer;
 	}
 
-	public WaldotAnonymousValidator getAnonymousValidator() {
+	public AbstractIdentityValidator<String> getAnonymousValidator() {
 		return anonymousValidator;
 	}
 
@@ -246,7 +277,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	}
 
 	public WaldotGraph getGremlinGraph() {
-		return managerNamespace.getGremlinGraph();
+		return getManagerNamespace().getGremlinGraph();
 
 	}
 
@@ -254,8 +285,19 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		return identityValidator;
 	}
 
+	public WaldotNamespace getManagerNamespace() {
+		if (managerNamespace == null) {
+			throw new RuntimeException("WaldotNamespace not initialized");
+		}
+		return managerNamespace;
+	}
+
 	public OpcUaServer getServer() {
 		return server;
+	}
+
+	public WaldotConfiguration getWaldotConfiguration() {
+		return waldotConfiguration;
 	}
 
 	public X509IdentityValidator getX509IdentityValidator() {
@@ -264,13 +306,13 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	private void registerPluginsInNamespace() throws IOException {
 		final ClassPath cp = ClassPath.from(Thread.currentThread().getContextClassLoader());
-		for (final ClassPath.ClassInfo classInfo : cp.getTopLevelClassesRecursive("net.rossonet.waldot")) {
+		for (final ClassPath.ClassInfo classInfo : cp.getTopLevelClassesRecursive(PLUGINS_BASE_SEARCH_PACKAGE)) {
 			final Class<?> clazz = classInfo.load();
 			if (clazz.isAnnotationPresent(WaldotPlugin.class)) {
 				logger.info("Found plugin: {}", clazz.getName());
 				try {
 					final PluginListener candidate = (PluginListener) clazz.getConstructor().newInstance();
-					managerNamespace.registerPlugin(candidate);
+					getManagerNamespace().registerPlugin(candidate);
 				} catch (final Exception e) {
 					logger.error("Error creating plugin", e);
 				}
@@ -287,13 +329,15 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	 * @return
 	 */
 	public Object runExpression(final String query) {
-		return managerNamespace.runExpression(query);
+		return getManagerNamespace().runExpression(query);
 	}
 
 	public CompletableFuture<OpcUaServer> startup(final WaldotNamespace waldotNamespace) {
 		try {
 			managerNamespace = waldotNamespace;
 			registerPluginsInNamespace();
+			managerNamespace.registerAgentValidators(agentAnonymousValidator, agentIdentityValidator,
+					agentX509IdentityValidator);
 			managerNamespace.startup();
 			return server.startup();
 		} catch (final Exception e) {
