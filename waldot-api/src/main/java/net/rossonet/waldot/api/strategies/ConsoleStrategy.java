@@ -1,5 +1,7 @@
 package net.rossonet.waldot.api.strategies;
 
+import org.apache.commons.jexl3.JexlContext;
+
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
 /**
@@ -12,8 +14,9 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 public interface ConsoleStrategy {
 	public static String G_LABEL = "g";
 	public static String LOG_LABEL = "log";
-	public static String COMMANDS_LABEL = "c";
+	public static String COMMANDS_LABEL = "cmd";
 	public static String CTX_LABEL = "ctx";
+	public static String SELF_LABEL = "self";
 
 	WaldotNamespace getWaldotNamespace();
 
@@ -22,5 +25,7 @@ public interface ConsoleStrategy {
 	void reset();
 
 	Object runExpression(String expression);
+
+	Object runExpression(String expression, JexlContext jexlContext);
 
 }

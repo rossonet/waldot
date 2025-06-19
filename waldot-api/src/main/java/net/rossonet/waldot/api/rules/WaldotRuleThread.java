@@ -1,5 +1,8 @@
 package net.rossonet.waldot.api.rules;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * extends Thread to add a Rule and a WaldotStepLogger.
  * 
@@ -7,13 +10,14 @@ package net.rossonet.waldot.api.rules;
  */
 public final class WaldotRuleThread extends Thread {
 
+	private static final Logger logger = LoggerFactory.getLogger("RE Thread");
+
 	private Rule rule;
 	private final WaldotStepLogger stepRegister;
 
 	public WaldotRuleThread(final Runnable target, final WaldotStepLogger stepRegister) {
 		super(target);
 		this.stepRegister = stepRegister;
-		stepRegister.onThreadRegistered();
 	}
 
 	public Rule getRule() {
@@ -28,5 +32,7 @@ public final class WaldotRuleThread extends Thread {
 		this.rule = rule;
 		setPriority(rule.getPriority());
 		setName(rule.getThreadName());
+		logger.info("Rule {} execution on this thread with priority {}", rule.label(), getPriority());
+		stepRegister.onThreadRegistered(getName(), getPriority());
 	}
 }

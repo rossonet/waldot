@@ -31,14 +31,13 @@ public class RulesThreadManager implements AutoCloseable {
 
 	private final Map<NodeId, Rule> rules;
 
-	private final Map<Future<WaldotStepLogger>, Long> timeoutRunners = new HashMap<>();
+	private final Map<Future<WaldotStepLogger>, Long> runFutures = new HashMap<>();
 
 	public RulesThreadManager(final Map<NodeId, Rule> rules, final Logger logger) {
 		this.logger = logger;
 		this.rules = rules;
 		executor = Executors.newThreadPerTaskExecutor(new DefaultThreadFactory());
 		controlThread = getThread();
-
 	}
 
 	private synchronized void checkRules() throws InterruptedException {
@@ -47,7 +46,7 @@ public class RulesThreadManager implements AutoCloseable {
 				if (rule.isDirty()) {
 					final Callable<WaldotStepLogger> newRunner = rule.getNewRunner();
 					final Future<WaldotStepLogger> future = executor.submit(newRunner);
-					timeoutRunners.put(future, System.currentTimeMillis() + rule.getExecutionTimeout());
+					runFutures.put(future, System.currentTimeMillis() + rule.getExecutionTimeout());
 				}
 			}
 		} else {
@@ -57,16 +56,16 @@ public class RulesThreadManager implements AutoCloseable {
 	}
 
 	private synchronized void checkThread() {
-		if (!timeoutRunners.isEmpty()) {
+		if (!runFutures.isEmpty()) {
 			final long currentTime = System.currentTimeMillis();
-			for (final Entry<Future<WaldotStepLogger>, Long> runner : timeoutRunners.entrySet()) {
+			for (final Entry<Future<WaldotStepLogger>, Long> runner : runFutures.entrySet()) {
 				if (runner.getValue() < currentTime) {
 					runner.getKey().cancel(true);
 					logger.warn("Rule execution timeout");
 				}
 			}
 			final Set<Future<WaldotStepLogger>> toRemove = new HashSet<>();
-			for (final Entry<Future<WaldotStepLogger>, Long> runner : timeoutRunners.entrySet()) {
+			for (final Entry<Future<WaldotStepLogger>, Long> runner : runFutures.entrySet()) {
 				if (runner.getKey().isDone()) {
 					toRemove.add(runner.getKey());
 				}
@@ -82,7 +81,7 @@ public class RulesThreadManager implements AutoCloseable {
 				} catch (final Exception e) {
 					logger.error("Error during the step log trascoding", e);
 				}
-				timeoutRunners.remove(future);
+				runFutures.remove(future);
 			}
 		}
 
@@ -91,21 +90,22 @@ public class RulesThreadManager implements AutoCloseable {
 	@Override
 	public void close() throws Exception {
 		stop();
-
 	}
 
 	private Thread getThread() {
 		return new Thread(new Runnable() {
 			@Override
 			public void run() {
-				Thread.currentThread().setName("Rules Engine");
+				Thread.currentThread().setName("RE Thread Manager");
 				Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+				logger.info("Rules Engine Thread Manager started with thread name " + Thread.currentThread().getName()
+						+ " and priority " + Thread.currentThread().getPriority());
 				while (active) {
 					try {
 						checkRules();
 						checkThread();
 					} catch (final Throwable e) {
-						logger.error("Error in RulesThreadManager", e);
+						logger.error("Error in Rules Thread Manager", e);
 					}
 				}
 			}
@@ -114,19 +114,17 @@ public class RulesThreadManager implements AutoCloseable {
 
 	private void logSteps(final WaldotStepLogger waldotStepRegister) {
 		logger.info(waldotStepRegister.toString());
-
 	}
 
 	public void start() {
 		controlThread.start();
-
 	}
 
 	public void stop() {
 		if (controlThread != null) {
 			active = false;
+			logger.info("Stopping Rules Thread Manager");
 		}
-
 	}
 
 }

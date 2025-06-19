@@ -1,5 +1,6 @@
 package net.rossonet.waldot.gremlin.opcgraph.strategies.console;
 
+import org.apache.commons.jexl3.JexlContext;
 import org.slf4j.Logger;
 
 import net.rossonet.waldot.api.annotation.WaldotConsoleStrategy;
@@ -39,6 +40,11 @@ public class ConsoleV0Strategy implements ConsoleStrategy {
 	@Override
 	public Object runExpression(final String expression) {
 		return baseExecutor.execute(expression);
+	}
+
+	@Override
+	public Object runExpression(final String expression, final JexlContext jexlContext) {
+		return baseExecutor.execute(expression, jexlContext);
 	}
 
 }

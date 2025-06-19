@@ -32,5 +32,5 @@ public interface WaldotStepLogger {
 
 	void onEvaluateStoppedByListener(RuleListener listener);
 
-	void onThreadRegistered();
+	void onThreadRegistered(String threadName, int priority);
 }

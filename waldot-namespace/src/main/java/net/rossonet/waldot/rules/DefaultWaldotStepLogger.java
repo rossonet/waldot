@@ -24,7 +24,8 @@ public class DefaultWaldotStepLogger implements WaldotStepLogger {
 
 	@Override
 	public void onAfterActionExecution(final long executionTimeMs, final Object result) {
-		log.append(Instant.now().toString() + " - action executed in ").append(executionTimeMs).append("ms\n");
+		log.append(Instant.now().toString() + " - action executed in ").append(executionTimeMs).append("ms")
+				.append(" with result ").append(result).append("\n");
 	}
 
 	@Override
@@ -60,8 +61,9 @@ public class DefaultWaldotStepLogger implements WaldotStepLogger {
 	}
 
 	@Override
-	public void onThreadRegistered() {
-		log.append(Instant.now().toString() + " - thread registered\n");
+	public void onThreadRegistered(final String threadName, final int priority) {
+		log.append(Instant.now().toString() + " - thread registered with name ").append(threadName)
+				.append(" and priority ").append(priority).append("\n");
 	}
 
 	@Override

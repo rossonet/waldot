@@ -1,5 +1,7 @@
 package net.rossonet.waldot.api.rules;
 
+import org.apache.commons.jexl3.JexlContext;
+
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
 /**
@@ -19,6 +21,8 @@ public interface ExecutorHelper extends AutoCloseable {
 	boolean evaluateRule(WaldotNamespace waldotNamespace, Rule rule, WaldotStepLogger stepRegister);
 
 	Object execute(String expression);
+
+	Object execute(String expression, JexlContext jexlContext);
 
 	Object executeRule(WaldotNamespace waldotNamespace, Rule rule, WaldotStepLogger stepRegister);
 

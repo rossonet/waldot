@@ -65,7 +65,7 @@ public abstract class TinkerWorld implements World {
 
 		private final World world;
 
-		public ComputerWorld(World world) {
+		public ComputerWorld(final World world) {
 			this.world = world;
 		}
 
@@ -121,7 +121,7 @@ public abstract class TinkerWorld implements World {
 	public static class NullWorld implements World {
 		private final TinkerWorld world;
 
-		public NullWorld(TinkerWorld world) {
+		public NullWorld(final TinkerWorld world) {
 			this.world = world;
 		}
 
@@ -356,7 +356,7 @@ public abstract class TinkerWorld implements World {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public boolean useParametersLiterally() {
-		// TODO Auto-generated method stub
+		// TODO da capire...
 		return false;
 	}
 }

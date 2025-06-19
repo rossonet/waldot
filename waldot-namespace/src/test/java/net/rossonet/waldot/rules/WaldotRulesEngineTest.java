@@ -6,7 +6,6 @@ import javax.naming.ConfigurationException;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -24,15 +23,14 @@ public class WaldotRulesEngineTest {
 
 		@Override
 		public void onEvent(final String messagePattern, final Object[] arguments, final Throwable throwable) {
-			/*
-			 * System.out.println("TEST LOGGER OUTPUT: " + messagePattern + " -> " +
-			 * arguments + " [ " + (throwable != null ? throwable.getMessage() : "") +
-			 * " ] ");
-			 */
+
+			System.out.println("TEST LOGGER OUTPUT: " + messagePattern + " -> " + arguments + " [ "
+					+ (throwable != null ? throwable.getMessage() : "") + " ] ");
+
 		}
 	};
 
-	@Disabled
+	// @Disabled
 	@Test
 	public void runComplexRuleTest() throws InterruptedException, ExecutionException, ConfigurationException {
 		LogHelper.changeJulLogLevel("fine");
@@ -42,11 +40,12 @@ public class WaldotRulesEngineTest {
 		final Vertex test2 = g.addVertex("label", "test2");
 		final Vertex rule1 = g.addVertex("label", "rule1", "type-node-id", "rule", "condition", "true", "action",
 				"let i = 33 ; log.info('!!! Rule 1 executed with ' + i);");
-		final Vertex rule2 = g.addVertex("label", "rule2", "type-node-id", "rule", "condition", "true");
+		final Vertex rule2 = g.addVertex("label", "rule2", "type-node-id", "rule", "condition", "true", "action",
+				"cmd.echo(self)");
 		test1.addEdge("fire", rule1);
 		test2.addEdge("fire", rule2);
 		rule1.addEdge("fire", rule2);
-		for (int counter = 0; counter < 100; counter++) {
+		for (int counter = 0; counter < 20; counter++) {
 			test1.property("inc", counter);
 			Thread.sleep(5000);
 			test2.property("inc", counter * 2);
@@ -61,7 +60,7 @@ public class WaldotRulesEngineTest {
 			Thread.sleep(1000);
 			test1.property("inc", RandomUtils.nextInt(0, 100));
 		}
-		Thread.sleep(60_000);
+		Thread.sleep(4_000);
 	}
 
 }

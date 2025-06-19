@@ -10,12 +10,12 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlScript;
-import org.apache.commons.jexl3.MapContext;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.api.rules.ClonableMapContext;
 import net.rossonet.waldot.api.rules.ExecutorHelper;
 import net.rossonet.waldot.api.rules.Rule;
 import net.rossonet.waldot.api.rules.WaldotStepLogger;
@@ -42,7 +42,7 @@ public class JexlExecutorHelper implements ExecutorHelper {
 
 	private JexlEngine jexl = generateEngine();
 
-	protected final JexlContext jexlContext = new MapContext();
+	protected final ClonableMapContext baseJexlContext = new ClonableMapContext();
 
 	protected transient Map<String, JexlScript> compiledConditions = new HashMap<>();
 	protected transient Map<String, JexlScript> compiledActions = new HashMap<>();
@@ -70,21 +70,27 @@ public class JexlExecutorHelper implements ExecutorHelper {
 			if (compiledJob) {
 				stepRegister.onConditionCompiled(runnableStartTime - startTime);
 			}
-			stepRegister.onBeforeConditionExecution(jexlContext);
-			final Object result = compiledConditions.get(rule.getCondition()).execute(jexlContext);
+			stepRegister.onBeforeConditionExecution(rule.getJexlContext(baseJexlContext));
+			final Object result = compiledConditions.get(rule.getCondition())
+					.execute(rule.getJexlContext(baseJexlContext));
 			stepRegister.onAfterConditionExecution(runnableStartTime - startTime, result);
 			LOGGER.debug("Rule '{}' evaluated to {}", rule.getCondition(), result);
 			return (boolean) result;
 		} catch (final Exception e) {
 			LOGGER.error(
 					"Unable to evaluate rule: '" + rule.getCondition() + "\n" + LogHelper.stackTraceToString(e, 4));
-			stepRegister.onConditionExecutionException(jexlContext, e);
+			stepRegister.onConditionExecutionException(rule.getJexlContext(baseJexlContext), e);
 			return false;
 		}
 	}
 
 	@Override
 	public Object execute(final String expression) {
+		return execute(expression, baseJexlContext);
+	}
+
+	@Override
+	public Object execute(final String expression, final JexlContext jexlContext) {
 		try {
 			final JexlScript compiled = jexl.createScript(expression);
 			return compiled.execute(jexlContext);
@@ -111,14 +117,14 @@ public class JexlExecutorHelper implements ExecutorHelper {
 			if (compiledJob) {
 				stepRegister.onActionCompiled(runnableStartTime - startTime);
 			}
-			stepRegister.onBeforeActionExecution(jexlContext);
-			final Object result = compiledActions.get(rule.getAction()).execute(jexlContext);
+			stepRegister.onBeforeActionExecution(rule.getJexlContext(baseJexlContext));
+			final Object result = compiledActions.get(rule.getAction()).execute(rule.getJexlContext(baseJexlContext));
 			stepRegister.onAfterActionExecution(runnableStartTime - startTime, result);
 			LOGGER.debug("Rule '{}' executed with result: {}", rule.getAction(), result);
 			return result;
 		} catch (final Exception e) {
 			LOGGER.error("Unable to execute rule: '" + rule.getAction() + "\n" + LogHelper.stackTraceToString(e, 4));
-			stepRegister.onActionExecutionException(jexlContext, e);
+			stepRegister.onActionExecutionException(rule.getJexlContext(baseJexlContext), e);
 			return null;
 		}
 
@@ -126,12 +132,12 @@ public class JexlExecutorHelper implements ExecutorHelper {
 
 	@Override
 	public void setContext(final String id, final Object context) {
-		jexlContext.set(id, context);
+		baseJexlContext.set(id, context);
 	}
 
 	@Override
 	public void setFunctionObject(final String id, final Object function) {
-		jexlContext.set(id, function);
+		baseJexlContext.set(id, function);
 		functionObjects.add(function.getClass());
 		classPermissions = new JexlPermissions.ClassPermissions(functionObjects.toArray(new Class<?>[0]));
 		jexl = generateEngine();

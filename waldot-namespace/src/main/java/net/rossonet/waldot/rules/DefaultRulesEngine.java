@@ -43,7 +43,8 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 				if (f.getKey() != null && f.getValue() != null) {
 					if (ConsoleStrategy.G_LABEL.equals(f.getKey()) || ConsoleStrategy.LOG_LABEL.equals(f.getKey())
 							|| ConsoleStrategy.COMMANDS_LABEL.equals(f.getKey())
-							|| ConsoleStrategy.CTX_LABEL.equals(f.getKey())) {
+							|| ConsoleStrategy.CTX_LABEL.equals(f.getKey())
+							|| ConsoleStrategy.SELF_LABEL.equals(f.getKey())) {
 						logger.error("The plugin " + p.toString() + " tried to override a reserved function name "
 								+ f.getKey());
 					} else {
@@ -90,6 +91,7 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	@Override
 	public void registerObserver(final WaldotVertex eventVertex, final NodeId ruleNodeId) {
 		if (rules.containsKey(ruleNodeId)) {
+			// Register the vertex triggers to the rule
 			eventVertex.addAttributeObserver(rules.get(ruleNodeId));
 			eventVertex.addPropertyObserver(rules.get(ruleNodeId));
 			eventVertex.addEventObserver(rules.get(ruleNodeId));

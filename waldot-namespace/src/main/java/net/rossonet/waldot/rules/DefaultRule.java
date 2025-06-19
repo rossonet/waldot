@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.jexl3.JexlContext;
 import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
@@ -31,10 +32,12 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.api.RuleListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.rules.CachedRuleRecord;
+import net.rossonet.waldot.api.rules.ClonableMapContext;
 import net.rossonet.waldot.api.rules.Rule;
 import net.rossonet.waldot.api.rules.WaldotRuleThread;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.rules.WaldotStepLogger;
+import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
 
 public class DefaultRule extends OpcVertex implements Rule {
@@ -71,6 +74,8 @@ public class DefaultRule extends OpcVertex implements Rule {
 
 	private final AtomicInteger threadCounter = new AtomicInteger(0);
 	private final WaldotRulesEngine waldotRulesEngine;
+
+	private JexlContext cacheJexlContext;
 
 	public DefaultRule(final NodeId typeDefinition, final WaldotGraph graph, final UaNodeContext context,
 			final NodeId nodeId, final QualifiedName browseName, final LocalizedText displayName,
@@ -280,6 +285,16 @@ public class DefaultRule extends OpcVertex implements Rule {
 			}
 		}
 		return reply;
+	}
+
+	@Override
+	public JexlContext getJexlContext(final ClonableMapContext baseJexlContext) {
+		if (cacheJexlContext == null) {
+			cacheJexlContext = new ClonableMapContext(baseJexlContext);
+			cacheJexlContext.set(ConsoleStrategy.SELF_LABEL, this);
+			logger.info("Created new JexlContext for rule {}", getNodeId());
+		}
+		return cacheJexlContext;
 	}
 
 	@Override

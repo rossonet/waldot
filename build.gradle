@@ -10,7 +10,7 @@ buildscript {
 
 description = "WaldOT - TinkerPop implementation with Milo OpcUA"
 group = 'net.rossonet.waldot'
-version = '0.2.11'
+version = '0.3.1'
 
 ext {
     sourceCompatibility = 21

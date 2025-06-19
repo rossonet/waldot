@@ -3,6 +3,8 @@ package net.rossonet.waldot.api.rules;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.jexl3.JexlContext;
+
 import net.rossonet.waldot.api.EventObserver;
 import net.rossonet.waldot.api.RuleListener;
 import net.rossonet.waldot.api.models.WaldotVertex;
@@ -33,6 +35,8 @@ public interface Rule extends WaldotVertex, AutoCloseable, EventObserver {
 	int getExecutionTimeout();
 
 	Collection<CachedRuleRecord> getFacts();
+
+	JexlContext getJexlContext(ClonableMapContext baseJexlContext);
 
 	Collection<RuleListener> getListeners();
 
