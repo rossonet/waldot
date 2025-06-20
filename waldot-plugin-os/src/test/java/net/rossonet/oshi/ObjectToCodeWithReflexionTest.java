@@ -105,7 +105,7 @@ public class ObjectToCodeWithReflexionTest {
 		elaborateInstance(g, operatingSystem, null);
 		final HardwareAbstractionLayer hw = systemInfo.getHardware();
 		elaborateInstance(g, hw, null);
-		Thread.sleep(120_000);
+		// Thread.sleep(120_000);
 	}
 
 	@Test

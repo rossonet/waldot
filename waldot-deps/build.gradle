@@ -41,7 +41,8 @@ dependencies {
     api 'org.apache.commons:commons-jexl3:3.4.0'
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
     // asset management
-    api("org.eclipse.digitaltwin.aas4j:aas4j-model:1.0.4")
+    // api("org.eclipse.digitaltwin.aas4j:aas4j-model:1.0.4")
+    api group: 'com.github.jsonld-java', name: 'jsonld-java', version: '0.13.6'
     // gremlin
     api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
     // OPCUA
