@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.auth.FactoryPasswordValidator;
 import net.rossonet.waldot.api.auth.WaldotIdentityValidator;
-import net.rossonet.waldot.api.strategies.WaldotAgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 public class AgentRegisterUsernameIdentityValidator extends WaldotIdentityValidator implements AgentAuthenticator {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private WaldotAgentManagementStrategy agentManagementStrategy;
+	private AgentManagementStrategy agentManagementStrategy;
 
 	public AgentRegisterUsernameIdentityValidator(final WaldotOpcUaServer waldotOpcUaServer,
 			final FactoryPasswordValidator authChallenge) {
@@ -23,7 +23,7 @@ public class AgentRegisterUsernameIdentityValidator extends WaldotIdentityValida
 	}
 
 	@Override
-	public void setAgentManagementStrategy(final WaldotAgentManagementStrategy agentManagementStrategy) {
+	public void setAgentManagementStrategy(final AgentManagementStrategy agentManagementStrategy) {
 		this.agentManagementStrategy = agentManagementStrategy;
 
 	}

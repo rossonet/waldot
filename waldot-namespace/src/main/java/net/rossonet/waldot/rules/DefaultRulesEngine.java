@@ -24,7 +24,6 @@ import net.rossonet.waldot.jexl.JexlExecutorHelper;
 public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	private final ExecutorHelper jexlEngine = new JexlExecutorHelper();
 
-	private final WaldotJexlRuleInterface jexlInterface;
 	private final List<RuleListener> listeners = new ArrayList<>();
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private final Map<NodeId, Rule> rules = new ConcurrentHashMap<>();
@@ -33,17 +32,15 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 
 	public DefaultRulesEngine(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
-		jexlInterface = new WaldotJexlRuleInterface(this);
 		jexlEngine.setFunctionObject(ConsoleStrategy.G_LABEL, waldotNamespace.getGremlinGraph());
 		jexlEngine.setFunctionObject(ConsoleStrategy.LOG_LABEL, waldotNamespace.getRulesLogger());
 		jexlEngine.setFunctionObject(ConsoleStrategy.COMMANDS_LABEL, waldotNamespace.getCommandsAsFunction());
-		jexlEngine.setFunctionObject(ConsoleStrategy.CTX_LABEL, jexlInterface);
 		for (final PluginListener p : waldotNamespace.getPlugins()) {
 			for (final Entry<String, Object> f : p.getRuleFunctions().entrySet()) {
 				if (f.getKey() != null && f.getValue() != null) {
 					if (ConsoleStrategy.G_LABEL.equals(f.getKey()) || ConsoleStrategy.LOG_LABEL.equals(f.getKey())
 							|| ConsoleStrategy.COMMANDS_LABEL.equals(f.getKey())
-							|| ConsoleStrategy.CTX_LABEL.equals(f.getKey())
+
 							|| ConsoleStrategy.SELF_LABEL.equals(f.getKey())) {
 						logger.error("The plugin " + p.toString() + " tried to override a reserved function name "
 								+ f.getKey());

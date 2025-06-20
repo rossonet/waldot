@@ -5,11 +5,11 @@ import java.lang.reflect.Modifier;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
-public class jexlWaldotCommandHelper {
+public class RulesCmdFunction {
 
 	protected final WaldotNamespace waldotNamespace;
 
-	public jexlWaldotCommandHelper(final WaldotNamespace waldotNamespace) {
+	public RulesCmdFunction(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
 	}
 

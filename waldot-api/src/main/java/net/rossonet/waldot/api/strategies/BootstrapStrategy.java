@@ -9,7 +9,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface BootstrapProcedureStrategy {
+public interface BootstrapStrategy {
 
 	public enum AgentStatus {
 		INIT, BOOT, FAULT, READY

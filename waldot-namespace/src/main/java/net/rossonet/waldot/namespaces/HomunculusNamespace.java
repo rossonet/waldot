@@ -49,17 +49,17 @@ import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
-import net.rossonet.waldot.api.strategies.BootstrapProcedureStrategy;
+import net.rossonet.waldot.api.strategies.BootstrapStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
-import net.rossonet.waldot.api.strategies.WaldotAgentManagementStrategy;
-import net.rossonet.waldot.api.strategies.WaldotMappingStrategy;
+import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
-import net.rossonet.waldot.jexl.jexlWaldotCommandHelper;
+import net.rossonet.waldot.jexl.RulesCmdFunction;
 import net.rossonet.waldot.logger.TraceLogger;
 import net.rossonet.waldot.logger.TraceLogger.ContexLogger;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
@@ -67,7 +67,7 @@ import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
-	private final BootstrapProcedureStrategy bootstrapProcedureStrategy;
+	private final BootstrapStrategy bootstrapProcedureStrategy;
 	private final WaldotConfiguration configuration;
 	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
 	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
@@ -75,11 +75,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final DataTypeDictionaryManager dictionaryManager;
 	private WaldotGraphComputerView graphComputerView;
 	private final WaldotGraph gremlin;
-	private final jexlWaldotCommandHelper jexlWaldotCommandHelper;
+	private final RulesCmdFunction jexlWaldotCommandHelper;
 	private final List<NamespaceListener> listeners = new ArrayList<>();
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private final Graph.Variables opcGraphVariables;
-	private final WaldotMappingStrategy opcMappingStrategy;
+	private final MiloStrategy opcMappingStrategy;
 	private final Set<PluginListener> plugins = new HashSet<>();
 	private final WaldotRulesEngine rulesEngine;
 	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
@@ -90,17 +90,17 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private AgentRegisterAnonymousValidator agentAnonymousValidator;
 	private AgentRegisterUsernameIdentityValidator agentIdentityValidator;
 	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
-	private final WaldotAgentManagementStrategy agentManagementStrategy;
+	private final AgentManagementStrategy agentManagementStrategy;
 
-	public HomunculusNamespace(final WaldotOpcUaServer server, final WaldotMappingStrategy opcMappingStrategy,
+	public HomunculusNamespace(final WaldotOpcUaServer server, final MiloStrategy opcMappingStrategy,
 			final ConsoleStrategy consoleStrategy, final DefaultHomunculusConfiguration configuration,
-			final BootstrapProcedureStrategy bootstrapProcedureStrategy,
-			final WaldotAgentManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
+			final BootstrapStrategy bootstrapProcedureStrategy,
+			final AgentManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
 		this.consoleStrategy = consoleStrategy;
-		this.jexlWaldotCommandHelper = new jexlWaldotCommandHelper(this);
+		this.jexlWaldotCommandHelper = new RulesCmdFunction(this);
 		this.configuration = configuration;
 		this.bootstrapProcedureStrategy = bootstrapProcedureStrategy;
 		this.agentManagementStrategy = agentManagementStrategy;
@@ -206,7 +206,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public WaldotAgentManagementStrategy getAgentManagementStrategy() {
+	public AgentManagementStrategy getAgentManagementStrategy() {
 		return agentManagementStrategy;
 	}
 
@@ -303,7 +303,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public IdManager<NodeId> getNodeIdManager() {
-		return WaldotMappingStrategy.getNodeIdManager();
+		return MiloStrategy.getNodeIdManager();
 	}
 
 	@Override

@@ -35,10 +35,10 @@ import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
 import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
 import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.strategies.WaldotAgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 
-public class BaseAgentManagementStrategy implements WaldotAgentManagementStrategy {
+public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	private class GenerateAddProvisioningMethodInvocationHandler extends AbstractMethodInvocationHandler {
 
 		private final List<Argument> inputArguments;
@@ -366,7 +366,7 @@ public class BaseAgentManagementStrategy implements WaldotAgentManagementStrateg
 	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
-		logger.info("Agent Management Strategy initialized for namespace: {}", waldotNamespace);
+		logger.info("Agent Management Strategy initialized");
 	}
 
 	@Override

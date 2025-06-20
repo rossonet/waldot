@@ -9,13 +9,13 @@ import java.util.List;
 
 import org.slf4j.Logger;
 
-import net.rossonet.waldot.api.annotation.WaldotBootStrategy;
+import net.rossonet.waldot.api.annotation.WaldotBootstrapStrategy;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.strategies.BootstrapProcedureStrategy;
+import net.rossonet.waldot.api.strategies.BootstrapStrategy;
 import net.rossonet.waldot.utils.LogHelper;
 
-@WaldotBootStrategy
-public class SingleFileWithStagesBootstrapStrategy implements BootstrapProcedureStrategy {
+@WaldotBootstrapStrategy
+public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 
 	private WaldotNamespace waldotNamespace;
 	private AgentStatus agentStatus = AgentStatus.INIT;

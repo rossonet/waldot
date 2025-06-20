@@ -10,6 +10,7 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.eclipse.milo.opcua.sdk.core.nodes.Node;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
@@ -31,7 +32,7 @@ import net.rossonet.waldot.api.models.WaldotVertexProperty;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface WaldotMappingStrategy {
+public interface MiloStrategy {
 
 	static IdManager<NodeId> getNodeIdManager() {
 		return new IdManager<NodeId>() {
@@ -117,6 +118,8 @@ public interface WaldotMappingStrategy {
 
 	void dropGraphComputerView();
 
+	UaFolderNode getAssetRootFolderNode();
+
 	WaldotVertex getEdgeInVertex(WaldotEdge opcEdge);
 
 	WaldotVertex getEdgeOutVertex(WaldotEdge opcEdge);
@@ -128,6 +131,8 @@ public interface WaldotMappingStrategy {
 	<DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getProperties(WaldotEdge edge);
 
 	<DATA_TYPE> WaldotEdge getPropertyReference(WaldotProperty<DATA_TYPE> opcProperty);
+
+	UaFolderNode getRootFolderNode();
 
 	<DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(WaldotVertex opcVertex);
 

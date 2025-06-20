@@ -8,20 +8,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.auth.WaldotAnonymousValidator;
-import net.rossonet.waldot.api.strategies.WaldotAgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 public class AgentRegisterAnonymousValidator extends WaldotAnonymousValidator implements AgentAuthenticator {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private WaldotAgentManagementStrategy agentManagementStrategy;
+	private AgentManagementStrategy agentManagementStrategy;
 
 	public AgentRegisterAnonymousValidator(final WaldotOpcUaServer waldotOpcUaServer) {
 		super(waldotOpcUaServer.getWaldotConfiguration());
 	}
 
 	@Override
-	public void setAgentManagementStrategy(final WaldotAgentManagementStrategy agentManagementStrategy) {
+	public void setAgentManagementStrategy(final AgentManagementStrategy agentManagementStrategy) {
 		this.agentManagementStrategy = agentManagementStrategy;
 
 	}

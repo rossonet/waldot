@@ -10,7 +10,7 @@ import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.jexl.JexlExecutorHelper;
 
 @WaldotConsoleStrategy
-public class ConsoleV0Strategy implements ConsoleStrategy {
+public class BaseConsoleStrategy implements ConsoleStrategy {
 	private WaldotNamespace waldotNamespace;
 	private ExecutorHelper baseExecutor;
 	private Logger logger;

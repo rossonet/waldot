@@ -37,9 +37,9 @@ import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.agent.BaseAgentManagementStrategy;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileWithStagesBootstrapStrategy;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.console.ConsoleV0Strategy;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseV0Strategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileBootstrapStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.console.BaseConsoleStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseStrategy;
 import net.rossonet.waldot.namespaces.HomunculusNamespace;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
@@ -269,8 +269,8 @@ public final class OpcFactory {
 				}
 			}
 		});
-		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseV0Strategy(),
-				new ConsoleV0Strategy(), configuration, new SingleFileWithStagesBootstrapStrategy(),
+		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),
+				new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
 				new BaseAgentManagementStrategy(), "file:///tmp/boot.conf");
 		waldot.startup(namespace).get();
 		return waldot.getGremlinGraph();

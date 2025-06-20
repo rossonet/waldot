@@ -11,7 +11,7 @@ import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
 import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
-public interface WaldotAgentManagementStrategy {
+public interface AgentManagementStrategy {
 
 	void activate(AgentRegisterAnonymousValidator agentAnonymousValidator,
 			AgentRegisterUsernameIdentityValidator agentIdentityValidator,

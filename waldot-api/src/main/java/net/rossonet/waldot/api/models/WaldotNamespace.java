@@ -32,7 +32,7 @@ import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
-import net.rossonet.waldot.api.strategies.WaldotAgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 /**
@@ -72,7 +72,7 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	QualifiedName generateQualifiedName(String label);
 
-	WaldotAgentManagementStrategy getAgentManagementStrategy();
+	AgentManagementStrategy getAgentManagementStrategy();
 
 	Logger getBootLogger();
 
