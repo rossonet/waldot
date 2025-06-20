@@ -1,0 +1,188 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:glikk_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "glikk_zatz",
+          "response": {
+            "name": "glikk_floob",
+            "schema": "double",
+            "@type": "CommandResponse"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:glikk_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "glikk_itch",
+          "response": {
+            "name": "glikk_flunn",
+            "schema": "duration",
+            "@type": [
+              "CommandResponse"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "glikk_hi",
+          "response": {
+            "name": "glikk_vroo",
+            "schema": "float",
+            "@type": "dtmi:dtdl:class:CommandResponse;3"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_gamma",
+          "response": {
+            "name": "nuh_beta",
+            "schema": "integer",
+            "@type": [
+              "dtmi:dtdl:class:CommandResponse;3"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_zeta",
+          "response": {
+            "name": "nuh_epsilon",
+            "schema": "long",
+            "@type": "Something"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_iota",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "nuh_theta",
+            "schema": "string",
+            "@type": "Something"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_mu",
+          "response": {
+            "name": "nuh_lambda",
+            "schema": "time",
+            "@type": [
+              "Something"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_omicron",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "nuh_xi",
+            "schema": "boolean",
+            "@type": [
+              "Something"
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

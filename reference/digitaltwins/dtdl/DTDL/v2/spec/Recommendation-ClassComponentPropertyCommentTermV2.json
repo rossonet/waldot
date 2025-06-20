@@ -1,0 +1,48 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:theta_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Component",
+          "comment": "theta_jogg",
+          "name": "theta_flunn",
+          "schema": {
+            "@id": "dtmi:example:theta_itch;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:iota_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Component",
+          "dtmi:dtdl:property:comment;2": "theta_vroo",
+          "name": "theta_hi",
+          "schema": {
+            "@id": "dtmi:example:iota_alpha;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  }
+]

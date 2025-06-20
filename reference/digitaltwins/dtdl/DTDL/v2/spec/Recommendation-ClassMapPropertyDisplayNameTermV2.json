@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_omicron;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:hi_lambda;1",
+          "@type": "Map",
+          "displayName": [
+            "hi_mu"
+          ],
+          "mapKey": {
+            "name": "hi_nu",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "hi_xi",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_upsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:hi_pi;1",
+          "@type": "Map",
+          "dtmi:dtdl:property:displayName;2": [
+            "hi_rho"
+          ],
+          "mapKey": {
+            "name": "hi_sigma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "hi_tau",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

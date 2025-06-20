@@ -1,0 +1,20 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nuh_phi",
+          "dtmi:dtdl:property:schema;3": "string"
+        }
+      }
+    ]
+  }
+]

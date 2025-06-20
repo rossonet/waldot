@@ -1,0 +1,289 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;7"
+          ],
+          "@type": "Command",
+          "name": "mu_wum"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;7"
+          ],
+          "@type": "Command",
+          "name": "mu_humpf"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;108675309"
+          ],
+          "@type": "Command",
+          "name": "mu_glikk"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_quan;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;108675309"
+          ],
+          "@type": "Command",
+          "name": "mu_snee"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;999999999"
+          ],
+          "@type": "Command",
+          "name": "mu_thnad"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;999999999"
+          ],
+          "@type": "Command",
+          "name": "mu_floob"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo;1"
+          ],
+          "@type": "Command",
+          "name": "mu_jogg"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo;1"
+          ],
+          "@type": "Command",
+          "name": "mu_itch"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar"
+          ],
+          "@type": "Command",
+          "name": "mu_vroo"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar"
+          ],
+          "@type": "Command",
+          "name": "nu_alpha"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;3.14"
+          ],
+          "@type": "Command",
+          "name": "nu_gamma"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;3.14"
+          ],
+          "@type": "Command",
+          "name": "nu_epsilon"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;3.141592"
+          ],
+          "@type": "Command",
+          "name": "nu_eta"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;3.141592"
+          ],
+          "@type": "Command",
+          "name": "nu_iota"
+        }
+      }
+    ]
+  }
+]

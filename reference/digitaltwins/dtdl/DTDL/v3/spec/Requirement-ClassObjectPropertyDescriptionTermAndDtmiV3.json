@@ -1,0 +1,49 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omicron_floob;1",
+          "@type": "Object",
+          "description": [
+            "omicron_zatz"
+          ],
+          "dtmi:dtdl:property:description;3": [
+            "omicron_jogg"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:omicron_itch;1",
+          "@type": "Object",
+          "description": [
+            "omicron_yekk"
+          ],
+          "dtmi:dtdl:property:description;3": [
+            "omicron_vroo"
+          ]
+        }
+      }
+    ]
+  }
+]

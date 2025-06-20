@@ -1,0 +1,119 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_quan;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:omega_snee;1",
+          "@type": "Interface",
+          "contents": {
+            "@context": [],
+            "@type": "Property",
+            "name": "omega_nuh",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_floob;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:omega_spazz;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Property",
+            "name": "omega_thnad",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "omega_zatz",
+          "schema": "float"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "omega_flunn",
+          "schema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "omega_yekk",
+          "schema": "long"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "omega_hi",
+          "schema": "string"
+        }
+      }
+    ]
+  }
+]

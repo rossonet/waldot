@@ -1,0 +1,29 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_beta;1",
+          "@type": "Enum",
+          "dtmi:dtdl:property:displayName;2": [
+            "zeta_gamma"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 698,
+              "name": "zeta_delta"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

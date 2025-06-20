@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omicron_yuzz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omicron_chi;1",
+          "mapKey": {
+            "name": "omicron_psi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "omicron_omega",
+            "schema": "boolean"
+          },
+          "@type": [
+            "Map",
+            "Map"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omicron_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omicron_wum;1",
+          "mapKey": {
+            "name": "omicron_um",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "omicron_humpf",
+            "schema": "date"
+          },
+          "@type": [
+            "dtmi:dtdl:class:Map;2",
+            "dtmi:dtdl:class:Map;2"
+          ]
+        }
+      }
+    ]
+  }
+]

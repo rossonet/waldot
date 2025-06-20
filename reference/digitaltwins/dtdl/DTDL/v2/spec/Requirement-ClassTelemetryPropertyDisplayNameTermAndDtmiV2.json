@@ -1,0 +1,51 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "displayName": [
+            "psi_phi"
+          ],
+          "dtmi:dtdl:property:displayName;2": [
+            "psi_chi"
+          ],
+          "name": "psi_psi",
+          "schema": "time"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Telemetry",
+          "displayName": [
+            "psi_yuzz"
+          ],
+          "dtmi:dtdl:property:displayName;2": [
+            "psi_wum"
+          ],
+          "name": "psi_um",
+          "schema": "boolean"
+        }
+      }
+    ]
+  }
+]

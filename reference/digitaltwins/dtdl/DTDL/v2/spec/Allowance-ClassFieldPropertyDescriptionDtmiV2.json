@@ -1,0 +1,26 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_gamma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:mu_beta;1",
+          "@type": "Object",
+          "fields": {
+            "dtmi:dtdl:property:description;2": [
+              "lambda_hi"
+            ],
+            "name": "mu_alpha",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,270 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_upsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "um_tau",
+          "schema": "double",
+          "unit": "acre"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:Area;2"
+          ],
+          "name": "um_phi",
+          "schema": "float",
+          "unit": "acre"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "um_psi",
+          "schema": "integer",
+          "unit": "dtmi:standard:unit:acre;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:Area;2"
+          ],
+          "name": "um_yuzz",
+          "schema": "long",
+          "unit": "dtmi:standard:unit:acre;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "um_um",
+          "schema": "double",
+          "unit": "farad"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "um_fuddle",
+          "schema": "float",
+          "unit": "farad"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:Area;2"
+          ],
+          "name": "um_nuh",
+          "schema": "integer",
+          "unit": "farad"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:Area;2"
+          ],
+          "name": "um_quan",
+          "schema": "long",
+          "unit": "farad"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "um_spazz",
+          "schema": "double",
+          "unit": "dtmi:standard:unit:farad;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "um_zatz",
+          "schema": "float",
+          "unit": "dtmi:standard:unit:farad;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:Area;2"
+          ],
+          "name": "um_flunn",
+          "schema": "integer",
+          "unit": "dtmi:standard:unit:farad;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:Area;2"
+          ],
+          "name": "um_yekk",
+          "schema": "long",
+          "unit": "dtmi:standard:unit:farad;2"
+        }
+      }
+    ]
+  }
+]

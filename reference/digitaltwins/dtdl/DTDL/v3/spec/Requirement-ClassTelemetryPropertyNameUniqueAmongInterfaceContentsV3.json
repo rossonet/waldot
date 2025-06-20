@@ -1,0 +1,80 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:glikk_alpha;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Telemetry",
+            "schema": "time",
+            "name": "gamma_itch"
+          },
+          {
+            "@type": "Telemetry",
+            "schema": "boolean",
+            "name": "gamma_yekk"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:glikk_beta;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Telemetry",
+            "schema": "date",
+            "name": "gamma_itch"
+          },
+          {
+            "@type": "Telemetry",
+            "schema": "dateTime",
+            "name": "gamma_itch"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": [
+          "dtmi:dtdl:context;3",
+          "dtmi:undefinedExtension:context;1"
+        ],
+        "@id": "dtmi:example:glikk_gamma;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Telemetry",
+            "schema": "double",
+            "name": "gamma_itch"
+          },
+          {
+            "@type": "Telemetry",
+            "schema": "duration",
+            "name": "gamma_itch"
+          }
+        ]
+      }
+    ]
+  }
+]

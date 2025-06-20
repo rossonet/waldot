@@ -1,0 +1,104 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_quan",
+          "response": {
+            "@type": [
+              "CommandResponse",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "nuh_snee",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_floob",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandResponse",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "nuh_spazz",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_flunn",
+          "response": {
+            "@type": [
+              "CommandResponse",
+              "boolean"
+            ],
+            "name": "nuh_jogg",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_vroo",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandResponse",
+              "boolean"
+            ],
+            "name": "nuh_yekk",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

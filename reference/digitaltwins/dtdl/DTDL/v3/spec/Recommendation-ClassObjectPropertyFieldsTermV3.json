@@ -1,0 +1,50 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:phi_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:phi_omega;1",
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "phi_yuzz",
+              "schema": "long"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:phi_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:phi_um;1",
+          "@type": "Object",
+          "dtmi:dtdl:property:fields;3": [
+            {
+              "name": "phi_humpf",
+              "schema": "string"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

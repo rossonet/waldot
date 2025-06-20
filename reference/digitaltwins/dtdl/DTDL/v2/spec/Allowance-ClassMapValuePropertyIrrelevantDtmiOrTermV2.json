@@ -1,0 +1,62 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_yekk;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "glikk_vroo",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@type": [
+              "MapValue",
+              "Foobar"
+            ],
+            "name": "glikk_itch",
+            "schema": "integer",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nuh_beta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "nuh_gamma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@type": [
+              "MapValue",
+              "Foobar"
+            ],
+            "name": "nuh_alpha",
+            "schema": "long",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  }
+]

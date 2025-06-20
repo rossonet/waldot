@@ -1,0 +1,55 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_psi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_phi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "glikk_chi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "glikk_upsilon",
+            "schema": "date",
+            "@graph": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_um;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_yuzz;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "glikk_wum",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "glikk_omega",
+            "schema": "dateTime",
+            "@graph": {}
+          }
+        }
+      }
+    ]
+  }
+]

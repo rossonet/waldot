@@ -1,0 +1,57 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_kappa;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_kappa;1",
+          "@type": "Interface",
+          "contents": {
+            "@id": "dtmi:example:iota_kappa;1",
+            "@type": "Command",
+            "name": "iota_mu",
+            "request": {
+              "@id": "dtmi:example:iota_kappa;1",
+              "name": "iota_lambda",
+              "schema": "long"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_nu;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_nu;1",
+          "@type": "Interface",
+          "contents": {
+            "@id": "dtmi:example:iota_nu;1",
+            "@type": "Command",
+            "name": "iota_omicron",
+            "request": {
+              "@context": "dtmi:undefinedExtension:context;1",
+              "@id": "dtmi:example:iota_nu;1",
+              "name": "iota_xi",
+              "schema": "string"
+            }
+          }
+        }
+      }
+    ]
+  }
+]

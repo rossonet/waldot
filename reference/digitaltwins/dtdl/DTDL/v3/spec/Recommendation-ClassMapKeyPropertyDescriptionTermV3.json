@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_itch;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:theta_jogg;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "theta_flunn",
+            "schema": "double"
+          },
+          "mapKey": {
+            "description": [
+              "theta_floob"
+            ],
+            "name": "theta_zatz",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:theta_hi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "iota_alpha",
+            "schema": "duration"
+          },
+          "mapKey": {
+            "dtmi:dtdl:property:description;3": [
+              "theta_yekk"
+            ],
+            "name": "theta_vroo",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

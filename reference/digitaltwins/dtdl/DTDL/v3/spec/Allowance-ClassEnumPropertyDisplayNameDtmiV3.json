@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:hi_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:hi_mu;1",
+          "@type": "Enum",
+          "dtmi:dtdl:property:displayName;3": [
+            "hi_nu"
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

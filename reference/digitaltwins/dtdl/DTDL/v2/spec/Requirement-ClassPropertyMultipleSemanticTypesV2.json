@@ -1,0 +1,141 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Acceleration",
+            "Angle"
+          ],
+          "name": "nu_glikk",
+          "schema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_quan;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Acceleration",
+            "Angle"
+          ],
+          "name": "nu_snee",
+          "schema": "long"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Acceleration",
+            "dtmi:standard:class:Angle;2"
+          ],
+          "name": "nu_thnad",
+          "schema": "double",
+          "unit": "centimetrePerSecondSquared"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Acceleration",
+            "dtmi:standard:class:Angle;2"
+          ],
+          "name": "nu_floob",
+          "schema": "float",
+          "unit": "centimetrePerSecondSquared"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Acceleration;2",
+            "dtmi:standard:class:Angle;2"
+          ],
+          "name": "nu_jogg",
+          "schema": "integer",
+          "unit": "centimetrePerSecondSquared"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Acceleration;2",
+            "dtmi:standard:class:Angle;2"
+          ],
+          "name": "nu_itch",
+          "schema": "long",
+          "unit": "centimetrePerSecondSquared"
+        }
+      }
+    ]
+  }
+]

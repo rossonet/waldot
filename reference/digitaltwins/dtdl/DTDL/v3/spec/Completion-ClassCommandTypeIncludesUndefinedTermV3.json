@@ -1,0 +1,43 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Command",
+            "Foobar"
+          ],
+          "name": "zeta_flunn"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Command",
+            "Foobar"
+          ],
+          "name": "zeta_yekk"
+        }
+      }
+    ]
+  }
+]

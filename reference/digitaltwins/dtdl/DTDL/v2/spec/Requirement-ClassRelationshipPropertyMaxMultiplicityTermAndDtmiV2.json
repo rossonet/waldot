@@ -1,0 +1,41 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "maxMultiplicity": 500,
+          "dtmi:dtdl:property:maxMultiplicity;2": 500,
+          "name": "mu_iota"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "maxMultiplicity": 500,
+          "dtmi:dtdl:property:maxMultiplicity;2": 500,
+          "name": "mu_lambda"
+        }
+      }
+    ]
+  }
+]

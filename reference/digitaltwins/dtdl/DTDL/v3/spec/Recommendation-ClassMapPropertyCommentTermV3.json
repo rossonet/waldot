@@ -1,0 +1,56 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:lambda_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:lambda_chi;1",
+          "@type": "Map",
+          "comment": "lambda_psi",
+          "mapKey": {
+            "name": "lambda_omega",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "lambda_yuzz",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:lambda_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:lambda_um;1",
+          "@type": "Map",
+          "dtmi:dtdl:property:comment;3": "lambda_humpf",
+          "mapKey": {
+            "name": "lambda_fuddle",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "lambda_glikk",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

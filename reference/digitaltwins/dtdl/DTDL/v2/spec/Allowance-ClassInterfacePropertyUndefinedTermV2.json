@@ -1,0 +1,19 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_humpf;1",
+        "@type": [
+          "Interface",
+          "Foobar"
+        ],
+        "foobar": {}
+      }
+    ]
+  }
+]

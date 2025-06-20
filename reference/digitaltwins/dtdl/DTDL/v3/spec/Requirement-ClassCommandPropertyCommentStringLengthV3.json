@@ -1,0 +1,57 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "sigma_itch",
+          "comment": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddl"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "sigma_vroo",
+          "comment": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:tau_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Command",
+          "name": "tau_alpha",
+          "comment": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+        }
+      }
+    ]
+  }
+]

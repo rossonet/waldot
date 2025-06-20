@@ -1,0 +1,32 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:flunn_upsilon;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "flunn_phi",
+            "schema": "date"
+          },
+          "mapKey": {
+            "@type": [
+              "MapKey",
+              "Foobar"
+            ],
+            "name": "flunn_tau",
+            "schema": "string",
+            "foobar": {}
+          }
+        }
+      }
+    ]
+  }
+]

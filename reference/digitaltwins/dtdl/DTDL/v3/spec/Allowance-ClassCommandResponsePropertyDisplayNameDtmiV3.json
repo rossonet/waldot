@@ -1,0 +1,26 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:hi_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "hi_flunn",
+          "response": {
+            "dtmi:dtdl:property:displayName;3": [
+              "hi_zatz"
+            ],
+            "name": "hi_jogg",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,76 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:upsilon_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "upsilon_yekk",
+          "schema": "point"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:phi_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Property",
+          "name": "upsilon_hi",
+          "schema": "point"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:phi_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "phi_beta",
+          "schema": "dtmi:standard:schema:geospatial:point;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:phi_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Property",
+          "name": "phi_delta",
+          "schema": "dtmi:standard:schema:geospatial:point;2"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,100 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Component",
+            "dtmi:foo:bar;1"
+          ],
+          "name": "spazz_fuddle",
+          "schema": {
+            "@id": "dtmi:example:spazz_glikk;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Component",
+            "dtmi:foo:bar;1"
+          ],
+          "name": "spazz_snee",
+          "schema": {
+            "@id": "dtmi:example:spazz_quan;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Component",
+            "boolean"
+          ],
+          "name": "spazz_spazz",
+          "schema": {
+            "@id": "dtmi:example:spazz_floob;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Component",
+            "boolean"
+          ],
+          "name": "spazz_jogg",
+          "schema": {
+            "@id": "dtmi:example:spazz_flunn;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  }
+]

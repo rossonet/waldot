@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:fuddle_hi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "glikk_alpha",
+            "schema": "string"
+          },
+          "mapValue": {
+            "displayName": [
+              "fuddle_yekk"
+            ],
+            "name": "fuddle_vroo",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_epsilon;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "glikk_zeta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "dtmi:dtdl:property:displayName;2": [
+              "glikk_gamma"
+            ],
+            "name": "glikk_delta",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,227 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "glikk_yuzz",
+          "schema": {
+            "@type": "Map",
+            "mapKey": {
+              "name": "glikk_omega",
+              "schema": "string"
+            },
+            "mapValue": {
+              "name": "glikk_psi",
+              "schema": {
+                "@type": "Map",
+                "mapKey": {
+                  "name": "glikk_chi",
+                  "schema": "string"
+                },
+                "mapValue": {
+                  "name": "glikk_phi",
+                  "schema": {
+                    "@type": "Map",
+                    "mapKey": {
+                      "name": "glikk_upsilon",
+                      "schema": "string"
+                    },
+                    "mapValue": {
+                      "name": "glikk_tau",
+                      "schema": {
+                        "@type": "Map",
+                        "mapKey": {
+                          "name": "glikk_sigma",
+                          "schema": "string"
+                        },
+                        "mapValue": {
+                          "name": "glikk_rho",
+                          "schema": {
+                            "@type": "Map",
+                            "mapKey": {
+                              "name": "glikk_omicron",
+                              "schema": "string"
+                            },
+                            "mapValue": {
+                              "name": "glikk_pi",
+                              "schema": "double"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "glikk_flunn",
+          "schema": {
+            "@type": "Map",
+            "mapKey": {
+              "name": "glikk_jogg",
+              "schema": "string"
+            },
+            "mapValue": {
+              "name": "glikk_zatz",
+              "schema": {
+                "@type": "Map",
+                "mapKey": {
+                  "name": "glikk_floob",
+                  "schema": "string"
+                },
+                "mapValue": {
+                  "name": "glikk_spazz",
+                  "schema": {
+                    "@type": "Map",
+                    "mapKey": {
+                      "name": "glikk_thnad",
+                      "schema": "string"
+                    },
+                    "mapValue": {
+                      "name": "glikk_quan",
+                      "schema": {
+                        "@type": "Map",
+                        "mapKey": {
+                          "name": "glikk_snee",
+                          "schema": "string"
+                        },
+                        "mapValue": {
+                          "name": "glikk_nuh",
+                          "schema": {
+                            "@type": "Map",
+                            "mapKey": {
+                              "name": "glikk_glikk",
+                              "schema": "string"
+                            },
+                            "mapValue": {
+                              "name": "glikk_fuddle",
+                              "schema": {
+                                "@type": "Map",
+                                "mapKey": {
+                                  "name": "glikk_um",
+                                  "schema": "string"
+                                },
+                                "mapValue": {
+                                  "name": "glikk_humpf",
+                                  "schema": "duration"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nuh_kappa",
+          "schema": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": "Map",
+            "mapKey": {
+              "name": "nuh_iota",
+              "schema": "string"
+            },
+            "mapValue": {
+              "name": "nuh_theta",
+              "schema": {
+                "@type": "Map",
+                "mapKey": {
+                  "name": "nuh_eta",
+                  "schema": "string"
+                },
+                "mapValue": {
+                  "name": "nuh_zeta",
+                  "schema": {
+                    "@type": "Map",
+                    "mapKey": {
+                      "name": "nuh_epsilon",
+                      "schema": "string"
+                    },
+                    "mapValue": {
+                      "name": "nuh_delta",
+                      "schema": {
+                        "@type": "Map",
+                        "mapKey": {
+                          "name": "nuh_gamma",
+                          "schema": "string"
+                        },
+                        "mapValue": {
+                          "name": "nuh_beta",
+                          "schema": {
+                            "@type": "Map",
+                            "mapKey": {
+                              "name": "nuh_alpha",
+                              "schema": "string"
+                            },
+                            "mapValue": {
+                              "name": "glikk_hi",
+                              "schema": {
+                                "@type": "Map",
+                                "mapKey": {
+                                  "name": "glikk_yekk",
+                                  "schema": "string"
+                                },
+                                "mapValue": {
+                                  "name": "glikk_vroo",
+                                  "schema": "float"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+]

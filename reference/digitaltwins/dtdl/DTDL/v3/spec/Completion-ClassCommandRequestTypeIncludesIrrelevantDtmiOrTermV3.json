@@ -1,0 +1,104 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_quan;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_snee",
+          "request": {
+            "@type": [
+              "CommandRequest",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "gamma_nuh",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_spazz",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandRequest",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "gamma_thnad",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_jogg",
+          "request": {
+            "@type": [
+              "CommandRequest",
+              "boolean"
+            ],
+            "name": "gamma_zatz",
+            "schema": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_yekk",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandRequest",
+              "boolean"
+            ],
+            "name": "gamma_itch",
+            "schema": "date"
+          }
+        }
+      }
+    ]
+  }
+]

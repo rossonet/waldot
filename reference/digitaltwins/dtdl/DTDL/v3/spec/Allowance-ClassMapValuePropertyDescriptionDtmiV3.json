@@ -1,0 +1,30 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_theta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_zeta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "beta_eta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "dtmi:dtdl:property:description;3": [
+              "beta_delta"
+            ],
+            "name": "beta_epsilon",
+            "schema": "boolean"
+          }
+        }
+      }
+    ]
+  }
+]

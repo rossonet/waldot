@@ -1,0 +1,104 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "gamma_jogg",
+          "schema": {
+            "@type": "Map",
+            "mapKey": {
+              "name": "gamma_floob",
+              "schema": "string"
+            },
+            "mapValue": {
+              "name": "gamma_zatz",
+              "schema": "duration"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:gamma_itch;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "gamma_yekk",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "gamma_vroo",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_gamma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@type": "Map",
+          "mapKey": {
+            "name": "delta_alpha",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "delta_beta",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "delta_delta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "delta_epsilon",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

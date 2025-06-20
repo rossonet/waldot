@@ -1,0 +1,54 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_omega;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "zeta_yuzz",
+            "schema": "double"
+          },
+          "mapKey": {
+            "name": "zeta_psi",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_humpf;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "zeta_fuddle",
+            "schema": "duration"
+          },
+          "mapKey": {
+            "dtmi:dtdl:property:name;2": "zeta_um",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

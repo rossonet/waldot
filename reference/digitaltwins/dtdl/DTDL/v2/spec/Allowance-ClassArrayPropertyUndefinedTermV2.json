@@ -1,0 +1,24 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:upsilon_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:upsilon_zatz;1",
+          "@type": [
+            "Array",
+            "Foobar"
+          ],
+          "elementSchema": "date",
+          "foobar": {}
+        }
+      }
+    ]
+  }
+]

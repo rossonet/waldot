@@ -1,0 +1,48 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:humpf_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "humpf_delta",
+          "schema": "integer",
+          "unit": "acre"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:humpf_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "humpf_zeta",
+          "schema": "long",
+          "dtmi:dtdl:property:unit;2": "acre"
+        }
+      }
+    ]
+  }
+]

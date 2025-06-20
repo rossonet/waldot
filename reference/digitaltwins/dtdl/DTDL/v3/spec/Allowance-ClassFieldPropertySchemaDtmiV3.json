@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_omicron;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:itch_xi;1",
+          "@type": "Object",
+          "fields": {
+            "name": "itch_nu",
+            "dtmi:dtdl:property:schema;3": "duration"
+          }
+        }
+      }
+    ]
+  }
+]

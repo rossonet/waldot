@@ -1,0 +1,63 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_pi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "xi_rho",
+            "schema": "time"
+          },
+          "mapKey": {
+            "@type": [
+              "MapKey",
+              "Foobar"
+            ],
+            "name": "xi_omicron",
+            "schema": "string",
+            "foobar": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_upsilon;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "xi_phi",
+            "schema": "boolean"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "MapKey",
+              "Foobar"
+            ],
+            "name": "xi_tau",
+            "schema": "string",
+            "foobar": {}
+          }
+        }
+      }
+    ]
+  }
+]

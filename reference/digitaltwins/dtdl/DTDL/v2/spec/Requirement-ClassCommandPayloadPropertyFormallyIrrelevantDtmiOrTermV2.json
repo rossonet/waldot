@@ -1,0 +1,92 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_upsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_tau",
+          "request": {
+            "name": "snee_sigma",
+            "schema": "integer",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_chi",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "snee_phi",
+            "schema": "long",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_yuzz",
+          "request": {
+            "name": "snee_omega",
+            "schema": "string",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_humpf",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "snee_um",
+            "schema": "time",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,66 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:thnad_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "thnad_lambda",
+          "request": {
+            "schema": "dateTime",
+            "name": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddl"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:thnad_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "thnad_nu",
+          "request": {
+            "schema": "double",
+            "name": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:thnad_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "thnad_omicron",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "schema": "duration",
+            "name": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+          }
+        }
+      }
+    ]
+  }
+]

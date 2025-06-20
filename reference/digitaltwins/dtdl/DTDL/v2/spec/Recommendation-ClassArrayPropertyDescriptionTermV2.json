@@ -1,0 +1,46 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:sigma_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:sigma_delta;1",
+          "@type": "Array",
+          "description": [
+            "sigma_epsilon"
+          ],
+          "elementSchema": "string"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:sigma_iota;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:sigma_eta;1",
+          "@type": "Array",
+          "dtmi:dtdl:property:description;2": [
+            "sigma_theta"
+          ],
+          "elementSchema": "time"
+        }
+      }
+    ]
+  }
+]

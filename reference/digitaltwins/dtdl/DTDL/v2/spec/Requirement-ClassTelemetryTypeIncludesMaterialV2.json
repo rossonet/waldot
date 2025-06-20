@@ -1,0 +1,156 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "beta_glikk",
+          "schema": "duration",
+          "@type": "Telemetry"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_quan;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "beta_snee",
+          "schema": "float",
+          "@type": [
+            "Telemetry"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "beta_thnad",
+          "schema": "integer",
+          "@type": "dtmi:dtdl:class:Telemetry;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "beta_floob",
+          "schema": "long",
+          "@type": [
+            "dtmi:dtdl:class:Telemetry;2"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "beta_jogg",
+          "schema": "string",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "name": "beta_itch",
+          "schema": "time",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "beta_vroo",
+          "schema": "boolean",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:gamma_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "name": "gamma_alpha",
+          "schema": "date",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  }
+]

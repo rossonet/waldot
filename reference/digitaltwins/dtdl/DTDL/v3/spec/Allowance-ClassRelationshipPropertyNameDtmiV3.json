@@ -1,0 +1,19 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "dtmi:dtdl:property:name;3": "gamma_vroo"
+        }
+      }
+    ]
+  }
+]

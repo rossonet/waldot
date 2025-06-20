@@ -1,0 +1,434 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nu_chi",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1226,
+              "name": "nu_phi",
+              "@context": "dtmi:dtdl:extension:quantitativeTypes;1"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nu_yuzz",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1227,
+              "name": "nu_omega",
+              "@context": []
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nu_humpf",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1228,
+              "name": "nu_um",
+              "@context": [
+                "dtmi:dtdl:extension:quantitativeTypes;1"
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nu_nuh",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1229,
+              "name": "nu_glikk",
+              "@context": null
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nu_thnad",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1230,
+              "name": "nu_quan",
+              "@context": 626
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nu_zatz",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1231,
+              "name": "nu_floob",
+              "@context": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nu_itch",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1232,
+              "name": "nu_flunn",
+              "@context": [
+                null
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nu_hi",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1233,
+              "name": "nu_vroo",
+              "@context": [
+                626
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "xi_gamma",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1234,
+              "name": "xi_beta",
+              "@context": [
+                true
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "xi_zeta",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1235,
+              "name": "xi_epsilon",
+              "@context": "dtmi:dtdl:extension:quantitativeTypes"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "xi_iota",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1236,
+              "name": "xi_theta",
+              "@context": "http://dtdl/extension/quantitativeTypes/1"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "xi_mu",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1237,
+              "name": "xi_lambda",
+              "@context": "quantitativeTypes;1"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "xi_omicron",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1238,
+              "name": "xi_xi",
+              "@context": {}
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_tau;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "xi_sigma",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1239,
+              "name": "xi_rho",
+              "@context": {
+                "foo": "dtmi:foo:bar;1"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "xi_phi",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1240,
+              "name": "xi_upsilon",
+              "@context": [
+                {}
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_yuzz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "xi_omega",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "enumValues": {
+              "enumValue": 1241,
+              "name": "xi_psi",
+              "@context": [
+                {
+                  "foo": "dtmi:foo:bar;1"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+]

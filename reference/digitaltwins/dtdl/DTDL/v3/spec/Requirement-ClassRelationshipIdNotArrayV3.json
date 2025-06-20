@@ -1,0 +1,289 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_upsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;7"
+          ],
+          "@type": "Relationship",
+          "name": "theta_tau"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;7"
+          ],
+          "@type": "Relationship",
+          "name": "theta_phi"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;108675309"
+          ],
+          "@type": "Relationship",
+          "name": "theta_psi"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;108675309"
+          ],
+          "@type": "Relationship",
+          "name": "theta_yuzz"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;999999999"
+          ],
+          "@type": "Relationship",
+          "name": "theta_um"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;999999999"
+          ],
+          "@type": "Relationship",
+          "name": "theta_fuddle"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo;1"
+          ],
+          "@type": "Relationship",
+          "name": "theta_nuh"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo;1"
+          ],
+          "@type": "Relationship",
+          "name": "theta_quan"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar"
+          ],
+          "@type": "Relationship",
+          "name": "theta_spazz"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar"
+          ],
+          "@type": "Relationship",
+          "name": "theta_zatz"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;3.14"
+          ],
+          "@type": "Relationship",
+          "name": "theta_flunn"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;3.14"
+          ],
+          "@type": "Relationship",
+          "name": "theta_yekk"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;3.141592"
+          ],
+          "@type": "Relationship",
+          "name": "theta_hi"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;3.141592"
+          ],
+          "@type": "Relationship",
+          "name": "iota_beta"
+        }
+      }
+    ]
+  }
+]

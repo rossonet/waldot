@@ -1,0 +1,45 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:wum_upsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Relationship",
+            "Foobar"
+          ],
+          "name": "wum_tau",
+          "dtmi:foo//bar": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:wum_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Relationship",
+            "Foobar"
+          ],
+          "name": "wum_phi",
+          "dtmi:foo//bar": 626
+        }
+      }
+    ]
+  }
+]

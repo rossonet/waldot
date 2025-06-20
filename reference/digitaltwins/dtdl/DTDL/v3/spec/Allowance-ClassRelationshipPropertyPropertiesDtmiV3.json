@@ -1,0 +1,26 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:upsilon_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "upsilon_fuddle",
+          "dtmi:dtdl:property:properties;3": [
+            {
+              "@type": "Property",
+              "name": "upsilon_glikk",
+              "schema": "time"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

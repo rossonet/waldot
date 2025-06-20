@@ -1,0 +1,80 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:wum_iota;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Property",
+            "schema": "integer",
+            "name": "gamma_glikk"
+          },
+          {
+            "@type": "Property",
+            "schema": "long",
+            "name": "gamma_nuh"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:wum_kappa;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Property",
+            "schema": "string",
+            "name": "gamma_glikk"
+          },
+          {
+            "@type": "Property",
+            "schema": "time",
+            "name": "gamma_glikk"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": [
+          "dtmi:dtdl:context;3",
+          "dtmi:undefinedExtension:context;1"
+        ],
+        "@id": "dtmi:example:wum_lambda;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Property",
+            "schema": "boolean",
+            "name": "gamma_glikk"
+          },
+          {
+            "@type": "Property",
+            "schema": "date",
+            "name": "gamma_glikk"
+          }
+        ]
+      }
+    ]
+  }
+]

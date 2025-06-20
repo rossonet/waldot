@@ -1,0 +1,58 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:gamma_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:gamma_snee;1",
+          "@type": "Enum",
+          "description": [
+            "gamma_quan"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 667,
+              "name": "gamma_thnad"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:gamma_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:gamma_floob;1",
+          "@type": "Enum",
+          "dtmi:dtdl:property:description;2": [
+            "gamma_zatz"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 668,
+              "name": "gamma_jogg"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

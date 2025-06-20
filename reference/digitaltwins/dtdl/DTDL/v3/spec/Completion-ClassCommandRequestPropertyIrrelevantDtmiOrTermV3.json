@@ -1,0 +1,108 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:pi_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "pi_itch",
+          "request": {
+            "@type": [
+              "CommandRequest",
+              "Foobar"
+            ],
+            "name": "pi_flunn",
+            "schema": "boolean",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "pi_hi",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandRequest",
+              "Foobar"
+            ],
+            "name": "pi_vroo",
+            "schema": "date",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "rho_gamma",
+          "request": {
+            "@type": [
+              "CommandRequest",
+              "Foobar"
+            ],
+            "name": "rho_beta",
+            "schema": "dateTime",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "rho_zeta",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandRequest",
+              "Foobar"
+            ],
+            "name": "rho_epsilon",
+            "schema": "double",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  }
+]

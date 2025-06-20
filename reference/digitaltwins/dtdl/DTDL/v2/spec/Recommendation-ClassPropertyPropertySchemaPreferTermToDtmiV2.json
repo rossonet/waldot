@@ -1,0 +1,40 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:upsilon_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "upsilon_zatz",
+          "schema": "time"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:upsilon_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "upsilon_flunn",
+          "schema": "dtmi:dtdl:instance:Schema:time;2"
+        }
+      }
+    ]
+  }
+]

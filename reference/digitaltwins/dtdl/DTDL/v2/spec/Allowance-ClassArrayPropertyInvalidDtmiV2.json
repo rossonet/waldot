@@ -1,0 +1,24 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:upsilon_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:upsilon_yuzz;1",
+          "@type": [
+            "Array",
+            "Foobar"
+          ],
+          "elementSchema": "float",
+          "dtmi:foo//bar": 626
+        }
+      }
+    ]
+  }
+]

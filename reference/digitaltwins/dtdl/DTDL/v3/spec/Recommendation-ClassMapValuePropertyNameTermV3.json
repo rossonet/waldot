@@ -1,0 +1,54 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:sigma_humpf;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "sigma_fuddle",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "sigma_um",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_thnad;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:sigma_snee;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "sigma_quan",
+            "schema": "string"
+          },
+          "mapValue": {
+            "dtmi:dtdl:property:name;3": "sigma_nuh",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

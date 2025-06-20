@@ -1,0 +1,29 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nuh_humpf;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@type": [
+              "EnumValue",
+              "Foobar"
+            ],
+            "enumValue": 1024,
+            "name": "nuh_um",
+            "dtmi:foo//bar": 626
+          }
+        }
+      }
+    ]
+  }
+]

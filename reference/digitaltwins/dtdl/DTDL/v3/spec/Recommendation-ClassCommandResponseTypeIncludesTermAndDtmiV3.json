@@ -1,0 +1,28 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_tau;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_sigma",
+          "response": {
+            "name": "nuh_rho",
+            "schema": "date",
+            "@type": [
+              "CommandResponse",
+              "dtmi:dtdl:class:CommandResponse;3"
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

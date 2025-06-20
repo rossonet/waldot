@@ -1,0 +1,119 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_quan;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:nuh_snee;1",
+          "@type": "Interface",
+          "contents": {
+            "@context": [],
+            "@type": "Property",
+            "name": "nuh_nuh",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_floob;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:nuh_spazz;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Property",
+            "name": "nuh_thnad",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nuh_zatz",
+          "schema": "long"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nuh_flunn",
+          "schema": "string"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nuh_yekk",
+          "schema": "time"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nuh_hi",
+          "schema": "boolean"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:kappa_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "displayName": [
+            "kappa_phi"
+          ],
+          "name": "kappa_chi"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:kappa_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "dtmi:dtdl:property:displayName;2": [
+            "kappa_omega"
+          ],
+          "name": "kappa_yuzz"
+        }
+      }
+    ]
+  }
+]

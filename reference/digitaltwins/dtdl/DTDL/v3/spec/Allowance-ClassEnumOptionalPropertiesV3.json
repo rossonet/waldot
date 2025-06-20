@@ -1,0 +1,117 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "spazz_hi",
+          "schema": {
+            "@context": [],
+            "@type": "Enum",
+            "valueSchema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_beta",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:floob_delta;1",
+          "@type": "Enum",
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:floob_zeta;1",
+          "@type": "Enum",
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_iota;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:floob_theta;1",
+          "@type": "Enum",
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_lambda;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:floob_kappa;1",
+          "@type": "Enum",
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

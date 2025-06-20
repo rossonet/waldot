@@ -1,0 +1,81 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:lambda_humpf;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:lambda_wum;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "lambda_um",
+            "schema": "date"
+          },
+          "mapKey": {
+            "name": "lambda_yuzz",
+            "schema": "string",
+            "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddl"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:lambda_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:lambda_glikk;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "lambda_nuh",
+            "schema": "dateTime"
+          },
+          "mapKey": {
+            "name": "lambda_fuddle",
+            "schema": "string",
+            "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:lambda_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:lambda_thnad;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "lambda_spazz",
+            "schema": "double"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "lambda_quan",
+            "schema": "string",
+            "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+          }
+        }
+      }
+    ]
+  }
+]

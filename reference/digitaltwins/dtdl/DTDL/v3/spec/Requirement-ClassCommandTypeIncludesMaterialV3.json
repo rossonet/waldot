@@ -1,0 +1,148 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "epsilon_itch",
+          "@type": "Command"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "epsilon_vroo",
+          "@type": [
+            "Command"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "zeta_alpha",
+          "@type": "dtmi:dtdl:class:Command;3"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "zeta_gamma",
+          "@type": [
+            "dtmi:dtdl:class:Command;3"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "zeta_epsilon",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "name": "zeta_eta",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "zeta_iota",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "name": "zeta_lambda",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,414 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_nu",
+          "minMultiplicity": 0
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_omicron",
+          "minMultiplicity": [
+            0
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_sigma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_rho",
+          "minMultiplicity": {
+            "@value": 0,
+            "@type": "xsd:integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_upsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_tau",
+          "minMultiplicity": [
+            {
+              "@value": 0,
+              "@type": "xsd:integer"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_phi",
+          "minMultiplicity": []
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_psi",
+          "minMultiplicity": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "mu_yuzz",
+          "minMultiplicity": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_um",
+          "minMultiplicity": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "mu_fuddle",
+          "minMultiplicity": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_nuh",
+          "minMultiplicity": "hello"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "mu_quan",
+          "minMultiplicity": "hello"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_spazz",
+          "minMultiplicity": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "mu_zatz",
+          "minMultiplicity": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_flunn",
+          "minMultiplicity": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "mu_yekk",
+          "minMultiplicity": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "mu_hi",
+          "minMultiplicity": [
+            "hello"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "nu_beta",
+          "minMultiplicity": [
+            "hello"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "nu_delta",
+          "minMultiplicity": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "nu_zeta",
+          "minMultiplicity": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "nu_theta",
+          "minMultiplicity": [
+            {}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "nu_kappa",
+          "minMultiplicity": [
+            {}
+          ]
+        }
+      }
+    ]
+  }
+]

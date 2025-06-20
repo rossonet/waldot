@@ -1,0 +1,69 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:iota_tau;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:iota_sigma;1",
+          "@type": "Object",
+          "fields": {
+            "name": "iota_rho",
+            "schema": "dateTime",
+            "comment": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddl"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:iota_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:iota_phi;1",
+          "@type": "Object",
+          "fields": {
+            "name": "iota_upsilon",
+            "schema": "double",
+            "comment": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:iota_yuzz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:iota_omega;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "iota_psi",
+            "schema": "duration",
+            "comment": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+          }
+        }
+      }
+    ]
+  }
+]

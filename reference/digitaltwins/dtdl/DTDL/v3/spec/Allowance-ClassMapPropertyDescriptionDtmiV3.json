@@ -1,0 +1,30 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_um;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_psi;1",
+          "@type": "Map",
+          "dtmi:dtdl:property:description;3": [
+            "xi_omega"
+          ],
+          "mapKey": {
+            "name": "xi_yuzz",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "xi_wum",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

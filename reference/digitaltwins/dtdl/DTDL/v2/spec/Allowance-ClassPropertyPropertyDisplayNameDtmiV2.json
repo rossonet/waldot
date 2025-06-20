@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "dtmi:dtdl:property:displayName;2": [
+            "quan_snee"
+          ],
+          "name": "quan_quan",
+          "schema": "date"
+        }
+      }
+    ]
+  }
+]

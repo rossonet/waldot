@@ -1,0 +1,54 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_nu",
+          "request": {
+            "@type": [
+              "CommandPayload",
+              "Foobar"
+            ],
+            "name": "snee_mu",
+            "schema": "duration",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_rho;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_pi",
+          "request": {
+            "@type": [
+              "CommandPayload",
+              "Foobar"
+            ],
+            "name": "snee_omicron",
+            "schema": "float",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  }
+]

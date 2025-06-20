@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_tau;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_rho;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "epsilon_sigma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "displayName": [
+              "epsilon_omicron"
+            ],
+            "name": "epsilon_pi",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_chi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "epsilon_psi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "dtmi:dtdl:property:displayName;3": [
+              "epsilon_upsilon"
+            ],
+            "name": "epsilon_phi",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  }
+]

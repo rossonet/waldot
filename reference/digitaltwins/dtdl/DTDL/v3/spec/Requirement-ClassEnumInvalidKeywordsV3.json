@@ -1,0 +1,158 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_jogg;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "@graph": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_yekk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:delta_itch;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "@graph": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_vroo;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "@value": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_alpha;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "@value": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_gamma;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "@language": "en"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_epsilon;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "@language": "en"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_theta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_eta;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "@foobar": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_iota;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "@foobar": true
+        }
+      }
+    ]
+  }
+]

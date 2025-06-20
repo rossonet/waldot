@@ -1,0 +1,418 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_chi",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "vroo_phi",
+              "schema": "boolean",
+              "@context": "dtmi:iotcentral:context;2"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_yuzz",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "vroo_omega",
+              "schema": "date",
+              "@context": []
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_humpf",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "vroo_um",
+              "schema": "dateTime",
+              "@context": [
+                "dtmi:iotcentral:context;2"
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_nuh",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "vroo_glikk",
+              "schema": "double",
+              "@context": null
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_thnad",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "vroo_quan",
+              "schema": "duration",
+              "@context": 626
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_zatz",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "vroo_floob",
+              "schema": "float",
+              "@context": true
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_itch",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "vroo_flunn",
+              "schema": "integer",
+              "@context": [
+                null
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_hi",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "vroo_vroo",
+              "schema": "long",
+              "@context": [
+                626
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "hi_gamma",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "hi_beta",
+              "schema": "string",
+              "@context": [
+                true
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "hi_zeta",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "hi_epsilon",
+              "schema": "time",
+              "@context": "dtmi:iotcentral:context"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "hi_iota",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "hi_theta",
+              "schema": "boolean",
+              "@context": "http://iotcentral/context/2"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "hi_mu",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "hi_lambda",
+              "schema": "date",
+              "@context": "iotcentral;2"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "hi_omicron",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "hi_xi",
+              "schema": "dateTime",
+              "@context": {}
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_tau;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "hi_sigma",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "hi_rho",
+              "schema": "double",
+              "@context": {
+                "foo": "dtmi:foo:bar;1"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "hi_phi",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "hi_upsilon",
+              "schema": "duration",
+              "@context": [
+                {}
+              ]
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_yuzz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "hi_omega",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "hi_psi",
+              "schema": "float",
+              "@context": [
+                {
+                  "foo": "dtmi:foo:bar;1"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+]

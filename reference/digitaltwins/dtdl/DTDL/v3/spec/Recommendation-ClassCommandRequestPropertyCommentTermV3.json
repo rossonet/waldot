@@ -1,0 +1,48 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:lambda_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "lambda_theta",
+          "request": {
+            "comment": "lambda_zeta",
+            "name": "lambda_eta",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:lambda_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "lambda_mu",
+          "request": {
+            "dtmi:dtdl:property:comment;3": "lambda_kappa",
+            "name": "lambda_lambda",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

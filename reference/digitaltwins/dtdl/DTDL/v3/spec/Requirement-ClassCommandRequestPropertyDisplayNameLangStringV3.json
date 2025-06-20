@@ -1,0 +1,578 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nu_vroo",
+          "request": {
+            "name": "nu_yekk",
+            "schema": "boolean",
+            "displayName": "hello"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_beta",
+          "request": {
+            "name": "xi_alpha",
+            "schema": "date",
+            "displayName": [
+              "hello"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_epsilon",
+          "request": {
+            "name": "xi_delta",
+            "schema": "dateTime",
+            "displayName": {
+              "en": "hello"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_theta",
+          "request": {
+            "name": "xi_eta",
+            "schema": "double",
+            "displayName": [
+              {
+                "@value": "hello",
+                "@language": "en"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_lambda",
+          "request": {
+            "name": "xi_kappa",
+            "schema": "duration",
+            "displayName": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_omicron;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_xi",
+          "request": {
+            "name": "xi_nu",
+            "schema": "float",
+            "displayName": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_sigma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_rho",
+          "request": {
+            "name": "xi_pi",
+            "schema": "integer",
+            "displayName": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_phi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_upsilon",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_tau",
+            "schema": "long",
+            "displayName": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_psi",
+          "request": {
+            "name": "xi_chi",
+            "schema": "string",
+            "displayName": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_wum",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_yuzz",
+            "schema": "time",
+            "displayName": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_fuddle",
+          "request": {
+            "name": "xi_humpf",
+            "schema": "boolean",
+            "displayName": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_quan;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_snee",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_nuh",
+            "schema": "date",
+            "displayName": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_spazz",
+          "request": {
+            "name": "xi_thnad",
+            "schema": "dateTime",
+            "displayName": [
+              null
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_jogg",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_zatz",
+            "schema": "double",
+            "displayName": [
+              null
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "xi_yekk",
+          "request": {
+            "name": "xi_itch",
+            "schema": "duration",
+            "displayName": [
+              true
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_alpha",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_hi",
+            "schema": "float",
+            "displayName": [
+              true
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_delta",
+          "request": {
+            "name": "omicron_gamma",
+            "schema": "integer",
+            "displayName": [
+              626
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_eta",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "omicron_zeta",
+            "schema": "long",
+            "displayName": [
+              626
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_kappa",
+          "request": {
+            "name": "omicron_iota",
+            "schema": "string",
+            "displayName": [
+              {}
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_nu",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "omicron_mu",
+            "schema": "time",
+            "displayName": [
+              {}
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_rho;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_pi",
+          "request": {
+            "name": "omicron_omicron",
+            "schema": "boolean",
+            "displayName": {
+              "@value": "hello",
+              "@language": "en"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_upsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_tau",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "omicron_sigma",
+            "schema": "date",
+            "displayName": {
+              "@value": "hello",
+              "@language": "en"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_chi",
+          "request": {
+            "name": "omicron_phi",
+            "schema": "dateTime",
+            "displayName": [
+              {
+                "en": "hello"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_yuzz",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "omicron_omega",
+            "schema": "double",
+            "displayName": [
+              {
+                "en": "hello"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

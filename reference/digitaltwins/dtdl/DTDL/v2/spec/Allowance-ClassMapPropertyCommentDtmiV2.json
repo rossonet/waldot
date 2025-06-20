@@ -1,0 +1,28 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_yekk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:floob_zatz;1",
+          "@type": "Map",
+          "dtmi:dtdl:property:comment;2": "floob_jogg",
+          "mapKey": {
+            "name": "floob_flunn",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "floob_itch",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,61 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:upsilon_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:upsilon_eta;1",
+          "@type": [
+            "Map",
+            "Foobar"
+          ],
+          "mapKey": {
+            "name": "upsilon_theta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "upsilon_iota",
+            "schema": "dateTime"
+          },
+          "foobar": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:upsilon_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:upsilon_lambda;1",
+          "@type": [
+            "Map",
+            "Foobar"
+          ],
+          "mapKey": {
+            "name": "upsilon_mu",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "upsilon_nu",
+            "schema": "double"
+          },
+          "foobar": {}
+        }
+      }
+    ]
+  }
+]

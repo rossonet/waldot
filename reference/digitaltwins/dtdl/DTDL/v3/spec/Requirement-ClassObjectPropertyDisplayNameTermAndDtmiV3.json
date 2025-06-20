@@ -1,0 +1,49 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_phi;1",
+          "@type": "Object",
+          "displayName": [
+            "rho_chi"
+          ],
+          "dtmi:dtdl:property:displayName;3": [
+            "rho_psi"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_humpf;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:rho_yuzz;1",
+          "@type": "Object",
+          "displayName": [
+            "rho_wum"
+          ],
+          "dtmi:dtdl:property:displayName;3": [
+            "rho_um"
+          ]
+        }
+      }
+    ]
+  }
+]

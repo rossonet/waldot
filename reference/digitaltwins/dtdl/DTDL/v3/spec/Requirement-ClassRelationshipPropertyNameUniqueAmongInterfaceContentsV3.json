@@ -1,0 +1,74 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_flunn;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Relationship",
+            "name": "gamma_floob"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_zatz"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_itch;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Relationship",
+            "name": "gamma_floob"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_floob"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": [
+          "dtmi:dtdl:context;3",
+          "dtmi:undefinedExtension:context;1"
+        ],
+        "@id": "dtmi:example:gamma_yekk;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Relationship",
+            "name": "gamma_floob"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_floob"
+          }
+        ]
+      }
+    ]
+  }
+]

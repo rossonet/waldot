@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "zeta_nu",
+          "@type": [
+            "Command",
+            "dtmi:dtdl:class:Command;3"
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,65 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_humpf;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "zatz_fuddle",
+            "schema": "dateTime"
+          },
+          "mapKey": {
+            "displayName": [
+              "zatz_yuzz"
+            ],
+            "dtmi:dtdl:property:displayName;2": [
+              "zatz_wum"
+            ],
+            "name": "zatz_um",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_thnad;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "zatz_spazz",
+            "schema": "double"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "displayName": [
+              "zatz_nuh"
+            ],
+            "dtmi:dtdl:property:displayName;2": [
+              "zatz_snee"
+            ],
+            "name": "zatz_quan",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

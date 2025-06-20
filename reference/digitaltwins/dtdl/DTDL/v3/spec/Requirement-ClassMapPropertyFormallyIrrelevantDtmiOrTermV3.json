@@ -1,0 +1,108 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:tau_phi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:tau_sigma;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "tau_tau",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "tau_upsilon",
+            "schema": "duration"
+          },
+          "dtmi:foo:bar;1": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:tau_yuzz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:tau_chi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "tau_psi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "tau_omega",
+            "schema": "float"
+          },
+          "dtmi:foo:bar;1": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:tau_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:tau_wum;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "tau_um",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "tau_humpf",
+            "schema": "integer"
+          },
+          "boolean": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:tau_quan;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:tau_glikk;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "tau_nuh",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "tau_snee",
+            "schema": "long"
+          },
+          "boolean": null
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yekk_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "name": "yekk_gamma",
+          "schema": "float",
+          "comment": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddl"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yekk_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "name": "yekk_epsilon",
+          "schema": "integer",
+          "comment": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yekk_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Telemetry",
+          "name": "yekk_eta",
+          "schema": "long",
+          "comment": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethingQuiteAtrociousIfYouSayItLoudEnoughYouWillAlwaysSoundPrecociousSupercalifragilisticexpialidociousUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddleUmDiddleAyUmDiddleDiddleDiddle"
+        }
+      }
+    ]
+  }
+]

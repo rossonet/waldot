@@ -1,0 +1,94 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "um_lambda",
+          "schema": "double",
+          "unit": "acre"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:Area;2"
+          ],
+          "name": "um_nu",
+          "schema": "float",
+          "unit": "acre"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "um_omicron",
+          "schema": "integer",
+          "unit": "dtmi:standard:unit:acre;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_sigma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:Area;2"
+          ],
+          "name": "um_rho",
+          "schema": "long",
+          "unit": "dtmi:standard:unit:acre;2"
+        }
+      }
+    ]
+  }
+]

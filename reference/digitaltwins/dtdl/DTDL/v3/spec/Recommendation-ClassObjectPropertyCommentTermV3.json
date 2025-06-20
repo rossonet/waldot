@@ -1,0 +1,40 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_beta;1",
+          "@type": "Object",
+          "comment": "xi_gamma"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_epsilon;1",
+          "@type": "Object",
+          "dtmi:dtdl:property:comment;3": "xi_zeta"
+        }
+      }
+    ]
+  }
+]

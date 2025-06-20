@@ -1,0 +1,26 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_jogg",
+          "request": {
+            "dtmi:dtdl:property:displayName;3": [
+              "omicron_floob"
+            ],
+            "name": "omicron_zatz",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,30 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:lambda_yekk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:lambda_flunn;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "lambda_itch",
+            "schema": "duration"
+          },
+          "mapKey": {
+            "dtmi:dtdl:property:displayName;3": [
+              "lambda_zatz"
+            ],
+            "name": "lambda_jogg",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

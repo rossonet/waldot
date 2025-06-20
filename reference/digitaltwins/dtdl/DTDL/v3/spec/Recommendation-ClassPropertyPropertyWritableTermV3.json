@@ -1,0 +1,42 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_phi",
+          "schema": "long",
+          "writable": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_psi",
+          "schema": "string",
+          "dtmi:dtdl:property:writable;3": false
+        }
+      }
+    ]
+  }
+]

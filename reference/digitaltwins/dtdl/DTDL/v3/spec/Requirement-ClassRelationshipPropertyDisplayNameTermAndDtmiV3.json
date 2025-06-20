@@ -1,0 +1,49 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "displayName": [
+            "nu_spazz"
+          ],
+          "dtmi:dtdl:property:displayName;3": [
+            "nu_floob"
+          ],
+          "name": "nu_zatz"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "displayName": [
+            "nu_flunn"
+          ],
+          "dtmi:dtdl:property:displayName;3": [
+            "nu_itch"
+          ],
+          "name": "nu_yekk"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:theta_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "description": [
+            "theta_floob"
+          ],
+          "name": "theta_zatz"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:theta_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "dtmi:dtdl:property:description;2": [
+            "theta_flunn"
+          ],
+          "name": "theta_itch"
+        }
+      }
+    ]
+  }
+]

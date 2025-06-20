@@ -1,0 +1,90 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "vroo_zeta",
+          "request": {
+            "name": "vroo_epsilon",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "vroo_iota",
+          "request": {
+            "name": "vroo_theta",
+            "schema": "dtmi:dtdl:instance:Schema:double;3"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "vroo_mu",
+          "request": {
+            "name": "vroo_lambda",
+            "schema": "point"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "vroo_omicron",
+          "request": {
+            "name": "vroo_xi",
+            "schema": "dtmi:standard:schema:geospatial:point;3"
+          }
+        }
+      }
+    ]
+  }
+]

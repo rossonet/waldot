@@ -1,0 +1,46 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:gamma_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "gamma_epsilon",
+          "schema": "double",
+          "@type": [
+            "Telemetry",
+            "Telemetry"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:gamma_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "gamma_eta",
+          "schema": "duration",
+          "@type": [
+            "dtmi:dtdl:class:Telemetry;2",
+            "dtmi:dtdl:class:Telemetry;2"
+          ]
+        }
+      }
+    ]
+  }
+]

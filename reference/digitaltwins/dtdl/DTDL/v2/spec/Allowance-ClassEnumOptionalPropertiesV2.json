@@ -1,0 +1,129 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "zatz_glikk",
+          "schema": {
+            "@context": [],
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 517,
+                "name": "zatz_fuddle"
+              }
+            ],
+            "valueSchema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "zatz_quan",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 518,
+                "name": "zatz_snee"
+              }
+            ],
+            "valueSchema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_zatz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_spazz;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 519,
+              "name": "zatz_floob"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_itch;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_jogg;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 520,
+              "name": "zatz_flunn"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_yekk;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 521,
+              "name": "zatz_vroo"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

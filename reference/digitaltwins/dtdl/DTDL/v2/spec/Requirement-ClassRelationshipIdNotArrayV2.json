@@ -1,0 +1,166 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;7"
+          ],
+          "@type": "Relationship",
+          "name": "epsilon_psi"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;7"
+          ],
+          "@type": "Relationship",
+          "name": "epsilon_yuzz"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;108675309"
+          ],
+          "@type": "Relationship",
+          "name": "epsilon_um"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;108675309"
+          ],
+          "@type": "Relationship",
+          "name": "epsilon_fuddle"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo:bar;999999999"
+          ],
+          "@type": "Relationship",
+          "name": "epsilon_nuh"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo:bar;999999999"
+          ],
+          "@type": "Relationship",
+          "name": "epsilon_quan"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": [
+            "dtmi:foo;1"
+          ],
+          "@type": "Relationship",
+          "name": "epsilon_spazz"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": [
+            "dtmi:foo;1"
+          ],
+          "@type": "Relationship",
+          "name": "epsilon_zatz"
+        }
+      }
+    ]
+  }
+]

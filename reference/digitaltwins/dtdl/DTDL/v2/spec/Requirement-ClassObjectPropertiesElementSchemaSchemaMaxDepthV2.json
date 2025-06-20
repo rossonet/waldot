@@ -1,0 +1,165 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nuh_yuzz",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "nuh_omega",
+              "schema": {
+                "@type": "Object",
+                "fields": {
+                  "name": "nuh_psi",
+                  "schema": {
+                    "@type": "Object",
+                    "fields": {
+                      "name": "nuh_chi",
+                      "schema": {
+                        "@type": "Object",
+                        "fields": {
+                          "name": "nuh_phi",
+                          "schema": {
+                            "@type": "Object",
+                            "fields": [
+                              {
+                                "name": "nuh_upsilon",
+                                "schema": "integer"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nuh_quan",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "nuh_snee",
+              "schema": {
+                "@type": "Object",
+                "fields": {
+                  "name": "nuh_nuh",
+                  "schema": {
+                    "@type": "Object",
+                    "fields": {
+                      "name": "nuh_glikk",
+                      "schema": {
+                        "@type": "Object",
+                        "fields": {
+                          "name": "nuh_fuddle",
+                          "schema": {
+                            "@type": "Object",
+                            "fields": {
+                              "name": "nuh_humpf",
+                              "schema": {
+                                "@type": "Object",
+                                "fields": [
+                                  {
+                                    "name": "nuh_um",
+                                    "schema": "long"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "nuh_yekk",
+          "schema": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": "Object",
+            "fields": {
+              "name": "nuh_itch",
+              "schema": {
+                "@type": "Object",
+                "fields": {
+                  "name": "nuh_flunn",
+                  "schema": {
+                    "@type": "Object",
+                    "fields": {
+                      "name": "nuh_jogg",
+                      "schema": {
+                        "@type": "Object",
+                        "fields": {
+                          "name": "nuh_zatz",
+                          "schema": {
+                            "@type": "Object",
+                            "fields": {
+                              "name": "nuh_floob",
+                              "schema": {
+                                "@type": "Object",
+                                "fields": [
+                                  {
+                                    "name": "nuh_spazz",
+                                    "schema": "string"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+]

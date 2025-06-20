@@ -1,0 +1,61 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_um;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_yuzz;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "snee_wum",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@type": [
+              "MapValue",
+              "dtmi:foo//bar"
+            ],
+            "name": "snee_omega",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_fuddle;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "snee_glikk",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "MapValue",
+              "dtmi:foo//bar"
+            ],
+            "name": "snee_humpf",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_yekk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:jogg_flunn;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "jogg_itch",
+            "schema": "float"
+          },
+          "mapKey": {
+            "@type": [
+              "MapKey",
+              "Foobar"
+            ],
+            "name": "jogg_jogg",
+            "schema": "string",
+            "dtmi:foo//bar": 626
+          }
+        }
+      }
+    ]
+  }
+]

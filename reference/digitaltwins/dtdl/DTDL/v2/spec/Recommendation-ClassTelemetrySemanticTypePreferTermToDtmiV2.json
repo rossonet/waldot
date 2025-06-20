@@ -1,0 +1,48 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:gamma_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "LuminousIntensity"
+          ],
+          "name": "gamma_spazz",
+          "schema": "integer",
+          "unit": "candela"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:gamma_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:LuminousIntensity;2"
+          ],
+          "name": "gamma_zatz",
+          "schema": "long",
+          "unit": "candela"
+        }
+      }
+    ]
+  }
+]

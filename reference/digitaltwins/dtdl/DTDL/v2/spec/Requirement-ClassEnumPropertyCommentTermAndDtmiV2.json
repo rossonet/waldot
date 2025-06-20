@@ -1,0 +1,55 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:alpha_um;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:alpha_psi;1",
+          "@type": "Enum",
+          "comment": "alpha_omega",
+          "dtmi:dtdl:property:comment;2": "alpha_yuzz",
+          "enumValues": [
+            {
+              "enumValue": 637,
+              "name": "alpha_wum"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:alpha_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:alpha_humpf;1",
+          "@type": "Enum",
+          "comment": "alpha_fuddle",
+          "dtmi:dtdl:property:comment;2": "alpha_glikk",
+          "enumValues": [
+            {
+              "enumValue": 638,
+              "name": "alpha_nuh"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,66 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Component",
+          "schema": {
+            "@id": "dtmi:example:zatz_lambda;1",
+            "@type": "Interface"
+          },
+          "name": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSometh"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Component",
+          "schema": {
+            "@id": "dtmi:example:zatz_nu;1",
+            "@type": "Interface"
+          },
+          "name": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Component",
+          "schema": {
+            "@id": "dtmi:example:zatz_omicron;1",
+            "@type": "Interface"
+          },
+          "name": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+        }
+      }
+    ]
+  }
+]

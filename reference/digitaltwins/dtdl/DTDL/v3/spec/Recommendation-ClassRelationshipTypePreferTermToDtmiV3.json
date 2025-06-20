@@ -1,0 +1,38 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "beta_theta",
+          "@type": "Relationship"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "beta_kappa",
+          "@type": "dtmi:dtdl:class:Relationship;3"
+        }
+      }
+    ]
+  }
+]

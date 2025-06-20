@@ -1,0 +1,182 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nu_zatz;1",
+          "@type": "Object",
+          "fields": {
+            "name": "nu_floob",
+            "schema": "integer",
+            "@graph": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_yekk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nu_itch;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "nu_flunn",
+            "schema": "long",
+            "@graph": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_alpha;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nu_hi;1",
+          "@type": "Object",
+          "fields": {
+            "name": "nu_vroo",
+            "schema": "string",
+            "@value": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_gamma;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_beta",
+            "schema": "time",
+            "@value": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_zeta;1",
+          "@type": "Object",
+          "fields": {
+            "name": "xi_epsilon",
+            "schema": "boolean",
+            "@language": "en"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_iota;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_theta",
+            "schema": "date",
+            "@language": "en"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_nu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_mu;1",
+          "@type": "Object",
+          "fields": {
+            "name": "xi_lambda",
+            "schema": "dateTime",
+            "@foobar": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_pi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_omicron;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_xi",
+            "schema": "double",
+            "@foobar": true
+          }
+        }
+      }
+    ]
+  }
+]

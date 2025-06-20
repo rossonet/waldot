@@ -1,0 +1,825 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:psi_glikk;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "psi_nuh",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:psi_fuddle;1",
+            "elementSchema": "boolean",
+            "@type": "Array"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:psi_thnad;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "psi_spazz",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:psi_quan;1",
+            "elementSchema": "date",
+            "@type": "Array"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_yekk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:psi_flunn;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "psi_itch",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:psi_zatz;1",
+            "name": "psi_jogg",
+            "@type": "Command"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_gamma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:omega_alpha;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "omega_beta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:psi_vroo;1",
+            "name": "psi_hi",
+            "@type": "Command"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_theta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omega_zeta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "omega_eta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:omega_delta;1",
+            "name": "omega_epsilon",
+            "schema": "dateTime",
+            "@type": "CommandPayload"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_nu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:omega_lambda;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "omega_mu",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:omega_iota;1",
+            "name": "omega_kappa",
+            "schema": "double",
+            "@type": "CommandPayload"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_tau;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omega_rho;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "omega_sigma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:omega_xi;1",
+            "name": "omega_omicron",
+            "schema": {
+              "@id": "dtmi:example:omega_pi;1",
+              "@type": "Interface"
+            },
+            "@type": "Component"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_yuzz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:omega_psi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "omega_omega",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:omega_upsilon;1",
+            "name": "omega_phi",
+            "schema": {
+              "@id": "dtmi:example:omega_chi;1",
+              "@type": "Interface"
+            },
+            "@type": "Component"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omega_humpf;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "omega_fuddle",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:omega_wum;1",
+            "enumValues": [
+              {
+                "enumValue": 1060,
+                "name": "omega_um"
+              }
+            ],
+            "valueSchema": "integer",
+            "@type": "Enum"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:omega_quan;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "omega_thnad",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:omega_nuh;1",
+            "enumValues": [
+              {
+                "enumValue": 1061,
+                "name": "omega_snee"
+              }
+            ],
+            "valueSchema": "integer",
+            "@type": "Enum"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_itch;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omega_jogg;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "omega_flunn",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:omega_floob;1",
+            "enumValue": 1062,
+            "name": "omega_zatz",
+            "@type": "EnumValue"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:omega_hi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "yuzz_alpha",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:omega_yekk;1",
+            "enumValue": 1063,
+            "name": "omega_vroo",
+            "@type": "EnumValue"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yuzz_epsilon;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "yuzz_zeta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:yuzz_gamma;1",
+            "name": "yuzz_delta",
+            "schema": "duration",
+            "@type": "Field"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_mu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:yuzz_kappa;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "yuzz_lambda",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:yuzz_theta;1",
+            "name": "yuzz_iota",
+            "schema": "float",
+            "@type": "Field"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_pi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yuzz_xi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "yuzz_omicron",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:yuzz_nu;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_upsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:yuzz_sigma;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "yuzz_tau",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:yuzz_rho;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yuzz_omega;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "yuzz_yuzz",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:yuzz_phi;1",
+            "mapKey": {
+              "name": "yuzz_chi",
+              "schema": "string"
+            },
+            "mapValue": {
+              "name": "yuzz_psi",
+              "schema": "integer"
+            },
+            "@type": "Map"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:yuzz_glikk;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "yuzz_nuh",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:yuzz_um;1",
+            "mapKey": {
+              "name": "yuzz_humpf",
+              "schema": "string"
+            },
+            "mapValue": {
+              "name": "yuzz_fuddle",
+              "schema": "long"
+            },
+            "@type": "Map"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_zatz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yuzz_spazz;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "yuzz_floob",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:yuzz_quan;1",
+            "name": "yuzz_thnad",
+            "schema": "string",
+            "@type": "MapKey"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_vroo;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:yuzz_itch;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "yuzz_yekk",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:yuzz_jogg;1",
+            "name": "yuzz_flunn",
+            "schema": "string",
+            "@type": "MapKey"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:wum_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:wum_beta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "wum_gamma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:yuzz_hi;1",
+            "name": "wum_alpha",
+            "schema": "string",
+            "@type": "MapValue"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:wum_iota;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:wum_eta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "wum_theta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:wum_epsilon;1",
+            "fields": [
+              {
+                "name": "wum_zeta",
+                "schema": "time"
+              }
+            ],
+            "@type": "Object"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:wum_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:wum_mu;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "wum_nu",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:wum_kappa;1",
+            "fields": [
+              {
+                "name": "wum_lambda",
+                "schema": "boolean"
+              }
+            ],
+            "@type": "Object"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:wum_tau;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:wum_rho;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "wum_sigma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:wum_omicron;1",
+            "name": "wum_pi",
+            "schema": "date",
+            "@type": "Property"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:wum_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:wum_chi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "wum_psi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:wum_upsilon;1",
+            "name": "wum_phi",
+            "schema": "dateTime",
+            "@type": "Property"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:wum_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:wum_um;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "wum_humpf",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:wum_yuzz;1",
+            "name": "wum_wum",
+            "@type": "Relationship"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:wum_thnad;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:wum_snee;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "wum_quan",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:wum_glikk;1",
+            "name": "wum_nuh",
+            "@type": "Relationship"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:wum_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:wum_zatz;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "wum_jogg",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:wum_spazz;1",
+            "name": "wum_floob",
+            "schema": "double",
+            "@type": "Telemetry"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_alpha;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:wum_vroo;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "wum_hi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@id": "dtmi:example:wum_itch;1",
+            "name": "wum_yekk",
+            "schema": "duration",
+            "@type": "Telemetry"
+          }
+        }
+      }
+    ]
+  }
+]

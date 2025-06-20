@@ -1,0 +1,40 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:eta_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:eta_gamma;1",
+          "elementSchema": "string",
+          "@type": "Array"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:eta_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:eta_epsilon;1",
+          "elementSchema": "time",
+          "@type": "dtmi:dtdl:class:Array;2"
+        }
+      }
+    ]
+  }
+]

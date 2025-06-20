@@ -1,0 +1,27 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:upsilon_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "upsilon_delta",
+          "request": {
+            "@type": [
+              "CommandPayload",
+              "http://foo.com/bar"
+            ],
+            "name": "upsilon_gamma",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  }
+]

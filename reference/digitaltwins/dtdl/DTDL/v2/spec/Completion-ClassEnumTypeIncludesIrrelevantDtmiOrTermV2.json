@@ -1,0 +1,112 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_itch;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_jogg;1",
+          "@type": [
+            "Enum",
+            "dtmi:foo:bar;1"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 91,
+              "name": "rho_flunn"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:rho_yekk;1",
+          "@type": [
+            "Enum",
+            "dtmi:foo:bar;1"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 92,
+              "name": "rho_vroo"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:sigma_gamma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:sigma_alpha;1",
+          "@type": [
+            "Enum",
+            "boolean"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 93,
+              "name": "sigma_beta"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:sigma_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:sigma_delta;1",
+          "@type": [
+            "Enum",
+            "boolean"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 94,
+              "name": "sigma_epsilon"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

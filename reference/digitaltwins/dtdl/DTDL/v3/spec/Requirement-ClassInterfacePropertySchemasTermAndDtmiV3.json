@@ -1,0 +1,59 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:humpf_jogg;1",
+        "@type": "Interface",
+        "schemas": [
+          {
+            "@id": "dtmi:example:humpf_flunn;1",
+            "@type": "Array",
+            "elementSchema": "duration"
+          }
+        ],
+        "dtmi:dtdl:property:schemas;3": [
+          {
+            "@id": "dtmi:example:humpf_itch;1",
+            "@type": "Array",
+            "elementSchema": "float"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": [
+          "dtmi:dtdl:context;3",
+          "dtmi:undefinedExtension:context;1"
+        ],
+        "@id": "dtmi:example:humpf_yekk;1",
+        "@type": "Interface",
+        "schemas": [
+          {
+            "@id": "dtmi:example:humpf_vroo;1",
+            "@type": "Array",
+            "elementSchema": "integer"
+          }
+        ],
+        "dtmi:dtdl:property:schemas;3": [
+          {
+            "@id": "dtmi:example:humpf_hi;1",
+            "@type": "Array",
+            "elementSchema": "long"
+          }
+        ]
+      }
+    ]
+  }
+]

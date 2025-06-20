@@ -1,0 +1,27 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Component",
+            "Foobar"
+          ],
+          "name": "xi_zatz",
+          "schema": {
+            "@id": "dtmi:example:xi_jogg;1",
+            "@type": "Interface"
+          },
+          "dtmi:foo//bar": 626
+        }
+      }
+    ]
+  }
+]

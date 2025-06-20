@@ -1,0 +1,57 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:glikk_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_rho;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@type": [
+              "EnumValue",
+              "Foobar"
+            ],
+            "enumValue": 1461,
+            "name": "glikk_pi",
+            "dtmi:foo//bar": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:glikk_phi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_upsilon;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "EnumValue",
+              "Foobar"
+            ],
+            "enumValue": 1462,
+            "name": "glikk_tau",
+            "dtmi:foo//bar": 626
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,28 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_sigma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_rho",
+          "request": {
+            "name": "gamma_pi",
+            "schema": "double",
+            "@type": [
+              "CommandRequest",
+              "dtmi:dtdl:class:CommandRequest;3"
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,46 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_nuh;1",
+          "@type": "Object",
+          "fields": {
+            "name": "quan_glikk",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_thnad;1",
+          "@type": "Object",
+          "fields": {
+            "dtmi:dtdl:property:name;3": "quan_quan",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  }
+]

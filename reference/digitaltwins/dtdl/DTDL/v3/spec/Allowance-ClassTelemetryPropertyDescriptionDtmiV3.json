@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "dtmi:dtdl:property:description;3": [
+            "vroo_zatz"
+          ],
+          "name": "vroo_jogg",
+          "schema": "boolean"
+        }
+      }
+    ]
+  }
+]

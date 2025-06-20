@@ -1,0 +1,52 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nu_yuzz",
+          "request": {
+            "description": [
+              "nu_psi"
+            ],
+            "name": "nu_omega",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nu_fuddle",
+          "request": {
+            "dtmi:dtdl:property:description;3": [
+              "nu_um"
+            ],
+            "name": "nu_humpf",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

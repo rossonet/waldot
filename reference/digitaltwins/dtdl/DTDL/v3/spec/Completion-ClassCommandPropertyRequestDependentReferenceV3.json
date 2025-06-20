@@ -1,0 +1,58 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omega_beta;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:omega_alpha;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "psi_hi",
+            "request": "dtmi:ex:dependentRef;1"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omega_epsilon;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:omega_delta;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "omega_gamma",
+            "request": [
+              "dtmi:ex:dependentRef;1"
+            ]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  }
+]

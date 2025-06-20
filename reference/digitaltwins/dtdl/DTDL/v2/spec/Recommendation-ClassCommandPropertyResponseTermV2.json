@@ -1,0 +1,46 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "delta_omega",
+          "response": {
+            "name": "delta_yuzz",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "delta_um",
+          "dtmi:dtdl:property:response;2": {
+            "name": "delta_humpf",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

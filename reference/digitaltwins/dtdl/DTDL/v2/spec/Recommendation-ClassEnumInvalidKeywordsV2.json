@@ -1,0 +1,80 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_glikk;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 705,
+              "name": "zeta_nuh"
+            }
+          ],
+          "valueSchema": "integer",
+          "@value": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_quan;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 706,
+              "name": "zeta_thnad"
+            }
+          ],
+          "valueSchema": "integer",
+          "@language": "en"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_floob;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 707,
+              "name": "zeta_zatz"
+            }
+          ],
+          "valueSchema": "integer",
+          "@foobar": true
+        }
+      }
+    ]
+  }
+]

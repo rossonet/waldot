@@ -1,0 +1,57 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:alpha_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "alpha_iota",
+          "response": {
+            "displayName": [
+              "alpha_zeta"
+            ],
+            "dtmi:dtdl:property:displayName;3": [
+              "alpha_eta"
+            ],
+            "name": "alpha_theta",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:alpha_omicron;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "alpha_xi",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "displayName": [
+              "alpha_lambda"
+            ],
+            "dtmi:dtdl:property:displayName;3": [
+              "alpha_mu"
+            ],
+            "name": "alpha_nu",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,84 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_spazz;1",
+          "@type": "Object",
+          "fields": [
+            {
+              "schema": "double",
+              "name": "alpha_glikk"
+            },
+            {
+              "schema": "duration",
+              "name": "alpha_nuh"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_zatz;1",
+          "@type": "Object",
+          "fields": [
+            {
+              "schema": "float",
+              "name": "alpha_glikk"
+            },
+            {
+              "schema": "integer",
+              "name": "alpha_glikk"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_itch;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:thnad_flunn;1",
+          "@type": "Object",
+          "fields": [
+            {
+              "schema": "long",
+              "name": "alpha_glikk"
+            },
+            {
+              "schema": "string",
+              "name": "alpha_glikk"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

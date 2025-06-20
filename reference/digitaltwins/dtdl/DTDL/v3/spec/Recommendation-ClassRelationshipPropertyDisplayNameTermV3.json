@@ -1,0 +1,44 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "displayName": [
+            "nu_fuddle"
+          ],
+          "name": "nu_glikk"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "dtmi:dtdl:property:displayName;3": [
+            "nu_snee"
+          ],
+          "name": "nu_quan"
+        }
+      }
+    ]
+  }
+]

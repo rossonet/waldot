@@ -1,0 +1,20 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yuzz_phi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "yuzz_upsilon",
+          "dtmi:dtdl:property:writable;3": true
+        }
+      }
+    ]
+  }
+]

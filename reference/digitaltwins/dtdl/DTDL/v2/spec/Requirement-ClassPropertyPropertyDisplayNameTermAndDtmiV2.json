@@ -1,0 +1,51 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "displayName": [
+            "quan_yekk"
+          ],
+          "dtmi:dtdl:property:displayName;2": [
+            "quan_vroo"
+          ],
+          "name": "quan_hi",
+          "schema": "duration"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Property",
+          "displayName": [
+            "thnad_beta"
+          ],
+          "dtmi:dtdl:property:displayName;2": [
+            "thnad_gamma"
+          ],
+          "name": "thnad_delta",
+          "schema": "float"
+        }
+      }
+    ]
+  }
+]

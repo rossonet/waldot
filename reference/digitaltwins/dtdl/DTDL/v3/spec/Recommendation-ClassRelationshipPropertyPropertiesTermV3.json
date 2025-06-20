@@ -1,0 +1,52 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:upsilon_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "upsilon_snee",
+          "properties": [
+            {
+              "@type": "Property",
+              "name": "upsilon_quan",
+              "schema": "boolean"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:upsilon_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "upsilon_spazz",
+          "dtmi:dtdl:property:properties;3": [
+            {
+              "@type": "Property",
+              "name": "upsilon_floob",
+              "schema": "date"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

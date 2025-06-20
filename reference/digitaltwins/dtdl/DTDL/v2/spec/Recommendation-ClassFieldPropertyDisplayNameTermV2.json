@@ -1,0 +1,52 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_psi;1",
+          "@type": "Object",
+          "fields": {
+            "displayName": [
+              "xi_phi"
+            ],
+            "name": "xi_chi",
+            "schema": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_humpf;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_um;1",
+          "@type": "Object",
+          "fields": {
+            "dtmi:dtdl:property:displayName;2": [
+              "xi_yuzz"
+            ],
+            "name": "xi_wum",
+            "schema": "date"
+          }
+        }
+      }
+    ]
+  }
+]

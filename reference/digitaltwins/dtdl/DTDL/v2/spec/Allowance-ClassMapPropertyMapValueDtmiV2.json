@@ -1,0 +1,27 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:um_beta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "um_gamma",
+            "schema": "string"
+          },
+          "dtmi:dtdl:property:mapValue;2": {
+            "name": "um_delta",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

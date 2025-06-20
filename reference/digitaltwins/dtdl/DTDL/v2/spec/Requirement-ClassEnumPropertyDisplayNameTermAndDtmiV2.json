@@ -1,0 +1,63 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_xi;1",
+          "@type": "Enum",
+          "displayName": [
+            "zeta_omicron"
+          ],
+          "dtmi:dtdl:property:displayName;2": [
+            "zeta_pi"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 701,
+              "name": "zeta_rho"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_psi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:zeta_tau;1",
+          "@type": "Enum",
+          "displayName": [
+            "zeta_upsilon"
+          ],
+          "dtmi:dtdl:property:displayName;2": [
+            "zeta_phi"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 702,
+              "name": "zeta_chi"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:tau_alpha;1",
+        "@type": "Interface",
+        "comment": "tau_beta"
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:tau_gamma;1",
+        "@type": "Interface",
+        "dtmi:dtdl:property:comment;2": "tau_delta"
+      }
+    ]
+  }
+]

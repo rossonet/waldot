@@ -1,0 +1,57 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_hi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "zeta_alpha",
+            "schema": "double"
+          },
+          "mapKey": {
+            "comment": "epsilon_itch",
+            "dtmi:dtdl:property:comment;3": "epsilon_yekk",
+            "name": "epsilon_vroo",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:zeta_theta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_zeta;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "zeta_eta",
+            "schema": "duration"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "comment": "zeta_gamma",
+            "dtmi:dtdl:property:comment;3": "zeta_delta",
+            "name": "zeta_epsilon",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

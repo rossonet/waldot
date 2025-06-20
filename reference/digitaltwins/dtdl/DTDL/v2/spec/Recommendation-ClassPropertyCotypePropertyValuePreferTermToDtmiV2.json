@@ -1,0 +1,94 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "flunn_epsilon",
+          "schema": "long",
+          "unit": "gigawatt"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "flunn_eta",
+          "schema": "double",
+          "unit": "gigawatt"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "flunn_iota",
+          "schema": "float",
+          "unit": "dtmi:standard:unit:gigawatt;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "flunn_lambda",
+          "schema": "integer",
+          "unit": "dtmi:standard:unit:gigawatt;2"
+        }
+      }
+    ]
+  }
+]

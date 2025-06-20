@@ -1,0 +1,52 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:mu_zeta;1",
+          "@type": "Object",
+          "fields": {
+            "description": [
+              "mu_delta"
+            ],
+            "name": "mu_epsilon",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:mu_lambda;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:mu_kappa;1",
+          "@type": "Object",
+          "fields": {
+            "dtmi:dtdl:property:description;2": [
+              "mu_theta"
+            ],
+            "name": "mu_iota",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

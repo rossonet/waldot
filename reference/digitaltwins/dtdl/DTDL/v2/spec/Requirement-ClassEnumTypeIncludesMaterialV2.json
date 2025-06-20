@@ -1,0 +1,204 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_alpha;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:pi_vroo;1",
+          "enumValues": [
+            {
+              "enumValue": 78,
+              "name": "pi_hi"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": "Enum"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_beta;1",
+          "enumValues": [
+            {
+              "enumValue": 79,
+              "name": "rho_gamma"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": [
+            "Enum"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_epsilon;1",
+          "enumValues": [
+            {
+              "enumValue": 80,
+              "name": "rho_zeta"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": "dtmi:dtdl:class:Enum;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_theta;1",
+          "enumValues": [
+            {
+              "enumValue": 81,
+              "name": "rho_iota"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": [
+            "dtmi:dtdl:class:Enum;2"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_nu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_lambda;1",
+          "enumValues": [
+            {
+              "enumValue": 82,
+              "name": "rho_mu"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_pi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:rho_xi;1",
+          "enumValues": [
+            {
+              "enumValue": 83,
+              "name": "rho_omicron"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_tau;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_rho;1",
+          "enumValues": [
+            {
+              "enumValue": 84,
+              "name": "rho_sigma"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:rho_upsilon;1",
+          "enumValues": [
+            {
+              "enumValue": 85,
+              "name": "rho_phi"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  }
+]

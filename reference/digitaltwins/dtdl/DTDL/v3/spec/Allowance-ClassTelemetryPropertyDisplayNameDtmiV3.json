@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:alpha_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "dtmi:dtdl:property:displayName;3": [
+            "alpha_chi"
+          ],
+          "name": "alpha_psi",
+          "schema": "dateTime"
+        }
+      }
+    ]
+  }
+]

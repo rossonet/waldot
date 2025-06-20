@@ -1,0 +1,26 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:fuddle_yuzz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:fuddle_psi;1",
+          "@type": "Enum",
+          "dtmi:dtdl:property:enumValues;2": [
+            {
+              "enumValue": 415,
+              "name": "fuddle_omega"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

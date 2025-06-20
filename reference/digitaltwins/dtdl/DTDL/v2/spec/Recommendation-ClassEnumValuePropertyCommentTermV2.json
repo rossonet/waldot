@@ -1,0 +1,50 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yuzz_glikk;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "comment": "yuzz_humpf",
+            "enumValue": 945,
+            "name": "yuzz_fuddle"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yuzz_thnad;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "dtmi:dtdl:property:comment;2": "yuzz_snee",
+            "enumValue": 946,
+            "name": "yuzz_quan"
+          }
+        }
+      }
+    ]
+  }
+]

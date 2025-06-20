@@ -1,0 +1,27 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:humpf_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:humpf_thnad;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "dtmi:dtdl:property:displayName;3": [
+              "humpf_snee"
+            ],
+            "enumValue": 1440,
+            "name": "humpf_quan"
+          }
+        }
+      }
+    ]
+  }
+]

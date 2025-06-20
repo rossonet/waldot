@@ -1,0 +1,42 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:phi_delta;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Command",
+            "name": "phi_epsilon"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:phi_zeta;1",
+        "@type": "Interface",
+        "dtmi:dtdl:property:contents;3": [
+          {
+            "@type": "Command",
+            "name": "phi_eta"
+          }
+        ]
+      }
+    ]
+  }
+]

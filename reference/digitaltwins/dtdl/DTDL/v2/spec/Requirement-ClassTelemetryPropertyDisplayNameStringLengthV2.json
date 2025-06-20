@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "name": "psi_zeta",
+          "schema": "double",
+          "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSometh"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "name": "psi_theta",
+          "schema": "duration",
+          "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Telemetry",
+          "name": "psi_kappa",
+          "schema": "float",
+          "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+        }
+      }
+    ]
+  }
+]

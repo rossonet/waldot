@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "quan_wum",
+          "schema": "string",
+          "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSometh"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "quan_humpf",
+          "schema": "time",
+          "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Property",
+          "name": "quan_glikk",
+          "schema": "boolean",
+          "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+        }
+      }
+    ]
+  }
+]

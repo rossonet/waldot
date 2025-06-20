@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_nu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_lambda;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "thnad_mu",
+            "schema": "string"
+          },
+          "mapKey": {
+            "description": [
+              "thnad_iota"
+            ],
+            "name": "thnad_kappa",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_pi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "thnad_rho",
+            "schema": "time"
+          },
+          "mapKey": {
+            "dtmi:dtdl:property:description;2": [
+              "thnad_xi"
+            ],
+            "name": "thnad_omicron",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

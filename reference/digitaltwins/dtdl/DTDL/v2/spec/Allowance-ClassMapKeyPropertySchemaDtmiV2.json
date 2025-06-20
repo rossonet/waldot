@@ -1,0 +1,27 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:pi_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:pi_upsilon;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "pi_phi",
+            "schema": "time"
+          },
+          "mapKey": {
+            "name": "pi_tau",
+            "dtmi:dtdl:property:schema;2": "string"
+          }
+        }
+      }
+    ]
+  }
+]

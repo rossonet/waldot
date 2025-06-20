@@ -1,0 +1,41 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "name": "beta_itch",
+          "schema": "time",
+          "foobar": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Telemetry",
+          "name": "beta_vroo",
+          "schema": "boolean",
+          "foobar": {}
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,466 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_beta",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 522,
+                "name": "jogg_alpha"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": "dtmi:iotcentral:context;2"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_epsilon",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 523,
+                "name": "jogg_delta"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_theta",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 524,
+                "name": "jogg_eta"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": [
+              "dtmi:iotcentral:context;2"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_lambda",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 525,
+                "name": "jogg_kappa"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_omicron;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_xi",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 526,
+                "name": "jogg_nu"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_sigma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_rho",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 527,
+                "name": "jogg_pi"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_phi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_upsilon",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 528,
+                "name": "jogg_tau"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": [
+              null
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_psi",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 529,
+                "name": "jogg_chi"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": [
+              626
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_wum",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 530,
+                "name": "jogg_yuzz"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": [
+              true
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_fuddle",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 531,
+                "name": "jogg_humpf"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": "dtmi:iotcentral:context"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_quan;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_snee",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 532,
+                "name": "jogg_nuh"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": "http://iotcentral/context/2"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_spazz",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 533,
+                "name": "jogg_thnad"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": "iotcentral;2"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_jogg",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 534,
+                "name": "jogg_zatz"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "jogg_yekk",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 535,
+                "name": "jogg_itch"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": {
+              "foo": "dtmi:foo:bar;1"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_alpha",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 536,
+                "name": "jogg_hi"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": [
+              {}
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_delta",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 537,
+                "name": "flunn_gamma"
+              }
+            ],
+            "valueSchema": "integer",
+            "@context": [
+              {
+                "foo": "dtmi:foo:bar;1"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,27 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omega_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omega_pi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "omega_rho",
+            "schema": "boolean"
+          },
+          "mapKey": {
+            "dtmi:dtdl:property:name;3": "omega_omicron",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

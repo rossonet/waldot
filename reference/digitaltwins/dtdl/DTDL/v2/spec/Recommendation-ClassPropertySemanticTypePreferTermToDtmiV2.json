@@ -1,0 +1,48 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Acceleration"
+          ],
+          "name": "xi_epsilon",
+          "schema": "long",
+          "unit": "centimetrePerSecondSquared"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Acceleration;2"
+          ],
+          "name": "xi_eta",
+          "schema": "double",
+          "unit": "centimetrePerSecondSquared"
+        }
+      }
+    ]
+  }
+]

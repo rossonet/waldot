@@ -1,0 +1,41 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yuzz_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "yuzz_wum",
+          "writable": false,
+          "dtmi:dtdl:property:writable;3": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yuzz_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "yuzz_humpf",
+          "writable": false,
+          "dtmi:dtdl:property:writable;3": true
+        }
+      }
+    ]
+  }
+]

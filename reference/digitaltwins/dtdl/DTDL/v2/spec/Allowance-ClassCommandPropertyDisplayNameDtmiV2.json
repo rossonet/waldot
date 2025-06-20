@@ -1,0 +1,22 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "dtmi:dtdl:property:displayName;2": [
+            "jogg_upsilon"
+          ],
+          "name": "jogg_phi"
+        }
+      }
+    ]
+  }
+]

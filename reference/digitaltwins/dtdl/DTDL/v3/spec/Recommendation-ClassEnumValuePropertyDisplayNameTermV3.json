@@ -1,0 +1,54 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:humpf_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:humpf_jogg;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "displayName": [
+              "humpf_floob"
+            ],
+            "enumValue": 1441,
+            "name": "humpf_zatz"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:humpf_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:humpf_vroo;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "dtmi:dtdl:property:displayName;3": [
+              "humpf_itch"
+            ],
+            "enumValue": 1442,
+            "name": "humpf_yekk"
+          }
+        }
+      }
+    ]
+  }
+]

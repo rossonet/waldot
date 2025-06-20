@@ -1,0 +1,45 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:wum_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Relationship",
+            "Foobar"
+          ],
+          "name": "wum_um",
+          "foobar": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:wum_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Relationship",
+            "Foobar"
+          ],
+          "name": "wum_fuddle",
+          "foobar": {}
+        }
+      }
+    ]
+  }
+]

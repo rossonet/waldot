@@ -1,0 +1,83 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:alpha_alpha;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:hi_yekk;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "hi_vroo",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "hi_hi",
+            "schema": "boolean"
+          },
+          "@value": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:alpha_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:alpha_beta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "alpha_gamma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "alpha_delta",
+            "schema": "date"
+          },
+          "@language": "en"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:alpha_iota;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:alpha_zeta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "alpha_eta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "alpha_theta",
+            "schema": "dateTime"
+          },
+          "@foobar": true
+        }
+      }
+    ]
+  }
+]

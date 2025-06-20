@@ -1,0 +1,46 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:gamma_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "LuminousIntensity"
+          ],
+          "name": "gamma_nu",
+          "schema": "long",
+          "unit": "candela"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:gamma_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "dtmi:standard:class:LuminousIntensity;2"
+          ],
+          "name": "gamma_omicron",
+          "schema": "double",
+          "unit": "candela"
+        }
+      }
+    ]
+  }
+]

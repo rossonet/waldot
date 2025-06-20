@@ -1,0 +1,54 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_phi;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "displayName": [
+              "glikk_tau"
+            ],
+            "enumValue": 1009,
+            "name": "glikk_upsilon"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_yuzz;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "dtmi:dtdl:property:displayName;2": [
+              "glikk_psi"
+            ],
+            "enumValue": 1010,
+            "name": "glikk_omega"
+          }
+        }
+      }
+    ]
+  }
+]

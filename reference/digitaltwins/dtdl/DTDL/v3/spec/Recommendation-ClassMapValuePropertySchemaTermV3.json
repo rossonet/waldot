@@ -1,0 +1,54 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:um_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:um_delta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "um_epsilon",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "um_gamma",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:um_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:um_theta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "um_iota",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "um_eta",
+            "dtmi:dtdl:property:schema;3": "long"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,53 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_beta",
+          "response": {
+            "@type": [
+              "CommandResponse",
+              "dtmi:foo//bar"
+            ],
+            "name": "snee_alpha",
+            "schema": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_epsilon",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandResponse",
+              "dtmi:foo//bar"
+            ],
+            "name": "snee_delta",
+            "schema": "date"
+          }
+        }
+      }
+    ]
+  }
+]

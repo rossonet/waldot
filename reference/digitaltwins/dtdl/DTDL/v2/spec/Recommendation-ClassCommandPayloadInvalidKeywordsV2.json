@@ -1,0 +1,71 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_delta",
+          "request": {
+            "name": "snee_gamma",
+            "schema": "date",
+            "@value": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_eta",
+          "request": {
+            "name": "snee_zeta",
+            "schema": "dateTime",
+            "@language": "en"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_kappa",
+          "request": {
+            "name": "snee_iota",
+            "schema": "double",
+            "@foobar": true
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,92 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "rho_iota",
+          "request": {
+            "name": "rho_theta",
+            "schema": "duration",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "rho_mu",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "rho_lambda",
+            "schema": "float",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "rho_omicron",
+          "request": {
+            "name": "rho_xi",
+            "schema": "integer",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_tau;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "rho_sigma",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "rho_rho",
+            "schema": "long",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  }
+]

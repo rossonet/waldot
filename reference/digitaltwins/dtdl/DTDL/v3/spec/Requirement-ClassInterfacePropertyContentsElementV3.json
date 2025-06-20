@@ -1,0 +1,169 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_yuzz;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:sigma_omega;1",
+          "@type": "Interface",
+          "contents": {
+            "@id": "dtmi:example:sigma_chi;1",
+            "@type": "Command",
+            "name": "sigma_psi"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_fuddle;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:sigma_humpf;1",
+          "@type": "Interface",
+          "contents": [
+            {
+              "@id": "dtmi:example:sigma_wum;1",
+              "@type": "Command",
+              "name": "sigma_um"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_quan;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:sigma_snee;1",
+          "@type": "Interface",
+          "contents": {
+            "@id": "dtmi:example:sigma_glikk;1",
+            "@type": "Command",
+            "name": "sigma_nuh",
+            "@context": "dtmi:dtdl:context;2"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_zatz;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:sigma_floob;1",
+          "@type": "Interface",
+          "contents": {
+            "@id": "dtmi:example:sigma_thnad;1",
+            "@type": "Command",
+            "name": "sigma_spazz",
+            "@context": "dtmi:dtdl:context;4"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_yekk;1",
+        "@type": "Interface",
+        "extends": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:sigma_itch;1",
+          "@type": "Interface",
+          "contents": {
+            "@id": "dtmi:example:sigma_jogg;1",
+            "@type": "Command",
+            "name": "sigma_flunn",
+            "@context": "dtmi:dtdl:context;4"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_hi;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:sigma_vroo;1",
+          "@type": "Interface",
+          "contents": []
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:tau_eta;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:tau_zeta;1",
+          "@type": "Interface",
+          "contents": [
+            {
+              "@id": "dtmi:example:tau_alpha;1",
+              "@type": "Command",
+              "name": "tau_beta"
+            },
+            {
+              "@id": "dtmi:example:tau_gamma;1",
+              "@type": "Component",
+              "name": "tau_delta",
+              "schema": {
+                "@id": "dtmi:example:tau_epsilon;1",
+                "@type": "Interface"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

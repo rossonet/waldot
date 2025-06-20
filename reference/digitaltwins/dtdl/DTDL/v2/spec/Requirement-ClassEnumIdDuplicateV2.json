@@ -1,0 +1,61 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_tau;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": "dtmi:example:vroo_tau;1",
+          "@type": "Property",
+          "name": "vroo_phi",
+          "schema": {
+            "@id": "dtmi:example:vroo_tau;1",
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 608,
+                "name": "vroo_upsilon"
+              }
+            ],
+            "valueSchema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": "dtmi:example:vroo_chi;1",
+          "@type": "Property",
+          "name": "vroo_omega",
+          "schema": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@id": "dtmi:example:vroo_chi;1",
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 609,
+                "name": "vroo_psi"
+              }
+            ],
+            "valueSchema": "integer"
+          }
+        }
+      }
+    ]
+  }
+]

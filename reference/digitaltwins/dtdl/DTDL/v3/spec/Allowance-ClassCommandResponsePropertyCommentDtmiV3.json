@@ -1,0 +1,24 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "flunn_epsilon",
+          "response": {
+            "dtmi:dtdl:property:comment;3": "flunn_gamma",
+            "name": "flunn_delta",
+            "schema": "date"
+          }
+        }
+      }
+    ]
+  }
+]

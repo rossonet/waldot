@@ -1,0 +1,108 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:eta_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_hi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "eta_alpha",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "zeta_vroo",
+            "schema": "time",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:eta_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:eta_delta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "eta_epsilon",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "eta_gamma",
+            "schema": "boolean",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:eta_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:eta_theta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "eta_iota",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "eta_eta",
+            "schema": "date",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:eta_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:eta_mu;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "eta_nu",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "eta_lambda",
+            "schema": "dateTime",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  }
+]

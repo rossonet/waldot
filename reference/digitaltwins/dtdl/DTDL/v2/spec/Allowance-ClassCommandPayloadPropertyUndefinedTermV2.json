@@ -1,0 +1,28 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "quan_zeta",
+          "request": {
+            "@type": [
+              "CommandPayload",
+              "Foobar"
+            ],
+            "name": "quan_epsilon",
+            "schema": "integer",
+            "foobar": {}
+          }
+        }
+      }
+    ]
+  }
+]

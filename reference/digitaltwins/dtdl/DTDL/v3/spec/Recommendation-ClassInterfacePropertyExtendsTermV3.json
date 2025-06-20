@@ -1,0 +1,42 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yuzz_yekk;1",
+        "@type": "Interface",
+        "extends": [
+          {
+            "@id": "dtmi:example:yuzz_vroo;1",
+            "@type": "Interface"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yuzz_hi;1",
+        "@type": "Interface",
+        "dtmi:dtdl:property:extends;3": [
+          {
+            "@id": "dtmi:example:wum_alpha;1",
+            "@type": "Interface"
+          }
+        ]
+      }
+    ]
+  }
+]

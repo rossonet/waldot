@@ -1,0 +1,55 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:flunn_mu;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "flunn_nu",
+            "schema": "time"
+          },
+          "mapKey": {
+            "name": "flunn_lambda",
+            "schema": "string",
+            "http://foo.com/bar": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:flunn_pi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "flunn_rho",
+            "schema": "boolean"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "flunn_omicron",
+            "schema": "string",
+            "http://foo.com/bar": true
+          }
+        }
+      }
+    ]
+  }
+]

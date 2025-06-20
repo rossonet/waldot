@@ -1,0 +1,54 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:jogg_itch;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:jogg_zatz;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "jogg_jogg",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "jogg_flunn",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_alpha;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:jogg_yekk;1",
+          "@type": "Map",
+          "dtmi:dtdl:property:mapKey;3": {
+            "name": "jogg_vroo",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "jogg_hi",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  }
+]

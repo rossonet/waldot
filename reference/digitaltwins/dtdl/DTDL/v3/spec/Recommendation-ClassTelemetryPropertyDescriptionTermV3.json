@@ -1,0 +1,46 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "description": [
+            "vroo_itch"
+          ],
+          "name": "vroo_yekk",
+          "schema": "date"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:hi_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "dtmi:dtdl:property:description;3": [
+            "vroo_hi"
+          ],
+          "name": "hi_alpha",
+          "schema": "dateTime"
+        }
+      }
+    ]
+  }
+]

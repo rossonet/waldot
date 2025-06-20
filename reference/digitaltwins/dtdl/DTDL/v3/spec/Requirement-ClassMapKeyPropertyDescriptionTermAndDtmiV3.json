@@ -1,0 +1,65 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_theta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:iota_zeta;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "iota_eta",
+            "schema": "float"
+          },
+          "mapKey": {
+            "description": [
+              "iota_gamma"
+            ],
+            "dtmi:dtdl:property:description;3": [
+              "iota_delta"
+            ],
+            "name": "iota_epsilon",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:iota_mu;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "iota_nu",
+            "schema": "integer"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "description": [
+              "iota_iota"
+            ],
+            "dtmi:dtdl:property:description;3": [
+              "iota_kappa"
+            ],
+            "name": "iota_lambda",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

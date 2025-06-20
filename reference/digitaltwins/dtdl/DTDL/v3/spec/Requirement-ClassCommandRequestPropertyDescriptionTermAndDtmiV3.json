@@ -1,0 +1,57 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nu_thnad",
+          "request": {
+            "description": [
+              "nu_nuh"
+            ],
+            "dtmi:dtdl:property:description;3": [
+              "nu_snee"
+            ],
+            "name": "nu_quan",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nu_flunn",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "description": [
+              "nu_floob"
+            ],
+            "dtmi:dtdl:property:description;3": [
+              "nu_zatz"
+            ],
+            "name": "nu_jogg",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,40 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:flunn_epsilon;1",
+          "@type": "Array",
+          "elementSchema": "float"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_theta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:flunn_eta;1",
+          "@type": "Array",
+          "dtmi:dtdl:property:elementSchema;3": "integer"
+        }
+      }
+    ]
+  }
+]

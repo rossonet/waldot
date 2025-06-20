@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "delta_phi",
+          "dtmi:dtdl:property:response;2": {
+            "name": "delta_chi",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,55 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "beta_humpf",
+          "response": {
+            "@type": [
+              "CommandResponse",
+              "Foobar"
+            ],
+            "name": "beta_um",
+            "schema": "string",
+            "http://foo.com/bar": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "beta_nuh",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandResponse",
+              "Foobar"
+            ],
+            "name": "beta_glikk",
+            "schema": "time",
+            "http://foo.com/bar": true
+          }
+        }
+      }
+    ]
+  }
+]

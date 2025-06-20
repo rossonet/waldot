@@ -1,0 +1,19 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:pi_eta;1",
+        "@type": [
+          "Interface",
+          "dtmi:dtdl:class:Interface;3"
+        ]
+      }
+    ]
+  }
+]

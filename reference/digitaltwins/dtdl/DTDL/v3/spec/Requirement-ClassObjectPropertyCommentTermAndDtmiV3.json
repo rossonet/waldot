@@ -1,0 +1,41 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_lambda;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_theta;1",
+          "@type": "Object",
+          "comment": "xi_iota",
+          "dtmi:dtdl:property:comment;3": "xi_kappa"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_omicron;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:xi_mu;1",
+          "@type": "Object",
+          "comment": "xi_nu",
+          "dtmi:dtdl:property:comment;3": "xi_xi"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,58 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_humpf;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_wum;1",
+          "enumValues": [
+            {
+              "enumValue": 87,
+              "name": "rho_um"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": [
+            "Enum",
+            "Enum"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_fuddle;1",
+          "enumValues": [
+            {
+              "enumValue": 88,
+              "name": "rho_glikk"
+            }
+          ],
+          "valueSchema": "integer",
+          "@type": [
+            "dtmi:dtdl:class:Enum;2",
+            "dtmi:dtdl:class:Enum;2"
+          ]
+        }
+      }
+    ]
+  }
+]

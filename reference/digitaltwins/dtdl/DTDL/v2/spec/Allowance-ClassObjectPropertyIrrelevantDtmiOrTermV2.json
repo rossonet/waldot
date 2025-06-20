@@ -1,0 +1,56 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:lambda_alpha;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:kappa_vroo;1",
+          "@type": [
+            "Object",
+            "Foobar"
+          ],
+          "fields": [
+            {
+              "name": "kappa_hi",
+              "schema": "integer"
+            }
+          ],
+          "dtmi:foo:bar;1": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:lambda_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:lambda_beta;1",
+          "@type": [
+            "Object",
+            "Foobar"
+          ],
+          "fields": [
+            {
+              "name": "lambda_gamma",
+              "schema": "long"
+            }
+          ],
+          "boolean": null
+        }
+      }
+    ]
+  }
+]

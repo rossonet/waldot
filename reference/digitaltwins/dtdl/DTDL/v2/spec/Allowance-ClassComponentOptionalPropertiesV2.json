@@ -1,0 +1,116 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_omega;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:hi_psi;1",
+          "@type": "Interface",
+          "contents": {
+            "@context": [],
+            "@type": "Component",
+            "name": "hi_phi",
+            "schema": {
+              "@id": "dtmi:example:hi_chi;1",
+              "@type": "Interface"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_humpf;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:hi_um;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Component",
+            "name": "hi_yuzz",
+            "schema": {
+              "@id": "dtmi:example:hi_wum;1",
+              "@type": "Interface"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Component",
+          "name": "hi_fuddle",
+          "schema": {
+            "@id": "dtmi:example:hi_glikk;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Component",
+          "name": "hi_snee",
+          "schema": {
+            "@id": "dtmi:example:hi_quan;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Component",
+          "name": "hi_spazz",
+          "schema": {
+            "@id": "dtmi:example:hi_floob;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  }
+]

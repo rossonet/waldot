@@ -1,0 +1,108 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:pi_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:pi_humpf;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@type": [
+              "EnumValue",
+              "dtmi:foo:bar;1"
+            ],
+            "enumValue": 1271,
+            "name": "pi_um"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:pi_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:pi_nuh;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "EnumValue",
+              "dtmi:foo:bar;1"
+            ],
+            "enumValue": 1272,
+            "name": "pi_glikk"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:pi_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:pi_thnad;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@type": [
+              "EnumValue",
+              "boolean"
+            ],
+            "enumValue": 1273,
+            "name": "pi_quan"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:pi_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:pi_zatz;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "EnumValue",
+              "boolean"
+            ],
+            "enumValue": 1274,
+            "name": "pi_floob"
+          }
+        }
+      }
+    ]
+  }
+]

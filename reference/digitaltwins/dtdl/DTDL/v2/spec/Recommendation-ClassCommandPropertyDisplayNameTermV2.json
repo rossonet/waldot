@@ -1,0 +1,44 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_yuzz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "displayName": [
+            "jogg_psi"
+          ],
+          "name": "jogg_omega"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "dtmi:dtdl:property:displayName;2": [
+            "jogg_wum"
+          ],
+          "name": "jogg_um"
+        }
+      }
+    ]
+  }
+]
