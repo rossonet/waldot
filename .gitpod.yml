@@ -7,7 +7,6 @@ vscode:
   extensions:
     - vscjava.vscode-java-debug
     - vscjava.vscode-java-pack
-    - redhat.java
     - vscjava.vscode-maven
     - vscjava.vscode-java-dependency
     - vscjava.vscode-java-test
