@@ -9,7 +9,12 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
-      - name: Test with Gradle
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Build fat jar with Gradle
         run: ./gradlew clean waldot-app:shadowJar -Dorg.gradle.daemon=false --info
       - name: Rename file created
         run: mv waldot-app/build/libs/waldot-app-*-all.jar WaldOT.jar

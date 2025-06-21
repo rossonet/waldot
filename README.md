@@ -4,7 +4,13 @@
 
 experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org/gremlin.html) and [Eclipse Milo OPCUA library](https://projects.eclipse.org/projects/iot.milo)
 
+## Docker image
+
 [Docker Hub page](https://hub.docker.com/r/rossonet/waldot)
+
+## Maven
+
+[WaldOT](https://mvnrepository.com/artifact/net.rossonet.waldot)
 
 ## Logbook
 
@@ -22,10 +28,6 @@ My first goal is to pass TinkerPop's compliance tests, I want the logo...
 
 <small>[rif: https://tinkerpop.apache.org/docs/current/dev/provider/#graph-system-provider-requirements](https://tinkerpop.apache.org/docs/current/dev/provider/#graph-system-provider-requirements)</small>
 
-## Maven
-
-[WaldOT](https://mvnrepository.com/artifact/net.rossonet.waldot)
-
 ## Code tools
 
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/rossonet/waldot)
@@ -34,6 +36,7 @@ My first goal is to pass TinkerPop's compliance tests, I want the logo...
 ## GitHub Actions
 
 [![WaldOT Library Test](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml)
+[![Build WaldOT shadowJar](https://github.com/rossonet/waldot/actions/workflows/build-shadowjar-app.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/build-shadowjar-app.yml)
 [![Build and publish WaldOT docker image to Docker Hub](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml)
 [![Publish Java artifacts to Maven Central](https://github.com/rossonet/waldot/actions/workflows/publish-to-maven.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/publish-to-maven.yml)
 
