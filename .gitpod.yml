@@ -1,7 +1,6 @@
 
 tasks:
-  - before: sdk install java 21.0.7-oracle
-  - init: ./gradlew build
+  - init: sdk install java 21.0.7-oracle && ./gradlew build
   - name: test
     command: ./gradlew test
 vscode:
