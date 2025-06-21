@@ -5,9 +5,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -30,3 +28,34 @@ jobs:
           platforms: linux/arm64,linux/amd64
           push: true
           tags: rossonet/waldot:latest
+  security-check:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.2
+        with:
+          version: v0.59.1
+          cache: true
+      - run: |
+          docker pull --platform amd64 rossonet/waldot:latest
+          docker images
+      - name: Avvia container filesystem 
+        run: docker run --rm --name test -d rossonet/waldot:latest
+      - name: Export container disk 
+        run: docker export test -o trivy.export && mkdir trivy_disk && tar -xvf trivy.export -C trivy_disk
+      - name: Stop container 
+        run: docker stop test
+      - name: Run security check report
+        run: trivy rootfs trivy_disk > trivy-report.txt
+      - name: Run security check report
+        run: trivy rootfs -f cyclonedx --scanners vuln trivy_disk > cyclonedx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trivy_report_waldot_app
+          path: trivy-report.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyclonedx_waldot_app
+          path: cyclonedx.json
+

@@ -1,0 +1,19 @@
+name: Build WaldOT shadowJar
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Test with Gradle
+        run: ./gradlew clean waldot-app:shadowJar -Dorg.gradle.daemon=false --info
+      - name: Rename file created
+        run: mv waldot-app/build/libs/waldot-app-*-all.jar WaldOT.jar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WaldOT shadowjar
+          path: WaldOT.jar
