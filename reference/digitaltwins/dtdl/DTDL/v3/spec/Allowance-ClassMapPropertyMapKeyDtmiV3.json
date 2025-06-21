@@ -1,0 +1,27 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:jogg_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:jogg_quan;1",
+          "@type": "Map",
+          "dtmi:dtdl:property:mapKey;3": {
+            "name": "jogg_thnad",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "jogg_spazz",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  }
+]

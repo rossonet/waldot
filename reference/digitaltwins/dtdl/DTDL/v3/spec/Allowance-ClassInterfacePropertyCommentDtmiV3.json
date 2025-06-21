@@ -1,0 +1,16 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_kappa;1",
+        "@type": "Interface",
+        "dtmi:dtdl:property:comment;3": "sigma_lambda"
+      }
+    ]
+  }
+]

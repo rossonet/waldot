@@ -1,0 +1,100 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_eta",
+          "schema": {
+            "@type": "Enum",
+            "enumValues": [
+              {
+                "enumValue": 538,
+                "name": "flunn_zeta"
+              }
+            ],
+            "valueSchema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_lambda;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:flunn_iota;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 539,
+              "name": "flunn_kappa"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_nu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 540,
+              "name": "flunn_mu"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_omicron;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 541,
+              "name": "flunn_xi"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

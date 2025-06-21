@@ -1,0 +1,111 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "iota_hi",
+          "schema": {
+            "@context": [],
+            "@type": "Object"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "kappa_beta",
+          "schema": {
+            "@type": "Object"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:kappa_delta;1",
+          "@type": "Object"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:kappa_zeta;1",
+          "@type": "Object"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_iota;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:kappa_theta;1",
+          "@type": "Object"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_lambda;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:kappa_kappa;1",
+          "@type": "Object"
+        }
+      }
+    ]
+  }
+]

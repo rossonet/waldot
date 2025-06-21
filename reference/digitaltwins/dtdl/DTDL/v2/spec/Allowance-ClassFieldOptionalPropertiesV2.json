@@ -1,0 +1,135 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_delta",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "@context": [],
+              "name": "vroo_gamma",
+              "schema": "duration"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_theta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:vroo_eta;1",
+          "@type": "Object",
+          "fields": {
+            "name": "vroo_zeta",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "vroo_kappa",
+          "schema": {
+            "@type": "Object",
+            "fields": {
+              "name": "vroo_iota",
+              "schema": "integer"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:vroo_nu;1",
+          "@type": "Object",
+          "fields": {
+            "name": "vroo_mu",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_rho;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:vroo_pi;1",
+          "@type": "Object",
+          "fields": {
+            "name": "vroo_omicron",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_upsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:vroo_tau;1",
+          "@type": "Object",
+          "fields": {
+            "name": "vroo_sigma",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

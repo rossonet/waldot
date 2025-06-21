@@ -1,0 +1,137 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omicron_snee;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:omicron_nuh;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "omicron_glikk",
+            "request": {
+              "@context": [],
+              "name": "omicron_fuddle",
+              "schema": "time"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omicron_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_thnad",
+          "request": {
+            "name": "omicron_quan",
+            "schema": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omicron_flunn;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:omicron_jogg;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "omicron_zatz",
+            "request": {
+              "name": "omicron_floob",
+              "schema": "date"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omicron_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "omicron_yekk",
+          "request": {
+            "name": "omicron_itch",
+            "schema": "dateTime"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:pi_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "pi_alpha",
+          "request": {
+            "name": "omicron_hi",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:pi_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "pi_delta",
+          "request": {
+            "name": "pi_gamma",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  }
+]

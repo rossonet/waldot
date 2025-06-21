@@ -1,0 +1,22 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:theta_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "dtmi:dtdl:property:description;2": [
+            "theta_quan"
+          ],
+          "name": "theta_thnad"
+        }
+      }
+    ]
+  }
+]

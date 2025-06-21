@@ -1,0 +1,90 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:um_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "um_eta",
+          "response": {
+            "name": "um_zeta",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:um_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "um_kappa",
+          "response": {
+            "name": "um_iota",
+            "schema": "dtmi:dtdl:instance:Schema:float;3"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:um_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "um_nu",
+          "response": {
+            "name": "um_mu",
+            "schema": "point"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:um_rho;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "um_pi",
+          "response": {
+            "name": "um_omicron",
+            "schema": "dtmi:standard:schema:geospatial:point;3"
+          }
+        }
+      }
+    ]
+  }
+]

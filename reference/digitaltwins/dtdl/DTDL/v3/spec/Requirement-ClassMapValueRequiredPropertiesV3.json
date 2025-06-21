@@ -1,0 +1,100 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_quan;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_nuh;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_snee",
+            "schema": "string"
+          },
+          "mapValue": {
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_thnad;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_spazz",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_itch;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_jogg;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_flunn",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "xi_zatz"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_alpha;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_vroo;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_hi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_yekk"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,104 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:tau_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "tau_fuddle",
+          "request": {
+            "@type": [
+              "CommandPayload",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "tau_humpf",
+            "schema": "boolean"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:tau_quan;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "tau_snee",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandPayload",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "tau_nuh",
+            "schema": "date"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:tau_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "tau_spazz",
+          "request": {
+            "@type": [
+              "CommandPayload",
+              "boolean"
+            ],
+            "name": "tau_thnad",
+            "schema": "dateTime"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:tau_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "tau_jogg",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandPayload",
+              "boolean"
+            ],
+            "name": "tau_zatz",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  }
+]

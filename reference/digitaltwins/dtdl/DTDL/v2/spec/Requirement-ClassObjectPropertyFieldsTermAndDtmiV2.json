@@ -1,0 +1,61 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yekk_um;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yekk_omega;1",
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "yekk_yuzz",
+              "schema": "date"
+            }
+          ],
+          "dtmi:dtdl:property:fields;2": [
+            {
+              "name": "yekk_wum",
+              "schema": "dateTime"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yekk_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:yekk_humpf;1",
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "yekk_fuddle",
+              "schema": "double"
+            }
+          ],
+          "dtmi:dtdl:property:fields;2": [
+            {
+              "name": "yekk_glikk",
+              "schema": "duration"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

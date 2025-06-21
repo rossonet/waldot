@@ -1,0 +1,53 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:eta_tau;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:eta_rho;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 715,
+              "name": "eta_sigma"
+            }
+          ],
+          "valueSchema": "integer",
+          "dtmi:foo//bar": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:eta_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:eta_upsilon;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 716,
+              "name": "eta_phi"
+            }
+          ],
+          "valueSchema": "integer",
+          "dtmi:foo//bar": 626
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,156 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_pi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_omicron;1",
+          "elementSchema": "long",
+          "@type": "Array"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_rho;1",
+          "elementSchema": "string",
+          "@type": [
+            "Array"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_upsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_tau;1",
+          "elementSchema": "time",
+          "@type": "dtmi:dtdl:class:Array;3"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_phi;1",
+          "elementSchema": "boolean",
+          "@type": [
+            "dtmi:dtdl:class:Array;3"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_psi;1",
+          "elementSchema": "date",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:quan_yuzz;1",
+          "elementSchema": "dateTime",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_humpf;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_um;1",
+          "elementSchema": "double",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:quan_fuddle;1",
+          "elementSchema": "duration",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  }
+]

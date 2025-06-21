@@ -1,0 +1,22 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:lambda_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "dtmi:dtdl:property:description;3": [
+            "lambda_yekk"
+          ],
+          "name": "lambda_vroo"
+        }
+      }
+    ]
+  }
+]

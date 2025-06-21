@@ -1,0 +1,31 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_omicron;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_mu;1",
+          "mapKey": {
+            "name": "snee_nu",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "snee_xi",
+            "schema": "integer"
+          },
+          "@type": [
+            "Map",
+            "dtmi:dtdl:class:Map;3"
+          ]
+        }
+      }
+    ]
+  }
+]

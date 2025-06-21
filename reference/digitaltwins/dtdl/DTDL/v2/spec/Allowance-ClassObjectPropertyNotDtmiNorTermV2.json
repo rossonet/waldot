@@ -1,0 +1,29 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:lambda_humpf;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:lambda_wum;1",
+          "@type": [
+            "Object",
+            "Foobar"
+          ],
+          "fields": [
+            {
+              "name": "lambda_um",
+              "schema": "float"
+            }
+          ],
+          "http://foo.com/bar": true
+        }
+      }
+    ]
+  }
+]

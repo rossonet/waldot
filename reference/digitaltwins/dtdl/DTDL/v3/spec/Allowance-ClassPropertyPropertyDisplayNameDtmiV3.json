@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "dtmi:dtdl:property:displayName;3": [
+            "itch_jogg"
+          ],
+          "name": "itch_flunn",
+          "schema": "integer"
+        }
+      }
+    ]
+  }
+]

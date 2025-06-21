@@ -1,0 +1,64 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_yuzz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "psi_omega",
+          "schema": {
+            "@type": "Map",
+            "mapKey": {
+              "name": "psi_psi",
+              "schema": "string"
+            },
+            "mapValue": "dtmi:ex:dependentRef;1"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:psi_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "psi_um",
+          "schema": {
+            "@type": "Map",
+            "mapKey": {
+              "name": "psi_wum",
+              "schema": "string"
+            },
+            "mapValue": [
+              "dtmi:ex:dependentRef;1"
+            ]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  }
+]

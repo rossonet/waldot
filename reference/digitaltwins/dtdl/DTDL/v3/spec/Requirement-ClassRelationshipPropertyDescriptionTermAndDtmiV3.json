@@ -1,0 +1,49 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "description": [
+            "mu_eta"
+          ],
+          "dtmi:dtdl:property:description;3": [
+            "mu_theta"
+          ],
+          "name": "mu_iota"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:mu_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "description": [
+            "mu_lambda"
+          ],
+          "dtmi:dtdl:property:description;3": [
+            "mu_mu"
+          ],
+          "name": "mu_nu"
+        }
+      }
+    ]
+  }
+]

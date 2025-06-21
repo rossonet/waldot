@@ -1,0 +1,24 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:theta_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Component",
+          "dtmi:dtdl:property:comment;2": "theta_thnad",
+          "name": "theta_spazz",
+          "schema": {
+            "@id": "dtmi:example:theta_floob;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  }
+]

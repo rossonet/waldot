@@ -1,0 +1,90 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omicron_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "omicron_spazz",
+          "properties": [
+            {
+              "@type": "Property",
+              "schema": "date",
+              "name": "beta_iota"
+            },
+            {
+              "@type": "Property",
+              "schema": "dateTime",
+              "name": "beta_kappa"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omicron_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "omicron_zatz",
+          "properties": [
+            {
+              "@type": "Property",
+              "schema": "double",
+              "name": "beta_iota"
+            },
+            {
+              "@type": "Property",
+              "schema": "duration",
+              "name": "beta_iota"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omicron_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "omicron_flunn",
+          "properties": [
+            {
+              "@type": "Property",
+              "schema": "float",
+              "name": "beta_iota"
+            },
+            {
+              "@type": "Property",
+              "schema": "integer",
+              "name": "beta_iota"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

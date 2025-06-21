@@ -1,0 +1,370 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_psi",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "integer",
+            "@context": "dtmi:dtdl:extension:quantitativeTypes;1"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_yuzz",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "long",
+            "@context": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_um",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "string",
+            "@context": [
+              "dtmi:dtdl:extension:quantitativeTypes;1"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_fuddle",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "time",
+            "@context": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_nuh",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "boolean",
+            "@context": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_quan",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "date",
+            "@context": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_spazz",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "dateTime",
+            "@context": [
+              null
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_zatz",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "double",
+            "@context": [
+              626
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_flunn",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "duration",
+            "@context": [
+              true
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:flunn_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_yekk",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "float",
+            "@context": "dtmi:dtdl:extension:quantitativeTypes"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "flunn_hi",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "integer",
+            "@context": "http://dtdl/extension/quantitativeTypes/1"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "itch_beta",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "long",
+            "@context": "quantitativeTypes;1"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "itch_delta",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "string",
+            "@context": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "itch_zeta",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "time",
+            "@context": {
+              "foo": "dtmi:foo:bar;1"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "itch_theta",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "boolean",
+            "@context": [
+              {}
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "itch_kappa",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "date",
+            "@context": [
+              {
+                "foo": "dtmi:foo:bar;1"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

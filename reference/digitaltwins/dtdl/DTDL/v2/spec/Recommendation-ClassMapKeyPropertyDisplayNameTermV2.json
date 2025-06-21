@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_tau;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_rho;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "zatz_sigma",
+            "schema": "boolean"
+          },
+          "mapKey": {
+            "displayName": [
+              "zatz_omicron"
+            ],
+            "name": "zatz_pi",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_chi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "zatz_psi",
+            "schema": "date"
+          },
+          "mapKey": {
+            "dtmi:dtdl:property:displayName;2": [
+              "zatz_upsilon"
+            ],
+            "name": "zatz_phi",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

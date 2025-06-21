@@ -1,0 +1,69 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_iota;1",
+          "@type": "Object",
+          "fields": {
+            "name": "xi_theta",
+            "schema": "integer",
+            "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSometh"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_nu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_mu;1",
+          "@type": "Object",
+          "fields": {
+            "name": "xi_lambda",
+            "schema": "long",
+            "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_pi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_omicron;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "xi_xi",
+            "schema": "string",
+            "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+          }
+        }
+      }
+    ]
+  }
+]

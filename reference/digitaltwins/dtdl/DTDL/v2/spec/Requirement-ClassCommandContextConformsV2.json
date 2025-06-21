@@ -1,0 +1,370 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_floob;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:omega_spazz;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "omega_thnad",
+            "@context": "dtmi:iotcentral:context;2"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_flunn;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:omega_jogg;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "omega_zatz",
+            "@context": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_vroo;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:omega_yekk;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "omega_itch",
+            "@context": [
+              "dtmi:iotcentral:context;2"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_beta;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_alpha;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "omega_hi",
+            "@context": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_epsilon;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_delta;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_gamma",
+            "@context": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_theta;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_eta;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_zeta",
+            "@context": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_lambda;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_kappa;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_iota",
+            "@context": [
+              null
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_xi;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_nu;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_mu",
+            "@context": [
+              626
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_rho;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_pi;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_omicron",
+            "@context": [
+              true
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_upsilon;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_tau;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_sigma",
+            "@context": "dtmi:iotcentral:context"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_psi;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_chi;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_phi",
+            "@context": "http://iotcentral/context/2"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_wum;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_yuzz;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_omega",
+            "@context": "iotcentral;2"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_fuddle;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_humpf;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_um",
+            "@context": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_snee;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_nuh;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_glikk",
+            "@context": {
+              "foo": "dtmi:foo:bar;1"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_spazz;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_thnad;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_quan",
+            "@context": [
+              {}
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yuzz_jogg;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:yuzz_zatz;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "yuzz_floob",
+            "@context": [
+              {
+                "foo": "dtmi:foo:bar;1"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

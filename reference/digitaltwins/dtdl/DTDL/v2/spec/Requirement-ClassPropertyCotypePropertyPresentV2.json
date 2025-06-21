@@ -1,0 +1,1124 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "spazz_quan",
+          "schema": "long"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "spazz_spazz",
+          "schema": "double"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "spazz_zatz",
+          "schema": "float"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "spazz_flunn",
+          "schema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "spazz_yekk",
+          "schema": "long",
+          "unit": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "spazz_hi",
+          "schema": "double",
+          "unit": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_beta",
+          "schema": "float",
+          "unit": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_delta",
+          "schema": "integer",
+          "unit": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_zeta",
+          "schema": "long",
+          "unit": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_theta",
+          "schema": "double",
+          "unit": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_kappa",
+          "schema": "float",
+          "unit": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_mu",
+          "schema": "integer",
+          "unit": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_omicron;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_xi",
+          "schema": "long",
+          "unit": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_rho;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_pi",
+          "schema": "double",
+          "unit": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_tau;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_sigma",
+          "schema": "float",
+          "unit": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_phi;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_upsilon",
+          "schema": "integer",
+          "unit": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_chi",
+          "schema": "long",
+          "unit": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_yuzz;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_omega",
+          "schema": "double",
+          "unit": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_wum",
+          "schema": "float",
+          "unit": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_humpf",
+          "schema": "integer",
+          "unit": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_glikk",
+          "schema": "long",
+          "unit": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_quan;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_snee",
+          "schema": "double",
+          "unit": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_thnad",
+          "schema": "float",
+          "unit": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_floob",
+          "schema": "integer",
+          "unit": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_jogg",
+          "schema": "long",
+          "unit": [
+            626
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "floob_itch",
+          "schema": "double",
+          "unit": [
+            626
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:floob_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "floob_vroo",
+          "schema": "float",
+          "unit": [
+            626
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_alpha",
+          "schema": "integer",
+          "unit": [
+            626
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_gamma",
+          "schema": "long",
+          "unit": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_epsilon",
+          "schema": "double",
+          "unit": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_eta",
+          "schema": "float",
+          "unit": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_iota",
+          "schema": "integer",
+          "unit": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_lambda",
+          "schema": "long",
+          "unit": [
+            {}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_nu",
+          "schema": "double",
+          "unit": [
+            {}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_omicron",
+          "schema": "float",
+          "unit": [
+            {}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_sigma;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_rho",
+          "schema": "integer",
+          "unit": [
+            {}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_upsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_tau",
+          "schema": "long",
+          "unit": []
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_phi",
+          "schema": "double",
+          "unit": []
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_psi",
+          "schema": "float",
+          "unit": []
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_yuzz",
+          "schema": "integer",
+          "unit": []
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_um",
+          "schema": "long",
+          "unit": "gigawatt"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_fuddle",
+          "schema": "double",
+          "unit": "gigawatt"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_nuh",
+          "schema": "float",
+          "unit": [
+            "gigawatt"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_quan",
+          "schema": "integer",
+          "unit": [
+            "gigawatt"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_spazz",
+          "schema": "long",
+          "unit": [
+            "gigawatt",
+            "gigawatt"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_jogg;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "Luminosity"
+          ],
+          "name": "zatz_zatz",
+          "schema": "double",
+          "unit": [
+            "gigawatt",
+            "gigawatt"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_flunn",
+          "schema": "float",
+          "unit": [
+            "gigawatt",
+            "gigawatt"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Luminosity;2"
+          ],
+          "name": "zatz_yekk",
+          "schema": "integer",
+          "unit": [
+            "gigawatt",
+            "gigawatt"
+          ]
+        }
+      }
+    ]
+  }
+]

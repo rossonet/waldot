@@ -15,7 +15,6 @@ public interface ConsoleStrategy {
 	public static String G_LABEL = "g";
 	public static String LOG_LABEL = "log";
 	public static String COMMANDS_LABEL = "cmd";
-	public static String CTX_LABEL = "ctx";
 	public static String SELF_LABEL = "self";
 
 	WaldotNamespace getWaldotNamespace();

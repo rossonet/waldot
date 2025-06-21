@@ -1,0 +1,62 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@id": "dtmi:example:rho_omega;1",
+        "@type": "Interface",
+        "@context": []
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@id": "dtmi:example:rho_yuzz;1",
+        "@type": "Interface",
+        "@context": "dtmi:iotcentral:context;2"
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:rho_um;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:rho_wum;1",
+          "@type": "Interface",
+          "@context": "dtmi:iotcentral:context;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@id": "dtmi:example:rho_humpf;1",
+        "@type": "Interface",
+        "@context": [
+          "dtmi:dtdl:context;2",
+          "dtmi:iotcentral:context;2"
+        ]
+      }
+    ]
+  }
+]

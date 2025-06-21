@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_vroo;1",
+          "@type": "Object",
+          "fields": {
+            "dtmi:dtdl:property:name;2": "thnad_yekk",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,47 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:um_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "um_humpf",
+          "response": {
+            "name": "um_um",
+            "schema": "date",
+            "dtmi:dtdl:property:schema;3": "dateTime"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:um_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "um_nuh",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "um_glikk",
+            "schema": "double",
+            "dtmi:dtdl:property:schema;3": "duration"
+          }
+        }
+      }
+    ]
+  }
+]

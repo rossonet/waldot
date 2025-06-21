@@ -1,0 +1,47 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "snee_hi",
+          "request": {
+            "name": "snee_vroo",
+            "schema": "duration",
+            "http://foo.com/bar": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "quan_gamma",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "quan_beta",
+            "schema": "float",
+            "http://foo.com/bar": true
+          }
+        }
+      }
+    ]
+  }
+]

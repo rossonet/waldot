@@ -1,0 +1,56 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_lambda;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nuh_kappa;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@type": [
+              "EnumValue",
+              "Foobar"
+            ],
+            "enumValue": 1018,
+            "name": "nuh_iota",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nuh_nu;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@type": [
+              "EnumValue",
+              "Foobar"
+            ],
+            "enumValue": 1019,
+            "name": "nuh_mu",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_floob;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_zatz",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@type": [
+              "MapValue",
+              "http://foo.com/bar"
+            ],
+            "name": "xi_spazz",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

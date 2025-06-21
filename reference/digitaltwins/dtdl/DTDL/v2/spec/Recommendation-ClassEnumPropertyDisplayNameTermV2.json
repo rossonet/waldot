@@ -1,0 +1,58 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_iota;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_zeta;1",
+          "@type": "Enum",
+          "displayName": [
+            "zeta_eta"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 699,
+              "name": "zeta_theta"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_nu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_kappa;1",
+          "@type": "Enum",
+          "dtmi:dtdl:property:displayName;2": [
+            "zeta_lambda"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 700,
+              "name": "zeta_mu"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,49 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:humpf_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "humpf_theta",
+          "schema": "double",
+          "unit": "acre",
+          "dtmi:dtdl:property:unit;2": "acre"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:humpf_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Telemetry",
+            "Area"
+          ],
+          "name": "humpf_kappa",
+          "schema": "float",
+          "unit": "acre",
+          "dtmi:dtdl:property:unit;2": "acre"
+        }
+      }
+    ]
+  }
+]

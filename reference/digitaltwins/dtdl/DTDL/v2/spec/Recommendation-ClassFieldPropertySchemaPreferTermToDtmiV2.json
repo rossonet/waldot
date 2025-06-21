@@ -1,0 +1,90 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yekk_phi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yekk_upsilon;1",
+          "@type": "Object",
+          "fields": {
+            "name": "yekk_tau",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yekk_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yekk_psi;1",
+          "@type": "Object",
+          "fields": {
+            "name": "yekk_chi",
+            "schema": "dtmi:dtdl:instance:Schema:float;2"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yekk_um;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yekk_wum;1",
+          "@type": "Object",
+          "fields": {
+            "name": "yekk_yuzz",
+            "schema": "point"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yekk_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:yekk_fuddle;1",
+          "@type": "Object",
+          "fields": {
+            "name": "yekk_humpf",
+            "schema": "dtmi:standard:schema:geospatial:point;2"
+          }
+        }
+      }
+    ]
+  }
+]

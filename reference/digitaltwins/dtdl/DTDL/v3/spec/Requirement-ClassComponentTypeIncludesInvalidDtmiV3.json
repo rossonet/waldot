@@ -1,0 +1,51 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Component",
+            "dtmi:foo//bar"
+          ],
+          "name": "epsilon_fuddle",
+          "schema": {
+            "@id": "dtmi:example:epsilon_glikk;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Component",
+            "dtmi:foo//bar"
+          ],
+          "name": "epsilon_snee",
+          "schema": {
+            "@id": "dtmi:example:epsilon_quan;1",
+            "@type": "Interface"
+          }
+        }
+      }
+    ]
+  }
+]

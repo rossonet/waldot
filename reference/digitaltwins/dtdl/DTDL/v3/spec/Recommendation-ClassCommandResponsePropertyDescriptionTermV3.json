@@ -1,0 +1,52 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yekk_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "yekk_wum",
+          "response": {
+            "description": [
+              "yekk_omega"
+            ],
+            "name": "yekk_yuzz",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yekk_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "yekk_glikk",
+          "response": {
+            "dtmi:dtdl:property:description;3": [
+              "yekk_humpf"
+            ],
+            "name": "yekk_fuddle",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

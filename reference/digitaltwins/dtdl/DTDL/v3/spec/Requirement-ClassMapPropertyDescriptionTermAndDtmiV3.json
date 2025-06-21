@@ -1,0 +1,65 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:xi_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_jogg;1",
+          "@type": "Map",
+          "description": [
+            "xi_flunn"
+          ],
+          "dtmi:dtdl:property:description;3": [
+            "xi_itch"
+          ],
+          "mapKey": {
+            "name": "xi_yekk",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "xi_vroo",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omicron_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:omicron_alpha;1",
+          "@type": "Map",
+          "description": [
+            "omicron_beta"
+          ],
+          "dtmi:dtdl:property:description;3": [
+            "omicron_gamma"
+          ],
+          "mapKey": {
+            "name": "omicron_delta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "omicron_epsilon",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

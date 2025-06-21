@@ -1,0 +1,76 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "itch_mu",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": "dateTime"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_omicron;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:itch_xi;1",
+          "@type": "Array",
+          "elementSchema": "double"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_pi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@type": "Array",
+          "elementSchema": "duration"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:itch_rho;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Array",
+          "elementSchema": "float"
+        }
+      }
+    ]
+  }
+]

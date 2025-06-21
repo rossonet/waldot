@@ -1,0 +1,65 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:humpf_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": "dtmi:example:humpf_psi;1",
+          "@type": "Property",
+          "name": "humpf_wum",
+          "schema": {
+            "@id": "dtmi:example:humpf_psi;1",
+            "@type": "Map",
+            "mapValue": {
+              "name": "humpf_yuzz",
+              "schema": "time"
+            },
+            "mapKey": {
+              "@id": "dtmi:example:humpf_psi;1",
+              "name": "humpf_omega",
+              "schema": "string"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:humpf_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@id": "dtmi:example:humpf_um;1",
+          "@type": "Property",
+          "name": "humpf_glikk",
+          "schema": {
+            "@id": "dtmi:example:humpf_um;1",
+            "@type": "Map",
+            "mapValue": {
+              "name": "humpf_fuddle",
+              "schema": "boolean"
+            },
+            "mapKey": {
+              "@context": "dtmi:undefinedExtension:context;1",
+              "@id": "dtmi:example:humpf_um;1",
+              "name": "humpf_humpf",
+              "schema": "string"
+            }
+          }
+        }
+      }
+    ]
+  }
+]

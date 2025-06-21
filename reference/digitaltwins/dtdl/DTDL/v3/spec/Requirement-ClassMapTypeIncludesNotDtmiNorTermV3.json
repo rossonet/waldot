@@ -1,0 +1,59 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_pi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_nu;1",
+          "@type": [
+            "Map",
+            "http://foo.com/bar"
+          ],
+          "mapKey": {
+            "name": "quan_xi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "quan_omicron",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_upsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:quan_rho;1",
+          "@type": [
+            "Map",
+            "http://foo.com/bar"
+          ],
+          "mapKey": {
+            "name": "quan_sigma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "quan_tau",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,54 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:humpf_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:humpf_delta;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "description": [
+              "humpf_beta"
+            ],
+            "enumValue": 977,
+            "name": "humpf_gamma"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:humpf_iota;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:humpf_theta;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "dtmi:dtdl:property:description;2": [
+              "humpf_zeta"
+            ],
+            "enumValue": 978,
+            "name": "humpf_eta"
+          }
+        }
+      }
+    ]
+  }
+]

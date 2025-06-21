@@ -1,0 +1,35 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:sigma_pi;1",
+        "@type": "Interface",
+        "comment": "sigma_rho",
+        "dtmi:dtdl:property:comment;3": "sigma_sigma"
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": [
+          "dtmi:dtdl:context;3",
+          "dtmi:undefinedExtension:context;1"
+        ],
+        "@id": "dtmi:example:sigma_tau;1",
+        "@type": "Interface",
+        "comment": "sigma_upsilon",
+        "dtmi:dtdl:property:comment;3": "sigma_phi"
+      }
+    ]
+  }
+]

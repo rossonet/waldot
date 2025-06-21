@@ -1,0 +1,55 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "rho_phi",
+          "request": {
+            "@type": [
+              "CommandRequest",
+              "Foobar"
+            ],
+            "name": "rho_upsilon",
+            "schema": "string",
+            "dtmi:foo//bar": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_yuzz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "rho_omega",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandRequest",
+              "Foobar"
+            ],
+            "name": "rho_psi",
+            "schema": "time",
+            "dtmi:foo//bar": 626
+          }
+        }
+      }
+    ]
+  }
+]

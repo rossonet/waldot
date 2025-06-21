@@ -1,0 +1,61 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_humpf;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_fuddle",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@type": [
+              "MapValue",
+              "dtmi:foo//bar"
+            ],
+            "name": "xi_um",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_thnad;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_snee;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_quan",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "MapValue",
+              "dtmi:foo//bar"
+            ],
+            "name": "xi_nuh",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

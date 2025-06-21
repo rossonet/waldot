@@ -1,0 +1,50 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_floob;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:zeta_spazz;1",
+          "@type": "Interface",
+          "extends": "dtmi:ex:dependentRef;1"
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_jogg;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:zeta_zatz;1",
+          "@type": "Interface",
+          "extends": [
+            "dtmi:ex:dependentRef;1"
+          ]
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  }
+]

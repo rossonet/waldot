@@ -1,0 +1,58 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:itch_mu;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:itch_lambda;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Component",
+            "name": "itch_kappa",
+            "schema": "dtmi:ex:dependentRef;1"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:itch_omicron;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:itch_xi;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Component",
+            "name": "itch_nu",
+            "schema": [
+              "dtmi:ex:dependentRef;1"
+            ]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  }
+]

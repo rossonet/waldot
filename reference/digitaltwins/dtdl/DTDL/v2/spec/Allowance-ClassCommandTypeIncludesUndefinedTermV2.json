@@ -1,0 +1,22 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:chi_floob;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Command",
+            "Foobar"
+          ],
+          "name": "chi_spazz"
+        }
+      }
+    ]
+  }
+]

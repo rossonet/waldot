@@ -1,0 +1,49 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:sigma_quan;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:sigma_quan;1",
+          "@type": "Interface",
+          "contents": {
+            "@id": "dtmi:example:sigma_quan;1",
+            "@type": "Telemetry",
+            "name": "sigma_thnad",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:sigma_spazz;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:sigma_spazz;1",
+          "@type": "Interface",
+          "contents": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@id": "dtmi:example:sigma_spazz;1",
+            "@type": "Telemetry",
+            "name": "sigma_floob",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

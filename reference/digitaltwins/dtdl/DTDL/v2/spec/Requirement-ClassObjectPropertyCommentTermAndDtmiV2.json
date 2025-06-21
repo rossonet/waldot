@@ -1,0 +1,53 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_wum;1",
+          "@type": "Object",
+          "comment": "epsilon_um",
+          "dtmi:dtdl:property:comment;2": "epsilon_humpf",
+          "fields": [
+            {
+              "name": "epsilon_fuddle",
+              "schema": "float"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_nuh;1",
+          "@type": "Object",
+          "comment": "epsilon_snee",
+          "dtmi:dtdl:property:comment;2": "epsilon_quan",
+          "fields": [
+            {
+              "name": "epsilon_thnad",
+              "schema": "integer"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

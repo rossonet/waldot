@@ -1,0 +1,32 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_thnad;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nuh_snee;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "nuh_quan",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "nuh_nuh",
+            "schema": "string",
+            "@type": [
+              "MapValue",
+              "dtmi:dtdl:class:MapValue;3"
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

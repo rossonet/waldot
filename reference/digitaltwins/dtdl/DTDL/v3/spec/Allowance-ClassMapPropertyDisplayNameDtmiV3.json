@@ -1,0 +1,30 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_quan;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_fuddle;1",
+          "@type": "Map",
+          "dtmi:dtdl:property:displayName;3": [
+            "rho_glikk"
+          ],
+          "mapKey": {
+            "name": "rho_nuh",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "rho_snee",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

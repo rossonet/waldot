@@ -1,0 +1,61 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_yekk;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "snee_vroo",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@type": [
+              "MapValue",
+              "Foobar"
+            ],
+            "name": "snee_itch",
+            "schema": "date"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_beta;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "quan_gamma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "MapValue",
+              "Foobar"
+            ],
+            "name": "quan_alpha",
+            "schema": "dateTime"
+          }
+        }
+      }
+    ]
+  }
+]

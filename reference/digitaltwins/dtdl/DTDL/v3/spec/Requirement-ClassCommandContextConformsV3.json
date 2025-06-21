@@ -1,0 +1,370 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:theta_vroo;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:theta_yekk;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "theta_itch",
+            "@context": "dtmi:dtdl:extension:quantitativeTypes;1"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_beta;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_alpha;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "theta_hi",
+            "@context": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_epsilon;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_delta;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_gamma",
+            "@context": [
+              "dtmi:dtdl:extension:quantitativeTypes;1"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_theta;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_eta;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_zeta",
+            "@context": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_lambda;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_kappa;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_iota",
+            "@context": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_xi;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_nu;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_mu",
+            "@context": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_rho;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_pi;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_omicron",
+            "@context": [
+              null
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_upsilon;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_tau;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_sigma",
+            "@context": [
+              626
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_psi;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_chi;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_phi",
+            "@context": [
+              true
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_wum;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_yuzz;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_omega",
+            "@context": "dtmi:dtdl:extension:quantitativeTypes"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_fuddle;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_humpf;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_um",
+            "@context": "http://dtdl/extension/quantitativeTypes/1"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_snee;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_nuh;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_glikk",
+            "@context": "quantitativeTypes;1"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_spazz;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_thnad;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_quan",
+            "@context": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_jogg;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_zatz;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_floob",
+            "@context": {
+              "foo": "dtmi:foo:bar;1"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:iota_yekk;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_itch;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_flunn",
+            "@context": [
+              {}
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_alpha;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:iota_hi;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Command",
+            "name": "iota_vroo",
+            "@context": [
+              {
+                "foo": "dtmi:foo:bar;1"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

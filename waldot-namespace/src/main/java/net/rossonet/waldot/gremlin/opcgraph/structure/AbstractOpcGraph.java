@@ -22,7 +22,7 @@ import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.api.strategies.WaldotMappingStrategy;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcGraphComputer;
 import net.rossonet.waldot.gremlin.opcgraph.services.OpcServiceRegistry;
 
@@ -123,15 +123,15 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 
 	protected Configuration configuration;
 	protected VertexProperty.Cardinality defaultVertexPropertyCardinality;
-	protected IdManager<NodeId> edgeIdManager = WaldotMappingStrategy.getNodeIdManager();
+	protected IdManager<NodeId> edgeIdManager = MiloStrategy.getNodeIdManager();
 
 	protected transient AtomicLong generatedId = new AtomicLong(120000L);
 
 	protected OpcServiceRegistry serviceRegistry;
 
-	protected IdManager<NodeId> vertexIdManager = WaldotMappingStrategy.getNodeIdManager();
+	protected IdManager<NodeId> vertexIdManager = MiloStrategy.getNodeIdManager();
 
-	protected IdManager<NodeId> vertexPropertyIdManager = WaldotMappingStrategy.getNodeIdManager();
+	protected IdManager<NodeId> vertexPropertyIdManager = MiloStrategy.getNodeIdManager();
 
 	@Override
 	public abstract Vertex addVertex(final Object... keyValues);

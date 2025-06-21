@@ -1,0 +1,43 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:chi_delta;1",
+        "@type": "Interface",
+        "description": [
+          "chi_epsilon"
+        ],
+        "dtmi:dtdl:property:description;3": [
+          "chi_zeta"
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": [
+          "dtmi:dtdl:context;3",
+          "dtmi:undefinedExtension:context;1"
+        ],
+        "@id": "dtmi:example:chi_eta;1",
+        "@type": "Interface",
+        "description": [
+          "chi_theta"
+        ],
+        "dtmi:dtdl:property:description;3": [
+          "chi_iota"
+        ]
+      }
+    ]
+  }
+]

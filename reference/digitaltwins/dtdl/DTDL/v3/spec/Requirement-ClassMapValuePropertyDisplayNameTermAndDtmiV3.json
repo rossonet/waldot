@@ -1,0 +1,65 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_humpf;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "epsilon_fuddle",
+            "schema": "string"
+          },
+          "mapValue": {
+            "displayName": [
+              "epsilon_yuzz"
+            ],
+            "dtmi:dtdl:property:displayName;3": [
+              "epsilon_wum"
+            ],
+            "name": "epsilon_um",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_thnad;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "epsilon_spazz",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "displayName": [
+              "epsilon_nuh"
+            ],
+            "dtmi:dtdl:property:displayName;3": [
+              "epsilon_snee"
+            ],
+            "name": "epsilon_quan",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  }
+]

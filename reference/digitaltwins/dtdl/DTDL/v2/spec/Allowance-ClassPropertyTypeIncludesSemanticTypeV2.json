@@ -1,0 +1,46 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Acceleration"
+          ],
+          "name": "nu_wum",
+          "schema": "double",
+          "unit": "centimetrePerSecondSquared"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "dtmi:standard:class:Acceleration;2"
+          ],
+          "name": "nu_humpf",
+          "schema": "float",
+          "unit": "centimetrePerSecondSquared"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,69 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:fuddle_xi;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:fuddle_nu;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Component",
+            "name": "fuddle_mu",
+            "schema": {
+              "@id": "dtmi:example:fuddle_lambda;1",
+              "@type": "Interface",
+              "contents": {
+                "@type": "Component",
+                "name": "fuddle_iota",
+                "schema": {
+                  "@id": "dtmi:example:fuddle_kappa;1",
+                  "@type": "Interface"
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:fuddle_upsilon;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:fuddle_tau;1",
+          "@type": "Interface",
+          "contents": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": "Component",
+            "name": "fuddle_sigma",
+            "schema": {
+              "@id": "dtmi:example:fuddle_rho;1",
+              "@type": "Interface",
+              "contents": {
+                "@type": "Component",
+                "name": "fuddle_omicron",
+                "schema": {
+                  "@id": "dtmi:example:fuddle_pi;1",
+                  "@type": "Interface"
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,59 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:fuddle_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:fuddle_delta;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "displayName": [
+              "fuddle_alpha"
+            ],
+            "dtmi:dtdl:property:displayName;3": [
+              "fuddle_beta"
+            ],
+            "enumValue": 1443,
+            "name": "fuddle_gamma"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:fuddle_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:fuddle_iota;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "displayName": [
+              "fuddle_zeta"
+            ],
+            "dtmi:dtdl:property:displayName;3": [
+              "fuddle_eta"
+            ],
+            "enumValue": 1444,
+            "name": "fuddle_theta"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:um_upsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "um_tau",
+          "response": {
+            "name": "um_sigma",
+            "dtmi:dtdl:property:schema;3": "string"
+          }
+        }
+      }
+    ]
+  }
+]

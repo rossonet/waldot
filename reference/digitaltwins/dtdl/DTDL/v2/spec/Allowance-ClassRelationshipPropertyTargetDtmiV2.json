@@ -1,0 +1,20 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "yekk_hi",
+          "dtmi:dtdl:property:target;2": "dtmi:example:vroo_alpha;1"
+        }
+      }
+    ]
+  }
+]

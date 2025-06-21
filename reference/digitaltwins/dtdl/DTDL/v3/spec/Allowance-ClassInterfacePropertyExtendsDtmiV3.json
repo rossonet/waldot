@@ -1,0 +1,21 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yuzz_flunn;1",
+        "@type": "Interface",
+        "dtmi:dtdl:property:extends;3": [
+          {
+            "@id": "dtmi:example:yuzz_itch;1",
+            "@type": "Interface"
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,40 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_zatz;1",
+          "elementSchema": "string",
+          "@type": "Array"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_itch;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_flunn;1",
+          "elementSchema": "time",
+          "@type": "dtmi:dtdl:class:Array;3"
+        }
+      }
+    ]
+  }
+]

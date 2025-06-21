@@ -1,0 +1,108 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:alpha_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "alpha_yekk",
+          "response": {
+            "@type": [
+              "CommandResponse",
+              "Foobar"
+            ],
+            "name": "alpha_itch",
+            "schema": "string",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "beta_alpha",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandResponse",
+              "Foobar"
+            ],
+            "name": "alpha_hi",
+            "schema": "time",
+            "dtmi:foo:bar;1": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "beta_delta",
+          "response": {
+            "@type": [
+              "CommandResponse",
+              "Foobar"
+            ],
+            "name": "beta_gamma",
+            "schema": "boolean",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "beta_eta",
+          "response": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandResponse",
+              "Foobar"
+            ],
+            "name": "beta_zeta",
+            "schema": "date",
+            "boolean": null
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,159 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:thnad_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "thnad_epsilon",
+          "schema": {
+            "@type": "Map",
+            "mapValue": {
+              "name": "thnad_delta",
+              "schema": "duration"
+            },
+            "mapKey": {
+              "@context": [],
+              "name": "thnad_gamma",
+              "schema": "string"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:thnad_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_theta;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "thnad_iota",
+            "schema": "float"
+          },
+          "mapKey": {
+            "name": "thnad_eta",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:thnad_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "thnad_nu",
+          "schema": {
+            "@type": "Map",
+            "mapValue": {
+              "name": "thnad_mu",
+              "schema": "integer"
+            },
+            "mapKey": {
+              "name": "thnad_lambda",
+              "schema": "string"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:thnad_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_pi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "thnad_rho",
+            "schema": "long"
+          },
+          "mapKey": {
+            "name": "thnad_omicron",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:thnad_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_upsilon;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "thnad_phi",
+            "schema": "string"
+          },
+          "mapKey": {
+            "name": "thnad_tau",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:thnad_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_omega;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "thnad_yuzz",
+            "schema": "time"
+          },
+          "mapKey": {
+            "name": "thnad_psi",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

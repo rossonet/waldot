@@ -1,0 +1,59 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:pi_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:pi_lambda;1",
+          "@type": [
+            "Map",
+            "dtmi:foo//bar"
+          ],
+          "mapKey": {
+            "name": "pi_mu",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "pi_nu",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:pi_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:pi_omicron;1",
+          "@type": [
+            "Map",
+            "dtmi:foo//bar"
+          ],
+          "mapKey": {
+            "name": "pi_pi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "pi_rho",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

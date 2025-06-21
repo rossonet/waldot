@@ -1,0 +1,4738 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_iota;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Command",
+            "name": "phi_floob"
+          },
+          {
+            "@type": "Component",
+            "name": "phi_zatz",
+            "schema": {
+              "@id": "dtmi:example:phi_jogg;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "phi_flunn",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "phi_itch"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "phi_yekk",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "phi_vroo"
+          },
+          {
+            "@type": "Component",
+            "name": "phi_hi",
+            "schema": {
+              "@id": "dtmi:example:chi_alpha;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "chi_beta",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "chi_gamma"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "chi_delta",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "chi_epsilon"
+          },
+          {
+            "@type": "Component",
+            "name": "chi_zeta",
+            "schema": {
+              "@id": "dtmi:example:chi_eta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "chi_theta",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "chi_iota"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "chi_kappa",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "chi_lambda"
+          },
+          {
+            "@type": "Component",
+            "name": "chi_mu",
+            "schema": {
+              "@id": "dtmi:example:chi_nu;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "chi_xi",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "chi_omicron"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "chi_pi",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "chi_rho"
+          },
+          {
+            "@type": "Component",
+            "name": "chi_sigma",
+            "schema": {
+              "@id": "dtmi:example:chi_tau;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "chi_upsilon",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "chi_phi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "chi_chi",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "chi_psi"
+          },
+          {
+            "@type": "Component",
+            "name": "chi_omega",
+            "schema": {
+              "@id": "dtmi:example:chi_yuzz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "chi_wum",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "chi_um"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "chi_humpf",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "chi_fuddle"
+          },
+          {
+            "@type": "Component",
+            "name": "chi_glikk",
+            "schema": {
+              "@id": "dtmi:example:chi_nuh;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "chi_snee",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "chi_quan"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "chi_thnad",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "chi_spazz"
+          },
+          {
+            "@type": "Component",
+            "name": "chi_floob",
+            "schema": {
+              "@id": "dtmi:example:chi_zatz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "chi_jogg",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "chi_flunn"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "chi_itch",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "chi_yekk"
+          },
+          {
+            "@type": "Component",
+            "name": "chi_vroo",
+            "schema": {
+              "@id": "dtmi:example:chi_hi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "psi_alpha",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "psi_beta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "psi_gamma",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "psi_delta"
+          },
+          {
+            "@type": "Component",
+            "name": "psi_epsilon",
+            "schema": {
+              "@id": "dtmi:example:psi_zeta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "psi_eta",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "psi_theta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "psi_iota",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "psi_kappa"
+          },
+          {
+            "@type": "Component",
+            "name": "psi_lambda",
+            "schema": {
+              "@id": "dtmi:example:psi_mu;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "psi_nu",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "psi_xi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "psi_omicron",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "psi_pi"
+          },
+          {
+            "@type": "Component",
+            "name": "psi_rho",
+            "schema": {
+              "@id": "dtmi:example:psi_sigma;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "psi_tau",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "psi_upsilon"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "psi_phi",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "psi_chi"
+          },
+          {
+            "@type": "Component",
+            "name": "psi_psi",
+            "schema": {
+              "@id": "dtmi:example:psi_omega;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "psi_yuzz",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "psi_wum"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "psi_um",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "psi_humpf"
+          },
+          {
+            "@type": "Component",
+            "name": "psi_fuddle",
+            "schema": {
+              "@id": "dtmi:example:psi_glikk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "psi_nuh",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "psi_snee"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "psi_quan",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "psi_thnad"
+          },
+          {
+            "@type": "Component",
+            "name": "psi_spazz",
+            "schema": {
+              "@id": "dtmi:example:psi_floob;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "psi_zatz",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "psi_jogg"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "psi_flunn",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "psi_itch"
+          },
+          {
+            "@type": "Component",
+            "name": "psi_yekk",
+            "schema": {
+              "@id": "dtmi:example:psi_vroo;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "psi_hi",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "omega_alpha"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "omega_beta",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "omega_gamma"
+          },
+          {
+            "@type": "Component",
+            "name": "omega_delta",
+            "schema": {
+              "@id": "dtmi:example:omega_epsilon;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "omega_zeta",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "omega_eta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "omega_theta",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "omega_iota"
+          },
+          {
+            "@type": "Component",
+            "name": "omega_kappa",
+            "schema": {
+              "@id": "dtmi:example:omega_lambda;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "omega_mu",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "omega_nu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "omega_xi",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "omega_omicron"
+          },
+          {
+            "@type": "Component",
+            "name": "omega_pi",
+            "schema": {
+              "@id": "dtmi:example:omega_rho;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "omega_sigma",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "omega_tau"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "omega_upsilon",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "omega_phi"
+          },
+          {
+            "@type": "Component",
+            "name": "omega_chi",
+            "schema": {
+              "@id": "dtmi:example:omega_psi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "omega_omega",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "omega_yuzz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "omega_wum",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "omega_um"
+          },
+          {
+            "@type": "Component",
+            "name": "omega_humpf",
+            "schema": {
+              "@id": "dtmi:example:omega_fuddle;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "omega_glikk",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "omega_nuh"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "omega_snee",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "omega_quan"
+          },
+          {
+            "@type": "Component",
+            "name": "omega_thnad",
+            "schema": {
+              "@id": "dtmi:example:omega_spazz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "omega_floob",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "omega_zatz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "omega_jogg",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "omega_flunn"
+          },
+          {
+            "@type": "Component",
+            "name": "omega_itch",
+            "schema": {
+              "@id": "dtmi:example:omega_yekk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "omega_vroo",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "omega_hi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yuzz_alpha",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "yuzz_beta"
+          },
+          {
+            "@type": "Component",
+            "name": "yuzz_gamma",
+            "schema": {
+              "@id": "dtmi:example:yuzz_delta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yuzz_epsilon",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yuzz_zeta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yuzz_eta",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "yuzz_theta"
+          },
+          {
+            "@type": "Component",
+            "name": "yuzz_iota",
+            "schema": {
+              "@id": "dtmi:example:yuzz_kappa;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yuzz_lambda",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yuzz_mu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yuzz_nu",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "yuzz_xi"
+          },
+          {
+            "@type": "Component",
+            "name": "yuzz_omicron",
+            "schema": {
+              "@id": "dtmi:example:yuzz_pi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yuzz_rho",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yuzz_sigma"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yuzz_tau",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "yuzz_upsilon"
+          },
+          {
+            "@type": "Component",
+            "name": "yuzz_phi",
+            "schema": {
+              "@id": "dtmi:example:yuzz_chi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yuzz_psi",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yuzz_omega"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yuzz_yuzz",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "yuzz_wum"
+          },
+          {
+            "@type": "Component",
+            "name": "yuzz_um",
+            "schema": {
+              "@id": "dtmi:example:yuzz_humpf;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yuzz_fuddle",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yuzz_glikk"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yuzz_nuh",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "yuzz_snee"
+          },
+          {
+            "@type": "Component",
+            "name": "yuzz_quan",
+            "schema": {
+              "@id": "dtmi:example:yuzz_thnad;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yuzz_spazz",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yuzz_floob"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yuzz_zatz",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "yuzz_jogg"
+          },
+          {
+            "@type": "Component",
+            "name": "yuzz_flunn",
+            "schema": {
+              "@id": "dtmi:example:yuzz_itch;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yuzz_yekk",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yuzz_vroo"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yuzz_hi",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "wum_alpha"
+          },
+          {
+            "@type": "Component",
+            "name": "wum_beta",
+            "schema": {
+              "@id": "dtmi:example:wum_gamma;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "wum_delta",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "wum_epsilon"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "wum_zeta",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "wum_eta"
+          },
+          {
+            "@type": "Component",
+            "name": "wum_theta",
+            "schema": {
+              "@id": "dtmi:example:wum_iota;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "wum_kappa",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "wum_lambda"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "wum_mu",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "wum_nu"
+          },
+          {
+            "@type": "Component",
+            "name": "wum_xi",
+            "schema": {
+              "@id": "dtmi:example:wum_omicron;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "wum_pi",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "wum_rho"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "wum_sigma",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "wum_tau"
+          },
+          {
+            "@type": "Component",
+            "name": "wum_upsilon",
+            "schema": {
+              "@id": "dtmi:example:wum_phi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "wum_chi",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "wum_psi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "wum_omega",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "wum_yuzz"
+          },
+          {
+            "@type": "Component",
+            "name": "wum_wum",
+            "schema": {
+              "@id": "dtmi:example:wum_um;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "wum_humpf",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "wum_fuddle"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "wum_glikk",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "wum_nuh"
+          },
+          {
+            "@type": "Component",
+            "name": "wum_snee",
+            "schema": {
+              "@id": "dtmi:example:wum_quan;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "wum_thnad",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "wum_spazz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "wum_floob",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "wum_zatz"
+          },
+          {
+            "@type": "Component",
+            "name": "wum_jogg",
+            "schema": {
+              "@id": "dtmi:example:wum_flunn;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "wum_itch",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "wum_yekk"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "wum_vroo",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "wum_hi"
+          },
+          {
+            "@type": "Component",
+            "name": "um_alpha",
+            "schema": {
+              "@id": "dtmi:example:um_beta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "um_gamma",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "um_delta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "um_epsilon",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "um_zeta"
+          },
+          {
+            "@type": "Component",
+            "name": "um_eta",
+            "schema": {
+              "@id": "dtmi:example:um_theta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "um_iota",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "um_kappa"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "um_lambda",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "um_mu"
+          },
+          {
+            "@type": "Component",
+            "name": "um_nu",
+            "schema": {
+              "@id": "dtmi:example:um_xi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "um_omicron",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "um_pi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "um_rho",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "um_sigma"
+          },
+          {
+            "@type": "Component",
+            "name": "um_tau",
+            "schema": {
+              "@id": "dtmi:example:um_upsilon;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "um_phi",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "um_chi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "um_psi",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "um_omega"
+          },
+          {
+            "@type": "Component",
+            "name": "um_yuzz",
+            "schema": {
+              "@id": "dtmi:example:um_wum;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "um_um",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "um_humpf"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "um_fuddle",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "um_glikk"
+          },
+          {
+            "@type": "Component",
+            "name": "um_nuh",
+            "schema": {
+              "@id": "dtmi:example:um_snee;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "um_quan",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "um_thnad"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "um_spazz",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "um_floob"
+          },
+          {
+            "@type": "Component",
+            "name": "um_zatz",
+            "schema": {
+              "@id": "dtmi:example:um_jogg;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "um_flunn",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "um_itch"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "um_yekk",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "um_vroo"
+          },
+          {
+            "@type": "Component",
+            "name": "um_hi",
+            "schema": {
+              "@id": "dtmi:example:humpf_alpha;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "humpf_beta",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "humpf_gamma"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "humpf_delta",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "humpf_epsilon"
+          },
+          {
+            "@type": "Component",
+            "name": "humpf_zeta",
+            "schema": {
+              "@id": "dtmi:example:humpf_eta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "humpf_theta",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "humpf_iota"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "humpf_kappa",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "humpf_lambda"
+          },
+          {
+            "@type": "Component",
+            "name": "humpf_mu",
+            "schema": {
+              "@id": "dtmi:example:humpf_nu;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "humpf_xi",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "humpf_omicron"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "humpf_pi",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "humpf_rho"
+          },
+          {
+            "@type": "Component",
+            "name": "humpf_sigma",
+            "schema": {
+              "@id": "dtmi:example:humpf_tau;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "humpf_upsilon",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "humpf_phi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "humpf_chi",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "humpf_psi"
+          },
+          {
+            "@type": "Component",
+            "name": "humpf_omega",
+            "schema": {
+              "@id": "dtmi:example:humpf_yuzz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "humpf_wum",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "humpf_um"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "humpf_humpf",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "humpf_fuddle"
+          },
+          {
+            "@type": "Component",
+            "name": "humpf_glikk",
+            "schema": {
+              "@id": "dtmi:example:humpf_nuh;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "humpf_snee",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "humpf_quan"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "humpf_thnad",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "humpf_spazz"
+          },
+          {
+            "@type": "Component",
+            "name": "humpf_floob",
+            "schema": {
+              "@id": "dtmi:example:humpf_zatz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "humpf_jogg",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "humpf_flunn"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "humpf_itch",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "humpf_yekk"
+          },
+          {
+            "@type": "Component",
+            "name": "humpf_vroo",
+            "schema": {
+              "@id": "dtmi:example:humpf_hi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "fuddle_alpha",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "fuddle_beta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "fuddle_gamma",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "fuddle_delta"
+          },
+          {
+            "@type": "Component",
+            "name": "fuddle_epsilon",
+            "schema": {
+              "@id": "dtmi:example:fuddle_zeta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "fuddle_eta",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "fuddle_theta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "fuddle_iota",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "fuddle_kappa"
+          },
+          {
+            "@type": "Component",
+            "name": "fuddle_lambda",
+            "schema": {
+              "@id": "dtmi:example:fuddle_mu;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "fuddle_nu",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "fuddle_xi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "fuddle_omicron",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "fuddle_pi"
+          },
+          {
+            "@type": "Component",
+            "name": "fuddle_rho",
+            "schema": {
+              "@id": "dtmi:example:fuddle_sigma;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "fuddle_tau",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "fuddle_upsilon"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "fuddle_phi",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "fuddle_chi"
+          },
+          {
+            "@type": "Component",
+            "name": "fuddle_psi",
+            "schema": {
+              "@id": "dtmi:example:fuddle_omega;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "fuddle_yuzz",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "fuddle_wum"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "fuddle_um",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "fuddle_humpf"
+          },
+          {
+            "@type": "Component",
+            "name": "fuddle_fuddle",
+            "schema": {
+              "@id": "dtmi:example:fuddle_glikk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "fuddle_nuh",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "fuddle_snee"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "fuddle_quan",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "fuddle_thnad"
+          },
+          {
+            "@type": "Component",
+            "name": "fuddle_spazz",
+            "schema": {
+              "@id": "dtmi:example:fuddle_floob;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "fuddle_zatz",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "fuddle_jogg"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "fuddle_flunn",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "fuddle_itch"
+          },
+          {
+            "@type": "Component",
+            "name": "fuddle_yekk",
+            "schema": {
+              "@id": "dtmi:example:fuddle_vroo;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "fuddle_hi",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "glikk_alpha"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "glikk_beta",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "glikk_gamma"
+          },
+          {
+            "@type": "Component",
+            "name": "glikk_delta",
+            "schema": {
+              "@id": "dtmi:example:glikk_epsilon;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "glikk_zeta",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "glikk_eta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "glikk_theta",
+            "schema": "long"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:jogg_um;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Command",
+            "name": "glikk_kappa"
+          },
+          {
+            "@type": "Component",
+            "name": "glikk_lambda",
+            "schema": {
+              "@id": "dtmi:example:glikk_mu;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "glikk_nu",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "glikk_xi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "glikk_omicron",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "glikk_pi"
+          },
+          {
+            "@type": "Component",
+            "name": "glikk_rho",
+            "schema": {
+              "@id": "dtmi:example:glikk_sigma;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "glikk_tau",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "glikk_upsilon"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "glikk_phi",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "glikk_chi"
+          },
+          {
+            "@type": "Component",
+            "name": "glikk_psi",
+            "schema": {
+              "@id": "dtmi:example:glikk_omega;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "glikk_yuzz",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "glikk_wum"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "glikk_um",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "glikk_humpf"
+          },
+          {
+            "@type": "Component",
+            "name": "glikk_fuddle",
+            "schema": {
+              "@id": "dtmi:example:glikk_glikk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "glikk_nuh",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "glikk_snee"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "glikk_quan",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "glikk_thnad"
+          },
+          {
+            "@type": "Component",
+            "name": "glikk_spazz",
+            "schema": {
+              "@id": "dtmi:example:glikk_floob;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "glikk_zatz",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "glikk_jogg"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "glikk_flunn",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "glikk_itch"
+          },
+          {
+            "@type": "Component",
+            "name": "glikk_yekk",
+            "schema": {
+              "@id": "dtmi:example:glikk_vroo;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "glikk_hi",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "nuh_alpha"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "nuh_beta",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "nuh_gamma"
+          },
+          {
+            "@type": "Component",
+            "name": "nuh_delta",
+            "schema": {
+              "@id": "dtmi:example:nuh_epsilon;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "nuh_zeta",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "nuh_eta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "nuh_theta",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "nuh_iota"
+          },
+          {
+            "@type": "Component",
+            "name": "nuh_kappa",
+            "schema": {
+              "@id": "dtmi:example:nuh_lambda;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "nuh_mu",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "nuh_nu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "nuh_xi",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "nuh_omicron"
+          },
+          {
+            "@type": "Component",
+            "name": "nuh_pi",
+            "schema": {
+              "@id": "dtmi:example:nuh_rho;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "nuh_sigma",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "nuh_tau"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "nuh_upsilon",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "nuh_phi"
+          },
+          {
+            "@type": "Component",
+            "name": "nuh_chi",
+            "schema": {
+              "@id": "dtmi:example:nuh_psi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "nuh_omega",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "nuh_yuzz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "nuh_wum",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "nuh_um"
+          },
+          {
+            "@type": "Component",
+            "name": "nuh_humpf",
+            "schema": {
+              "@id": "dtmi:example:nuh_fuddle;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "nuh_glikk",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "nuh_nuh"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "nuh_snee",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "nuh_quan"
+          },
+          {
+            "@type": "Component",
+            "name": "nuh_thnad",
+            "schema": {
+              "@id": "dtmi:example:nuh_spazz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "nuh_floob",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "nuh_zatz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "nuh_jogg",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "nuh_flunn"
+          },
+          {
+            "@type": "Component",
+            "name": "nuh_itch",
+            "schema": {
+              "@id": "dtmi:example:nuh_yekk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "nuh_vroo",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "nuh_hi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "snee_alpha",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "snee_beta"
+          },
+          {
+            "@type": "Component",
+            "name": "snee_gamma",
+            "schema": {
+              "@id": "dtmi:example:snee_delta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "snee_epsilon",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "snee_zeta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "snee_eta",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "snee_theta"
+          },
+          {
+            "@type": "Component",
+            "name": "snee_iota",
+            "schema": {
+              "@id": "dtmi:example:snee_kappa;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "snee_lambda",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "snee_mu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "snee_nu",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "snee_xi"
+          },
+          {
+            "@type": "Component",
+            "name": "snee_omicron",
+            "schema": {
+              "@id": "dtmi:example:snee_pi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "snee_rho",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "snee_sigma"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "snee_tau",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "snee_upsilon"
+          },
+          {
+            "@type": "Component",
+            "name": "snee_phi",
+            "schema": {
+              "@id": "dtmi:example:snee_chi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "snee_psi",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "snee_omega"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "snee_yuzz",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "snee_wum"
+          },
+          {
+            "@type": "Component",
+            "name": "snee_um",
+            "schema": {
+              "@id": "dtmi:example:snee_humpf;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "snee_fuddle",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "snee_glikk"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "snee_nuh",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "snee_snee"
+          },
+          {
+            "@type": "Component",
+            "name": "snee_quan",
+            "schema": {
+              "@id": "dtmi:example:snee_thnad;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "snee_spazz",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "snee_floob"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "snee_zatz",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "snee_jogg"
+          },
+          {
+            "@type": "Component",
+            "name": "snee_flunn",
+            "schema": {
+              "@id": "dtmi:example:snee_itch;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "snee_yekk",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "snee_vroo"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "snee_hi",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "quan_alpha"
+          },
+          {
+            "@type": "Component",
+            "name": "quan_beta",
+            "schema": {
+              "@id": "dtmi:example:quan_gamma;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "quan_delta",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "quan_epsilon"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "quan_zeta",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "quan_eta"
+          },
+          {
+            "@type": "Component",
+            "name": "quan_theta",
+            "schema": {
+              "@id": "dtmi:example:quan_iota;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "quan_kappa",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "quan_lambda"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "quan_mu",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "quan_nu"
+          },
+          {
+            "@type": "Component",
+            "name": "quan_xi",
+            "schema": {
+              "@id": "dtmi:example:quan_omicron;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "quan_pi",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "quan_rho"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "quan_sigma",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "quan_tau"
+          },
+          {
+            "@type": "Component",
+            "name": "quan_upsilon",
+            "schema": {
+              "@id": "dtmi:example:quan_phi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "quan_chi",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "quan_psi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "quan_omega",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "quan_yuzz"
+          },
+          {
+            "@type": "Component",
+            "name": "quan_wum",
+            "schema": {
+              "@id": "dtmi:example:quan_um;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "quan_humpf",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "quan_fuddle"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "quan_glikk",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "quan_nuh"
+          },
+          {
+            "@type": "Component",
+            "name": "quan_snee",
+            "schema": {
+              "@id": "dtmi:example:quan_quan;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "quan_thnad",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "quan_spazz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "quan_floob",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "quan_zatz"
+          },
+          {
+            "@type": "Component",
+            "name": "quan_jogg",
+            "schema": {
+              "@id": "dtmi:example:quan_flunn;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "quan_itch",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "quan_yekk"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "quan_vroo",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "quan_hi"
+          },
+          {
+            "@type": "Component",
+            "name": "thnad_alpha",
+            "schema": {
+              "@id": "dtmi:example:thnad_beta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "thnad_gamma",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "thnad_delta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "thnad_epsilon",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "thnad_zeta"
+          },
+          {
+            "@type": "Component",
+            "name": "thnad_eta",
+            "schema": {
+              "@id": "dtmi:example:thnad_theta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "thnad_iota",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "thnad_kappa"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "thnad_lambda",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "thnad_mu"
+          },
+          {
+            "@type": "Component",
+            "name": "thnad_nu",
+            "schema": {
+              "@id": "dtmi:example:thnad_xi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "thnad_omicron",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "thnad_pi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "thnad_rho",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "thnad_sigma"
+          },
+          {
+            "@type": "Component",
+            "name": "thnad_tau",
+            "schema": {
+              "@id": "dtmi:example:thnad_upsilon;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "thnad_phi",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "thnad_chi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "thnad_psi",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "thnad_omega"
+          },
+          {
+            "@type": "Component",
+            "name": "thnad_yuzz",
+            "schema": {
+              "@id": "dtmi:example:thnad_wum;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "thnad_um",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "thnad_humpf"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "thnad_fuddle",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "thnad_glikk"
+          },
+          {
+            "@type": "Component",
+            "name": "thnad_nuh",
+            "schema": {
+              "@id": "dtmi:example:thnad_snee;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "thnad_quan",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "thnad_thnad"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "thnad_spazz",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "thnad_floob"
+          },
+          {
+            "@type": "Component",
+            "name": "thnad_zatz",
+            "schema": {
+              "@id": "dtmi:example:thnad_jogg;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "thnad_flunn",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "thnad_itch"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "thnad_yekk",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "thnad_vroo"
+          },
+          {
+            "@type": "Component",
+            "name": "thnad_hi",
+            "schema": {
+              "@id": "dtmi:example:spazz_alpha;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "spazz_beta",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "spazz_gamma"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "spazz_delta",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "spazz_epsilon"
+          },
+          {
+            "@type": "Component",
+            "name": "spazz_zeta",
+            "schema": {
+              "@id": "dtmi:example:spazz_eta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "spazz_theta",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "spazz_iota"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "spazz_kappa",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "spazz_lambda"
+          },
+          {
+            "@type": "Component",
+            "name": "spazz_mu",
+            "schema": {
+              "@id": "dtmi:example:spazz_nu;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "spazz_xi",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "spazz_omicron"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "spazz_pi",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "spazz_rho"
+          },
+          {
+            "@type": "Component",
+            "name": "spazz_sigma",
+            "schema": {
+              "@id": "dtmi:example:spazz_tau;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "spazz_upsilon",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "spazz_phi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "spazz_chi",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "spazz_psi"
+          },
+          {
+            "@type": "Component",
+            "name": "spazz_omega",
+            "schema": {
+              "@id": "dtmi:example:spazz_yuzz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "spazz_wum",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "spazz_um"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "spazz_humpf",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "spazz_fuddle"
+          },
+          {
+            "@type": "Component",
+            "name": "spazz_glikk",
+            "schema": {
+              "@id": "dtmi:example:spazz_nuh;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "spazz_snee",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "spazz_quan"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "spazz_thnad",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "spazz_spazz"
+          },
+          {
+            "@type": "Component",
+            "name": "spazz_floob",
+            "schema": {
+              "@id": "dtmi:example:spazz_zatz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "spazz_jogg",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "spazz_flunn"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "spazz_itch",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "spazz_yekk"
+          },
+          {
+            "@type": "Component",
+            "name": "spazz_vroo",
+            "schema": {
+              "@id": "dtmi:example:spazz_hi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "floob_alpha",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "floob_beta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "floob_gamma",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "floob_delta"
+          },
+          {
+            "@type": "Component",
+            "name": "floob_epsilon",
+            "schema": {
+              "@id": "dtmi:example:floob_zeta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "floob_eta",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "floob_theta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "floob_iota",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "floob_kappa"
+          },
+          {
+            "@type": "Component",
+            "name": "floob_lambda",
+            "schema": {
+              "@id": "dtmi:example:floob_mu;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "floob_nu",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "floob_xi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "floob_omicron",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "floob_pi"
+          },
+          {
+            "@type": "Component",
+            "name": "floob_rho",
+            "schema": {
+              "@id": "dtmi:example:floob_sigma;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "floob_tau",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "floob_upsilon"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "floob_phi",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "floob_chi"
+          },
+          {
+            "@type": "Component",
+            "name": "floob_psi",
+            "schema": {
+              "@id": "dtmi:example:floob_omega;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "floob_yuzz",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "floob_wum"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "floob_um",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "floob_humpf"
+          },
+          {
+            "@type": "Component",
+            "name": "floob_fuddle",
+            "schema": {
+              "@id": "dtmi:example:floob_glikk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "floob_nuh",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "floob_snee"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "floob_quan",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "floob_thnad"
+          },
+          {
+            "@type": "Component",
+            "name": "floob_spazz",
+            "schema": {
+              "@id": "dtmi:example:floob_floob;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "floob_zatz",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "floob_jogg"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "floob_flunn",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "floob_itch"
+          },
+          {
+            "@type": "Component",
+            "name": "floob_yekk",
+            "schema": {
+              "@id": "dtmi:example:floob_vroo;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "floob_hi",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "zatz_alpha"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "zatz_beta",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "zatz_gamma"
+          },
+          {
+            "@type": "Component",
+            "name": "zatz_delta",
+            "schema": {
+              "@id": "dtmi:example:zatz_epsilon;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "zatz_zeta",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "zatz_eta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "zatz_theta",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "zatz_iota"
+          },
+          {
+            "@type": "Component",
+            "name": "zatz_kappa",
+            "schema": {
+              "@id": "dtmi:example:zatz_lambda;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "zatz_mu",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "zatz_nu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "zatz_xi",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "zatz_omicron"
+          },
+          {
+            "@type": "Component",
+            "name": "zatz_pi",
+            "schema": {
+              "@id": "dtmi:example:zatz_rho;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "zatz_sigma",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "zatz_tau"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "zatz_upsilon",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "zatz_phi"
+          },
+          {
+            "@type": "Component",
+            "name": "zatz_chi",
+            "schema": {
+              "@id": "dtmi:example:zatz_psi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "zatz_omega",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "zatz_yuzz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "zatz_wum",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "zatz_um"
+          },
+          {
+            "@type": "Component",
+            "name": "zatz_humpf",
+            "schema": {
+              "@id": "dtmi:example:zatz_fuddle;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "zatz_glikk",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "zatz_nuh"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "zatz_snee",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "zatz_quan"
+          },
+          {
+            "@type": "Component",
+            "name": "zatz_thnad",
+            "schema": {
+              "@id": "dtmi:example:zatz_spazz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "zatz_floob",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "zatz_zatz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "zatz_jogg",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "zatz_flunn"
+          },
+          {
+            "@type": "Component",
+            "name": "zatz_itch",
+            "schema": {
+              "@id": "dtmi:example:zatz_yekk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "zatz_vroo",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "zatz_hi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "jogg_alpha",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "jogg_beta"
+          },
+          {
+            "@type": "Component",
+            "name": "jogg_gamma",
+            "schema": {
+              "@id": "dtmi:example:jogg_delta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "jogg_epsilon",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "jogg_zeta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "jogg_eta",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "jogg_theta"
+          },
+          {
+            "@type": "Component",
+            "name": "jogg_iota",
+            "schema": {
+              "@id": "dtmi:example:jogg_kappa;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "jogg_lambda",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "jogg_mu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "jogg_nu",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "jogg_xi"
+          },
+          {
+            "@type": "Component",
+            "name": "jogg_omicron",
+            "schema": {
+              "@id": "dtmi:example:jogg_pi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "jogg_rho",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "jogg_sigma"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "jogg_tau",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "jogg_upsilon"
+          },
+          {
+            "@type": "Component",
+            "name": "jogg_phi",
+            "schema": {
+              "@id": "dtmi:example:jogg_chi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "jogg_psi",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "jogg_omega"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "jogg_yuzz",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "jogg_wum"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": [
+          "dtmi:dtdl:context;2",
+          "dtmi:undefinedExtension:context;1"
+        ],
+        "@id": "dtmi:example:delta_beta;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@type": "Command",
+            "name": "jogg_humpf"
+          },
+          {
+            "@type": "Component",
+            "name": "jogg_fuddle",
+            "schema": {
+              "@id": "dtmi:example:jogg_glikk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "jogg_nuh",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "jogg_snee"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "jogg_quan",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "jogg_thnad"
+          },
+          {
+            "@type": "Component",
+            "name": "jogg_spazz",
+            "schema": {
+              "@id": "dtmi:example:jogg_floob;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "jogg_zatz",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "jogg_jogg"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "jogg_flunn",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "jogg_itch"
+          },
+          {
+            "@type": "Component",
+            "name": "jogg_yekk",
+            "schema": {
+              "@id": "dtmi:example:jogg_vroo;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "jogg_hi",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "flunn_alpha"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "flunn_beta",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "flunn_gamma"
+          },
+          {
+            "@type": "Component",
+            "name": "flunn_delta",
+            "schema": {
+              "@id": "dtmi:example:flunn_epsilon;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "flunn_zeta",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "flunn_eta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "flunn_theta",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "flunn_iota"
+          },
+          {
+            "@type": "Component",
+            "name": "flunn_kappa",
+            "schema": {
+              "@id": "dtmi:example:flunn_lambda;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "flunn_mu",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "flunn_nu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "flunn_xi",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "flunn_omicron"
+          },
+          {
+            "@type": "Component",
+            "name": "flunn_pi",
+            "schema": {
+              "@id": "dtmi:example:flunn_rho;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "flunn_sigma",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "flunn_tau"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "flunn_upsilon",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "flunn_phi"
+          },
+          {
+            "@type": "Component",
+            "name": "flunn_chi",
+            "schema": {
+              "@id": "dtmi:example:flunn_psi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "flunn_omega",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "flunn_yuzz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "flunn_wum",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "flunn_um"
+          },
+          {
+            "@type": "Component",
+            "name": "flunn_humpf",
+            "schema": {
+              "@id": "dtmi:example:flunn_fuddle;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "flunn_glikk",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "flunn_nuh"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "flunn_snee",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "flunn_quan"
+          },
+          {
+            "@type": "Component",
+            "name": "flunn_thnad",
+            "schema": {
+              "@id": "dtmi:example:flunn_spazz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "flunn_floob",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "flunn_zatz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "flunn_jogg",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "flunn_flunn"
+          },
+          {
+            "@type": "Component",
+            "name": "flunn_itch",
+            "schema": {
+              "@id": "dtmi:example:flunn_yekk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "flunn_vroo",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "flunn_hi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "itch_alpha",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "itch_beta"
+          },
+          {
+            "@type": "Component",
+            "name": "itch_gamma",
+            "schema": {
+              "@id": "dtmi:example:itch_delta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "itch_epsilon",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "itch_zeta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "itch_eta",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "itch_theta"
+          },
+          {
+            "@type": "Component",
+            "name": "itch_iota",
+            "schema": {
+              "@id": "dtmi:example:itch_kappa;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "itch_lambda",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "itch_mu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "itch_nu",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "itch_xi"
+          },
+          {
+            "@type": "Component",
+            "name": "itch_omicron",
+            "schema": {
+              "@id": "dtmi:example:itch_pi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "itch_rho",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "itch_sigma"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "itch_tau",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "itch_upsilon"
+          },
+          {
+            "@type": "Component",
+            "name": "itch_phi",
+            "schema": {
+              "@id": "dtmi:example:itch_chi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "itch_psi",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "itch_omega"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "itch_yuzz",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "itch_wum"
+          },
+          {
+            "@type": "Component",
+            "name": "itch_um",
+            "schema": {
+              "@id": "dtmi:example:itch_humpf;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "itch_fuddle",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "itch_glikk"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "itch_nuh",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "itch_snee"
+          },
+          {
+            "@type": "Component",
+            "name": "itch_quan",
+            "schema": {
+              "@id": "dtmi:example:itch_thnad;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "itch_spazz",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "itch_floob"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "itch_zatz",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "itch_jogg"
+          },
+          {
+            "@type": "Component",
+            "name": "itch_flunn",
+            "schema": {
+              "@id": "dtmi:example:itch_itch;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "itch_yekk",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "itch_vroo"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "itch_hi",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "yekk_alpha"
+          },
+          {
+            "@type": "Component",
+            "name": "yekk_beta",
+            "schema": {
+              "@id": "dtmi:example:yekk_gamma;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yekk_delta",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yekk_epsilon"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yekk_zeta",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "yekk_eta"
+          },
+          {
+            "@type": "Component",
+            "name": "yekk_theta",
+            "schema": {
+              "@id": "dtmi:example:yekk_iota;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yekk_kappa",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yekk_lambda"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yekk_mu",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "yekk_nu"
+          },
+          {
+            "@type": "Component",
+            "name": "yekk_xi",
+            "schema": {
+              "@id": "dtmi:example:yekk_omicron;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yekk_pi",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yekk_rho"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yekk_sigma",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "yekk_tau"
+          },
+          {
+            "@type": "Component",
+            "name": "yekk_upsilon",
+            "schema": {
+              "@id": "dtmi:example:yekk_phi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yekk_chi",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yekk_psi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yekk_omega",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "yekk_yuzz"
+          },
+          {
+            "@type": "Component",
+            "name": "yekk_wum",
+            "schema": {
+              "@id": "dtmi:example:yekk_um;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yekk_humpf",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yekk_fuddle"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yekk_glikk",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "yekk_nuh"
+          },
+          {
+            "@type": "Component",
+            "name": "yekk_snee",
+            "schema": {
+              "@id": "dtmi:example:yekk_quan;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yekk_thnad",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yekk_spazz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yekk_floob",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "yekk_zatz"
+          },
+          {
+            "@type": "Component",
+            "name": "yekk_jogg",
+            "schema": {
+              "@id": "dtmi:example:yekk_flunn;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "yekk_itch",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "yekk_yekk"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "yekk_vroo",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "yekk_hi"
+          },
+          {
+            "@type": "Component",
+            "name": "vroo_alpha",
+            "schema": {
+              "@id": "dtmi:example:vroo_beta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "vroo_gamma",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "vroo_delta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "vroo_epsilon",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "vroo_zeta"
+          },
+          {
+            "@type": "Component",
+            "name": "vroo_eta",
+            "schema": {
+              "@id": "dtmi:example:vroo_theta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "vroo_iota",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "vroo_kappa"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "vroo_lambda",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "vroo_mu"
+          },
+          {
+            "@type": "Component",
+            "name": "vroo_nu",
+            "schema": {
+              "@id": "dtmi:example:vroo_xi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "vroo_omicron",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "vroo_pi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "vroo_rho",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "vroo_sigma"
+          },
+          {
+            "@type": "Component",
+            "name": "vroo_tau",
+            "schema": {
+              "@id": "dtmi:example:vroo_upsilon;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "vroo_phi",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "vroo_chi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "vroo_psi",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "vroo_omega"
+          },
+          {
+            "@type": "Component",
+            "name": "vroo_yuzz",
+            "schema": {
+              "@id": "dtmi:example:vroo_wum;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "vroo_um",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "vroo_humpf"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "vroo_fuddle",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "vroo_glikk"
+          },
+          {
+            "@type": "Component",
+            "name": "vroo_nuh",
+            "schema": {
+              "@id": "dtmi:example:vroo_snee;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "vroo_quan",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "vroo_thnad"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "vroo_spazz",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "vroo_floob"
+          },
+          {
+            "@type": "Component",
+            "name": "vroo_zatz",
+            "schema": {
+              "@id": "dtmi:example:vroo_jogg;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "vroo_flunn",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "vroo_itch"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "vroo_yekk",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "vroo_vroo"
+          },
+          {
+            "@type": "Component",
+            "name": "vroo_hi",
+            "schema": {
+              "@id": "dtmi:example:hi_alpha;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "hi_beta",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "hi_gamma"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "hi_delta",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "hi_epsilon"
+          },
+          {
+            "@type": "Component",
+            "name": "hi_zeta",
+            "schema": {
+              "@id": "dtmi:example:hi_eta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "hi_theta",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "hi_iota"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "hi_kappa",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "hi_lambda"
+          },
+          {
+            "@type": "Component",
+            "name": "hi_mu",
+            "schema": {
+              "@id": "dtmi:example:hi_nu;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "hi_xi",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "hi_omicron"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "hi_pi",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "hi_rho"
+          },
+          {
+            "@type": "Component",
+            "name": "hi_sigma",
+            "schema": {
+              "@id": "dtmi:example:hi_tau;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "hi_upsilon",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "hi_phi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "hi_chi",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "hi_psi"
+          },
+          {
+            "@type": "Component",
+            "name": "hi_omega",
+            "schema": {
+              "@id": "dtmi:example:hi_yuzz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "hi_wum",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "hi_um"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "hi_humpf",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "hi_fuddle"
+          },
+          {
+            "@type": "Component",
+            "name": "hi_glikk",
+            "schema": {
+              "@id": "dtmi:example:hi_nuh;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "hi_snee",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "hi_quan"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "hi_thnad",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "hi_spazz"
+          },
+          {
+            "@type": "Component",
+            "name": "hi_floob",
+            "schema": {
+              "@id": "dtmi:example:hi_zatz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "hi_jogg",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "hi_flunn"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "hi_itch",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "hi_yekk"
+          },
+          {
+            "@type": "Component",
+            "name": "hi_vroo",
+            "schema": {
+              "@id": "dtmi:example:hi_hi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "alpha_alpha",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "alpha_beta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "alpha_gamma",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "alpha_delta"
+          },
+          {
+            "@type": "Component",
+            "name": "alpha_epsilon",
+            "schema": {
+              "@id": "dtmi:example:alpha_zeta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "alpha_eta",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "alpha_theta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "alpha_iota",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "alpha_kappa"
+          },
+          {
+            "@type": "Component",
+            "name": "alpha_lambda",
+            "schema": {
+              "@id": "dtmi:example:alpha_mu;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "alpha_nu",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "alpha_xi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "alpha_omicron",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "alpha_pi"
+          },
+          {
+            "@type": "Component",
+            "name": "alpha_rho",
+            "schema": {
+              "@id": "dtmi:example:alpha_sigma;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "alpha_tau",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "alpha_upsilon"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "alpha_phi",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "alpha_chi"
+          },
+          {
+            "@type": "Component",
+            "name": "alpha_psi",
+            "schema": {
+              "@id": "dtmi:example:alpha_omega;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "alpha_yuzz",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "alpha_wum"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "alpha_um",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "alpha_humpf"
+          },
+          {
+            "@type": "Component",
+            "name": "alpha_fuddle",
+            "schema": {
+              "@id": "dtmi:example:alpha_glikk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "alpha_nuh",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "alpha_snee"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "alpha_quan",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "alpha_thnad"
+          },
+          {
+            "@type": "Component",
+            "name": "alpha_spazz",
+            "schema": {
+              "@id": "dtmi:example:alpha_floob;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "alpha_zatz",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "alpha_jogg"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "alpha_flunn",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "alpha_itch"
+          },
+          {
+            "@type": "Component",
+            "name": "alpha_yekk",
+            "schema": {
+              "@id": "dtmi:example:alpha_vroo;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "alpha_hi",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "beta_alpha"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "beta_beta",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "beta_gamma"
+          },
+          {
+            "@type": "Component",
+            "name": "beta_delta",
+            "schema": {
+              "@id": "dtmi:example:beta_epsilon;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "beta_zeta",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "beta_eta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "beta_theta",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "beta_iota"
+          },
+          {
+            "@type": "Component",
+            "name": "beta_kappa",
+            "schema": {
+              "@id": "dtmi:example:beta_lambda;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "beta_mu",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "beta_nu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "beta_xi",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "beta_omicron"
+          },
+          {
+            "@type": "Component",
+            "name": "beta_pi",
+            "schema": {
+              "@id": "dtmi:example:beta_rho;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "beta_sigma",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "beta_tau"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "beta_upsilon",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "beta_phi"
+          },
+          {
+            "@type": "Component",
+            "name": "beta_chi",
+            "schema": {
+              "@id": "dtmi:example:beta_psi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "beta_omega",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "beta_yuzz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "beta_wum",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "beta_um"
+          },
+          {
+            "@type": "Component",
+            "name": "beta_humpf",
+            "schema": {
+              "@id": "dtmi:example:beta_fuddle;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "beta_glikk",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "beta_nuh"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "beta_snee",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "beta_quan"
+          },
+          {
+            "@type": "Component",
+            "name": "beta_thnad",
+            "schema": {
+              "@id": "dtmi:example:beta_spazz;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "beta_floob",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "beta_zatz"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "beta_jogg",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "beta_flunn"
+          },
+          {
+            "@type": "Component",
+            "name": "beta_itch",
+            "schema": {
+              "@id": "dtmi:example:beta_yekk;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "beta_vroo",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "beta_hi"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "gamma_alpha",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "gamma_beta"
+          },
+          {
+            "@type": "Component",
+            "name": "gamma_gamma",
+            "schema": {
+              "@id": "dtmi:example:gamma_delta;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "gamma_epsilon",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_zeta"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "gamma_eta",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "gamma_theta"
+          },
+          {
+            "@type": "Component",
+            "name": "gamma_iota",
+            "schema": {
+              "@id": "dtmi:example:gamma_kappa;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "gamma_lambda",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_mu"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "gamma_nu",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "gamma_xi"
+          },
+          {
+            "@type": "Component",
+            "name": "gamma_omicron",
+            "schema": {
+              "@id": "dtmi:example:gamma_pi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "gamma_rho",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_sigma"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "gamma_tau",
+            "schema": "time"
+          },
+          {
+            "@type": "Command",
+            "name": "gamma_upsilon"
+          },
+          {
+            "@type": "Component",
+            "name": "gamma_phi",
+            "schema": {
+              "@id": "dtmi:example:gamma_chi;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "gamma_psi",
+            "schema": "boolean"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_omega"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "gamma_yuzz",
+            "schema": "date"
+          },
+          {
+            "@type": "Command",
+            "name": "gamma_wum"
+          },
+          {
+            "@type": "Component",
+            "name": "gamma_um",
+            "schema": {
+              "@id": "dtmi:example:gamma_humpf;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "gamma_fuddle",
+            "schema": "dateTime"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_glikk"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "gamma_nuh",
+            "schema": "double"
+          },
+          {
+            "@type": "Command",
+            "name": "gamma_snee"
+          },
+          {
+            "@type": "Component",
+            "name": "gamma_quan",
+            "schema": {
+              "@id": "dtmi:example:gamma_thnad;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "gamma_spazz",
+            "schema": "duration"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_floob"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "gamma_zatz",
+            "schema": "float"
+          },
+          {
+            "@type": "Command",
+            "name": "gamma_jogg"
+          },
+          {
+            "@type": "Component",
+            "name": "gamma_flunn",
+            "schema": {
+              "@id": "dtmi:example:gamma_itch;1",
+              "@type": "Interface"
+            }
+          },
+          {
+            "@type": "Property",
+            "name": "gamma_yekk",
+            "schema": "integer"
+          },
+          {
+            "@type": "Relationship",
+            "name": "gamma_vroo"
+          },
+          {
+            "@type": "Telemetry",
+            "name": "gamma_hi",
+            "schema": "long"
+          },
+          {
+            "@type": "Command",
+            "name": "delta_alpha"
+          }
+        ]
+      }
+    ]
+  }
+]

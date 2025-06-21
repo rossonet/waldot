@@ -1,0 +1,83 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_fuddle;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "glikk_glikk",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "glikk_humpf",
+            "schema": "double",
+            "@value": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_quan;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "glikk_thnad",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "glikk_snee",
+            "schema": "duration",
+            "@language": "en"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:glikk_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:glikk_zatz;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "glikk_jogg",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "glikk_floob",
+            "schema": "float",
+            "@foobar": true
+          }
+        }
+      }
+    ]
+  }
+]

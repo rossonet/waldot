@@ -1,0 +1,48 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_iota;1",
+          "@type": "Enum",
+          "enumValues": {
+            "name": "zatz_theta",
+            "enumValue": "alpha_tau"
+          },
+          "valueSchema": "string"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_nu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_mu;1",
+          "@type": "Enum",
+          "enumValues": {
+            "name": "zatz_lambda",
+            "enumValue": "alpha_tau"
+          },
+          "valueSchema": "dtmi:dtdl:instance:Schema:string;2"
+        }
+      }
+    ]
+  }
+]

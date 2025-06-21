@@ -1,0 +1,104 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_humpf;1",
+          "@type": "Object",
+          "fields": {
+            "@type": [
+              "Field",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "beta_um",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_nuh;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "Field",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "beta_glikk",
+            "schema": "integer"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_thnad;1",
+          "@type": "Object",
+          "fields": {
+            "@type": [
+              "Field",
+              "boolean"
+            ],
+            "name": "beta_quan",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_zatz;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "Field",
+              "boolean"
+            ],
+            "name": "beta_floob",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

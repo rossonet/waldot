@@ -1,0 +1,56 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:sigma_omicron;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:sigma_xi;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "enumValue": 840,
+            "name": "sigma_nu",
+            "@type": [
+              "EnumValue",
+              "EnumValue"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:sigma_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:sigma_rho;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "enumValue": 841,
+            "name": "sigma_pi",
+            "@type": [
+              "dtmi:dtdl:class:EnumValue;2",
+              "dtmi:dtdl:class:EnumValue;2"
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

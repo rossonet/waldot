@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nuh_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_phi",
+          "dtmi:dtdl:property:response;3": {
+            "name": "nuh_chi",
+            "schema": "date"
+          }
+        }
+      }
+    ]
+  }
+]

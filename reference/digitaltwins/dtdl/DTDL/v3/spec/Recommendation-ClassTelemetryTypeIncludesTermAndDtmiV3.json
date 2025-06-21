@@ -1,0 +1,24 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:humpf_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "humpf_eta",
+          "schema": "duration",
+          "@type": [
+            "Telemetry",
+            "dtmi:dtdl:class:Telemetry;3"
+          ]
+        }
+      }
+    ]
+  }
+]

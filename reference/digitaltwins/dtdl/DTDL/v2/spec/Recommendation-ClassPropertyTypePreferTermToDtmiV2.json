@@ -1,0 +1,40 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "nu_chi",
+          "schema": "dateTime",
+          "@type": "Property"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_yuzz;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "nu_omega",
+          "schema": "double",
+          "@type": "dtmi:dtdl:class:Property;2"
+        }
+      }
+    ]
+  }
+]

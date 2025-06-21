@@ -1,0 +1,40 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "comment": "spazz_kappa",
+          "name": "spazz_lambda"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_omicron;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "dtmi:dtdl:property:comment;2": "spazz_nu",
+          "name": "spazz_xi"
+        }
+      }
+    ]
+  }
+]

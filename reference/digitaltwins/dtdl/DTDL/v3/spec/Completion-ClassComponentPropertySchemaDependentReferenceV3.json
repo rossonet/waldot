@@ -1,0 +1,58 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_beta;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:kappa_alpha;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Component",
+            "name": "iota_hi",
+            "schema": "dtmi:ex:dependentRef;1"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_epsilon;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:kappa_delta;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Component",
+            "name": "kappa_gamma",
+            "schema": [
+              "dtmi:ex:dependentRef;1"
+            ]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  }
+]

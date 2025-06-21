@@ -1,0 +1,69 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_kappa",
+          "request": {
+            "name": "nuh_iota",
+            "schema": "date",
+            "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSometh"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_nu",
+          "request": {
+            "name": "nuh_mu",
+            "schema": "dateTime",
+            "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_rho;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_pi",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "nuh_omicron",
+            "schema": "double",
+            "displayName": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+          }
+        }
+      }
+    ]
+  }
+]

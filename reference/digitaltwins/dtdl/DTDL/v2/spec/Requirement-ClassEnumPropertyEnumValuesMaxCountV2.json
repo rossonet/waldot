@@ -1,0 +1,1271 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omega_glikk;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": [
+            {
+              "enumValue": 113,
+              "name": "chi_pi"
+            },
+            {
+              "enumValue": 114,
+              "name": "chi_rho"
+            },
+            {
+              "enumValue": 115,
+              "name": "chi_sigma"
+            },
+            {
+              "enumValue": 116,
+              "name": "chi_tau"
+            },
+            {
+              "enumValue": 117,
+              "name": "chi_upsilon"
+            },
+            {
+              "enumValue": 118,
+              "name": "chi_phi"
+            },
+            {
+              "enumValue": 119,
+              "name": "chi_chi"
+            },
+            {
+              "enumValue": 120,
+              "name": "chi_psi"
+            },
+            {
+              "enumValue": 121,
+              "name": "chi_omega"
+            },
+            {
+              "enumValue": 122,
+              "name": "chi_yuzz"
+            },
+            {
+              "enumValue": 123,
+              "name": "chi_wum"
+            },
+            {
+              "enumValue": 124,
+              "name": "chi_um"
+            },
+            {
+              "enumValue": 125,
+              "name": "chi_humpf"
+            },
+            {
+              "enumValue": 126,
+              "name": "chi_fuddle"
+            },
+            {
+              "enumValue": 127,
+              "name": "chi_glikk"
+            },
+            {
+              "enumValue": 128,
+              "name": "chi_nuh"
+            },
+            {
+              "enumValue": 129,
+              "name": "chi_snee"
+            },
+            {
+              "enumValue": 130,
+              "name": "chi_quan"
+            },
+            {
+              "enumValue": 131,
+              "name": "chi_thnad"
+            },
+            {
+              "enumValue": 132,
+              "name": "chi_spazz"
+            },
+            {
+              "enumValue": 133,
+              "name": "chi_floob"
+            },
+            {
+              "enumValue": 134,
+              "name": "chi_zatz"
+            },
+            {
+              "enumValue": 135,
+              "name": "chi_jogg"
+            },
+            {
+              "enumValue": 136,
+              "name": "chi_flunn"
+            },
+            {
+              "enumValue": 137,
+              "name": "chi_itch"
+            },
+            {
+              "enumValue": 138,
+              "name": "chi_yekk"
+            },
+            {
+              "enumValue": 139,
+              "name": "chi_vroo"
+            },
+            {
+              "enumValue": 140,
+              "name": "chi_hi"
+            },
+            {
+              "enumValue": 141,
+              "name": "psi_alpha"
+            },
+            {
+              "enumValue": 142,
+              "name": "psi_beta"
+            },
+            {
+              "enumValue": 143,
+              "name": "psi_gamma"
+            },
+            {
+              "enumValue": 144,
+              "name": "psi_delta"
+            },
+            {
+              "enumValue": 145,
+              "name": "psi_epsilon"
+            },
+            {
+              "enumValue": 146,
+              "name": "psi_zeta"
+            },
+            {
+              "enumValue": 147,
+              "name": "psi_eta"
+            },
+            {
+              "enumValue": 148,
+              "name": "psi_theta"
+            },
+            {
+              "enumValue": 149,
+              "name": "psi_iota"
+            },
+            {
+              "enumValue": 150,
+              "name": "psi_kappa"
+            },
+            {
+              "enumValue": 151,
+              "name": "psi_lambda"
+            },
+            {
+              "enumValue": 152,
+              "name": "psi_mu"
+            },
+            {
+              "enumValue": 153,
+              "name": "psi_nu"
+            },
+            {
+              "enumValue": 154,
+              "name": "psi_xi"
+            },
+            {
+              "enumValue": 155,
+              "name": "psi_omicron"
+            },
+            {
+              "enumValue": 156,
+              "name": "psi_pi"
+            },
+            {
+              "enumValue": 157,
+              "name": "psi_rho"
+            },
+            {
+              "enumValue": 158,
+              "name": "psi_sigma"
+            },
+            {
+              "enumValue": 159,
+              "name": "psi_tau"
+            },
+            {
+              "enumValue": 160,
+              "name": "psi_upsilon"
+            },
+            {
+              "enumValue": 161,
+              "name": "psi_phi"
+            },
+            {
+              "enumValue": 162,
+              "name": "psi_chi"
+            },
+            {
+              "enumValue": 163,
+              "name": "psi_psi"
+            },
+            {
+              "enumValue": 164,
+              "name": "psi_omega"
+            },
+            {
+              "enumValue": 165,
+              "name": "psi_yuzz"
+            },
+            {
+              "enumValue": 166,
+              "name": "psi_wum"
+            },
+            {
+              "enumValue": 167,
+              "name": "psi_um"
+            },
+            {
+              "enumValue": 168,
+              "name": "psi_humpf"
+            },
+            {
+              "enumValue": 169,
+              "name": "psi_fuddle"
+            },
+            {
+              "enumValue": 170,
+              "name": "psi_glikk"
+            },
+            {
+              "enumValue": 171,
+              "name": "psi_nuh"
+            },
+            {
+              "enumValue": 172,
+              "name": "psi_snee"
+            },
+            {
+              "enumValue": 173,
+              "name": "psi_quan"
+            },
+            {
+              "enumValue": 174,
+              "name": "psi_thnad"
+            },
+            {
+              "enumValue": 175,
+              "name": "psi_spazz"
+            },
+            {
+              "enumValue": 176,
+              "name": "psi_floob"
+            },
+            {
+              "enumValue": 177,
+              "name": "psi_zatz"
+            },
+            {
+              "enumValue": 178,
+              "name": "psi_jogg"
+            },
+            {
+              "enumValue": 179,
+              "name": "psi_flunn"
+            },
+            {
+              "enumValue": 180,
+              "name": "psi_itch"
+            },
+            {
+              "enumValue": 181,
+              "name": "psi_yekk"
+            },
+            {
+              "enumValue": 182,
+              "name": "psi_vroo"
+            },
+            {
+              "enumValue": 183,
+              "name": "psi_hi"
+            },
+            {
+              "enumValue": 184,
+              "name": "omega_alpha"
+            },
+            {
+              "enumValue": 185,
+              "name": "omega_beta"
+            },
+            {
+              "enumValue": 186,
+              "name": "omega_gamma"
+            },
+            {
+              "enumValue": 187,
+              "name": "omega_delta"
+            },
+            {
+              "enumValue": 188,
+              "name": "omega_epsilon"
+            },
+            {
+              "enumValue": 189,
+              "name": "omega_zeta"
+            },
+            {
+              "enumValue": 190,
+              "name": "omega_eta"
+            },
+            {
+              "enumValue": 191,
+              "name": "omega_theta"
+            },
+            {
+              "enumValue": 192,
+              "name": "omega_iota"
+            },
+            {
+              "enumValue": 193,
+              "name": "omega_kappa"
+            },
+            {
+              "enumValue": 194,
+              "name": "omega_lambda"
+            },
+            {
+              "enumValue": 195,
+              "name": "omega_mu"
+            },
+            {
+              "enumValue": 196,
+              "name": "omega_nu"
+            },
+            {
+              "enumValue": 197,
+              "name": "omega_xi"
+            },
+            {
+              "enumValue": 198,
+              "name": "omega_omicron"
+            },
+            {
+              "enumValue": 199,
+              "name": "omega_pi"
+            },
+            {
+              "enumValue": 200,
+              "name": "omega_rho"
+            },
+            {
+              "enumValue": 201,
+              "name": "omega_sigma"
+            },
+            {
+              "enumValue": 202,
+              "name": "omega_tau"
+            },
+            {
+              "enumValue": 203,
+              "name": "omega_upsilon"
+            },
+            {
+              "enumValue": 204,
+              "name": "omega_phi"
+            },
+            {
+              "enumValue": 205,
+              "name": "omega_chi"
+            },
+            {
+              "enumValue": 206,
+              "name": "omega_psi"
+            },
+            {
+              "enumValue": 207,
+              "name": "omega_omega"
+            },
+            {
+              "enumValue": 208,
+              "name": "omega_yuzz"
+            },
+            {
+              "enumValue": 209,
+              "name": "omega_wum"
+            },
+            {
+              "enumValue": 210,
+              "name": "omega_um"
+            },
+            {
+              "enumValue": 211,
+              "name": "omega_humpf"
+            },
+            {
+              "enumValue": 212,
+              "name": "omega_fuddle"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:um_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:um_delta;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": [
+            {
+              "enumValue": 213,
+              "name": "omega_snee"
+            },
+            {
+              "enumValue": 214,
+              "name": "omega_quan"
+            },
+            {
+              "enumValue": 215,
+              "name": "omega_thnad"
+            },
+            {
+              "enumValue": 216,
+              "name": "omega_spazz"
+            },
+            {
+              "enumValue": 217,
+              "name": "omega_floob"
+            },
+            {
+              "enumValue": 218,
+              "name": "omega_zatz"
+            },
+            {
+              "enumValue": 219,
+              "name": "omega_jogg"
+            },
+            {
+              "enumValue": 220,
+              "name": "omega_flunn"
+            },
+            {
+              "enumValue": 221,
+              "name": "omega_itch"
+            },
+            {
+              "enumValue": 222,
+              "name": "omega_yekk"
+            },
+            {
+              "enumValue": 223,
+              "name": "omega_vroo"
+            },
+            {
+              "enumValue": 224,
+              "name": "omega_hi"
+            },
+            {
+              "enumValue": 225,
+              "name": "yuzz_alpha"
+            },
+            {
+              "enumValue": 226,
+              "name": "yuzz_beta"
+            },
+            {
+              "enumValue": 227,
+              "name": "yuzz_gamma"
+            },
+            {
+              "enumValue": 228,
+              "name": "yuzz_delta"
+            },
+            {
+              "enumValue": 229,
+              "name": "yuzz_epsilon"
+            },
+            {
+              "enumValue": 230,
+              "name": "yuzz_zeta"
+            },
+            {
+              "enumValue": 231,
+              "name": "yuzz_eta"
+            },
+            {
+              "enumValue": 232,
+              "name": "yuzz_theta"
+            },
+            {
+              "enumValue": 233,
+              "name": "yuzz_iota"
+            },
+            {
+              "enumValue": 234,
+              "name": "yuzz_kappa"
+            },
+            {
+              "enumValue": 235,
+              "name": "yuzz_lambda"
+            },
+            {
+              "enumValue": 236,
+              "name": "yuzz_mu"
+            },
+            {
+              "enumValue": 237,
+              "name": "yuzz_nu"
+            },
+            {
+              "enumValue": 238,
+              "name": "yuzz_xi"
+            },
+            {
+              "enumValue": 239,
+              "name": "yuzz_omicron"
+            },
+            {
+              "enumValue": 240,
+              "name": "yuzz_pi"
+            },
+            {
+              "enumValue": 241,
+              "name": "yuzz_rho"
+            },
+            {
+              "enumValue": 242,
+              "name": "yuzz_sigma"
+            },
+            {
+              "enumValue": 243,
+              "name": "yuzz_tau"
+            },
+            {
+              "enumValue": 244,
+              "name": "yuzz_upsilon"
+            },
+            {
+              "enumValue": 245,
+              "name": "yuzz_phi"
+            },
+            {
+              "enumValue": 246,
+              "name": "yuzz_chi"
+            },
+            {
+              "enumValue": 247,
+              "name": "yuzz_psi"
+            },
+            {
+              "enumValue": 248,
+              "name": "yuzz_omega"
+            },
+            {
+              "enumValue": 249,
+              "name": "yuzz_yuzz"
+            },
+            {
+              "enumValue": 250,
+              "name": "yuzz_wum"
+            },
+            {
+              "enumValue": 251,
+              "name": "yuzz_um"
+            },
+            {
+              "enumValue": 252,
+              "name": "yuzz_humpf"
+            },
+            {
+              "enumValue": 253,
+              "name": "yuzz_fuddle"
+            },
+            {
+              "enumValue": 254,
+              "name": "yuzz_glikk"
+            },
+            {
+              "enumValue": 255,
+              "name": "yuzz_nuh"
+            },
+            {
+              "enumValue": 256,
+              "name": "yuzz_snee"
+            },
+            {
+              "enumValue": 257,
+              "name": "yuzz_quan"
+            },
+            {
+              "enumValue": 258,
+              "name": "yuzz_thnad"
+            },
+            {
+              "enumValue": 259,
+              "name": "yuzz_spazz"
+            },
+            {
+              "enumValue": 260,
+              "name": "yuzz_floob"
+            },
+            {
+              "enumValue": 261,
+              "name": "yuzz_zatz"
+            },
+            {
+              "enumValue": 262,
+              "name": "yuzz_jogg"
+            },
+            {
+              "enumValue": 263,
+              "name": "yuzz_flunn"
+            },
+            {
+              "enumValue": 264,
+              "name": "yuzz_itch"
+            },
+            {
+              "enumValue": 265,
+              "name": "yuzz_yekk"
+            },
+            {
+              "enumValue": 266,
+              "name": "yuzz_vroo"
+            },
+            {
+              "enumValue": 267,
+              "name": "yuzz_hi"
+            },
+            {
+              "enumValue": 268,
+              "name": "wum_alpha"
+            },
+            {
+              "enumValue": 269,
+              "name": "wum_beta"
+            },
+            {
+              "enumValue": 270,
+              "name": "wum_gamma"
+            },
+            {
+              "enumValue": 271,
+              "name": "wum_delta"
+            },
+            {
+              "enumValue": 272,
+              "name": "wum_epsilon"
+            },
+            {
+              "enumValue": 273,
+              "name": "wum_zeta"
+            },
+            {
+              "enumValue": 274,
+              "name": "wum_eta"
+            },
+            {
+              "enumValue": 275,
+              "name": "wum_theta"
+            },
+            {
+              "enumValue": 276,
+              "name": "wum_iota"
+            },
+            {
+              "enumValue": 277,
+              "name": "wum_kappa"
+            },
+            {
+              "enumValue": 278,
+              "name": "wum_lambda"
+            },
+            {
+              "enumValue": 279,
+              "name": "wum_mu"
+            },
+            {
+              "enumValue": 280,
+              "name": "wum_nu"
+            },
+            {
+              "enumValue": 281,
+              "name": "wum_xi"
+            },
+            {
+              "enumValue": 282,
+              "name": "wum_omicron"
+            },
+            {
+              "enumValue": 283,
+              "name": "wum_pi"
+            },
+            {
+              "enumValue": 284,
+              "name": "wum_rho"
+            },
+            {
+              "enumValue": 285,
+              "name": "wum_sigma"
+            },
+            {
+              "enumValue": 286,
+              "name": "wum_tau"
+            },
+            {
+              "enumValue": 287,
+              "name": "wum_upsilon"
+            },
+            {
+              "enumValue": 288,
+              "name": "wum_phi"
+            },
+            {
+              "enumValue": 289,
+              "name": "wum_chi"
+            },
+            {
+              "enumValue": 290,
+              "name": "wum_psi"
+            },
+            {
+              "enumValue": 291,
+              "name": "wum_omega"
+            },
+            {
+              "enumValue": 292,
+              "name": "wum_yuzz"
+            },
+            {
+              "enumValue": 293,
+              "name": "wum_wum"
+            },
+            {
+              "enumValue": 294,
+              "name": "wum_um"
+            },
+            {
+              "enumValue": 295,
+              "name": "wum_humpf"
+            },
+            {
+              "enumValue": 296,
+              "name": "wum_fuddle"
+            },
+            {
+              "enumValue": 297,
+              "name": "wum_glikk"
+            },
+            {
+              "enumValue": 298,
+              "name": "wum_nuh"
+            },
+            {
+              "enumValue": 299,
+              "name": "wum_snee"
+            },
+            {
+              "enumValue": 300,
+              "name": "wum_quan"
+            },
+            {
+              "enumValue": 301,
+              "name": "wum_thnad"
+            },
+            {
+              "enumValue": 302,
+              "name": "wum_spazz"
+            },
+            {
+              "enumValue": 303,
+              "name": "wum_floob"
+            },
+            {
+              "enumValue": 304,
+              "name": "wum_zatz"
+            },
+            {
+              "enumValue": 305,
+              "name": "wum_jogg"
+            },
+            {
+              "enumValue": 306,
+              "name": "wum_flunn"
+            },
+            {
+              "enumValue": 307,
+              "name": "wum_itch"
+            },
+            {
+              "enumValue": 308,
+              "name": "wum_yekk"
+            },
+            {
+              "enumValue": 309,
+              "name": "wum_vroo"
+            },
+            {
+              "enumValue": 310,
+              "name": "wum_hi"
+            },
+            {
+              "enumValue": 311,
+              "name": "um_alpha"
+            },
+            {
+              "enumValue": 312,
+              "name": "um_beta"
+            },
+            {
+              "enumValue": 313,
+              "name": "um_gamma"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:fuddle_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:fuddle_phi;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": [
+            {
+              "enumValue": 314,
+              "name": "um_zeta"
+            },
+            {
+              "enumValue": 315,
+              "name": "um_eta"
+            },
+            {
+              "enumValue": 316,
+              "name": "um_theta"
+            },
+            {
+              "enumValue": 317,
+              "name": "um_iota"
+            },
+            {
+              "enumValue": 318,
+              "name": "um_kappa"
+            },
+            {
+              "enumValue": 319,
+              "name": "um_lambda"
+            },
+            {
+              "enumValue": 320,
+              "name": "um_mu"
+            },
+            {
+              "enumValue": 321,
+              "name": "um_nu"
+            },
+            {
+              "enumValue": 322,
+              "name": "um_xi"
+            },
+            {
+              "enumValue": 323,
+              "name": "um_omicron"
+            },
+            {
+              "enumValue": 324,
+              "name": "um_pi"
+            },
+            {
+              "enumValue": 325,
+              "name": "um_rho"
+            },
+            {
+              "enumValue": 326,
+              "name": "um_sigma"
+            },
+            {
+              "enumValue": 327,
+              "name": "um_tau"
+            },
+            {
+              "enumValue": 328,
+              "name": "um_upsilon"
+            },
+            {
+              "enumValue": 329,
+              "name": "um_phi"
+            },
+            {
+              "enumValue": 330,
+              "name": "um_chi"
+            },
+            {
+              "enumValue": 331,
+              "name": "um_psi"
+            },
+            {
+              "enumValue": 332,
+              "name": "um_omega"
+            },
+            {
+              "enumValue": 333,
+              "name": "um_yuzz"
+            },
+            {
+              "enumValue": 334,
+              "name": "um_wum"
+            },
+            {
+              "enumValue": 335,
+              "name": "um_um"
+            },
+            {
+              "enumValue": 336,
+              "name": "um_humpf"
+            },
+            {
+              "enumValue": 337,
+              "name": "um_fuddle"
+            },
+            {
+              "enumValue": 338,
+              "name": "um_glikk"
+            },
+            {
+              "enumValue": 339,
+              "name": "um_nuh"
+            },
+            {
+              "enumValue": 340,
+              "name": "um_snee"
+            },
+            {
+              "enumValue": 341,
+              "name": "um_quan"
+            },
+            {
+              "enumValue": 342,
+              "name": "um_thnad"
+            },
+            {
+              "enumValue": 343,
+              "name": "um_spazz"
+            },
+            {
+              "enumValue": 344,
+              "name": "um_floob"
+            },
+            {
+              "enumValue": 345,
+              "name": "um_zatz"
+            },
+            {
+              "enumValue": 346,
+              "name": "um_jogg"
+            },
+            {
+              "enumValue": 347,
+              "name": "um_flunn"
+            },
+            {
+              "enumValue": 348,
+              "name": "um_itch"
+            },
+            {
+              "enumValue": 349,
+              "name": "um_yekk"
+            },
+            {
+              "enumValue": 350,
+              "name": "um_vroo"
+            },
+            {
+              "enumValue": 351,
+              "name": "um_hi"
+            },
+            {
+              "enumValue": 352,
+              "name": "humpf_alpha"
+            },
+            {
+              "enumValue": 353,
+              "name": "humpf_beta"
+            },
+            {
+              "enumValue": 354,
+              "name": "humpf_gamma"
+            },
+            {
+              "enumValue": 355,
+              "name": "humpf_delta"
+            },
+            {
+              "enumValue": 356,
+              "name": "humpf_epsilon"
+            },
+            {
+              "enumValue": 357,
+              "name": "humpf_zeta"
+            },
+            {
+              "enumValue": 358,
+              "name": "humpf_eta"
+            },
+            {
+              "enumValue": 359,
+              "name": "humpf_theta"
+            },
+            {
+              "enumValue": 360,
+              "name": "humpf_iota"
+            },
+            {
+              "enumValue": 361,
+              "name": "humpf_kappa"
+            },
+            {
+              "enumValue": 362,
+              "name": "humpf_lambda"
+            },
+            {
+              "enumValue": 363,
+              "name": "humpf_mu"
+            },
+            {
+              "enumValue": 364,
+              "name": "humpf_nu"
+            },
+            {
+              "enumValue": 365,
+              "name": "humpf_xi"
+            },
+            {
+              "enumValue": 366,
+              "name": "humpf_omicron"
+            },
+            {
+              "enumValue": 367,
+              "name": "humpf_pi"
+            },
+            {
+              "enumValue": 368,
+              "name": "humpf_rho"
+            },
+            {
+              "enumValue": 369,
+              "name": "humpf_sigma"
+            },
+            {
+              "enumValue": 370,
+              "name": "humpf_tau"
+            },
+            {
+              "enumValue": 371,
+              "name": "humpf_upsilon"
+            },
+            {
+              "enumValue": 372,
+              "name": "humpf_phi"
+            },
+            {
+              "enumValue": 373,
+              "name": "humpf_chi"
+            },
+            {
+              "enumValue": 374,
+              "name": "humpf_psi"
+            },
+            {
+              "enumValue": 375,
+              "name": "humpf_omega"
+            },
+            {
+              "enumValue": 376,
+              "name": "humpf_yuzz"
+            },
+            {
+              "enumValue": 377,
+              "name": "humpf_wum"
+            },
+            {
+              "enumValue": 378,
+              "name": "humpf_um"
+            },
+            {
+              "enumValue": 379,
+              "name": "humpf_humpf"
+            },
+            {
+              "enumValue": 380,
+              "name": "humpf_fuddle"
+            },
+            {
+              "enumValue": 381,
+              "name": "humpf_glikk"
+            },
+            {
+              "enumValue": 382,
+              "name": "humpf_nuh"
+            },
+            {
+              "enumValue": 383,
+              "name": "humpf_snee"
+            },
+            {
+              "enumValue": 384,
+              "name": "humpf_quan"
+            },
+            {
+              "enumValue": 385,
+              "name": "humpf_thnad"
+            },
+            {
+              "enumValue": 386,
+              "name": "humpf_spazz"
+            },
+            {
+              "enumValue": 387,
+              "name": "humpf_floob"
+            },
+            {
+              "enumValue": 388,
+              "name": "humpf_zatz"
+            },
+            {
+              "enumValue": 389,
+              "name": "humpf_jogg"
+            },
+            {
+              "enumValue": 390,
+              "name": "humpf_flunn"
+            },
+            {
+              "enumValue": 391,
+              "name": "humpf_itch"
+            },
+            {
+              "enumValue": 392,
+              "name": "humpf_yekk"
+            },
+            {
+              "enumValue": 393,
+              "name": "humpf_vroo"
+            },
+            {
+              "enumValue": 394,
+              "name": "humpf_hi"
+            },
+            {
+              "enumValue": 395,
+              "name": "fuddle_alpha"
+            },
+            {
+              "enumValue": 396,
+              "name": "fuddle_beta"
+            },
+            {
+              "enumValue": 397,
+              "name": "fuddle_gamma"
+            },
+            {
+              "enumValue": 398,
+              "name": "fuddle_delta"
+            },
+            {
+              "enumValue": 399,
+              "name": "fuddle_epsilon"
+            },
+            {
+              "enumValue": 400,
+              "name": "fuddle_zeta"
+            },
+            {
+              "enumValue": 401,
+              "name": "fuddle_eta"
+            },
+            {
+              "enumValue": 402,
+              "name": "fuddle_theta"
+            },
+            {
+              "enumValue": 403,
+              "name": "fuddle_iota"
+            },
+            {
+              "enumValue": 404,
+              "name": "fuddle_kappa"
+            },
+            {
+              "enumValue": 405,
+              "name": "fuddle_lambda"
+            },
+            {
+              "enumValue": 406,
+              "name": "fuddle_mu"
+            },
+            {
+              "enumValue": 407,
+              "name": "fuddle_nu"
+            },
+            {
+              "enumValue": 408,
+              "name": "fuddle_xi"
+            },
+            {
+              "enumValue": 409,
+              "name": "fuddle_omicron"
+            },
+            {
+              "enumValue": 410,
+              "name": "fuddle_pi"
+            },
+            {
+              "enumValue": 411,
+              "name": "fuddle_rho"
+            },
+            {
+              "enumValue": 412,
+              "name": "fuddle_sigma"
+            },
+            {
+              "enumValue": 413,
+              "name": "fuddle_tau"
+            },
+            {
+              "enumValue": 414,
+              "name": "fuddle_upsilon"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

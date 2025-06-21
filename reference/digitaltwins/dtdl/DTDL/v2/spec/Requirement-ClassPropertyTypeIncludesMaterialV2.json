@@ -1,0 +1,156 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_alpha;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "mu_hi",
+          "schema": "date",
+          "@type": "Property"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "nu_beta",
+          "schema": "dateTime",
+          "@type": [
+            "Property"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "nu_delta",
+          "schema": "double",
+          "@type": "dtmi:dtdl:class:Property;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "nu_zeta",
+          "schema": "duration",
+          "@type": [
+            "dtmi:dtdl:class:Property;2"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "nu_theta",
+          "schema": "float",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "name": "nu_kappa",
+          "schema": "integer",
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "nu_mu",
+          "schema": "long",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_omicron;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "name": "nu_xi",
+          "schema": "string",
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  }
+]

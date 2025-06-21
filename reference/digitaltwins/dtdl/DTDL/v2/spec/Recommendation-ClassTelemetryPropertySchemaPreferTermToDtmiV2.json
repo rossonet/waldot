@@ -1,0 +1,78 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:kappa_omega;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "name": "kappa_psi",
+          "schema": "dateTime"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:kappa_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "name": "kappa_yuzz",
+          "schema": "dtmi:dtdl:instance:Schema:dateTime;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:kappa_humpf;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "name": "kappa_um",
+          "schema": "point"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:kappa_glikk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "name": "kappa_fuddle",
+          "schema": "dtmi:standard:schema:geospatial:point;2"
+        }
+      }
+    ]
+  }
+]

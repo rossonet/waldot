@@ -1,0 +1,370 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_nu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_mu",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": "dtmi:dtdl:extension:quantitativeTypes;1"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_omicron;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_xi",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_rho;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_pi",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": [
+              "dtmi:dtdl:extension:quantitativeTypes;1"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_tau;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_sigma",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": null
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_phi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_upsilon",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": 626
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_psi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_chi",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": true
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_yuzz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_omega",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": [
+              null
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_um;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_wum",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": [
+              626
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_fuddle;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_humpf",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": [
+              true
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_nuh;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_glikk",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": "dtmi:dtdl:extension:quantitativeTypes"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_quan;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_snee",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": "http://dtdl/extension/quantitativeTypes/1"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_spazz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_thnad",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": "quantitativeTypes;1"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_floob",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": {}
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_jogg",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": {
+              "foo": "dtmi:foo:bar;1"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_yekk;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_itch",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": [
+              {}
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:floob_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "floob_vroo",
+          "schema": {
+            "@type": "Enum",
+            "valueSchema": "integer",
+            "@context": [
+              {
+                "foo": "dtmi:foo:bar;1"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

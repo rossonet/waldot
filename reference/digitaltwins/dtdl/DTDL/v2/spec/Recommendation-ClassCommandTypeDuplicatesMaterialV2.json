@@ -1,0 +1,44 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:chi_xi;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "chi_nu",
+          "@type": [
+            "Command",
+            "Command"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:chi_pi;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "chi_omicron",
+          "@type": [
+            "dtmi:dtdl:class:Command;2",
+            "dtmi:dtdl:class:Command;2"
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,47 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:spazz_iota;1",
+          "@type": "Object",
+          "fields": {
+            "name": "spazz_eta",
+            "dtmi:dtdl:property:name;2": "spazz_theta",
+            "schema": "dateTime"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:spazz_nu;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "spazz_lambda",
+            "dtmi:dtdl:property:name;2": "spazz_mu",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  }
+]

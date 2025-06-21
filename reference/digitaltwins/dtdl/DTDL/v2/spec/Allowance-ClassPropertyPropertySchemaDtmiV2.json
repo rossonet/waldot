@@ -1,0 +1,20 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:omega_chi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "omega_phi",
+          "dtmi:dtdl:property:schema;2": "integer"
+        }
+      }
+    ]
+  }
+]

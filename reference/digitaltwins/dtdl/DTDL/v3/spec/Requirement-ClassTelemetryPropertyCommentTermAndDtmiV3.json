@@ -1,0 +1,43 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yekk_phi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "comment": "yekk_sigma",
+          "dtmi:dtdl:property:comment;3": "yekk_tau",
+          "name": "yekk_upsilon",
+          "schema": "date"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:yekk_yuzz;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Telemetry",
+          "comment": "yekk_chi",
+          "dtmi:dtdl:property:comment;3": "yekk_psi",
+          "name": "yekk_omega",
+          "schema": "dateTime"
+        }
+      }
+    ]
+  }
+]

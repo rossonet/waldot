@@ -1,0 +1,31 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:chi_pi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:chi_xi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "chi_omicron",
+            "schema": "dateTime"
+          },
+          "mapKey": {
+            "@type": [
+              "MapKey",
+              "Foobar"
+            ],
+            "name": "chi_nu",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,58 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_yekk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_flunn;1",
+          "@type": [
+            "Enum",
+            "Foobar"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 708,
+              "name": "zeta_itch"
+            }
+          ],
+          "valueSchema": "integer",
+          "dtmi:foo:bar;1": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:eta_alpha;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_vroo;1",
+          "@type": [
+            "Enum",
+            "Foobar"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 709,
+              "name": "zeta_hi"
+            }
+          ],
+          "valueSchema": "integer",
+          "boolean": null
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,40 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_epsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "vroo_gamma",
+          "target": "dtmi:example:vroo_delta;1"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:vroo_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "vroo_zeta",
+          "dtmi:dtdl:property:target;2": "dtmi:example:vroo_eta;1"
+        }
+      }
+    ]
+  }
+]

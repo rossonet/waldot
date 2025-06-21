@@ -1,0 +1,56 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:vroo_epsilon;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "vroo_zeta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "comment": "vroo_gamma",
+            "name": "vroo_delta",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:vroo_mu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:vroo_kappa;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "vroo_lambda",
+            "schema": "string"
+          },
+          "mapValue": {
+            "dtmi:dtdl:property:comment;3": "vroo_theta",
+            "name": "vroo_iota",
+            "schema": "boolean"
+          }
+        }
+      }
+    ]
+  }
+]

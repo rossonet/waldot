@@ -1,0 +1,394 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_omega;1",
+          "fields": [
+            {
+              "name": "snee_yuzz",
+              "schema": "double"
+            }
+          ],
+          "@type": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:snee_um;1",
+          "fields": [
+            {
+              "name": "snee_humpf",
+              "schema": "duration"
+            }
+          ],
+          "@type": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_glikk;1",
+          "fields": [
+            {
+              "name": "snee_nuh",
+              "schema": "float"
+            }
+          ],
+          "@type": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:snee_quan;1",
+          "fields": [
+            {
+              "name": "snee_thnad",
+              "schema": "integer"
+            }
+          ],
+          "@type": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_floob;1",
+          "fields": [
+            {
+              "name": "snee_zatz",
+              "schema": "long"
+            }
+          ],
+          "@type": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_yekk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:snee_flunn;1",
+          "fields": [
+            {
+              "name": "snee_itch",
+              "schema": "string"
+            }
+          ],
+          "@type": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_alpha;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_vroo;1",
+          "fields": [
+            {
+              "name": "snee_hi",
+              "schema": "time"
+            }
+          ],
+          "@type": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:quan_beta;1",
+          "fields": [
+            {
+              "name": "quan_gamma",
+              "schema": "boolean"
+            }
+          ],
+          "@type": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_epsilon;1",
+          "fields": [
+            {
+              "name": "quan_zeta",
+              "schema": "date"
+            }
+          ],
+          "@type": [
+            626
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_kappa;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:quan_theta;1",
+          "fields": [
+            {
+              "name": "quan_iota",
+              "schema": "dateTime"
+            }
+          ],
+          "@type": [
+            626
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_nu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_lambda;1",
+          "fields": [
+            {
+              "name": "quan_mu",
+              "schema": "double"
+            }
+          ],
+          "@type": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_pi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:quan_xi;1",
+          "fields": [
+            {
+              "name": "quan_omicron",
+              "schema": "duration"
+            }
+          ],
+          "@type": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_tau;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_rho;1",
+          "fields": [
+            {
+              "name": "quan_sigma",
+              "schema": "float"
+            }
+          ],
+          "@type": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:quan_upsilon;1",
+          "fields": [
+            {
+              "name": "quan_phi",
+              "schema": "integer"
+            }
+          ],
+          "@type": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_yuzz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_psi;1",
+          "fields": [
+            {
+              "name": "quan_omega",
+              "schema": "long"
+            }
+          ],
+          "@type": [
+            {}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_humpf;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:quan_wum;1",
+          "fields": [
+            {
+              "name": "quan_um",
+              "schema": "string"
+            }
+          ],
+          "@type": [
+            {}
+          ]
+        }
+      }
+    ]
+  }
+]

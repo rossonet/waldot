@@ -1,0 +1,45 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_snee;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Command",
+            "Foobar"
+          ],
+          "name": "snee_nuh",
+          "http://foo.com/bar": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": [
+            "Command",
+            "Foobar"
+          ],
+          "name": "snee_quan",
+          "http://foo.com/bar": true
+        }
+      }
+    ]
+  }
+]

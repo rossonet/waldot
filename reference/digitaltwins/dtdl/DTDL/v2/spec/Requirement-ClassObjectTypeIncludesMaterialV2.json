@@ -1,0 +1,196 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_fuddle;1",
+          "fields": [
+            {
+              "name": "quan_glikk",
+              "schema": "time"
+            }
+          ],
+          "@type": "Object"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_thnad;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_snee;1",
+          "fields": [
+            {
+              "name": "quan_quan",
+              "schema": "boolean"
+            }
+          ],
+          "@type": [
+            "Object"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_zatz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_spazz;1",
+          "fields": [
+            {
+              "name": "quan_floob",
+              "schema": "date"
+            }
+          ],
+          "@type": "dtmi:dtdl:class:Object;2"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_itch;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_jogg;1",
+          "fields": [
+            {
+              "name": "quan_flunn",
+              "schema": "dateTime"
+            }
+          ],
+          "@type": [
+            "dtmi:dtdl:class:Object;2"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:quan_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_yekk;1",
+          "fields": [
+            {
+              "name": "quan_vroo",
+              "schema": "double"
+            }
+          ],
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_gamma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:thnad_alpha;1",
+          "fields": [
+            {
+              "name": "thnad_beta",
+              "schema": "duration"
+            }
+          ],
+          "@type": "Something"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_delta;1",
+          "fields": [
+            {
+              "name": "thnad_epsilon",
+              "schema": "float"
+            }
+          ],
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_iota;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:thnad_eta;1",
+          "fields": [
+            {
+              "name": "thnad_theta",
+              "schema": "integer"
+            }
+          ],
+          "@type": [
+            "Something"
+          ]
+        }
+      }
+    ]
+  }
+]

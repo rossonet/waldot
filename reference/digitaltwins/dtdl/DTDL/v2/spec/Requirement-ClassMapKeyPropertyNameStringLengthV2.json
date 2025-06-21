@@ -1,0 +1,78 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_psi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_phi;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "delta_chi",
+            "schema": "duration"
+          },
+          "mapKey": {
+            "schema": "string",
+            "name": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSometh"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_omega;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "delta_yuzz",
+            "schema": "float"
+          },
+          "mapKey": {
+            "schema": "string",
+            "name": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_um;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "delta_humpf",
+            "schema": "integer"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "schema": "string",
+            "name": "SupercalifragilisticexpialidociousEvenThoughTheSoundOfItIsSomethi"
+          }
+        }
+      }
+    ]
+  }
+]

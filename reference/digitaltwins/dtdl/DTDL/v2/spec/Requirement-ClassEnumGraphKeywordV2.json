@@ -1,0 +1,53 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zeta_omega;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 703,
+              "name": "zeta_yuzz"
+            }
+          ],
+          "valueSchema": "integer",
+          "@graph": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zeta_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:zeta_um;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 704,
+              "name": "zeta_humpf"
+            }
+          ],
+          "valueSchema": "integer",
+          "@graph": {}
+        }
+      }
+    ]
+  }
+]

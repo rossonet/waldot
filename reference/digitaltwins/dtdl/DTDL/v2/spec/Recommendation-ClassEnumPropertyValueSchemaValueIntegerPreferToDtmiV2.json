@@ -1,0 +1,48 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_gamma;1",
+          "@type": "Enum",
+          "enumValues": {
+            "name": "zatz_beta",
+            "enumValue": 3
+          },
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_eta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_zeta;1",
+          "@type": "Enum",
+          "enumValues": {
+            "name": "zatz_epsilon",
+            "enumValue": 3
+          },
+          "valueSchema": "dtmi:dtdl:instance:Schema:integer;2"
+        }
+      }
+    ]
+  }
+]

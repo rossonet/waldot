@@ -1,0 +1,188 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:alpha_quan;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:alpha_snee;1",
+          "@type": "Object",
+          "fields": {
+            "name": "alpha_nuh",
+            "schema": "dateTime",
+            "@type": "Field"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:alpha_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:alpha_spazz;1",
+          "@type": "Object",
+          "fields": {
+            "name": "alpha_thnad",
+            "schema": "double",
+            "@type": [
+              "Field"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:alpha_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:alpha_jogg;1",
+          "@type": "Object",
+          "fields": {
+            "name": "alpha_zatz",
+            "schema": "duration",
+            "@type": "dtmi:dtdl:class:Field;2"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:alpha_vroo;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:alpha_yekk;1",
+          "@type": "Object",
+          "fields": {
+            "name": "alpha_itch",
+            "schema": "float",
+            "@type": [
+              "dtmi:dtdl:class:Field;2"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_alpha;1",
+          "@type": "Object",
+          "fields": {
+            "name": "alpha_hi",
+            "schema": "integer",
+            "@type": "Something"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_delta;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "beta_gamma",
+            "schema": "long",
+            "@type": "Something"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_theta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_eta;1",
+          "@type": "Object",
+          "fields": {
+            "name": "beta_zeta",
+            "schema": "string",
+            "@type": [
+              "Something"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_lambda;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_kappa;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "beta_iota",
+            "schema": "time",
+            "@type": [
+              "Something"
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

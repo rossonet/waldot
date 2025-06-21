@@ -1,0 +1,36 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_itch;1",
+        "@type": "Interface",
+        "displayName": [
+          "epsilon_yekk"
+        ]
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_vroo;1",
+        "@type": "Interface",
+        "dtmi:dtdl:property:displayName;2": [
+          "epsilon_hi"
+        ]
+      }
+    ]
+  }
+]

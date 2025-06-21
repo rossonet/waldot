@@ -1,0 +1,50 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_phi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_tau;1",
+          "fields": [
+            {
+              "name": "thnad_upsilon",
+              "schema": "boolean"
+            }
+          ],
+          "@type": "Object"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:thnad_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_chi;1",
+          "fields": [
+            {
+              "name": "thnad_psi",
+              "schema": "date"
+            }
+          ],
+          "@type": "dtmi:dtdl:class:Object;2"
+        }
+      }
+    ]
+  }
+]

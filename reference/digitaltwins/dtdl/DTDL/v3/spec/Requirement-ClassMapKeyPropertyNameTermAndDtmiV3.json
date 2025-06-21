@@ -1,0 +1,55 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omega_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omega_fuddle;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "omega_glikk",
+            "schema": "double"
+          },
+          "mapKey": {
+            "name": "omega_um",
+            "dtmi:dtdl:property:name;3": "omega_humpf",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:omega_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:omega_thnad;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "omega_spazz",
+            "schema": "duration"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "omega_snee",
+            "dtmi:dtdl:property:name;3": "omega_quan",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,47 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_jogg;1",
+          "@type": "Object",
+          "fields": {
+            "name": "quan_floob",
+            "dtmi:dtdl:property:name;3": "quan_zatz",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:quan_vroo;1",
+          "@type": "Object",
+          "fields": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "quan_itch",
+            "dtmi:dtdl:property:name;3": "quan_yekk",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

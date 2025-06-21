@@ -1,0 +1,87 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_phi;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": [
+            {
+              "enumValue": 782,
+              "name": "alpha_yuzz"
+            },
+            {
+              "enumValue": 783,
+              "name": "alpha_wum"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_psi;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": [
+            {
+              "enumValue": 784,
+              "name": "alpha_yuzz"
+            },
+            {
+              "enumValue": 785,
+              "name": "alpha_yuzz"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:xi_yuzz;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": [
+            {
+              "enumValue": 786,
+              "name": "alpha_yuzz"
+            },
+            {
+              "enumValue": 787,
+              "name": "alpha_yuzz"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

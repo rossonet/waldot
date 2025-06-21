@@ -1,0 +1,30 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:pi_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:pi_psi;1",
+          "@type": [
+            "Map",
+            "Foobar"
+          ],
+          "mapKey": {
+            "name": "pi_omega",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "pi_yuzz",
+            "schema": "date"
+          }
+        }
+      }
+    ]
+  }
+]

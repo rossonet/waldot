@@ -1,0 +1,57 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_thnad;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_quan",
+          "request": {
+            "displayName": [
+              "nuh_glikk"
+            ],
+            "dtmi:dtdl:property:displayName;2": [
+              "nuh_nuh"
+            ],
+            "name": "nuh_snee",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nuh_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "nuh_jogg",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "displayName": [
+              "nuh_spazz"
+            ],
+            "dtmi:dtdl:property:displayName;2": [
+              "nuh_floob"
+            ],
+            "name": "nuh_zatz",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

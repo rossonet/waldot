@@ -1,0 +1,108 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "gamma_alpha",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": {
+              "@type": "Array",
+              "elementSchema": {
+                "@type": "Array",
+                "elementSchema": {
+                  "@type": "Array",
+                  "elementSchema": {
+                    "@type": "Array",
+                    "elementSchema": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_delta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "gamma_gamma",
+          "schema": {
+            "@type": "Array",
+            "elementSchema": {
+              "@type": "Array",
+              "elementSchema": {
+                "@type": "Array",
+                "elementSchema": {
+                  "@type": "Array",
+                  "elementSchema": {
+                    "@type": "Array",
+                    "elementSchema": {
+                      "@type": "Array",
+                      "elementSchema": "date"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Property",
+          "name": "gamma_epsilon",
+          "schema": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": "Array",
+            "elementSchema": {
+              "@type": "Array",
+              "elementSchema": {
+                "@type": "Array",
+                "elementSchema": {
+                  "@type": "Array",
+                  "elementSchema": {
+                    "@type": "Array",
+                    "elementSchema": {
+                      "@type": "Array",
+                      "elementSchema": "dateTime"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+]

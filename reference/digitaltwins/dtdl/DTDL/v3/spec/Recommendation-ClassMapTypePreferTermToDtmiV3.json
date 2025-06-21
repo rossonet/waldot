@@ -1,0 +1,54 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_um;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_omega;1",
+          "mapKey": {
+            "name": "snee_yuzz",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "snee_wum",
+            "schema": "time"
+          },
+          "@type": "Map"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_humpf;1",
+          "mapKey": {
+            "name": "snee_fuddle",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "snee_glikk",
+            "schema": "boolean"
+          },
+          "@type": "dtmi:dtdl:class:Map;3"
+        }
+      }
+    ]
+  }
+]

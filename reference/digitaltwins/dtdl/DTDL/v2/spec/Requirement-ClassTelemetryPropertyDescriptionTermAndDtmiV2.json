@@ -1,0 +1,51 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:phi_flunn;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Telemetry",
+          "description": [
+            "phi_floob"
+          ],
+          "dtmi:dtdl:property:description;2": [
+            "phi_zatz"
+          ],
+          "name": "phi_jogg",
+          "schema": "long"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:phi_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Telemetry",
+          "description": [
+            "phi_itch"
+          ],
+          "dtmi:dtdl:property:description;2": [
+            "phi_yekk"
+          ],
+          "name": "phi_vroo",
+          "schema": "string"
+        }
+      }
+    ]
+  }
+]

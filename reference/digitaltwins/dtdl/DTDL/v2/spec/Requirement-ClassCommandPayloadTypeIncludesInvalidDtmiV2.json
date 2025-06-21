@@ -1,0 +1,53 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:tau_vroo;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "tau_yekk",
+          "request": {
+            "@type": [
+              "CommandPayload",
+              "dtmi:foo//bar"
+            ],
+            "name": "tau_itch",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:upsilon_beta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "upsilon_alpha",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandPayload",
+              "dtmi:foo//bar"
+            ],
+            "name": "tau_hi",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

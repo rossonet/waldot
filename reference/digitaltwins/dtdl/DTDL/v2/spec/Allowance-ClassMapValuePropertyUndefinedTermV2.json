@@ -1,0 +1,32 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_gamma;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "snee_delta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@type": [
+              "MapValue",
+              "Foobar"
+            ],
+            "name": "snee_beta",
+            "schema": "string",
+            "foobar": {}
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,57 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:zatz_iota;1",
+          "@type": "Map",
+          "comment": "zatz_kappa",
+          "dtmi:dtdl:property:comment;2": "zatz_lambda",
+          "mapKey": {
+            "name": "zatz_mu",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "zatz_nu",
+            "schema": "dateTime"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:zatz_upsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:zatz_omicron;1",
+          "@type": "Map",
+          "comment": "zatz_pi",
+          "dtmi:dtdl:property:comment;2": "zatz_rho",
+          "mapKey": {
+            "name": "zatz_sigma",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "zatz_tau",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  }
+]

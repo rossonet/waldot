@@ -1,0 +1,28 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:epsilon_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_um;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "epsilon_humpf",
+            "schema": "boolean"
+          },
+          "mapKey": {
+            "dtmi:dtdl:property:comment;3": "epsilon_yuzz",
+            "name": "epsilon_wum",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

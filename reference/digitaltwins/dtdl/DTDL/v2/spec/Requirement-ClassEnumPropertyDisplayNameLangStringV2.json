@@ -1,0 +1,650 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_iota;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_eta;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 671,
+              "name": "delta_theta"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": "hello"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_mu;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_kappa;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 672,
+              "name": "delta_lambda"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            "hello"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_omicron;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_nu;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 673,
+              "name": "delta_xi"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": {
+            "en": "hello"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_pi;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 674,
+              "name": "delta_rho"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            {
+              "@value": "hello",
+              "@language": "en"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_phi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_tau;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 675,
+              "name": "delta_upsilon"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": {}
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_chi;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 676,
+              "name": "delta_psi"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": []
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_um;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_yuzz;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 677,
+              "name": "delta_wum"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_glikk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:delta_humpf;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 678,
+              "name": "delta_fuddle"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": null
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_quan;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_nuh;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 679,
+              "name": "delta_snee"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_floob;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:delta_thnad;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 680,
+              "name": "delta_spazz"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": true
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_zatz;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 681,
+              "name": "delta_jogg"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:delta_vroo;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:delta_itch;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 682,
+              "name": "delta_yekk"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": 626
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_hi;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 683,
+              "name": "epsilon_alpha"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_epsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_gamma;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 684,
+              "name": "epsilon_delta"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            null
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_theta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_zeta;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 685,
+              "name": "epsilon_eta"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_lambda;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_iota;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 686,
+              "name": "epsilon_kappa"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            true
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_mu;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 687,
+              "name": "epsilon_nu"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            626
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_rho;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_omicron;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 688,
+              "name": "epsilon_pi"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            626
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_upsilon;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_sigma;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 689,
+              "name": "epsilon_tau"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            {}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_psi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_phi;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 690,
+              "name": "epsilon_chi"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            {}
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_omega;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 691,
+              "name": "epsilon_yuzz"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": {
+            "@value": "hello",
+            "@language": "en"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_fuddle;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_um;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 692,
+              "name": "epsilon_humpf"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": {
+            "@value": "hello",
+            "@language": "en"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_snee;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:epsilon_glikk;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 693,
+              "name": "epsilon_nuh"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            {
+              "en": "hello"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:epsilon_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:epsilon_quan;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 694,
+              "name": "epsilon_thnad"
+            }
+          ],
+          "valueSchema": "integer",
+          "displayName": [
+            {
+              "en": "hello"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,120 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_mu;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_nu",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@type": [
+              "MapValue",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "xi_lambda",
+            "schema": "dateTime"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_sigma;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_pi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_rho",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "MapValue",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "xi_omicron",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_chi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_upsilon;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_phi",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@type": [
+              "MapValue",
+              "boolean"
+            ],
+            "name": "xi_tau",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_wum;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:xi_omega;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_yuzz",
+            "schema": "string"
+          },
+          "mapValue": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "MapValue",
+              "boolean"
+            ],
+            "name": "xi_psi",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

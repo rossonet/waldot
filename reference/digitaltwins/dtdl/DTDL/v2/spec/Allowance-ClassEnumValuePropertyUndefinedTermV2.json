@@ -1,0 +1,29 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:snee_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_gamma;1",
+          "@type": "Enum",
+          "valueSchema": "integer",
+          "enumValues": {
+            "@type": [
+              "EnumValue",
+              "Foobar"
+            ],
+            "enumValue": 1030,
+            "name": "snee_beta",
+            "foobar": {}
+          }
+        }
+      }
+    ]
+  }
+]

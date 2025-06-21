@@ -1,0 +1,120 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:phi_nuh;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:phi_fuddle;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "phi_glikk",
+            "schema": "float"
+          },
+          "mapKey": {
+            "@type": [
+              "MapKey",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "phi_humpf",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:phi_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:phi_quan;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "phi_thnad",
+            "schema": "integer"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "MapKey",
+              "dtmi:foo:bar;1"
+            ],
+            "name": "phi_snee",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:phi_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:phi_zatz;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "phi_jogg",
+            "schema": "long"
+          },
+          "mapKey": {
+            "@type": [
+              "MapKey",
+              "boolean"
+            ],
+            "name": "phi_floob",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:phi_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:phi_yekk;1",
+          "@type": "Map",
+          "mapValue": {
+            "name": "phi_vroo",
+            "schema": "string"
+          },
+          "mapKey": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "MapKey",
+              "boolean"
+            ],
+            "name": "phi_itch",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  }
+]

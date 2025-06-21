@@ -1,0 +1,26 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": [
+            "Property",
+            "Acceleration",
+            "dtmi:standard:class:Acceleration;2"
+          ],
+          "name": "nu_vroo",
+          "schema": "double",
+          "unit": "centimetrePerSecondSquared"
+        }
+      }
+    ]
+  }
+]

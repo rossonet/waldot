@@ -1,0 +1,254 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:pi_jogg;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:pi_zatz;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Relationship",
+            "name": "pi_floob",
+            "properties": {
+              "@id": "dtmi:example:pi_thnad;1",
+              "@type": "Property",
+              "name": "pi_spazz",
+              "schema": "float"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:pi_hi;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:pi_vroo;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Relationship",
+            "name": "pi_yekk",
+            "properties": [
+              {
+                "@id": "dtmi:example:pi_flunn;1",
+                "@type": "Property",
+                "name": "pi_itch",
+                "schema": "integer"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_beta;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@id": "dtmi:ex:dependentRef;1",
+            "@type": "Property",
+            "name": "rho_alpha",
+            "schema": "long"
+          },
+          {
+            "@type": "Relationship",
+            "name": "rho_gamma",
+            "properties": "dtmi:ex:dependentRef;1"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_epsilon;1",
+        "@type": "Interface",
+        "contents": [
+          {
+            "@id": "dtmi:ex:dependentRef;1",
+            "@type": "Property",
+            "name": "rho_delta",
+            "schema": "string"
+          },
+          {
+            "@type": "Relationship",
+            "name": "rho_zeta",
+            "properties": [
+              "dtmi:ex:dependentRef;1"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_lambda;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:rho_kappa;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Relationship",
+            "name": "rho_iota",
+            "properties": {
+              "@id": "dtmi:example:rho_eta;1",
+              "@type": "Property",
+              "name": "rho_theta",
+              "schema": "time",
+              "@context": "dtmi:dtdl:context;2"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_pi;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:rho_omicron;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Relationship",
+            "name": "rho_xi",
+            "properties": {
+              "@id": "dtmi:example:rho_mu;1",
+              "@type": "Property",
+              "name": "rho_nu",
+              "schema": "unsignedLong",
+              "@context": "dtmi:dtdl:context;4"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_phi;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:rho_upsilon;1",
+          "@type": "Interface",
+          "contents": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": "Relationship",
+            "name": "rho_tau",
+            "properties": {
+              "@id": "dtmi:example:rho_rho;1",
+              "@type": "Property",
+              "name": "rho_sigma",
+              "schema": "unsignedShort",
+              "@context": "dtmi:dtdl:context;4"
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_omega;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:rho_psi;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Relationship",
+            "name": "rho_chi",
+            "properties": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_nuh;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:rho_glikk;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Relationship",
+            "name": "rho_fuddle",
+            "properties": [
+              {
+                "@id": "dtmi:example:rho_yuzz;1",
+                "@type": "Property",
+                "name": "rho_wum",
+                "schema": "dateTime"
+              },
+              {
+                "@id": "dtmi:example:rho_um;1",
+                "@type": "Property",
+                "name": "rho_humpf",
+                "schema": "double"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

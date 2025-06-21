@@ -1,0 +1,30 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:eta_thnad;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:eta_snee;1",
+          "@type": [
+            "Enum",
+            "Foobar"
+          ],
+          "enumValues": [
+            {
+              "enumValue": 720,
+              "name": "eta_quan"
+            }
+          ],
+          "valueSchema": "integer",
+          "foobar": {}
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,53 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_theta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "delta_eta",
+          "request": {
+            "@type": [
+              "CommandRequest",
+              "http://foo.com/bar"
+            ],
+            "name": "delta_zeta",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "delta_kappa",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "@type": [
+              "CommandRequest",
+              "http://foo.com/bar"
+            ],
+            "name": "delta_iota",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  }
+]

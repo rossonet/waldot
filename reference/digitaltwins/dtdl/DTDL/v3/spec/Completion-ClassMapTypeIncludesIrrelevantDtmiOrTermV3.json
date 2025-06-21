@@ -1,0 +1,116 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_spazz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_snee;1",
+          "@type": [
+            "Map",
+            "dtmi:foo:bar;1"
+          ],
+          "mapKey": {
+            "name": "snee_quan",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "snee_thnad",
+            "schema": "date"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_flunn;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:snee_floob;1",
+          "@type": [
+            "Map",
+            "dtmi:foo:bar;1"
+          ],
+          "mapKey": {
+            "name": "snee_zatz",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "snee_jogg",
+            "schema": "dateTime"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:snee_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:snee_itch;1",
+          "@type": [
+            "Map",
+            "boolean"
+          ],
+          "mapKey": {
+            "name": "snee_yekk",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "snee_vroo",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:quan_delta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:quan_alpha;1",
+          "@type": [
+            "Map",
+            "boolean"
+          ],
+          "mapKey": {
+            "name": "quan_beta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "quan_gamma",
+            "schema": "duration"
+          }
+        }
+      }
+    ]
+  }
+]

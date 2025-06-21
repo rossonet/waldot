@@ -1,0 +1,28 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:spazz_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:thnad_hi;1",
+          "@type": [
+            "Object",
+            "http://foo.com/bar"
+          ],
+          "fields": [
+            {
+              "name": "spazz_alpha",
+              "schema": "string"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

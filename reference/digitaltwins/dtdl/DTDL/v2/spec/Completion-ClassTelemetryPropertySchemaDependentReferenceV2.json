@@ -1,0 +1,58 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:theta_alpha;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:eta_hi;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Telemetry",
+            "name": "eta_vroo",
+            "schema": "dtmi:ex:dependentRef;1"
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:theta_delta;1",
+        "@type": "Interface",
+        "extends": {
+          "@id": "dtmi:example:theta_gamma;1",
+          "@type": "Interface",
+          "contents": {
+            "@type": "Telemetry",
+            "name": "theta_beta",
+            "schema": [
+              "dtmi:ex:dependentRef;1"
+            ]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "unresolvedIdentifiers": [
+        "dtmi:ex:dependentRef;1"
+      ]
+    }
+  }
+]

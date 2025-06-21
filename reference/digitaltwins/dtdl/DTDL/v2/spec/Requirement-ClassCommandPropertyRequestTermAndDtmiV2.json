@@ -1,0 +1,53 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_lambda;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "hi_theta",
+          "request": {
+            "name": "hi_iota",
+            "schema": "duration"
+          },
+          "dtmi:dtdl:property:request;2": {
+            "name": "hi_kappa",
+            "schema": "float"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:hi_omicron;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Command",
+          "name": "hi_mu",
+          "request": {
+            "name": "hi_nu",
+            "schema": "integer"
+          },
+          "dtmi:dtdl:property:request;2": {
+            "name": "hi_xi",
+            "schema": "long"
+          }
+        }
+      }
+    ]
+  }
+]

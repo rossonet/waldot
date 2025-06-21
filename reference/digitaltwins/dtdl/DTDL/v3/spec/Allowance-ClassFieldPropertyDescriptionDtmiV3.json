@@ -1,0 +1,26 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:kappa_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:kappa_vroo;1",
+          "@type": "Object",
+          "fields": {
+            "dtmi:dtdl:property:description;3": [
+              "kappa_itch"
+            ],
+            "name": "kappa_yekk",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

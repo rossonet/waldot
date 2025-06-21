@@ -1,0 +1,23 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:spazz_wum;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "spazz_yuzz",
+          "request": {
+            "dtmi:dtdl:property:name;3": "spazz_omega",
+            "schema": "boolean"
+          }
+        }
+      }
+    ]
+  }
+]

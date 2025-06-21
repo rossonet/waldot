@@ -1,0 +1,63 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_quan;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:delta_glikk;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 1146,
+              "name": "delta_nuh"
+            }
+          ],
+          "dtmi:dtdl:property:enumValues;3": [
+            {
+              "enumValue": 1147,
+              "name": "delta_snee"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_zatz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:delta_thnad;1",
+          "@type": "Enum",
+          "enumValues": [
+            {
+              "enumValue": 1148,
+              "name": "delta_spazz"
+            }
+          ],
+          "dtmi:dtdl:property:enumValues;3": [
+            {
+              "enumValue": 1149,
+              "name": "delta_floob"
+            }
+          ],
+          "valueSchema": "integer"
+        }
+      }
+    ]
+  }
+]

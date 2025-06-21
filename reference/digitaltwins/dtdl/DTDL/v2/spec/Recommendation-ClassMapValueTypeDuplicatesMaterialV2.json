@@ -1,0 +1,62 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:nu_yekk;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nu_flunn;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "nu_itch",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "nu_jogg",
+            "schema": "string",
+            "@type": [
+              "MapValue",
+              "MapValue"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:xi_beta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nu_hi;1",
+          "@type": "Map",
+          "mapKey": {
+            "name": "xi_alpha",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "nu_vroo",
+            "schema": "time",
+            "@type": [
+              "dtmi:dtdl:class:MapValue;2",
+              "dtmi:dtdl:class:MapValue;2"
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:beta_zeta;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:beta_gamma;1",
+          "@type": [
+            "Map",
+            "Foobar"
+          ],
+          "mapKey": {
+            "name": "beta_delta",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "beta_epsilon",
+            "schema": "dateTime"
+          },
+          "http://foo.com/bar": true
+        }
+      }
+    ]
+  }
+]

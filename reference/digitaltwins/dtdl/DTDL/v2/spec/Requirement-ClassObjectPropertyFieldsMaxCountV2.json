@@ -1,0 +1,428 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:flunn_thnad;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:flunn_quan;1",
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "flunn_gamma",
+              "schema": "integer"
+            },
+            {
+              "name": "flunn_delta",
+              "schema": "long"
+            },
+            {
+              "name": "flunn_epsilon",
+              "schema": "string"
+            },
+            {
+              "name": "flunn_zeta",
+              "schema": "time"
+            },
+            {
+              "name": "flunn_eta",
+              "schema": "boolean"
+            },
+            {
+              "name": "flunn_theta",
+              "schema": "date"
+            },
+            {
+              "name": "flunn_iota",
+              "schema": "dateTime"
+            },
+            {
+              "name": "flunn_kappa",
+              "schema": "double"
+            },
+            {
+              "name": "flunn_lambda",
+              "schema": "duration"
+            },
+            {
+              "name": "flunn_mu",
+              "schema": "float"
+            },
+            {
+              "name": "flunn_nu",
+              "schema": "integer"
+            },
+            {
+              "name": "flunn_xi",
+              "schema": "long"
+            },
+            {
+              "name": "flunn_omicron",
+              "schema": "string"
+            },
+            {
+              "name": "flunn_pi",
+              "schema": "time"
+            },
+            {
+              "name": "flunn_rho",
+              "schema": "boolean"
+            },
+            {
+              "name": "flunn_sigma",
+              "schema": "date"
+            },
+            {
+              "name": "flunn_tau",
+              "schema": "dateTime"
+            },
+            {
+              "name": "flunn_upsilon",
+              "schema": "double"
+            },
+            {
+              "name": "flunn_phi",
+              "schema": "duration"
+            },
+            {
+              "name": "flunn_chi",
+              "schema": "float"
+            },
+            {
+              "name": "flunn_psi",
+              "schema": "integer"
+            },
+            {
+              "name": "flunn_omega",
+              "schema": "long"
+            },
+            {
+              "name": "flunn_yuzz",
+              "schema": "string"
+            },
+            {
+              "name": "flunn_wum",
+              "schema": "time"
+            },
+            {
+              "name": "flunn_um",
+              "schema": "boolean"
+            },
+            {
+              "name": "flunn_humpf",
+              "schema": "date"
+            },
+            {
+              "name": "flunn_fuddle",
+              "schema": "dateTime"
+            },
+            {
+              "name": "flunn_glikk",
+              "schema": "double"
+            },
+            {
+              "name": "flunn_nuh",
+              "schema": "duration"
+            },
+            {
+              "name": "flunn_snee",
+              "schema": "float"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:itch_omega;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:itch_psi;1",
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "flunn_spazz",
+              "schema": "integer"
+            },
+            {
+              "name": "flunn_floob",
+              "schema": "long"
+            },
+            {
+              "name": "flunn_zatz",
+              "schema": "string"
+            },
+            {
+              "name": "flunn_jogg",
+              "schema": "time"
+            },
+            {
+              "name": "flunn_flunn",
+              "schema": "boolean"
+            },
+            {
+              "name": "flunn_itch",
+              "schema": "date"
+            },
+            {
+              "name": "flunn_yekk",
+              "schema": "dateTime"
+            },
+            {
+              "name": "flunn_vroo",
+              "schema": "double"
+            },
+            {
+              "name": "flunn_hi",
+              "schema": "duration"
+            },
+            {
+              "name": "itch_alpha",
+              "schema": "float"
+            },
+            {
+              "name": "itch_beta",
+              "schema": "integer"
+            },
+            {
+              "name": "itch_gamma",
+              "schema": "long"
+            },
+            {
+              "name": "itch_delta",
+              "schema": "string"
+            },
+            {
+              "name": "itch_epsilon",
+              "schema": "time"
+            },
+            {
+              "name": "itch_zeta",
+              "schema": "boolean"
+            },
+            {
+              "name": "itch_eta",
+              "schema": "date"
+            },
+            {
+              "name": "itch_theta",
+              "schema": "dateTime"
+            },
+            {
+              "name": "itch_iota",
+              "schema": "double"
+            },
+            {
+              "name": "itch_kappa",
+              "schema": "duration"
+            },
+            {
+              "name": "itch_lambda",
+              "schema": "float"
+            },
+            {
+              "name": "itch_mu",
+              "schema": "integer"
+            },
+            {
+              "name": "itch_nu",
+              "schema": "long"
+            },
+            {
+              "name": "itch_xi",
+              "schema": "string"
+            },
+            {
+              "name": "itch_omicron",
+              "schema": "time"
+            },
+            {
+              "name": "itch_pi",
+              "schema": "boolean"
+            },
+            {
+              "name": "itch_rho",
+              "schema": "date"
+            },
+            {
+              "name": "itch_sigma",
+              "schema": "dateTime"
+            },
+            {
+              "name": "itch_tau",
+              "schema": "double"
+            },
+            {
+              "name": "itch_upsilon",
+              "schema": "duration"
+            },
+            {
+              "name": "itch_phi",
+              "schema": "float"
+            },
+            {
+              "name": "itch_chi",
+              "schema": "integer"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:yekk_xi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@id": "dtmi:example:yekk_nu;1",
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "itch_yuzz",
+              "schema": "long"
+            },
+            {
+              "name": "itch_wum",
+              "schema": "string"
+            },
+            {
+              "name": "itch_um",
+              "schema": "time"
+            },
+            {
+              "name": "itch_humpf",
+              "schema": "boolean"
+            },
+            {
+              "name": "itch_fuddle",
+              "schema": "date"
+            },
+            {
+              "name": "itch_glikk",
+              "schema": "dateTime"
+            },
+            {
+              "name": "itch_nuh",
+              "schema": "double"
+            },
+            {
+              "name": "itch_snee",
+              "schema": "duration"
+            },
+            {
+              "name": "itch_quan",
+              "schema": "float"
+            },
+            {
+              "name": "itch_thnad",
+              "schema": "integer"
+            },
+            {
+              "name": "itch_spazz",
+              "schema": "long"
+            },
+            {
+              "name": "itch_floob",
+              "schema": "string"
+            },
+            {
+              "name": "itch_zatz",
+              "schema": "time"
+            },
+            {
+              "name": "itch_jogg",
+              "schema": "boolean"
+            },
+            {
+              "name": "itch_flunn",
+              "schema": "date"
+            },
+            {
+              "name": "itch_itch",
+              "schema": "dateTime"
+            },
+            {
+              "name": "itch_yekk",
+              "schema": "double"
+            },
+            {
+              "name": "itch_vroo",
+              "schema": "duration"
+            },
+            {
+              "name": "itch_hi",
+              "schema": "float"
+            },
+            {
+              "name": "yekk_alpha",
+              "schema": "integer"
+            },
+            {
+              "name": "yekk_beta",
+              "schema": "long"
+            },
+            {
+              "name": "yekk_gamma",
+              "schema": "string"
+            },
+            {
+              "name": "yekk_delta",
+              "schema": "time"
+            },
+            {
+              "name": "yekk_epsilon",
+              "schema": "boolean"
+            },
+            {
+              "name": "yekk_zeta",
+              "schema": "date"
+            },
+            {
+              "name": "yekk_eta",
+              "schema": "dateTime"
+            },
+            {
+              "name": "yekk_theta",
+              "schema": "double"
+            },
+            {
+              "name": "yekk_iota",
+              "schema": "duration"
+            },
+            {
+              "name": "yekk_kappa",
+              "schema": "float"
+            },
+            {
+              "name": "yekk_lambda",
+              "schema": "integer"
+            },
+            {
+              "name": "yekk_mu",
+              "schema": "long"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

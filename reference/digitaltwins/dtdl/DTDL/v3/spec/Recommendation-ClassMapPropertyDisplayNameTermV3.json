@@ -1,0 +1,60 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_jogg;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_thnad;1",
+          "@type": "Map",
+          "displayName": [
+            "rho_spazz"
+          ],
+          "mapKey": {
+            "name": "rho_floob",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "rho_zatz",
+            "schema": "string"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:rho_hi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:rho_flunn;1",
+          "@type": "Map",
+          "dtmi:dtdl:property:displayName;3": [
+            "rho_itch"
+          ],
+          "mapKey": {
+            "name": "rho_yekk",
+            "schema": "string"
+          },
+          "mapValue": {
+            "name": "rho_vroo",
+            "schema": "time"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,188 @@
+﻿[
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_zatz;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "beta_floob",
+          "request": {
+            "name": "beta_spazz",
+            "schema": "float",
+            "@type": "CommandRequest"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_itch;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "beta_flunn",
+          "request": {
+            "name": "beta_jogg",
+            "schema": "integer",
+            "@type": [
+              "CommandRequest"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:beta_hi;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "beta_vroo",
+          "request": {
+            "name": "beta_yekk",
+            "schema": "long",
+            "@type": "dtmi:dtdl:class:CommandRequest;3"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_gamma;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_beta",
+          "request": {
+            "name": "gamma_alpha",
+            "schema": "string",
+            "@type": [
+              "dtmi:dtdl:class:CommandRequest;3"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_zeta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_epsilon",
+          "request": {
+            "name": "gamma_delta",
+            "schema": "time",
+            "@type": "Something"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_iota;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_theta",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "gamma_eta",
+            "schema": "boolean",
+            "@type": "Something"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_mu;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_lambda",
+          "request": {
+            "name": "gamma_kappa",
+            "schema": "date",
+            "@type": [
+              "Something"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:gamma_omicron;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Command",
+          "name": "gamma_xi",
+          "request": {
+            "@context": "dtmi:undefinedExtension:context;1",
+            "name": "gamma_nu",
+            "schema": "dateTime",
+            "@type": [
+              "Something"
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

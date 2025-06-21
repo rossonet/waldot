@@ -1,0 +1,38 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:chi_sigma;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "chi_rho",
+          "@type": "Command"
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;2",
+        "@id": "dtmi:example:chi_upsilon;1",
+        "@type": "Interface",
+        "contents": {
+          "name": "chi_tau",
+          "@type": "dtmi:dtdl:class:Command;2"
+        }
+      }
+    ]
+  }
+]

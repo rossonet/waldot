@@ -1,0 +1,52 @@
+﻿[
+  {
+    "valid": true,
+    "desirable": true,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_phi;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nu_upsilon;1",
+          "@type": "Object",
+          "fields": {
+            "displayName": [
+              "nu_sigma"
+            ],
+            "name": "nu_tau",
+            "schema": "dateTime"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "valid": true,
+    "desirable": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:nu_yuzz;1",
+        "@type": "Interface",
+        "schemas": {
+          "@id": "dtmi:example:nu_omega;1",
+          "@type": "Object",
+          "fields": {
+            "dtmi:dtdl:property:displayName;3": [
+              "nu_chi"
+            ],
+            "name": "nu_psi",
+            "schema": "double"
+          }
+        }
+      }
+    ]
+  }
+]

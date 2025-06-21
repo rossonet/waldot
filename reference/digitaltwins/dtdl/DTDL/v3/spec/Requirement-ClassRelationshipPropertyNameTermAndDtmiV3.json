@@ -1,0 +1,39 @@
+﻿[
+  {
+    "valid": false,
+    "options": [
+      "DisallowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_eta;1",
+        "@type": "Interface",
+        "contents": {
+          "@type": "Relationship",
+          "name": "delta_epsilon",
+          "dtmi:dtdl:property:name;3": "delta_zeta"
+        }
+      }
+    ]
+  },
+  {
+    "valid": false,
+    "options": [
+      "AllowUndefinedExtensions"
+    ],
+    "input": [
+      {
+        "@context": "dtmi:dtdl:context;3",
+        "@id": "dtmi:example:delta_kappa;1",
+        "@type": "Interface",
+        "contents": {
+          "@context": "dtmi:undefinedExtension:context;1",
+          "@type": "Relationship",
+          "name": "delta_theta",
+          "dtmi:dtdl:property:name;3": "delta_iota"
+        }
+      }
+    ]
+  }
+]
