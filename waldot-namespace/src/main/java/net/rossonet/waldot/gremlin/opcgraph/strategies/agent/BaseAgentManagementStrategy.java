@@ -39,24 +39,12 @@ import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 
 public class BaseAgentManagementStrategy implements AgentManagementStrategy {
-	private class GenerateAddProvisioningMethodInvocationHandler extends AbstractMethodInvocationHandler {
 
-		private final List<Argument> inputArguments;
+	private class GenerateAddProvisioningMethodInvocationHandler extends TemplateMethodInvocationHandler {
 
 		public GenerateAddProvisioningMethodInvocationHandler(final UaMethodNode methodNode,
 				final List<Argument> inputArguments) {
-			super(methodNode);
-			this.inputArguments = inputArguments;
-		}
-
-		@Override
-		public Argument[] getInputArguments() {
-			return inputArguments.toArray(new Argument[0]);
-		}
-
-		@Override
-		public Argument[] getOutputArguments() {
-			return new Argument[0];
+			super(methodNode, inputArguments, new ArrayList<>());
 		}
 
 		@Override
@@ -71,27 +59,13 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 				return new Variant[0];
 			}
 		}
-
 	}
 
-	private class GenerateDeleteProvisioningMethodInvocationHandler extends AbstractMethodInvocationHandler {
-
-		private final List<Argument> inputArguments;
+	private class GenerateDeleteProvisioningMethodInvocationHandler extends TemplateMethodInvocationHandler {
 
 		public GenerateDeleteProvisioningMethodInvocationHandler(final UaMethodNode methodNode,
 				final List<Argument> inputArguments) {
-			super(methodNode);
-			this.inputArguments = inputArguments;
-		}
-
-		@Override
-		public Argument[] getInputArguments() {
-			return inputArguments.toArray(new Argument[0]);
-		}
-
-		@Override
-		public Argument[] getOutputArguments() {
-			return new Argument[0];
+			super(methodNode, inputArguments, new ArrayList<>());
 		}
 
 		@Override
@@ -107,17 +81,54 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 				return new Variant[0];
 			}
 		}
+	}
 
+	private class GenerateRpcProvisioningManualRequestMethodInvocationHandler extends TemplateMethodInvocationHandler {
+
+		public GenerateRpcProvisioningManualRequestMethodInvocationHandler(final UaMethodNode methodNode,
+				final List<Argument> inputArguments, List<Argument> outputArguments) {
+			super(methodNode, inputArguments, outputArguments);
+		}
+
+		@Override
+		protected Variant[] invoke(final InvocationContext invocationContext, final Variant[] inputValues)
+				throws UaException {
+			try {
+				return rpcProvisioningManualRequestMethodAction(inputValues);
+			} catch (final Exception e) {
+				logger.error("Error requesting provisioning manual approval", e);
+				return new Variant[0];
+			}
+		}
+	}
+
+	private class GenerateRpcProvisioningTokenRequestMethodInvocationHandler extends TemplateMethodInvocationHandler {
+
+		public GenerateRpcProvisioningTokenRequestMethodInvocationHandler(final UaMethodNode methodNode,
+				final List<Argument> inputArguments, List<Argument> outputArguments) {
+			super(methodNode, inputArguments, outputArguments);
+		}
+
+		@Override
+		protected Variant[] invoke(final InvocationContext invocationContext, final Variant[] inputValues)
+				throws UaException {
+			try {
+				return rpcProvisioningTokenRequestMethodAction(inputValues);
+			} catch (final Exception e) {
+				logger.error("Error requesting provisioning token", e);
+				return new Variant[0];
+			}
+		}
 	}
 
 	public enum ProvisioningStatus {
-		PENDING, APPROVED, REJECTED
+		APPROVED, PENDING, REJECTED
 	}
 
 	public final class ProvisioningToken {
 		private final String id;
-		private final String secret;
 		private final NodeId nodeId;
+		private final String secret;
 
 		public ProvisioningToken(final String id, final String secret, final NodeId nodeId) {
 			this.id = id;
@@ -156,23 +167,63 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 		}
 	}
 
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private WaldotNamespace waldotNamespace;
-	private UaFolderNode provisioningFolder;
-	private UaFolderNode assetRootNode;
-	private UaFolderNode agentFolder;
+	private abstract class TemplateMethodInvocationHandler extends AbstractMethodInvocationHandler {
 
+		private final List<Argument> inputArguments;
+
+		private final List<Argument> outputArguments;
+
+		public TemplateMethodInvocationHandler(UaMethodNode methodNode, final List<Argument> inputArguments,
+				List<Argument> outputArguments) {
+			super(methodNode);
+			this.inputArguments = inputArguments;
+			this.outputArguments = outputArguments;
+		}
+
+		@Override
+		public Argument[] getInputArguments() {
+			return inputArguments.toArray(new Argument[0]);
+		}
+
+		@Override
+		public Argument[] getOutputArguments() {
+			return outputArguments.toArray(new Argument[0]);
+		}
+
+	}
+
+	private static final String PROVISIONING_CRT_CHAIN = "provisioning-chain";
+	private static final String PROVISIONING_CRT_CHAIN_DESCRIPTION = "certificate issued for the agent's certificate with all the chain";
+	private static final String PROVISIONING_CSR = "provisioning-csr";
+	private static final String PROVISIONING_CSR_DESCRIPTION = "certificate signing request (CSR) for the agent's certificate";
+	private static final String PROVISIONING_ID = "provisioning-id";
+	private static final String PROVISIONING_ID_DESCRIPTION = "unique identifier of the provisioning token";
+	private static final String PROVISIONING_NOTE = "provisioning-note";
+	private static final String PROVISIONING_NOTE_DESCRIPTION = "note about the provisioning request";
+	private static final String PROVISIONING_SECRET = "provisioning-secret";
+	private static final String PROVISIONING_SECRET_DESCRIPTION = "provisioning secret token ( password)";
+	private static final String PROVISIONING_STATUS = "provisioning-status";
+	private static final String PROVISIONING_STATUS_DESCRIPTION = "status of the provisioning request";
+	private static final String PROVISIONING_UNIQUE_ID = "provisioning-unique-id";
+	private static final String PROVISIONING_UNIQUE_ID_DESCRIPTION = "unique identifier of the provisioning session visualized in the client";
 	private AgentRegisterAnonymousValidator agentAnonymousValidator;
+	private UaFolderNode agentFolder;
 	private AgentRegisterUsernameIdentityValidator agentIdentityValidator;
-
+	private UaObjectNode agentLifeCycleRecord;
 	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
+	private UaFolderNode assetRootNode;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private UaObjectNode managementRecord;
 	private UaMethodNode provisioningAddTokenMethod;
-
+	private UaMethodNode provisioningDeleteTokenMethod;
+	private UaFolderNode provisioningFolder;
+	private UaMethodNode provisioningRpcManualRequest;
+	private UaFolderNode rpcFolder;
 	private final Map<NodeId, SessionData> sessions = new HashMap<>();
 
 	private final Map<String, ProvisioningToken> tokenSecrets = new HashMap<>();
-	private UaObjectNode managementRecord;
-	private UaMethodNode provisioningDeleteTokenMethod;
+
+	private WaldotNamespace waldotNamespace;
 
 	@Override
 	public void activate(final AgentRegisterAnonymousValidator agentAnonymousValidator,
@@ -202,20 +253,17 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 				executable, userExecutable);
 
 		final List<Argument> inputArguments = new ArrayList<>();
-		final Argument id = new Argument("provisioningID", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar,
-				null, LocalizedText.english("unique identifier of the provisioning token"));
+		final Argument id = new Argument(PROVISIONING_ID, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(PROVISIONING_ID_DESCRIPTION));
 		inputArguments.add(id);
-		final Argument secret = new Argument("provisioningPassword", VariableNodeTypes.String.getNodeId(),
-				ValueRanks.Scalar, null, LocalizedText.english("provvisioning secret token ( password)"));
+		final Argument secret = new Argument(PROVISIONING_SECRET, VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(PROVISIONING_SECRET_DESCRIPTION));
 		inputArguments.add(secret);
 		provisioningAddTokenMethod.setInputArguments(inputArguments.toArray(new Argument[0]));
 		provisioningAddTokenMethod.setOutputArguments(new Argument[0]);
 		provisioningAddTokenMethod.setInvocationHandler(
 				new GenerateAddProvisioningMethodInvocationHandler(provisioningAddTokenMethod, inputArguments));
 		waldotNamespace.getStorageManager().addNode(provisioningAddTokenMethod);
-		// provisioningAddTokenMethod.addReference(new
-		// Reference(provisioningAddTokenMethod.getNodeId(),
-		// Identifiers.Organizes, managementRecord.getNodeId().expanded(), false));
 		provisioningAddTokenMethod.addReference(new Reference(provisioningAddTokenMethod.getNodeId(),
 				Identifiers.HasModellingRule, Identifiers.ModellingRule_Mandatory.expanded(), true));
 		managementRecord.addComponent(provisioningAddTokenMethod);
@@ -226,9 +274,6 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 				waldotNamespace.generateQualifiedName("Agent Management"),
 				LocalizedText.english("Agents Management Instrumentation"));
 		waldotNamespace.getStorageManager().addNode(agentFolder);
-		// agentFolder.addReference(new Reference(agentFolder.getNodeId(),
-		// Identifiers.Organizes,
-		// assetRootNode.getNodeId().expanded(), false));
 		assetRootNode.addOrganizes(agentFolder);
 	}
 
@@ -236,6 +281,9 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	public void generateAssetFolders(final UaFolderNode assetRootNode) {
 		this.assetRootNode = assetRootNode;
 		generateProvisioningFolder();
+		generateRpcFolder();
+		generateRpcProvisioningManualRequest();
+		generateRpcProvisioningTokenRequest();
 		generateAddProvisioningTokenMethod();
 		generateDeleteProvisioningTokenMethod();
 		generateAgentFolder();
@@ -253,17 +301,14 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 				LocalizedText.english("with this method you can delete the provisioning token"), writeMask,
 				userWriteMask, executable, userExecutable);
 		final List<Argument> inputArguments = new ArrayList<>();
-		final Argument id = new Argument("provisioningID", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar,
-				null, LocalizedText.english("unique identifier of the provisioning token"));
+		final Argument id = new Argument(PROVISIONING_ID, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(PROVISIONING_ID_DESCRIPTION));
 		inputArguments.add(id);
 		provisioningDeleteTokenMethod.setInputArguments(inputArguments.toArray(new Argument[0]));
 		provisioningDeleteTokenMethod.setOutputArguments(new Argument[0]);
 		provisioningDeleteTokenMethod.setInvocationHandler(
 				new GenerateDeleteProvisioningMethodInvocationHandler(provisioningDeleteTokenMethod, inputArguments));
 		waldotNamespace.getStorageManager().addNode(provisioningDeleteTokenMethod);
-		// provisioningAddTokenMethod.addReference(new
-		// Reference(provisioningAddTokenMethod.getNodeId(),
-		// Identifiers.Organizes, managementRecord.getNodeId().expanded(), false));
 		provisioningDeleteTokenMethod.addReference(new Reference(provisioningDeleteTokenMethod.getNodeId(),
 				Identifiers.HasModellingRule, Identifiers.ModellingRule_Mandatory.expanded(), true));
 		managementRecord.addComponent(provisioningDeleteTokenMethod);
@@ -295,9 +340,6 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 
 		});
 		waldotNamespace.getStorageManager().addNode(provisioningDeleteTokenMethod);
-		// provisioningDeleteTokenMethod.addReference(new
-		// Reference(provisioningDeleteTokenMethod.getNodeId(),
-		// Identifiers.Organizes, token.getNodeId().expanded(), false));
 		token.addComponent(provisioningDeleteTokenMethod);
 	}
 
@@ -317,7 +359,7 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 		// Identifiers.Organizes,
 		// assetRootNode.getNodeId().expanded(), false));
 		assetRootNode.addOrganizes(provisioningFolder);
-		final NodeId nodeId = waldotNamespace.generateNodeId("token_management");
+		final NodeId nodeId = waldotNamespace.generateNodeId("token-management");
 		managementRecord = new UaObjectNode(waldotNamespace.getOpcUaNodeContext(), nodeId,
 				waldotNamespace.generateQualifiedName("Token Management"), LocalizedText.english("Token Management"));
 
@@ -348,6 +390,103 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 		generateDeleteProvisioningTokenMethod(provisioningRecord, id);
 		waldotNamespace.opcuaUpdateEvent(provisioningFolder);
 		return nodeId;
+	}
+
+	private void generateRpcFolder() {
+		rpcFolder = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId("agent-rpc"),
+				waldotNamespace.generateQualifiedName("Agent RPC folder"),
+				LocalizedText.english("Foler for Agent RPC methods"));
+		waldotNamespace.getStorageManager().addNode(rpcFolder);
+		assetRootNode.addOrganizes(rpcFolder);
+		final NodeId nodeId = waldotNamespace.generateNodeId("lifecycle");
+		agentLifeCycleRecord = new UaObjectNode(waldotNamespace.getOpcUaNodeContext(), nodeId,
+				waldotNamespace.generateQualifiedName("Life Cycle Manager"),
+				LocalizedText.english("Life Cycle Manager"));
+
+		waldotNamespace.getStorageManager().addNode(agentLifeCycleRecord);
+		agentLifeCycleRecord.addReference(new Reference(agentLifeCycleRecord.getNodeId(), Identifiers.HasTypeDefinition,
+				Identifiers.BaseObjectType.expanded(), true));
+		provisioningFolder.addComponent(agentLifeCycleRecord);
+	}
+
+	private void generateRpcProvisioningManualRequest() {
+		final Boolean userExecutable = Boolean.TRUE;
+		final Boolean executable = Boolean.TRUE;
+		final UInteger writeMask = UInteger.valueOf(WriteMask.Executable.getValue());
+		final UInteger userWriteMask = UInteger.valueOf(WriteMask.Executable.getValue());
+		provisioningRpcManualRequest = new UaMethodNode(waldotNamespace.getOpcUaNodeContext(),
+				waldotNamespace.generateNodeId("provisioning-manual-request"),
+				waldotNamespace.generateQualifiedName("Create Provisioning Manual Request"),
+				LocalizedText.english("Create Provisioning Manual Request"),
+				LocalizedText.english("RPC for Manual Request Provisioning"), writeMask, userWriteMask, executable,
+				userExecutable);
+		final List<Argument> inputArguments = new ArrayList<>();
+		final Argument unique = new Argument(PROVISIONING_UNIQUE_ID, VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(PROVISIONING_UNIQUE_ID_DESCRIPTION));
+		inputArguments.add(unique);
+		final Argument id = new Argument(PROVISIONING_ID, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(PROVISIONING_ID_DESCRIPTION));
+		inputArguments.add(id);
+		final List<Argument> outputArguments = new ArrayList<>();
+		final Argument generatedToken = new Argument(PROVISIONING_SECRET, VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(PROVISIONING_SECRET_DESCRIPTION));
+		outputArguments.add(generatedToken);
+		final Argument provisioningStatus = new Argument(PROVISIONING_STATUS, VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(PROVISIONING_STATUS_DESCRIPTION));
+		outputArguments.add(provisioningStatus);
+		final Argument provisioningNote = new Argument(PROVISIONING_NOTE, VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(PROVISIONING_NOTE_DESCRIPTION));
+		outputArguments.add(provisioningNote);
+		provisioningRpcManualRequest.setOutputArguments(outputArguments.toArray(new Argument[0]));
+		provisioningRpcManualRequest.setInvocationHandler(
+				new GenerateRpcProvisioningManualRequestMethodInvocationHandler(provisioningRpcManualRequest,
+						inputArguments, outputArguments));
+		waldotNamespace.getStorageManager().addNode(provisioningRpcManualRequest);
+		provisioningRpcManualRequest.addReference(new Reference(provisioningRpcManualRequest.getNodeId(),
+				Identifiers.HasModellingRule, Identifiers.ModellingRule_Mandatory.expanded(), true));
+		rpcFolder.addComponent(provisioningRpcManualRequest);
+	}
+
+	private void generateRpcProvisioningTokenRequest() {
+		final Boolean userExecutable = Boolean.TRUE;
+		final Boolean executable = Boolean.TRUE;
+		final UInteger writeMask = UInteger.valueOf(WriteMask.Executable.getValue());
+		final UInteger userWriteMask = UInteger.valueOf(WriteMask.Executable.getValue());
+		provisioningRpcManualRequest = new UaMethodNode(waldotNamespace.getOpcUaNodeContext(),
+				waldotNamespace.generateNodeId("provisioning-manual-request"),
+				waldotNamespace.generateQualifiedName("Create Provisioning Manual Request"),
+				LocalizedText.english("Create Provisioning Manual Request"),
+				LocalizedText.english("RPC for Manual Request Provisioning"), writeMask, userWriteMask, executable,
+				userExecutable);
+		final List<Argument> inputArguments = new ArrayList<>();
+		final Argument id = new Argument(PROVISIONING_ID, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(PROVISIONING_ID_DESCRIPTION));
+		inputArguments.add(id);
+		final Argument secret = new Argument(PROVISIONING_SECRET, VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(PROVISIONING_SECRET_DESCRIPTION));
+		inputArguments.add(secret);
+		final Argument csr = new Argument(PROVISIONING_CSR, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar,
+				null, LocalizedText.english(PROVISIONING_CSR_DESCRIPTION));
+		inputArguments.add(csr);
+		final List<Argument> outputArguments = new ArrayList<>();
+
+		final Argument provisioningStatus = new Argument(PROVISIONING_STATUS, VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(PROVISIONING_STATUS_DESCRIPTION));
+		outputArguments.add(provisioningStatus);
+		final Argument provisioningNote = new Argument(PROVISIONING_NOTE, VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(PROVISIONING_NOTE_DESCRIPTION));
+		outputArguments.add(provisioningNote);
+		final Argument provisioningCrt = new Argument(PROVISIONING_CRT_CHAIN, VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(PROVISIONING_CRT_CHAIN_DESCRIPTION));
+		outputArguments.add(provisioningCrt);
+		provisioningRpcManualRequest.setOutputArguments(outputArguments.toArray(new Argument[0]));
+		provisioningRpcManualRequest.setInvocationHandler(
+				new GenerateRpcProvisioningTokenRequestMethodInvocationHandler(provisioningRpcManualRequest,
+						inputArguments, outputArguments));
+		waldotNamespace.getStorageManager().addNode(provisioningRpcManualRequest);
+		provisioningRpcManualRequest.addReference(new Reference(provisioningRpcManualRequest.getNodeId(),
+				Identifiers.HasModellingRule, Identifiers.ModellingRule_Mandatory.expanded(), true));
+		rpcFolder.addComponent(provisioningRpcManualRequest);
 	}
 
 	private String getSessionId(final Session session) {
@@ -392,6 +531,16 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 			sessions.put(session.getSessionId(), new SessionData(session, pending));
 		}
 
+	}
+
+	public Variant[] rpcProvisioningManualRequestMethodAction(Variant[] inputValues) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Variant[] rpcProvisioningTokenRequestMethodAction(Variant[] inputValues) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

@@ -1,21 +1,32 @@
 package net.rossonet.waldot.agent.client.api;
 
 import org.eclipse.milo.opcua.sdk.client.api.ServiceFaultListener;
-import org.eclipse.milo.opcua.stack.core.UaException;
+import org.eclipse.milo.opcua.sdk.client.api.UaClient;
 
 import net.rossonet.waldot.agent.client.v1.WaldOTAgentClientImplV1;
 
-public interface WaldOTAgentClient extends ServiceFaultListener, AutoCloseable {
+public interface WaldOTAgentClient extends ServiceFaultListener, UaClient, AutoCloseable {
 
 	public enum Status {
-		INIT, CLOSED, FAULTED, STOPPED
+		CLOSED, COMPLETED_PROVISIONING_MANUAL_REQUEST, COMPLETED_PROVISIONING_TOKEN, CONNECTED,
+		CONNECTED_PROVISIONING_MANUAL_APPROVAL, CONNECTED_PROVISIONING_TOKEN, FAULTED, INIT, STARTING,
+		STARTING_PROVISIONING_MANUAL_APPROVAL, STARTING_PROVISIONING_TOKEN, STOPPED,
+		WAITING_PROVISIONING_MANUAL_APPROVAL
 	}
 
 	public static int CONTROL_THREAD_PRIORITY = Thread.MAX_PRIORITY;
+	public static long CONTROL_THREAD_SLEEP_TIME_MSEC = 5000L;
+	public static long MANUAL_APPROVAL_WAITING_TIME_SEC = 20;
+
+	public static int TIMEOUT_GET_SESSION_SEC = 2;
+
+	public static long TIMEOUT_PROVISIONING_ACTION_SEC = 120;
 
 	public static WaldOTAgentClient withConfiguration(final WaldOTAgentClientConfiguration configuration) {
 		return new WaldOTAgentClientImplV1(configuration);
 	}
+
+	void changeStatus(Status newStatus);
 
 	WaldOTAgentClientConfiguration getConfiguration();
 
@@ -23,7 +34,4 @@ public interface WaldOTAgentClient extends ServiceFaultListener, AutoCloseable {
 
 	void setStatusObserver(WaldotAgentClientObserver waldotAgentClientObserver);
 
-	void start() throws UaException;
-
-	void stop();
 }

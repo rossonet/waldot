@@ -6,11 +6,16 @@ import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.filters.AttributeFilter;
+import org.eclipse.milo.opcua.sdk.server.nodes.filters.AttributeFilterContext.GetAttributeContext;
+import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotElement;
 import net.rossonet.waldot.api.models.WaldotGraph;
@@ -24,15 +29,35 @@ import net.rossonet.waldot.api.models.WaldotGraph;
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implements WaldotElement {
-
 	protected static IllegalStateException elementAlreadyRemoved(final Class<? extends Element> clazz,
 			final NodeId id) {
 		return new IllegalStateException(String.format("%s with id %s was removed.", clazz.getSimpleName(), id));
 	}
 
-	private boolean removed = false;
-
 	protected long currentVersion;
+
+	private final AttributeFilter filterChain = new AttributeFilter() {
+
+		@Override
+		public Object getAttribute(GetAttributeContext ctx, AttributeId attributeId) {
+			// FIXME: gestione permessi per sessione
+			if (attributeId == AttributeId.UserAccessLevel) {
+				logger.debug("UserAccessLevel requested for {}", getNodeId());
+				// return AccessLevel.toValue(AccessLevel.READ_WRITE);
+				return ctx.getAttribute(attributeId);
+			} else if (attributeId == AttributeId.AccessLevel) {
+				logger.debug("AccessLevel requested for {}", getNodeId());
+				// return AccessLevel.toValue(AccessLevel.READ_ONLY);
+				return ctx.getAttribute(attributeId);
+			} else {
+				return ctx.getAttribute(attributeId);
+			}
+		}
+
+	};
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+
+	private boolean removed = false;
 
 	protected GremlinProperty(final WaldotGraph graph, final String key, final DATA_TYPE value,
 			final UaNodeContext context, final NodeId nodeId, final LocalizedText description, final UInteger writeMask,
@@ -42,6 +67,7 @@ public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implemen
 		super(context, nodeId, QualifiedName.parse(key), LocalizedText.english(key), description, writeMask,
 				userWriteMask, null, dataType, valueRank, arrayDimensions, accessLevel, userAccessLevel,
 				minimumSamplingInterval, historizing);
+		getFilterChain().addLast(filterChain);
 		currentVersion = -1;
 	}
 

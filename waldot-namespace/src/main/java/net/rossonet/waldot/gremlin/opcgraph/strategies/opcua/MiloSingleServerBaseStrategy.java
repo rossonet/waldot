@@ -19,7 +19,6 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
-import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
@@ -74,8 +73,13 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			&& Identifiers.HasComponent.equals(reference.getReferenceTypeId());
 	public static final String CONDITION_FIELD = "Condition";
 	public static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
+	private static final boolean DEFAULT_CLEAR_FACTS_AFTER_EXECUTION = false;
 	public static final String DEFAULT_CONDITION_VALUE = "true";
+	private static final int DEFAULT_DELAY_BEFORE_EVALUATION = 0;
+	private static final int DEFAULT_DELAY_BEFORE_EXECUTE = 0;
+	private static final boolean DEFAULT_PARALLEL_EXECUTION = false;
 	public static final int DEFAULT_PRIORITY_VALUE = 100;
+	private static final int DEFAULT_REFACTORY_PERIOD_MS = 0;
 	public static final String DESCRIPTION_PARAMETER = "description";
 	public static final String DIRECTORY_PARAMETER = "directory";
 	public static final String HAS_WALDOT_RULE = "HasRule";
@@ -84,11 +88,6 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	public static final String PRIORITY_FIELD = "Priority";
 	public static final String RULE_NODE_PARAMETER = "rule";
 	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
-	private static final int DEFAULT_DELAY_BEFORE_EVALUATION = 0;
-	private static final int DEFAULT_DELAY_BEFORE_EXECUTE = 0;
-	private static final boolean DEFAULT_CLEAR_FACTS_AFTER_EXECUTION = false;
-	private static final int DEFAULT_REFACTORY_PERIOD_MS = 0;
-	private static final boolean DEFAULT_PARALLEL_EXECUTION = false;
 
 	private UaFolderNode assetRootNode;
 
@@ -123,8 +122,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		// create the edge
 		// FIXME parametrizzare tutto per la creazione dell'edge
 		final OpcEdge edge = new OpcEdge(waldotNamespace.getGremlinGraph(), nodeId, sourceVertex, targetVertex,
-				elaboratedLabel, description, MiloSingleServerBaseReferenceNodeBuilder.writeMask,
-				MiloSingleServerBaseReferenceNodeBuilder.userWriteMask,
+				elaboratedLabel, description, MiloSingleServerBaseReferenceNodeBuilder.vertexWriteMask,
+				MiloSingleServerBaseReferenceNodeBuilder.vertexUserWriteMask,
 				MiloSingleServerBaseReferenceNodeBuilder.eventNotifierDisable,
 				MiloSingleServerBaseReferenceNodeBuilder.version);
 		waldotNamespace.getStorageManager().addNode(edge);
@@ -205,8 +204,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			// if typeDefinition is not a rule, create a vertex
 			// FIXME parametrizzare tutto per la creazione del vertice
 			return createVertex(nodeId, typeDefinition, label, description, browseName, displayName, propertyKeyValues,
-					MiloSingleServerBaseReferenceNodeBuilder.writeMask,
-					MiloSingleServerBaseReferenceNodeBuilder.userWriteMask,
+					MiloSingleServerBaseReferenceNodeBuilder.vertexWriteMask,
+					MiloSingleServerBaseReferenceNodeBuilder.vertexUserWriteMask,
 					MiloSingleServerBaseReferenceNodeBuilder.eventNotifierActive,
 					MiloSingleServerBaseReferenceNodeBuilder.version);
 		}
@@ -265,13 +264,13 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			final UaNodeContext context = opcEdge.getNodeContext();
 			final LocalizedText description = LocalizedText
 					.english(key + " of edge property " + opcEdge.getBrowseName());
-			final UInteger writeMask = UInteger.MIN;
-			final UInteger userWriteMask = UInteger.MIN;
+			final UInteger writeMask = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableWriteMask;
+			final UInteger userWriteMask = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableUserWriteMask;
 			final NodeId dataType = Identifiers.BaseDataType;
 			final int valueRank = ValueRanks.Scalar;
 			final UInteger[] arrayDimensions = null;
-			final UByte accessLevel = AccessLevel.toValue(AccessLevel.CurrentRead);
-			final UByte userAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead);
+			final UByte accessLevel = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableAccessLevel;
+			final UByte userAccessLevel = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableUserAccessLevel;
 			final Double minimumSamplingInterval = -1.0;
 			final boolean historizing = false;
 			@SuppressWarnings({ "rawtypes" })
@@ -304,13 +303,13 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			final UaNodeContext context = opcVertex.getNodeContext();
 			final LocalizedText description = LocalizedText
 					.english(key + " of vertex property " + opcVertex.getBrowseName());
-			final UInteger writeMask = UInteger.MIN;
-			final UInteger userWriteMask = UInteger.MIN;
+			final UInteger writeMask = MiloSingleServerBaseReferenceNodeBuilder.variableWriteMask;
+			final UInteger userWriteMask = MiloSingleServerBaseReferenceNodeBuilder.variableUserWriteMask;
 			final NodeId dataType = Identifiers.BaseDataType;
 			final int valueRank = ValueRanks.Scalar;
 			final UInteger[] arrayDimensions = null;
-			final UByte accessLevel = AccessLevel.toValue(AccessLevel.CurrentRead);
-			final UByte userAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead);
+			final UByte accessLevel = MiloSingleServerBaseReferenceNodeBuilder.variableAccessLevel;
+			final UByte userAccessLevel = MiloSingleServerBaseReferenceNodeBuilder.variableUserAccessLevel;
 			final Double minimumSamplingInterval = -1.0;
 			final boolean historizing = false;
 			@SuppressWarnings({ "rawtypes" })
@@ -400,8 +399,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		// create rule node
 		final DefaultRule rule = createRuleObject(typeDefinition, waldotNamespace.getGremlinGraph(),
 				waldotNamespace.getOpcUaNodeContext(), nodeId, browseName, displayName, new LocalizedText(description),
-				MiloSingleServerBaseReferenceNodeBuilder.writeMask,
-				MiloSingleServerBaseReferenceNodeBuilder.userWriteMask,
+				MiloSingleServerBaseReferenceNodeBuilder.vertexWriteMask,
+				MiloSingleServerBaseReferenceNodeBuilder.vertexUserWriteMask,
 				MiloSingleServerBaseReferenceNodeBuilder.eventNotifierActive,
 				MiloSingleServerBaseReferenceNodeBuilder.version, waldotNamespace.getRulesEngine(), condition, action,
 				priority);

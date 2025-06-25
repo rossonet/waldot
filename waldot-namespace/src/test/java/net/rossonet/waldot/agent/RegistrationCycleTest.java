@@ -23,14 +23,13 @@ public class RegistrationCycleTest {
 				System.out.println("Status changed: " + status);
 			}
 		});
-		client.start();
-		int limit = 120 / 5;
+		client.connect();
+		final int limit = 120 / 5;
 		for (int i = 0; i < limit; i++) {
 			final WaldOTAgentClient.Status status = client.getStatus();
-			System.out.println("Status: " + status);
 			Thread.sleep(5000);
 		}
-		client.stop();
+		client.disconnect();
 	}
 
 }

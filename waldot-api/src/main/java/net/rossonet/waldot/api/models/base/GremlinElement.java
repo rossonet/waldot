@@ -11,6 +11,8 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotElement;
 
@@ -23,15 +25,16 @@ import net.rossonet.waldot.api.models.WaldotElement;
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public abstract class GremlinElement extends UaObjectNode implements WaldotElement {
-
 	protected static IllegalStateException elementAlreadyRemoved(final Class<? extends Element> clazz,
 			final NodeId id) {
 		return new IllegalStateException(String.format("%s with id %s was removed.", clazz.getSimpleName(), id));
 	}
 
-	private boolean removed = false;
-
 	protected long currentVersion;
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+
+	private boolean removed = false;
 
 	protected GremlinElement(final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
 			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,

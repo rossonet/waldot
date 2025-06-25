@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.Reference;
-import org.eclipse.milo.opcua.sdk.core.WriteMask;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaReferenceTypeNode;
@@ -29,15 +28,20 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	static UaVariableNode conditionRuleTypeNode;
 	static UaObjectTypeNode edgeTypeNode;
 
+	static final UByte edgeVariableAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead, AccessLevel.CurrentWrite);
+	static final UByte edgeVariableUserAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead,
+			AccessLevel.CurrentWrite);
+	static final UInteger edgeVariableUserWriteMask = UInteger.MIN;
+	static final UInteger edgeVariableWriteMask = UInteger.MIN;
 	static final UByte eventNotifierActive = ubyte(1);
 	static final UByte eventNotifierDisable = ubyte(0);
 	static NodeId hasPropertyReferenceType;
 	static NodeId hasReferenceDescriptionReferenceType;
+
 	static NodeId hasSourceNodeReferenceType;
 	static NodeId hasTargetNodeReferenceType;
 	static UaObjectTypeNode interfaceTypeNode;
 	static UaVariableNode isForwardTypeNode;
-
 	static UaVariableNode labelEdgeTypeNode;
 	static UaVariableNode labelRuleTypeNode;
 	static UaVariableNode labelVertexTypeNode;
@@ -46,10 +50,14 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	static UaObjectTypeNode ruleTypeNode;
 	static UaVariableNode sourceNodeTypeNode;
 	static UaVariableNode targetNodeTypeNode;
-	static final UInteger userWriteMask = UInteger.valueOf(WriteMask.AccessLevel.getValue());
+	static final UByte variableAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead, AccessLevel.CurrentWrite);
+	static final UByte variableUserAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead, AccessLevel.CurrentWrite);
+	static final UInteger variableUserWriteMask = UInteger.MIN;
+	static final UInteger variableWriteMask = UInteger.MIN;
 	static final int version = 0;
 	static UaObjectTypeNode vertexTypeNode;
-	static final UInteger writeMask = UInteger.valueOf(WriteMask.AccessLevel.getValue());
+	static final UInteger vertexUserWriteMask = UInteger.MIN;
+	static final UInteger vertexWriteMask = UInteger.MIN;
 
 	private static void generateEdgeTypeNode(final MiloSingleServerBaseStrategy miloSingleServerBaseV0Strategy) {
 		edgeTypeNode = UaObjectTypeNode
@@ -164,8 +172,8 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 		hasPropertyReferenceType = generateReferenceTypeNode("HasGremlinProperty", "IsPropertyOf",
 				"A property linked to an edge or vertex", Identifiers.HasComponent, false, false,
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
-		hasPropertyReferenceType = generateReferenceTypeNode(MiloSingleServerBaseStrategy.HAS_WALDOT_RULE,
-				"IsFiredBy", "A rule fired by the events", Identifiers.HasComponent, false, false,
+		hasPropertyReferenceType = generateReferenceTypeNode(MiloSingleServerBaseStrategy.HAS_WALDOT_RULE, "IsFiredBy",
+				"A rule fired by the events", Identifiers.HasComponent, false, false,
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
 	}
 
@@ -224,8 +232,8 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 				.setDisplayName(LocalizedText.english("WaldOT Rule Node")).setIsAbstract(false).build();
 		labelRuleTypeNode = new UaVariableNode.UaVariableNodeBuilder(
 				miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext())
-				.setNodeId(miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(
-						"ObjectTypes/WaldOTRuleObjectType." + MiloSingleServerBaseStrategy.LABEL_FIELD))
+				.setNodeId(miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateNodeId("ObjectTypes/WaldOTRuleObjectType." + MiloSingleServerBaseStrategy.LABEL_FIELD))
 				.setAccessLevel(AccessLevel.READ_WRITE)
 				.setBrowseName(miloSingleServerBaseV0Strategy.getWaldotNamespace()
 						.generateQualifiedName(MiloSingleServerBaseStrategy.LABEL_FIELD))
@@ -276,8 +284,7 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 				.setDataType(Identifiers.Int32).setTypeDefinition(Identifiers.BaseDataVariableType).build();
 		priorityRuleTypeNode.addReference(new Reference(priorityRuleTypeNode.getNodeId(), Identifiers.HasModellingRule,
 				Identifiers.ModellingRule_Mandatory.expanded(), true));
-		priorityRuleTypeNode
-				.setValue(new DataValue(new Variant(MiloSingleServerBaseStrategy.DEFAULT_PRIORITY_VALUE)));
+		priorityRuleTypeNode.setValue(new DataValue(new Variant(MiloSingleServerBaseStrategy.DEFAULT_PRIORITY_VALUE)));
 		ruleTypeNode.addComponent(priorityRuleTypeNode);
 
 		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(labelRuleTypeNode);
