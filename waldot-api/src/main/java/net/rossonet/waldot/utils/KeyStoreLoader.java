@@ -40,6 +40,7 @@ import com.google.common.collect.Sets;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
+@Deprecated
 public class KeyStoreLoader {
 
 	private static final Pattern IP_ADDR_PATTERN = Pattern
@@ -66,6 +67,7 @@ public class KeyStoreLoader {
 		return serverKeyPair;
 	}
 
+	@Deprecated
 	public KeyStoreLoader load(final Path baseDir) throws Exception {
 		final KeyStore keyStore = KeyStore.getInstance("PKCS12");
 

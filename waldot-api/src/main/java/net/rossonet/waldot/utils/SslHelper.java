@@ -2,15 +2,16 @@ package net.rossonet.waldot.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
+import java.security.Key;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -18,20 +19,19 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -40,14 +40,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.ExtensionsGenerator;
@@ -56,15 +51,8 @@ import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMException;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
@@ -73,6 +61,11 @@ import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateBuilder;
+import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SslHelper provides utility methods for handling SSL/TLS operations, including
@@ -84,44 +77,175 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
  */
 public class SslHelper {
 
-	public static String DEFAULT_CONTEXT_TLS_PROTOCOL = "TLSv1.2";
+	public static final class KeyStoreHelper {
 
+		private final Logger logger = LoggerFactory.getLogger(getClass());
+		private final String keyStoreFilePath;
+		private final String keyStorePassword;
+
+		public KeyStoreHelper(final String keyStoreFilePath, final String keyStorePassword) {
+			this.keyStoreFilePath = keyStoreFilePath;
+			this.keyStorePassword = keyStorePassword;
+		}
+
+		public synchronized boolean createSelfSignedCertificate(final String certificateLabel, final String commonName,
+				final String organization, final String unit, final String locality, final String state,
+				final String country, final String uri, final String dns, final String ip, final String dnsAlias) {
+			boolean result = false;
+			try {
+				final KeyStore keyStore = loadOrCreateKeyStore();
+				final KeyPair keyPair = SelfSignedCertificateGenerator.generateRsaKeyPair(2048);
+				final SelfSignedCertificateBuilder builder = new SelfSignedCertificateBuilder(keyPair)
+						.setCommonName(commonName).setOrganization(organization).setOrganizationalUnit(unit)
+						.setLocalityName(locality).setStateName(state).setCountryCode(country).setApplicationUri(uri)
+						.addDnsName(dns).addDnsName(dnsAlias).addIpAddress(ip);
+				final X509Certificate certificate = builder.build();
+				keyStore.setKeyEntry(certificateLabel, keyPair.getPrivate(), keyStorePassword.toCharArray(),
+						new X509Certificate[] { certificate });
+				keyStore.store(new FileOutputStream(keyStoreFilePath), keyStorePassword.toCharArray());
+				result = true;
+			} catch (final Exception df) {
+				logger.error("error in key generation", df);
+				result = false;
+			}
+			return result;
+		}
+
+		public PKCS10CertificationRequest generateCertificateSigningRequest(final String certificateLabel)
+				throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
+				IOException, OperatorCreationException {
+			final KeyPair keyPair = getKeyPair(certificateLabel);
+			final X509Certificate certificate = getCertificate(certificateLabel);
+			final SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo
+					.getInstance(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded()));
+			final PKCS10CertificationRequestBuilder p10Builder = new PKCS10CertificationRequestBuilder(
+					new JcaX509CertificateHolder(certificate).getSubject(), subjectPublicKeyInfo);
+			final JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(DEFAULT_SIGNATURE_ALGORITHM);
+			final ContentSigner signer = csBuilder.build(keyPair.getPrivate());
+			final List<GeneralName> generalNames = new ArrayList<>();
+			if (getSanUri(certificate).isPresent()) {
+				generalNames.add(new GeneralName(SUBJECT_ALT_NAME_URI, getSanUri(certificate).get()));
+			}
+			generalNames.addAll(getSubjectAltNames(certificate));
+			final GeneralNames subjectAltNames = new GeneralNames(generalNames.toArray(new GeneralName[0]));
+			final ExtensionsGenerator extGen = new ExtensionsGenerator();
+			extGen.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
+			p10Builder.addAttribute(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest, extGen.generate());
+			final PKCS10CertificationRequest certificateRequest = p10Builder.build(signer);
+			return certificateRequest;
+		}
+
+		public X509Certificate getCertificate(final String certificateLabel)
+				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+			final KeyStore keyStore = loadOrCreateKeyStore();
+			final X509Certificate clientCertificate = (X509Certificate) keyStore.getCertificate(certificateLabel);
+			return clientCertificate;
+		}
+
+		public String getCertificateBase64(final String certificateLabel)
+				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+			return Base64.getEncoder().encodeToString(getCertificate(certificateLabel).getEncoded());
+		}
+
+		public KeyPair getKeyPair(final String certificateLabel) throws UnrecoverableKeyException, KeyStoreException,
+				NoSuchAlgorithmException, CertificateException, IOException {
+			final PrivateKey privateKey = getPrivateKey(certificateLabel);
+			final PublicKey publicKey = getPublicKey(certificateLabel);
+			return new KeyPair(publicKey, privateKey);
+		}
+
+		public PrivateKey getPrivateKey(final String certificateLabel) throws UnrecoverableKeyException,
+				KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+			final KeyStore keyStore = loadOrCreateKeyStore();
+			final Key privateKey = keyStore.getKey(certificateLabel, keyStorePassword.toCharArray());
+			if (!(privateKey instanceof PrivateKey)) {
+				logger.error("The key for label {} is not a PrivateKey", certificateLabel);
+				throw new IllegalArgumentException("The key for label " + certificateLabel + " is not a PrivateKey");
+			} else {
+				return (PrivateKey) privateKey;
+			}
+		}
+
+		public String getPrivateKeyBase64(final String certificateLabel) throws UnrecoverableKeyException,
+				KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+			return Base64.getEncoder().encodeToString(getPrivateKey(certificateLabel).getEncoded());
+		}
+
+		public PublicKey getPublicKey(final String certificateLabel)
+				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+			final X509Certificate certificate = getCertificate(certificateLabel);
+			return certificate.getPublicKey();
+		}
+
+		public boolean hasCertificate(final String certificateLabel)
+				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+			final KeyStore keyStore = loadOrCreateKeyStore();
+			return keyStore.containsAlias(certificateLabel);
+		}
+
+		private KeyStore loadOrCreateKeyStore()
+				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+			final KeyStore keyStore = KeyStore.getInstance("PKCS12");
+			if (!Files.exists(Path.of(keyStoreFilePath))) {
+				logger.info("Creating new keystore at {}", keyStoreFilePath);
+				keyStore.load(null, keyStorePassword.toCharArray());
+			} else {
+				logger.info("Loading existing keystore from {}", keyStoreFilePath);
+				try (FileInputStream fis = new FileInputStream(keyStoreFilePath)) {
+					keyStore.load(fis, keyStorePassword.toCharArray());
+				} catch (final IOException e) {
+					logger.error("Failed to load keystore", e);
+					throw new KeyStoreException("Could not load keystore", e);
+				}
+			}
+			return keyStore;
+		}
+
+		public synchronized boolean setCertificate(final String certificateLabel, final byte[] certificate,
+				final byte[] privateKey) {
+			boolean result = false;
+			try {
+				logger.info("importing keypair from string data");
+				final KeyStore keyStore = loadOrCreateKeyStore();
+				final KeyFactory kf = KeyFactory.getInstance("RSA");
+				final X509Certificate clientCertificate = (X509Certificate) CertificateFactory.getInstance("X.509")
+						.generateCertificate(new ByteArrayInputStream(certificate));
+				final PublicKey pubKey = clientCertificate.getPublicKey();
+				final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKey);
+				final PrivateKey privKey = kf.generatePrivate(keySpec);
+				final KeyPair clientKeyPair = new KeyPair(pubKey, privKey);
+				final X509Certificate[] clientCertificateChain = new X509Certificate[] { clientCertificate };
+				keyStore.setKeyEntry(certificateLabel, clientKeyPair.getPrivate(), keyStorePassword.toCharArray(),
+						clientCertificateChain);
+				keyStore.store(new FileOutputStream(keyStoreFilePath), keyStorePassword.toCharArray());
+				result = true;
+				logger.info("keypair imported successfully");
+			} catch (final Exception df) {
+				result = false;
+				logger.error("error in select keypair", df);
+			}
+			return result;
+		}
+
+		public boolean setCertificate(final String certificateLabel, final PemObject certificate,
+				final PemObject privateKey) {
+			return setCertificate(certificateLabel, certificate.getContent(), privateKey.getContent());
+
+		}
+
+		public boolean setCertificate(final String certificateLabel, final String base64Certificate,
+				final String base64PrivateKey) {
+			return setCertificate(certificateLabel, Base64.getDecoder().decode(base64Certificate),
+					Base64.getDecoder().decode(base64PrivateKey));
+
+		}
+	}
+
+	public static String DEFAULT_CONTEXT_TLS_PROTOCOL = "TLSv1.2";
 	public static String DEFAULT_SIGNATURE_ALGORITHM = "SHA256withRSA";
 	public static final int SUBJECT_ALT_NAME_DNS_NAME = GeneralName.dNSName;
-
 	public static final int SUBJECT_ALT_NAME_IP_ADDRESS = GeneralName.iPAddress;
-
 	public static final int SUBJECT_ALT_NAME_URI = GeneralName.uniformResourceIdentifier;
-
-	public static String certificateStringFromOneLine(final String certificateInOneLine) {
-		final StringBuilder result = new StringBuilder();
-		String header = null;
-		if (certificateInOneLine.contains("-----BEGIN CERTIFICATE-----")) {
-			header = "-----BEGIN CERTIFICATE-----";
-		} else if (certificateInOneLine.contains("-----BEGIN RSA PRIVATE KEY-----")) {
-			header = "-----BEGIN RSA PRIVATE KEY-----";
-		} else if (certificateInOneLine.contains("-----BEGIN PRIVATE KEY-----")) {
-			header = "-----BEGIN PRIVATE KEY-----";
-		}
-		String footer = null;
-		if (certificateInOneLine.contains("-----END CERTIFICATE-----")) {
-			footer = "-----END CERTIFICATE-----";
-		} else if (certificateInOneLine.contains("-----END RSA PRIVATE KEY-----")) {
-			footer = "-----END RSA PRIVATE KEY-----";
-		} else if (certificateInOneLine.contains("-----END PRIVATE KEY-----")) {
-			footer = "-----END PRIVATE KEY-----";
-		}
-		if (header != null && footer != null) {
-			final String payload = certificateInOneLine.replace(header, "").replace(footer, "");
-			for (final String line : TextHelper.splitFixSize(payload, 64)) {
-				result.append(line);
-				result.append("\n");
-			}
-			final String converted = header + "\n" + result.toString() + footer;
-			return converted;
-		}
-		return result.toString();
-	}
 
 	public static boolean checkSignatureWithPayload(final PublicKey pubKey, final PrivateKey privKey)
 			throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
@@ -141,200 +265,6 @@ public class SslHelper {
 		return sig.verify(signature);
 	}
 
-	public static PKCS10CertificationRequest createCertificationRequest(final KeyPair keyPair,
-			final X509Certificate certificate)
-			throws CertificateEncodingException, OperatorCreationException, CertificateParsingException, IOException {
-		return createCertificationRequest(keyPair, certificate, DEFAULT_SIGNATURE_ALGORITHM);
-	}
-
-	public static PKCS10CertificationRequest createCertificationRequest(final KeyPair keyPair,
-			final X509Certificate certificate, final String signatureAlgorithm)
-			throws OperatorCreationException, CertificateEncodingException, CertificateParsingException, IOException {
-		final SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo
-				.getInstance(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded()));
-		final PKCS10CertificationRequestBuilder p10Builder = new PKCS10CertificationRequestBuilder(
-				new JcaX509CertificateHolder(certificate).getSubject(), subjectPublicKeyInfo);
-		final JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(signatureAlgorithm);
-		final ContentSigner signer = csBuilder.build(keyPair.getPrivate());
-		final List<GeneralName> generalNames = new ArrayList<>();
-		if (getSanUri(certificate).isPresent()) {
-			generalNames.add(new GeneralName(SUBJECT_ALT_NAME_URI, getSanUri(certificate).get()));
-		}
-		generalNames.addAll(getSubjectAltNames(certificate));
-		final GeneralNames subjectAltNames = new GeneralNames(generalNames.toArray(new GeneralName[0]));
-		final ExtensionsGenerator extGen = new ExtensionsGenerator();
-		extGen.addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
-		p10Builder.addAttribute(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest, extGen.generate());
-		final PKCS10CertificationRequest certificateRequest = p10Builder.build(signer);
-		return certificateRequest;
-	}
-
-	public static KeyStore createKeystore(final String certificateAlias, final X509Certificate certificate,
-			final String privateKeyAlias, final PrivateKey privateKey, final String keystorePassword)
-			throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-		final KeyStore clientKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		clientKeyStore.load(null, keystorePassword.toCharArray());
-		clientKeyStore.setCertificateEntry(certificateAlias, certificate);
-		clientKeyStore.setKeyEntry(privateKeyAlias, privateKey, keystorePassword.toCharArray(),
-				new Certificate[] { certificate });
-		return clientKeyStore;
-	}
-
-	public static KeyStore createKeystore(final String caAlias, final X509Certificate ca, final String certificateAlias,
-			final X509Certificate certificate, final String privateKeyAlias, final PrivateKey privateKey,
-			final String keystorePassword)
-			throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-		final KeyStore clientKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		clientKeyStore.load(null, keystorePassword.toCharArray());
-		clientKeyStore.setCertificateEntry(certificateAlias, certificate);
-		clientKeyStore.setKeyEntry(privateKeyAlias, privateKey, keystorePassword.toCharArray(),
-				new Certificate[] { certificate });
-		return clientKeyStore;
-	}
-
-	public static KeyStore createKeyStore(final String caAlias, final Path caCrtFile, final String certificateAlias,
-			final Path crtFile, final String privateKeyAlias, final Path keyFile, final String keystorePassword)
-			throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
-		Security.addProvider(new BouncyCastleProvider());
-		final JcaX509CertificateConverter certificateConverter = new JcaX509CertificateConverter().setProvider("BC");
-		PEMParser reader = new PEMParser(new FileReader(caCrtFile.toFile().getAbsolutePath()));
-		final X509CertificateHolder caCertHolder = (X509CertificateHolder) reader.readObject();
-		reader.close();
-		final X509Certificate caCert = certificateConverter.getCertificate(caCertHolder);
-		reader = new PEMParser(new FileReader(crtFile.toFile().getAbsolutePath()));
-		final X509CertificateHolder certHolder = (X509CertificateHolder) reader.readObject();
-		reader.close();
-		final X509Certificate cert = certificateConverter.getCertificate(certHolder);
-		reader = new PEMParser(new FileReader(keyFile.toFile().getAbsolutePath()));
-		final Object readObject = reader.readObject();
-		PrivateKeyInfo privateKeyInfo = null;
-		if (readObject instanceof PrivateKeyInfo) {
-			privateKeyInfo = (PrivateKeyInfo) readObject;
-		} else if (readObject instanceof PEMKeyPair) {
-			final PEMKeyPair pemKeyPair = (PEMKeyPair) readObject;
-			privateKeyInfo = pemKeyPair.getPrivateKeyInfo();
-		} else {
-			throw new CertificateException("private key not valid");
-		}
-		reader.close();
-		final KeyStore keyStore = createKeyStore(caAlias, caCert, certificateAlias, cert, privateKeyAlias,
-				privateKeyInfo, keystorePassword);
-		return keyStore;
-	}
-
-	public static KeyStore createKeyStore(final String caAlias, final String caCrtString, final String certificateAlias,
-			final String certificateString, final String privateKeyAlias, final String privateKeyString,
-			final String keystorePassword)
-			throws IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
-		final Path caCrtFile = Files.createTempFile("caCrtFile", ".pem");
-		final Path crtFile = Files.createTempFile("crtFile", ".pem");
-		final Path keyFile = Files.createTempFile("keyFile", ".pem");
-		Files.write(caCrtFile, caCrtString.getBytes());
-		Files.write(crtFile, certificateString.getBytes());
-		Files.write(keyFile, privateKeyString.getBytes());
-		final KeyStore keyStore = createKeyStore(caAlias, caCrtFile, certificateAlias, crtFile, privateKeyAlias,
-				keyFile, keystorePassword);
-		caCrtFile.toFile().delete();
-		crtFile.toFile().delete();
-		keyFile.toFile().delete();
-		return keyStore;
-	}
-
-	public static TrustManagerFactory createKeyStore(final String caAlias, final X509Certificate caCert)
-			throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-		final KeyStore caKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		caKeyStore.load(null, null);
-		caKeyStore.setCertificateEntry(caAlias, caCert);
-		final TrustManagerFactory trustManagerFactory = TrustManagerFactory
-				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-		trustManagerFactory.init(caKeyStore);
-		return trustManagerFactory;
-	}
-
-	public static KeyStore createKeyStore(final String certificateAlias, final X509Certificate certificate,
-			final String privateKeyAlias, final PrivateKeyInfo privateKeyInfo, final String keystorePassword)
-			throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-		final JcaPEMKeyConverter keyConverter = new JcaPEMKeyConverter().setProvider("BC");
-		final PrivateKey key = keyConverter.getPrivateKey(privateKeyInfo);
-		final KeyStore clientKeyStore = createKeystore(certificateAlias, certificate, privateKeyAlias, key,
-				keystorePassword);
-		return clientKeyStore;
-	}
-
-	public static KeyStore createKeyStore(final String caAlias, final X509Certificate ca, final String certificateAlias,
-			final X509Certificate certificate, final String privateKeyAlias, final PrivateKeyInfo privateKeyInfo,
-			final String keystorePassword)
-			throws PEMException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-		final JcaPEMKeyConverter keyConverter = new JcaPEMKeyConverter().setProvider("BC");
-		final PrivateKey key = keyConverter.getPrivateKey(privateKeyInfo);
-		final KeyStore clientKeyStore = createKeystore(caAlias, ca, certificateAlias, certificate, privateKeyAlias, key,
-				keystorePassword);
-		return clientKeyStore;
-	}
-
-	public static SSLContext createSSLContext(final String caAlias, final Path caCrtFile, final String certificateAlias,
-			final Path crtFile, final String privateKeyAlias, final Path keyFile, final String keystorePassword)
-			throws KeyManagementException, UnrecoverableKeyException, CertificateException, KeyStoreException,
-			NoSuchAlgorithmException, IOException {
-		return createSSLContext(keystorePassword, keyFile, keystorePassword, keyFile, keystorePassword, keyFile,
-				keystorePassword, DEFAULT_CONTEXT_TLS_PROTOCOL);
-	}
-
-	public static SSLContext createSSLContext(final String caAlias, final Path caCrtFile, final String certificateAlias,
-			final Path crtFile, final String privateKeyAlias, final Path keyFile, final String keystorePassword,
-			final String sslContextProtocol) throws CertificateException, IOException, KeyStoreException,
-			NoSuchAlgorithmException, KeyManagementException, UnrecoverableKeyException {
-		Security.addProvider(new BouncyCastleProvider());
-		final JcaX509CertificateConverter certificateConverter = new JcaX509CertificateConverter().setProvider("BC");
-		PEMParser reader = new PEMParser(new FileReader(caCrtFile.toFile().getAbsolutePath()));
-		final X509CertificateHolder caCertHolder = (X509CertificateHolder) reader.readObject();
-		reader.close();
-		final X509Certificate caCert = certificateConverter.getCertificate(caCertHolder);
-		reader = new PEMParser(new FileReader(crtFile.toFile().getAbsolutePath()));
-		final X509CertificateHolder certHolder = (X509CertificateHolder) reader.readObject();
-		reader.close();
-		final X509Certificate cert = certificateConverter.getCertificate(certHolder);
-		reader = new PEMParser(new FileReader(keyFile.toFile().getAbsolutePath()));
-		final PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) reader.readObject();
-		reader.close();
-		final KeyStore clientKeyStore = createKeyStore(certificateAlias, cert, privateKeyAlias, privateKeyInfo,
-				keystorePassword);
-		final TrustManagerFactory trustManagerFactory = createKeyStore(caAlias, caCert);
-		final KeyManagerFactory keyManagerFactory = KeyManagerFactory
-				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-		keyManagerFactory.init(clientKeyStore, keystorePassword.toCharArray());
-		final SSLContext context = SSLContext.getInstance(sslContextProtocol);
-		context.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
-		return context;
-	}
-
-	public static SSLContext createSSLContext(final String caAlias, final String caCrtString,
-			final String certificateAlias, final String certificateString, final String privateKeyAlias,
-			final String privateKeyString, final String keystorePassword) throws IOException, KeyManagementException,
-			UnrecoverableKeyException, CertificateException, KeyStoreException, NoSuchAlgorithmException {
-		final Path caCrtFile = Files.createTempFile("caCrtFile", ".pem");
-		final Path crtFile = Files.createTempFile("crtFile", ".pem");
-		final Path keyFile = Files.createTempFile("keyFile", ".pem");
-		Files.write(caCrtFile, caCrtString.getBytes());
-		Files.write(crtFile, certificateString.getBytes());
-		Files.write(keyFile, privateKeyString.getBytes());
-		final SSLContext sslContext = createSSLContext(caAlias, caCrtFile, certificateAlias, crtFile, privateKeyAlias,
-				keyFile, keystorePassword);
-		caCrtFile.toFile().delete();
-		crtFile.toFile().delete();
-		keyFile.toFile().delete();
-		return sslContext;
-	}
-
-	public static <OBJECT_TYPE extends Object> String encodeInPemFormat(final OBJECT_TYPE data) throws IOException {
-		final StringWriter writer = new StringWriter();
-		final JcaPEMWriter pemWriter = new JcaPEMWriter(writer);
-		pemWriter.writeObject(data);
-		pemWriter.flush();
-		pemWriter.close();
-		return writer.toString();
-	}
-
 	public static String getDefaultCharSet() {
 		final OutputStreamWriter writer = new OutputStreamWriter(new ByteArrayOutputStream());
 		final String enc = writer.getEncoding();
@@ -350,7 +280,6 @@ public class SslHelper {
 	 */
 	public static List<String> getSanDnsNames(final X509Certificate certificate) {
 		final List<Object> values = getSubjectAltNameField(certificate, SUBJECT_ALT_NAME_DNS_NAME);
-
 		return values.stream().filter(v -> v instanceof String).map(String.class::cast).collect(Collectors.toList());
 	}
 

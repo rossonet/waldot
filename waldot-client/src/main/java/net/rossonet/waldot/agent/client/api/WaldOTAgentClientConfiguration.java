@@ -25,10 +25,6 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 
 	String getApplicationUri();
 
-	List<X509Certificate> getAuthCertificateChain();
-
-	PrivateKey getAuthPrivateKey();
-
 	String getBaseWaldOTOpcEndpoint();
 
 	int getChannelLifetime();
@@ -61,6 +57,10 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 
 	int getKeepAliveTimeout();
 
+	String getKeyStorePassword();
+
+	String getKeyStorePath();
+
 	int getMaxChunkCount();
 
 	int getMaxChunkSize();
@@ -70,14 +70,6 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 	int getMaxMessageSize();
 
 	MessageSecurityMode getMessageSecurityMode();
-
-	PrivateKey getProvisioningPrivateKey();
-
-	X509Certificate getProvisioningPublicCrt();
-
-	String getProvisioningPublicCsr();
-
-	String getProvisioningUniqueId();
 
 	int getRequestTimeout();
 
@@ -100,10 +92,6 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 	void setAgentUniqueName(String agentUniqueName);
 
 	void setApplicationUri(String applicationUri);
-
-	void setAuthCertificateChain(List<X509Certificate> authCertificateChain);
-
-	void setAuthPrivateKey(PrivateKey authPrivateKey);
 
 	void setBaseWaldOTOpcEndpoint(String baseWaldOTOpcEndpoint);
 
@@ -139,6 +127,10 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 
 	void setKeepAliveTimeout(int keepAliveTimeout);
 
+	void setKeyStorePassword(String password);
+
+	void setKeyStorePath(String path);
+
 	void setMaxChunkCount(int maxChunkCount);
 
 	void setMaxChunkSize(int maxChunkSize);
@@ -150,14 +142,6 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 	void setMessageSecurityMode(MessageSecurityMode securityMode);
 
 	void setPassword(String password);
-
-	void setProvisioningPrivateKey(PrivateKey provisioningPrivateKey);
-
-	void setProvisioningPublicCrt(X509Certificate provisioningPublicCrt);
-
-	void setProvisioningPublicCsr(String provisioningPublicCsr);
-
-	void setProvisioningUniqueId(String provisioningUniqueId);
 
 	void setRequestTimeout(int requestTimeout);
 

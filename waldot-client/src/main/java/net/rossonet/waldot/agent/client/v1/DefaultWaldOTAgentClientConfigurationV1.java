@@ -6,10 +6,7 @@ import java.util.List;
 
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.agent.client.api.WaldOTAgentClient;
 import net.rossonet.waldot.agent.client.api.WaldOTAgentClientConfiguration;
 
 public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClientConfiguration {
@@ -26,15 +23,11 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	public static String DEFAULT_NEW_CERTIFICATE_UNIT = "WaldOT Agent Client";
 	public static String DEFAULT_NEW_ORGANIZATION = "Rossonet s.c.a r.l.";
 	public static String DISCOVERY_PATH = "/discovery";
-	private final static Logger logger = LoggerFactory.getLogger(WaldOTAgentClient.class);
 	public static final long serialVersionUID = 977371251684189681L;
 
 	private int acknowledgeTimeout = 5000;
 	private String agentUniqueName = null;
 	private String applicationUri = DEFAULT_NEW_CERTIFICATE_APPLICATION_URI;
-	private List<X509Certificate> authCertificateChain = null;
-	// private UserTokenType authMode = UserTokenType.Anonymous;
-	private PrivateKey authPrivateKey = null;
 	private String baseWaldOTOpcEndpoint = DEFAULT_ENDPOINT;
 	private int channelLifetime = 60000;
 	private int connectTimeout = 5000;
@@ -77,20 +70,14 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 
 	private String password;
 
-	protected PrivateKey provisioningPrivateKey = null;
-
-	private X509Certificate provisioningPublicCrt = null;
-
-	private String provisioningPublicCsr = null;
-
-	private String provisioningUniqueId = null;
-
 	private int requestTimeout = 60000;
 
 	private SecurityPolicy securityPolicy = SecurityPolicy.None;
 
 	private int sessionTimeout = 120000;
 	private String username;
+	private String keyStorePassword;
+	private String keyStorePath;
 
 	@Override
 	public int getAcknowledgeTimeout() {
@@ -110,16 +97,6 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	@Override
 	public String getApplicationUri() {
 		return applicationUri;
-	}
-
-	@Override
-	public List<X509Certificate> getAuthCertificateChain() {
-		return authCertificateChain;
-	}
-
-	@Override
-	public PrivateKey getAuthPrivateKey() {
-		return authPrivateKey;
 	}
 
 	@Override
@@ -203,6 +180,16 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	}
 
 	@Override
+	public String getKeyStorePassword() {
+		return keyStorePassword;
+	}
+
+	@Override
+	public String getKeyStorePath() {
+		return keyStorePath;
+	}
+
+	@Override
 	public int getMaxChunkCount() {
 		return maxChunkCount;
 	}
@@ -225,26 +212,6 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	@Override
 	public MessageSecurityMode getMessageSecurityMode() {
 		return messageSecurityMode;
-	}
-
-	@Override
-	public PrivateKey getProvisioningPrivateKey() {
-		return provisioningPrivateKey;
-	}
-
-	@Override
-	public X509Certificate getProvisioningPublicCrt() {
-		return provisioningPublicCrt;
-	}
-
-	@Override
-	public String getProvisioningPublicCsr() {
-		return provisioningPublicCsr;
-	}
-
-	@Override
-	public String getProvisioningUniqueId() {
-		return provisioningUniqueId;
 	}
 
 	@Override
@@ -290,183 +257,165 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	}
 
 	@Override
-	public void setAcknowledgeTimeout(int acknowledgeTimeout) {
+	public void setAcknowledgeTimeout(final int acknowledgeTimeout) {
 		this.acknowledgeTimeout = acknowledgeTimeout;
 	}
 
 	@Override
-	public void setAgentUniqueName(String agentUniqueName) {
+	public void setAgentUniqueName(final String agentUniqueName) {
 		this.agentUniqueName = agentUniqueName;
 	}
 
 	@Override
-	public void setApplicationUri(String applicationUri) {
+	public void setApplicationUri(final String applicationUri) {
 		this.applicationUri = applicationUri;
 
 	}
 
 	@Override
-	public void setAuthCertificateChain(List<X509Certificate> authCertificateChain) {
-		this.authCertificateChain = authCertificateChain;
-	}
-
-	@Override
-	public void setAuthPrivateKey(PrivateKey authPrivateKey) {
-		this.authPrivateKey = authPrivateKey;
-	}
-
-	@Override
-	public void setBaseWaldOTOpcEndpoint(String baseWaldOTOpcEndpoint) {
+	public void setBaseWaldOTOpcEndpoint(final String baseWaldOTOpcEndpoint) {
 		this.baseWaldOTOpcEndpoint = baseWaldOTOpcEndpoint;
 	}
 
 	@Override
-	public void setChannelLifetime(int channelLifetime) {
+	public void setChannelLifetime(final int channelLifetime) {
 		this.channelLifetime = channelLifetime;
 	}
 
 	@Override
-	public void setConnectTimeout(int connectTimeout) {
+	public void setConnectTimeout(final int connectTimeout) {
 		this.connectTimeout = connectTimeout;
 	}
 
 	@Override
-	public void setCryptoCertificateChain(List<X509Certificate> cryptoCertificateChain) {
+	public void setCryptoCertificateChain(final List<X509Certificate> cryptoCertificateChain) {
 		this.cryptoCertificateChain = cryptoCertificateChain;
 	}
 
 	@Override
-	public void setCryptoPrivateKey(PrivateKey cryptoPrivateKey) {
+	public void setCryptoPrivateKey(final PrivateKey cryptoPrivateKey) {
 		this.cryptoPrivateKey = cryptoPrivateKey;
 	}
 
 	@Override
-	public void setForceCertificateValidator(boolean forceCertificateValidator) {
+	public void setForceCertificateValidator(final boolean forceCertificateValidator) {
 		this.forceCertificateValidator = forceCertificateValidator;
 	}
 
 	@Override
-	public void setForceDiscoveredEndpointUrl(String forceDiscoveredEndpointUrl) {
+	public void setForceDiscoveredEndpointUrl(final String forceDiscoveredEndpointUrl) {
 		this.forceDiscoveredEndpointUrl = forceDiscoveredEndpointUrl;
 	}
 
 	@Override
-	public void setGenerateCertCountry(String generateCertCountry) {
+	public void setGenerateCertCountry(final String generateCertCountry) {
 		this.generateCertCountry = generateCertCountry;
 	}
 
 	@Override
-	public void setGenerateCertDns(String generateCertDns) {
+	public void setGenerateCertDns(final String generateCertDns) {
 		this.generateCertDns = generateCertDns;
 	}
 
 	@Override
-	public void setGenerateCertDnsAlias(String generateCertDnsAlias) {
+	public void setGenerateCertDnsAlias(final String generateCertDnsAlias) {
 		this.generateCertDnsAlias = generateCertDnsAlias;
 	}
 
 	@Override
-	public void setGenerateCertIp(String generateCertIp) {
+	public void setGenerateCertIp(final String generateCertIp) {
 		this.generateCertIp = generateCertIp;
 	}
 
 	@Override
-	public void setGenerateCertLocality(String generateCertLocality) {
+	public void setGenerateCertLocality(final String generateCertLocality) {
 		this.generateCertLocality = generateCertLocality;
 	}
 
 	@Override
-	public void setGenerateCertOrganization(String generateCertOrganization) {
+	public void setGenerateCertOrganization(final String generateCertOrganization) {
 		this.generateCertOrganization = generateCertOrganization;
 	}
 
 	@Override
-	public void setGenerateCertState(String generateCertState) {
+	public void setGenerateCertState(final String generateCertState) {
 		this.generateCertState = generateCertState;
 	}
 
 	@Override
-	public void setGenerateCertUnit(String generateCertUnit) {
+	public void setGenerateCertUnit(final String generateCertUnit) {
 		this.generateCertUnit = generateCertUnit;
 	}
 
 	@Override
-	public void setIgnoreServiceFault(boolean ignoreServiceFault) {
+	public void setIgnoreServiceFault(final boolean ignoreServiceFault) {
 		this.ignoreServiceFault = ignoreServiceFault;
 	}
 
 	@Override
-	public void setKeepAliveTimeout(int keepAliveTimeout) {
+	public void setKeepAliveTimeout(final int keepAliveTimeout) {
 		this.keepAliveTimeout = keepAliveTimeout;
 	}
 
 	@Override
-	public void setMaxChunkCount(int maxChunkCount) {
+	public void setKeyStorePassword(final String password) {
+		this.keyStorePassword = password;
+
+	}
+
+	@Override
+	public void setKeyStorePath(final String path) {
+		this.keyStorePath = path;
+
+	}
+
+	@Override
+	public void setMaxChunkCount(final int maxChunkCount) {
 		this.maxChunkCount = maxChunkCount;
 	}
 
 	@Override
-	public void setMaxChunkSize(int maxChunkSize) {
+	public void setMaxChunkSize(final int maxChunkSize) {
 		this.maxChunkSize = maxChunkSize;
 	}
 
 	@Override
-	public void setMaxClientFaults(int maxClientFaults) {
+	public void setMaxClientFaults(final int maxClientFaults) {
 		this.maxClientFaults = maxClientFaults;
 	}
 
 	@Override
-	public void setMaxMessageSize(int maxMessageSize) {
+	public void setMaxMessageSize(final int maxMessageSize) {
 		this.maxMessageSize = maxMessageSize;
 	}
 
 	@Override
-	public void setMessageSecurityMode(MessageSecurityMode securityMode) {
+	public void setMessageSecurityMode(final MessageSecurityMode securityMode) {
 		this.messageSecurityMode = securityMode;
 	}
 
 	@Override
-	public void setPassword(String password) {
+	public void setPassword(final String password) {
 		this.password = password;
 	}
 
 	@Override
-	public void setProvisioningPrivateKey(PrivateKey provisioningPrivateKey) {
-		this.provisioningPrivateKey = provisioningPrivateKey;
-	}
-
-	@Override
-	public void setProvisioningPublicCrt(X509Certificate provisioningPublicCrt) {
-		this.provisioningPublicCrt = provisioningPublicCrt;
-	}
-
-	@Override
-	public void setProvisioningPublicCsr(String provisioningPublicCsr) {
-		this.provisioningPublicCsr = provisioningPublicCsr;
-	}
-
-	@Override
-	public void setProvisioningUniqueId(String provisioningUniqueId) {
-		this.provisioningUniqueId = provisioningUniqueId;
-	}
-
-	@Override
-	public void setRequestTimeout(int requestTimeout) {
+	public void setRequestTimeout(final int requestTimeout) {
 		this.requestTimeout = requestTimeout;
 	}
 
 	@Override
-	public void setSecurityPolicy(SecurityPolicy securityPolicy) {
+	public void setSecurityPolicy(final SecurityPolicy securityPolicy) {
 		this.securityPolicy = securityPolicy;
 	}
 
 	@Override
-	public void setSessionTimeout(int sessionTimeout) {
+	public void setSessionTimeout(final int sessionTimeout) {
 		this.sessionTimeout = sessionTimeout;
 	}
 
 	@Override
-	public void setUsername(String username) {
+	public void setUsername(final String username) {
 		this.username = username;
 	}
 

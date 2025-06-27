@@ -1,17 +1,15 @@
 package net.rossonet.waldot.agent.client.v1;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.security.KeyPair;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -97,6 +95,7 @@ import net.rossonet.waldot.agent.client.api.WaldOTAgentClientConfiguration;
 import net.rossonet.waldot.agent.client.api.WaldotAgentClientObserver;
 import net.rossonet.waldot.agent.exception.ProvisioningException;
 import net.rossonet.waldot.utils.LogHelper;
+import net.rossonet.waldot.utils.SslHelper.KeyStoreHelper;
 import net.rossonet.waldot.utils.ThreadHelper;
 
 public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
@@ -120,6 +119,8 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	}
 
+	public static String SELFSIGNED_CERTIFICATE_ALIAS = "waldot-selfsigned";
+	public static String SIGNED_CERTIFICATE_ALIAS = "waldot-signed";
 	private final static Logger logger = LoggerFactory.getLogger(WaldOTAgentClient.class);
 
 	private boolean activeConnectionRequest = false;
@@ -130,7 +131,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	private ByteString lastNonce = null;
 
-	private transient OpcUaClient provisioningClientclient;
+	private transient OpcUaClient provisioningClient;
 
 	private final ProvisioningLifeCycle provisioningLifeCycle = new ProvisioningLifeCycle(this);
 
@@ -138,34 +139,50 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	private WaldotAgentClientObserver waldotAgentClientObserver;
 
+	private final KeyStoreHelper certificateHelper;
+
 	public WaldOTAgentClientImplV1(final WaldOTAgentClientConfiguration configuration) {
 		this.configuration = configuration;
+		certificateHelper = new KeyStoreHelper(configuration.getKeyStorePath(), configuration.getKeyStorePassword());
+		try {
+			if (certificateHelper.hasCertificate(SELFSIGNED_CERTIFICATE_ALIAS)
+					|| certificateHelper.hasCertificate(SIGNED_CERTIFICATE_ALIAS)) {
+				logger.info("Certificate already exists in keystore, using it");
+			} else {
+				logger.info("Certificate not found in keystore, creating self-signed certificate");
+				createSelfSignedCertificate(configuration);
+			}
+		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+			logger.error("Error while checking certificate in keystore: {}", LogHelper.stackTraceToString(e, 5));
+			logger.info("Creating self-signed certificate");
+			createSelfSignedCertificate(configuration);
+		}
 	}
 
 	@Override
-	public CompletableFuture<AddNodesResponse> addNodes(List<AddNodesItem> nodesToAdd) {
+	public CompletableFuture<AddNodesResponse> addNodes(final List<AddNodesItem> nodesToAdd) {
 		return client.addNodes(nodesToAdd);
 	}
 
 	@Override
-	public CompletableFuture<AddReferencesResponse> addReferences(List<AddReferencesItem> referencesToAdd) {
+	public CompletableFuture<AddReferencesResponse> addReferences(final List<AddReferencesItem> referencesToAdd) {
 		return client.addReferences(referencesToAdd);
 	}
 
 	@Override
-	public CompletableFuture<BrowseResponse> browse(ViewDescription viewDescription, UInteger maxReferencesPerNode,
-			List<BrowseDescription> nodesToBrowse) {
+	public CompletableFuture<BrowseResponse> browse(final ViewDescription viewDescription,
+			final UInteger maxReferencesPerNode, final List<BrowseDescription> nodesToBrowse) {
 		return client.browse(viewDescription, maxReferencesPerNode, nodesToBrowse);
 	}
 
 	@Override
-	public CompletableFuture<BrowseNextResponse> browseNext(boolean releaseContinuationPoints,
-			List<ByteString> continuationPoints) {
+	public CompletableFuture<BrowseNextResponse> browseNext(final boolean releaseContinuationPoints,
+			final List<ByteString> continuationPoints) {
 		return client.browseNext(releaseContinuationPoints, continuationPoints);
 	}
 
 	@Override
-	public CompletableFuture<CallResponse> call(List<CallMethodRequest> methodsToCall) {
+	public CompletableFuture<CallResponse> call(final List<CallMethodRequest> methodsToCall) {
 		return client.call(methodsToCall);
 	}
 
@@ -177,7 +194,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	private boolean checkClientConnected(OpcUaClient clientOpc)
+	private boolean checkClientConnected(final OpcUaClient clientOpc)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		return clientOpc != null && clientOpc.getSession().isDone()
 				&& getClientSessionWithTimeout(clientOpc).getServerNonce() != null;
@@ -198,8 +215,8 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 			client.disconnect();
 			logger.info("Disconnected from server");
 		}
-		if (provisioningClientclient != null) {
-			provisioningClientclient.disconnect();
+		if (provisioningClient != null) {
+			provisioningClient.disconnect();
 			logger.info("Disconnected from provisioning server");
 		}
 	}
@@ -219,8 +236,8 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<CreateMonitoredItemsResponse> createMonitoredItems(UInteger subscriptionId,
-			TimestampsToReturn timestampsToReturn, List<MonitoredItemCreateRequest> itemsToCreate) {
+	public CompletableFuture<CreateMonitoredItemsResponse> createMonitoredItems(final UInteger subscriptionId,
+			final TimestampsToReturn timestampsToReturn, final List<MonitoredItemCreateRequest> itemsToCreate) {
 		return client.createMonitoredItems(subscriptionId, timestampsToReturn, itemsToCreate);
 	}
 
@@ -231,32 +248,41 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		return createdClient;
 	}
 
+	private void createSelfSignedCertificate(final WaldOTAgentClientConfiguration configuration) {
+		certificateHelper.createSelfSignedCertificate(SELFSIGNED_CERTIFICATE_ALIAS, configuration.getAgentUniqueName(),
+				configuration.getGenerateCertOrganization(), configuration.getGenerateCertUnit(),
+				configuration.getGenerateCertLocality(), configuration.getGenerateCertState(),
+				configuration.getGenerateCertCountry(), null, configuration.getGenerateCertDns(),
+				configuration.getGenerateCertIp(), configuration.getGenerateCertDnsAlias());
+	}
+
 	@Override
-	public CompletableFuture<CreateSubscriptionResponse> createSubscription(double requestedPublishingInterval,
-			UInteger requestedLifetimeCount, UInteger requestedMaxKeepAliveCount, UInteger maxNotificationsPerPublish,
-			boolean publishingEnabled, UByte priority) {
+	public CompletableFuture<CreateSubscriptionResponse> createSubscription(final double requestedPublishingInterval,
+			final UInteger requestedLifetimeCount, final UInteger requestedMaxKeepAliveCount,
+			final UInteger maxNotificationsPerPublish, final boolean publishingEnabled, final UByte priority) {
 		return client.createSubscription(requestedPublishingInterval, requestedLifetimeCount,
 				requestedMaxKeepAliveCount, maxNotificationsPerPublish, publishingEnabled, priority);
 	}
 
 	@Override
-	public CompletableFuture<DeleteMonitoredItemsResponse> deleteMonitoredItems(UInteger subscriptionId,
-			List<UInteger> monitoredItemIds) {
+	public CompletableFuture<DeleteMonitoredItemsResponse> deleteMonitoredItems(final UInteger subscriptionId,
+			final List<UInteger> monitoredItemIds) {
 		return client.deleteMonitoredItems(subscriptionId, monitoredItemIds);
 	}
 
 	@Override
-	public CompletableFuture<DeleteNodesResponse> deleteNodes(List<DeleteNodesItem> nodesToDelete) {
+	public CompletableFuture<DeleteNodesResponse> deleteNodes(final List<DeleteNodesItem> nodesToDelete) {
 		return client.deleteNodes(nodesToDelete);
 	}
 
 	@Override
-	public CompletableFuture<DeleteReferencesResponse> deleteReferences(List<DeleteReferencesItem> referencesToDelete) {
+	public CompletableFuture<DeleteReferencesResponse> deleteReferences(
+			final List<DeleteReferencesItem> referencesToDelete) {
 		return client.deleteReferences(referencesToDelete);
 	}
 
 	@Override
-	public CompletableFuture<DeleteSubscriptionsResponse> deleteSubscriptions(List<UInteger> subscriptionIds) {
+	public CompletableFuture<DeleteSubscriptionsResponse> deleteSubscriptions(final List<UInteger> subscriptionIds) {
 		return client.deleteSubscriptions(subscriptionIds);
 	}
 
@@ -287,11 +313,11 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	private void doActionProvisioningClientManualStart() {
 		try {
 			if (activeConnectionRequest) {
-				if (checkClientConnected(provisioningClientclient)) {
+				if (checkClientConnected(provisioningClient)) {
 					changeStatus(Status.CONNECTED_PROVISIONING_MANUAL_APPROVAL);
 					logger.info("Connected to server for manual approval provisioning");
 				} else {
-					provisioningClientclient = createOpcClient(getGeneralConfigBuilder().build());
+					provisioningClient = createOpcClient(getGeneralConfigBuilder().build());
 					logger.info("Waiting for connection to server for manual approval provisioning...");
 				}
 			}
@@ -304,11 +330,11 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	private void doActionProvisioningClientTokenStart() {
 		try {
 			if (activeConnectionRequest) {
-				if (checkClientConnected(provisioningClientclient)) {
+				if (checkClientConnected(provisioningClient)) {
 					changeStatus(Status.CONNECTED_PROVISIONING_TOKEN);
 					logger.info("Connected to server for token provisioning");
 				} else {
-					provisioningClientclient = createOpcClient(getGeneralConfigBuilder().build());
+					provisioningClient = createOpcClient(getGeneralConfigBuilder().build());
 					logger.info("Waiting for connection to server for token provisioning...");
 				}
 			}
@@ -380,108 +406,14 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	private void generateCertificate() {
-		final OpcKeyUtils loader = new OpcKeyUtils();
-		final String commonName = configuration.getCommonName();
-		final String organization = configuration.getOrganization();
-		final String unit = configuration.getUnit();
-		final String locality = configuration.getLocality();
-		final String state = configuration.getState();
-		final String country = configuration.getCountry();
-		final String uri = configuration.getUri();
-		final String dns = configuration.getDns();
-		final String dnsAlias = configuration.getDnsAlias();
-		final String ip = configuration.getIp();
-		if (!dns.isEmpty() && !ip.isEmpty() && !commonName.isEmpty() && !organization.isEmpty() && !state.isEmpty()
-				&& !country.isEmpty()) {
-
-			logger.debug("try to generate certificate with data: " + commonName + "," + organization + "," + unit + ","
-					+ locality + "," + state + "," + country + "," + uri + "," + dns + "," + ip);
-			loader.create(commonName, organization, unit, locality, state, country, uri, dns, ip, dnsAlias);
-		} else {
-			logger.debug("try to generate standard certificate");
-			loader.create();
-		}
-		final String privateKey = loader.getPrivateKeyBase64().toString();
-		String crt = null;
-		try (final FileWriter certFileWriter = new FileWriter(GENERATED_CERT_PATH)) {
-			final PrintWriter printCertWriter = new PrintWriter(certFileWriter);
-			crt = loader.getClientCertificateBase64().toString();
-			printCertWriter.print(crt);
-			printCertWriter.close();
-
-			logger.debug("written " + GENERATED_CERT_PATH + " with new certificate");
-		} catch (final IOException | CertificateEncodingException e) {
-			logger.error("saving cert generated", e);
-		}
-		try (final FileWriter keyFileWriter = new FileWriter(GENERATED_KEY_PATH)) {
-			final PrintWriter printKeyWriter = new PrintWriter(keyFileWriter);
-			printKeyWriter.print(privateKey);
-			printKeyWriter.close();
-
-			logger.debug("written " + GENERATED_KEY_PATH + " with new certificate");
-		} catch (final IOException e) {
-			logger.error("saving key generated", e);
-		}
-
-	}
-
 	@Override
 	public AddressSpace getAddressSpace() {
 		return client.getAddressSpace();
 	}
 
-	private X509Certificate getCertificate() {
-		String cryptoPrivateKey = configuration.getCryptoPrivateKey();
-		cryptoPrivateKey = convertFileToString(cryptoPrivateKey);
-		String cryptoPublicCrt = configuration.getCryptoPublicCrt();
-		cryptoPublicCrt = convertFileToString(cryptoPublicCrt);
-		if (cryptoPrivateKey != null && cryptoPublicCrt != null) {
-			final OpcKeyUtils opcKeyUtils = new OpcKeyUtils();
-			opcKeyUtils.setClientKeyPair(cryptoPrivateKey, cryptoPublicCrt);
-			final X509Certificate clientCertificate = opcKeyUtils.getClientCertificate();
-			clientCertificateChain = opcKeyUtils.getClientCertificateChain();
-			return clientCertificate;
-		} else {
-			return null;
-		}
-	}
-
-	private X509Certificate getCertificateActualConnection() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private X509Certificate[] getCertificateChain() {
-
-		String certificateChainList = configuration.getCryptoCertificateChainList();
-		certificateChainList = convertFileToString(certificateChainList);
-		logger.trace("certificateChainList " + certificateChainList);
-		if (certificateChainList != null) {
-			final List<X509Certificate> certList = new ArrayList<>();
-			if (certificateChainList != null) {
-				if (certificateChainList.contains(CERTIFICATE_CHAIN_SEPARATOR)) {
-					for (final String singleCert : certificateChainList.split(CERTIFICATE_CHAIN_SEPARATOR)) {
-						try {
-							certList.add((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(
-									new ByteArrayInputStream(Base64.getDecoder().decode(singleCert.getBytes()))));
-						} catch (final CertificateException exception) {
-							logger.error("encoding one of crypto chains cert", exception);
-						}
-					}
-				} else {
-					try {
-						certList.add((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(
-								new ByteArrayInputStream(Base64.getDecoder().decode(certificateChainList.getBytes()))));
-					} catch (final CertificateException exception) {
-						logger.error("encoding unique crypto chain cert", exception);
-					}
-				}
-			}
-			return certList.toArray(new X509Certificate[0]);
-		} else {
-			return clientCertificateChain;
-		}
+	private X509Certificate getCertificateActualConnection()
+			throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+		return certificateHelper.getCertificate(SIGNED_CERTIFICATE_ALIAS);
 	}
 
 	private X509Certificate[] getCertificateChainActualConnection() {
@@ -489,27 +421,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		return null;
 	}
 
-	private X509Certificate getClientAuthCertificate() {
-		final OpcKeyUtils opcKeyUtils = new OpcKeyUtils();
-		String authPrivateKey = configuration.getAuthPrivateKey();
-		authPrivateKey = convertFileToString(authPrivateKey);
-		String authPublicCrt = configuration.getAuthPublicCrt();
-		authPublicCrt = convertFileToString(authPublicCrt);
-		opcKeyUtils.setClientKeyPair(authPrivateKey, authPublicCrt);
-		return opcKeyUtils.getClientCertificate();
-	}
-
-	private PrivateKey getClientAuthPrivateKey() {
-		final OpcKeyUtils opcKeyUtils = new OpcKeyUtils();
-		String authPrivateKey = configuration.getAuthPrivateKey();
-		authPrivateKey = convertFileToString(authPrivateKey);
-		String authPublicCrt = configuration.getAuthPublicCrt();
-		authPublicCrt = convertFileToString(authPublicCrt);
-		opcKeyUtils.setClientKeyPair(authPrivateKey, authPublicCrt);
-		return opcKeyUtils.getPrivateKey();
-	}
-
-	private OpcUaSession getClientSessionWithTimeout(OpcUaClient clientOpc)
+	private OpcUaSession getClientSessionWithTimeout(final OpcUaClient clientOpc)
 			throws InterruptedException, ExecutionException, TimeoutException {
 		return clientOpc.getSession().get(TIMEOUT_GET_SESSION_SEC, TimeUnit.SECONDS);
 	}
@@ -562,7 +474,8 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		return targetEndpoint;
 	}
 
-	private OpcUaClientConfigBuilder getGeneralConfigBuilder() {
+	private OpcUaClientConfigBuilder getGeneralConfigBuilder() throws KeyStoreException, NoSuchAlgorithmException,
+			CertificateException, IOException, UnrecoverableKeyException {
 		final OpcUaClientConfigBuilder config = OpcUaClientConfig.builder().setEndpoint(getEndpoint())
 				.setApplicationUri(configuration.getApplicationUri())
 				.setApplicationName(LocalizedText.english(configuration.getApplicationName()));
@@ -644,23 +557,9 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		return idp;
 	}
 
-	private KeyPair getKeyPair() {
-		String cryptoPrivateKey = configuration.getCryptoPrivateKey();
-		cryptoPrivateKey = convertFileToString(cryptoPrivateKey);
-		String cryptoPublicCrt = configuration.getCryptoPublicCrt();
-		cryptoPublicCrt = convertFileToString(cryptoPublicCrt);
-		if (cryptoPrivateKey != null && cryptoPublicCrt != null) {
-			final OpcKeyUtils opcKeyUtils = new OpcKeyUtils();
-			opcKeyUtils.setClientKeyPair(cryptoPrivateKey, cryptoPublicCrt);
-			return opcKeyUtils.getClientKeyPair();
-		} else {
-			return null;
-		}
-	}
-
-	private KeyPair getKeyPairActualConnection() {
-		// TODO Auto-generated method stub
-		return null;
+	private KeyPair getKeyPairActualConnection() throws UnrecoverableKeyException, KeyStoreException,
+			NoSuchAlgorithmException, CertificateException, IOException {
+		return certificateHelper.getKeyPair(SIGNED_CERTIFICATE_ALIAS);
 	}
 
 	public ByteString getLastNonce() {
@@ -683,18 +582,19 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<HistoryReadResponse> historyRead(HistoryReadDetails historyReadDetails,
-			TimestampsToReturn timestampsToReturn, boolean releaseContinuationPoints,
-			List<HistoryReadValueId> nodesToRead) {
+	public CompletableFuture<HistoryReadResponse> historyRead(final HistoryReadDetails historyReadDetails,
+			final TimestampsToReturn timestampsToReturn, final boolean releaseContinuationPoints,
+			final List<HistoryReadValueId> nodesToRead) {
 		return client.historyRead(historyReadDetails, timestampsToReturn, releaseContinuationPoints, nodesToRead);
 	}
 
 	@Override
-	public CompletableFuture<HistoryUpdateResponse> historyUpdate(List<HistoryUpdateDetails> historyUpdateDetails) {
+	public CompletableFuture<HistoryUpdateResponse> historyUpdate(
+			final List<HistoryUpdateDetails> historyUpdateDetails) {
 		return client.historyUpdate(historyUpdateDetails);
 	}
 
-	private void logServerCertificate(EndpointDescription endpoint) throws CertificateException {
+	private void logServerCertificate(final EndpointDescription endpoint) throws CertificateException {
 		if (!endpoint.getServerCertificate().isNullOrEmpty()) {
 			logger.info("Server certificate for endpoint {}: {}", endpoint, CertificateFactory.getInstance("X.509")
 					.generateCertificate(new ByteArrayInputStream(endpoint.getServerCertificate().bytes())));
@@ -702,15 +602,16 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<ModifyMonitoredItemsResponse> modifyMonitoredItems(UInteger subscriptionId,
-			TimestampsToReturn timestampsToReturn, List<MonitoredItemModifyRequest> itemsToModify) {
+	public CompletableFuture<ModifyMonitoredItemsResponse> modifyMonitoredItems(final UInteger subscriptionId,
+			final TimestampsToReturn timestampsToReturn, final List<MonitoredItemModifyRequest> itemsToModify) {
 		return client.modifyMonitoredItems(subscriptionId, timestampsToReturn, itemsToModify);
 	}
 
 	@Override
-	public CompletableFuture<ModifySubscriptionResponse> modifySubscription(UInteger subscriptionId,
-			double requestedPublishingInterval, UInteger requestedLifetimeCount, UInteger requestedMaxKeepAliveCount,
-			UInteger maxNotificationsPerPublish, UByte priority) {
+	public CompletableFuture<ModifySubscriptionResponse> modifySubscription(final UInteger subscriptionId,
+			final double requestedPublishingInterval, final UInteger requestedLifetimeCount,
+			final UInteger requestedMaxKeepAliveCount, final UInteger maxNotificationsPerPublish,
+			final UByte priority) {
 		return client.modifySubscription(subscriptionId, requestedPublishingInterval, requestedLifetimeCount,
 				requestedMaxKeepAliveCount, maxNotificationsPerPublish, priority);
 	}
@@ -784,13 +685,14 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<PublishResponse> publish(List<SubscriptionAcknowledgement> subscriptionAcknowledgements) {
+	public CompletableFuture<PublishResponse> publish(
+			final List<SubscriptionAcknowledgement> subscriptionAcknowledgements) {
 		return client.publish(subscriptionAcknowledgements);
 	}
 
 	@Override
-	public CompletableFuture<ReadResponse> read(double maxAge, TimestampsToReturn timestampsToReturn,
-			List<ReadValueId> readValueIds) {
+	public CompletableFuture<ReadResponse> read(final double maxAge, final TimestampsToReturn timestampsToReturn,
+			final List<ReadValueId> readValueIds) {
 		return client.read(maxAge, timestampsToReturn, readValueIds);
 	}
 
@@ -799,29 +701,30 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<RegisterNodesResponse> registerNodes(List<NodeId> nodesToRegister) {
+	public CompletableFuture<RegisterNodesResponse> registerNodes(final List<NodeId> nodesToRegister) {
 		return client.registerNodes(nodesToRegister);
 	}
 
 	@Override
-	public CompletableFuture<RepublishResponse> republish(UInteger subscriptionId, UInteger retransmitSequenceNumber) {
+	public CompletableFuture<RepublishResponse> republish(final UInteger subscriptionId,
+			final UInteger retransmitSequenceNumber) {
 		return client.republish(subscriptionId, retransmitSequenceNumber);
 	}
 
 	@Override
-	public <T extends UaResponseMessage> CompletableFuture<T> sendRequest(UaRequestMessage request) {
+	public <T extends UaResponseMessage> CompletableFuture<T> sendRequest(final UaRequestMessage request) {
 		return client.sendRequest(request);
 	}
 
 	@Override
-	public CompletableFuture<SetMonitoringModeResponse> setMonitoringMode(UInteger subscriptionId,
-			MonitoringMode monitoringMode, List<UInteger> monitoredItemIds) {
+	public CompletableFuture<SetMonitoringModeResponse> setMonitoringMode(final UInteger subscriptionId,
+			final MonitoringMode monitoringMode, final List<UInteger> monitoredItemIds) {
 		return client.setMonitoringMode(subscriptionId, monitoringMode, monitoredItemIds);
 	}
 
 	@Override
-	public CompletableFuture<SetPublishingModeResponse> setPublishingMode(boolean publishingEnabled,
-			List<UInteger> subscriptionIds) {
+	public CompletableFuture<SetPublishingModeResponse> setPublishingMode(final boolean publishingEnabled,
+			final List<UInteger> subscriptionIds) {
 		return client.setPublishingMode(publishingEnabled, subscriptionIds);
 	}
 
@@ -831,24 +734,25 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<SetTriggeringResponse> setTriggering(UInteger subscriptionId, UInteger triggeringItemId,
-			List<UInteger> linksToAdd, List<UInteger> linksToRemove) {
+	public CompletableFuture<SetTriggeringResponse> setTriggering(final UInteger subscriptionId,
+			final UInteger triggeringItemId, final List<UInteger> linksToAdd, final List<UInteger> linksToRemove) {
 		return client.setTriggering(subscriptionId, triggeringItemId, linksToAdd, linksToRemove);
 	}
 
 	@Override
-	public CompletableFuture<TransferSubscriptionsResponse> transferSubscriptions(List<UInteger> subscriptionIds,
-			boolean sendInitialValues) {
+	public CompletableFuture<TransferSubscriptionsResponse> transferSubscriptions(final List<UInteger> subscriptionIds,
+			final boolean sendInitialValues) {
 		return client.transferSubscriptions(subscriptionIds, sendInitialValues);
 	}
 
 	@Override
-	public CompletableFuture<TranslateBrowsePathsToNodeIdsResponse> translateBrowsePaths(List<BrowsePath> browsePaths) {
+	public CompletableFuture<TranslateBrowsePathsToNodeIdsResponse> translateBrowsePaths(
+			final List<BrowsePath> browsePaths) {
 		return client.translateBrowsePaths(browsePaths);
 	}
 
 	@Override
-	public CompletableFuture<UnregisterNodesResponse> unregisterNodes(List<NodeId> nodesToUnregister) {
+	public CompletableFuture<UnregisterNodesResponse> unregisterNodes(final List<NodeId> nodesToUnregister) {
 		return client.unregisterNodes(nodesToUnregister);
 	}
 
@@ -866,7 +770,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<WriteResponse> write(List<WriteValue> writeValues) {
+	public CompletableFuture<WriteResponse> write(final List<WriteValue> writeValues) {
 		return client.write(writeValues);
 	}
 

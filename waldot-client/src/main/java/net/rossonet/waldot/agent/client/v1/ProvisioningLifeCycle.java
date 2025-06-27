@@ -1,19 +1,21 @@
 package net.rossonet.waldot.agent.client.v1;
 
+import java.util.UUID;
+
 import net.rossonet.waldot.agent.client.api.WaldOTAgentClient;
 import net.rossonet.waldot.agent.exception.ProvisioningException;
 
 public class ProvisioningLifeCycle {
 
 	private final WaldOTAgentClient waldOTAgentClient;
+	private final String requestUniqueCode = UUID.randomUUID().toString();
 
 	public ProvisioningLifeCycle(final WaldOTAgentClient waldOTAgentClient) {
 		this.waldOTAgentClient = waldOTAgentClient;
 	}
 
 	public String getRequestUniqueCode() {
-		// TODO Auto-generated method stub
-		return null;
+		return requestUniqueCode;
 	}
 
 	public boolean isManualRequestCompleted() {

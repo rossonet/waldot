@@ -32,17 +32,31 @@ import javax.crypto.spec.SecretKeySpec;
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public final class OtpHelper {
+	public enum Algorithm {
+		HMAC_SHA1("HmacSHA1"), HMAC_SHA256("HmacSHA256"), HMAC_SHA512("HmacSHA512");
+
+		public final String algorithm;
+
+		Algorithm(final String algorithm) {
+			this.algorithm = algorithm;
+		}
+
+		public String getAlgorithm() {
+			return algorithm;
+		}
+	}
+
 	private final static int[] DIGITS_POWER = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
 
-	public static boolean checkTOTP(final String seedOTP, final String otpCode, final int finestraOTP,
-			final String returnDigits) {
+	public static boolean checkTOTP(final Algorithm algorithm, final String seedOTP, final String otpCode,
+			final int finestraOTP, final String returnDigits) {
 		boolean result = false;
 		final List<String> validOtps = new ArrayList<String>();
 		final long millisec = new java.util.Date().getTime();
 		final long end = millisec + (Long.valueOf(finestraOTP * 500));
 		long counter = millisec - (Long.valueOf(finestraOTP * 500));
 		while (counter <= end) {
-			validOtps.add(generateTOTP512(seedOTP, (String.valueOf(counter)), returnDigits));
+			validOtps.add(generateTOTP(algorithm, seedOTP, counter, returnDigits));
 			counter++;
 		}
 		if (validOtps.contains(otpCode)) {
@@ -53,19 +67,17 @@ public final class OtpHelper {
 		return result;
 	}
 
-	public static String generateTOTP(final String key, final String time, final String returnDigits) {
-		return generateTOTP(key, time, returnDigits, "HmacSHA1");
-	}
-
-	public static String generateTOTP(final String key, String time, final String returnDigits, final String crypto) {
+	public static String generateTOTP(final Algorithm algorithm, final String key, final long timeMs,
+			final String returnDigits) {
 		final int codeDigits = Integer.decode(returnDigits).intValue();
 		String result = null;
+		String time = String.valueOf(timeMs);
 		while (time.length() < 16) {
 			time = "0" + time;
 		}
 		final byte[] msg = hexStr2Bytes(time);
 		final byte[] k = hexStr2Bytes(key);
-		final byte[] hash = hmac_sha(crypto, k, msg);
+		final byte[] hash = hmac_sha(algorithm.getAlgorithm(), k, msg);
 		final int offset = hash[hash.length - 1] & 0xf;
 		final int binary = ((hash[offset] & 0x7f) << 24) | ((hash[offset + 1] & 0xff) << 16)
 				| ((hash[offset + 2] & 0xff) << 8) | (hash[offset + 3] & 0xff);
@@ -75,14 +87,6 @@ public final class OtpHelper {
 			result = "0" + result;
 		}
 		return result;
-	}
-
-	public static String generateTOTP256(final String key, final String time, final String returnDigits) {
-		return generateTOTP(key, time, returnDigits, "HmacSHA256");
-	}
-
-	public static String generateTOTP512(final String key, final String time, final String returnDigits) {
-		return generateTOTP(key, time, returnDigits, "HmacSHA512");
 	}
 
 	public static String getRandomHexString(final int numchars) {
