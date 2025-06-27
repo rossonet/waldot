@@ -36,7 +36,8 @@ apply plugin: 'maven-publish'
 dependencies {
     compileOnly project(':waldot-deps')
     annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
-    testImplementation project(':waldot-namespace')
+
+    testImplementation project(':waldot-deps')
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testImplementation(platform('org.junit:junit-bom:5.13.1'))
