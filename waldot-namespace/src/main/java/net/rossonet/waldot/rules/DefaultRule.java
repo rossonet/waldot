@@ -69,7 +69,7 @@ public class DefaultRule extends OpcVertex implements Rule {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private boolean parallelExecution = false;
-	private final int priority;
+	private int priority = 5; // Default priority
 	private int refractoryPeriodMs = 1000;
 
 	private final AtomicInteger threadCounter = new AtomicInteger(0);

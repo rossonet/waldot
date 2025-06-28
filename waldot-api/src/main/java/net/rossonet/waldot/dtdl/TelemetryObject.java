@@ -9,6 +9,32 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The {@code TelemetryObject} class represents a telemetry definition in the
+ * Digital Twin Definition Language (DTDL) version 2. Telemetry is used to
+ * describe dynamic data emitted by a digital twin, such as sensor readings or
+ * status updates.
+ *
+ * <p>
+ * This class parses and stores telemetry attributes defined in a DTDL model,
+ * including:
+ * <ul>
+ * <li>{@code @id}: A unique identifier for the telemetry.</li>
+ * <li>{@code @type}: Specifies the type of the object, which must include
+ * "Telemetry".</li>
+ * <li>{@code name}: The name of the telemetry.</li>
+ * <li>{@code schema}: The data type of the telemetry value (e.g., integer,
+ * double).</li>
+ * <li>{@code unit}: The unit of measurement for the telemetry value, if
+ * applicable.</li>
+ * <li>{@code comment}, {@code description}, {@code displayName}: Optional
+ * metadata fields for documentation and readability.</li>
+ * </ul>
+ *
+ * @see <a href=
+ *      "https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/DTDL.v2.md">DTDL
+ *      v2 Specification</a>
+ */
 public class TelemetryObject {
 
 	@SuppressWarnings("unused")
@@ -25,6 +51,16 @@ public class TelemetryObject {
 
 	private Unit unit;
 
+	/**
+	 * Constructs a {@code TelemetryObject} from a map of attributes defined in a
+	 * DTDL model.
+	 *
+	 * @param telemetry a map containing the telemetry attributes as key-value
+	 *                  pairs. The map must conform to the DTDL v2 specification for
+	 *                  telemetry objects.
+	 * @throws IllegalArgumentException if the {@code @type} field is missing or
+	 *                                  invalid.
+	 */
 	@SuppressWarnings("unchecked")
 	public TelemetryObject(final Map<String, Object> telemetry) {
 		for (final Entry<String, Object> record : telemetry.entrySet()) {
@@ -74,38 +110,87 @@ public class TelemetryObject {
 		}
 	}
 
+	/**
+	 * Retrieves the optional comment associated with the telemetry.
+	 *
+	 * @return the comment string, or {@code null} if not defined.
+	 */
 	public String getComment() {
 		return comment;
 	}
 
+	/**
+	 * Retrieves the description of the telemetry.
+	 *
+	 * @return the description string, or {@code null} if not defined.
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * Retrieves the display name of the telemetry.
+	 *
+	 * @return the display name string, or {@code null} if not defined.
+	 */
 	public String getDisplayName() {
 		return displayName;
 	}
 
+	/**
+	 * Retrieves the unique identifier of the telemetry.
+	 *
+	 * @return the {@link DigitalTwinModelIdentifier} representing the telemetry's
+	 *         ID.
+	 */
 	public DigitalTwinModelIdentifier getId() {
 		return id;
 	}
 
+	/**
+	 * Retrieves the name of the telemetry.
+	 *
+	 * @return the name string.
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Retrieves the schema of the telemetry, which defines the data type of its
+	 * value.
+	 *
+	 * @return the {@link Schema} object representing the telemetry's schema.
+	 */
 	public Schema getSchema() {
 		return schema;
 	}
 
+	/**
+	 * Retrieves the list of types associated with the telemetry.
+	 *
+	 * @return a list of type strings, which must include "Telemetry".
+	 */
 	public List<String> getTypes() {
 		return types;
 	}
 
+	/**
+	 * Retrieves the unit of measurement for the telemetry value, if applicable.
+	 *
+	 * @return the {@link Unit} object representing the telemetry's unit, or
+	 *         {@code null} if not defined.
+	 */
 	public Unit getUnit() {
 		return unit;
 	}
 
+	/**
+	 * Returns a string representation of the telemetry object.
+	 *
+	 * @return a string containing the telemetry's attributes, including types,
+	 *         name, schema, and metadata.
+	 */
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();

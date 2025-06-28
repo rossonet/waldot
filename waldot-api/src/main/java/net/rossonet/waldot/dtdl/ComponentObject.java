@@ -6,6 +6,31 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The {@code ComponentObject} class represents a component definition in the
+ * Digital Twin Definition Language (DTDL) version 2. Components are reusable
+ * building blocks that encapsulate other interfaces, enabling modular and
+ * hierarchical digital twin models.
+ *
+ * <p>
+ * This class parses and stores component attributes defined in a DTDL model,
+ * including:
+ * </p>
+ * <ul>
+ * <li>{@code @id}: A unique identifier for the component.</li>
+ * <li>{@code @type}: Specifies the type of the object, which must include
+ * "Component".</li>
+ * <li>{@code name}: The name of the component.</li>
+ * <li>{@code schema}: The schema of the component, which references another
+ * interface.</li>
+ * <li>{@code comment}, {@code description}, {@code displayName}: Optional
+ * metadata fields for documentation and readability.</li>
+ * </ul>
+ *
+ * @see <a href=
+ *      "https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/DTDL.v2.md">DTDL
+ *      v2 Specification</a>
+ */
 public class ComponentObject {
 
 	@SuppressWarnings("unused")
@@ -19,6 +44,16 @@ public class ComponentObject {
 
 	private Schema schema;
 
+	/**
+	 * Constructs a {@code ComponentObject} from a map of attributes defined in a
+	 * DTDL model.
+	 *
+	 * @param component a map containing the component attributes as key-value
+	 *                  pairs. The map must conform to the DTDL v2 specification for
+	 *                  component objects.
+	 * @throws IllegalArgumentException if the {@code @type} field is missing or
+	 *                                  invalid.
+	 */
 	public ComponentObject(final Map<String, Object> component) {
 		for (final Entry<String, Object> record : component.entrySet()) {
 			switch (record.getKey()) {
@@ -49,30 +84,67 @@ public class ComponentObject {
 		}
 	}
 
+	/**
+	 * Retrieves the optional comment associated with the component.
+	 *
+	 * @return the comment string, or {@code null} if not defined.
+	 */
 	public String getComment() {
 		return comment;
 	}
 
+	/**
+	 * Retrieves the description of the component.
+	 *
+	 * @return the description string, or {@code null} if not defined.
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * Retrieves the display name of the component.
+	 *
+	 * @return the display name string, or {@code null} if not defined.
+	 */
 	public String getDisplayName() {
 		return displayName;
 	}
 
+	/**
+	 * Retrieves the unique identifier of the component.
+	 *
+	 * @return the {@link DigitalTwinModelIdentifier} representing the component's
+	 *         ID.
+	 */
 	public DigitalTwinModelIdentifier getId() {
 		return id;
 	}
 
+	/**
+	 * Retrieves the name of the component.
+	 *
+	 * @return the name string.
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Retrieves the schema of the component, which references another interface.
+	 *
+	 * @return the {@link Schema} object representing the component's schema.
+	 */
 	public Schema getSchema() {
 		return schema;
 	}
 
+	/**
+	 * Returns a string representation of the component object.
+	 *
+	 * @return a string containing the component's attributes, including name,
+	 *         schema, ID, and metadata.
+	 */
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();

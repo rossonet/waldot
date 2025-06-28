@@ -28,11 +28,11 @@ public final class WaldotRuleThread extends Thread {
 		return stepRegister;
 	}
 
-	public void setRule(final Rule rule) {
-		this.rule = rule;
-		setPriority(rule.getPriority());
-		setName(rule.getThreadName());
-		logger.info("Rule {} execution on this thread with priority {}", rule.label(), getPriority());
+	public void setRule(final Rule newRule) {
+		this.rule = newRule;
+		setPriority(newRule.getPriority());
+		setName(newRule.getThreadName());
+		logger.info("Rule {} execution on this thread with priority {}", newRule.label(), getPriority());
 		stepRegister.onThreadRegistered(getName(), getPriority());
 	}
 }

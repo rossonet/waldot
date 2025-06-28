@@ -6,6 +6,33 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The {@code CommandObject} class represents a command definition in the
+ * Digital Twin Definition Language (DTDL) version 2. Commands are used to
+ * define operations that can be invoked on a digital twin, including their
+ * input and output payloads.
+ *
+ * <p>
+ * This class parses and stores command attributes defined in a DTDL model,
+ * including:
+ * </p>
+ * <ul>
+ * <li>{@code @id}: A unique identifier for the command.</li>
+ * <li>{@code @type}: Specifies the type of the object, which must include
+ * "Command".</li>
+ * <li>{@code name}: The name of the command.</li>
+ * <li>{@code request}: The input payload schema for the command.</li>
+ * <li>{@code response}: The output payload schema for the command.</li>
+ * <li>{@code comment}, {@code description}, {@code displayName}: Optional
+ * metadata fields for documentation and readability.</li>
+ * <li>{@code commandType}: A deprecated field indicating the type of the
+ * command.</li>
+ * </ul>
+ *
+ * @see <a href=
+ *      "https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/DTDL.v2.md">DTDL
+ *      v2 Specification</a>
+ */
 public class CommandObject {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommandObject.class);
@@ -20,6 +47,16 @@ public class CommandObject {
 	private CommandPayload request;
 	private CommandPayload response;
 
+	/**
+	 * Constructs a {@code CommandObject} from a map of attributes defined in a DTDL
+	 * model.
+	 *
+	 * @param command a map containing the command attributes as key-value pairs.
+	 *                The map must conform to the DTDL v2 specification for command
+	 *                objects.
+	 * @throws IllegalArgumentException if the {@code @type} field is missing or
+	 *                                  invalid.
+	 */
 	@SuppressWarnings("unchecked")
 	public CommandObject(final Map<String, Object> command) {
 		for (final Entry<String, Object> record : command.entrySet()) {
@@ -59,38 +96,86 @@ public class CommandObject {
 
 	}
 
+	/**
+	 * Retrieves the deprecated {@code commandType} field of the command.
+	 *
+	 * @return the command type as a string, or {@code null} if not defined.
+	 */
 	public String getCommandType() {
 		return commandType;
 	}
 
+	/**
+	 * Retrieves the optional comment associated with the command.
+	 *
+	 * @return the comment string, or {@code null} if not defined.
+	 */
 	public String getComment() {
 		return comment;
 	}
 
+	/**
+	 * Retrieves the description of the command.
+	 *
+	 * @return the description string, or {@code null} if not defined.
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * Retrieves the display name of the command.
+	 *
+	 * @return the display name string, or {@code null} if not defined.
+	 */
 	public String getDisplayName() {
 		return displayName;
 	}
 
+	/**
+	 * Retrieves the unique identifier of the command.
+	 *
+	 * @return the {@link DigitalTwinModelIdentifier} representing the command's ID.
+	 */
 	public DigitalTwinModelIdentifier getId() {
 		return id;
 	}
 
+	/**
+	 * Retrieves the name of the command.
+	 *
+	 * @return the name string.
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Retrieves the input payload schema for the command.
+	 *
+	 * @return the {@link CommandPayload} object representing the request payload,
+	 *         or {@code null} if not defined.
+	 */
 	public CommandPayload getRequest() {
 		return request;
 	}
 
+	/**
+	 * Retrieves the output payload schema for the command.
+	 *
+	 * @return the {@link CommandPayload} object representing the response payload,
+	 *         or {@code null} if not defined.
+	 */
 	public CommandPayload getResponse() {
 		return response;
 	}
 
+	/**
+	 * Returns a string representation of the command object.
+	 *
+	 * @return a string containing the command's attributes, including name, ID,
+	 *         payloads, and metadata.
+	 */
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();

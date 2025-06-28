@@ -9,28 +9,79 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 
 /**
- * WaldotRulesEngine is an interface that defines the methods for managing rules
- * in the Waldot system. It allows for adding and removing listeners,
- * registering and updating rules, and managing observers.
+ * The {@code WaldotRulesEngine} interface defines methods for managing rules in the Waldot system.
+ * It provides functionality for adding and removing listeners, registering and updating rules,
+ * and managing observers. The rules engine integrates with other components such as
+ * {@link Rule}, {@link CachedRuleRecord}, and {@link ExecutorHelper} to evaluate and execute rules.
+ *
+ * <p>Rules in the Waldot system are defined using the {@link Rule} interface, which includes
+ * conditions, actions, and execution details. The rules engine facilitates the lifecycle
+ * of these rules, including registration, updates, and deregistration.</p>
+ *
+ * @see Rule
+ * @see CachedRuleRecord
+ * @see ExecutorHelper
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public interface WaldotRulesEngine {
 
+	/**
+	 * Adds a listener to the rules engine.
+	 *
+	 * @param listener the {@link RuleListener} to be added.
+	 */
 	void addListener(RuleListener listener);
 
+	/**
+	 * Deregisters a rule from the rules engine.
+	 *
+	 * @param ruleNodeId the {@link NodeId} of the rule to be deregistered.
+	 */
 	void deregisterRule(NodeId ruleNodeId);
 
+	/**
+	 * Retrieves the {@link ExecutorHelper} used by the rules engine for evaluating rules
+	 * and executing expressions.
+	 *
+	 * @return the {@link ExecutorHelper} instance.
+	 */
 	ExecutorHelper getJexlEngine();
 
+	/**
+	 * Retrieves all listeners currently registered with the rules engine.
+	 *
+	 * @return a collection of {@link RuleListener} instances.
+	 */
 	Collection<RuleListener> getListeners();
 
+	/**
+	 * Retrieves the {@link WaldotNamespace} associated with the rules engine.
+	 *
+	 * @return the {@link WaldotNamespace} instance.
+	 */
 	WaldotNamespace getNamespace();
 
+	/**
+	 * Registers an observer for a specific event vertex and associates it with a rule.
+	 *
+	 * @param eventVertex the {@link WaldotVertex} representing the event to observe.
+	 * @param ruleNodeId the {@link NodeId} of the rule to associate with the observer.
+	 */
 	void registerObserver(WaldotVertex eventVertex, NodeId ruleNodeId);
 
+	/**
+	 * Registers or updates a rule in the rules engine.
+	 *
+	 * @param rule the {@link Rule} to be registered or updated.
+	 */
 	void registerOrUpdateRule(Rule rule);
 
+	/**
+	 * Removes a listener from the rules engine.
+	 *
+	 * @param listener the {@link RuleListener} to be removed.
+	 */
 	void removeListener(RuleListener listener);
 
 }

@@ -4,6 +4,22 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * The {@code UnitType} enumerator represents various categories of units used
+ * in the Digital Twin Definition Language (DTDL) version 2. Each
+ * {@code UnitType} groups related units that describe physical quantities, such
+ * as length, mass, or temperature.
+ *
+ * <p>
+ * In DTDL, units are used to provide semantic meaning to telemetry, properties,
+ * and commands. This enumerator facilitates the mapping of DTDL unit types to
+ * their corresponding {@link Unit} definitions.
+ * </p>
+ *
+ * @see <a href=
+ *      "https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/DTDL.v2.md">DTDL
+ *      v2 Specification</a>
+ */
 public enum UnitType {
 	AccelerationUnit(new Unit[] { Unit.metrePerSecondSquared, Unit.centimetrePerSecondSquared, Unit.gForce }),
 	AngleUnit(new Unit[] { Unit.radian, Unit.degreeOfArc, Unit.minuteOfArc, Unit.secondOfArc, Unit.turn }),
@@ -56,12 +72,30 @@ public enum UnitType {
 	VolumeFlowRateUnit(
 			new Unit[] { Unit.litrePerSecond, Unit.millilitrePerSecond, Unit.litrePerHour, Unit.millilitrePerHour });
 
-	private Unit[] units;
+	private final Unit[] units;
 
-	private UnitType(Unit[] units) {
+	/**
+	 * Constructs a {@code UnitType} with the specified array of {@link Unit}
+	 * instances.
+	 *
+	 * @param units an array of {@link Unit} objects representing the units
+	 *              associated with this {@code UnitType}.
+	 */
+	private UnitType(final Unit[] units) {
 		this.units = units;
 	}
 
+	/**
+	 * Retrieves the semantic types associated with this {@code UnitType}.
+	 *
+	 * <p>
+	 * Semantic types in DTDL provide additional context and meaning to units,
+	 * enabling better integration and interoperability in digital twin models.
+	 * </p>
+	 *
+	 * @return a collection of {@link SemanticType} objects associated with this
+	 *         {@code UnitType}.
+	 */
 	public Collection<SemanticType> getSemanticType() {
 		final Set<SemanticType> result = new HashSet<>();
 		for (final SemanticType s : SemanticType.values()) {
@@ -72,6 +106,18 @@ public enum UnitType {
 		return result;
 	}
 
+	/**
+	 * Retrieves the array of {@link Unit} objects associated with this
+	 * {@code UnitType}.
+	 *
+	 * <p>
+	 * Units in DTDL define the measurement standards for telemetry, properties, and
+	 * commands. This method provides access to the specific units grouped under
+	 * this {@code UnitType}.
+	 * </p>
+	 *
+	 * @return an array of {@link Unit} objects.
+	 */
 	public Unit[] getUnits() {
 		return units;
 	}

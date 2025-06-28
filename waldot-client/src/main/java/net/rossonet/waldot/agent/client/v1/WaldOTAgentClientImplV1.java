@@ -133,7 +133,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	private transient OpcUaClient provisioningClient;
 
-	private final ProvisioningLifeCycle provisioningLifeCycle = new ProvisioningLifeCycle(this);
+	private final ProvisioningLifeCycleProcedure provisioningLifeCycle = new ProvisioningLifeCycleProcedure(this);
 
 	private transient Status status = Status.INIT;
 
