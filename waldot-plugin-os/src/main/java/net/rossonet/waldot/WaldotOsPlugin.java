@@ -1,11 +1,15 @@
 package net.rossonet.waldot;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.Reference;
@@ -63,8 +67,9 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 
 	private ExecCommand execCommand;
 
-	private final SysCommandExecutor sysCommandExecutor = new SysCommandExecutor();
+	private final HashMap<Object, Method> objectsToRefresh = new HashMap<>();
 
+	private final SysCommandExecutor sysCommandExecutor = new SysCommandExecutor();
 	private final Thread systemDataThread = new Thread(() -> {
 		while (active) {
 			try {
@@ -236,11 +241,39 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 		} catch (final Throwable e) {
 			logger.error("Error elaborating graphics cards data", e);
 		}
+		for (final UpdateTrigger trigger : triggers) {
+			try {
+				final List<Method> methods = Arrays.stream(trigger.getAnalizedObject().getClass().getMethods())
+						.filter(m -> Modifier.isPublic(m.getModifiers()))
+						.filter(m -> !Modifier.isStatic(m.getModifiers())).collect(Collectors.toList());
+				for (final Method method : methods) {
+					final String name = method.getName();
+					if (name.equals("updateAttributes")) {
+						objectsToRefresh.put(trigger.getAnalizedObject(), method);
+						break;
+					}
+				}
+			} catch (final Throwable e) {
+				logger.error("Error invoking update trigger for " + trigger, e);
+			}
+		}
+
 		systemDataThread.setPriority(Thread.MIN_PRIORITY);
 		systemDataThread.start();
 	}
 
 	private void updateSystemData() {
+		for (final Map.Entry<Object, Method> entry : objectsToRefresh.entrySet()) {
+			final Object analizedObject = entry.getKey();
+			final Method method = entry.getValue();
+			try {
+				method.invoke(analizedObject);
+				logger.debug("Update method invoked: " + method.getName() + " on " + analizedObject);
+			} catch (final Throwable e) {
+				logger.error("Error invoking update method " + method.getName() + " on " + analizedObject, e);
+			}
+		}
+
 		for (final UpdateTrigger trigger : triggers) {
 			try {
 				trigger.invoke();

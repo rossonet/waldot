@@ -9,6 +9,7 @@ public class UpdateTrigger {
 	private final Object analizedObject;
 
 	private final Method method;
+
 	private final Vertex vertex;
 
 	public UpdateTrigger(Vertex vertex, Object analizedObject, Method method) {
@@ -24,6 +25,18 @@ public class UpdateTrigger {
 		this.analizedObject = analizedObject;
 		this.method = method;
 		this.vertex = vertex;
+	}
+
+	public Object getAnalizedObject() {
+		return analizedObject;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public Vertex getVertex() {
+		return vertex;
 	}
 
 	public void invoke() {
