@@ -22,6 +22,11 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
+/**
+ * Builder for the reference nodes used in the WaldOT Gremlin OPC UA server.
+ * This class generates the necessary nodes for edges, vertices, and rules in
+ * the OPC UA address space.
+ */
 public class MiloSingleServerBaseReferenceNodeBuilder {
 
 	static UaVariableNode actionRuleTypeNode;

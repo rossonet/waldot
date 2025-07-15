@@ -1,43 +1,165 @@
 package net.rossonet.waldot;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.milo.opcua.sdk.core.AccessLevel;
+import org.eclipse.milo.opcua.sdk.core.Reference;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
 import net.rossonet.waldot.api.models.WaldotCommand;
+import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.api.models.WaldotVertex;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.commands.ExecCommand;
 import net.rossonet.waldot.rules.SysCommandExecutor;
-import oshi.PlatformEnum;
+import net.rossonet.waldot.utils.GremlinHelper;
+import net.rossonet.waldot.utils.gremlin.UpdateTrigger;
 import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
+import oshi.hardware.Display;
 import oshi.hardware.GraphicsCard;
+import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
-import oshi.hardware.Sensors;
+import oshi.hardware.LogicalVolumeGroup;
+import oshi.hardware.NetworkIF;
+import oshi.hardware.SoundCard;
+import oshi.hardware.UsbDevice;
 import oshi.software.os.OperatingSystem;
 
 /**
- * WaldotOsPlugin is a plugin that provides OS-related commands to the Waldot
- * system. It implements the PluginListener interface to register its commands
- * and initialize itself with the provided WaldotNamespace.
- * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 @WaldotPlugin
-public class WaldotOsPlugin implements PluginListener {
+public class WaldotOsPlugin implements AutoCloseable, PluginListener {
+	private static final String CRONTAB_FIELD = "scheduling";
+	private static final String DEFAULT_CRONTAB_FIELD = "0 0/5 * * *"; // Every 5 minutes
+	private final static Logger logger = LoggerFactory.getLogger(WaldotOsPlugin.class);
 
-	protected WaldotNamespace waldotNamespace;
+	public static final String TIMER_OBJECT_TYPE_LABEL = "timer";
+
+	private static final long UPDATE_DELAY = 60_000;
+
+	private boolean active = true;
 
 	private ExecCommand execCommand;
+
 	private final SysCommandExecutor sysCommandExecutor = new SysCommandExecutor();
+
+	private final Thread systemDataThread = new Thread(() -> {
+		while (active) {
+			try {
+				Thread.sleep(UPDATE_DELAY);
+				updateSystemData();
+			} catch (final Throwable e) {
+				logger.error("System data thread error", e);
+				break;
+			}
+		}
+	}, "WaldotOsPlugin");
+	private SystemInfo systemInfo;
+	private UaObjectTypeNode timerTypeNode;
+	private final List<UpdateTrigger> triggers = new ArrayList<>();
+	protected WaldotNamespace waldotNamespace;
+
+	@Override
+	public void close() throws Exception {
+		active = false;
+
+	}
+
+	@Override
+	public boolean containsObjectDefinition(NodeId typeDefinitionNodeId) {
+		return timerTypeNode.getNodeId().equals(typeDefinitionNodeId);
+	}
+
+	@Override
+	public boolean containsObjectLabel(String typeDefinitionLabel) {
+		return TIMER_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel);
+	}
+
+	private WaldotVertex createTimerVertexObject(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
+			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
+			UInteger userWriteMask, UByte eventNotifier, long version) {
+		// TODO creare oggetto di tipo timer
+		return null;
+	}
+
+	@Override
+	public WaldotVertex createVertexObject(NodeId typeDefinitionNodeId, WaldotGraph graph, UaNodeContext context,
+			NodeId nodeId, QualifiedName browseName, LocalizedText displayName, LocalizedText description,
+			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier, long version) {
+		if (!containsObjectDefinition(typeDefinitionNodeId)) {
+			return null;
+		}
+		return createTimerVertexObject(graph, context, nodeId, browseName, displayName, description, writeMask,
+				userWriteMask, eventNotifier, version);
+	}
+
+	private void generateTimerTypeNode() {
+		timerTypeNode = UaObjectTypeNode.builder(waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTTimerObjectType"))
+				.setBrowseName(waldotNamespace.generateQualifiedName("WaldOTTimerObjectType"))
+				.setDisplayName(LocalizedText.english("WaldOT Timer Node")).setIsAbstract(false).build();
+		final UaVariableNode labelTimerTypeNode = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(
+						waldotNamespace.generateNodeId("ObjectTypes/WaldOTTimerObjectType." + MiloStrategy.LABEL_FIELD))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(waldotNamespace.generateQualifiedName(MiloStrategy.LABEL_FIELD))
+				.setDisplayName(LocalizedText.english(MiloStrategy.LABEL_FIELD)).setDataType(Identifiers.String)
+				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+		labelTimerTypeNode.addReference(new Reference(labelTimerTypeNode.getNodeId(), Identifiers.HasModellingRule,
+				Identifiers.ModellingRule_Mandatory.expanded(), true));
+		labelTimerTypeNode.setValue(new DataValue(new Variant("NaN")));
+		timerTypeNode.addComponent(labelTimerTypeNode);
+		final UaVariableNode schedulingTimerTypeNode = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTTimerObjectType." + CRONTAB_FIELD))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(waldotNamespace.generateQualifiedName(CRONTAB_FIELD))
+				.setDisplayName(LocalizedText.english(CRONTAB_FIELD)).setDataType(Identifiers.String)
+				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+		schedulingTimerTypeNode.addReference(new Reference(schedulingTimerTypeNode.getNodeId(),
+				Identifiers.HasModellingRule, Identifiers.ModellingRule_Mandatory.expanded(), true));
+		schedulingTimerTypeNode.setValue(new DataValue(new Variant(DEFAULT_CRONTAB_FIELD)));
+		timerTypeNode.addComponent(schedulingTimerTypeNode);
+		waldotNamespace.getStorageManager().addNode(labelTimerTypeNode);
+		waldotNamespace.getStorageManager().addNode(schedulingTimerTypeNode);
+		waldotNamespace.getStorageManager().addNode(timerTypeNode);
+		timerTypeNode.addReference(new Reference(timerTypeNode.getNodeId(), Identifiers.HasSubtype,
+				Identifiers.BaseObjectType.expanded(), false));
+		waldotNamespace.getObjectTypeManager().registerObjectType(timerTypeNode.getNodeId(), UaObjectNode.class,
+				UaObjectNode::new);
+	}
 
 	@Override
 	public Collection<WaldotCommand> getCommands() {
 		return Collections.singleton(execCommand);
+	}
+
+	@Override
+	public NodeId getObjectLabel(String typeDefinitionLabel) {
+		return containsObjectLabel(typeDefinitionLabel) ? timerTypeNode.getNodeId() : null;
 	}
 
 	@Override
@@ -50,18 +172,83 @@ public class WaldotOsPlugin implements PluginListener {
 	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
+		generateTimerTypeNode();
 		execCommand = new ExecCommand(waldotNamespace);
 		popolateOsData();
 	}
 
 	private void popolateOsData() {
-		final SystemInfo systemInfo = new SystemInfo();
-		final OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
-		final PlatformEnum platform = systemInfo.getCurrentPlatform();
+		systemInfo = new SystemInfo();
+		try {
+			final OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), operatingSystem,
+					"operatingSystem"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating operating system data", e);
+		}
 		final HardwareAbstractionLayer hardwareAbstractionLayer = systemInfo.getHardware();
-		final CentralProcessor cpu = hardwareAbstractionLayer.getProcessor();
-		final List<GraphicsCard> graphicsCards = hardwareAbstractionLayer.getGraphicsCards();
-		final Sensors sensors = hardwareAbstractionLayer.getSensors();
+		try {
+			final List<HWDiskStore> diskStores = hardwareAbstractionLayer.getDiskStores();
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), diskStores,
+					"hardware/diskStores"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating disk stores data", e);
+		}
+		try {
+			final List<LogicalVolumeGroup> logicalVolumeGroups = hardwareAbstractionLayer.getLogicalVolumeGroups();
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), logicalVolumeGroups,
+					"hardware/logicalVolumeGroups"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating logical volume groups data", e);
+		}
+		try {
+			final List<NetworkIF> networkIFs = hardwareAbstractionLayer.getNetworkIFs(true);
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), networkIFs,
+					"hardware/networkIFs"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating network interfaces data", e);
+		}
+		try {
+			final List<Display> displays = hardwareAbstractionLayer.getDisplays();
+			triggers.addAll(
+					GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), displays, "hardware/displays"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating display data", e);
+		}
+		try {
+			final List<UsbDevice> usbDevices = hardwareAbstractionLayer.getUsbDevices(true);
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), usbDevices,
+					"hardware/usbDevices"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating USB devices data", e);
+		}
+		try {
+			final List<SoundCard> soundCards = hardwareAbstractionLayer.getSoundCards();
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), soundCards,
+					"hardware/soundCards"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating sound cards data", e);
+		}
+		try {
+			final List<GraphicsCard> graphicsCards = hardwareAbstractionLayer.getGraphicsCards();
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), graphicsCards,
+					"hardware/graphicsCards"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating graphics cards data", e);
+		}
+		systemDataThread.setPriority(Thread.MIN_PRIORITY);
+		systemDataThread.start();
+	}
+
+	private void updateSystemData() {
+		for (final UpdateTrigger trigger : triggers) {
+			try {
+				trigger.invoke();
+				logger.debug("Update trigger invoked: " + trigger);
+			} catch (final Throwable e) {
+				logger.error("Error invoking update trigger for " + trigger, e);
+			}
+		}
 
 	}
 

@@ -395,7 +395,7 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	private void generateRpcFolder() {
 		rpcFolder = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId("agent-rpc"),
 				waldotNamespace.generateQualifiedName("Agent RPC folder"),
-				LocalizedText.english("Foler for Agent RPC methods"));
+				LocalizedText.english("Folder for Agent RPC methods"));
 		waldotNamespace.getStorageManager().addNode(rpcFolder);
 		assetRootNode.addOrganizes(rpcFolder);
 		final NodeId nodeId = waldotNamespace.generateNodeId("lifecycle");

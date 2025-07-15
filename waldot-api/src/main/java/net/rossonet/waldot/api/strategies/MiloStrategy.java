@@ -3,14 +3,17 @@ package net.rossonet.waldot.api.strategies;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
+import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
+import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
@@ -33,6 +36,27 @@ import net.rossonet.waldot.api.models.WaldotVertexProperty;
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public interface MiloStrategy {
+
+	public static final String ACTION_FIELD = "Action";
+	public static final Predicate<Reference> COMPONENT_OF_PREDICATE = (reference) -> reference.isInverse()
+			&& Identifiers.HasComponent.equals(reference.getReferenceTypeId());
+	public static final String CONDITION_FIELD = "Condition";
+	public static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
+	public static final boolean DEFAULT_CLEAR_FACTS_AFTER_EXECUTION = false;
+	public static final String DEFAULT_CONDITION_VALUE = "true";
+	public static final int DEFAULT_DELAY_BEFORE_EVALUATION = 0;
+	public static final int DEFAULT_DELAY_BEFORE_EXECUTE = 0;
+	public static final boolean DEFAULT_PARALLEL_EXECUTION = false;
+	public static final int DEFAULT_PRIORITY_VALUE = 100;
+	public static final int DEFAULT_REFACTORY_PERIOD_MS = 0;
+	public static final String DESCRIPTION_PARAMETER = "description";
+	public static final String DIRECTORY_PARAMETER = "directory";
+	public static final String HAS_WALDOT_RULE = "HasRule";
+	public static final String LABEL_FIELD = "Label";
+	public static final String OBSERVER_EDGE_PARAMETER = "fire";
+	public static final String PRIORITY_FIELD = "Priority";
+	public static final String RULE_NODE_PARAMETER = "rule";
+	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
 
 	static IdManager<NodeId> getNodeIdManager() {
 		return new IdManager<NodeId>() {

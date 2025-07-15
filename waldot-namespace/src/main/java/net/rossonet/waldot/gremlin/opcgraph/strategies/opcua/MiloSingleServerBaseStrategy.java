@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
@@ -67,27 +66,6 @@ import net.rossonet.waldot.rules.DefaultRule;
 
 @WaldotMiloStrategy
 public class MiloSingleServerBaseStrategy implements MiloStrategy {
-
-	public static final String ACTION_FIELD = "Action";
-	public static final Predicate<Reference> COMPONENT_OF_PREDICATE = (reference) -> reference.isInverse()
-			&& Identifiers.HasComponent.equals(reference.getReferenceTypeId());
-	public static final String CONDITION_FIELD = "Condition";
-	public static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
-	private static final boolean DEFAULT_CLEAR_FACTS_AFTER_EXECUTION = false;
-	public static final String DEFAULT_CONDITION_VALUE = "true";
-	private static final int DEFAULT_DELAY_BEFORE_EVALUATION = 0;
-	private static final int DEFAULT_DELAY_BEFORE_EXECUTE = 0;
-	private static final boolean DEFAULT_PARALLEL_EXECUTION = false;
-	public static final int DEFAULT_PRIORITY_VALUE = 100;
-	private static final int DEFAULT_REFACTORY_PERIOD_MS = 0;
-	public static final String DESCRIPTION_PARAMETER = "description";
-	public static final String DIRECTORY_PARAMETER = "directory";
-	public static final String HAS_WALDOT_RULE = "HasRule";
-	public static final String LABEL_FIELD = "Label";
-	public static final String OBSERVER_EDGE_PARAMETER = "fire";
-	public static final String PRIORITY_FIELD = "Priority";
-	public static final String RULE_NODE_PARAMETER = "rule";
-	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
 
 	private UaFolderNode assetRootNode;
 
@@ -215,25 +193,35 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	private void checkDirectoryParameterAndLinkNode(final Object[] propertyKeyValues, final GremlinElement vertex,
 			final UaFolderNode folderNode, final Map<String, UaFolderNode> directories) {
 		final String directory = getKeyValuesProperty(propertyKeyValues, DIRECTORY_PARAMETER.toLowerCase());
-		// final UaFolderNode folderNode = folderManager.getVerticesFolderNode();
-		// final UaFolderNode folderNode = folderManager.getRulesFolderNode();
 		if (directory == null || directory.isEmpty()) {
 			folderNode.addOrganizes(vertex);
-		} else {
-			// final Map<String, UaFolderNode> directories =
-			// folderManager.getVertexDirectories();
-			// final Map<String, UaFolderNode> directories =
-			// folderManager.getRulesDirectories();
-			if (!directories.containsKey(directory)) {
-				directories.put(directory,
-						new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
-								waldotNamespace.generateNodeId(
-										folderNode.getNodeId().getIdentifier().toString() + "/" + directory),
-								waldotNamespace.generateQualifiedName(directory), LocalizedText.english(directory)));
-				waldotNamespace.getStorageManager().addNode(directories.get(directory));
-				folderNode.addOrganizes(directories.get(directory));
+			return;
+		}
+		final String[] components = directory.split("/");
+		String actual = null;
+		String last = actual;
+		for (int counter = 0; counter < components.length; counter++) {
+			actual = (actual == null ? "" : (actual + "/")) + components[counter].trim();
+			if (!directories.containsKey(actual)) {
+				directories.put(actual,
+						new UaFolderNode(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(actual),
+								waldotNamespace.generateQualifiedName(actual), LocalizedText.english(actual)));
+				waldotNamespace.getStorageManager().addNode(directories.get(actual));
+				final UaFolderNode uaFolderNode = directories.get(actual);
+				if (counter == 0) {
+					// first component, add the directory to the root folder
+					folderNode.addOrganizes(uaFolderNode);
+				} else {
+					// not the first or last component, add the directory to the previous one
+					directories.get(last).addOrganizes(uaFolderNode);
+				}
 			}
-			directories.get(directory).addOrganizes(vertex);
+
+			if (counter == components.length - 1) {
+				// last component, add the vertex to the directory
+				directories.get(actual).addOrganizes(vertex);
+			}
+			last = actual;
 		}
 	}
 
