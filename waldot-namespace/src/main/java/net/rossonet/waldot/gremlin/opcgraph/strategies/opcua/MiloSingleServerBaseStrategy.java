@@ -95,7 +95,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		if (description == null || description.isEmpty()) {
 			description = sourceVertex.getDescription().getText() + " -- " + label + " -> "
 					+ targetVertex.getDescription().getText();
-			logger.info(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
+			logger.debug(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
 		}
 		// create the edge
 		// FIXME parametrizzare tutto per la creazione dell'edge
@@ -166,12 +166,12 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		String description = getKeyValuesProperty(propertyKeyValues, DESCRIPTION_PARAMETER.toLowerCase());
 		if (description == null) {
 			description = label;
-			logger.info(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
+			logger.debug(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
 		}
 		NodeId typeDefinition = getTypeDefinition(propertyKeyValues);
 		if (typeDefinition == null) {
 			typeDefinition = MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode.getNodeId();
-			logger.info(TYPE_DEFINITION_PARAMETER + " not found in propertyKeyValues, using default type '{}'",
+			logger.debug(TYPE_DEFINITION_PARAMETER + " not found in propertyKeyValues, using default type '{}'",
 					typeDefinition);
 		}
 		// check if typeDefinition is a rule
@@ -368,19 +368,19 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		// get rule specific fields
 		if (action == null) {
 			action = DEFAULT_ACTION_VALUE;
-			logger.warn(ACTION_FIELD.toLowerCase() + " not found in propertyKeyValues, using default action '{}'",
+			logger.info(ACTION_FIELD.toLowerCase() + " not found in propertyKeyValues, using default action '{}'",
 					action);
 		}
 		String condition = getKeyValuesProperty(propertyKeyValues, CONDITION_FIELD.toLowerCase());
 		if (condition == null) {
 			condition = DEFAULT_CONDITION_VALUE;
-			logger.warn(CONDITION_FIELD.toLowerCase() + " not found in propertyKeyValues, using default condition '{}'",
+			logger.info(CONDITION_FIELD.toLowerCase() + " not found in propertyKeyValues, using default condition '{}'",
 					condition);
 		}
 		Integer priority = getPriorityDefinition(propertyKeyValues);
 		if (priority == null) {
 			priority = DEFAULT_PRIORITY_VALUE;
-			logger.warn(PRIORITY_FIELD.toLowerCase() + " not found in propertyKeyValues, using default priority '{}'",
+			logger.info(PRIORITY_FIELD.toLowerCase() + " not found in propertyKeyValues, using default priority '{}'",
 					priority);
 		}
 
@@ -478,7 +478,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	@Override
 	public Map<NodeId, WaldotEdge> getEdges(final WaldotVertex opcVertex, final Direction direction,
 			final String[] edgeLabels) {
-		logger.info("getEdges: opcVertex={}, direction={}, edgeLabels={}", opcVertex, direction, edgeLabels);
+		logger.error("getEdges: opcVertex={}, direction={}, edgeLabels={}", opcVertex, direction, edgeLabels);
 		// TODO da verificare come usare questa chiamata
 		return null;
 	}
@@ -633,7 +633,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	@Override
 	public Map<NodeId, WaldotVertex> getVertices(final WaldotVertex opcVertex, final Direction direction,
 			final String[] edgeLabels) {
-		logger.info("getVertices: opcVertex={}, direction={}, edgeLabels={}", opcVertex, direction, edgeLabels);
+		logger.error("getVertices: opcVertex={}, direction={}, edgeLabels={}", opcVertex, direction, edgeLabels);
 		// TODO da verificare come usare questa chiamata
 		return null;
 	}

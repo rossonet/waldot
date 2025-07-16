@@ -31,38 +31,44 @@ import net.rossonet.waldot.utils.gremlin.UpdateTrigger;
 public final class GremlinHelper {
 	private final static Logger logger = LoggerFactory.getLogger(GremlinHelper.class);
 
+	private static boolean checkValidMethod(final String parentName, final String name) {
+		return name.startsWith("get") && !name.equals("getClass") && !name.equals("get") && !name.equals("getBytes")
+				&& !name.equals("getChars") && !name.equals("getFirst") && !name.equals("getLast")
+				&& !name.equals("getOrDefault") && !name.endsWith("CpuLoadBetweenTicks") && !name.equals("getThreadId")
+				&& (parentName == null || !parentName.endsWith(name));
+	}
+
 	public static List<UpdateTrigger> elaborateInstance(final WaldotGraph g, final Object analizedObject,
 			final String parentName) {
 		final List<UpdateTrigger> updateTriggers = new ArrayList<>();
 		if (analizedObject instanceof List) {
-			logger.info("elaborateInstance - List: " + analizedObject.getClass().getName() + " - " + analizedObject);
+			logger.debug("elaborateInstance - List: " + analizedObject.getClass().getName() + " - " + analizedObject);
 			int count = 1;
 			for (final Object item : (List<?>) analizedObject) {
 				if (item != null) {
-					logger.info("Item: " + item.getClass().getName() + " - " + item);
+					logger.debug("Item: " + item.getClass().getName() + " - " + item);
 					updateTriggers.addAll(elaborateInstance(g, item, parentName + "/" + count));
 					count++;
 				}
 			}
 		} else {
-			logger.info("elaborateInstance - Object: " + analizedObject.getClass().getName() + " - " + analizedObject);
+			logger.debug("elaborateInstance - Object: " + analizedObject.getClass().getName() + " - " + analizedObject);
 			final List<Method> methods = Arrays.stream(analizedObject.getClass().getMethods())
 					.filter(m -> Modifier.isPublic(m.getModifiers())).filter(m -> !Modifier.isStatic(m.getModifiers()))
 					.collect(Collectors.toList());
 			for (final Method method : methods) {
 				final String name = method.getName();
 				try {
-					if (name.startsWith("get") && !name.equals("getClass") && !name.equals("get")
-							&& !name.equals("getFirst") && !name.equals("getLast")
-							&& (parentName == null || !parentName.endsWith(name)) && !name.equals("getThreadId")) {
-						logger.info("Method: " + name + " - Return Type: " + method.getReturnType().getName()
+					if (checkValidMethod(parentName, name)) {
+						logger.debug("Method: " + name + " - Return Type: " + method.getReturnType().getName()
 								+ " - Parameters: " + Arrays.toString(method.getParameterTypes()));
 						if (method.getParameterCount() > 0) {
-							logger.info("Cannot invoke method with parameters");
+							logger.warn("Cannot invoke method " + name + " on object " + analizedObject
+									+ " because it has parameters: " + Arrays.toString(method.getParameters()));
 							continue;
 						}
 						if (method.getReturnType().equals(void.class)) {
-							logger.info("Method returns void, skipping invocation");
+							logger.warn("Method 	" + name + " returns void and cannot be processed");
 							continue;
 						}
 						final Object result = method.invoke(analizedObject);
@@ -83,7 +89,7 @@ public final class GremlinHelper {
 							} else {
 								queryData.add("NaN");
 							}
-							logger.info("** QUERY: " + Arrays.toString(queryData.toArray()));
+							logger.debug("** QUERY: " + Arrays.toString(queryData.toArray()));
 							final Vertex v = g.addVertex(queryData.toArray());
 							final UpdateTrigger currentTrigger = new UpdateTrigger(v, analizedObject, method);
 							updateTriggers.add(currentTrigger);
@@ -94,7 +100,7 @@ public final class GremlinHelper {
 						}
 					}
 				} catch (final Throwable e) {
-					logger.info("Error invoking method " + name + ": " + e.getMessage());
+					logger.warn("Error invoking method " + name + ": " + e.getMessage());
 				}
 			}
 		}

@@ -5,7 +5,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +35,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.commands.ExecCommand;
+import net.rossonet.waldot.commands.OsCheckDelayCommand;
 import net.rossonet.waldot.rules.SysCommandExecutor;
 import net.rossonet.waldot.utils.GremlinHelper;
 import net.rossonet.waldot.utils.gremlin.UpdateTrigger;
@@ -57,11 +57,11 @@ import oshi.software.os.OperatingSystem;
 public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	private static final String CRONTAB_FIELD = "scheduling";
 	private static final String DEFAULT_CRONTAB_FIELD = "0 0/5 * * *"; // Every 5 minutes
+	public static final long DEFAULT_UPDATE_DELAY = 120_000;
+
 	private final static Logger logger = LoggerFactory.getLogger(WaldotOsPlugin.class);
 
 	public static final String TIMER_OBJECT_TYPE_LABEL = "timer";
-
-	private static final long UPDATE_DELAY = 60_000;
 
 	private boolean active = true;
 
@@ -69,11 +69,13 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 
 	private final HashMap<Object, Method> objectsToRefresh = new HashMap<>();
 
+	private OsCheckDelayCommand osCheckDelayCommand;
+
 	private final SysCommandExecutor sysCommandExecutor = new SysCommandExecutor();
 	private final Thread systemDataThread = new Thread(() -> {
 		while (active) {
 			try {
-				Thread.sleep(UPDATE_DELAY);
+				Thread.sleep(getUpdateDelay());
 				updateSystemData();
 			} catch (final Throwable e) {
 				logger.error("System data thread error", e);
@@ -84,6 +86,7 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	private SystemInfo systemInfo;
 	private UaObjectTypeNode timerTypeNode;
 	private final List<UpdateTrigger> triggers = new ArrayList<>();
+	private long updateDelay = DEFAULT_UPDATE_DELAY;
 	protected WaldotNamespace waldotNamespace;
 
 	@Override
@@ -159,7 +162,7 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 
 	@Override
 	public Collection<WaldotCommand> getCommands() {
-		return Collections.singleton(execCommand);
+		return Arrays.asList(execCommand, osCheckDelayCommand);
 	}
 
 	@Override
@@ -174,11 +177,16 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 		return ruleFunctions;
 	}
 
+	public long getUpdateDelay() {
+		return updateDelay;
+	}
+
 	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
 		generateTimerTypeNode();
 		execCommand = new ExecCommand(waldotNamespace);
+		osCheckDelayCommand = new OsCheckDelayCommand(waldotNamespace, this);
 		popolateOsData();
 	}
 
@@ -257,9 +265,17 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 				logger.error("Error invoking update trigger for " + trigger, e);
 			}
 		}
+		for (final Object entry : objectsToRefresh.keySet()) {
+			logger.info("Object to refresh: " + entry);
+		}
 
 		systemDataThread.setPriority(Thread.MIN_PRIORITY);
 		systemDataThread.start();
+	}
+
+	public void setUpdateDelay(long timeout) {
+		updateDelay = timeout;
+
 	}
 
 	private void updateSystemData() {

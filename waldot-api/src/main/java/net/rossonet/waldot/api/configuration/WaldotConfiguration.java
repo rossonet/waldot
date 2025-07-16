@@ -80,6 +80,18 @@ public interface WaldotConfiguration extends Serializable, Map<String, String> {
 
 	String getManagerNamespaceUri();
 
+	String getOsCheckDelayCommandDescription();
+
+	Boolean getOsCheckDelayCommandExecutable();
+
+	String getOsCheckDelayCommandLabel();
+
+	Boolean getOsCheckDelayCommandUserExecutable();
+
+	UInteger getOsCheckDelayCommandUserWriteMask();
+
+	UInteger getOsCheckDelayCommandWriteMask();
+
 	String getRootNodeBrowseName();
 
 	String getRootNodeDisplayName();

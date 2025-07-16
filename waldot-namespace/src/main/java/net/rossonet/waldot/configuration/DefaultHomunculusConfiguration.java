@@ -182,6 +182,36 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 	}
 
 	@Override
+	public String getOsCheckDelayCommandDescription() {
+		return "manage system delay on OS data updates";
+	}
+
+	@Override
+	public Boolean getOsCheckDelayCommandExecutable() {
+		return true;
+	}
+
+	@Override
+	public String getOsCheckDelayCommandLabel() {
+		return "os_check_delay";
+	}
+
+	@Override
+	public Boolean getOsCheckDelayCommandUserExecutable() {
+		return true;
+	}
+
+	@Override
+	public UInteger getOsCheckDelayCommandUserWriteMask() {
+		return UInteger.valueOf(WriteMask.Executable.getValue());
+	}
+
+	@Override
+	public UInteger getOsCheckDelayCommandWriteMask() {
+		return UInteger.valueOf(WriteMask.Executable.getValue());
+	}
+
+	@Override
 	public String getRootNodeBrowseName() {
 		return "WaldOT";
 	}
