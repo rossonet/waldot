@@ -40,12 +40,17 @@ import net.rossonet.waldot.rules.SysCommandExecutor;
 import net.rossonet.waldot.utils.GremlinHelper;
 import net.rossonet.waldot.utils.gremlin.UpdateTrigger;
 import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
+import oshi.hardware.ComputerSystem;
 import oshi.hardware.Display;
+import oshi.hardware.GlobalMemory;
 import oshi.hardware.GraphicsCard;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.LogicalVolumeGroup;
 import oshi.hardware.NetworkIF;
+import oshi.hardware.PowerSource;
+import oshi.hardware.Sensors;
 import oshi.hardware.SoundCard;
 import oshi.hardware.UsbDevice;
 import oshi.software.os.OperatingSystem;
@@ -200,6 +205,42 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 			logger.error("Error elaborating operating system data", e);
 		}
 		final HardwareAbstractionLayer hardwareAbstractionLayer = systemInfo.getHardware();
+
+		try {
+			final List<PowerSource> powerSources = hardwareAbstractionLayer.getPowerSources();
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), powerSources,
+					"hardware/powerSources"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating power sources data", e);
+		}
+		try {
+			final ComputerSystem computerSystem = hardwareAbstractionLayer.getComputerSystem();
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), computerSystem,
+					"hardware/computerSystem"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating computer system data", e);
+		}
+		try {
+			final GlobalMemory memory = hardwareAbstractionLayer.getMemory();
+			triggers.addAll(
+					GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), memory, "hardware/memory"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating memory data", e);
+		}
+		try {
+			final CentralProcessor processor = hardwareAbstractionLayer.getProcessor();
+			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), processor,
+					"hardware/processor"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating processor data", e);
+		}
+		try {
+			final Sensors sensors = hardwareAbstractionLayer.getSensors();
+			triggers.addAll(
+					GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), sensors, "hardware/sensors"));
+		} catch (final Throwable e) {
+			logger.error("Error elaborating sensors data", e);
+		}
 		try {
 			final List<HWDiskStore> diskStores = hardwareAbstractionLayer.getDiskStores();
 			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), diskStores,
@@ -266,7 +307,7 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 			}
 		}
 		for (final Object entry : objectsToRefresh.keySet()) {
-			logger.info("Object to refresh: " + entry);
+			logger.debug("Object to refresh: " + entry);
 		}
 
 		systemDataThread.setPriority(Thread.MIN_PRIORITY);
