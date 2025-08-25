@@ -11,15 +11,14 @@ import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 public class AgentRegisterX509IdentityValidator extends WaldotX509IdentityValidator implements AgentAuthenticator {
-	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private AgentManagementStrategy agentManagementStrategy;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public AgentRegisterX509IdentityValidator(final WaldotOpcUaServer waldotOpcUaServer) {
 		super(waldotOpcUaServer.getWaldotConfiguration());
 
 	}
 
-	@Override
 	protected Object authenticateIdentityCertificate(final Session session, final X509Certificate identityCertificate) {
 		if (session.getEndpoint().getEndpointUrl().endsWith(WaldotOpcUaServer.REGISTER_PATH)) {
 			final String sessionDataForLogging = AgentAuthenticator.generateSessionDataForLogging(session);

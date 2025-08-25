@@ -34,8 +34,6 @@ apply plugin: 'signing'
 apply plugin: 'maven-publish'
 
 dependencies {
-    api 'org.slf4j:jul-to-slf4j:2.0.17'
-    api 'org.slf4j:slf4j-simple:2.0.17'
     api 'org.json:json:20250107'
     api 'org.yaml:snakeyaml:2.4'
     api 'org.apache.commons:commons-jexl3:3.4.0'
@@ -45,10 +43,7 @@ dependencies {
     // gremlin
     api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
     // OPCUA
-    api group: 'org.eclipse.milo', name: 'sdk-server', version: '0.6.15'
-    api group: 'org.eclipse.milo', name: 'dictionary-manager', version: '0.6.15'
-    api group: 'org.eclipse.milo', name: 'dictionary-reader', version: '0.6.15'
-    api group: 'org.eclipse.milo', name: 'bsd-parser-core', version: '0.3.8'
+    api group: 'org.eclipse.milo', name: 'milo-sdk-server', version: '1.0.4'
 }
 
 task eclipseClosedDependencies {}

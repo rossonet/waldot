@@ -11,19 +11,18 @@ import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
+import org.eclipse.milo.opcua.sdk.core.typetree.ReferenceTypeTree;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager;
 import org.eclipse.milo.opcua.sdk.server.UaNodeManager;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.factories.EventFactory;
 import org.eclipse.milo.opcua.stack.core.NamespaceTable;
-import org.eclipse.milo.opcua.stack.core.ReferenceType;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
-
-import com.google.common.eventbus.EventBus;
 
 import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
 import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
@@ -124,7 +123,7 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	public <DATA_TYPE> WaldotEdge getPropertyReference(WaldotProperty<DATA_TYPE> property);
 
-	public Map<NodeId, ReferenceType> getReferenceTypes();
+	public ReferenceTypeTree getReferenceTypes();
 
 	WaldotRulesEngine getRulesEngine();
 

@@ -4,9 +4,8 @@ import java.util.Optional;
 
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
-import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseObjectType;
-
-import com.google.common.collect.ImmutableList;
+import org.eclipse.milo.opcua.sdk.server.model.objects.BaseObjectType;
+import org.eclipse.milo.shaded.com.google.common.collect.ImmutableList;
 
 /**
  * WaldotEdge is an interface that extends Edge, WaldotElement, and

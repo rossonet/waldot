@@ -10,10 +10,13 @@ import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.core.WriteMask;
+import org.eclipse.milo.opcua.sdk.server.AccessContext;
 import org.eclipse.milo.opcua.sdk.server.Session;
-import org.eclipse.milo.opcua.sdk.server.api.AccessContext;
-import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler;
-import org.eclipse.milo.opcua.sdk.server.api.methods.MethodInvocationHandler;
+import org.eclipse.milo.opcua.sdk.server.identity.Identity;
+import org.eclipse.milo.opcua.sdk.server.identity.Identity.AnonymousIdentity;
+import org.eclipse.milo.opcua.sdk.server.identity.Identity.UsernameIdentity;
+import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler;
+import org.eclipse.milo.opcua.sdk.server.methods.MethodInvocationHandler;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
@@ -158,13 +161,6 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 			this.status = status;
 		}
 
-		public Session getSession() {
-			return session;
-		}
-
-		public ProvisioningStatus getStatus() {
-			return status;
-		}
 	}
 
 	private abstract class TemplateMethodInvocationHandler extends AbstractMethodInvocationHandler {
@@ -331,10 +327,11 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 			public CallMethodResult invoke(final AccessContext accessContext, final CallMethodRequest request) {
 				try {
 					deleteProvisioningToken(id);
-					return CallMethodResult.builder().statusCode(StatusCode.GOOD).build();
+					return new CallMethodResult(StatusCode.GOOD, null, null, null);
 				} catch (final Exception e) {
 					logger.error("Error deleting provisioning token with ID: {}", id, e);
-					return CallMethodResult.builder().statusCode(StatusCode.BAD).build();
+					return new CallMethodResult(StatusCode.BAD, null, null, null);
+
 				}
 			}
 
@@ -355,27 +352,22 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 				waldotNamespace.generateQualifiedName("Provisioning Management"),
 				LocalizedText.english("Provisioning Management Instrumentation"));
 		waldotNamespace.getStorageManager().addNode(provisioningFolder);
-		// provisioningFolder.addReference(new Reference(provisioningFolder.getNodeId(),
-		// Identifiers.Organizes,
-		// assetRootNode.getNodeId().expanded(), false));
 		assetRootNode.addOrganizes(provisioningFolder);
 		final NodeId nodeId = waldotNamespace.generateNodeId("token-management");
 		managementRecord = new UaObjectNode(waldotNamespace.getOpcUaNodeContext(), nodeId,
-				waldotNamespace.generateQualifiedName("Token Management"), LocalizedText.english("Token Management"));
-
+				waldotNamespace.generateQualifiedName("Token Management"), LocalizedText.english("Token Management"),
+				LocalizedText.english("Token Management"), UInteger.MIN, UInteger.MIN);
 		waldotNamespace.getStorageManager().addNode(managementRecord);
 		managementRecord.addReference(new Reference(managementRecord.getNodeId(), Identifiers.HasTypeDefinition,
 				Identifiers.BaseObjectType.expanded(), true));
-		// managementRecord.addReference(new Reference(managementRecord.getNodeId(),
-		// Identifiers.Organizes,
-		// provisioningFolder.getNodeId().expanded(), false));
 		provisioningFolder.addComponent(managementRecord);
 	}
 
 	private NodeId generateProvisioningTokenRecord(final String id, final String secret) {
 		final NodeId nodeId = waldotNamespace.generateNodeId("pt-" + id);
 		final UaObjectNode provisioningRecord = new UaObjectNode(waldotNamespace.getOpcUaNodeContext(), nodeId,
-				waldotNamespace.generateQualifiedName("Provisioning Token " + id), LocalizedText.english("ID " + id));
+				waldotNamespace.generateQualifiedName(id), LocalizedText.english("ID " + id),
+				LocalizedText.english("Provisioning Token " + id), UInteger.MIN, UInteger.MIN);
 		waldotNamespace.getStorageManager().addNode(provisioningRecord);
 		// provisioningRecord.addReference(new Reference(provisioningRecord.getNodeId(),
 		// Identifiers.Organizes,
@@ -401,7 +393,8 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 		final NodeId nodeId = waldotNamespace.generateNodeId("lifecycle");
 		agentLifeCycleRecord = new UaObjectNode(waldotNamespace.getOpcUaNodeContext(), nodeId,
 				waldotNamespace.generateQualifiedName("Life Cycle Manager"),
-				LocalizedText.english("Life Cycle Manager"));
+				LocalizedText.english("Life Cycle Manager"), LocalizedText.english("Life Cycle Manager"), UInteger.MIN,
+				UInteger.MIN);
 
 		waldotNamespace.getStorageManager().addNode(agentLifeCycleRecord);
 		agentLifeCycleRecord.addReference(new Reference(agentLifeCycleRecord.getNodeId(), Identifiers.HasTypeDefinition,
@@ -489,13 +482,13 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 		rpcFolder.addComponent(provisioningRpcManualRequest);
 	}
 
-	private String getSessionId(final Session session) {
+	private Identity getSessionIdentity(final Session session) {
 		if (session == null) {
 			logger.warn("Session is null, cannot get session ID");
 			return null;
 		}
 		if (sessions.containsKey(session.getSessionId())) {
-			return session.getSessionId().toString();
+			return session.getIdentity();
 		} else {
 			logger.warn("Session {} not found in registered sessions", session.getSessionId());
 			throw new IllegalStateException("Session " + session.getSessionId() + " not found in registered sessions");
@@ -509,17 +502,18 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	}
 
 	@Override
-	public String registerNewAgentForApproval(final Session session) {
+	public AnonymousIdentity registerNewAgentForApproval(final Session session) {
 		registerSessionIfNeeded(session, ProvisioningStatus.PENDING);
 		logger.info("New agent registered for approval: {}", session.getSessionId());
-		return getSessionId(session);
+		return (AnonymousIdentity) getSessionIdentity(session);
 	}
 
 	@Override
-	public String registerNewAgentWithProvisioningPassword(final Session session, final UserNameIdentityToken token) {
+	public UsernameIdentity registerNewAgentWithProvisioningPassword(final Session session,
+			final UserNameIdentityToken token) {
 		// TODO verificare il token
 		registerSessionIfNeeded(session, ProvisioningStatus.APPROVED);
-		return getSessionId(session);
+		return (UsernameIdentity) getSessionIdentity(session);
 	}
 
 	private void registerSessionIfNeeded(final Session session, final ProvisioningStatus pending) {
@@ -547,7 +541,7 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	public Object updateAgentCertificate(final Session session, final X509Certificate identityCertificate) {
 		// TODO controllare la validità del certificato
 		registerSessionIfNeeded(session, ProvisioningStatus.APPROVED);
-		return getSessionId(session);
+		return session.getSessionId();
 	}
 
 }

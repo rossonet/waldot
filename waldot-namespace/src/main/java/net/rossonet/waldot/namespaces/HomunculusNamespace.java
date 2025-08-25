@@ -13,25 +13,25 @@ import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
+import org.eclipse.milo.opcua.sdk.core.typetree.ReferenceTypeTree;
+import org.eclipse.milo.opcua.sdk.server.ManagedNamespaceWithLifecycle;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager;
 import org.eclipse.milo.opcua.sdk.server.UaNodeManager;
-import org.eclipse.milo.opcua.sdk.server.api.DataItem;
-import org.eclipse.milo.opcua.sdk.server.api.ManagedNamespaceWithLifecycle;
-import org.eclipse.milo.opcua.sdk.server.api.MonitoredItem;
-import org.eclipse.milo.opcua.sdk.server.dtd.DataTypeDictionaryManager;
+import org.eclipse.milo.opcua.sdk.server.items.DataItem;
+import org.eclipse.milo.opcua.sdk.server.items.MonitoredItem;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.factories.EventFactory;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.NamespaceTable;
-import org.eclipse.milo.opcua.stack.core.ReferenceType;
+import org.eclipse.milo.opcua.stack.core.types.DataTypeManager;
+import org.eclipse.milo.opcua.stack.core.types.DefaultDataTypeManager;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.eventbus.EventBus;
 
 import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
 import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
@@ -49,9 +49,9 @@ import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
+import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.api.strategies.BootstrapStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
-import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
@@ -67,35 +67,35 @@ import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
+	private AgentRegisterAnonymousValidator agentAnonymousValidator;
+	private AgentRegisterUsernameIdentityValidator agentIdentityValidator;
+	private final AgentManagementStrategy agentManagementStrategy;
+	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
+	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
 	private final BootstrapStrategy bootstrapProcedureStrategy;
+	private final String bootstrapUrl;
 	private final WaldotConfiguration configuration;
 	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
-	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
 	private final ConsoleStrategy consoleStrategy;
-	private final DataTypeDictionaryManager dictionaryManager;
+	private final DataTypeManager dictionaryManager;
 	private WaldotGraphComputerView graphComputerView;
 	private final WaldotGraph gremlin;
 	private final RulesCmdFunction jexlWaldotCommandHelper;
 	private final List<NamespaceListener> listeners = new ArrayList<>();
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+
 	private final Graph.Variables opcGraphVariables;
 	private final MiloStrategy opcMappingStrategy;
 	private final Set<PluginListener> plugins = new HashSet<>();
 	private final WaldotRulesEngine rulesEngine;
 	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
-
 	private final SubscriptionModel subscriptionModel;
-	private final String bootstrapUrl;
 	private WaldotOpcUaServer waldotOpcUaServer;
-	private AgentRegisterAnonymousValidator agentAnonymousValidator;
-	private AgentRegisterUsernameIdentityValidator agentIdentityValidator;
-	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
-	private final AgentManagementStrategy agentManagementStrategy;
 
 	public HomunculusNamespace(final WaldotOpcUaServer server, final MiloStrategy opcMappingStrategy,
 			final ConsoleStrategy consoleStrategy, final DefaultHomunculusConfiguration configuration,
-			final BootstrapStrategy bootstrapProcedureStrategy,
-			final AgentManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
+			final BootstrapStrategy bootstrapProcedureStrategy, final AgentManagementStrategy agentManagementStrategy,
+			final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
@@ -107,8 +107,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		this.bootstrapUrl = bootstrapUrl;
 		opcGraphVariables = new OpcGraphVariables(this);
 		subscriptionModel = new SubscriptionModel(server.getServer(), this);
-		dictionaryManager = new DataTypeDictionaryManager(getNodeContext(), configuration.getManagerNamespaceUri());
-		getLifecycleManager().addLifecycle(dictionaryManager);
+		dictionaryManager = new DefaultDataTypeManager();
+		// getLifecycleManager().addLifecycle(dictionaryManager);
 		getLifecycleManager().addLifecycle(subscriptionModel);
 		getLifecycleManager().addStartupTask(this::runBootstrapProcedure);
 		gremlin = OpcGraph.open();
@@ -273,7 +273,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public EventBus getEventBus() {
-		return getServer().getEventBus();
+		return getServer().getInternalEventBus();
 	}
 
 	@Override
@@ -333,8 +333,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public Map<NodeId, ReferenceType> getReferenceTypes() {
-		return getServer().getReferenceTypes();
+	public ReferenceTypeTree getReferenceTypes() {
+		return getServer().getReferenceTypeTree();
 	}
 
 	@Override

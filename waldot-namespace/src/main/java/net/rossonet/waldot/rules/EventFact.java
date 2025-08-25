@@ -1,6 +1,6 @@
 package net.rossonet.waldot.rules;
 
-import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
+import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 
 import net.rossonet.waldot.api.rules.Fact;
 

@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
-import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler.InvocationContext;
+import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler.InvocationContext;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.slf4j.Logger;
@@ -17,8 +17,8 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class HelpCommand extends AbstractOpcCommand {
-	private static final String TXT = ".txt";
-	private static final String INDEX_TXT = "index" + TXT;
+	private static final String _TXT = ".txt";
+	private static final String INDEX_TXT = "index" + _TXT;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public HelpCommand(final WaldotNamespace waldotNamespace) {
@@ -46,7 +46,7 @@ public class HelpCommand extends AbstractOpcCommand {
 	public String[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
 		Path target;
 		if (inputValues != null && inputValues.length > 0 && inputValues[0] != null && !inputValues[0].isEmpty()) {
-			target = Path.of(getNamespace().getConfiguration().getHelpDirectoryPath(), inputValues[0] + TXT);
+			target = Path.of(getNamespace().getConfiguration().getHelpDirectoryPath(), inputValues[0] + _TXT);
 		} else {
 			target = Path.of(getNamespace().getConfiguration().getHelpDirectoryPath(), INDEX_TXT);
 		}

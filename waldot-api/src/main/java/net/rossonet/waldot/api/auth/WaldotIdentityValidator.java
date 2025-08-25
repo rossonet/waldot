@@ -15,7 +15,7 @@ public abstract class WaldotIdentityValidator extends UsernameIdentityValidator 
 
 	public WaldotIdentityValidator(final WaldotConfiguration configuration,
 			final FactoryPasswordValidator authChallenge) {
-		super(configuration.getAnonymousAccessAllowed(), authChallenge.getAuthChallenge(configuration));
+		super(authChallenge.getAuthChallenge(configuration));
 	}
 
 }

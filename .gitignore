@@ -27,6 +27,7 @@ status.json
 gradle.properties
 trace/*
 java_pid*.hprof
+waldot-*/.security
 
 ### OUTPUT ###
 spring-shell.log

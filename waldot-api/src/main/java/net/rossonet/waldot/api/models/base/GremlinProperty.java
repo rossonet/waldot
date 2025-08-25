@@ -7,7 +7,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.filters.AttributeFilter;
-import org.eclipse.milo.opcua.sdk.server.nodes.filters.AttributeFilterContext.GetAttributeContext;
+import org.eclipse.milo.opcua.sdk.server.nodes.filters.AttributeFilterContext;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
@@ -39,7 +39,7 @@ public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implemen
 	private final AttributeFilter filterChain = new AttributeFilter() {
 
 		@Override
-		public Object getAttribute(GetAttributeContext ctx, AttributeId attributeId) {
+		public Object getAttribute(AttributeFilterContext ctx, AttributeId attributeId) {
 			// FIXME: gestione permessi per sessione
 			if (attributeId == AttributeId.UserAccessLevel) {
 				logger.debug("UserAccessLevel requested for {}", getNodeId());

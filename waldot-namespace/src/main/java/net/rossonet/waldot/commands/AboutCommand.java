@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
-import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler.InvocationContext;
+import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler.InvocationContext;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.slf4j.Logger;
@@ -19,22 +19,22 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class AboutCommand extends AbstractOpcCommand {
-	private static final String LONG_LABEL_DESCRIPTION = "description of the software";
-	private static final String LONG_LABEL_NAME = "the name of the software";
 	private static final String LABEL_DESCRIPTION = "description";
+	private static final String LABEL_LICENSE = "license";
+	private static final String LABEL_LICENSE_URL = "licence URL";
 	private static final String LABEL_NAME = "name";
-	private static final String SOFTWARE_DESCRIPTION = "basic WaldOT Agent with Rule Engine";
-	private static final String SOFTWARE_NAME = "WaldOT Agent";
+	private static final String LABEL_REPOSITORY_URL = "repository URL";
 	private static final String LICENSE = "Apache License 2.0";
 	private static final String LICENSE_URL = "https://www.apache.org/licenses/LICENSE-2.0";
-	private static final String REPOSITORY_URL = "https://github.com/rossonet/waldot/";
-	private static final String LABEL_LICENSE = "license";
-	private static final String LONG_LABEL_LICENSE = "license of the software";
-	private static final String LABEL_LICENSE_URL = "licence URL";
-	private static final String LONG_LABEL_LICENSE_URL = "URL of the license of the software";
-	private static final String LABEL_REPOSITORY_URL = "repository URL";
-	private static final String LONG_LABEL_REPOSITORY_URL = "URL of the repository of the software";
 	private final static Logger logger = LoggerFactory.getLogger(AboutCommand.class);
+	private static final String LONG_LABEL_DESCRIPTION = "description of the software";
+	private static final String LONG_LABEL_LICENSE = "license of the software";
+	private static final String LONG_LABEL_LICENSE_URL = "URL of the license of the software";
+	private static final String LONG_LABEL_NAME = "the name of the software";
+	private static final String LONG_LABEL_REPOSITORY_URL = "URL of the repository of the software";
+	private static final String REPOSITORY_URL = "https://github.com/rossonet/waldot/";
+	private static final String SOFTWARE_DESCRIPTION = "basic WaldOT Agent with Rule Engine";
+	private static final String SOFTWARE_NAME = "WaldOT Agent";
 
 	private static Properties loadProperties(final String propertiesFilename) {
 		final Properties prop = new Properties();

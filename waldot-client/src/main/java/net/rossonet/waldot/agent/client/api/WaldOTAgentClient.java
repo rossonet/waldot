@@ -1,11 +1,13 @@
 package net.rossonet.waldot.agent.client.api;
 
-import org.eclipse.milo.opcua.sdk.client.api.ServiceFaultListener;
-import org.eclipse.milo.opcua.sdk.client.api.UaClient;
+import java.util.concurrent.CompletableFuture;
+
+import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
+import org.eclipse.milo.opcua.sdk.client.ServiceFaultListener;
 
 import net.rossonet.waldot.agent.client.v1.WaldOTAgentClientImplV1;
 
-public interface WaldOTAgentClient extends ServiceFaultListener, UaClient, AutoCloseable {
+public interface WaldOTAgentClient extends ServiceFaultListener, AutoCloseable {
 
 	public enum Status {
 		CLOSED, COMPLETED_PROVISIONING_MANUAL_REQUEST, COMPLETED_PROVISIONING_TOKEN, CONNECTED,
@@ -30,8 +32,14 @@ public interface WaldOTAgentClient extends ServiceFaultListener, UaClient, AutoC
 
 	WaldOTAgentClientConfiguration getConfiguration();
 
+	OpcUaClient getOpcUaClient();
+
 	Status getStatus();
 
 	void setStatusObserver(WaldotAgentClientObserver waldotAgentClientObserver);
+
+	CompletableFuture<WaldOTAgentClient> startConnectionProcedure();
+
+	CompletableFuture<WaldOTAgentClient> stopConnectionProcedure();
 
 }

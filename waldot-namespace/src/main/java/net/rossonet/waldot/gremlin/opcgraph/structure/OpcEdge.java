@@ -18,10 +18,9 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.shaded.com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableList;
 
 import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
@@ -32,11 +31,11 @@ import net.rossonet.waldot.api.models.base.GremlinElement;
 
 public class OpcEdge extends GremlinElement implements WaldotEdge {
 
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	private final boolean allowNullPropertyValues;
 
 	private final WaldotGraph graph;
 
-	private final boolean allowNullPropertyValues;
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public OpcEdge(WaldotGraph graph, final NodeId nodeId, final WaldotVertex outVertex, final WaldotVertex inVertex,
 			final String label, String description, UInteger writeMask, UInteger userWriteMask, UByte eventNotifier,

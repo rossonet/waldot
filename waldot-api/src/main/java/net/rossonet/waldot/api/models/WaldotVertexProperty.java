@@ -1,7 +1,7 @@
 package net.rossonet.waldot.api.models;
 
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
-import org.eclipse.milo.opcua.sdk.server.model.types.variables.BaseVariableType;
+import org.eclipse.milo.opcua.sdk.server.model.variables.BaseVariableType;
 import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 
 import net.rossonet.waldot.api.PropertyObserver;

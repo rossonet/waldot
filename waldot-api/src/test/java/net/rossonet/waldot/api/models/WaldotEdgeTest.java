@@ -9,10 +9,9 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
+import org.eclipse.milo.shaded.com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import com.google.common.collect.ImmutableList;
 
 class WaldotEdgeTest {
 
@@ -28,7 +27,8 @@ class WaldotEdgeTest {
 		final ImmutableList<WaldotProperty<Object>> properties = mock(ImmutableList.class);
 		when(mockEdge.getProperties()).thenReturn(properties);
 
-		final ImmutableList<WaldotProperty<Object>> result = mockEdge.getProperties();
+		final org.eclipse.milo.shaded.com.google.common.collect.ImmutableList<WaldotProperty<Object>> result = mockEdge
+				.getProperties();
 
 		assertEquals(properties, result);
 		verify(mockEdge, times(1)).getProperties();

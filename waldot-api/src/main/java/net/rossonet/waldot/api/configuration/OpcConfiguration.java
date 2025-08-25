@@ -36,6 +36,8 @@ public interface OpcConfiguration extends Serializable, Map<String, String> {
 
 	String getProductUri();
 
+	String getSecurityTempDir();
+
 	int getTcpBindPort();
 
 }

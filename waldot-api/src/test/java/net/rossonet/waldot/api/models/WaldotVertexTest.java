@@ -10,15 +10,14 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
+import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import com.google.common.collect.ImmutableMap;
 
 import net.rossonet.waldot.api.EventObserver;
 import net.rossonet.waldot.api.PropertyObserver;
@@ -131,10 +130,12 @@ class WaldotVertexTest {
 
 	@Test
 	void testGetVertexProperties() {
-		final ImmutableMap<String, WaldotVertexProperty<Object>> properties = mock(ImmutableMap.class);
+		final org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap<String, WaldotVertexProperty<Object>> properties = mock(
+				ImmutableMap.class);
 		when(mockVertex.getVertexProperties()).thenReturn(properties);
 
-		final ImmutableMap<String, WaldotVertexProperty<Object>> result = mockVertex.getVertexProperties();
+		final org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap<String, WaldotVertexProperty<Object>> result = mockVertex
+				.getVertexProperties();
 
 		assertEquals(properties, result);
 		verify(mockVertex, times(1)).getVertexProperties();

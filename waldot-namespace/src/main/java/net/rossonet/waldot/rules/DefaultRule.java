@@ -12,8 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.jexl3.JexlContext;
-import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
-import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseEventType;
+import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
+import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
@@ -56,6 +56,7 @@ public class DefaultRule extends OpcVertex implements Rule {
 
 	private final String action;
 
+	private JexlContext cacheJexlContext;
 	private boolean clearFactsAfterExecution = true;
 	private final String condition;
 	private int delayBeforeEvaluation = 0;
@@ -66,16 +67,15 @@ public class DefaultRule extends OpcVertex implements Rule {
 	private long factsValidDelayMs = 0;
 	private long factsValidUntilMs = 0;
 	private long lastRun = 0;
-	private final Logger logger = LoggerFactory.getLogger(getClass());
 
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private boolean parallelExecution = false;
 	private int priority = 5; // Default priority
+
 	private int refractoryPeriodMs = 1000;
-
 	private final AtomicInteger threadCounter = new AtomicInteger(0);
-	private final WaldotRulesEngine waldotRulesEngine;
 
-	private JexlContext cacheJexlContext;
+	private final WaldotRulesEngine waldotRulesEngine;
 
 	public DefaultRule(final NodeId typeDefinition, final WaldotGraph graph, final UaNodeContext context,
 			final NodeId nodeId, final QualifiedName browseName, final LocalizedText displayName,

@@ -80,6 +80,11 @@ public class DefaultOpcUaConfiguration extends HashMap<String, String> implement
 	}
 
 	@Override
+	public String getSecurityTempDir() {
+		return ".security";
+	}
+
+	@Override
 	public int getTcpBindPort() {
 		return DEFAULT_TCP_BIND_PORT;
 	}

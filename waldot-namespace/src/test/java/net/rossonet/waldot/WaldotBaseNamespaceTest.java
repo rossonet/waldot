@@ -56,6 +56,7 @@ public class WaldotBaseNamespaceTest {
 	public void runModern() throws Exception {
 		final WaldotGraph d = OpcFactory.createModern();
 		Thread.sleep(4_000);
+		System.out.println("closing server...");
 		d.getWaldotNamespace().getOpcuaServer().close();
 	}
 

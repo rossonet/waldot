@@ -2,9 +2,9 @@ package net.rossonet.waldot.api;
 
 import java.util.List;
 
-import org.eclipse.milo.opcua.sdk.server.api.DataItem;
-import org.eclipse.milo.opcua.sdk.server.api.ManagedNamespaceWithLifecycle;
-import org.eclipse.milo.opcua.sdk.server.api.MonitoredItem;
+import org.eclipse.milo.opcua.sdk.server.ManagedNamespaceWithLifecycle;
+import org.eclipse.milo.opcua.sdk.server.items.DataItem;
+import org.eclipse.milo.opcua.sdk.server.items.MonitoredItem;
 
 import net.rossonet.waldot.api.models.WaldotCommand;
 

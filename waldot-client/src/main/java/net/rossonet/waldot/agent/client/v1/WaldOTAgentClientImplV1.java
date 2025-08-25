@@ -11,81 +11,29 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import org.eclipse.milo.opcua.sdk.client.AddressSpace;
+import org.eclipse.milo.opcua.sdk.client.DiscoveryClient;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
+import org.eclipse.milo.opcua.sdk.client.OpcUaClientConfig;
+import org.eclipse.milo.opcua.sdk.client.OpcUaClientConfigBuilder;
 import org.eclipse.milo.opcua.sdk.client.OpcUaSession;
-import org.eclipse.milo.opcua.sdk.client.api.UaClient;
-import org.eclipse.milo.opcua.sdk.client.api.UaSession;
-import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig;
-import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfigBuilder;
-import org.eclipse.milo.opcua.sdk.client.api.identity.AnonymousProvider;
-import org.eclipse.milo.opcua.sdk.client.api.identity.IdentityProvider;
-import org.eclipse.milo.opcua.sdk.client.api.identity.UsernameProvider;
-import org.eclipse.milo.opcua.sdk.client.api.identity.X509IdentityProvider;
-import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaSubscriptionManager;
-import org.eclipse.milo.opcua.stack.client.DiscoveryClient;
-import org.eclipse.milo.opcua.stack.client.security.ClientCertificateValidator;
+import org.eclipse.milo.opcua.sdk.client.identity.AnonymousProvider;
+import org.eclipse.milo.opcua.sdk.client.identity.IdentityProvider;
+import org.eclipse.milo.opcua.sdk.client.identity.UsernameProvider;
+import org.eclipse.milo.opcua.sdk.client.identity.X509IdentityProvider;
 import org.eclipse.milo.opcua.stack.core.UaException;
-import org.eclipse.milo.opcua.stack.core.serialization.UaRequestMessage;
-import org.eclipse.milo.opcua.stack.core.serialization.UaResponseMessage;
+import org.eclipse.milo.opcua.stack.core.security.CertificateValidator;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
-import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
-import org.eclipse.milo.opcua.stack.core.types.enumerated.MonitoringMode;
-import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.UserTokenType;
-import org.eclipse.milo.opcua.stack.core.types.structured.AddNodesItem;
-import org.eclipse.milo.opcua.stack.core.types.structured.AddNodesResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.AddReferencesItem;
-import org.eclipse.milo.opcua.stack.core.types.structured.AddReferencesResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.BrowseDescription;
-import org.eclipse.milo.opcua.stack.core.types.structured.BrowseNextResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.BrowsePath;
-import org.eclipse.milo.opcua.stack.core.types.structured.BrowseResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.CallMethodRequest;
-import org.eclipse.milo.opcua.stack.core.types.structured.CallResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.CreateMonitoredItemsResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.CreateSubscriptionResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.DeleteMonitoredItemsResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.DeleteNodesItem;
-import org.eclipse.milo.opcua.stack.core.types.structured.DeleteNodesResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.DeleteReferencesItem;
-import org.eclipse.milo.opcua.stack.core.types.structured.DeleteReferencesResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.DeleteSubscriptionsResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
-import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadDetails;
-import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadValueId;
-import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateDetails;
-import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.ModifyMonitoredItemsResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.ModifySubscriptionResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.MonitoredItemCreateRequest;
-import org.eclipse.milo.opcua.stack.core.types.structured.MonitoredItemModifyRequest;
-import org.eclipse.milo.opcua.stack.core.types.structured.PublishResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.ReadResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
-import org.eclipse.milo.opcua.stack.core.types.structured.RegisterNodesResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.RepublishResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.ServiceFault;
-import org.eclipse.milo.opcua.stack.core.types.structured.SetMonitoringModeResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.SetPublishingModeResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.SetTriggeringResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.SubscriptionAcknowledgement;
-import org.eclipse.milo.opcua.stack.core.types.structured.TransferSubscriptionsResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.TranslateBrowsePathsToNodeIdsResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.UnregisterNodesResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.ViewDescription;
-import org.eclipse.milo.opcua.stack.core.types.structured.WriteResponse;
-import org.eclipse.milo.opcua.stack.core.types.structured.WriteValue;
 import org.eclipse.milo.opcua.stack.core.util.EndpointUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,27 +67,27 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	}
 
+	private final static Logger logger = LoggerFactory.getLogger(WaldOTAgentClient.class);
 	public static String SELFSIGNED_CERTIFICATE_ALIAS = "waldot-selfsigned";
 	public static String SIGNED_CERTIFICATE_ALIAS = "waldot-signed";
-	private final static Logger logger = LoggerFactory.getLogger(WaldOTAgentClient.class);
 
 	private boolean activeConnectionRequest = false;
+	private final KeyStoreHelper certificateHelper;
 	private transient OpcUaClient client = null;
 	private int clientFaultCounter;
 	private final WaldOTAgentClientConfiguration configuration;
+
 	private final WaldOTAgentThread controlThread = new WaldOTAgentThread();
 
 	private ByteString lastNonce = null;
 
-	private transient OpcUaClient provisioningClient;
+	private transient OpcUaClient provisioningClient = null;
 
 	private final ProvisioningLifeCycleProcedure provisioningLifeCycle = new ProvisioningLifeCycleProcedure(this);
 
 	private transient Status status = Status.INIT;
 
 	private WaldotAgentClientObserver waldotAgentClientObserver;
-
-	private final KeyStoreHelper certificateHelper;
 
 	public WaldOTAgentClientImplV1(final WaldOTAgentClientConfiguration configuration) {
 		this.configuration = configuration;
@@ -160,33 +108,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<AddNodesResponse> addNodes(final List<AddNodesItem> nodesToAdd) {
-		return client.addNodes(nodesToAdd);
-	}
-
-	@Override
-	public CompletableFuture<AddReferencesResponse> addReferences(final List<AddReferencesItem> referencesToAdd) {
-		return client.addReferences(referencesToAdd);
-	}
-
-	@Override
-	public CompletableFuture<BrowseResponse> browse(final ViewDescription viewDescription,
-			final UInteger maxReferencesPerNode, final List<BrowseDescription> nodesToBrowse) {
-		return client.browse(viewDescription, maxReferencesPerNode, nodesToBrowse);
-	}
-
-	@Override
-	public CompletableFuture<BrowseNextResponse> browseNext(final boolean releaseContinuationPoints,
-			final List<ByteString> continuationPoints) {
-		return client.browseNext(releaseContinuationPoints, continuationPoints);
-	}
-
-	@Override
-	public CompletableFuture<CallResponse> call(final List<CallMethodRequest> methodsToCall) {
-		return client.call(methodsToCall);
-	}
-
-	@Override
 	public void changeStatus(final Status newStatus) {
 		status = newStatus;
 		if (waldotAgentClientObserver != null) {
@@ -194,10 +115,8 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	private boolean checkClientConnected(final OpcUaClient clientOpc)
-			throws InterruptedException, ExecutionException, TimeoutException {
-		return clientOpc != null && clientOpc.getSession().isDone()
-				&& getClientSessionWithTimeout(clientOpc).getServerNonce() != null;
+	private boolean checkClientConnected(final OpcUaClient clientOpc) throws Exception {
+		return clientOpc != null && getClientSessionWithTimeout(clientOpc).getServerNonce() != null;
 	}
 
 	private void checkFaultCounter() {
@@ -209,7 +128,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	private void cleanConnectionObjects() {
+	private void cleanConnectionObjects() throws UaException {
 		activeConnectionRequest = false;
 		if (client != null) {
 			client.disconnect();
@@ -223,22 +142,8 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	@Override
 	public void close() throws Exception {
-		disconnect();
+		stopConnectionProcedure();
 		changeStatus(Status.CLOSED);
-	}
-
-	@Override
-	public CompletableFuture<? extends UaClient> connect() {
-		controlThread.start();
-		activeConnectionRequest = true;
-		nextConnectionAction();
-		return CompletableFuture.completedFuture(this);
-	}
-
-	@Override
-	public CompletableFuture<CreateMonitoredItemsResponse> createMonitoredItems(final UInteger subscriptionId,
-			final TimestampsToReturn timestampsToReturn, final List<MonitoredItemCreateRequest> itemsToCreate) {
-		return client.createMonitoredItems(subscriptionId, timestampsToReturn, itemsToCreate);
 	}
 
 	private OpcUaClient createOpcClient(final OpcUaClientConfig actualConfiguration) throws UaException {
@@ -254,43 +159,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 				configuration.getGenerateCertLocality(), configuration.getGenerateCertState(),
 				configuration.getGenerateCertCountry(), null, configuration.getGenerateCertDns(),
 				configuration.getGenerateCertIp(), configuration.getGenerateCertDnsAlias());
-	}
-
-	@Override
-	public CompletableFuture<CreateSubscriptionResponse> createSubscription(final double requestedPublishingInterval,
-			final UInteger requestedLifetimeCount, final UInteger requestedMaxKeepAliveCount,
-			final UInteger maxNotificationsPerPublish, final boolean publishingEnabled, final UByte priority) {
-		return client.createSubscription(requestedPublishingInterval, requestedLifetimeCount,
-				requestedMaxKeepAliveCount, maxNotificationsPerPublish, publishingEnabled, priority);
-	}
-
-	@Override
-	public CompletableFuture<DeleteMonitoredItemsResponse> deleteMonitoredItems(final UInteger subscriptionId,
-			final List<UInteger> monitoredItemIds) {
-		return client.deleteMonitoredItems(subscriptionId, monitoredItemIds);
-	}
-
-	@Override
-	public CompletableFuture<DeleteNodesResponse> deleteNodes(final List<DeleteNodesItem> nodesToDelete) {
-		return client.deleteNodes(nodesToDelete);
-	}
-
-	@Override
-	public CompletableFuture<DeleteReferencesResponse> deleteReferences(
-			final List<DeleteReferencesItem> referencesToDelete) {
-		return client.deleteReferences(referencesToDelete);
-	}
-
-	@Override
-	public CompletableFuture<DeleteSubscriptionsResponse> deleteSubscriptions(final List<UInteger> subscriptionIds) {
-		return client.deleteSubscriptions(subscriptionIds);
-	}
-
-	@Override
-	public CompletableFuture<? extends UaClient> disconnect() {
-		changeStatus(Status.STOPPED);
-		cleanConnectionObjects();
-		return CompletableFuture.completedFuture(this);
 	}
 
 	private void doActionClientStart() {
@@ -406,29 +274,21 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	@Override
-	public AddressSpace getAddressSpace() {
-		return client.getAddressSpace();
-	}
-
 	private X509Certificate getCertificateActualConnection()
 			throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 		return certificateHelper.getCertificate(SIGNED_CERTIFICATE_ALIAS);
 	}
 
-	private X509Certificate[] getCertificateChainActualConnection() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private OpcUaSession getClientSessionWithTimeout(final OpcUaClient clientOpc)
-			throws InterruptedException, ExecutionException, TimeoutException {
-		return clientOpc.getSession().get(TIMEOUT_GET_SESSION_SEC, TimeUnit.SECONDS);
-	}
-
-	@Override
-	public OpcUaClientConfig getConfig() {
-		return client.getConfig();
+	private OpcUaSession getClientSessionWithTimeout(final OpcUaClient clientOpc) throws Exception {
+		final Callable<OpcUaSession> callable = new Callable<OpcUaSession>() {
+			@Override
+			public OpcUaSession call() throws Exception {
+				final OpcUaSession session = clientOpc.getSession();
+				return Optional.ofNullable(session).orElseThrow(() -> new UaException(-1, "No session"));
+			}
+		};
+		ThreadHelper.runWithTimeout(callable, TIMEOUT_GET_SESSION_SEC, TimeUnit.SECONDS);
+		return callable.call();
 	}
 
 	@Override
@@ -480,28 +340,17 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 				.setApplicationUri(configuration.getApplicationUri())
 				.setApplicationName(LocalizedText.english(configuration.getApplicationName()));
 		config.setSessionTimeout(UInteger.valueOf(configuration.getSessionTimeout()));
-		config.setConnectTimeout(UInteger.valueOf(configuration.getConnectTimeout()));
+		// config.setConnectTimeout(UInteger.valueOf(configuration.getConnectTimeout()));
 		config.setKeepAliveTimeout(UInteger.valueOf(configuration.getKeepAliveTimeout()));
 		config.setRequestTimeout(UInteger.valueOf(configuration.getRequestTimeout()));
-		config.setChannelLifetime(UInteger.valueOf(configuration.getChannelLifetime()));
-		config.setAcknowledgeTimeout(UInteger.valueOf(configuration.getAcknowledgeTimeout()));
+		// config.setChannelLifetime(UInteger.valueOf(configuration.getChannelLifetime()));
+		// config.setAcknowledgeTimeout(UInteger.valueOf(configuration.getAcknowledgeTimeout()));
 		config.setIdentityProvider(getIdentityProviderActualConnection());
 		config.setKeyPair(getKeyPairActualConnection());
-		config.setCertificateChain(getCertificateChainActualConnection());
+		// config.setCertificateChain(getCertificateChainActualConnection());
 		config.setCertificate(getCertificateActualConnection());
 		if (configuration.isForceCertificateValidator()) {
-			final ClientCertificateValidator alwaysValidCert = new ClientCertificateValidator() {
-				@Override
-				public void validateCertificateChain(final List<X509Certificate> certificateChain) throws UaException {
-					final StringBuilder sb = new StringBuilder();
-					for (final X509Certificate c : certificateChain) {
-						sb.append("\n" + c + "\n");
-					}
-					logger.warn(
-							"because forceCertificateValidator is true, the function validateCertificateChain authorizes the follow certificates"
-									+ sb.toString() + "\nApplicationUri is " + configuration.getApplicationUri()
-									+ " and endpoint is " + getEndpoint().getEndpointUrl());
-				}
+			final CertificateValidator alwaysValidCert = new CertificateValidator() {
 
 				@Override
 				public void validateCertificateChain(final List<X509Certificate> certificateChain,
@@ -567,8 +416,12 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<? extends UaSession> getSession() {
-		return client.getSession();
+	public OpcUaClient getOpcUaClient() {
+		if (client == null) {
+			return provisioningClient;
+		}
+		return client;
+
 	}
 
 	@Override
@@ -576,44 +429,11 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		return status;
 	}
 
-	@Override
-	public UaSubscriptionManager getSubscriptionManager() {
-		return client.getSubscriptionManager();
-	}
-
-	@Override
-	public CompletableFuture<HistoryReadResponse> historyRead(final HistoryReadDetails historyReadDetails,
-			final TimestampsToReturn timestampsToReturn, final boolean releaseContinuationPoints,
-			final List<HistoryReadValueId> nodesToRead) {
-		return client.historyRead(historyReadDetails, timestampsToReturn, releaseContinuationPoints, nodesToRead);
-	}
-
-	@Override
-	public CompletableFuture<HistoryUpdateResponse> historyUpdate(
-			final List<HistoryUpdateDetails> historyUpdateDetails) {
-		return client.historyUpdate(historyUpdateDetails);
-	}
-
 	private void logServerCertificate(final EndpointDescription endpoint) throws CertificateException {
 		if (!endpoint.getServerCertificate().isNullOrEmpty()) {
 			logger.info("Server certificate for endpoint {}: {}", endpoint, CertificateFactory.getInstance("X.509")
 					.generateCertificate(new ByteArrayInputStream(endpoint.getServerCertificate().bytes())));
 		}
-	}
-
-	@Override
-	public CompletableFuture<ModifyMonitoredItemsResponse> modifyMonitoredItems(final UInteger subscriptionId,
-			final TimestampsToReturn timestampsToReturn, final List<MonitoredItemModifyRequest> itemsToModify) {
-		return client.modifyMonitoredItems(subscriptionId, timestampsToReturn, itemsToModify);
-	}
-
-	@Override
-	public CompletableFuture<ModifySubscriptionResponse> modifySubscription(final UInteger subscriptionId,
-			final double requestedPublishingInterval, final UInteger requestedLifetimeCount,
-			final UInteger requestedMaxKeepAliveCount, final UInteger maxNotificationsPerPublish,
-			final UByte priority) {
-		return client.modifySubscription(subscriptionId, requestedPublishingInterval, requestedLifetimeCount,
-				requestedMaxKeepAliveCount, maxNotificationsPerPublish, priority);
 	}
 
 	private void nextConnectionAction() {
@@ -669,7 +489,11 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 			break;
 		case FAULTED:
 			logger.error("Client is in faulted status, resetting connection");
-			cleanConnectionObjects();
+			try {
+				cleanConnectionObjects();
+			} catch (final UaException e) {
+				logger.error("Error during cleaning connection objects: {}", LogHelper.stackTraceToString(e, 5));
+			}
 			activeConnectionRequest = true;
 			nextConnectionAction();
 			break;
@@ -684,48 +508,8 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	@Override
-	public CompletableFuture<PublishResponse> publish(
-			final List<SubscriptionAcknowledgement> subscriptionAcknowledgements) {
-		return client.publish(subscriptionAcknowledgements);
-	}
-
-	@Override
-	public CompletableFuture<ReadResponse> read(final double maxAge, final TimestampsToReturn timestampsToReturn,
-			final List<ReadValueId> readValueIds) {
-		return client.read(maxAge, timestampsToReturn, readValueIds);
-	}
-
 	private void refreshCertificateIfNeeded() {
 		// TODO rigenerare il certificato se necessario
-	}
-
-	@Override
-	public CompletableFuture<RegisterNodesResponse> registerNodes(final List<NodeId> nodesToRegister) {
-		return client.registerNodes(nodesToRegister);
-	}
-
-	@Override
-	public CompletableFuture<RepublishResponse> republish(final UInteger subscriptionId,
-			final UInteger retransmitSequenceNumber) {
-		return client.republish(subscriptionId, retransmitSequenceNumber);
-	}
-
-	@Override
-	public <T extends UaResponseMessage> CompletableFuture<T> sendRequest(final UaRequestMessage request) {
-		return client.sendRequest(request);
-	}
-
-	@Override
-	public CompletableFuture<SetMonitoringModeResponse> setMonitoringMode(final UInteger subscriptionId,
-			final MonitoringMode monitoringMode, final List<UInteger> monitoredItemIds) {
-		return client.setMonitoringMode(subscriptionId, monitoringMode, monitoredItemIds);
-	}
-
-	@Override
-	public CompletableFuture<SetPublishingModeResponse> setPublishingMode(final boolean publishingEnabled,
-			final List<UInteger> subscriptionIds) {
-		return client.setPublishingMode(publishingEnabled, subscriptionIds);
 	}
 
 	@Override
@@ -734,26 +518,22 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	@Override
-	public CompletableFuture<SetTriggeringResponse> setTriggering(final UInteger subscriptionId,
-			final UInteger triggeringItemId, final List<UInteger> linksToAdd, final List<UInteger> linksToRemove) {
-		return client.setTriggering(subscriptionId, triggeringItemId, linksToAdd, linksToRemove);
+	public CompletableFuture<WaldOTAgentClient> startConnectionProcedure() {
+		controlThread.start();
+		activeConnectionRequest = true;
+		nextConnectionAction();
+		return CompletableFuture.completedFuture(this);
 	}
 
 	@Override
-	public CompletableFuture<TransferSubscriptionsResponse> transferSubscriptions(final List<UInteger> subscriptionIds,
-			final boolean sendInitialValues) {
-		return client.transferSubscriptions(subscriptionIds, sendInitialValues);
-	}
-
-	@Override
-	public CompletableFuture<TranslateBrowsePathsToNodeIdsResponse> translateBrowsePaths(
-			final List<BrowsePath> browsePaths) {
-		return client.translateBrowsePaths(browsePaths);
-	}
-
-	@Override
-	public CompletableFuture<UnregisterNodesResponse> unregisterNodes(final List<NodeId> nodesToUnregister) {
-		return client.unregisterNodes(nodesToUnregister);
+	public CompletableFuture<WaldOTAgentClient> stopConnectionProcedure() {
+		changeStatus(Status.STOPPED);
+		try {
+			cleanConnectionObjects();
+		} catch (final UaException e) {
+			logger.error("Error during cleaning connection objects: {}", LogHelper.stackTraceToString(e, 5));
+		}
+		return CompletableFuture.completedFuture(this);
 	}
 
 	private void waitingManualApprovation() {
@@ -767,11 +547,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		} catch (final InterruptedException e) {
 			logger.warn("Thread interrupted during waiting for manual approval provisioning");
 		}
-	}
-
-	@Override
-	public CompletableFuture<WriteResponse> write(final List<WriteValue> writeValues) {
-		return client.write(writeValues);
 	}
 
 }

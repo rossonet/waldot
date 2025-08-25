@@ -37,6 +37,7 @@ apply plugin: 'maven-publish'
 dependencies {
     api project(':waldot-api')
     implementation project(':waldot-deps')
+    implementation 'org.slf4j:slf4j-api:2.0.17'
     annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
     testCompileOnly project(':waldot-client')
     testRuntimeOnly project(':waldot-client')
@@ -45,6 +46,7 @@ dependencies {
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testImplementation(platform('org.junit:junit-bom:5.13.1'))
 	testImplementation('org.junit.jupiter:junit-jupiter')
+	testImplementation('org.slf4j:slf4j-simple:2.0.17')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 

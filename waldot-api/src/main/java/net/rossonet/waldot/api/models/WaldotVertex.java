@@ -3,14 +3,13 @@ package net.rossonet.waldot.api.models;
 import java.util.List;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
-import org.eclipse.milo.opcua.sdk.server.model.types.objects.BaseObjectType;
+import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
+import org.eclipse.milo.opcua.sdk.server.model.objects.BaseObjectType;
 import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-
-import com.google.common.collect.ImmutableMap;
+import org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap;
 
 import net.rossonet.waldot.api.EventObserver;
 import net.rossonet.waldot.api.PropertyObserver;

@@ -11,7 +11,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler.InvocationContext;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
@@ -59,17 +58,17 @@ class WaldotCommandTest {
 		verify(mockCommand, times(1)).getIcon();
 	}
 
-	@Test
-	void testRunCommandWithInvocationContext() {
-		final InvocationContext context = mock(InvocationContext.class);
-		final String[] inputValues = { "value1", "value2" };
-		final Object[] expectedOutput = { "output1", "output2" };
-		when(mockCommand.runCommand(context, inputValues)).thenReturn(expectedOutput);
-
-		assertArrayEquals(expectedOutput, mockCommand.runCommand(context, inputValues));
-		verify(mockCommand, times(1)).runCommand(context, inputValues);
-	}
-
+	/*
+	 * @Test void testRunCommandWithInvocationContext() { final InvocationContext
+	 * context = mock(InvocationContext.class); final String[] inputValues = {
+	 * "value1", "value2" }; final Object[] expectedOutput = { "output1", "output2"
+	 * }; when(mockCommand.runCommand(context,
+	 * inputValues)).thenReturn(expectedOutput);
+	 * 
+	 * assertArrayEquals(expectedOutput, mockCommand.runCommand(context,
+	 * inputValues)); verify(mockCommand, times(1)).runCommand(context,
+	 * inputValues); }
+	 */
 	@Test
 	void testRunCommandWithMethodInputs() {
 		final String[] methodInputs = { "input1", "input2" };

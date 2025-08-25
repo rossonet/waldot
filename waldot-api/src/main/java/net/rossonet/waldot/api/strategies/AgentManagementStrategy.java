@@ -3,6 +3,8 @@ package net.rossonet.waldot.api.strategies;
 import java.security.cert.X509Certificate;
 
 import org.eclipse.milo.opcua.sdk.server.Session;
+import org.eclipse.milo.opcua.sdk.server.identity.Identity.AnonymousIdentity;
+import org.eclipse.milo.opcua.sdk.server.identity.Identity.UsernameIdentity;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.stack.core.types.structured.UserNameIdentityToken;
 
@@ -21,9 +23,9 @@ public interface AgentManagementStrategy {
 
 	void initialize(WaldotNamespace waldotNamespace);
 
-	String registerNewAgentForApproval(Session session);
+	AnonymousIdentity registerNewAgentForApproval(Session session);
 
-	String registerNewAgentWithProvisioningPassword(Session session, UserNameIdentityToken token);
+	UsernameIdentity registerNewAgentWithProvisioningPassword(Session session, UserNameIdentityToken token);
 
 	Object updateAgentCertificate(Session session, X509Certificate identityCertificate);
 

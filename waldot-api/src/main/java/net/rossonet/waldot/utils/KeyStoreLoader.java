@@ -28,10 +28,9 @@ import java.util.regex.Pattern;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateBuilder;
 import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateGenerator;
+import org.eclipse.milo.shaded.com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Sets;
 
 /**
  * KeyStoreLoader is a utility class that loads or generates a PKCS12 KeyStore
@@ -46,16 +45,16 @@ public class KeyStoreLoader {
 	private static final Pattern IP_ADDR_PATTERN = Pattern
 			.compile("^(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
 
-	private static final String SERVER_ALIAS = "server-ai";
 	private static final char[] PASSWORD = "password".toCharArray();
+	private static final String SERVER_ALIAS = "server-ai";
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private X509Certificate[] serverCertificateChain;
 	private X509Certificate serverCertificate;
+	private X509Certificate[] serverCertificateChain;
 	private KeyPair serverKeyPair;
 
-	X509Certificate getServerCertificate() {
+	public X509Certificate getServerCertificate() {
 		return serverCertificate;
 	}
 

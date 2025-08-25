@@ -22,14 +22,13 @@ import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.core.nodes.Node;
-import org.eclipse.milo.opcua.sdk.server.model.nodes.objects.BaseEventTypeNode;
+import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
-import org.eclipse.milo.opcua.stack.core.ReferenceType;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
@@ -40,6 +39,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.util.Tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -493,9 +493,10 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	}
 
 	private NodeId getOrCreateReferenceType(final String label) {
-		for (final ReferenceType r : waldotNamespace.getReferenceTypes().values()) {
-			if (r.getBrowseName().getName().equals(label)) {
-				return r.getNodeId();
+		for (final Tree<org.eclipse.milo.opcua.sdk.core.typetree.ReferenceType> r : waldotNamespace.getReferenceTypes()
+				.getRoot().getChildren()) {
+			if (r.getValue().getBrowseName().getName().equals(label)) {
+				return r.getValue().getNodeId();
 			}
 		}
 		return MiloSingleServerBaseReferenceNodeBuilder.generateReferenceTypeNode(label, "is a " + label + " of ",
@@ -655,7 +656,9 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				waldotNamespace.generateNodeId(waldotNamespace.getConfiguration().getInterfaceRootNodeId()),
 				waldotNamespace
 						.generateQualifiedName(waldotNamespace.getConfiguration().getInterfaceRootNodeBrowseName()),
-				LocalizedText.english(waldotNamespace.getConfiguration().getInterfaceRootNodeDisplayName()));
+				LocalizedText.english(waldotNamespace.getConfiguration().getInterfaceRootNodeDisplayName()),
+				LocalizedText.english(waldotNamespace.getConfiguration().getInterfaceRootNodeDisplayName()),
+				UInteger.MIN, UInteger.MIN);
 		interfaceRootNode.addReference(new Reference(interfaceRootNode.getNodeId(), Identifiers.HasTypeDefinition,
 				MiloSingleServerBaseReferenceNodeBuilder.interfaceTypeNode.getNodeId().expanded(), true));
 		assetRootNode = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
@@ -705,7 +708,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			property.setValue(new DataValue(new Variant(value)));
 		} else {
 			final UaVariableNode property = new UaVariableNode(waldotNamespace.getOpcUaNodeContext(),
-					getParameterNodeId(key), waldotNamespace.generateQualifiedName(key), LocalizedText.english(key));
+					getParameterNodeId(key), waldotNamespace.generateQualifiedName(key), LocalizedText.english(key),
+					LocalizedText.english("variable " + key), UInteger.MIN, UInteger.MIN);
 			waldotNamespace.getStorageManager().addNode(property);
 			folderManager.getVariablesFolderNode().addOrganizes(property);
 			property.setValue(new DataValue(new Variant(value)));
@@ -817,7 +821,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			eventNode.setMessage(LocalizedText.english("object model updated"));
 			eventNode.setSeverity(ushort(2));
 
-			waldotNamespace.getOpcuaServer().getServer().getEventBus().post(eventNode);
+			waldotNamespace.getOpcuaServer().getServer().getInternalEventBus().post(eventNode);
 
 			eventNode.delete();
 		} catch (final Throwable e) {

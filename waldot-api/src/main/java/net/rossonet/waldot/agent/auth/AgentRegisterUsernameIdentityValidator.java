@@ -1,6 +1,7 @@
 package net.rossonet.waldot.agent.auth;
 
 import org.eclipse.milo.opcua.sdk.server.Session;
+import org.eclipse.milo.opcua.sdk.server.identity.Identity.UsernameIdentity;
 import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.structured.SignatureData;
 import org.eclipse.milo.opcua.stack.core.types.structured.UserNameIdentityToken;
@@ -14,8 +15,8 @@ import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 public class AgentRegisterUsernameIdentityValidator extends WaldotIdentityValidator implements AgentAuthenticator {
-	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private AgentManagementStrategy agentManagementStrategy;
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public AgentRegisterUsernameIdentityValidator(final WaldotOpcUaServer waldotOpcUaServer,
 			final FactoryPasswordValidator authChallenge) {
@@ -29,7 +30,7 @@ public class AgentRegisterUsernameIdentityValidator extends WaldotIdentityValida
 	}
 
 	@Override
-	protected String validateUsernameToken(final Session session, final UserNameIdentityToken token,
+	protected UsernameIdentity validateUsernameToken(final Session session, final UserNameIdentityToken token,
 			final UserTokenPolicy tokenPolicy, final SignatureData tokenSignature) throws UaException {
 		if (session.getEndpoint().getEndpointUrl().endsWith(WaldotOpcUaServer.REGISTER_PATH)) {
 			final String sessionDataForLogging = AgentAuthenticator.generateSessionDataForLogging(session);

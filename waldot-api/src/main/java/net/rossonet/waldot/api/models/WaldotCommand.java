@@ -1,8 +1,8 @@
 package net.rossonet.waldot.api.models;
 
 import org.eclipse.milo.opcua.sdk.core.nodes.MethodNode;
-import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler.InvocationContext;
-import org.eclipse.milo.opcua.sdk.server.api.methods.MethodInvocationHandler;
+import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler.InvocationContext;
+import org.eclipse.milo.opcua.sdk.server.methods.MethodInvocationHandler;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaServerNode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;

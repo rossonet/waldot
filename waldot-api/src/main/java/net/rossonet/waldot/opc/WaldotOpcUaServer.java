@@ -1,9 +1,8 @@
 package net.rossonet.waldot.opc;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
-import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_USERNAME;
-import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_X509;
+import static org.eclipse.milo.opcua.sdk.server.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
+import static org.eclipse.milo.opcua.sdk.server.OpcUaServerConfig.USER_TOKEN_POLICY_USERNAME;
+import static org.eclipse.milo.opcua.sdk.server.OpcUaServerConfig.USER_TOKEN_POLICY_X509;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +12,7 @@ import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,8 +22,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.eclipse.milo.opcua.sdk.server.EndpointConfig;
+import org.eclipse.milo.opcua.sdk.server.EndpointConfig.Builder;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
-import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
+import org.eclipse.milo.opcua.sdk.server.OpcUaServerConfig;
 import org.eclipse.milo.opcua.sdk.server.identity.AbstractIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.IdentityValidator;
@@ -32,8 +34,14 @@ import org.eclipse.milo.opcua.sdk.server.identity.X509IdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.UaRuntimeException;
+import org.eclipse.milo.opcua.stack.core.security.CertificateManager;
+import org.eclipse.milo.opcua.stack.core.security.DefaultApplicationGroup;
 import org.eclipse.milo.opcua.stack.core.security.DefaultCertificateManager;
-import org.eclipse.milo.opcua.stack.core.security.DefaultTrustListManager;
+import org.eclipse.milo.opcua.stack.core.security.DefaultServerCertificateValidator;
+import org.eclipse.milo.opcua.stack.core.security.FileBasedCertificateQuarantine;
+import org.eclipse.milo.opcua.stack.core.security.FileBasedTrustListManager;
+import org.eclipse.milo.opcua.stack.core.security.KeyStoreCertificateStore;
+import org.eclipse.milo.opcua.stack.core.security.RsaSha256CertificateFactory;
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.transport.TransportProfile;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
@@ -41,14 +49,14 @@ import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
 import org.eclipse.milo.opcua.stack.core.util.NonceUtil;
-import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateGenerator;
-import org.eclipse.milo.opcua.stack.core.util.SelfSignedHttpsCertificateBuilder;
-import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
-import org.eclipse.milo.opcua.stack.server.security.DefaultServerCertificateValidator;
+import org.eclipse.milo.opcua.stack.transport.server.OpcServerTransport;
+import org.eclipse.milo.opcua.stack.transport.server.OpcServerTransportFactory;
+import org.eclipse.milo.opcua.stack.transport.server.tcp.OpcTcpServerTransport;
+import org.eclipse.milo.opcua.stack.transport.server.tcp.OpcTcpServerTransportConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.reflect.ClassPath;
+import com.github.jsonldjava.shaded.com.google.common.reflect.ClassPath;
 
 import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
 import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
@@ -71,9 +79,9 @@ import net.rossonet.waldot.utils.KeyStoreLoader;
  */
 public class WaldotOpcUaServer implements AutoCloseable {
 
-	public static final String REGISTER_PATH = "/register";
-
 	public static final String PLUGINS_BASE_SEARCH_PACKAGE = "net.rossonet.waldot";
+
+	public static final String REGISTER_PATH = "/register";
 
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
@@ -87,26 +95,26 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
-	private final AbstractIdentityValidator<String> anonymousValidator;
-
-	private OpcConfiguration configuration;
-
-	private final UsernameIdentityValidator identityValidator;
-
-	private final Logger logger = LoggerFactory.getLogger(getClass());
-
-	private WaldotNamespace managerNamespace;
-
-	private OpcUaServer server;
-
-	private final X509IdentityValidator x509IdentityValidator;
 	private final AgentRegisterAnonymousValidator agentAnonymousValidator;
 
 	private final AgentRegisterUsernameIdentityValidator agentIdentityValidator;
 
 	private final AgentRegisterX509IdentityValidator agentX509IdentityValidator;
 
+	private final AbstractIdentityValidator anonymousValidator;
+
+	private OpcConfiguration configuration;
+
+	private final UsernameIdentityValidator identityValidator;
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
+	private WaldotNamespace managerNamespace;
+
+	private OpcUaServer server;
+
 	private final WaldotConfiguration waldotConfiguration;
+
+	private final X509IdentityValidator x509IdentityValidator;
 
 	public WaldotOpcUaServer(final WaldotConfiguration waldotConfiguration, final OpcConfiguration serverConfiguration,
 			final WaldotAnonymousValidator anonymousValidator, final UsernameIdentityValidator identityValidator,
@@ -128,24 +136,25 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
-	private EndpointConfiguration buildHttpsEndpoint(final EndpointConfiguration.Builder base) {
+	private EndpointConfig buildHttpsEndpoint(EndpointConfig.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.HTTPS_UABINARY)
 				.setBindPort(configuration.getHttpsBindPort()).build();
 	}
 
-	private EndpointConfiguration buildTcpEndpoint(final EndpointConfiguration.Builder base) {
+	private EndpointConfig buildTcpEndpoint(EndpointConfig.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.TCP_UASC_UABINARY)
 				.setBindPort(configuration.getTcpBindPort()).build();
 	}
 
 	@Override
 	public void close() {
+		logger.info("Shutting down OPCUA Server");
 		if (server != null) {
 			try {
-				server.shutdown().get();
+				server.shutdown().get(10, TimeUnit.SECONDS);
 				logger.info("OPCUA Server shutdown completed");
-			} catch (final InterruptedException | ExecutionException e) {
-				logger.error("Error shutting down server", e);
+			} catch (final InterruptedException | ExecutionException | TimeoutException e) {
+				logger.error("Timeout during OPCUA Server shutdown", e);
 			}
 		}
 	}
@@ -154,61 +163,79 @@ public class WaldotOpcUaServer implements AutoCloseable {
 			final UsernameIdentityValidator identityValidator, final X509IdentityValidator x509IdentityValidator)
 			throws Exception {
 		this.configuration = configuration;
-		final Path securityTempDir = Paths.get(System.getProperty("java.io.tmpdir"), "server", "security");
+		final Path securityTempDir = Paths.get(configuration.getSecurityTempDir());
 		Files.createDirectories(securityTempDir);
 		if (!Files.exists(securityTempDir)) {
 			throw new Exception("unable to create security temp dir: " + securityTempDir);
 		}
 		final File pkiDir = securityTempDir.resolve("pki").toFile();
+		final File issuerDir = securityTempDir.resolve("store").toFile();
+		Files.createDirectories(issuerDir.toPath());
 		logger.info("security dir: {}", securityTempDir.toAbsolutePath());
 		logger.info("security pki dir: {}", pkiDir.getAbsolutePath());
+		logger.info("security issuer dir: {}", issuerDir.getAbsolutePath());
 		final KeyStoreLoader loader = new KeyStoreLoader().load(securityTempDir);
-		final DefaultCertificateManager certificateManager = new DefaultCertificateManager(loader.getServerKeyPair(),
-				loader.getServerCertificateChain());
-		final DefaultTrustListManager trustListManager = new DefaultTrustListManager(pkiDir);
+
+		final RsaSha256CertificateFactory certificateFactory = new RsaSha256CertificateFactory() {
+			@Override
+			protected X509Certificate[] createRsaSha256CertificateChain(KeyPair keyPair) {
+				return loader.getServerCertificateChain();
+			}
+
+			@Override
+			protected KeyPair createRsaSha256KeyPair() {
+				return loader.getServerKeyPair();
+			}
+		};
+
+		final X509Certificate certificate = loader.getServerCertificate();
+
+		final KeyStoreCertificateStore certificateStore = KeyStoreCertificateStore
+				.createAndInitialize(new KeyStoreCertificateStore.Settings(securityTempDir.resolve("pki"),
+						"password"::toCharArray, alias -> "password".toCharArray()));
+
+		final FileBasedTrustListManager trustListManager = FileBasedTrustListManager
+				.createAndInitialize(issuerDir.toPath());
+
+		final FileBasedCertificateQuarantine certificateQuarantine = FileBasedCertificateQuarantine
+				.create(issuerDir.toPath().resolve("rejected").resolve("certs"));
+
 		final DefaultServerCertificateValidator certificateValidator = new DefaultServerCertificateValidator(
-				trustListManager);
-		final KeyPair httpsKeyPair = SelfSignedCertificateGenerator.generateRsaKeyPair(2048);
-		final SelfSignedHttpsCertificateBuilder httpsCertificateBuilder = new SelfSignedHttpsCertificateBuilder(
-				httpsKeyPair);
-		httpsCertificateBuilder.setCommonName(HostnameUtil.getHostname());
-		HostnameUtil.getHostnames(configuration.getDnsAddressCertificateGenerator())
-				.forEach(httpsCertificateBuilder::addDnsName);
-		httpsCertificateBuilder.addIpAddress("127.0.0.1");
-		final X509Certificate httpsCertificate = httpsCertificateBuilder.build();
-		// If you need to use multiple certificates you'll have to be smarter than this.
-		final X509Certificate certificate = certificateManager.getCertificates().stream().findFirst()
-				.orElseThrow(() -> new UaRuntimeException(StatusCodes.Bad_ConfigurationError, "no certificate found"));
+				trustListManager, certificateQuarantine);
+
+		final DefaultApplicationGroup defaultGroup = DefaultApplicationGroup.createAndInitialize(trustListManager,
+				certificateStore, certificateFactory, certificateValidator);
+
+		final DefaultCertificateManager certificateManager = new DefaultCertificateManager(certificateQuarantine,
+				defaultGroup);
 
 		// The configured application URI must match the one in the certificate(s)
 		final String applicationUri = CertificateUtil.getSanUri(certificate)
 				.orElseThrow(() -> new UaRuntimeException(StatusCodes.Bad_ConfigurationError,
 						"certificate is missing the application URI"));
 
-		final Set<EndpointConfiguration> endpointConfigurations = createEndpointConfigurations(certificate);
+		final Set<EndpointConfig> endpointConfigurations = createEndpointConfigurations(certificate);
 
-		return generateServerInstance(configuration, certificateManager, trustListManager, certificateValidator,
-				httpsKeyPair, httpsCertificate, applicationUri, endpointConfigurations, anonymousValidator,
-				identityValidator, x509IdentityValidator);
+		return generateServerInstance(configuration, certificateManager, applicationUri, endpointConfigurations,
+				anonymousValidator, identityValidator, x509IdentityValidator);
 
 	}
 
-	private Set<EndpointConfiguration> createEndpointConfigurations(final X509Certificate certificate) {
-		final Set<EndpointConfiguration> endpointConfigurations = new LinkedHashSet<>();
-		final List<String> bindAddresses = newArrayList();
+	private Set<EndpointConfig> createEndpointConfigurations(final X509Certificate certificate) {
+		final Set<EndpointConfig> endpointConfigurations = new LinkedHashSet<>();
+		final List<String> bindAddresses = new ArrayList<>();
 		bindAddresses.add(configuration.getBindAddresses());
 		final Set<String> hostnames = new LinkedHashSet<>();
 		hostnames.add(HostnameUtil.getHostname());
 		hostnames.addAll(HostnameUtil.getHostnames(configuration.getBindHostname()));
 		for (final String bindAddress : bindAddresses) {
 			for (final String hostname : hostnames) {
-				final EndpointConfiguration.Builder builder = EndpointConfiguration.newBuilder()
-						.setBindAddress(bindAddress).setHostname(hostname).setPath(configuration.getPath())
-						.setCertificate(certificate).addTokenPolicies(USER_TOKEN_POLICY_ANONYMOUS,
-								USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
+				final Builder builder = EndpointConfig.newBuilder().setBindAddress(bindAddress).setHostname(hostname)
+						.setPath(configuration.getPath()).setCertificate(certificate).addTokenPolicies(
+								USER_TOKEN_POLICY_ANONYMOUS, USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
 				// TODO gestire la configurazione delle policy da configurazione opc
-				final EndpointConfiguration.Builder noSecurityBuilder = builder.copy()
-						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
+				final Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None)
+						.setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(noSecurityBuilder));
 				// endpointConfigurations.add(buildHttpsEndpoint(noSecurityBuilder));
 				// TCP Basic256Sha256 / SignAndEncrypt
@@ -229,14 +256,12 @@ public class WaldotOpcUaServer implements AutoCloseable {
 				 * OPC UA Server requires a different address for this Endpoint it shall create
 				 * the address by appending the path "/discovery" to its base address.
 				 */
-				final EndpointConfiguration.Builder discoveryBuilder = builder.copy()
-						.setPath(configuration.getPath() + "/discovery").setSecurityPolicy(SecurityPolicy.None)
-						.setSecurityMode(MessageSecurityMode.None);
+				final Builder discoveryBuilder = builder.copy().setPath(configuration.getPath() + "/discovery")
+						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(discoveryBuilder));
 				endpointConfigurations.add(buildHttpsEndpoint(discoveryBuilder));
-				final EndpointConfiguration.Builder registerBuilder = builder.copy()
-						.setPath(configuration.getPath() + REGISTER_PATH).setSecurityPolicy(SecurityPolicy.None)
-						.setSecurityMode(MessageSecurityMode.None);
+				final Builder registerBuilder = builder.copy().setPath(configuration.getPath() + REGISTER_PATH)
+						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(registerBuilder));
 				endpointConfigurations.add(buildHttpsEndpoint(registerBuilder));
 			}
@@ -246,10 +271,8 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	}
 
 	private OpcUaServer generateServerInstance(final OpcConfiguration configuration,
-			final DefaultCertificateManager certificateManager, final DefaultTrustListManager trustListManager,
-			final DefaultServerCertificateValidator certificateValidator, final KeyPair httpsKeyPair,
-			final X509Certificate httpsCertificate, final String applicationUri,
-			final Set<EndpointConfiguration> endpointConfigurations, final IdentityValidator<String> anonymousValidator,
+			final CertificateManager certificateManager, final String applicationUri,
+			final Set<EndpointConfig> endpointConfigurations, final IdentityValidator anonymousValidator,
 			final UsernameIdentityValidator identityValidator, final X509IdentityValidator x509IdentityValidator) {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final OpcUaServerConfig serverConfig = OpcUaServerConfig.builder().setApplicationUri(applicationUri)
@@ -258,17 +281,28 @@ public class WaldotOpcUaServer implements AutoCloseable {
 				.setBuildInfo(new BuildInfo(configuration.getProductUri(), configuration.getManufacturerName(),
 						configuration.getProductName(), OpcUaServer.SDK_VERSION, configuration.getBuildNumber(),
 						configuration.getBuildDate()))
-				.setCertificateManager(certificateManager).setTrustListManager(trustListManager)
-				.setCertificateValidator(certificateValidator).setHttpsKeyPair(httpsKeyPair)
-				.setHttpsCertificateChain(new X509Certificate[] { httpsCertificate })
+				.setCertificateManager(certificateManager)
+
 				.setIdentityValidator(new CompositeValidator(agentAnonymousValidator, agentIdentityValidator,
 						agentX509IdentityValidator, anonymousValidator, identityValidator, x509IdentityValidator))
 				.setProductUri(configuration.getProductUri()).build();
-		final OpcUaServer opcUaServer = new OpcUaServer(serverConfig);
+		final OpcServerTransportFactory transportFactory = new OpcServerTransportFactory() {
+
+			@Override
+			public OpcServerTransport create(TransportProfile transportProfile) {
+				assert transportProfile == TransportProfile.TCP_UASC_UABINARY;
+
+				final OpcTcpServerTransportConfig transportConfig = OpcTcpServerTransportConfig.newBuilder().build();
+
+				return new OpcTcpServerTransport(transportConfig);
+			}
+
+		};
+		final OpcUaServer opcUaServer = new OpcUaServer(serverConfig, transportFactory);
 		return opcUaServer;
 	}
 
-	public AbstractIdentityValidator<String> getAnonymousValidator() {
+	public IdentityValidator getAnonymousValidator() {
 		return anonymousValidator;
 	}
 
