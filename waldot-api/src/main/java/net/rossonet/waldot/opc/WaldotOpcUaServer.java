@@ -79,7 +79,8 @@ import net.rossonet.waldot.utils.KeyStoreLoader;
  */
 public class WaldotOpcUaServer implements AutoCloseable {
 
-	public static final String PLUGINS_BASE_SEARCH_PACKAGE = "net.rossonet.waldot";
+	public static final String[] PLUGINS_BASE_SEARCH_PACKAGE = new String[] { "net.rossonet.waldot", "plugin",
+			"plugins" };
 
 	public static final String REGISTER_PATH = "/register";
 
@@ -136,11 +137,11 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
-	private EndpointConfig buildHttpsEndpoint(EndpointConfig.Builder base) {
-		return base.copy().setTransportProfile(TransportProfile.HTTPS_UABINARY)
-				.setBindPort(configuration.getHttpsBindPort()).build();
-	}
-
+	/*
+	 * private EndpointConfig buildHttpsEndpoint(EndpointConfig.Builder base) {
+	 * return base.copy().setTransportProfile(TransportProfile.HTTPS_UABINARY)
+	 * .setBindPort(configuration.getHttpsBindPort()).build(); }
+	 */
 	private EndpointConfig buildTcpEndpoint(EndpointConfig.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.TCP_UASC_UABINARY)
 				.setBindPort(configuration.getTcpBindPort()).build();
@@ -259,11 +260,11 @@ public class WaldotOpcUaServer implements AutoCloseable {
 				final Builder discoveryBuilder = builder.copy().setPath(configuration.getPath() + "/discovery")
 						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(discoveryBuilder));
-				endpointConfigurations.add(buildHttpsEndpoint(discoveryBuilder));
+				// endpointConfigurations.add(buildHttpsEndpoint(discoveryBuilder));
 				final Builder registerBuilder = builder.copy().setPath(configuration.getPath() + REGISTER_PATH)
 						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(registerBuilder));
-				endpointConfigurations.add(buildHttpsEndpoint(registerBuilder));
+				// endpointConfigurations.add(buildHttpsEndpoint(registerBuilder));
 			}
 		}
 
@@ -274,7 +275,6 @@ public class WaldotOpcUaServer implements AutoCloseable {
 			final CertificateManager certificateManager, final String applicationUri,
 			final Set<EndpointConfig> endpointConfigurations, final IdentityValidator anonymousValidator,
 			final UsernameIdentityValidator identityValidator, final X509IdentityValidator x509IdentityValidator) {
-		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final OpcUaServerConfig serverConfig = OpcUaServerConfig.builder().setApplicationUri(applicationUri)
 				.setApplicationName(LocalizedText.english(configuration.getApplicationName()))
 				.setEndpoints(endpointConfigurations)
@@ -340,20 +340,22 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	private void registerPluginsInNamespace() throws IOException {
 		final ClassPath cp = ClassPath.from(Thread.currentThread().getContextClassLoader());
-		for (final ClassPath.ClassInfo classInfo : cp.getTopLevelClassesRecursive(PLUGINS_BASE_SEARCH_PACKAGE)) {
-			final Class<?> clazz = classInfo.load();
-			if (clazz.isAnnotationPresent(WaldotPlugin.class)) {
-				logger.info("Found plugin: {}", clazz.getName());
-				try {
-					final PluginListener candidate = (PluginListener) clazz.getConstructor().newInstance();
-					getManagerNamespace().registerPlugin(candidate);
-				} catch (final Exception e) {
-					logger.error("Error creating plugin", e);
-				}
+		for (final String basePackage : PLUGINS_BASE_SEARCH_PACKAGE) {
+			logger.info("Searching plugins in base package: {}", basePackage);
+			for (final ClassPath.ClassInfo classInfo : cp.getTopLevelClassesRecursive(basePackage)) {
+				final Class<?> clazz = classInfo.load();
+				if (clazz.isAnnotationPresent(WaldotPlugin.class)) {
+					logger.info("Found plugin: {}", clazz.getName());
+					try {
+						final PluginListener candidate = (PluginListener) clazz.getConstructor().newInstance();
+						getManagerNamespace().registerPlugin(candidate);
+					} catch (final Exception e) {
+						logger.error("Error creating plugin", e);
+					}
 
+				}
 			}
 		}
-
 	}
 
 	/**
@@ -373,7 +375,9 @@ public class WaldotOpcUaServer implements AutoCloseable {
 			managerNamespace.registerAgentValidators(agentAnonymousValidator, agentIdentityValidator,
 					agentX509IdentityValidator);
 			managerNamespace.startup();
-			return server.startup();
+			final CompletableFuture<OpcUaServer> future = server.startup();
+			Thread.sleep(2_000);
+			return future;
 		} catch (final Exception e) {
 			logger.error("Error creating server", e);
 			return CompletableFuture.failedFuture(e);

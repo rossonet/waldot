@@ -29,6 +29,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
@@ -51,6 +53,7 @@ import net.rossonet.waldot.opc.WaldotOpcUaServer;
  * @author Stephen Mallette (http://stephen.genoprime.com)
  */
 public final class OpcFactory {
+	private final static Logger logger = LoggerFactory.getLogger(OpcFactory.class);
 
 	/**
 	 * Create the "classic" graph which was the original toy graph from TinkerPop
@@ -273,6 +276,7 @@ public final class OpcFactory {
 				new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
 				new BaseAgentManagementStrategy(), "file:///tmp/boot.conf");
 		waldot.startup(namespace).get();
+		logger.info("Waldot OPC-UA Server started");
 		return waldot.getGremlinGraph();
 	}
 

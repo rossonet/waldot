@@ -1,5 +1,6 @@
 package net.rossonet.waldot.auth;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.milo.opcua.stack.core.types.enumerated.UserTokenType;
@@ -15,8 +16,7 @@ public class DefaultAnonymousValidator extends WaldotAnonymousValidator {
 
 	@Override
 	public Set<UserTokenType> getSupportedTokenTypes() {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.singleton(UserTokenType.Anonymous);
 	}
 
 }
