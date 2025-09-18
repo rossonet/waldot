@@ -2,8 +2,8 @@
 
 echo "starting Theia IDE"
 name=theia-$(basename $PWD)
-touch $(pwd)/theia.secret
-docker run -d -v $(pwd):/home/project:cached --env-file $(pwd)/theia.secrets --name $name -p 3000:3000 rossonet/linneo-theia:latest
+touch -a $(pwd)/theia.secrets
+docker run -d -v $(pwd):/home/project:cached --env-file $(pwd)/theia.secrets -v $(pwd)/theia-cache:/home/rossonet/.theia-ide --name $name -p 3000:3000 rossonet/linneo-theia:latest
 echo "container with name $name started"
 sleep 5
 xdg-open http://localhost:3000

@@ -30,6 +30,7 @@ java_pid*.hprof
 waldot-*/.security
 theia.secrets
 .theia-ide/globalStorage
+theia-cache
 
 ### OUTPUT ###
 spring-shell.log
