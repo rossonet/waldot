@@ -29,6 +29,7 @@ trace/*
 java_pid*.hprof
 waldot-*/.security
 theia.secrets
+.theia-ide/globalStorage
 
 ### OUTPUT ###
 spring-shell.log
