@@ -27,6 +27,7 @@ status.json
 gradle.properties
 trace/*
 java_pid*.hprof
+test-keystore.p12
 
 ### OUTPUT ###
 spring-shell.log
