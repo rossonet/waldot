@@ -28,6 +28,7 @@ gradle.properties
 trace/*
 java_pid*.hprof
 waldot-*/.security
+theia.secrets
 
 ### OUTPUT ###
 spring-shell.log
