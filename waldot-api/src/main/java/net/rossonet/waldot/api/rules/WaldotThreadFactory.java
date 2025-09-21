@@ -9,6 +9,6 @@ import java.util.concurrent.ThreadFactory;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface WaldotThreadFactory extends ThreadFactory {
+public interface WaldotThreadFactory extends ThreadFactory, Thread.UncaughtExceptionHandler {
 
 }

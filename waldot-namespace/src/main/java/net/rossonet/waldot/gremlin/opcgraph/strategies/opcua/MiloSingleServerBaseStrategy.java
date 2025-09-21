@@ -62,6 +62,7 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcProperty;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
+import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.rules.DefaultRule;
 
 @WaldotMiloStrategy
@@ -152,7 +153,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	}
 
 	@Override
-	public OpcVertex addVertex(final NodeId nodeId, final Object[] propertyKeyValues) {
+	public AbstractOpcVertex addVertex(final NodeId nodeId, final Object[] propertyKeyValues) {
 		// check propertyKeyValues
 		ElementHelper.legalPropertyKeyValueArray(propertyKeyValues);
 		// get basic fields
@@ -324,13 +325,13 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				waldotNamespace.getConfiguration().getDefaultFactsValidDelayMs());
 	}
 
-	private OpcVertex createVertex(final NodeId nodeId, final NodeId typeDefinition, final String label,
+	private AbstractOpcVertex createVertex(final NodeId nodeId, final NodeId typeDefinition, final String label,
 			final String description, final QualifiedName browseName, final LocalizedText displayName,
 			final Object[] propertyKeyValues, final UInteger writeMask, final UInteger userWriteMask,
 			final UByte eventNotifierActive, final long version) {
-		final OpcVertex vertex = createVertexObject(typeDefinition, waldotNamespace.getGremlinGraph(),
-				waldotNamespace.getOpcUaNodeContext(), nodeId, browseName, displayName, new LocalizedText(description),
-				writeMask, userWriteMask, eventNotifierActive, version);
+		final AbstractOpcVertex vertex = createVertexObject(propertyKeyValues, typeDefinition,
+				waldotNamespace.getGremlinGraph(), waldotNamespace.getOpcUaNodeContext(), nodeId, browseName,
+				displayName, new LocalizedText(description), writeMask, userWriteMask, eventNotifierActive, version);
 		waldotNamespace.getStorageManager().addNode(vertex);
 		vertex.addReference(
 				new Reference(vertex.getNodeId(), Identifiers.HasTypeDefinition, typeDefinition.expanded(), true));
@@ -345,15 +346,16 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		return vertex;
 	}
 
-	private OpcVertex createVertexObject(final NodeId typeDefinition, final WaldotGraph graph,
-			final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
+	private AbstractOpcVertex createVertexObject(Object[] propertyKeyValues, final NodeId typeDefinition,
+			final WaldotGraph graph, final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
 			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,
 			final UInteger userWriteMask, final UByte eventNotifier, final long version) {
 		if (typeDefinition != null && waldotNamespace.hasNodeId(typeDefinition)) {
 			for (final PluginListener p : waldotNamespace.getPlugins()) {
 				if (p.containsObjectDefinition(typeDefinition)) {
-					return (OpcVertex) p.createVertexObject(typeDefinition, graph, context, nodeId, browseName,
-							displayName, description, writeMask, userWriteMask, eventNotifier, version);
+					return (AbstractOpcVertex) p.createVertexObject(typeDefinition, graph, context, nodeId, browseName,
+							displayName, description, writeMask, userWriteMask, eventNotifier, version,
+							propertyKeyValues);
 				}
 			}
 		}
@@ -361,7 +363,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				eventNotifier, version);
 	}
 
-	private OpcVertex createVertexRule(final NodeId nodeId, final NodeId typeDefinition, final String label,
+	private AbstractOpcVertex createVertexRule(final NodeId nodeId, final NodeId typeDefinition, final String label,
 			final String description, final QualifiedName browseName, final LocalizedText displayName,
 			final Object[] propertyKeyValues) {
 		String action = getKeyValuesProperty(propertyKeyValues, ACTION_FIELD.toLowerCase());
@@ -445,7 +447,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				"TargetNode", MiloSingleServerBaseReferenceNodeBuilder.targetNodeTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, NodeId.class);
 		final NodeId nodeId = edge.getProperty(TARGET).get();
-		return (OpcVertex) waldotNamespace.getStorageManager().getNode(nodeId).get();
+		return (AbstractOpcVertex) waldotNamespace.getStorageManager().getNode(nodeId).get();
 	}
 
 	@Override
@@ -454,7 +456,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				"SourceNode", MiloSingleServerBaseReferenceNodeBuilder.sourceNodeTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, NodeId.class);
 		final NodeId nodeId = edge.getProperty(SOURCE).get();
-		return (OpcVertex) waldotNamespace.getStorageManager().getNode(nodeId).get();
+		return (AbstractOpcVertex) waldotNamespace.getStorageManager().getNode(nodeId).get();
 	}
 
 	@Override
@@ -595,7 +597,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		for (final Reference r : opcVertexProperty.getReferences()) {
 			if (r.getReferenceTypeId().equals(Identifiers.HasComponent) && r.isInverse()) {
 				final NodeId nodeId = r.getSourceNodeId();
-				return (OpcVertex) waldotNamespace.getStorageManager().get(nodeId);
+				return (AbstractOpcVertex) waldotNamespace.getStorageManager().get(nodeId);
 			}
 		}
 		return null;
@@ -746,7 +748,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	}
 
 	private void popolateVertexPropertiesFromPropertyKeyValues(final Object[] propertyKeyValues,
-			final OpcVertex vertex) {
+			final AbstractOpcVertex vertex) {
 		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
 			if (propertyKeyValues[i] instanceof String && propertyKeyValues[i] != null) {
 				createOrUpdateWaldotVertexProperty(vertex, (String) propertyKeyValues[i], propertyKeyValues[i + 1]);

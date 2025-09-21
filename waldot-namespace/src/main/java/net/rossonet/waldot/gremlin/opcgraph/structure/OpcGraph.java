@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.api.models.WaldotGraphComputerView;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.process.traversal.strategy.optimization.OpcGraphCountStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.process.traversal.strategy.optimization.OpcGraphStepStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.services.OpcServiceRegistry;
@@ -33,6 +34,7 @@ import net.rossonet.waldot.gremlin.opcgraph.services.OpcServiceRegistry;
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_LIMITED_STANDARD)
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_LIMITED_COMPUTER)
 public class OpcGraph extends AbstractOpcGraph {
+
 	public class OpcGraphFeatures implements Features {
 		private final OpcGraphEdgeFeatures edgeFeatures;
 		@SuppressWarnings("unused")
@@ -110,7 +112,7 @@ public class OpcGraph extends AbstractOpcGraph {
 
 	public static Optional<Object> getIdValue(final Object... keyValues) {
 		for (int i = 0; i < keyValues.length; i = i + 2) {
-			if (keyValues[i].equals("id")) {
+			if (keyValues[i].equals(MiloStrategy.ID_PARAMETER)) {
 				return Optional.ofNullable(keyValues[i + 1]);
 			}
 		}

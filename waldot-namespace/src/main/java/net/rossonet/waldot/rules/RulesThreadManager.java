@@ -36,7 +36,7 @@ public class RulesThreadManager implements AutoCloseable {
 	public RulesThreadManager(final Map<NodeId, Rule> rules, final Logger logger) {
 		this.logger = logger;
 		this.rules = rules;
-		executor = Executors.newThreadPerTaskExecutor(new DefaultThreadFactory());
+		executor = Executors.newThreadPerTaskExecutor(new RuleThreadFactory());
 		controlThread = getThread();
 	}
 

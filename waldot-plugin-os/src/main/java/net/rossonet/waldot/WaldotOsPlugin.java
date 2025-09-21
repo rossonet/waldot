@@ -136,7 +136,7 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	@Override
 	public WaldotVertex createVertexObject(NodeId typeDefinitionNodeId, WaldotGraph graph, UaNodeContext context,
 			NodeId nodeId, QualifiedName browseName, LocalizedText displayName, LocalizedText description,
-			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier, long version) {
+			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
 		if (!containsObjectDefinition(typeDefinitionNodeId)) {
 			return null;
 		}

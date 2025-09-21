@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.api.rules.WaldotRuleThread;
 import net.rossonet.waldot.api.rules.WaldotThreadFactory;
 
-public class DefaultThreadFactory implements WaldotThreadFactory {
+public class RuleThreadFactory implements WaldotThreadFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger("RE Thread Factory");
 
@@ -15,6 +15,12 @@ public class DefaultThreadFactory implements WaldotThreadFactory {
 		final WaldotRuleThread thread = new WaldotRuleThread(target, new DefaultWaldotStepLogger());
 		logger.debug("Creating new thread");
 		return thread;
+	}
+
+	@Override
+	public void uncaughtException(Thread t, Throwable e) {
+		logger.error("Uncaught exception in thread " + t.getName(), e);
+
 	}
 
 }

@@ -36,7 +36,7 @@ public interface PluginListener {
 	default WaldotVertex createVertexObject(final NodeId typeDefinitionNodeId, final WaldotGraph graph,
 			final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
 			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,
-			final UInteger userWriteMask, final UByte eventNotifier, final long version) {
+			final UInteger userWriteMask, final UByte eventNotifier, final long version, Object[] propertyKeyValues) {
 		return null;
 	}
 

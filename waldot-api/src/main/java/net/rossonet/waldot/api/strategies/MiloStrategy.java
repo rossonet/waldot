@@ -52,6 +52,7 @@ public interface MiloStrategy {
 	public static final String DESCRIPTION_PARAMETER = "description";
 	public static final String DIRECTORY_PARAMETER = "directory";
 	public static final String HAS_WALDOT_RULE = "HasRule";
+	public static final String ID_PARAMETER = "id";
 	public static final String LABEL_FIELD = "Label";
 	public static final String OBSERVER_EDGE_PARAMETER = "fire";
 	public static final String PRIORITY_FIELD = "Priority";
