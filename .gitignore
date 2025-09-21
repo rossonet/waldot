@@ -31,6 +31,7 @@ waldot-*/.security
 theia.secrets
 .theia-ide/globalStorage
 theia-cache
+gradle-cache
 
 ### OUTPUT ###
 spring-shell.log
