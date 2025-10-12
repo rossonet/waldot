@@ -22,7 +22,7 @@ public final class LogHelper {
 	public static void changeJulLogLevel(final String logLevel) throws ConfigurationException {
 		final Logger rootLogger = Logger.getLogger("");
 		Level targetLevel = Level.INFO;
-		switch (logLevel) {
+		switch (logLevel.toLowerCase()) {
 		case "all":
 			targetLevel = Level.ALL;
 			break;
