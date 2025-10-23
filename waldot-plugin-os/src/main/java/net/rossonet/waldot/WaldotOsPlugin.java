@@ -8,8 +8,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager.ObjectNodeConstructor;
@@ -39,6 +42,8 @@ import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.commands.ExecCommand;
 import net.rossonet.waldot.commands.OsCheckDelayCommand;
+import net.rossonet.waldot.dataGenerator.DataGeneratorVertex;
+import net.rossonet.waldot.dataGenerator.DataGeneratorVertex.Algorithm;
 import net.rossonet.waldot.rules.SysCommandExecutor;
 import net.rossonet.waldot.utils.GremlinHelper;
 import net.rossonet.waldot.utils.gremlin.UpdateTrigger;
@@ -63,11 +68,20 @@ import oshi.software.os.OperatingSystem;
  */
 @WaldotPlugin
 public class WaldotOsPlugin implements AutoCloseable, PluginListener {
+	public static final String ALGORITHM_FIELD = "Algorithm";
 	private static final String CRONTAB_FIELD = "scheduling";
+	public static final String DATA_GENERATOR_OBJECT_TYPE_LABEL = "generator";
+	private static final String DEFAULT_ALGORITHM_FIELD = Algorithm.incremental.toString();
 	private static final String DEFAULT_CRONTAB_FIELD = "0 0/5 * * *"; // Every 5 minutes
+	private static final Long DEFAULT_DELAY_FIELD = 1000L;
+	private static final Long DEFAULT_MAX_VALUE_FIELD = 20000L;
+	private static final Long DEFAULT_MIN_VALUE_FIELD = 0L;
 	public static final long DEFAULT_UPDATE_DELAY = 120_000;
-
+	public static final String DELAY_FIELD = "Delay";
+	private final static ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 	private final static Logger logger = LoggerFactory.getLogger(WaldotOsPlugin.class);
+	public static final String MAX_VALUE_FIELD = "Max";
+	public static final String MIN_VALUE_FIELD = "Min";
 
 	public final static ObjectNodeConstructor objectNodeConstructor = new ObjectNodeConstructor() {
 
@@ -86,12 +100,16 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 
 	private boolean active = true;
 
+	private UaObjectTypeNode dataGeneratorTypeNode;
+
 	private ExecCommand execCommand;
 
 	private final HashMap<Object, Method> objectsToRefresh = new HashMap<>();
 
 	private OsCheckDelayCommand osCheckDelayCommand;
+
 	private final SysCommandExecutor sysCommandExecutor = new SysCommandExecutor();
+
 	private final Thread systemDataThread = new Thread(() -> {
 		while (active) {
 			try {
@@ -105,7 +123,9 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	}, "WaldotOsPlugin");
 	private SystemInfo systemInfo;
 	private UaObjectTypeNode timerTypeNode;
+
 	private final List<UpdateTrigger> triggers = new ArrayList<>();
+
 	private long updateDelay = DEFAULT_UPDATE_DELAY;
 
 	protected WaldotNamespace waldotNamespace;
@@ -113,17 +133,155 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	@Override
 	public void close() throws Exception {
 		active = false;
-
+		executor.shutdownNow();
 	}
 
 	@Override
 	public boolean containsObjectDefinition(NodeId typeDefinitionNodeId) {
-		return timerTypeNode.getNodeId().equals(typeDefinitionNodeId);
+		return timerTypeNode.getNodeId().equals(typeDefinitionNodeId)
+				|| dataGeneratorTypeNode.getNodeId().equals(typeDefinitionNodeId);
 	}
 
 	@Override
 	public boolean containsObjectLabel(String typeDefinitionLabel) {
-		return TIMER_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel);
+		return TIMER_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel)
+				|| DATA_GENERATOR_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel);
+	}
+
+	private WaldotVertex createDataGeneratorObject(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
+			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
+			UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
+		final String keyValuesPropertyDelay = getKeyValuesProperty(propertyKeyValues, DELAY_FIELD.toLowerCase());
+		long delay = DEFAULT_DELAY_FIELD;
+		if (keyValuesPropertyDelay != null && !keyValuesPropertyDelay.isEmpty()) {
+			if (delay < 100L) {
+				delay = Long.valueOf(keyValuesPropertyDelay);
+			} else {
+				logger.info(DELAY_FIELD.toLowerCase() + " is less than 100ms, using default {} '{}'", DELAY_FIELD,
+						DEFAULT_DELAY_FIELD);
+			}
+		} else {
+			logger.info(DELAY_FIELD.toLowerCase() + " not found in propertyKeyValues, using default {} '{}'",
+					DELAY_FIELD, DEFAULT_DELAY_FIELD);
+		}
+
+		final String keyValuesPropertyMin = getKeyValuesProperty(propertyKeyValues, MIN_VALUE_FIELD.toLowerCase());
+		long min = DEFAULT_MIN_VALUE_FIELD;
+		if (keyValuesPropertyMin != null && !keyValuesPropertyMin.isEmpty()) {
+			min = Long.valueOf(keyValuesPropertyMin);
+		} else {
+			logger.info(MIN_VALUE_FIELD.toLowerCase() + " not found in propertyKeyValues, using default {} '{}'",
+					MIN_VALUE_FIELD, DEFAULT_MIN_VALUE_FIELD);
+		}
+
+		final String keyValuesPropertyMax = getKeyValuesProperty(propertyKeyValues, MAX_VALUE_FIELD.toLowerCase());
+		long max = DEFAULT_MAX_VALUE_FIELD;
+		if (keyValuesPropertyMax != null && !keyValuesPropertyMax.isEmpty()) {
+			max = Long.valueOf(keyValuesPropertyMax);
+		} else {
+			logger.info(MAX_VALUE_FIELD.toLowerCase() + " not found in propertyKeyValues, using default {} '{}'",
+					MAX_VALUE_FIELD, DEFAULT_MAX_VALUE_FIELD);
+		}
+
+		final String keyValuesPropertyAlgorithm = getKeyValuesProperty(propertyKeyValues,
+				ALGORITHM_FIELD.toLowerCase());
+		Algorithm algorithm = Algorithm.valueOf(DEFAULT_ALGORITHM_FIELD);
+		if (keyValuesPropertyAlgorithm != null && !keyValuesPropertyAlgorithm.isEmpty()) {
+			if (EnumUtils.isValidEnum(Algorithm.class, keyValuesPropertyAlgorithm)) {
+				algorithm = Algorithm.valueOf(keyValuesPropertyAlgorithm);
+			} else {
+				logger.info("Algorithm {} not found, using default {} '{}'", keyValuesPropertyAlgorithm,
+						ALGORITHM_FIELD, DEFAULT_ALGORITHM_FIELD);
+				logger.info("Available algorithms are: {}", EnumUtils.getEnumList(Algorithm.class).toString());
+			}
+		} else {
+			logger.info(ALGORITHM_FIELD.toLowerCase() + " not found in propertyKeyValues, using default {} '{}'",
+					ALGORITHM_FIELD, DEFAULT_ALGORITHM_FIELD);
+		}
+		return new DataGeneratorVertex(executor, graph, context, nodeId, browseName, displayName, description,
+				writeMask, userWriteMask, eventNotifier, version, delay, min, max, algorithm);
+	}
+
+	private void createDataGeneratorTypeNode() {
+		dataGeneratorTypeNode = UaObjectTypeNode.builder(waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType"))
+				.setBrowseName(waldotNamespace.generateQualifiedName("WaldOTDataGeneratorObjectType"))
+				.setDisplayName(LocalizedText.english("WaldOT Data Generator")).setIsAbstract(false).build();
+		final UaVariableNode labelTimerTypeNode = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace
+						.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + MiloStrategy.LABEL_FIELD))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(waldotNamespace.generateQualifiedName(MiloStrategy.LABEL_FIELD))
+				.setDisplayName(LocalizedText.english(MiloStrategy.LABEL_FIELD)).setDataType(Identifiers.String)
+				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+		labelTimerTypeNode.addReference(new Reference(labelTimerTypeNode.getNodeId(), Identifiers.HasModellingRule,
+				Identifiers.ModellingRule_Mandatory.expanded(), true));
+		labelTimerTypeNode.setValue(new DataValue(new Variant("NaN")));
+		dataGeneratorTypeNode.addComponent(labelTimerTypeNode);
+		waldotNamespace.getStorageManager().addNode(labelTimerTypeNode);
+		// variables
+		final UaVariableNode delayMsTypeNode = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + DELAY_FIELD))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(waldotNamespace.generateQualifiedName(DELAY_FIELD))
+				.setDisplayName(LocalizedText.english(DELAY_FIELD)).setDataType(Identifiers.UInt64)
+				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+		delayMsTypeNode.addReference(new Reference(delayMsTypeNode.getNodeId(), Identifiers.HasModellingRule,
+				Identifiers.ModellingRule_Mandatory.expanded(), true));
+		delayMsTypeNode.setValue(new DataValue(new Variant(DEFAULT_DELAY_FIELD)));
+		dataGeneratorTypeNode.addComponent(delayMsTypeNode);
+		waldotNamespace.getStorageManager().addNode(delayMsTypeNode);
+
+		final UaVariableNode maxValueTypeNode = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(
+						waldotNamespace.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + MAX_VALUE_FIELD))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(waldotNamespace.generateQualifiedName(MAX_VALUE_FIELD))
+				.setDisplayName(LocalizedText.english(MAX_VALUE_FIELD)).setDataType(Identifiers.UInt64)
+				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+		maxValueTypeNode.addReference(new Reference(maxValueTypeNode.getNodeId(), Identifiers.HasModellingRule,
+				Identifiers.ModellingRule_Mandatory.expanded(), true));
+		maxValueTypeNode.setValue(new DataValue(new Variant(DEFAULT_MAX_VALUE_FIELD)));
+		dataGeneratorTypeNode.addComponent(maxValueTypeNode);
+		waldotNamespace.getStorageManager().addNode(maxValueTypeNode);
+
+		final UaVariableNode minValueTypeNode = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(
+						waldotNamespace.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + MIN_VALUE_FIELD))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(waldotNamespace.generateQualifiedName(MIN_VALUE_FIELD))
+				.setDisplayName(LocalizedText.english(MIN_VALUE_FIELD)).setDataType(Identifiers.UInt64)
+				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+		minValueTypeNode.addReference(new Reference(minValueTypeNode.getNodeId(), Identifiers.HasModellingRule,
+				Identifiers.ModellingRule_Mandatory.expanded(), true));
+		minValueTypeNode.setValue(new DataValue(new Variant(DEFAULT_MIN_VALUE_FIELD)));
+		dataGeneratorTypeNode.addComponent(minValueTypeNode);
+		waldotNamespace.getStorageManager().addNode(minValueTypeNode);
+
+		final UaVariableNode algorithmTypeNode = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(
+						waldotNamespace.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + ALGORITHM_FIELD))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(waldotNamespace.generateQualifiedName(ALGORITHM_FIELD))
+				.setDisplayName(LocalizedText.english(ALGORITHM_FIELD)).setDataType(Identifiers.String)
+				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+		algorithmTypeNode.addReference(new Reference(algorithmTypeNode.getNodeId(), Identifiers.HasModellingRule,
+				Identifiers.ModellingRule_Mandatory.expanded(), true));
+		algorithmTypeNode.setValue(new DataValue(new Variant(DEFAULT_ALGORITHM_FIELD)));
+		dataGeneratorTypeNode.addComponent(algorithmTypeNode);
+		waldotNamespace.getStorageManager().addNode(algorithmTypeNode);
+
+		// add definition to the address space
+		waldotNamespace.getStorageManager().addNode(dataGeneratorTypeNode);
+		dataGeneratorTypeNode.addReference(new Reference(dataGeneratorTypeNode.getNodeId(), Identifiers.HasSubtype,
+				Identifiers.BaseObjectType.expanded(), false));
+		waldotNamespace.getObjectTypeManager().registerObjectType(dataGeneratorTypeNode.getNodeId(), UaObjectNode.class,
+				objectNodeConstructor);
 	}
 
 	private WaldotVertex createTimerVertexObject(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
@@ -140,8 +298,15 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 		if (!containsObjectDefinition(typeDefinitionNodeId)) {
 			return null;
 		}
-		return createTimerVertexObject(graph, context, nodeId, browseName, displayName, description, writeMask,
-				userWriteMask, eventNotifier, version);
+		if (timerTypeNode.getNodeId().equals(typeDefinitionNodeId)) {
+			return createTimerVertexObject(graph, context, nodeId, browseName, displayName, description, writeMask,
+					userWriteMask, eventNotifier, version);
+		} else if (dataGeneratorTypeNode.getNodeId().equals(typeDefinitionNodeId)) {
+			return createDataGeneratorObject(graph, context, nodeId, browseName, displayName, description, writeMask,
+					userWriteMask, eventNotifier, version, propertyKeyValues);
+		} else {
+			return null;
+		}
 	}
 
 	private void generateTimerTypeNode() {
@@ -186,9 +351,24 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 		return Arrays.asList(execCommand, osCheckDelayCommand);
 	}
 
+	private String getKeyValuesProperty(final Object[] propertyKeyValues, final String label) {
+		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
+			if (propertyKeyValues[i] instanceof String && label.equals(propertyKeyValues[i])) {
+				return propertyKeyValues[i + 1].toString();
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public NodeId getObjectLabel(String typeDefinitionLabel) {
-		return containsObjectLabel(typeDefinitionLabel) ? timerTypeNode.getNodeId() : null;
+		if (TIMER_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel)) {
+			return timerTypeNode.getNodeId();
+		} else if (DATA_GENERATOR_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel)) {
+			return dataGeneratorTypeNode.getNodeId();
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -206,6 +386,7 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	public void initialize(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
 		generateTimerTypeNode();
+		createDataGeneratorTypeNode();
 		execCommand = new ExecCommand(waldotNamespace);
 		osCheckDelayCommand = new OsCheckDelayCommand(waldotNamespace, this);
 		popolateOsData();
