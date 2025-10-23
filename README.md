@@ -12,20 +12,6 @@ experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org
 
 [WaldOT](https://mvnrepository.com/artifact/net.rossonet.waldot)
 
-## Logbook
-
-### January 2025
-
-I started from [a project template that I use practically everywhere](https://github.com/rossonet/TemplateConsoleApplication).
-
-I integrated the [on memory backend of Gremlin](https://github.com/rossonet/tinkerpop/tree/master/tinkergraph-gremlin).
-
-I started refactoring the code to replace the hashmaps used as the backend for Gremlin with the structure used by Milo's server sdk.
-
-My first goal is to pass TinkerPop's compliance tests, I want the logo...
-
-> At the core of TinkerPop 3.x is a Java API. The implementation of this core API and its validation via the gremlin-test suite is all that is required of a graph system provider wishing to provide a TinkerPop-enabled graph engine. Once a graph system has a valid implementation, then all the applications provided by TinkerPop (e.g. Gremlin Console, Gremlin Server, etc.) and 3rd-party developers (e.g. Gremlin-Scala, Gremlin-JS, etc.) will integrate properly. Finally, please feel free to use the logo on the left to promote your TinkerPop implementation.
-
 <small>[rif: https://tinkerpop.apache.org/docs/current/dev/provider/#graph-system-provider-requirements](https://tinkerpop.apache.org/docs/current/dev/provider/#graph-system-provider-requirements)</small>
 
 ## Code tools
