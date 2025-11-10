@@ -1,16 +1,11 @@
 package net.rossonet.waldot;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
@@ -45,23 +40,7 @@ import net.rossonet.waldot.commands.OsCheckDelayCommand;
 import net.rossonet.waldot.dataGenerator.DataGeneratorVertex;
 import net.rossonet.waldot.dataGenerator.DataGeneratorVertex.Algorithm;
 import net.rossonet.waldot.rules.SysCommandExecutor;
-import net.rossonet.waldot.utils.GremlinHelper;
-import net.rossonet.waldot.utils.gremlin.UpdateTrigger;
-import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
-import oshi.hardware.ComputerSystem;
-import oshi.hardware.Display;
-import oshi.hardware.GlobalMemory;
-import oshi.hardware.GraphicsCard;
-import oshi.hardware.HWDiskStore;
-import oshi.hardware.HardwareAbstractionLayer;
-import oshi.hardware.LogicalVolumeGroup;
-import oshi.hardware.NetworkIF;
-import oshi.hardware.PowerSource;
-import oshi.hardware.Sensors;
-import oshi.hardware.SoundCard;
-import oshi.hardware.UsbDevice;
-import oshi.software.os.OperatingSystem;
+import net.rossonet.waldot.rules.oshi.OsDataWrapper;
 
 /**
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
@@ -76,7 +55,7 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	private static final Long DEFAULT_DELAY_FIELD = 1000L;
 	private static final Long DEFAULT_MAX_VALUE_FIELD = 20000L;
 	private static final Long DEFAULT_MIN_VALUE_FIELD = 0L;
-	public static final long DEFAULT_UPDATE_DELAY = 120_000;
+	public static final long DEFAULT_UPDATE_DELAY = 20000;// 120_000;
 	public static final String DELAY_FIELD = "Delay";
 	private final static ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 	private final static Logger logger = LoggerFactory.getLogger(WaldotOsPlugin.class);
@@ -98,42 +77,27 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 
 	public static final String TIMER_OBJECT_TYPE_LABEL = "timer";
 
-	private boolean active = true;
-
 	private UaObjectTypeNode dataGeneratorTypeNode;
 
 	private ExecCommand execCommand;
 
-	private final HashMap<Object, Method> objectsToRefresh = new HashMap<>();
-
 	private OsCheckDelayCommand osCheckDelayCommand;
+
+	private OsDataWrapper osWrapper;
 
 	private final SysCommandExecutor sysCommandExecutor = new SysCommandExecutor();
 
-	private final Thread systemDataThread = new Thread(() -> {
-		while (active) {
-			try {
-				Thread.sleep(getUpdateDelay());
-				updateSystemData();
-			} catch (final Throwable e) {
-				logger.error("System data thread error", e);
-				break;
-			}
-		}
-	}, "WaldotOsPlugin");
-	private SystemInfo systemInfo;
 	private UaObjectTypeNode timerTypeNode;
 
-	private final List<UpdateTrigger> triggers = new ArrayList<>();
-
 	private long updateDelay = DEFAULT_UPDATE_DELAY;
-
 	protected WaldotNamespace waldotNamespace;
 
 	@Override
 	public void close() throws Exception {
-		active = false;
 		executor.shutdownNow();
+		if (osWrapper != null) {
+			osWrapper.close();
+		}
 	}
 
 	@Override
@@ -389,154 +353,13 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 		createDataGeneratorTypeNode();
 		execCommand = new ExecCommand(waldotNamespace);
 		osCheckDelayCommand = new OsCheckDelayCommand(waldotNamespace, this);
-		popolateOsData();
-	}
-
-	private void popolateOsData() {
-		systemInfo = new SystemInfo();
-		try {
-			final OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), operatingSystem,
-					"operatingSystem"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating operating system data", e);
-		}
-		final HardwareAbstractionLayer hardwareAbstractionLayer = systemInfo.getHardware();
-
-		try {
-			final List<PowerSource> powerSources = hardwareAbstractionLayer.getPowerSources();
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), powerSources,
-					"hardware/powerSources"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating power sources data", e);
-		}
-		try {
-			final ComputerSystem computerSystem = hardwareAbstractionLayer.getComputerSystem();
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), computerSystem,
-					"hardware/computerSystem"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating computer system data", e);
-		}
-		try {
-			final GlobalMemory memory = hardwareAbstractionLayer.getMemory();
-			triggers.addAll(
-					GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), memory, "hardware/memory"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating memory data", e);
-		}
-		try {
-			final CentralProcessor processor = hardwareAbstractionLayer.getProcessor();
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), processor,
-					"hardware/processor"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating processor data", e);
-		}
-		try {
-			final Sensors sensors = hardwareAbstractionLayer.getSensors();
-			triggers.addAll(
-					GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), sensors, "hardware/sensors"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating sensors data", e);
-		}
-		try {
-			final List<HWDiskStore> diskStores = hardwareAbstractionLayer.getDiskStores();
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), diskStores,
-					"hardware/diskStores"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating disk stores data", e);
-		}
-		try {
-			final List<LogicalVolumeGroup> logicalVolumeGroups = hardwareAbstractionLayer.getLogicalVolumeGroups();
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), logicalVolumeGroups,
-					"hardware/logicalVolumeGroups"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating logical volume groups data", e);
-		}
-		try {
-			final List<NetworkIF> networkIFs = hardwareAbstractionLayer.getNetworkIFs(true);
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), networkIFs,
-					"hardware/networkIFs"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating network interfaces data", e);
-		}
-		try {
-			final List<Display> displays = hardwareAbstractionLayer.getDisplays();
-			triggers.addAll(
-					GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), displays, "hardware/displays"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating display data", e);
-		}
-		try {
-			final List<UsbDevice> usbDevices = hardwareAbstractionLayer.getUsbDevices(true);
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), usbDevices,
-					"hardware/usbDevices"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating USB devices data", e);
-		}
-		try {
-			final List<SoundCard> soundCards = hardwareAbstractionLayer.getSoundCards();
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), soundCards,
-					"hardware/soundCards"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating sound cards data", e);
-		}
-		try {
-			final List<GraphicsCard> graphicsCards = hardwareAbstractionLayer.getGraphicsCards();
-			triggers.addAll(GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(), graphicsCards,
-					"hardware/graphicsCards"));
-		} catch (final Throwable e) {
-			logger.error("Error elaborating graphics cards data", e);
-		}
-		for (final UpdateTrigger trigger : triggers) {
-			try {
-				final List<Method> methods = Arrays.stream(trigger.getAnalizedObject().getClass().getMethods())
-						.filter(m -> Modifier.isPublic(m.getModifiers()))
-						.filter(m -> !Modifier.isStatic(m.getModifiers())).collect(Collectors.toList());
-				for (final Method method : methods) {
-					final String name = method.getName();
-					if (name.equals("updateAttributes")) {
-						objectsToRefresh.put(trigger.getAnalizedObject(), method);
-						break;
-					}
-				}
-			} catch (final Throwable e) {
-				logger.error("Error invoking update trigger for " + trigger, e);
-			}
-		}
-		for (final Object entry : objectsToRefresh.keySet()) {
-			logger.debug("Object to refresh: " + entry);
-		}
-
-		systemDataThread.setPriority(Thread.MIN_PRIORITY);
-		systemDataThread.start();
+		osWrapper = new OsDataWrapper(waldotNamespace, this);
+		osWrapper.popolateOsData();
 	}
 
 	public void setUpdateDelay(long timeout) {
 		updateDelay = timeout;
-
-	}
-
-	private void updateSystemData() {
-		for (final Map.Entry<Object, Method> entry : objectsToRefresh.entrySet()) {
-			final Object analizedObject = entry.getKey();
-			final Method method = entry.getValue();
-			try {
-				method.invoke(analizedObject);
-				logger.debug("Update method invoked: " + method.getName() + " on " + analizedObject);
-			} catch (final Throwable e) {
-				logger.error("Error invoking update method " + method.getName() + " on " + analizedObject, e);
-			}
-		}
-
-		for (final UpdateTrigger trigger : triggers) {
-			try {
-				trigger.invoke();
-				logger.debug("Update trigger invoked: " + trigger);
-			} catch (final Throwable e) {
-				logger.error("Error invoking update trigger for " + trigger, e);
-			}
-		}
-
+		logger.info("Update delay set to {} ms", updateDelay);
 	}
 
 }

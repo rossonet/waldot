@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
-import net.rossonet.waldot.utils.gremlin.UpdateTrigger;
+import net.rossonet.waldot.utils.gremlin.OshiMethodWrapper;
 
 public final class GremlinHelper {
 	private final static Logger logger = LoggerFactory.getLogger(GremlinHelper.class);
@@ -38,17 +38,46 @@ public final class GremlinHelper {
 				&& (parentName == null || !parentName.endsWith(name));
 	}
 
-	public static List<UpdateTrigger> elaborateInstance(final WaldotGraph g, final Object analizedObject,
+	public static List<OshiMethodWrapper> elaborateInstance(final WaldotGraph g, final Object analizedObject,
 			final String parentName) {
-		final List<UpdateTrigger> updateTriggers = new ArrayList<>();
+		final List<OshiMethodWrapper> updateTriggers = new ArrayList<>();
 		if (analizedObject instanceof List) {
 			logger.debug("elaborateInstance - List: " + analizedObject.getClass().getName() + " - " + analizedObject);
-			int count = 1;
+			int globalCounter = 0;
+			final List<String> usedNames = new ArrayList<>();
 			for (final Object item : (List<?>) analizedObject) {
 				if (item != null) {
 					logger.debug("Item: " + item.getClass().getName() + " - " + item);
-					updateTriggers.addAll(elaborateInstance(g, item, parentName + "/" + count));
-					count++;
+					String name = null;
+					final List<Method> methods = Arrays.stream(item.getClass().getMethods())
+							.filter(m -> Modifier.isPublic(m.getModifiers()))
+							.filter(m -> !Modifier.isStatic(m.getModifiers())).collect(Collectors.toList());
+					for (final Method method : methods) {
+						final String methodName = method.getName();
+						if (methodName.equals("getName")) {
+							try {
+								final Object result = method.invoke(item);
+								if (result != null && !result.toString().isEmpty()) {
+									name = result.toString().replace("/", "%").replace(" ", "_");
+									int counter = 1;
+									final String originalName = name;
+									while (usedNames.contains(name)) {
+										name = originalName + "#" + counter;
+										counter++;
+									}
+									usedNames.add(name);
+								}
+							} catch (final Throwable e) {
+								logger.warn("Error invoking method " + methodName + ": " + e.getMessage());
+							}
+							break;
+						}
+					}
+					if (name == null) {
+						name = globalCounter + "";
+						globalCounter++;
+					}
+					updateTriggers.addAll(elaborateInstance(g, item, parentName + "/" + name));
 				}
 			}
 		} else {
@@ -91,7 +120,7 @@ public final class GremlinHelper {
 							}
 							logger.debug("** QUERY: " + Arrays.toString(queryData.toArray()));
 							final Vertex v = g.addVertex(queryData.toArray());
-							final UpdateTrigger currentTrigger = new UpdateTrigger(v, analizedObject, method);
+							final OshiMethodWrapper currentTrigger = new OshiMethodWrapper(v, analizedObject, method);
 							updateTriggers.add(currentTrigger);
 						} else {
 							logger.debug("ENTER IN OBJECT " + result.getClass().getName());
