@@ -22,15 +22,10 @@ jobs:
         eval "$(ssh-agent -s)"
         git submodule init
         git submodule update
-    - name: Configure GPG Key
-      run: |
-        mkdir -p ~/.gnupg/
-        printf "$GPG_SIGNING_KEY" | base64 --decode > ~/.gnupg/private.key
-        gpg --import --batch ~/.gnupg/private.key
-      env:
-        GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
     - name: Publish with Gradle
       env:
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-      run: ./gradlew :waldot-client:publish :waldot-api:publish :waldot-deps:publish :waldot-namespace:publish :waldot-plugin-os:publish :waldot-plugin-tinkerpop:publish -Psigning.password=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} -Psigning.keyId=F6113733 -Psigning.secretKeyRingFile=/home/runner/.gnupg/private.key -Dorg.gradle.jvmargs="-Xms512M -Xmx4G"
+        GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+        GPG_SECRET_KEY_PASSWORD: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
+      run: ./gradlew :waldot-client:publish :waldot-api:publish :waldot-deps:publish :waldot-namespace:publish :waldot-plugin-os:publish :waldot-plugin-tinkerpop:publish -Dorg.gradle.jvmargs="-Xms512M -Xmx4G"
