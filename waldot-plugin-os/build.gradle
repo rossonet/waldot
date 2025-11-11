@@ -139,8 +139,8 @@ jreleaser {
   signing {
     active = 'ALWAYS'
     armored = true
-    secretKey = System.getenv('GPG_SIGNING_KEY')
-    passphrase = System.getenv('GPG_SECRET_KEY_PASSWORD')
+    secretKey = System.getenv('GPG_PRIVATE')
+    publicKey = System.getenv('GPG_PUBLIC')
   }
   deploy {
     maven {
