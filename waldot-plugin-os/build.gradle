@@ -162,8 +162,3 @@ configurations {
 		extendsFrom annotationProcessor
 	}
 }
-
-signing {
-    sign publishing.publications.mavenJava
-}
-

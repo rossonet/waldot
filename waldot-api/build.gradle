@@ -133,6 +133,8 @@ jreleaser {
   signing {
     active = 'ALWAYS'
     armored = true
+    secretKey = System.getenv('GPG_SIGNING_KEY')
+    
   }
   deploy {
     maven {
@@ -155,8 +157,4 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }
