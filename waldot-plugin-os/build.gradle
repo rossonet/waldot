@@ -5,6 +5,7 @@ buildscript {
     }
     dependencies {
         classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
+        classpath("org.jreleaser:org.jreleaser.gradle.plugin:1.21.0")
     }
 }
 
@@ -15,8 +16,6 @@ version = "${rootProject.version}"
 ext {
     sourceCompatibility = 21
     targetCompatibility = 21
-    ossrhPassword = System.getenv('OSSRH_PASSWORD')
-    ossrhUsername = System.getenv('OSSRH_USERNAME')
 }
 
 repositories {
@@ -35,6 +34,7 @@ apply plugin: 'jacoco'
 apply plugin: 'distribution'
 apply plugin: 'signing'
 apply plugin: 'maven-publish'
+apply plugin: 'org.jreleaser'
 
 dependencies {
     implementation project(':waldot-deps')
@@ -133,17 +133,29 @@ publishing {
       }
     }
   }
-  repositories {
+}
+
+jreleaser {
+  signing {
+    active = 'ALWAYS'
+    armored = true
+  }
+  deploy {
     maven {
-      url = "https://central.sonatype.com/api/v1/publisher"
-      name = "sonatype"
-      credentials {
-        username "${project.ext.ossrhUsername}"
-        password "${project.ext.ossrhPassword}"
+      mavenCentral {
+        sonatype {
+          active = 'ALWAYS'
+          url = 'https://central.sonatype.com/api/v1/publisher'
+          username = System.getenv('OSSRH_USERNAME')
+          password = System.getenv('OSSRH_PASSWORD') 
+        }
       }
     }
   }
 }
+
+tasks.named('publish').configure { dependsOn 'jreleaserDeploy' }
+
 
 configurations {
 	compileOnly {
