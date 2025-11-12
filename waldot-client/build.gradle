@@ -129,6 +129,12 @@ publishing {
           url = 'https://github.com/rossonet/waldot/tree/master'
         }
       }
+    }    
+  }
+  repositories {
+    maven {
+      name = 'staging'
+      url  = layout.buildDirectory.dir('staging-deploy')
     }
   }
 }
@@ -146,6 +152,7 @@ jreleaser {
         sonatype {
           active = 'ALWAYS'
           url = 'https://central.sonatype.com/api/v1/publisher'
+          stagingRepositories = [ "${layout.buildDirectory.dir('staging-deploy')}/staging-deploy" ]
           username = System.getenv('OSSRH_USERNAME')
           password = System.getenv('OSSRH_PASSWORD') 
         }
