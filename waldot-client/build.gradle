@@ -141,6 +141,7 @@ publishing {
 
 jreleaser {
   signing {
+    mode = MEMORY
     active = 'ALWAYS'
     armored = true
     secretKey = System.getenv('GPG_PRIVATE')
