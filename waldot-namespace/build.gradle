@@ -151,7 +151,13 @@ jreleaser {
         sonatype {
           active = 'ALWAYS'
           url = 'https://central.sonatype.com/api/v1/publisher'
-          stagingRepositories = [ "${layout.buildDirectory.dir('staging-deploy')}/staging-deploy" ]
+          stagingRepository(
+              layout.buildDirectory
+                     .dir('staging-deploy')
+                     .get()
+                     .asFile
+                     .absolutePath
+          )
           username = System.getenv('OSSRH_USERNAME')
           password = System.getenv('OSSRH_PASSWORD') 
         }
