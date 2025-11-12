@@ -163,7 +163,7 @@ jreleaser {
 }
 
 tasks.named('publish').configure { dependsOn 'jreleaserDeploy' }
-
+tasks.named('jreleaserDeploy').configure { dependsOn 'publishAllPublicationsToStagingRepository' }
 
 configurations {
 	compileOnly {
