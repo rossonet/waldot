@@ -28,4 +28,5 @@ jobs:
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         GPG_PUBLIC: ${{ secrets.GPG_PUBLIC }}
         GPG_PRIVATE: ${{ secrets.GPG_PRIVATE }}
+        JRELEASER_GPG_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}
       run: ./gradlew :waldot-client:publish :waldot-api:publish :waldot-deps:publish :waldot-namespace:publish :waldot-plugin-os:publish :waldot-plugin-tinkerpop:publish -Dorg.gradle.jvmargs="-Xms512M -Xmx4G" --stacktrace
