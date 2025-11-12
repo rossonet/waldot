@@ -140,6 +140,7 @@ jreleaser {
     armored = true
     secretKey = System.getenv('GPG_PRIVATE')
     publicKey = System.getenv('GPG_PUBLIC')
+    passphrase = System.getenv('GPG_PASSWORD')
   }
   deploy {
     maven {
