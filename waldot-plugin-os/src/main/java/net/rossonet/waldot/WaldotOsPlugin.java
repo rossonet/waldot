@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 import org.apache.commons.lang3.EnumUtils;
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.Reference;
-import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager.ObjectNodeConstructor;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
@@ -23,8 +22,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.eclipse.milo.opcua.stack.core.types.structured.AccessRestrictionType;
-import org.eclipse.milo.opcua.stack.core.types.structured.RolePermissionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,19 +58,6 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	private final static Logger logger = LoggerFactory.getLogger(WaldotOsPlugin.class);
 	public static final String MAX_VALUE_FIELD = "Max";
 	public static final String MIN_VALUE_FIELD = "Min";
-
-	public final static ObjectNodeConstructor objectNodeConstructor = new ObjectNodeConstructor() {
-
-		@Override
-		public UaObjectNode apply(UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-				LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-				RolePermissionType[] rolePermissions, RolePermissionType[] userRolePermissions,
-				AccessRestrictionType accessRestrictions) {
-			return new UaObjectNode(context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
-					rolePermissions, userRolePermissions, accessRestrictions);
-		}
-
-	};
 
 	public static final String TIMER_OBJECT_TYPE_LABEL = "timer";
 

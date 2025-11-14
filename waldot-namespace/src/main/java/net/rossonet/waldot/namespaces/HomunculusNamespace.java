@@ -123,6 +123,12 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		rulesEngine = new DefaultRulesEngine(this);
 	}
 
+	@Override
+	public void addAssetAmministrationNode(UaNode assetManagerComponent) {
+		getStorageManager().addNode(assetManagerComponent);
+		opcMappingStrategy.getAssetRootFolderNode().addOrganizes(assetManagerComponent);
+	}
+
 	private void addBaseCommands() {
 		if (configuration.getWaldotCommandLabel() != null) {
 			registerCommand(new QueryCommand(this));
