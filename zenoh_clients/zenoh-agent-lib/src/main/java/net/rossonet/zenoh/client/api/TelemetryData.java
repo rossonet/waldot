@@ -1,0 +1,21 @@
+package net.rossonet.zenoh.client.api;
+
+import java.util.Map;
+
+import net.rossonet.waldot.agent.digitalTwin.DtdlHandler;
+import net.rossonet.waldot.dtdl.TelemetryObject;
+
+public abstract class TelemetryData {
+
+	public static Map<String, TelemetryData> fromDtml(DtdlHandler dtmlHandler) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private TelemetryObject dtmlTelemetryObject;
+
+	private TelemetryData() {
+		// TODO Auto-generated constructor stub
+	}
+
+}

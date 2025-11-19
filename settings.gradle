@@ -3,7 +3,12 @@ include 'waldot-api'
 include 'waldot-deps'
 include 'waldot-namespace'
 include 'waldot-app'
-include 'waldot-plugin-os'
 include 'waldot-client'
 include 'wotctl'
 include 'waldot-plugin-tinkerpop'
+include 'waldot-plugin-os'
+include 'waldot-plugin-zenoh'
+include 'zenoh-agent-lib'
+project(':zenoh-agent-lib').projectDir = file('zenoh_clients/zenoh-agent-lib')
+include 'zenoh-acme'
+project(':zenoh-acme').projectDir = file('zenoh_clients/zenoh-acme')

@@ -1,0 +1,151 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
+        classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.11.2'
+        classpath 'de.undercouch:gradle-download-task:5.6.0'
+//        classpath "com.palantir.gradle.docker:gradle-docker:0.36.0"
+    }
+}
+
+plugins {
+    id 'org.graalvm.buildtools.native' version '0.10.6'
+    id "com.gradleup.shadow" version "8.3.6"
+}
+
+description = "WaldOT Zenoh agent ACME"
+group = 'net.rossonet.waldot'
+version = "${rootProject.version}"
+
+ext {
+    sourceCompatibility = 21
+    targetCompatibility = 21
+    mainClassName = "net.rossonet.zenoh.agent.Acme"
+    ossrhPassword = System.getenv('OSSRH_PASSWORD')
+}
+
+repositories {
+    mavenCentral()
+    maven {
+       url "https://repo.craftyn.com/repository/snapshots/" 
+    }
+    maven { url 'https://jitpack.io' }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: "com.gorylenko.gradle-git-properties"
+apply plugin: 'jacoco'
+apply plugin: "com.netflix.nebula.ospackage"
+apply plugin: 'base'
+apply plugin: 'distribution'
+apply plugin: 'application'
+
+configurations.all {
+  resolutionStrategy { 
+    force 'org.slf4j:slf4j-api:2.0.17'
+    force 'org.slf4j:slf4j-simple:2.0.17'
+    force("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.2")
+  }
+}
+
+
+configurations {
+    picocliBuild
+}
+
+dependencies {
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+    implementation 'org.slf4j:slf4j-simple:2.0.17'
+    implementation project(':zenoh-agent-lib')
+    testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
+    testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
+    testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
+    testImplementation(platform('org.junit:junit-bom:5.13.1'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+}
+
+task eclipseClosedDependencies {}
+
+task eclipseClosedDependencies_ {}
+
+compileJava {
+    options.encoding = "UTF-8"
+    options.compilerArgs.addAll(['-XprintProcessorInfo'])
+}
+
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+task view { doLast { println "Working on project ${project.name} [ ${project.description} ]" } }
+
+jar {
+    manifest {
+        attributes 'Main-Class': "${mainClassName}"
+    }
+    enabled = true
+}
+
+jar.doLast { task ->
+	ant.checksum file: task.archivePath
+}
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+gitProperties {
+    failOnNoGitDirectory = false
+    dateFormat = "yyyy-MM-dd HH:mm:ssZ"
+    dateFormatTimeZone = 'GMT'
+}
+
+shadowJar.doLast{ println ("You can find the fat jar of ${project.name} at $buildDir/libs/${project.name}-${version}-all.jar") }
+
+test {
+    useJUnitPlatform()
+}
+
+javadoc{
+    destinationDir = file("${project.buildDir}/docs/javadoc/${project.name}/")
+    failOnError=false
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+application {
+    mainClass = "${mainClassName}"
+    applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
+}
+
+graalvmNative {
+    toolchainDetection = false
+    agent {
+        enabled = true
+        defaultMode = "standard"
+    }
+    binaries {
+        main {
+            verbose = true
+            sharedLibrary = false
+            mainClass = "${mainClassName}"
+        }
+    }
+}
