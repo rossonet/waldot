@@ -12,8 +12,6 @@ experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org
 
 [WaldOT](https://mvnrepository.com/artifact/net.rossonet.waldot)
 
-<small>[rif: https://tinkerpop.apache.org/docs/current/dev/provider/#graph-system-provider-requirements](https://tinkerpop.apache.org/docs/current/dev/provider/#graph-system-provider-requirements)</small>
-
 ## Code tools
 
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/rossonet/waldot)
