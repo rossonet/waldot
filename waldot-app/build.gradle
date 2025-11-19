@@ -53,6 +53,7 @@ dependencies {
     implementation project(':waldot-namespace')
     implementation project(':waldot-plugin-os')
     implementation project(':waldot-plugin-tinkerpop')
+    implementation project(':waldot-plugin-zenoh')
 
     implementation 'org.slf4j:jul-to-slf4j:2.0.17'
     implementation 'org.slf4j:slf4j-simple:2.0.17'
