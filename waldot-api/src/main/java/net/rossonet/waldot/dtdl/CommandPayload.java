@@ -1,5 +1,6 @@
 package net.rossonet.waldot.dtdl;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -41,7 +42,11 @@ public class CommandPayload {
 	private String displayName;
 	private DigitalTwinModelIdentifier id;
 	private String name;
+
 	private Schema schema;
+
+	public CommandPayload() {
+	}
 
 	/**
 	 * Constructs a {@code CommandPayload} from a map of attributes defined in a
@@ -130,6 +135,47 @@ public class CommandPayload {
 	 */
 	public Schema getSchema() {
 		return schema;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public void setId(DigitalTwinModelIdentifier id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setSchema(Schema schema) {
+		this.schema = schema;
+	}
+
+	public Map<String, Object> toMap() {
+		final Map<String, Object> map = new HashMap<>();
+		map.put("@id", id.toString());
+		map.put("name", name);
+		map.put("schema", schema.toSchemaString());
+		if (comment != null) {
+			map.put("comment", comment);
+		}
+		if (description != null) {
+			map.put("description", description);
+		}
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		return map;
 	}
 
 	/**

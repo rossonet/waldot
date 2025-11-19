@@ -1,6 +1,7 @@
 package net.rossonet.waldot.dtdl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -46,10 +47,15 @@ public class TelemetryObject {
 	private DigitalTwinModelIdentifier id;
 
 	private String name;
+
 	private Schema schema;
+
 	private List<String> types;
 
 	private Unit unit;
+
+	public TelemetryObject() {
+	}
 
 	/**
 	 * Constructs a {@code TelemetryObject} from a map of attributes defined in a
@@ -183,6 +189,63 @@ public class TelemetryObject {
 	 */
 	public Unit getUnit() {
 		return unit;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public void setId(DigitalTwinModelIdentifier id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setSchema(Schema schema) {
+		this.schema = schema;
+	}
+
+	public void setTypes(List<String> types) {
+		this.types = types;
+	}
+
+	public void setUnit(Unit unit) {
+		this.unit = unit;
+	}
+
+	public Map<String, Object> toMap() {
+		final Map<String, Object> map = new HashMap<>();
+		map.put("@id", id.toString());
+		if (types.size() == 1) {
+			map.put("@type", types.get(0));
+		} else {
+			map.put("@type", types);
+		}
+		map.put("name", name);
+		map.put("schema", schema.toSchemaString());
+		if (comment != null) {
+			map.put("comment", comment);
+		}
+		if (description != null) {
+			map.put("description", description);
+		}
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		if (unit != null) {
+			map.put("unit", unit.toString());
+		}
+		return map;
 	}
 
 	/**

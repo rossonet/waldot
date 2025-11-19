@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,8 +156,8 @@ public class DtdlHandler {
 	private String description;
 
 	private String displayName;
-	private DigitalTwinModelIdentifier id;
 
+	private DigitalTwinModelIdentifier id;
 	private final List<PropertyObject> properties = new ArrayList<>();
 
 	private final List<RelationshipObject> relationships = new ArrayList<>();
@@ -419,6 +420,42 @@ public class DtdlHandler {
 	void setType(final Object type) {
 		this.type = type.toString();
 
+	}
+
+	public JSONObject toDtdlV2String() {
+		final Map<String, Object> dtdlMap = new java.util.HashMap<>();
+		dtdlMap.put("@context", "dtmi:dtdl:context;2");
+		dtdlMap.put("@type", type);
+		dtdlMap.put("@id", id.toString());
+		if (displayName != null) {
+			dtdlMap.put("displayName", displayName);
+		}
+		if (comment != null) {
+			dtdlMap.put("comment", comment);
+		}
+		if (description != null) {
+			dtdlMap.put("description", description);
+		}
+		// TODO schemas
+		// TODO extends
+		final List<Map<String, Object>> contents = new ArrayList<>();
+		for (final TelemetryObject telemetry : telemetries) {
+			contents.add(telemetry.toMap());
+		}
+		for (final PropertyObject property : properties) {
+			contents.add(property.toMap());
+		}
+		for (final CommandObject command : commands) {
+			contents.add(command.toMap());
+		}
+		for (final RelationshipObject relationship : relationships) {
+			contents.add(relationship.toMap());
+		}
+		for (final ComponentObject component : components) {
+			contents.add(component.toMap());
+		}
+		dtdlMap.put("contents", contents);
+		return new JSONObject(dtdlMap);
 	}
 
 	/**

@@ -82,6 +82,16 @@ public class Schema {
 		}
 	}
 
+	public String toSchemaString() {
+		if (digitalTwinPrimitive != null) {
+			return digitalTwinPrimitive.toString().substring(1);
+		} else if (digitalTwinModelIdentifier != null) {
+			return digitalTwinModelIdentifier.toString();
+		} else {
+			return "unknown";
+		}
+	}
+
 	/**
 	 * Returns a string representation of the schema.
 	 *
