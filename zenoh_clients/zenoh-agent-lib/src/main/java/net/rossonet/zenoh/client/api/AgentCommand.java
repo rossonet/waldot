@@ -64,11 +64,15 @@ public class AgentCommand {
 	}
 
 	private final AgentController agentControl;
+
 	private final ExportedCommand annotation;
+
 	private final String commandName;
+
 	private final Set<AgentCommandParameter> commandParameters;
 
 	private final String methodName;
+
 	private final String methodReturnType;
 
 	public AgentCommand(String commandName, AgentController agentControl, String methodName, String methodReturnType,
@@ -122,6 +126,30 @@ public class AgentCommand {
 		final DigitalTwinModelIdentifier id = DigitalTwinModelIdentifier.fromString(idCommand);
 		commandObject.setId(id);
 		return commandObject;
+	}
+
+	public AgentController getAgentControl() {
+		return agentControl;
+	}
+
+	public ExportedCommand getAnnotation() {
+		return annotation;
+	}
+
+	public String getCommandName() {
+		return commandName;
+	}
+
+	public Set<AgentCommandParameter> getCommandParameters() {
+		return commandParameters;
+	}
+
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public String getMethodReturnType() {
+		return methodReturnType;
 	}
 
 }

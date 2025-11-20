@@ -153,7 +153,15 @@ public class AgentProperty {
 		return agentController;
 	}
 
+	public ExportedParameter getAnnotation() {
+		return annotation;
+	}
+
 	public String getName() {
+		return propertyName;
+	}
+
+	public String getPropertyName() {
 		return propertyName;
 	}
 

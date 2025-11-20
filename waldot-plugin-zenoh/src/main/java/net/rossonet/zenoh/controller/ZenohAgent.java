@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.json.JSONObject;
@@ -19,6 +20,7 @@ import io.zenoh.qos.Priority;
 import io.zenoh.qos.Reliability;
 import io.zenoh.sample.Sample;
 import net.rossonet.waldot.dtdl.DtdlHandler;
+import net.rossonet.waldot.utils.TextHelper;
 import net.rossonet.zenoh.WaldotZenohException;
 import net.rossonet.zenoh.ZenohHelper;
 import net.rossonet.zenoh.client.api.AgentCommand;
@@ -41,12 +43,16 @@ public class ZenohAgent {
 
 	private transient AgentLifeCycleManager agentLifeCycleManager;
 	private final int apiVersion;
+	private String baseAgentOpcDirectory;
+	private final Map<String, Vertex> commandVertices = new HashMap<>();
 	private final Map<String, AgentConfigurationObject> configurationObjects = new HashMap<>();
+	private final Map<String, Vertex> configurationObjectVertices = new HashMap<>();
 	private final long discoveryMessageTime;
 	private DtdlHandler dtmlHandler;
 	private Vertex managedVertex;
 	private final Map<String, AgentProperty> propertyObjects = new HashMap<>();
 	private final Map<String, AgentCommand> registerCommands = new HashMap<>();
+
 	private final Map<String, TelemetryData> registerTelemetries = new HashMap<>();
 	private final String uniqueId;
 
@@ -65,14 +71,30 @@ public class ZenohAgent {
 		updateTelemetryObjects(TelemetryData.fromDtml(dtmlHandler));
 		updatePropertyObjects(AgentProperty.fromDtml(dtmlHandler));
 		this.discoveryMessageTime = discoveryMessageTime;
-		subscribeToAgentDtmlTopic();
-		subscribeToAgentTelemetryTopics();
-		subscribeToAgentPropertyTopics();
-		subscribeToAgentKeepAliveTopics();
+		subscribeToUpdateDiscoveryTopic();
+		subscribeToAgentTelemetryTopic();
+		subscribeToAgentInternalTelemetryTopic();
+		subscribeToAgentKeepAliveTopic();
+		updateManagedVertexObjects();
 	}
 
-	public void checkAgentLifeCycle() {
+	public void checkAgentStatus() {
 		// TODO Auto-generated method stub
+
+	}
+
+	private void elaborateInternalTelemetryMessage(Sample sample) {
+		// TODO elaborare telemetria interna con controllo di flusso
+
+	}
+
+	protected void elaborateKeepAliveMessage(Sample sample) {
+		// TODO elaborare messaggio di keep alive
+
+	}
+
+	protected void elaborateTelemetryMessage(Sample sample) {
+		// TODO elaborare messaggio di telemetria con controllo di flusso
 
 	}
 
@@ -98,7 +120,8 @@ public class ZenohAgent {
 		properties.add("api-version");
 		properties.add(Integer.toString(apiVersion));
 		properties.add("directory");
-		properties.add(agentsOpcuaDirectory);
+		baseAgentOpcDirectory = agentsOpcuaDirectory + "/" + uniqueId;
+		properties.add(baseAgentOpcDirectory);
 		properties.add("discovery-time");
 		properties.add(Long.toString(discoveryMessageTime));
 		properties.add("dtml");
@@ -141,8 +164,47 @@ public class ZenohAgent {
 
 	}
 
-	private void subscribeToAgentDtmlTopic() {
-		getAgentLifeCycleManager().getZenohClient().subscribe(ZenohHelper.getUpdateDiscoveryTopic(getUniqueId()),
+	private void subscribeToAgentInternalTelemetryTopic() {
+		getAgentLifeCycleManager().getZenohClient()
+				.subscribe(ZenohHelper.getAgentInternalTelemetryTopicsAll(getUniqueId()), new Callback<Sample>() {
+
+					@Override
+					public void run(Sample sample) {
+						elaborateInternalTelemetryMessage(sample);
+
+					}
+
+				});
+
+	}
+
+	private void subscribeToAgentKeepAliveTopic() {
+		getAgentLifeCycleManager().getZenohClient().subscribe(ZenohHelper.getAgentKeepAliveTopic(getUniqueId()),
+				new Callback<Sample>() {
+
+					@Override
+					public void run(Sample sample) {
+						elaborateKeepAliveMessage(sample);
+
+					}
+				});
+	}
+
+	private void subscribeToAgentTelemetryTopic() {
+		getAgentLifeCycleManager().getZenohClient()
+				.subscribe(ZenohHelper.getAgentTelemetryTopicsSubscription(getUniqueId()), new Callback<Sample>() {
+
+					@Override
+					public void run(Sample sample) {
+						elaborateTelemetryMessage(sample);
+
+					}
+				});
+
+	}
+
+	private void subscribeToUpdateDiscoveryTopic() {
+		getAgentLifeCycleManager().getZenohClient().subscribe(ZenohHelper.getAgentUpdateDiscoveryTopic(getUniqueId()),
 				new Callback<Sample>() {
 
 					@Override
@@ -181,25 +243,10 @@ public class ZenohAgent {
 						updateTelemetryObjects(TelemetryData.fromDtml(dtmlHandler));
 						updatePropertyObjects(AgentProperty.fromDtml(dtmlHandler));
 						lastDiscoveryMessageTime = discoveryMessageTime;
-						updateManagedVertex();
+						updateManagedVertexObjects();
 						sendAcknowLedgeMessage(agentLifeCycleManager);
 					}
 				});
-	}
-
-	private void subscribeToAgentKeepAliveTopics() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void subscribeToAgentPropertyTopics() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void subscribeToAgentTelemetryTopics() {
-		// TODO Auto-generated method stub
-
 	}
 
 	private void updateCommands(Map<String, AgentCommand> commands) {
@@ -232,8 +279,47 @@ public class ZenohAgent {
 		}
 	}
 
-	private void updateManagedVertex() {
-		// TODO Auto-generated method stub
+	private void updateManagedVertexObjects() {
+		for (final Map.Entry<String, AgentConfigurationObject> configurationObject : configurationObjects.entrySet()) {
+			final List<String> properties = new ArrayList<>();
+			properties.add("id");
+			properties.add(uniqueId + ":configuration:" + TextHelper.cleanText(configurationObject.getKey()));
+			properties.add("label");
+			properties.add(configurationObject.getKey());
+			properties.add("api-version");
+			properties.add(Integer.toString(apiVersion));
+			properties.add("directory");
+			properties.add(baseAgentOpcDirectory);
+			properties.add("description");
+			properties.add(configurationObject.getValue().getDescription());
+			properties.add("class-name");
+			properties.add(configurationObject.getValue().getConfigurationClassName());
+			final Object[] objects = properties.toArray(new Object[properties.size()]);
+			logger.debug("Adding configuration object vertex with properties: {}", properties);
+			final Vertex objectVertex = agentLifeCycleManager.getGraph().addVertex(objects);
+			configurationObjectVertices.put(configurationObject.getKey(), objectVertex);
+		}
+		for (final Entry<String, AgentCommand> commandObject : registerCommands.entrySet()) {
+			final List<String> properties = new ArrayList<>();
+			properties.add("id");
+			properties.add(uniqueId + ":command:" + TextHelper.cleanText(commandObject.getKey()));
+			properties.add("label");
+			properties.add(commandObject.getKey());
+			properties.add("api-version");
+			properties.add(Integer.toString(apiVersion));
+			properties.add("directory");
+			properties.add(baseAgentOpcDirectory);
+			final Object[] objects = properties.toArray(new Object[properties.size()]);
+			logger.debug("Adding command object vertex with properties: {}", properties);
+			final Vertex objectVertex = agentLifeCycleManager.getGraph().addVertex(objects);
+			commandVertices.put(commandObject.getKey(), objectVertex);
+		}
+		for (final Entry<String, AgentProperty> propertyObject : propertyObjects.entrySet()) {
+			logger.debug("Adding property {} with default value {} to managed vertex of agent {}",
+					propertyObject.getKey(), propertyObject.getValue().getAnnotation().defaultValue(), uniqueId);
+			managedVertex.property(TextHelper.cleanText(propertyObject.getKey()),
+					propertyObject.getValue().getAnnotation().defaultValue());
+		}
 
 	}
 

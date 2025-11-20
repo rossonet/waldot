@@ -112,6 +112,11 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 
 	}
 
+	public WaldotGraph getGraph() {
+		return graph;
+
+	}
+
 	public ZenohClientFacade getZenohClient() {
 		return zenohClient;
 

@@ -1,5 +1,7 @@
 package net.rossonet.waldot.dtdl;
 
+import net.rossonet.waldot.utils.TextHelper;
+
 /**
  * The {@code DigitalTwinModelIdentifier} class represents a unique identifier
  * for a digital twin model as defined in the Digital Twin Definition Language
@@ -44,10 +46,6 @@ public class DigitalTwinModelIdentifier {
 		return new DigitalTwinModelIdentifier(value);
 	}
 
-	private static final boolean isDirtyValue(final String value) {
-		return !value.matches("[^\\w+]+") && !value.matches("[ ]+");
-	}
-
 	private final String path;
 	private final String scheme;
 
@@ -58,8 +56,8 @@ public class DigitalTwinModelIdentifier {
 		if (cleanValue == null || cleanValue.isEmpty()) {
 			throw new IllegalArgumentException("DigitalTwinModelIdentifier cannot be null or empty");
 		}
-		if (isDirtyValue(cleanValue)) {
-			cleanValue = value.toLowerCase().trim().replaceAll("[^\\w;:]+", "_").replaceAll("[ ]+", "_");
+		if (TextHelper.isDirtyValue(cleanValue)) {
+			cleanValue = TextHelper.cleanText(cleanValue);
 		}
 		scheme = cleanValue.split(":")[0];
 		final String others = cleanValue.substring(scheme.length() + 1);

@@ -21,9 +21,8 @@ public class BaseLifeCycleStrategy implements LifeCycleStrategy {
 	@Override
 	public void periodicallyCheck() {
 		for (final ZenohAgent agent : managedAgents.values()) {
-			agent.checkAgentLifeCycle();
+			agent.checkAgentStatus();
 		}
-
 	}
 
 	@Override

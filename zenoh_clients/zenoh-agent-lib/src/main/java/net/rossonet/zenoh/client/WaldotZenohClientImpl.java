@@ -215,7 +215,7 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	private void sendUpdateDiscoveryMessage() throws ZError {
 		final JSONObject discoveryMessage = createDiscoveryPayload();
 		final Publisher publisher = zenohClient.declarePublisher(
-				KeyExpr.tryFrom(ZenohHelper.getUpdateDiscoveryTopic(getRuntimeUniqueId())),
+				KeyExpr.tryFrom(ZenohHelper.getAgentUpdateDiscoveryTopic(getRuntimeUniqueId())),
 				ZenohHelper.getGlobalPublisherOptions());
 		publisher.put(discoveryMessage.toString(), ZenohHelper.getDiscoveryPutOptions());
 	}
@@ -243,8 +243,8 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	}
 
 	private void subscribeCommandsTopic() throws ZError {
-		zenohClient.declareSubscriber(KeyExpr.tryFrom(ZenohHelper.getBaseControlTopic(getRuntimeUniqueId())
-				+ ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC), controlMessageRunner);
+		zenohClient.declareSubscriber(KeyExpr.tryFrom(ZenohHelper.getAgentControlTopicsSubscription(getRuntimeUniqueId())),
+				controlMessageRunner);
 	}
 
 }

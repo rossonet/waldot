@@ -145,4 +145,24 @@ public class AgentConfigurationObject {
 		relationshipObject.setId(id);
 		return relationshipObject;
 	}
+
+	public String getConfigurationClassName() {
+		return configurationClassName;
+	}
+
+	public String getConfigurationName() {
+		return configurationName;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public Map<String, AgentProperty> getProperties() {
+		return properties;
+	}
+
+	public boolean isUnique() {
+		return unique;
+	}
 }

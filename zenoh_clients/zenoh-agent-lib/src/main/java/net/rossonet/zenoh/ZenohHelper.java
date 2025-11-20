@@ -26,7 +26,9 @@ public class ZenohHelper {
 	public static final String DTML_LABEL = "dtml";
 	public static final String FLOW_START_COMMAND_TOPIC = "fstart";
 	public static final String FLOW_STOP_COMMAND_TOPIC = "fstop";
+	public static final String INTERNAL_TELEMETRY_TOPIC = "internal";
 	public static final String JOLLY_TOPIC = "**";
+	public static final String KEEPALIVE_TOPIC = "live/status";
 	public static final String OBJECTS_LABEL = "o";
 	public static final String PING_COMMAND_TOPIC = "ping";
 	public static final String PONG_LABEL = "pong";
@@ -36,7 +38,7 @@ public class ZenohHelper {
 	public static final String TELEMETRY_TOPIC = "telemetry";
 	public static final String TIME_LABEL = "t";
 	public static final String UNIQUE_ID_LABEL = "u";
-	public static final String UPDATE_DISCOVERY_TOPIC = "dtml/update";
+	public static final String UPDATE_DISCOVERY_TOPIC = "live/update";
 	public static final String VERSION_LABEL = "v";
 
 	public static Session createClient() throws ZError {
@@ -46,9 +48,29 @@ public class ZenohHelper {
 		return session;
 	}
 
-	public static String getAcknowLedgeTopic(String busZenohAgentTopic) {
-		return busZenohAgentTopic + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.BASE_CONTROL_TOPIC
-				+ ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.ACKNOWLEDGE_COMMAND_TOPIC;
+	public static String getAcknowLedgeTopic(String agentUniqueId) {
+		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR
+				+ ZenohHelper.ACKNOWLEDGE_COMMAND_TOPIC;
+	}
+
+	public static String getAgentControlTopicsSubscription(String agentUniqueId) {
+		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC;
+	}
+
+	public static String getAgentInternalTelemetryTopicsAll(String agentUniqueId) {
+		return getInternalTelemetryBaseTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC;
+	}
+
+	public static String getAgentKeepAliveTopic(String agentUniqueId) {
+		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.KEEPALIVE_TOPIC;
+	}
+
+	public static String getAgentTelemetryTopicsSubscription(String agentUniqueId) {
+		return getTelemetryBaseTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC;
+	}
+
+	public static String getAgentUpdateDiscoveryTopic(String agentUniqueId) {
+		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.UPDATE_DISCOVERY_TOPIC;
 	}
 
 	public static String getBaseAgentTopic(String agentUniqueId) {
@@ -76,12 +98,12 @@ public class ZenohHelper {
 		return publisherOptions;
 	}
 
-	public static String getTelemetryBaseTopic(String agentUniqueId) {
-		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.TELEMETRY_TOPIC;
+	public static String getInternalTelemetryBaseTopic(String agentUniqueId) {
+		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.INTERNAL_TELEMETRY_TOPIC;
 	}
 
-	public static String getUpdateDiscoveryTopic(String agentUniqueId) {
-		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.UPDATE_DISCOVERY_TOPIC;
+	public static String getTelemetryBaseTopic(String agentUniqueId) {
+		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.TELEMETRY_TOPIC;
 	}
 
 	private ZenohHelper() {
