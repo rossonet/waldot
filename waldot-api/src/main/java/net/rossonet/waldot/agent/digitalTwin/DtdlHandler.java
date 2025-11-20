@@ -166,7 +166,7 @@ public class DtdlHandler {
 
 	private String type;
 
-	private DtdlHandler() {
+	public DtdlHandler() {
 
 	}
 
@@ -178,7 +178,7 @@ public class DtdlHandler {
 	 *                {@code request} and {@code response} fields.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler addCommand(final Map<String, Object> command) {
+	public DtdlHandler addCommand(final Map<String, Object> command) {
 		commands.add(new CommandObject(command));
 		return this;
 	}
@@ -191,7 +191,7 @@ public class DtdlHandler {
 	 *                  fields.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler addComponent(final Map<String, Object> component) {
+	public DtdlHandler addComponent(final Map<String, Object> component) {
 		components.add(new ComponentObject(component));
 		return this;
 	}
@@ -204,7 +204,7 @@ public class DtdlHandler {
 	 *                 fields.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler addProperty(final Map<String, Object> property) {
+	public DtdlHandler addProperty(final Map<String, Object> property) {
 		properties.add(new PropertyObject(property));
 		return this;
 	}
@@ -217,7 +217,7 @@ public class DtdlHandler {
 	 *                     {@code target} fields.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler addRelationship(final Map<String, Object> relationship) {
+	public DtdlHandler addRelationship(final Map<String, Object> relationship) {
 		relationships.add(new RelationshipObject(relationship));
 		return this;
 	}
@@ -230,7 +230,7 @@ public class DtdlHandler {
 	 *                  fields.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler addTelemetry(final Map<String, Object> telemetry) {
+	public DtdlHandler addTelemetry(final Map<String, Object> telemetry) {
 		telemetries.add(new TelemetryObject(telemetry));
 		return this;
 	}
@@ -331,7 +331,7 @@ public class DtdlHandler {
 	 * @param comment an optional comment for the model.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler setComment(final String comment) {
+	public DtdlHandler setComment(final String comment) {
 		this.comment = comment;
 		return this;
 	}
@@ -345,7 +345,7 @@ public class DtdlHandler {
 	 * @throws IllegalArgumentException if the contents are not a list.
 	 */
 	@SuppressWarnings("unchecked")
-	DtdlHandler setContents(final Object contents) {
+	public DtdlHandler setContents(final Object contents) {
 		if (contents instanceof List) {
 			elaborateContents(this, (List<Map<String, Object>>) contents);
 		} else {
@@ -360,7 +360,7 @@ public class DtdlHandler {
 	 * @param description the description of the model.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler setDescription(final String description) {
+	public DtdlHandler setDescription(final String description) {
 		this.description = description;
 		return this;
 	}
@@ -371,7 +371,7 @@ public class DtdlHandler {
 	 * @param displayName the display name of the model.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler setDisplayName(final String displayName) {
+	public DtdlHandler setDisplayName(final String displayName) {
 		this.displayName = displayName;
 		return this;
 	}
@@ -382,7 +382,7 @@ public class DtdlHandler {
 	 * @param extendsData an object representing the models extended by this model.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler setExtends(final Object extendsData) {
+	public DtdlHandler setExtends(final Object extendsData) {
 		logger.info("extends ->" + extendsData.getClass().getName());
 		// TODO completare interprete Extends
 		return this;
@@ -395,7 +395,7 @@ public class DtdlHandler {
 	 *           identifier of the model.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler setId(final DigitalTwinModelIdentifier id) {
+	public DtdlHandler setId(final DigitalTwinModelIdentifier id) {
 		this.id = id;
 		return this;
 	}
@@ -406,7 +406,7 @@ public class DtdlHandler {
 	 * @param schemas an object representing the schemas used in the model.
 	 * @return the current {@code DtdlHandler} instance.
 	 */
-	DtdlHandler setSchemas(final Object schemas) {
+	public DtdlHandler setSchemas(final Object schemas) {
 		logger.info("schemas ->" + schemas.getClass().getName());
 		// TODO completare interprete Schemas
 		return this;
@@ -417,12 +417,12 @@ public class DtdlHandler {
 	 *
 	 * @param type the type of the model, typically {@code Interface}.
 	 */
-	void setType(final Object type) {
+	public void setType(final Object type) {
 		this.type = type.toString();
 
 	}
 
-	public JSONObject toDtdlV2String() {
+	public JSONObject toDtdlV2Json() {
 		final Map<String, Object> dtdlMap = new java.util.HashMap<>();
 		dtdlMap.put("@context", "dtmi:dtdl:context;2");
 		dtdlMap.put("@type", type);

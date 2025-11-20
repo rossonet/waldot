@@ -30,7 +30,7 @@ public class ZenohClientFacade {
 			throw new IllegalStateException("LifeCycleManager not set");
 		}
 		this.session = ZenohHelper.createClient();
-		logger.info("Zenoh session created {}", session.info());
+		logger.info("Zenoh session created with router {}", session.info().routersZid());
 	}
 
 	public boolean isConnected() {

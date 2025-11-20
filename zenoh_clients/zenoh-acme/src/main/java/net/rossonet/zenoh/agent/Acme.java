@@ -18,7 +18,7 @@ public class Acme {
 		acme.startAgent();
 	}
 
-	AbstractAgentAnnotationControlHandler controlHandler = new AbstractAgentAnnotationControlHandler(
+	private final AbstractAgentAnnotationControlHandler controlHandler = new AbstractAgentAnnotationControlHandler(
 			NET_ROSSONET_ZENOH_ACME) {
 
 		@Override
@@ -38,6 +38,26 @@ public class Acme {
 		protected void elaborateTelemetryUpdate(TelemetryUpdate<?> telemetry) {
 			System.out.println("Telemetry update: " + telemetry.toString());
 
+		}
+
+		@Override
+		protected String getAgentDescription() {
+			return "Acme Agent for testing purposes";
+		}
+
+		@Override
+		protected String getAgentDisplayName() {
+			return "Acme Agent";
+		}
+
+		@Override
+		protected String getDigitalTwinModelPath() {
+			return "/acme/" + runtimeUniqueId;
+		}
+
+		@Override
+		protected String getDigitalTwinModelVersion() {
+			return "1";
 		}
 
 		@Override

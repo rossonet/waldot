@@ -20,6 +20,8 @@ import org.json.JSONObject;
 import com.google.common.reflect.ClassPath;
 
 import io.zenoh.config.ZenohId;
+import net.rossonet.waldot.agent.digitalTwin.DtdlHandler;
+import net.rossonet.waldot.dtdl.DigitalTwinModelIdentifier;
 import net.rossonet.waldot.utils.ThreadHelper;
 import net.rossonet.zenoh.client.api.AgentCommand;
 import net.rossonet.zenoh.client.api.AgentCommandParameter;
@@ -157,6 +159,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		this.threadPriority = threadPriority;
 		this.basePackage = basePackage;
 		this.maxWaitExecutionCycleTime = maxWaitExecutionCycleTime.toMillis();
+		this.definedWaitTimeMs = definedWaitTimeMs;
 		try {
 			elaborateAnnotations();
 		} catch (final IOException e) {
@@ -186,21 +189,22 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 						+ commandName + " is missing ExportedMethodParameter annotation", null));
 			}
 		}
-		registeredCommands.put(commandName,
-				new AgentCommand(commandName, flowController, methodName, annotation, commandParameters));
+		final String methodRetunType = commandData.getMethod().getReturnType().getSimpleName();
+		registeredCommands.put(commandName, new AgentCommand(commandName, flowController, methodName, methodRetunType,
+				annotation, commandParameters));
 	}
 
 	private void addConfigurationObjectMetadata(Class<?> configClass,
 			Collection<ExportedParameterData> annotatedFields) {
 		final String configurationClassName = configClass.getName();
-		String configuredName = configClass.getSimpleName();
+		String configurationName = configClass.getSimpleName();
 		boolean unique = true;
 		String description = "";
 		for (final Annotation annotation : configClass.getAnnotations()) {
 			if (annotation instanceof ExportedObject) {
 				final ExportedObject exportedObject = (ExportedObject) annotation;
 				if (!exportedObject.name().isEmpty()) {
-					configuredName = exportedObject.name();
+					configurationName = exportedObject.name();
 				}
 				description = exportedObject.description();
 				unique = exportedObject.unique();
@@ -215,8 +219,8 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 			properties.put(parameterData.getName(),
 					new AgentProperty(propertyName, flowController, fieldName, annotation));
 		}
-		registeredConfigurationObjects.put(configuredName,
-				new AgentConfigurationObject(configuredName, configurationClassName, description, properties, unique));
+		registeredConfigurationObjects.put(configurationName,
+				new AgentConfigurationObject(configurationName, configurationClassName, description, properties, unique));
 
 	}
 
@@ -348,6 +352,10 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		return acknowledgeMessage;
 	}
 
+	protected abstract String getAgentDescription();
+
+	protected abstract String getAgentDisplayName();
+
 	public String getBasePackage() {
 		return basePackage;
 	}
@@ -374,10 +382,33 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		return definedWaitTimeMs;
 	}
 
+	protected abstract String getDigitalTwinModelPath();
+
+	protected abstract String getDigitalTwinModelVersion();
+
 	@Override
 	public JSONObject getDtdlJson() {
-		// TODO Auto-generated method stub
-		return new JSONObject();
+		final DtdlHandler dtdlHandler = new DtdlHandler();
+		final String digitalTwinModelIdentifier = "dtmi:" + getDigitalTwinModelPath() + ";"
+				+ getDigitalTwinModelVersion();
+		final DigitalTwinModelIdentifier digitalTwinId = DigitalTwinModelIdentifier
+				.fromString(digitalTwinModelIdentifier);
+		dtdlHandler.setId(digitalTwinId);
+		dtdlHandler.setDisplayName(getAgentDisplayName());
+		dtdlHandler.setDescription(getAgentDescription());
+		for (final AgentConfigurationObject configObject : registeredConfigurationObjects.values()) {
+			dtdlHandler.addRelationship(configObject.generateDtmlRelationshipObject().toMap());
+		}
+		for (final AgentProperty property : registeredProperties.values()) {
+			dtdlHandler.addProperty(property.generateDtmlPropertyObject().toMap());
+		}
+		for (final TelemetryData telemetry : registeredTelemetries.values()) {
+			dtdlHandler.addTelemetry(telemetry.generateDtmlTelemetryObject().toMap());
+		}
+		for (final AgentCommand command : registeredCommands.values()) {
+			dtdlHandler.addCommand(command.generateDtmlCommandObject().toMap());
+		}
+		return dtdlHandler.toDtdlV2Json();
 	}
 
 	public AgentController getFlowController() {

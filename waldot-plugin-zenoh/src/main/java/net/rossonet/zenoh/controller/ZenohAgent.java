@@ -30,14 +30,15 @@ public class ZenohAgent {
 
 	private final static Logger logger = LoggerFactory.getLogger(ZenohAgent.class);
 
-	public static ZenohAgent fromDiscoveryMessage(String busZenohBaseAgentsTopic, JSONObject discoveryMessage)
-			throws WaldotZenohException {
+	public static ZenohAgent fromDiscoveryMessage(AgentLifeCycleManager agentLifeCycleManager,
+			String busZenohBaseAgentsTopic, JSONObject discoveryMessage) throws WaldotZenohException {
 		final String uniqueId = discoveryMessage.getString(ZenohHelper.UNIQUE_ID_LABEL);
 		final String busZenohAgentTopic = busZenohBaseAgentsTopic + ZenohHelper._TOPIC_SEPARATOR + uniqueId;
 		final long discoveryMessageTime = discoveryMessage.getLong(ZenohHelper.TIME_LABEL);
 		final JSONObject dtml = discoveryMessage.getJSONObject(ZenohHelper.DTML_LABEL);
 		final int apiVersion = discoveryMessage.getInt(ZenohHelper.VERSION_LABEL);
-		return new ZenohAgent(uniqueId, busZenohAgentTopic, dtml, apiVersion, discoveryMessageTime);
+		return new ZenohAgent(agentLifeCycleManager, uniqueId, busZenohAgentTopic, dtml, apiVersion,
+				discoveryMessageTime);
 	}
 
 	private transient AgentLifeCycleManager agentLifeCycleManager;
@@ -51,8 +52,9 @@ public class ZenohAgent {
 	private final Map<String, AgentCommand> registerCommands = new HashMap<>();
 	private final String uniqueId;
 
-	public ZenohAgent(String uniqueId, String busZenohAgentTopic, JSONObject dtml, int apiVersion,
-			long discoveryMessageTime) {
+	public ZenohAgent(AgentLifeCycleManager agentLifeCycleManager, String uniqueId, String busZenohAgentTopic,
+			JSONObject dtml, int apiVersion, long discoveryMessageTime) {
+		this.agentLifeCycleManager = agentLifeCycleManager;
 		this.uniqueId = uniqueId;
 		this.busZenohAgentTopic = busZenohAgentTopic;
 		try {
@@ -141,12 +143,11 @@ public class ZenohAgent {
 		}
 	}
 
-	public void sendFirstAcknowledgeMessage(AgentLifeCycleManager agentLifeCycleManager) {
+	public void sendFirstAcknowledgeMessage() {
 		if (this.agentLifeCycleManager != null) {
 			logger.warn("Acknowledge message already sent for agent {}", uniqueId);
 			return;
 		}
-		this.agentLifeCycleManager = agentLifeCycleManager;
 		sendAcknowLedgeMessage(agentLifeCycleManager);
 	}
 

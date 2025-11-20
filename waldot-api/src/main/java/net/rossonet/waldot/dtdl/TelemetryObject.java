@@ -232,7 +232,11 @@ public class TelemetryObject {
 			map.put("@type", types);
 		}
 		map.put("name", name);
-		map.put("schema", schema.toSchemaString());
+		if (schema != null && schema.isJson()) {
+			map.put("schema", schema.toSchemaJson());
+		} else {
+			map.put("schema", schema.toSchemaString());
+		}
 		if (comment != null) {
 			map.put("comment", comment);
 		}

@@ -244,13 +244,21 @@ public class PropertyObject {
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());
-		if (types.size() == 1) {
-			map.put("@type", types.get(0));
+		if (types != null && !types.isEmpty()) {
+			if (types.size() == 1) {
+				map.put("@type", types.get(0));
+			} else {
+				map.put("@type", types);
+			}
 		} else {
-			map.put("@type", types);
+			map.put("@type", "Property");
 		}
 		map.put("name", name);
-		map.put("schema", schema.toSchemaString());
+		if (schema != null && schema.isJson()) {
+			map.put("schema", schema.toSchemaJson());
+		} else {
+			map.put("schema", schema.toSchemaString());
+		}
 		if (comment != null) {
 			map.put("comment", comment);
 		}

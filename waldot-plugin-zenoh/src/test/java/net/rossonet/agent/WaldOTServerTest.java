@@ -19,10 +19,11 @@ public class WaldOTServerTest {
 	public void runServerAndTwoClient() throws Exception {
 		// LogHelper.changeJulLogLevel("fine");
 		final WaldotGraph g = OpcFactory.getOpcGraph();
-		final Acme client1 = new Acme("client1");
-		final Acme client2 = new Acme("client2");
 		Thread.sleep(5_000);
+		final Acme client1 = new Acme("client1");
 		client1.startAgent();
+		Thread.sleep(60_000);
+		final Acme client2 = new Acme("client2");
 		client2.startAgent();
 		Thread.sleep(120_000);
 		g.getWaldotNamespace().getOpcuaServer().close();

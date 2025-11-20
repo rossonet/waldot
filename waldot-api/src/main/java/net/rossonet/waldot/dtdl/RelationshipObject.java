@@ -269,7 +269,7 @@ public class RelationshipObject {
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());
-		map.put("@type", "Relationship");
+		map.put("@type", "Property");
 		map.put("name", name);
 		map.put("target", target);
 		if (maxMultiplicity != null) {

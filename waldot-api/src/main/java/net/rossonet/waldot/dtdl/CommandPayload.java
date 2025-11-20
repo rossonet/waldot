@@ -165,7 +165,11 @@ public class CommandPayload {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());
 		map.put("name", name);
-		map.put("schema", schema.toSchemaString());
+		if (schema != null && schema.isJson()) {
+			map.put("schema", schema.toSchemaJson());
+		} else {
+			map.put("schema", schema.toSchemaString());
+		}
 		if (comment != null) {
 			map.put("comment", comment);
 		}

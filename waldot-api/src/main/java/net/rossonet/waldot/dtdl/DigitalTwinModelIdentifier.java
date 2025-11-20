@@ -44,14 +44,25 @@ public class DigitalTwinModelIdentifier {
 		return new DigitalTwinModelIdentifier(value);
 	}
 
-	private final String path;
+	private static final boolean isDirtyValue(final String value) {
+		return !value.matches("[^\\w+]+") && !value.matches("[ ]+");
+	}
 
+	private final String path;
 	private final String scheme;
+
 	private final int version;
 
 	private DigitalTwinModelIdentifier(final String value) {
-		scheme = value.split(":")[0];
-		final String others = value.substring(scheme.length() + 1);
+		String cleanValue = value.toLowerCase().trim();
+		if (cleanValue == null || cleanValue.isEmpty()) {
+			throw new IllegalArgumentException("DigitalTwinModelIdentifier cannot be null or empty");
+		}
+		if (isDirtyValue(cleanValue)) {
+			cleanValue = value.toLowerCase().trim().replaceAll("[^\\w;:]+", "_").replaceAll("[ ]+", "_");
+		}
+		scheme = cleanValue.split(":")[0];
+		final String others = cleanValue.substring(scheme.length() + 1);
 		path = others.split(";")[0];
 		version = Integer.valueOf(others.split(";")[1]);
 	}
@@ -130,22 +141,7 @@ public class DigitalTwinModelIdentifier {
 	 */
 	@Override
 	public String toString() {
-		final StringBuilder builder = new StringBuilder();
-		builder.append("Model Identifier [");
-		if (scheme != null) {
-			builder.append("scheme=");
-			builder.append(scheme);
-			builder.append(", ");
-		}
-		if (path != null) {
-			builder.append("path=");
-			builder.append(path);
-			builder.append(", ");
-		}
-		builder.append("version=");
-		builder.append(version);
-		builder.append("]");
-		return builder.toString();
+		return getScheme() + ":" + getPath() + ";" + getVersion();
 	}
 
 }

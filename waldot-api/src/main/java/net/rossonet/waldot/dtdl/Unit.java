@@ -43,8 +43,8 @@ public enum Unit {
 	nanosecond, nauticalMile, newton, newtonMetre, ohm, ounce, pascal, percent, picofarad, pound, poundPerSquareInch,
 	radian, radianPerSecond, radianPerSecondSquared, revolutionPerMinute, revolutionPerSecond, second, secondOfArc,
 	slug, squareCentimetre, squareFoot, squareInch, squareKilometre, squareMetre, squareMillimetre, tebibit,
-	tebibitPerSecond, tebibyte, tebibytePerSecond, tesla, ton, tonne, turn, unity, volt, watt, weber, year, yobibit,
-	yobibitPerSecond, yobibyte, yobibytePerSecond, zebibit, zebibitPerSecond, zebibyte, zebibytePerSecond;
+	tebibitPerSecond, tebibyte, tebibytePerSecond, tesla, text, ton, tonne, turn, unity, volt, watt, weber, year,
+	yobibit, yobibitPerSecond, yobibyte, yobibytePerSecond, zebibit, zebibitPerSecond, zebibyte, zebibytePerSecond;
 
 	/**
 	 * Retrieves the {@code Unit} corresponding to the specified string value.

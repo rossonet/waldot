@@ -40,6 +40,7 @@ dependencies {
     api("org.eclipse.zenoh:zenoh-java:1.5.1")
     api 'org.json:json:20250107'
     api project(':waldot-api')
+    implementation("dev.mccue:guava-reflect:33.4.0")
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testImplementation(platform('org.junit:junit-bom:5.13.1'))

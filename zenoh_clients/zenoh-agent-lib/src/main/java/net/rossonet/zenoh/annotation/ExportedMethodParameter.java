@@ -27,9 +27,11 @@ public @interface ExportedMethodParameter {
 
 	String[] parameters() default {};
 
-	String permissions() default "ALL"; // TODO: definire meglio
+	String permissions() default "all"; // TODO: definire meglio
 
 	boolean textArea() default false;
+
+	String unit() default "text";
 
 	int viewOrder() default 10;
 
