@@ -8,10 +8,10 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import net.rossonet.waldot.agent.digitalTwin.DtdlHandler;
 import net.rossonet.waldot.dtdl.CommandObject;
 import net.rossonet.waldot.dtdl.CommandPayload;
 import net.rossonet.waldot.dtdl.DigitalTwinModelIdentifier;
+import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.dtdl.Schema;
 import net.rossonet.zenoh.annotation.AgentController;
 import net.rossonet.zenoh.annotation.ExportedCommand;

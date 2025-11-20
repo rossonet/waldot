@@ -3,7 +3,7 @@ package net.rossonet.zenoh.client.api;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.rossonet.waldot.agent.digitalTwin.DtdlHandler;
+import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.dtdl.TelemetryObject;
 
 public class TelemetryData {

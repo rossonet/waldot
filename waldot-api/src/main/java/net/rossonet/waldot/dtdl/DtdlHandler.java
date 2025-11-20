@@ -1,4 +1,4 @@
-package net.rossonet.waldot.agent.digitalTwin;
+package net.rossonet.waldot.dtdl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,13 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.github.jsonldjava.utils.JsonUtils;
-
-import net.rossonet.waldot.dtdl.CommandObject;
-import net.rossonet.waldot.dtdl.ComponentObject;
-import net.rossonet.waldot.dtdl.DigitalTwinModelIdentifier;
-import net.rossonet.waldot.dtdl.PropertyObject;
-import net.rossonet.waldot.dtdl.RelationshipObject;
-import net.rossonet.waldot.dtdl.TelemetryObject;
 
 /**
  * The {@code DtdlHandler} class is responsible for parsing and handling Digital

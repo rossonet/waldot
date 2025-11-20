@@ -18,7 +18,7 @@ import io.zenoh.qos.CongestionControl;
 import io.zenoh.qos.Priority;
 import io.zenoh.qos.Reliability;
 import io.zenoh.sample.Sample;
-import net.rossonet.waldot.agent.digitalTwin.DtdlHandler;
+import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.zenoh.WaldotZenohException;
 import net.rossonet.zenoh.ZenohHelper;
 import net.rossonet.zenoh.client.api.AgentCommand;

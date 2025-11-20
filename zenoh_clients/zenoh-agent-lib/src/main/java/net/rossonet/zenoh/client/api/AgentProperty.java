@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
-import net.rossonet.waldot.agent.digitalTwin.DtdlHandler;
 import net.rossonet.waldot.dtdl.DigitalTwinModelIdentifier;
+import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.dtdl.PropertyObject;
 import net.rossonet.waldot.dtdl.Schema;
 import net.rossonet.waldot.dtdl.Unit;

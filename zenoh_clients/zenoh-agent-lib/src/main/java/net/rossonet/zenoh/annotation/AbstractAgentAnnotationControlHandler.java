@@ -20,8 +20,8 @@ import org.json.JSONObject;
 import com.google.common.reflect.ClassPath;
 
 import io.zenoh.config.ZenohId;
-import net.rossonet.waldot.agent.digitalTwin.DtdlHandler;
 import net.rossonet.waldot.dtdl.DigitalTwinModelIdentifier;
+import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.utils.ThreadHelper;
 import net.rossonet.zenoh.client.api.AgentCommand;
 import net.rossonet.zenoh.client.api.AgentCommandParameter;
