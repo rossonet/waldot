@@ -79,8 +79,8 @@ public class RelationshipObject {
 		for (final Entry<String, Object> record : relationship.entrySet()) {
 			switch (record.getKey()) {
 			case "@type":
-				if (!"Property".equals(record.getValue())) {
-					throw new IllegalArgumentException("@type must be Property but is " + record.getValue());
+				if (!"Relationship".equals(record.getValue())) {
+					throw new IllegalArgumentException("@type must be Relationship but is " + record.getValue());
 				}
 				break;
 			case "@id":
@@ -269,7 +269,7 @@ public class RelationshipObject {
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());
-		map.put("@type", "Property");
+		map.put("@type", "Relationship");
 		map.put("name", name);
 		map.put("target", target);
 		if (maxMultiplicity != null) {

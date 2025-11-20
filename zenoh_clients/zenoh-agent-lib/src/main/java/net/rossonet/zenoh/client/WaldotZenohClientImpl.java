@@ -90,8 +90,9 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	}
 
 	private void elaborateControlMessage(String topic, JSONObject message) {
-		if (topic.startsWith(getBaseControlTopic())) {
-			final String command = topic.substring(getBaseControlTopic().length());
+		if (topic.startsWith(ZenohHelper.getBaseControlTopic(getRuntimeUniqueId()) + ZenohHelper._TOPIC_SEPARATOR)) {
+			final String command = topic.substring(
+					(ZenohHelper.getBaseControlTopic(getRuntimeUniqueId()) + ZenohHelper._TOPIC_SEPARATOR).length());
 			if (command != null && !command.isEmpty()) {
 				switch (command) {
 				case ZenohHelper.ACKNOWLEDGE_COMMAND_TOPIC:
@@ -134,15 +135,6 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 
 	}
 
-	private String getBaseControlTopic() {
-		return getBaseTopic() + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.BASE_CONTROL_TOPIC
-				+ ZenohHelper._TOPIC_SEPARATOR;
-	}
-
-	private String getBaseTopic() {
-		return ZenohHelper._BASE_AGENT_TOPIC + ZenohHelper._TOPIC_SEPARATOR + runtimeUniqueId;
-	}
-
 	@Override
 	public Map<String, AgentCommand> getCommands() {
 		return registerCommands;
@@ -173,10 +165,6 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 				return Status.ERROR;
 			}
 		}
-	}
-
-	private String getUpdateDiscoveryTopic() {
-		return getBaseTopic() + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.UPDATE_DISCOVERY_TOPIC;
 	}
 
 	@Override
@@ -226,7 +214,8 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 
 	private void sendUpdateDiscoveryMessage() throws ZError {
 		final JSONObject discoveryMessage = createDiscoveryPayload();
-		final Publisher publisher = zenohClient.declarePublisher(KeyExpr.tryFrom(getUpdateDiscoveryTopic()),
+		final Publisher publisher = zenohClient.declarePublisher(
+				KeyExpr.tryFrom(ZenohHelper.getUpdateDiscoveryTopic(getRuntimeUniqueId())),
 				ZenohHelper.getGlobalPublisherOptions());
 		publisher.put(discoveryMessage.toString(), ZenohHelper.getDiscoveryPutOptions());
 	}
@@ -254,8 +243,8 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	}
 
 	private void subscribeCommandsTopic() throws ZError {
-		zenohClient.declareSubscriber(KeyExpr.tryFrom(getBaseControlTopic() + ZenohHelper.JOLLY_TOPIC),
-				controlMessageRunner);
+		zenohClient.declareSubscriber(KeyExpr.tryFrom(ZenohHelper.getBaseControlTopic(getRuntimeUniqueId())
+				+ ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC), controlMessageRunner);
 	}
 
 }

@@ -29,10 +29,10 @@ public enum Unit {
 	_byte, acre, ampere, astronomicalUnit, bar, bel, bit, bitPerSecond, bytePerSecond, candela, candelaPerSquareMetre,
 	centimetre, centimetrePerSecond, centimetrePerSecondSquared, coulomb, cubicCentimetre, cubicFoot, cubicInch,
 	cubicMetre, day, decibel, degreeCelsius, degreeFahrenheit, degreeOfArc, degreePerSecond, electronvolt, exbibit,
-	exbibitPerSecond, exbibyte, exbibytePerSecond, farad, fluidOunce, foot, footcandle, gallon, gForce, gibibit,
-	gibibitPerSecond, gibibyte, gibibytePerSecond, gigahertz, gigajoule, gigawatt, gram, gramPerCubicMetre, gramPerHour,
-	gramPerSecond, hectare, henry, hertz, horsepower, hour, inch, inchesOfMercury, inchesOfWater, joule, kelvin,
-	kibibit, kibibitPerSecond, kibibyte, kibibytePerSecond, kilogram, kilogramPerCubicMetre, kilogramPerHour,
+	exbibitPerSecond, exbibyte, exbibytePerSecond, farad, fluidOunce, foot, footcandle, gallon, general, gForce,
+	gibibit, gibibitPerSecond, gibibyte, gibibytePerSecond, gigahertz, gigajoule, gigawatt, gram, gramPerCubicMetre,
+	gramPerHour, gramPerSecond, hectare, henry, hertz, horsepower, hour, inch, inchesOfMercury, inchesOfWater, joule,
+	kelvin, kibibit, kibibitPerSecond, kibibyte, kibibytePerSecond, kilogram, kilogramPerCubicMetre, kilogramPerHour,
 	kilogramPerSecond, kilohertz, kilojoule, kilometre, kilometrePerHour, kilometrePerSecond, kiloohm, kilopascal,
 	kilovolt, kilowatt, kilowattHour, kilowattHourPerYear, knot, litre, litrePerHour, litrePerSecond, lumen, lux,
 	maxwell, mebibit, mebibitPerSecond, mebibyte, mebibytePerSecond, megaelectronvolt, megahertz, megajoule, megaohm,
@@ -43,8 +43,8 @@ public enum Unit {
 	nanosecond, nauticalMile, newton, newtonMetre, ohm, ounce, pascal, percent, picofarad, pound, poundPerSquareInch,
 	radian, radianPerSecond, radianPerSecondSquared, revolutionPerMinute, revolutionPerSecond, second, secondOfArc,
 	slug, squareCentimetre, squareFoot, squareInch, squareKilometre, squareMetre, squareMillimetre, tebibit,
-	tebibitPerSecond, tebibyte, tebibytePerSecond, tesla, text, ton, tonne, turn, unity, volt, watt, weber, year,
-	yobibit, yobibitPerSecond, yobibyte, yobibytePerSecond, zebibit, zebibitPerSecond, zebibyte, zebibytePerSecond;
+	tebibitPerSecond, tebibyte, tebibytePerSecond, tesla, ton, tonne, turn, unity, volt, watt, weber, year, yobibit,
+	yobibitPerSecond, yobibyte, yobibytePerSecond, zebibit, zebibitPerSecond, zebibyte, zebibytePerSecond;
 
 	/**
 	 * Retrieves the {@code Unit} corresponding to the specified string value.

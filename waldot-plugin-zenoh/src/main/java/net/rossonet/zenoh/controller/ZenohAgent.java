@@ -31,32 +31,29 @@ public class ZenohAgent {
 	private final static Logger logger = LoggerFactory.getLogger(ZenohAgent.class);
 
 	public static ZenohAgent fromDiscoveryMessage(AgentLifeCycleManager agentLifeCycleManager,
-			String busZenohBaseAgentsTopic, JSONObject discoveryMessage) throws WaldotZenohException {
+			JSONObject discoveryMessage) throws WaldotZenohException {
 		final String uniqueId = discoveryMessage.getString(ZenohHelper.UNIQUE_ID_LABEL);
-		final String busZenohAgentTopic = busZenohBaseAgentsTopic + ZenohHelper._TOPIC_SEPARATOR + uniqueId;
 		final long discoveryMessageTime = discoveryMessage.getLong(ZenohHelper.TIME_LABEL);
 		final JSONObject dtml = discoveryMessage.getJSONObject(ZenohHelper.DTML_LABEL);
 		final int apiVersion = discoveryMessage.getInt(ZenohHelper.VERSION_LABEL);
-		return new ZenohAgent(agentLifeCycleManager, uniqueId, busZenohAgentTopic, dtml, apiVersion,
-				discoveryMessageTime);
+		return new ZenohAgent(agentLifeCycleManager, uniqueId, dtml, apiVersion, discoveryMessageTime);
 	}
 
 	private transient AgentLifeCycleManager agentLifeCycleManager;
 	private final int apiVersion;
-	private final String busZenohAgentTopic;
 	private final Map<String, AgentConfigurationObject> configurationObjects = new HashMap<>();
 	private final long discoveryMessageTime;
 	private DtdlHandler dtmlHandler;
 	private Vertex managedVertex;
 	private final Map<String, AgentProperty> propertyObjects = new HashMap<>();
 	private final Map<String, AgentCommand> registerCommands = new HashMap<>();
+	private final Map<String, TelemetryData> registerTelemetries = new HashMap<>();
 	private final String uniqueId;
 
-	public ZenohAgent(AgentLifeCycleManager agentLifeCycleManager, String uniqueId, String busZenohAgentTopic,
-			JSONObject dtml, int apiVersion, long discoveryMessageTime) {
+	public ZenohAgent(AgentLifeCycleManager agentLifeCycleManager, String uniqueId, JSONObject dtml, int apiVersion,
+			long discoveryMessageTime) {
 		this.agentLifeCycleManager = agentLifeCycleManager;
 		this.uniqueId = uniqueId;
-		this.busZenohAgentTopic = busZenohAgentTopic;
 		try {
 			this.dtmlHandler = DtdlHandler.newFromDtdlV2(dtml.toString());
 		} catch (final IOException e) {
@@ -100,8 +97,6 @@ public class ZenohAgent {
 		properties.add(uniqueId);
 		properties.add("api-version");
 		properties.add(Integer.toString(apiVersion));
-		properties.add("zenoh-agent-topic");
-		properties.add(busZenohAgentTopic);
 		properties.add("directory");
 		properties.add(agentsOpcuaDirectory);
 		properties.add("discovery-time");
@@ -116,26 +111,16 @@ public class ZenohAgent {
 		return managedVertex;
 	}
 
-	private String getTelemetryBaseTopic() {
-		return busZenohAgentTopic + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.TELEMETRY_TOPIC;
-	}
-
 	public String getUniqueId() {
 		return uniqueId;
 	}
 
-	private String getUpdateDiscoveryTopic() {
-		return busZenohAgentTopic + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.UPDATE_DISCOVERY_TOPIC;
-	}
-
 	private void sendAcknowLedgeMessage(AgentLifeCycleManager agentLifeCycleManager) {
-		final String topic = busZenohAgentTopic + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.BASE_CONTROL_TOPIC
-				+ ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.ACKNOWLEDGE_COMMAND_TOPIC;
+		final String topic = ZenohHelper.getAcknowLedgeTopic(getUniqueId());
 		final JSONObject acknowledgeMessage = new JSONObject();
 		acknowledgeMessage.put(ZenohHelper.UNIQUE_ID_LABEL, uniqueId);
 		acknowledgeMessage.put(ZenohHelper.TIME_LABEL, System.currentTimeMillis());
 		acknowledgeMessage.put(ZenohHelper.DTML_LABEL, new JSONObject(dtmlHandler));
-		acknowledgeMessage.put(ZenohHelper.AGENT_TOPIC_BASE_LABEL, busZenohAgentTopic);
 		try {
 			agentLifeCycleManager.getZenohClient().sendMessage(topic, acknowledgeMessage, getAcknowledgePutOptions());
 		} catch (final WaldotZenohException e) {
@@ -157,48 +142,49 @@ public class ZenohAgent {
 	}
 
 	private void subscribeToAgentDtmlTopic() {
-		getAgentLifeCycleManager().getZenohClient().subscribe(getUpdateDiscoveryTopic(), new Callback<Sample>() {
+		getAgentLifeCycleManager().getZenohClient().subscribe(ZenohHelper.getUpdateDiscoveryTopic(getUniqueId()),
+				new Callback<Sample>() {
 
-			@Override
-			public void run(Sample sample) {
-				JSONObject payloadJson = null;
-				try {
-					payloadJson = new JSONObject(sample.getPayload().toString());
-				} catch (final Exception e) {
-					logger.error("Error parsing discovery message payload: {}", sample.getPayload(), e);
-					return;
-				}
-				final String uniqueId = payloadJson.getString(ZenohHelper.UNIQUE_ID_LABEL);
-				long lastDiscoveryMessageTime = payloadJson.getLong(ZenohHelper.TIME_LABEL);
-				final JSONObject dtml = payloadJson.getJSONObject(ZenohHelper.DTML_LABEL);
-				final int apiVersion = payloadJson.getInt(ZenohHelper.VERSION_LABEL);
-				if (!ZenohAgent.this.uniqueId.equals(uniqueId)) {
-					logger.warn("Received discovery update for different agent: {}", uniqueId);
-					return;
-				}
-				if (lastDiscoveryMessageTime <= discoveryMessageTime) {
-					logger.info("Ignoring out-of-date discovery update for agent {}", uniqueId);
-					return;
-				}
-				if (ZenohAgent.this.apiVersion != apiVersion) {
-					logger.warn("Ignoring discovery update for agent {} with different API version: {}", uniqueId,
-							apiVersion);
-					return;
-				}
-				try {
-					dtmlHandler = DtdlHandler.newFromDtdlV2(dtml.toString());
-				} catch (final IOException e) {
-					logger.error("Error parsing DTML from discovery info for agent {}", uniqueId, e);
-				}
-				updateConfigurationObjects(AgentConfigurationObject.fromDtml(dtmlHandler));
-				updateCommands(AgentCommand.fromDtml(dtmlHandler));
-				updateTelemetryObjects(TelemetryData.fromDtml(dtmlHandler));
-				updatePropertyObjects(AgentProperty.fromDtml(dtmlHandler));
-				lastDiscoveryMessageTime = discoveryMessageTime;
-				updateManagedVertex();
-				sendAcknowLedgeMessage(agentLifeCycleManager);
-			}
-		});
+					@Override
+					public void run(Sample sample) {
+						JSONObject payloadJson = null;
+						try {
+							payloadJson = new JSONObject(sample.getPayload().toString());
+						} catch (final Exception e) {
+							logger.error("Error parsing discovery message payload: {}", sample.getPayload(), e);
+							return;
+						}
+						final String uniqueId = payloadJson.getString(ZenohHelper.UNIQUE_ID_LABEL);
+						long lastDiscoveryMessageTime = payloadJson.getLong(ZenohHelper.TIME_LABEL);
+						final JSONObject dtml = payloadJson.getJSONObject(ZenohHelper.DTML_LABEL);
+						final int apiVersion = payloadJson.getInt(ZenohHelper.VERSION_LABEL);
+						if (!ZenohAgent.this.uniqueId.equals(uniqueId)) {
+							logger.warn("Received discovery update for different agent: {}", uniqueId);
+							return;
+						}
+						if (lastDiscoveryMessageTime <= discoveryMessageTime) {
+							logger.info("Ignoring out-of-date discovery update for agent {}", uniqueId);
+							return;
+						}
+						if (ZenohAgent.this.apiVersion != apiVersion) {
+							logger.warn("Ignoring discovery update for agent {} with different API version: {}",
+									uniqueId, apiVersion);
+							return;
+						}
+						try {
+							dtmlHandler = DtdlHandler.newFromDtdlV2(dtml.toString());
+						} catch (final IOException e) {
+							logger.error("Error parsing DTML from discovery info for agent {}", uniqueId, e);
+						}
+						updateConfigurationObjects(AgentConfigurationObject.fromDtml(dtmlHandler));
+						updateCommands(AgentCommand.fromDtml(dtmlHandler));
+						updateTelemetryObjects(TelemetryData.fromDtml(dtmlHandler));
+						updatePropertyObjects(AgentProperty.fromDtml(dtmlHandler));
+						lastDiscoveryMessageTime = discoveryMessageTime;
+						updateManagedVertex();
+						sendAcknowLedgeMessage(agentLifeCycleManager);
+					}
+				});
 	}
 
 	private void subscribeToAgentKeepAliveTopics() {
@@ -216,15 +202,34 @@ public class ZenohAgent {
 
 	}
 
-	private Map<String, AgentCommand> updateCommands(Map<String, AgentCommand> newDtml) {
-		// TODO Auto-generated method stub
-		return null;
+	private void updateCommands(Map<String, AgentCommand> commands) {
+		for (final Map.Entry<String, AgentCommand> entry : commands.entrySet()) {
+			if (!registerCommands.containsKey(entry.getKey())) {
+				registerCommands.put(entry.getKey(), entry.getValue());
+				logger.info("Registered new command {} for agent {}", entry.getKey(), uniqueId);
+			}
+		}
+		for (final String existingCommandKey : new ArrayList<>(registerCommands.keySet())) {
+			if (!commands.containsKey(existingCommandKey)) {
+				registerCommands.remove(existingCommandKey);
+				logger.info("Unregistered command {} for agent {}", existingCommandKey, uniqueId);
+			}
+		}
 	}
 
-	private Map<String, AgentConfigurationObject> updateConfigurationObjects(
-			Map<String, AgentConfigurationObject> newDtml) {
-		// TODO Auto-generated method stub
-		return null;
+	private void updateConfigurationObjects(Map<String, AgentConfigurationObject> configurations) {
+		for (final Map.Entry<String, AgentConfigurationObject> entry : configurations.entrySet()) {
+			if (!configurationObjects.containsKey(entry.getKey())) {
+				configurationObjects.put(entry.getKey(), entry.getValue());
+				logger.info("Registered new configuration object {} for agent {}", entry.getKey(), uniqueId);
+			}
+		}
+		for (final String existingConfigKey : new ArrayList<>(configurationObjects.keySet())) {
+			if (!configurations.containsKey(existingConfigKey)) {
+				configurationObjects.remove(existingConfigKey);
+				logger.info("Unregistered configuration object {} for agent {}", existingConfigKey, uniqueId);
+			}
+		}
 	}
 
 	private void updateManagedVertex() {
@@ -232,13 +237,35 @@ public class ZenohAgent {
 
 	}
 
-	private void updatePropertyObjects(Map<String, AgentProperty> newDtml) {
-		// TODO Auto-generated method stub
+	private void updatePropertyObjects(Map<String, AgentProperty> properties) {
+		for (final Map.Entry<String, AgentProperty> entry : properties.entrySet()) {
+			if (!propertyObjects.containsKey(entry.getKey())) {
+				propertyObjects.put(entry.getKey(), entry.getValue());
+				logger.info("Registered new property object {} for agent {}", entry.getKey(), uniqueId);
+			}
+		}
+		for (final String existingPropertyKey : new ArrayList<>(propertyObjects.keySet())) {
+			if (!properties.containsKey(existingPropertyKey)) {
+				propertyObjects.remove(existingPropertyKey);
+				logger.info("Unregistered property object {} for agent {}", existingPropertyKey, uniqueId);
+			}
+		}
 
 	}
 
-	private void updateTelemetryObjects(Map<String, TelemetryData> newDtml) {
-		// TODO Auto-generated method stub
+	private void updateTelemetryObjects(Map<String, TelemetryData> telemetries) {
+		for (final Map.Entry<String, TelemetryData> entry : telemetries.entrySet()) {
+			if (!registerTelemetries.containsKey(entry.getKey())) {
+				registerTelemetries.put(entry.getKey(), entry.getValue());
+				logger.info("Registered new telemetry object {} for agent {}", entry.getKey(), uniqueId);
+			}
+		}
+		for (final String existingTelemetryKey : new ArrayList<>(registerTelemetries.keySet())) {
+			if (!telemetries.containsKey(existingTelemetryKey)) {
+				registerTelemetries.remove(existingTelemetryKey);
+				logger.info("Unregistered telemetry object {} for agent {}", existingTelemetryKey, uniqueId);
+			}
+		}
 
 	}
 }

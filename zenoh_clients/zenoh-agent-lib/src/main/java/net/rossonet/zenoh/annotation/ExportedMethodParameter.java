@@ -31,7 +31,7 @@ public @interface ExportedMethodParameter {
 
 	boolean textArea() default false;
 
-	String unit() default "text";
+	String unit() default "general";
 
 	int viewOrder() default 10;
 

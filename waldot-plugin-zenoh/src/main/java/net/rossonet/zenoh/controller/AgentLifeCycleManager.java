@@ -125,7 +125,7 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 	private void registerNewAgent(JSONObject discoveryMessage) {
 		ZenohAgent agent;
 		try {
-			agent = ZenohAgent.fromDiscoveryMessage(this, ZenohHelper._BASE_AGENT_TOPIC, discoveryMessage);
+			agent = ZenohAgent.fromDiscoveryMessage(this, discoveryMessage);
 		} catch (final Exception e) {
 			logger.warn("Unable to register new agent from discovery message: {}", discoveryMessage.toString(2), e);
 			return;

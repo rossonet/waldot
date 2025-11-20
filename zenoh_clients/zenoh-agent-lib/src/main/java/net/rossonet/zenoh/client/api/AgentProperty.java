@@ -1,5 +1,6 @@
 package net.rossonet.zenoh.client.api;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,12 +17,101 @@ import net.rossonet.zenoh.annotation.ExportedParameter;
 public class AgentProperty {
 
 	public static Map<String, AgentProperty> fromDtml(DtdlHandler dtmlHandler) {
-		// TODO Auto-generated method stub
-		return null;
+		final Map<String, AgentProperty> properties = new HashMap<>();
+		for (final PropertyObject prop : dtmlHandler.getProperties()) {
+			final Schema schema = prop.getSchema();
+			if (!schema.isJson()) {
+				throw new IllegalArgumentException(
+						"Only JSON schema is supported for AgentProperty, property: " + prop.getName());
+			}
+			final JSONObject schemaJson = schema.toSchemaJson();
+			final ExportedParameter annotation = new ExportedParameter() {
+
+				@Override
+				public boolean advancedConfigurationField() {
+					return schemaJson.getBoolean("advancedConfigurationField");
+				}
+
+				@Override
+				public Class<? extends Annotation> annotationType() {
+					return ExportedParameter.class;
+				}
+
+				@Override
+				public String defaultValue() {
+					return schemaJson.getString("defaultValue");
+				}
+
+				@Override
+				public String description() {
+					return prop.getDescription();
+				}
+
+				@Override
+				public String fieldValidationRegEx() {
+					return schemaJson.getString("fieldValidationRegEx");
+				}
+
+				@Override
+				public boolean isArray() {
+					return schemaJson.getBoolean("isArray");
+				}
+
+				@Override
+				public boolean mandatary() {
+					return schemaJson.getBoolean("mandatary");
+				}
+
+				@Override
+				public String mimeType() {
+					return schemaJson.getString("mimeType");
+				}
+
+				@Override
+				public String name() {
+					return prop.getName();
+				}
+
+				@Override
+				public String[] parameters() {
+					return schemaJson.getJSONArray("parameters").toList().stream().map(Object::toString)
+							.toArray(String[]::new);
+				}
+
+				@Override
+				public String permissions() {
+					return schemaJson.getString("permissions");
+				}
+
+				@Override
+				public boolean textArea() {
+					return schemaJson.getBoolean("textArea");
+				}
+
+				@Override
+				public String unit() {
+					return schemaJson.getString("unit");
+				}
+
+				@Override
+				public int viewOrder() {
+					return schemaJson.getInt("viewOrder");
+				}
+
+				@Override
+				public boolean writable() {
+					return prop.isWritable();
+				}
+
+			};
+			properties.put(prop.getName(), new AgentProperty(prop.getName(), null, null, annotation));
+		}
+		return properties;
 	}
 
 	private final AgentController agentController;
 	private final ExportedParameter annotation;
+
 	private final String fieldName;
 	private final String propertyName;
 
@@ -57,6 +147,14 @@ public class AgentProperty {
 		propertyObject.setId(id);
 		propertyObject.setComment("java field name: " + fieldName);
 		return propertyObject;
+	}
+
+	public AgentController getAgentController() {
+		return agentController;
+	}
+
+	public String getName() {
+		return propertyName;
 	}
 
 }

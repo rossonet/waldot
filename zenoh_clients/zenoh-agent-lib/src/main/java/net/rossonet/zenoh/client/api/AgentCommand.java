@@ -1,5 +1,7 @@
 package net.rossonet.zenoh.client.api;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,8 +19,48 @@ import net.rossonet.zenoh.annotation.ExportedCommand;
 public class AgentCommand {
 
 	public static Map<String, AgentCommand> fromDtml(DtdlHandler dtmlHandler) {
-		// TODO Auto-generated method stub
-		return null;
+		final Map<String, AgentCommand> commands = new HashMap<>();
+		for (final CommandObject commandObject : dtmlHandler.getCommands()) {
+			final Set<AgentCommandParameter> parameters = new HashSet<>();
+			final CommandPayload request = commandObject.getRequest();
+			if (request != null) {
+				final JSONArray paramsArray = request.getSchema().toSchemaJson().getJSONArray("parameters");
+				for (int i = 0; i < paramsArray.length(); i++) {
+					final JSONObject paramObject = paramsArray.getJSONObject(i);
+					final AgentCommandParameter parameter = AgentCommandParameter.fromJsonObject(paramObject);
+					parameters.add(parameter);
+				}
+			}
+			final AgentCommand agentCommand = new AgentCommand(commandObject.getName(), null, "",
+					commandObject.getResponse().getSchema().toSchemaString(), new ExportedCommand() {
+						@Override
+						public Class<? extends java.lang.annotation.Annotation> annotationType() {
+							return ExportedCommand.class;
+						}
+
+						@Override
+						public String description() {
+							return commandObject.getDescription();
+						}
+
+						@Override
+						public String name() {
+							return commandObject.getName();
+						}
+
+						@Override
+						public String returnDescription() {
+							return commandObject.getResponse().getDescription();
+						}
+
+						@Override
+						public String returnName() {
+							return commandObject.getResponse().getName();
+						}
+					}, parameters);
+			commands.put(commandObject.getName(), agentCommand);
+		}
+		return commands;
 	}
 
 	private final AgentController agentControl;
