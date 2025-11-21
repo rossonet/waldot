@@ -10,7 +10,7 @@ experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org
 
 ## Maven
 
-[WaldOT](https://mvnrepository.com/artifact/net.rossonet.waldot)
+[WaldOT on Maven Central Repository](https://central.sonatype.com/search?q=net.rossonet.waldot)
 
 ## Code tools
 
