@@ -76,13 +76,13 @@ public class AcmeController implements AgentController {
 
 	@Override
 	public void startDataFlow() {
-		// TODO Auto-generated method stub
+		// TODO avvia la simulazione dei dati
 
 	}
 
 	@Override
 	public void stopDataFlow() {
-		// TODO Auto-generated method stub
+		// TODO ferma la simulazione dei dati
 
 	}
 

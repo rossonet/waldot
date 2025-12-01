@@ -183,7 +183,6 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 					parameterName = methodParameter.getName();
 				}
 				commandParameters.add(new AgentCommandParameter(parameterName, methodParameter, methodParamAnnotation));
-
 			} else {
 				errorQueue.offer(new InternalLogMessage("Method parameter " + methodParameter.getName() + " of command "
 						+ commandName + " is missing ExportedMethodParameter annotation", null));
@@ -219,8 +218,8 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 			properties.put(parameterData.getName(),
 					new AgentProperty(propertyName, flowController, fieldName, annotation));
 		}
-		registeredConfigurationObjects.put(configurationName,
-				new AgentConfigurationObject(configurationName, configurationClassName, description, properties, unique));
+		registeredConfigurationObjects.put(configurationName, new AgentConfigurationObject(configurationName,
+				configurationClassName, description, properties, unique));
 
 	}
 

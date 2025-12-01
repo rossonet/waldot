@@ -40,8 +40,7 @@ dependencies {
     implementation project(':waldot-deps')
     implementation 'org.slf4j:slf4j-api:2.0.17'
     annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
-    testCompileOnly project(':waldot-client')
-    testRuntimeOnly project(':waldot-client')
+    testImplementation project(':waldot-client')
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'

@@ -43,6 +43,11 @@ public class HelpCommand extends AbstractOpcCommand {
 	}
 
 	@Override
+	public String getDirectory() {
+		return "general";
+	}
+
+	@Override
 	public String[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
 		Path target;
 		if (inputValues != null && inputValues.length > 0 && inputValues[0] != null && !inputValues[0].isEmpty()) {

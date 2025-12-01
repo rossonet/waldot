@@ -3,7 +3,7 @@ package net.rossonet.zenoh.acme;
 import net.rossonet.zenoh.annotation.ExportedObject;
 import net.rossonet.zenoh.annotation.ExportedParameter;
 
-@ExportedObject(name = "create data", description = "create a new telemetry data", unique = false)
+@ExportedObject(name = "FireNewData", description = "create a new telemetry data", unique = false)
 public class FireNewData {
 
 	@ExportedParameter(description = "Maximum value for the simulated sensors", mandatary = true, name = "Max Simulation Value", viewOrder = 6)

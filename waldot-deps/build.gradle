@@ -40,12 +40,11 @@ dependencies {
     api 'org.yaml:snakeyaml:2.4'
     api 'org.apache.commons:commons-jexl3:3.4.0'
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
-    //api platform("io.modelcontextprotocol.sdk:mcp")
     api group: 'com.github.jsonld-java', name: 'jsonld-java', version: '0.13.6'
     // gremlin
     api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
     // OPCUA
-    api group: 'org.eclipse.milo', name: 'milo-sdk-server', version: '1.0.4'
+    api group: 'org.eclipse.milo', name: 'milo-sdk-server', version: '1.0.8'
 }
 
 task eclipseClosedDependencies {}

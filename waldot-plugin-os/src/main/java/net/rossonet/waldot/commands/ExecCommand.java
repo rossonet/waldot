@@ -55,6 +55,11 @@ public class ExecCommand extends AbstractOpcCommand {
 	}
 
 	@Override
+	public String getDirectory() {
+		return "system";
+	}
+
+	@Override
 	public String[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
 		try {
 			String command = "echo no command set";

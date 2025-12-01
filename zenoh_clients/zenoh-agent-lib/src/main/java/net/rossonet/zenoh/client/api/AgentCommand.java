@@ -152,4 +152,20 @@ public class AgentCommand {
 		return methodReturnType;
 	}
 
+	public int getUserWriteMask() {
+		return 0;
+	}
+
+	public int getWriteMask() {
+		return 0;
+	}
+
+	public Boolean isExecutable() {
+		return true;
+	}
+
+	public Boolean isUserExecutable() {
+		return true;
+	}
+
 }

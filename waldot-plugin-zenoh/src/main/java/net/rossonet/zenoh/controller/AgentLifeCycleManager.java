@@ -18,6 +18,10 @@ import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.zenoh.ZenohHelper;
 import net.rossonet.zenoh.client.ZenohClientFacade;
 
+/**
+ * Manages the lifecycle of Zenoh Agents on Waldot OPC UA Server * @Author
+ * Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public class AgentLifeCycleManager extends AbstractOpcVertex {
 	public static class AgentDiscoveryHandler implements Callback<Sample> {
 
@@ -39,7 +43,7 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 				logger.warn("Received invalid discovery message: {}", sample.getPayload());
 				return;
 			} else {
-				lifeCycleManager.helloAgentReceived(sample.getKeyExpr().toString(), payloadJson);
+				lifeCycleManager.discoveryFromAgentReceived(sample.getKeyExpr().toString(), payloadJson);
 			}
 		}
 
@@ -47,39 +51,37 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 
 	private static final Logger logger = LoggerFactory.getLogger(AgentLifeCycleManager.class);
 	private boolean active = true;
-	private Vertex baseBus;
 	private boolean connected = false;
 	private final WaldotGraph graph;
 	private final Thread lifeCycleThread;
-
-	private final LifeCycleStrategy strategy;
-
+	private final AgentStore agentStore;
 	private final ZenohClientFacade zenohClient;
+	private Vertex zenohClientVertex;
 
 	public AgentLifeCycleManager(final WaldotGraph graph, final UaNodeContext context, final NodeId nodeId,
 			final QualifiedName browseName, final LocalizedText displayName, final LocalizedText description,
 			final UInteger writeMask, final UInteger userWriteMask, final UByte eventNotifier, final long version,
-			final LifeCycleStrategy strategy, final ZenohClientFacade zenohClient) {
+			final AgentStore agentStore, final ZenohClientFacade zenohClient) {
 		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
 				version);
 		this.graph = graph;
-		createZenohRootNodeInGraph();
-		this.strategy = strategy;
+		createZenohClientVertexInGraph();
+		this.agentStore = agentStore;
 		this.zenohClient = zenohClient;
 		zenohClient.setLifeCycleManager(this);
-		strategy.setLifeCycleManager(this);
+		agentStore.setAgentLifeCycleManager(this);
 		active = true;
 		lifeCycleThread = new Thread(() -> {
 			while (active) {
 				try {
 					checkClientConnection();
 					if (zenohClient.isConnected()) {
-						strategy.periodicallyCheck();
+						agentStore.periodicallyCheck();
 						setConnected(true);
 					} else {
 						setConnected(false);
 					}
-					Thread.sleep(strategy.getPeriodicallyCheckIntervalMs());
+					Thread.sleep(agentStore.getPeriodicallyCheckIntervalMs());
 				} catch (final Exception e) {
 					e.printStackTrace();
 				}
@@ -102,14 +104,19 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 	@Override
 	public Object clone() {
 		return new AgentLifeCycleManager(graph, getNodeContext(), getNodeId(), getBrowseName(), getDisplayName(),
-				getDescription(), getWriteMask(), getUserWriteMask(), getEventNotifier(), version(), strategy,
+				getDescription(), getWriteMask(), getUserWriteMask(), getEventNotifier(), version(), agentStore,
 				zenohClient);
 	}
 
-	private void createZenohRootNodeInGraph() {
-		baseBus = graph.addVertex("id", "zenoh_bus", "label", "Zenoh BUS", "description", "Zenoh BUS information",
-				"directory", ZenohHelper.BASE_OPCUA_DIRECTORY, "online", "false");
+	private void createZenohClientVertexInGraph() {
+		zenohClientVertex = graph.addVertex("id", "zenoh_client", "label", "local client", "description",
+				"Zenoh local client information", "directory", ZenohHelper.BASE_OPCUA_DIRECTORY, "online", "false");
 
+	}
+
+	public void discoveryFromAgentReceived(String topic, JSONObject payload) {
+		logger.info("discovery message received on topic {}: {}", topic, payload.toString(2));
+		registerNewAgent(payload);
 	}
 
 	public WaldotGraph getGraph() {
@@ -122,27 +129,21 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 
 	}
 
-	public void helloAgentReceived(String topic, JSONObject payload) {
-		logger.info("Hello agent received on topic {} with payload {}", topic, payload.toString(2));
-		registerNewAgent(payload);
-	}
-
 	private void registerNewAgent(JSONObject discoveryMessage) {
 		ZenohAgent agent;
 		try {
-			agent = ZenohAgent.fromDiscoveryMessage(this, discoveryMessage);
+			agent = ZenohAgent.fromDiscoveryMessage(this, discoveryMessage, ZenohHelper.AGENTS_OPCUA_DIRECTORY);
 		} catch (final Exception e) {
 			logger.warn("Unable to register new agent from discovery message: {}", discoveryMessage.toString(2), e);
 			return;
 		}
 		if (agent != null) {
-			if (strategy.registerNewAgent(agent)) {
+			if (agentStore.registerNewAgent(agent)) {
 				logger.info("Registered new agent from discovery message: {}", discoveryMessage.toString(2));
-				agent.setManagedVertex(
-						graph.addVertex(agent.getAgentVertexProperties(ZenohHelper.AGENTS_OPCUA_DIRECTORY)));
-				agent.sendFirstAcknowledgeMessage();
+				agent.setManagedVertex(graph.addVertex(agent.getAgentVertexProperties()));
+				agent.sendAcknowLedgeMessage();
 			} else {
-				logger.warn("Agent from discovery message not registered by strategy: {}",
+				logger.warn("Agent from discovery message not registered by agentStore: {}",
 						discoveryMessage.toString(2));
 			}
 		} else {
@@ -154,7 +155,7 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 	private void setConnected(boolean newStatus) {
 		if (connected != newStatus) {
 			connected = newStatus;
-			baseBus.property("online", Boolean.toString(connected));
+			zenohClientVertex.property("online", Boolean.toString(connected));
 			logger.info("Zenoh Client connection status changed to {}", Boolean.toString(connected));
 			if (newStatus) {
 				subscribeTopics();

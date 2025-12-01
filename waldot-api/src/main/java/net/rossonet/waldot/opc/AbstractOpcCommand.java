@@ -79,6 +79,8 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	protected boolean allowNullPropertyValues = false;
 
+	private final String directory;
+
 	protected final List<EventObserver> eventObservers = new ArrayList<>();
 
 	protected final WaldotGraph graph;
@@ -93,14 +95,22 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	protected final WaldotNamespace waldotNamespace;
 
-	public AbstractOpcCommand(final WaldotGraph graph, final WaldotNamespace waldotNamespace, final String command,
-			final String description, final UInteger writeMask, final UInteger userWriteMask, final Boolean executable,
-			final Boolean userExecutable) {
-		super(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(command),
+	public AbstractOpcCommand(final WaldotGraph graph, final WaldotNamespace waldotNamespace, final String id,
+			final String command, final String description, String directory, final UInteger writeMask,
+			final UInteger userWriteMask, final Boolean executable, final Boolean userExecutable) {
+		super(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(id),
 				waldotNamespace.generateQualifiedName(command), LocalizedText.english(command),
 				LocalizedText.english(description), writeMask, userWriteMask, executable, userExecutable);
 		this.waldotNamespace = waldotNamespace;
 		this.graph = graph;
+		this.directory = directory;
+	}
+
+	public AbstractOpcCommand(final WaldotGraph graph, final WaldotNamespace waldotNamespace, final String command,
+			final String description, final UInteger writeMask, final UInteger userWriteMask, final Boolean executable,
+			final Boolean userExecutable) {
+		this(graph, waldotNamespace, command, command, description, null, writeMask, userWriteMask, executable,
+				userExecutable);
 	}
 
 	@Override
@@ -169,6 +179,11 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	@Override
 	public UaMethodNode findMethodNode(final NodeId methodId) {
 		return null;
+	}
+
+	@Override
+	public String getDirectory() {
+		return directory;
 	}
 
 	@Override

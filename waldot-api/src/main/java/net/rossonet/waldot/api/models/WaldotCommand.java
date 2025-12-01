@@ -25,6 +25,8 @@ public interface WaldotCommand extends WaldotVertex, MethodNode, UaServerNode {
 	void addOutputArgument(String name, NodeId dataType, Integer valueRank, UInteger[] arrayDimensions,
 			LocalizedText description);
 
+	String getDirectory();
+
 	@Override
 	public ByteString getIcon();
 

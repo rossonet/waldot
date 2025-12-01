@@ -41,6 +41,20 @@ dependencies {
     api 'org.json:json:20250107'
     api project(':waldot-api')
     api("com.google.guava:guava:33.5.0-jre")
+    // TODO: implementare agente BGP
+    //api("org.opendaylight.bgpcep:bgp-rib-impl:0.23.1")
+    //api("org.opendaylight.bgpcep:bgp-mvpn:0.23.1")
+    //api("org.opendaylight.bgpcep:bgp-l3vpn:0.23.1")
+    // TODO: implementare agente network mesh
+    //api group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0", classifier: "windows-x86_64"
+    //api group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0", classifier: "macos-x86_64"
+    //api group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0", classifier: "macos-aarch64"
+    //api group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0", classifier: "linux-x86_64"
+    //api group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0", classifier: "linux-aarch64"
+    //api group: "dev.onvoid.webrtc", name: "webrtc-java", version: "0.14.0", classifier: "linux-aarch32"
+    //TODO: agente Docker
+    //TODO: agente Talos (dind e firecracker)
+    //TODO: agente DBUS (systemd/network manager)
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testImplementation(platform('org.junit:junit-bom:5.13.1'))

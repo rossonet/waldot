@@ -1,6 +1,6 @@
 package net.rossonet.zenoh.controller;
 
-public interface LifeCycleStrategy {
+public interface AgentStore {
 
 	long getPeriodicallyCheckIntervalMs();
 
@@ -8,6 +8,6 @@ public interface LifeCycleStrategy {
 
 	boolean registerNewAgent(ZenohAgent agent);
 
-	void setLifeCycleManager(AgentLifeCycleManager agentLifeCycleManager);
+	void setAgentLifeCycleManager(AgentLifeCycleManager agentLifeCycleManager);
 
 }

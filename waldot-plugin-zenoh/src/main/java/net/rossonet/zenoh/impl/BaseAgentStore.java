@@ -4,17 +4,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.rossonet.zenoh.controller.AgentLifeCycleManager;
-import net.rossonet.zenoh.controller.LifeCycleStrategy;
+import net.rossonet.zenoh.controller.AgentStore;
 import net.rossonet.zenoh.controller.ZenohAgent;
 
-public class BaseLifeCycleStrategy implements LifeCycleStrategy {
+public class BaseAgentStore implements AgentStore {
 
 	private AgentLifeCycleManager agentLifeCycleManager;
 	private final Map<String, ZenohAgent> managedAgents = new HashMap<>();
 
+	public AgentLifeCycleManager getAgentLifeCycleManager() {
+		return agentLifeCycleManager;
+	}
+
 	@Override
 	public long getPeriodicallyCheckIntervalMs() {
-		// TODO Auto-generated method stub
+		// TODO renderere configurabile
 		return 1000;
 	}
 
@@ -32,9 +36,8 @@ public class BaseLifeCycleStrategy implements LifeCycleStrategy {
 	}
 
 	@Override
-	public void setLifeCycleManager(AgentLifeCycleManager agentLifeCycleManager) {
+	public void setAgentLifeCycleManager(AgentLifeCycleManager agentLifeCycleManager) {
 		this.agentLifeCycleManager = agentLifeCycleManager;
-
 	}
 
 }

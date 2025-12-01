@@ -22,16 +22,31 @@ import net.rossonet.zenoh.client.api.AgentCommand;
 import net.rossonet.zenoh.client.api.AgentConfigurationObject;
 import net.rossonet.zenoh.client.api.AgentControlHandler;
 import net.rossonet.zenoh.client.api.AgentErrorHandler;
-import net.rossonet.zenoh.client.api.TelemetryData;
 import net.rossonet.zenoh.client.api.TelemetryUpdate;
 import net.rossonet.zenoh.client.api.WaldotZenohClient;
 
 public class WaldotZenohClientImpl implements WaldotZenohClient {
 
 	private final int apiVersion;
+	private final Callback<Sample> configurationCallback = new Callback<Sample>() {
+
+		@Override
+		public void run(Sample sample) {
+			JSONObject payloadJson = null;
+			try {
+				payloadJson = new JSONObject(sample.getPayload());
+			} catch (final Exception e) {
+				elaborateErrorMessage("Error parsing configuration object message payload: " + sample.getPayload(), e);
+			}
+			final String topic = sample.getKeyExpr().toString();
+			elaborateConfigurationObjectMessage(topic, payloadJson);
+		}
+
+	};
 	private final Map<String, AgentConfigurationObject> configurationObjects = new HashMap<>();
 	private final AgentControlHandler control;
-	private final Callback<Sample> controlMessageRunner = new Callback<Sample>() {
+
+	private final Callback<Sample> controlCallback = new Callback<Sample>() {
 
 		@Override
 		public void run(Sample sample) {
@@ -46,13 +61,26 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 		}
 
 	};
-
 	private final Set<AgentErrorHandler> errorCallbacks = new HashSet<>();
+	private final Callback<Sample> inputTelemetryCallback = new Callback<Sample>() {
+
+		@Override
+		public void run(Sample sample) {
+			JSONObject payloadJson = null;
+			try {
+				payloadJson = new JSONObject(sample.getPayload());
+			} catch (final Exception e) {
+				elaborateErrorMessage("Error parsing input telemetry message payload: " + sample.getPayload(), e);
+			}
+			final String topic = sample.getKeyExpr().toString();
+			elaborateInputTelemetryMessage(topic, payloadJson);
+		}
+
+	};
 	private boolean needRunning = false;
 	private final Map<String, AgentCommand> registerCommands = new HashMap<>();
 	private boolean registered = false;
 	private final String runtimeUniqueId;
-	private final Map<String, TelemetryData> telemetries = new HashMap<>();
 	private Session zenohClient;
 
 	public WaldotZenohClientImpl(String runtimeUniqueId, AgentControlHandler control) {
@@ -87,6 +115,11 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 		discoveryMessage.put(ZenohHelper.DTML_LABEL, control.getDtdlJson());
 		discoveryMessage.put(ZenohHelper.VERSION_LABEL, apiVersion);
 		return discoveryMessage;
+	}
+
+	protected void elaborateConfigurationObjectMessage(String topic, JSONObject payloadJson) {
+		// TODO elabora il messaggio di configurazione in ingresso
+
 	}
 
 	private void elaborateControlMessage(String topic, JSONObject message) {
@@ -132,6 +165,11 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 		for (final AgentErrorHandler ecb : errorCallbacks) {
 			ecb.notifyError(message, exception);
 		}
+
+	}
+
+	protected void elaborateInputTelemetryMessage(String topic, JSONObject payloadJson) {
+		// TODO elabora il messaggio di telemetria in ingresso
 
 	}
 
@@ -197,7 +235,7 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 
 	@Override
 	public boolean sendInternalTelemetry(TelemetryUpdate<?> telemetryData) {
-		// TODO Auto-generated method stub
+		// TODO invia la telemetria relativa agli stati interni dell'agente
 		return false;
 	}
 
@@ -208,7 +246,7 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 
 	@Override
 	public boolean sendTelemetry(TelemetryUpdate<?> telemetryData) {
-		// TODO Auto-generated method stub
+		// TODO invia la telemetria relativa ai dati di processo
 		return false;
 	}
 
@@ -227,6 +265,8 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 			zenohClient = createClient();
 			sendDiscoveryMessage();
 			subscribeCommandsTopic();
+			subscribeInputDataTopics();
+			subscribeConfigurationTopics();
 			needRunning = true;
 		} catch (final ZError e) {
 			throw new WaldotZenohException("Error starting WaldotZenohClientImpl", e);
@@ -243,8 +283,22 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	}
 
 	private void subscribeCommandsTopic() throws ZError {
-		zenohClient.declareSubscriber(KeyExpr.tryFrom(ZenohHelper.getAgentControlTopicsSubscription(getRuntimeUniqueId())),
-				controlMessageRunner);
+		zenohClient.declareSubscriber(
+				KeyExpr.tryFrom(ZenohHelper.getAgentControlTopicsSubscriptionAll(getRuntimeUniqueId())),
+				controlCallback);
+	}
+
+	private void subscribeConfigurationTopics() throws ZError {
+		zenohClient.declareSubscriber(
+				KeyExpr.tryFrom(ZenohHelper.getAgentConfigurationsTopicsAll(getRuntimeUniqueId())),
+				configurationCallback);
+
+	}
+
+	private void subscribeInputDataTopics() throws ZError {
+		zenohClient.declareSubscriber(
+				KeyExpr.tryFrom(ZenohHelper.getAgentInputDataTopicsSubscriptionAll(getRuntimeUniqueId())),
+				inputTelemetryCallback);
 	}
 
 }

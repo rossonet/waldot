@@ -29,6 +29,12 @@ import org.eclipse.milo.opcua.stack.core.types.DefaultDataTypeManager;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadDetails;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadResult;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadValueId;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateDetails;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateResult;
 import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +58,13 @@ import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.api.strategies.BootstrapStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
+import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.jexl.RulesCmdFunction;
@@ -68,7 +76,9 @@ import net.rossonet.waldot.rules.DefaultRulesEngine;
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
 	private AgentRegisterAnonymousValidator agentAnonymousValidator;
+
 	private AgentRegisterUsernameIdentityValidator agentIdentityValidator;
+
 	private final AgentManagementStrategy agentManagementStrategy;
 	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
 	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
@@ -80,25 +90,28 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final DataTypeManager dictionaryManager;
 	private WaldotGraphComputerView graphComputerView;
 	private final WaldotGraph gremlin;
+	private final HistoryStrategy historyStrategy;
 	private final RulesCmdFunction jexlWaldotCommandHelper;
 	private final List<NamespaceListener> listeners = new ArrayList<>();
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-
 	private final Graph.Variables opcGraphVariables;
+
 	private final MiloStrategy opcMappingStrategy;
 	private final Set<PluginListener> plugins = new HashSet<>();
 	private final WaldotRulesEngine rulesEngine;
 	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
 	private final SubscriptionModel subscriptionModel;
+
 	private WaldotOpcUaServer waldotOpcUaServer;
 
 	public HomunculusNamespace(final WaldotOpcUaServer server, final MiloStrategy opcMappingStrategy,
-			final ConsoleStrategy consoleStrategy, final DefaultHomunculusConfiguration configuration,
-			final BootstrapStrategy bootstrapProcedureStrategy, final AgentManagementStrategy agentManagementStrategy,
-			final String bootstrapUrl) {
+			BaseHistoryStrategy historyStrategy, final ConsoleStrategy consoleStrategy,
+			final DefaultHomunculusConfiguration configuration, final BootstrapStrategy bootstrapProcedureStrategy,
+			final AgentManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
+		this.historyStrategy = historyStrategy;
 		this.consoleStrategy = consoleStrategy;
 		this.jexlWaldotCommandHelper = new RulesCmdFunction(this);
 		this.configuration = configuration;
@@ -124,9 +137,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public void addAssetAmministrationNode(UaNode assetManagerComponent) {
+	public void addAssetAgentNode(UaNode assetManagerComponent) {
 		getStorageManager().addNode(assetManagerComponent);
-		opcMappingStrategy.getAssetRootFolderNode().addOrganizes(assetManagerComponent);
+		agentManagementStrategy.getAssetAgentsFolderNode().addOrganizes(assetManagerComponent);
 	}
 
 	private void addBaseCommands() {
@@ -402,6 +415,18 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
+	public List<HistoryReadResult> historyRead(HistoryReadContext context, HistoryReadDetails readDetails,
+			TimestampsToReturn timestamps, List<HistoryReadValueId> readValueIds) {
+		return historyStrategy.historyRead(context, readDetails, timestamps, readValueIds);
+	}
+
+	@Override
+	public List<HistoryUpdateResult> historyUpdate(HistoryUpdateContext context,
+			List<HistoryUpdateDetails> updateDetails) {
+		return historyStrategy.historyUpdate(context, updateDetails);
+	}
+
+	@Override
 	public boolean inComputerMode() {
 		return null != getGraphComputerView();
 	}
@@ -437,18 +462,22 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	public void onDataItemsCreated(final List<DataItem> dataItems) {
 		subscriptionModel.onDataItemsCreated(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsCreated(dataItems));
+		historyStrategy.onDataItemsCreated(dataItems);
 	}
 
 	@Override
 	public void onDataItemsDeleted(final List<DataItem> dataItems) {
 		subscriptionModel.onDataItemsDeleted(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsDeleted(dataItems));
+		historyStrategy.onDataItemsDeleted(dataItems);
 	}
 
 	@Override
 	public void onDataItemsModified(final List<DataItem> dataItems) {
 		subscriptionModel.onDataItemsModified(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsModified(dataItems));
+		historyStrategy.onDataItemsModified(dataItems);
+		subscriptionModel.onDataItemsModified(dataItems);
 	}
 
 	@Override
@@ -460,7 +489,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public void opcuaUpdateEvent(final UaNode sourceNode) {
 		opcMappingStrategy.updateEventGenerator(sourceNode);
-
+		historyStrategy.opcuaUpdateEvent(sourceNode);
 	}
 
 	@Override

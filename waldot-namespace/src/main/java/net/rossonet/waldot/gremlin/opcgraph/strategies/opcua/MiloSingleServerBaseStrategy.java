@@ -26,7 +26,6 @@ import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
@@ -74,7 +73,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 
 	private final MiloSingleServerBaseFolderManager folderManager = new MiloSingleServerBaseFolderManager(this);
 
-	private UaObjectNode interfaceRootNode;
+	private UaFolderNode interfaceRootNode;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private Graph.Variables opcGraphVariables;
 	private UaFolderNode rootNode;
@@ -206,7 +205,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			if (!directories.containsKey(actual)) {
 				directories.put(actual,
 						new UaFolderNode(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(actual),
-								waldotNamespace.generateQualifiedName(actual), LocalizedText.english(actual)));
+								waldotNamespace.generateQualifiedName(components[counter].trim()),
+								LocalizedText.english(components[counter].trim())));
 				waldotNamespace.getStorageManager().addNode(directories.get(actual));
 				final UaFolderNode uaFolderNode = directories.get(actual);
 				if (counter == 0) {
@@ -653,14 +653,23 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				waldotNamespace.generateNodeId(waldotNamespace.getConfiguration().getRootNodeId()),
 				waldotNamespace.generateQualifiedName(waldotNamespace.getConfiguration().getRootNodeBrowseName()),
 				LocalizedText.english(waldotNamespace.getConfiguration().getRootNodeDisplayName()));
-
-		interfaceRootNode = new UaObjectNode(waldotNamespace.getOpcUaNodeContext(),
+		/*
+		 * interfaceRootNode = new UaObjectNode(waldotNamespace.getOpcUaNodeContext(),
+		 * waldotNamespace.generateNodeId(waldotNamespace.getConfiguration().
+		 * getInterfaceRootNodeId()), waldotNamespace
+		 * .generateQualifiedName(waldotNamespace.getConfiguration().
+		 * getInterfaceRootNodeBrowseName()),
+		 * LocalizedText.english(waldotNamespace.getConfiguration().
+		 * getInterfaceRootNodeDisplayName()),
+		 * LocalizedText.english(waldotNamespace.getConfiguration().
+		 * getInterfaceRootNodeDisplayName()), UInteger.MIN, UInteger.MIN);
+		 */
+		interfaceRootNode = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
 				waldotNamespace.generateNodeId(waldotNamespace.getConfiguration().getInterfaceRootNodeId()),
 				waldotNamespace
 						.generateQualifiedName(waldotNamespace.getConfiguration().getInterfaceRootNodeBrowseName()),
-				LocalizedText.english(waldotNamespace.getConfiguration().getInterfaceRootNodeDisplayName()),
-				LocalizedText.english(waldotNamespace.getConfiguration().getInterfaceRootNodeDisplayName()),
-				UInteger.MIN, UInteger.MIN);
+				LocalizedText.english(waldotNamespace.getConfiguration().getInterfaceRootNodeDisplayName()));
+
 		interfaceRootNode.addReference(new Reference(interfaceRootNode.getNodeId(), Identifiers.HasTypeDefinition,
 				MiloSingleServerBaseReferenceNodeBuilder.interfaceTypeNode.getNodeId().expanded(), true));
 		assetRootNode = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
@@ -680,6 +689,43 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				Identifiers.ObjectsFolder.expanded(), false));
 		folderManager.initialize();
 		return waldotNamespace;
+	}
+
+	private void linkCommandDirectoryStructure(AbstractOpcCommand command) {
+		final Map<String, UaFolderNode> commandDirectories = folderManager.getCommandDirectories();
+		if (!commandDirectories.containsKey(command.getDirectory())) {
+			final String[] components = command.getDirectory().split("/");
+			String actual = null;
+			String last = actual;
+			for (int counter = 0; counter < components.length; counter++) {
+				actual = (actual == null ? "" : (actual + "/")) + components[counter].trim();
+				if (!commandDirectories.containsKey(actual)) {
+					commandDirectories.put(actual,
+							new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
+									waldotNamespace.generateNodeId(actual),
+									waldotNamespace.generateQualifiedName(components[counter].trim()),
+									LocalizedText.english(components[counter].trim())));
+					waldotNamespace.getStorageManager().addNode(commandDirectories.get(actual));
+					final UaFolderNode uaFolderNode = commandDirectories.get(actual);
+					if (counter == 0) {
+						// first component, add the directory to the root folder
+						interfaceRootNode.addOrganizes(uaFolderNode);
+					} else {
+						// not the first or last component, add the directory to the previous one
+						commandDirectories.get(last).addOrganizes(uaFolderNode);
+					}
+				}
+
+				if (counter == components.length - 1) {
+					// last component, add the command to the directory
+					commandDirectories.get(actual).addComponent(command);
+				}
+				last = actual;
+			}
+		} else {
+			commandDirectories.get(command.getDirectory()).addComponent(command);
+		}
+
 	}
 
 	@Override
@@ -759,7 +805,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	@Override
 	public void registerCommand(final WaldotCommand command) {
 		waldotNamespace.getStorageManager().addNode((AbstractOpcCommand) command);
-		interfaceRootNode.addComponent((AbstractOpcCommand) command);
+		linkCommandDirectoryStructure((AbstractOpcCommand) command);
 
 	}
 

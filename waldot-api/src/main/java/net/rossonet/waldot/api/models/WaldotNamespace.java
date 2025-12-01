@@ -44,7 +44,7 @@ import net.rossonet.waldot.opc.WaldotOpcUaServer;
  */
 public interface WaldotNamespace extends AutoCloseable {
 
-	void addAssetAmministrationNode(UaNode node);
+	void addAssetAgentNode(UaNode node);
 
 	WaldotEdge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex, String label, Object[] keyValues);
 

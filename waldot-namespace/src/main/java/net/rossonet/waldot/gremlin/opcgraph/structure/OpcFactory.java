@@ -42,6 +42,7 @@ import net.rossonet.waldot.gremlin.opcgraph.strategies.agent.BaseAgentManagement
 import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileBootstrapStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.BaseConsoleStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
 import net.rossonet.waldot.namespaces.HomunculusNamespace;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
@@ -273,7 +274,7 @@ public final class OpcFactory {
 			}
 		});
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),
-				new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
+				new BaseHistoryStrategy(), new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
 				new BaseAgentManagementStrategy(), "file:///tmp/boot.conf");
 		waldot.startup(namespace).get();
 		logger.info("Waldot OPC-UA Server started");

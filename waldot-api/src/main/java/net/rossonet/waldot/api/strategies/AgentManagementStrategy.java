@@ -21,6 +21,8 @@ public interface AgentManagementStrategy {
 
 	void generateAssetFolders(UaFolderNode assetRootNode);
 
+	UaFolderNode getAssetAgentsFolderNode();
+
 	void initialize(WaldotNamespace waldotNamespace);
 
 	AnonymousIdentity registerNewAgentForApproval(Session session);

@@ -8,14 +8,15 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 
 public class MiloSingleServerBaseFolderManager {
 
+	private final Map<String, UaFolderNode> commandDirectoriesAndObjects = new HashMap<>();
 	private UaFolderNode edgesFolderNode;
 	private final MiloSingleServerBaseStrategy miloSingleServerBaseV0Strategy;
 	private final Map<String, UaFolderNode> rulesDirectories = new HashMap<>();
 	private UaFolderNode rulesFolderNode;
+
 	private UaFolderNode variablesFolderNode;
 
 	private final Map<String, UaFolderNode> vertexDirectories = new HashMap<>();
-
 	private UaFolderNode verticesFolderNode;
 
 	public MiloSingleServerBaseFolderManager(MiloSingleServerBaseStrategy miloSingleServerBaseV0Strategy) {
@@ -24,36 +25,42 @@ public class MiloSingleServerBaseFolderManager {
 
 	private UaFolderNode createEdgesFolder() {
 		return new UaFolderNode(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(
-						miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier().toString() + "/Edges"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
+								.toString() + "/Edges"),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Edges"),
 				LocalizedText.english("Gremlin Edges"));
 	}
 
 	private UaFolderNode createRulesFolder() {
 		return new UaFolderNode(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(
-						miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier().toString() + "/Rules"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
+								.toString() + "/Rules"),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Rules"),
 				LocalizedText.english("WaldoOT Rules"));
 	}
 
 	private UaFolderNode createVariablesFolder() {
 		return new UaFolderNode(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(
-						miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier().toString()
-								+ "/Variables"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
+								.toString() + "/Variables"),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Variables"),
 				LocalizedText.english("Gremlin Variables"));
 	}
 
 	private UaFolderNode createVerticesFolder() {
 		return new UaFolderNode(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(
-						miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier().toString()
-								+ "/Vertices"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
+								.toString() + "/Vertices"),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Vertices"),
 				LocalizedText.english("Gremlin Vertices"));
+	}
+
+	public Map<String, UaFolderNode> getCommandDirectories() {
+		return this.commandDirectoriesAndObjects;
 	}
 
 	public UaFolderNode getEdgesFolderNode() {

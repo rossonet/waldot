@@ -35,6 +35,11 @@ public class QueryCommand extends AbstractOpcCommand {
 	}
 
 	@Override
+	public String getDirectory() {
+		return "general";
+	}
+
+	@Override
 	public String[] runCommand(InvocationContext invocationContext, String[] inputValues) {
 		final String[] output = new String[2];
 		try {

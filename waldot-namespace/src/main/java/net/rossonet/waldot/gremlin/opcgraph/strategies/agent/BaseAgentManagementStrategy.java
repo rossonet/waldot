@@ -208,6 +208,7 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	private UaObjectNode agentLifeCycleRecord;
 	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
 	private UaFolderNode assetRootNode;
+	private UaFolderNode clientFolder;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private UaObjectNode managementRecord;
 	private UaMethodNode provisioningAddTokenMethod;
@@ -215,10 +216,10 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	private UaFolderNode provisioningFolder;
 	private UaMethodNode provisioningRpcManualRequest;
 	private UaFolderNode rpcFolder;
+
 	private final Map<NodeId, SessionData> sessions = new HashMap<>();
 
 	private final Map<String, ProvisioningToken> tokenSecrets = new HashMap<>();
-
 	private WaldotNamespace waldotNamespace;
 
 	@Override
@@ -266,9 +267,10 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	}
 
 	private void generateAgentFolder() {
-		agentFolder = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId("agents"),
+		agentFolder = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
+				waldotNamespace.generateNodeId("asset.agents"),
 				waldotNamespace.generateQualifiedName("Agent Management"),
-				LocalizedText.english("Agents Management Instrumentation"));
+				LocalizedText.english("Agents Management folder"));
 		waldotNamespace.getStorageManager().addNode(agentFolder);
 		assetRootNode.addOrganizes(agentFolder);
 	}
@@ -276,13 +278,25 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	@Override
 	public void generateAssetFolders(final UaFolderNode assetRootNode) {
 		this.assetRootNode = assetRootNode;
+		generateAgentFolder();
+		generateClientFolder();
 		generateProvisioningFolder();
 		generateRpcFolder();
+
 		generateRpcProvisioningManualRequest();
 		generateRpcProvisioningTokenRequest();
 		generateAddProvisioningTokenMethod();
 		generateDeleteProvisioningTokenMethod();
-		generateAgentFolder();
+
+	}
+
+	private void generateClientFolder() {
+		clientFolder = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
+				waldotNamespace.generateNodeId("asset.clients"),
+				waldotNamespace.generateQualifiedName("Client Management"),
+				LocalizedText.english("Clients Management folder"));
+		waldotNamespace.getStorageManager().addNode(clientFolder);
+		assetRootNode.addOrganizes(clientFolder);
 	}
 
 	private void generateDeleteProvisioningTokenMethod() {
@@ -352,7 +366,7 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 				waldotNamespace.generateQualifiedName("Provisioning Management"),
 				LocalizedText.english("Provisioning Management Instrumentation"));
 		waldotNamespace.getStorageManager().addNode(provisioningFolder);
-		assetRootNode.addOrganizes(provisioningFolder);
+		clientFolder.addOrganizes(provisioningFolder);
 		final NodeId nodeId = waldotNamespace.generateNodeId("token-management");
 		managementRecord = new UaObjectNode(waldotNamespace.getOpcUaNodeContext(), nodeId,
 				waldotNamespace.generateQualifiedName("Token Management"), LocalizedText.english("Token Management"),
@@ -389,7 +403,7 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 				waldotNamespace.generateQualifiedName("Agent RPC folder"),
 				LocalizedText.english("Folder for Agent RPC methods"));
 		waldotNamespace.getStorageManager().addNode(rpcFolder);
-		assetRootNode.addOrganizes(rpcFolder);
+		clientFolder.addOrganizes(rpcFolder);
 		final NodeId nodeId = waldotNamespace.generateNodeId("lifecycle");
 		agentLifeCycleRecord = new UaObjectNode(waldotNamespace.getOpcUaNodeContext(), nodeId,
 				waldotNamespace.generateQualifiedName("Life Cycle Manager"),
@@ -480,6 +494,11 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 		provisioningRpcManualRequest.addReference(new Reference(provisioningRpcManualRequest.getNodeId(),
 				Identifiers.HasModellingRule, Identifiers.ModellingRule_Mandatory.expanded(), true));
 		rpcFolder.addComponent(provisioningRpcManualRequest);
+	}
+
+	@Override
+	public UaFolderNode getAssetAgentsFolderNode() {
+		return agentFolder;
 	}
 
 	private Identity getSessionIdentity(final Session session) {

@@ -93,6 +93,11 @@ public class AboutCommand extends AbstractOpcCommand {
 	}
 
 	@Override
+	public String getDirectory() {
+		return "general";
+	}
+
+	@Override
 	public String[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
 		return aboutReplyList.toArray(new String[0]);
 	}
