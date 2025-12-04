@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  influxdb:
+    hostname: influxdb
+    image: influxdb
+    restart: always
+    volumes:
+      - ./influxdb:/var/lib/influxdb
+    networks:
+      - zenoh-internal
+
+  zenoh:
+    image: rossonet/zenohd:latest
+    restart: always
+    volumes:
+      - ./zenoh:/store
+    ports:
+      - 7447:7447/tcp
+      - 7446:7446/udp
+      - 8000:8000
+    environment:
+      - RUST_LOG=debug
+    networks:
+      - zenoh-internal
+
+networks:
+  zenoh-internal:
+    driver: bridge
