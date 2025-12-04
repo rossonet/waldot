@@ -7,6 +7,7 @@ experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org
 ## Docker image
 
 [WaldOT on DockerHub](https://hub.docker.com/r/rossonet/waldot)
+
 [Zenoh router on DockerHub](https://hub.docker.com/r/rossonet/zenohd)
 
 ## Maven
