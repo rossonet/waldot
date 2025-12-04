@@ -6,7 +6,8 @@ experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org
 
 ## Docker image
 
-[Docker Hub page](https://hub.docker.com/r/rossonet/waldot)
+[WaldOT on DockerHub](https://hub.docker.com/r/rossonet/waldot)
+[Zenoh router on DockerHub](https://hub.docker.com/r/rossonet/zenohd)
 
 ## Maven
 
@@ -19,9 +20,9 @@ experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org
 
 ## GitHub Actions
 
-[![WaldOT Library Test](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml)
+[![WaldOT Library Test](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml)
 [![Build WaldOT shadowJar](https://github.com/rossonet/waldot/actions/workflows/build-shadowjar-app.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/build-shadowjar-app.yml)
-[![Build and publish WaldOT docker image to Docker Hub](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml/badge.svg?branch=master)](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml)
+[![Build and publish WaldOT docker image to Docker Hub](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml)
 [![Publish Java artifacts to Maven Central](https://github.com/rossonet/waldot/actions/workflows/publish-to-maven.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/publish-to-maven.yml)
 
 ## Reference

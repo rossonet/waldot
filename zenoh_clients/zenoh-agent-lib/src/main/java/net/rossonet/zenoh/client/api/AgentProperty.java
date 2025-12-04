@@ -1,5 +1,6 @@
 package net.rossonet.zenoh.client.api;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,10 +12,12 @@ import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.dtdl.PropertyObject;
 import net.rossonet.waldot.dtdl.Schema;
 import net.rossonet.waldot.dtdl.Unit;
-import net.rossonet.zenoh.annotation.AgentController;
+import net.rossonet.zenoh.annotation.AnnotatedAgentController;
 import net.rossonet.zenoh.annotation.ExportedParameter;
 
-public class AgentProperty {
+public class AgentProperty implements Serializable {
+
+	private static final long serialVersionUID = 6733808400358705107L;
 
 	public static Map<String, AgentProperty> fromDtml(DtdlHandler dtmlHandler) {
 		final Map<String, AgentProperty> properties = new HashMap<>();
@@ -109,13 +112,13 @@ public class AgentProperty {
 		return properties;
 	}
 
-	private final AgentController agentController;
+	private final AnnotatedAgentController agentController;
 	private final ExportedParameter annotation;
 
 	private final String fieldName;
 	private final String propertyName;
 
-	public AgentProperty(String propertyName, AgentController agentController, String fieldName,
+	public AgentProperty(String propertyName, AnnotatedAgentController agentController, String fieldName,
 			ExportedParameter annotation) {
 		this.propertyName = propertyName;
 		this.agentController = agentController;
@@ -149,7 +152,7 @@ public class AgentProperty {
 		return propertyObject;
 	}
 
-	public AgentController getAgentController() {
+	public AnnotatedAgentController getAgentController() {
 		return agentController;
 	}
 

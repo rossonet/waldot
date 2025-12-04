@@ -13,6 +13,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.zenoh.client.ZenohClientFacade;
 import net.rossonet.zenoh.controller.AgentLifeCycleManager;
 import net.rossonet.zenoh.impl.BaseAgentStore;
+import net.rossonet.zenoh.impl.ZenohHistoryStrategy;
 
 /**
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
@@ -21,6 +22,8 @@ import net.rossonet.zenoh.impl.BaseAgentStore;
 public class WaldotZenohPlugin implements AutoCloseable, PluginListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(WaldotZenohPlugin.class);
+
+	private ZenohHistoryStrategy historyStrategy;
 
 	private AgentLifeCycleManager lifeCycleManager;
 
@@ -38,6 +41,7 @@ public class WaldotZenohPlugin implements AutoCloseable, PluginListener {
 		final UaFolderNode zenohFolder = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
 				waldotNamespace.generateNodeId("asset.zenoh_folder"), waldotNamespace.generateQualifiedName("Zenoh"),
 				LocalizedText.english("Zenoh BUS agent administration folder"));
+		final ZenohClientFacade zenohClient = new ZenohClientFacade();
 		lifeCycleManager = new AgentLifeCycleManager(waldotNamespace.getGremlinGraph(),
 				waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId("asset.zenoh_bus_manager"),
 				waldotNamespace.generateQualifiedName("Zenoh Event Manager"),
@@ -46,10 +50,15 @@ public class WaldotZenohPlugin implements AutoCloseable, PluginListener {
 				UInteger.valueOf(0), UInteger.valueOf(0), //
 				UByte.valueOf(0), 1L, //
 				new BaseAgentStore(), //
-				new ZenohClientFacade());
+				zenohClient);
 		waldotNamespace.getStorageManager().addNode(lifeCycleManager);
 		zenohFolder.addOrganizes(lifeCycleManager);
 		waldotNamespace.addAssetAgentNode(zenohFolder);
+		if (waldotNamespace.getHistoryStrategy() instanceof ZenohHistoryStrategy) {
+			this.historyStrategy = (ZenohHistoryStrategy) waldotNamespace.getHistoryStrategy();
+			historyStrategy.initialize(lifeCycleManager);
+			logger.info("ZenohHistoryStrategy initialized in WaldotZenohPlugin");
+		}
 	}
 
 }

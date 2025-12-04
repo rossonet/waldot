@@ -19,11 +19,24 @@ public interface AgentControlHandler extends AutoCloseable {
 			}
 			""";
 
-	default Map<String, AgentCommand> getCommands() {
+	default void addConfigurationObjects(String name, JSONObject configurationObject) {
+	}
+
+	default void delConfigurationObjects(String name) {
+	}
+
+	default void executeCommand(AgentCommand agentCommand, JSONObject message) {
+	}
+
+	default Map<String, AgentCommand> getCommandMetadatas() {
 		return new HashMap<>();
 	}
 
-	default Map<String, AgentConfigurationObject> getConfigurationObjects() {
+	default Map<String, AgentConfigurationObject> getConfigurationObjectMetadatas() {
+		return new HashMap<>();
+	}
+
+	default Map<String, Object> getConfigurationObjects() {
 		return new HashMap<>();
 	}
 
@@ -52,6 +65,9 @@ public interface AgentControlHandler extends AutoCloseable {
 	}
 
 	default void notifyZenohSessionCreated(ZenohId zid, List<ZenohId> routersZid, List<ZenohId> peersZid) {
+	}
+
+	default void updateConfigurationObjects(String name, JSONObject configurationObject) {
 	}
 
 }

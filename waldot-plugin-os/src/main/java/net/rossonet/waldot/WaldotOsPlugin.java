@@ -54,11 +54,12 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	private static final Long DEFAULT_MIN_VALUE_FIELD = 0L;
 	public static final long DEFAULT_UPDATE_DELAY = 20000;// 120_000;
 	public static final String DELAY_FIELD = "Delay";
+	public static boolean ENABLE_EXEC_COMMAND = false;
 	private final static ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 	private final static Logger logger = LoggerFactory.getLogger(WaldotOsPlugin.class);
 	public static final String MAX_VALUE_FIELD = "Max";
-	public static final String MIN_VALUE_FIELD = "Min";
 
+	public static final String MIN_VALUE_FIELD = "Min";
 	public static final String TIMER_OBJECT_TYPE_LABEL = "timer";
 
 	private UaObjectTypeNode dataGeneratorTypeNode;
@@ -296,7 +297,11 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 
 	@Override
 	public Collection<WaldotCommand> getCommands() {
-		return Arrays.asList(execCommand, osCheckDelayCommand);
+		if (ENABLE_EXEC_COMMAND) {
+			return Arrays.asList(execCommand, osCheckDelayCommand);
+		} else {
+			return Arrays.asList(osCheckDelayCommand);
+		}
 	}
 
 	private String getKeyValuesProperty(final Object[] propertyKeyValues, final String label) {
@@ -335,7 +340,9 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 		this.waldotNamespace = waldotNamespace;
 		generateTimerTypeNode();
 		createDataGeneratorTypeNode();
-		execCommand = new ExecCommand(waldotNamespace);
+		if (ENABLE_EXEC_COMMAND) {
+			execCommand = new ExecCommand(waldotNamespace);
+		}
 		osCheckDelayCommand = new OsCheckDelayCommand(waldotNamespace, this);
 		osWrapper = new OsDataWrapper(waldotNamespace, this);
 		osWrapper.popolateOsData();

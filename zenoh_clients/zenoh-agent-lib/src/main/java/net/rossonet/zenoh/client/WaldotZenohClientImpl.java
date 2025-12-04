@@ -1,5 +1,7 @@
 package net.rossonet.zenoh.client;
 
+import static io.zenoh.Config.loadDefault;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +11,7 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.zenoh.Config;
 import io.zenoh.Session;
 import io.zenoh.exceptions.ZError;
 import io.zenoh.handlers.Callback;
@@ -27,6 +30,7 @@ import net.rossonet.zenoh.client.api.WaldotZenohClient;
 
 public class WaldotZenohClientImpl implements WaldotZenohClient {
 
+	public static boolean debugEnabled = false;
 	private final int apiVersion;
 	private final Callback<Sample> configurationCallback = new Callback<Sample>() {
 
@@ -45,7 +49,6 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	};
 	private final Map<String, AgentConfigurationObject> configurationObjects = new HashMap<>();
 	private final AgentControlHandler control;
-
 	private final Callback<Sample> controlCallback = new Callback<Sample>() {
 
 		@Override
@@ -61,6 +64,7 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 		}
 
 	};
+
 	private final Set<AgentErrorHandler> errorCallbacks = new HashSet<>();
 	private final Callback<Sample> inputTelemetryCallback = new Callback<Sample>() {
 
@@ -78,17 +82,33 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 
 	};
 	private boolean needRunning = false;
+	private final Callback<Sample> parameterCallback = new Callback<Sample>() {
+
+		@Override
+		public void run(Sample sample) {
+			JSONObject payloadJson = null;
+			try {
+				payloadJson = new JSONObject(sample.getPayload());
+			} catch (final Exception e) {
+				elaborateErrorMessage("Error parsing parameter message payload: " + sample.getPayload(), e);
+			}
+			final String topic = sample.getKeyExpr().toString();
+			elaborateParameterMessage(topic, payloadJson);
+		}
+
+	};
 	private final Map<String, AgentCommand> registerCommands = new HashMap<>();
 	private boolean registered = false;
 	private final String runtimeUniqueId;
 	private Session zenohClient;
+	private Config zenohConfig;
 
 	public WaldotZenohClientImpl(String runtimeUniqueId, AgentControlHandler control) {
 		this.runtimeUniqueId = runtimeUniqueId;
 		this.control = control;
 		apiVersion = control.getVersionApi();
-		registerCommands.putAll(control.getCommands());
-		configurationObjects.putAll(control.getConfigurationObjects());
+		registerCommands.putAll(control.getCommandMetadatas());
+		configurationObjects.putAll(control.getConfigurationObjectMetadatas());
 	}
 
 	@Override
@@ -102,7 +122,11 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	}
 
 	private Session createClient() throws ZError {
-		final Session session = ZenohHelper.createClient();
+		if (zenohConfig == null) {
+			zenohConfig = loadDefault();
+		}
+
+		final Session session = ZenohHelper.createClient(zenohConfig, debugEnabled);
 		final SessionInfo info = session.info();
 		control.notifyZenohSessionCreated(info.zid(), info.routersZid(), info.peersZid());
 		return session;
@@ -117,9 +141,12 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 		return discoveryMessage;
 	}
 
-	protected void elaborateConfigurationObjectMessage(String topic, JSONObject payloadJson) {
+	protected void elaborateConfigurationObjectMessage(String topic, JSONObject payload) {
+		final String name;
 		// TODO elabora il messaggio di configurazione in ingresso
-
+		// control.addConfigurationObjects(name,payload);
+		// control.delConfigurationObjects(name);
+		// control.updateConfigurationObjects(name,payload);
 	}
 
 	private void elaborateControlMessage(String topic, JSONObject message) {
@@ -151,7 +178,7 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 					break;
 				default:
 					if (registerCommands.containsKey(command)) {
-						registerCommands.get(command).executeCommand(message);
+						control.executeCommand(registerCommands.get(command), message);
 					} else {
 						elaborateErrorMessage("Unknown command received: " + command, null);
 					}
@@ -168,8 +195,13 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 
 	}
 
-	protected void elaborateInputTelemetryMessage(String topic, JSONObject payloadJson) {
+	protected void elaborateInputTelemetryMessage(String topic, JSONObject payload) {
 		// TODO elabora il messaggio di telemetria in ingresso
+
+	}
+
+	protected void elaborateParameterMessage(String topic, JSONObject payload) {
+		// TODO elabora il messaggio di parametro in ingresso
 
 	}
 
@@ -203,6 +235,10 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 				return Status.ERROR;
 			}
 		}
+	}
+
+	public Config getZenohConfig() {
+		return zenohConfig;
 	}
 
 	@Override
@@ -258,6 +294,10 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 		publisher.put(discoveryMessage.toString(), ZenohHelper.getDiscoveryPutOptions());
 	}
 
+	public void setZenohConfig(Config zenohConfig) {
+		this.zenohConfig = zenohConfig;
+	}
+
 	@Override
 	public void start() throws WaldotZenohException {
 		try {
@@ -267,6 +307,7 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 			subscribeCommandsTopic();
 			subscribeInputDataTopics();
 			subscribeConfigurationTopics();
+			subscribeParameterTopics();
 			needRunning = true;
 		} catch (final ZError e) {
 			throw new WaldotZenohException("Error starting WaldotZenohClientImpl", e);
@@ -299,6 +340,12 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 		zenohClient.declareSubscriber(
 				KeyExpr.tryFrom(ZenohHelper.getAgentInputDataTopicsSubscriptionAll(getRuntimeUniqueId())),
 				inputTelemetryCallback);
+	}
+
+	private void subscribeParameterTopics() throws ZError {
+		zenohClient.declareSubscriber(KeyExpr.tryFrom(ZenohHelper.getAgentParametersTopicsAll(getRuntimeUniqueId())),
+				parameterCallback);
+
 	}
 
 }

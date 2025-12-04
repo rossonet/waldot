@@ -2,14 +2,14 @@ package net.rossonet.zenoh.acme;
 
 import java.util.List;
 
-import net.rossonet.zenoh.annotation.AgentController;
+import net.rossonet.zenoh.annotation.AnnotatedAgentController;
 import net.rossonet.zenoh.annotation.ExportedCommand;
 import net.rossonet.zenoh.annotation.ExportedController;
 import net.rossonet.zenoh.annotation.ExportedMethodParameter;
 import net.rossonet.zenoh.annotation.ExportedParameter;
 
 @ExportedController(enabled = true)
-public class AcmeController implements AgentController {
+public class AcmeController implements AnnotatedAgentController {
 
 	public enum SimulationSpeed {
 		FAST, NORMAL, SLOW, VERY_FAST, VERY_SLOW
@@ -52,6 +52,18 @@ public class AcmeController implements AgentController {
 
 	public boolean isEnableSimulation() {
 		return enableSimulation;
+	}
+
+	@Override
+	public void notifyObjectConfigurationChanged(String objectName, ConfigurationChangeType changeType) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void notifyParameterChanged(String parameterName) {
+		// TODO Auto-generated method stub
+
 	}
 
 	public void setEnableSimulation(boolean enableSimulation) {

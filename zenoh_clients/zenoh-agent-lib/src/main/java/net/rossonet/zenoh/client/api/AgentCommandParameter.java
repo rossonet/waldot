@@ -1,5 +1,6 @@
 package net.rossonet.zenoh.client.api;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
@@ -9,7 +10,9 @@ import org.json.JSONObject;
 
 import net.rossonet.zenoh.annotation.ExportedMethodParameter;
 
-public class AgentCommandParameter {
+public class AgentCommandParameter implements Serializable {
+
+	private static final long serialVersionUID = 6972239985896868568L;
 
 	public static AgentCommandParameter fromJsonObject(JSONObject paramObject) {
 		final String parameterNameCandidate = paramObject.getString("name");

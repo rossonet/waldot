@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
 import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
@@ -256,6 +257,16 @@ public final class OpcFactory {
 	}
 
 	public static WaldotGraph getOpcGraph() throws InterruptedException, ExecutionException {
+		return getOpcGraph(new BaseHistoryStrategy());
+	};
+
+	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {
+		// TODO verificare come usare la configurazione originale
+		return getOpcGraph();
+	}
+
+	public static WaldotGraph getOpcGraph(HistoryStrategy historyStrategy)
+			throws InterruptedException, ExecutionException {
 		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
 		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		final WaldotOpcUaServer waldot = new WaldotOpcUaServer(configuration, serverConfiguration,
@@ -274,16 +285,11 @@ public final class OpcFactory {
 			}
 		});
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),
-				new BaseHistoryStrategy(), new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
+				historyStrategy, new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
 				new BaseAgentManagementStrategy(), "file:///tmp/boot.conf");
 		waldot.startup(namespace).get();
 		logger.info("Waldot OPC-UA Server started");
 		return waldot.getGremlinGraph();
-	}
-
-	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {
-		// TODO verificare come usare la configurazione originale
-		return getOpcGraph();
 	}
 
 	private OpcFactory() {

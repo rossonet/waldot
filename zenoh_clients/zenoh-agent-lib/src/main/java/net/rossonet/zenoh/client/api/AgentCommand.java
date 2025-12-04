@@ -1,5 +1,6 @@
 package net.rossonet.zenoh.client.api;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,10 +14,12 @@ import net.rossonet.waldot.dtdl.CommandPayload;
 import net.rossonet.waldot.dtdl.DigitalTwinModelIdentifier;
 import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.dtdl.Schema;
-import net.rossonet.zenoh.annotation.AgentController;
+import net.rossonet.zenoh.annotation.AnnotatedAgentController;
 import net.rossonet.zenoh.annotation.ExportedCommand;
 
-public class AgentCommand {
+public class AgentCommand implements Serializable {
+
+	private static final long serialVersionUID = 4027473144192607112L;
 
 	public static Map<String, AgentCommand> fromDtml(DtdlHandler dtmlHandler) {
 		final Map<String, AgentCommand> commands = new HashMap<>();
@@ -63,7 +66,7 @@ public class AgentCommand {
 		return commands;
 	}
 
-	private final AgentController agentControl;
+	private final AnnotatedAgentController agentControl;
 
 	private final ExportedCommand annotation;
 
@@ -75,7 +78,7 @@ public class AgentCommand {
 
 	private final String methodReturnType;
 
-	public AgentCommand(String commandName, AgentController agentControl, String methodName, String methodReturnType,
+	public AgentCommand(String commandName, AnnotatedAgentController agentControl, String methodName, String methodReturnType,
 			ExportedCommand annotation, Set<AgentCommandParameter> commandParameters) {
 		this.commandName = commandName;
 		this.agentControl = agentControl;
@@ -83,10 +86,6 @@ public class AgentCommand {
 		this.annotation = annotation;
 		this.commandParameters = commandParameters;
 		this.methodReturnType = methodReturnType;
-	}
-
-	public void executeCommand(JSONObject message) {
-		// TODO Auto-generated method stub
 	}
 
 	public CommandObject generateDtmlCommandObject() {
@@ -128,7 +127,7 @@ public class AgentCommand {
 		return commandObject;
 	}
 
-	public AgentController getAgentControl() {
+	public AnnotatedAgentController getAgentControl() {
 		return agentControl;
 	}
 

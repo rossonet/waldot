@@ -2,6 +2,7 @@ package net.rossonet.zenoh.agent;
 
 import java.util.UUID;
 
+import io.zenoh.Config;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.zenoh.WaldotZenohException;
 import net.rossonet.zenoh.annotation.AbstractAgentAnnotationControlHandler;
@@ -77,6 +78,8 @@ public class Acme {
 
 	public void startAgent() {
 		try (WaldotZenohClientImpl client = new WaldotZenohClientImpl(runtimeUniqueId, controlHandler)) {
+			final Config config = Config.loadDefault();
+			client.setZenohConfig(config);
 			client.start();
 		} catch (final Exception e) {
 			e.printStackTrace();

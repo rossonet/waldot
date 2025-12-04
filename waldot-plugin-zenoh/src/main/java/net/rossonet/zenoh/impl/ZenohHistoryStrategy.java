@@ -1,14 +1,11 @@
-package net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history;
+package net.rossonet.zenoh.impl;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.server.AddressSpace.HistoryReadContext;
 import org.eclipse.milo.opcua.sdk.server.AddressSpace.HistoryUpdateContext;
 import org.eclipse.milo.opcua.sdk.server.items.DataItem;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
-import org.eclipse.milo.opcua.stack.core.StatusCodes;
-import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadDetails;
 import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadResult;
@@ -18,29 +15,29 @@ import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateResult;
 
 import net.rossonet.waldot.api.annotation.WaldotHistoryStrategy;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
+import net.rossonet.zenoh.controller.AgentLifeCycleManager;
 
 @WaldotHistoryStrategy
-public class BaseHistoryStrategy implements HistoryStrategy {
+public class ZenohHistoryStrategy implements HistoryStrategy {
+
+	private AgentLifeCycleManager lifeCycleManager;
 
 	@Override
 	public List<HistoryReadResult> historyRead(HistoryReadContext context, HistoryReadDetails readDetails,
 			TimestampsToReturn timestamps, List<HistoryReadValueId> readValueIds) {
-
-		final HistoryReadResult result = new HistoryReadResult(
-				new StatusCode(StatusCodes.Bad_HistoryOperationUnsupported), null, null);
-
-		return Collections.nCopies(readValueIds.size(), result);
-
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public List<HistoryUpdateResult> historyUpdate(HistoryUpdateContext context,
 			List<HistoryUpdateDetails> updateDetails) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-		final HistoryUpdateResult result = new HistoryUpdateResult(
-				new StatusCode(StatusCodes.Bad_HistoryOperationUnsupported), null, null);
-
-		return Collections.nCopies(updateDetails.size(), result);
+	public void initialize(AgentLifeCycleManager lifeCycleManager) {
+		this.lifeCycleManager = lifeCycleManager;
 
 	}
 

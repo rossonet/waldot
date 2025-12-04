@@ -111,6 +111,8 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	private final String basePackage;
 
+	private final Map<String, Object> configurations = new HashMap<>();
+
 	private boolean dataFlowActive = false;
 
 	private long dataFlowStartedAtMs;
@@ -121,7 +123,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	private final ConcurrentLinkedQueue<InternalLogMessage> errorQueue = new ConcurrentLinkedQueue<>();
 
-	private AgentController flowController;
+	private AnnotatedAgentController flowController;
 
 	private final ConcurrentLinkedQueue<InternalLogMessage> infoQueue = new ConcurrentLinkedQueue<>();
 
@@ -148,6 +150,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 	private final ConcurrentLinkedQueue<TelemetryUpdate<?>> telemetryQueue = new ConcurrentLinkedQueue<>();
 
 	private int threadPriority;
+
 	private Thread workerThread;
 
 	public AbstractAgentAnnotationControlHandler(String basePackage) {
@@ -223,6 +226,11 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	}
 
+	@Override
+	public void addConfigurationObjects(String name, JSONObject configurationObject) {
+		configurations.put(name, generateConfigurationObjectFromJson(name, configurationObject));
+	}
+
 	private void addPropertyMetadata(ExportedParameterData parameterData) {
 		final String fieldName = parameterData.getField().getName();
 		final String propertyName = parameterData.getName();
@@ -238,23 +246,30 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		shutdown();
 	}
 
+	@Override
+	public void delConfigurationObjects(String name) {
+		configurations.remove(name);
+	}
+
 	private void elaborateAnnotations() throws IOException {
 		final ClassPath cp = ClassPath.from(Thread.currentThread().getContextClassLoader());
 		final Set<Class<?>> configurationObjects = new HashSet<>();
 		for (final ClassPath.ClassInfo classInfo : cp.getTopLevelClassesRecursive(basePackage)) {
 			final Class<?> clazz = classInfo.load();
 			if (clazz.isAnnotationPresent(ExportedController.class)) {
-				infoQueue.offer(new InternalLogMessage("Found AgentController class: " + clazz.getName(), null));
+				infoQueue.offer(
+						new InternalLogMessage("Found AnnotatedAgentController class: " + clazz.getName(), null));
 				if (flowController != null) {
-					errorQueue.offer(
-							new InternalLogMessage("Multiple AgentController classes found. Only one is allowed. Class "
-									+ clazz.getName() + " will be ignored.", null));
+					errorQueue.offer(new InternalLogMessage(
+							"Multiple AnnotatedAgentController classes found. Only one is allowed. Class "
+									+ clazz.getName() + " will be ignored.",
+							null));
 				}
 				try {
-					flowController = (AgentController) clazz.getConstructor().newInstance();
+					flowController = (AnnotatedAgentController) clazz.getConstructor().newInstance();
 				} catch (final Exception e) {
 					errorQueue.offer(new InternalLogMessage(
-							"Error instantiating AgentController from class " + clazz.getName(), e));
+							"Error instantiating AnnotatedAgentController from class " + clazz.getName(), e));
 				}
 
 			}
@@ -265,7 +280,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 			}
 		}
 		if (flowController == null) {
-			errorQueue.offer(new InternalLogMessage("No AgentController class found.", null));
+			errorQueue.offer(new InternalLogMessage("No AnnotatedAgentController class found.", null));
 		} else {
 			elaborateControllerAnnotations();
 		}
@@ -300,7 +315,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	private void elaborateControllerAnnotations() {
 		final Set<ExportedParameterData> annotatedFields = new HashSet<>();
-		final Class<? extends AgentController> classToScan = flowController.getClass();
+		final Class<? extends AnnotatedAgentController> classToScan = flowController.getClass();
 		final Field[] fields = classToScan.getDeclaredFields();
 		for (final Field field : fields) {
 			final Annotation[] annotations = field.getAnnotations();
@@ -347,6 +362,16 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	protected abstract void elaborateTelemetryUpdate(TelemetryUpdate<?> telemetry);
 
+	@Override
+	public void executeCommand(AgentCommand agentCommand, JSONObject message) {
+		// TODO: eseguire il comando su flowController
+	}
+
+	private Object generateConfigurationObjectFromJson(String name, JSONObject configurationObject) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public JSONObject getAcknowledgeMessage() {
 		return acknowledgeMessage;
 	}
@@ -360,13 +385,18 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 	}
 
 	@Override
-	public Map<String, AgentCommand> getCommands() {
+	public Map<String, AgentCommand> getCommandMetadatas() {
 		return registeredCommands;
 	}
 
 	@Override
-	public Map<String, AgentConfigurationObject> getConfigurationObjects() {
+	public Map<String, AgentConfigurationObject> getConfigurationObjectMetadatas() {
 		return registeredConfigurationObjects;
+	}
+
+	@Override
+	public Map<String, Object> getConfigurationObjects() {
+		return configurations;
 	}
 
 	public long getDataFlowStartedAtMs() {
@@ -410,7 +440,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		return dtdlHandler.toDtdlV2Json();
 	}
 
-	public AgentController getFlowController() {
+	public AnnotatedAgentController getFlowController() {
 		return flowController;
 	}
 
@@ -570,6 +600,12 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		}, "queue-thread");
 		workerThread.setPriority(threadPriority);
 		workerThread.start();
+	}
+
+	@Override
+	public void updateConfigurationObjects(String name, JSONObject configurationObject) {
+		// TODO aggiorna la configurazione partendo dal JSON
+
 	}
 
 }

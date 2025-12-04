@@ -64,7 +64,6 @@ import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.jexl.RulesCmdFunction;
@@ -105,7 +104,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private WaldotOpcUaServer waldotOpcUaServer;
 
 	public HomunculusNamespace(final WaldotOpcUaServer server, final MiloStrategy opcMappingStrategy,
-			BaseHistoryStrategy historyStrategy, final ConsoleStrategy consoleStrategy,
+			HistoryStrategy historyStrategy, final ConsoleStrategy consoleStrategy,
 			final DefaultHomunculusConfiguration configuration, final BootstrapStrategy bootstrapProcedureStrategy,
 			final AgentManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
@@ -308,6 +307,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public WaldotGraph getGremlinGraph() {
 		return gremlin;
+	}
+
+	@Override
+	public HistoryStrategy getHistoryStrategy() {
+		return historyStrategy;
 	}
 
 	@Override

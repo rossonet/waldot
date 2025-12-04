@@ -60,10 +60,6 @@ dependencies {
 
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.6'
 
-    //testImplementation 'org.eclipse.digitaltwin.aas4j:aas4j-model:1.0.4'
-    //testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-aasx', version: '1.0.0-milestone-04'
-    //testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-xml', version: '1.0.0-milestone-04'
-    //testImplementation group: 'org.eclipse.digitaltwin.aas4j', name: 'dataformat-json', version: '1.0.0-milestone-04'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'

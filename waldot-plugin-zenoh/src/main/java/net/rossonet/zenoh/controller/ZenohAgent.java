@@ -95,6 +95,7 @@ public class ZenohAgent {
 		subscribeToAgentInternalTelemetryTopic();
 		subscribeToAgentKeepAliveTopic();
 		subscribeToAgentConfigurationsTopic();
+		subscribeToAgentParametersTopic();
 	}
 
 	private void addBaseCommands() {
@@ -182,6 +183,11 @@ public class ZenohAgent {
 
 	protected void elaborateKeepAliveMessage(Sample sample) {
 		// TODO elaborare messaggio di keep alive
+
+	}
+
+	protected void elaborateParameterMessage(Sample sample) {
+		// TODO elaborare messaggio di parametro
 
 	}
 
@@ -334,6 +340,20 @@ public class ZenohAgent {
 				});
 	}
 
+	private void subscribeToAgentParametersTopic() {
+		getAgentLifeCycleManager().getZenohClient().subscribe(ZenohHelper.getAgentParametersTopicsAll(getUniqueId()),
+				new Callback<Sample>() {
+
+					@Override
+					public void run(Sample sample) {
+						elaborateParameterMessage(sample);
+
+					}
+
+				});
+
+	}
+
 	private void subscribeToAgentTelemetryTopic() {
 		getAgentLifeCycleManager().getZenohClient()
 				.subscribe(ZenohHelper.getAgentTelemetryTopicsSubscriptionAll(getUniqueId()), new Callback<Sample>() {
@@ -388,7 +408,6 @@ public class ZenohAgent {
 						updateCommands(AgentCommand.fromDtml(dtmlHandler));
 						updateTelemetryObjects(TelemetryData.fromDtml(dtmlHandler));
 						updatePropertyObjects(AgentProperty.fromDtml(dtmlHandler));
-
 						updateManagedVertexObjects();
 						sendAcknowLedgeMessage();
 					}

@@ -32,6 +32,7 @@ import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 /**
@@ -106,6 +107,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	WaldotGraphComputerView getGraphComputerView();
 
 	WaldotGraph getGremlinGraph();
+
+	HistoryStrategy getHistoryStrategy();
 
 	Collection<NamespaceListener> getListeners();
 

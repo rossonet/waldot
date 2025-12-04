@@ -1,5 +1,6 @@
 package net.rossonet.zenoh.client.api;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +13,9 @@ import net.rossonet.waldot.dtdl.RelationshipObject;
 import net.rossonet.waldot.dtdl.Schema;
 import net.rossonet.zenoh.annotation.ExportedParameter;
 
-public class AgentConfigurationObject {
+public class AgentConfigurationObject implements Serializable {
+
+	private static final long serialVersionUID = 570922610537305674L;
 
 	public static Map<String, AgentConfigurationObject> fromDtml(DtdlHandler dtmlHandler) {
 		final Map<String, AgentConfigurationObject> configurations = new HashMap<>();

@@ -1,12 +1,13 @@
 package net.rossonet.zenoh.client.api;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.dtdl.TelemetryObject;
 
-public class TelemetryData {
+public class TelemetryData implements Serializable {
 
 	public static Map<String, TelemetryData> fromDtml(DtdlHandler dtmlHandler) {
 
