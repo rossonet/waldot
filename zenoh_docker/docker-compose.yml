@@ -15,6 +15,7 @@ services:
     restart: always
     volumes:
       - ./zenoh:/store
+      - ./zenoh.json:/config/zenoh.json
     ports:
       - 7447:7447/tcp
       - 7446:7446/udp

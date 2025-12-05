@@ -132,7 +132,7 @@ public class ZenohHelper {
 	}
 
 	public static String getInternalTelemetryBaseTopic(String agentUniqueId) {
-		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.INTERNAL_TELEMETRY_TOPIC;
+		return ZenohHelper.INTERNAL_TELEMETRY_TOPIC + ZenohHelper._TOPIC_SEPARATOR + agentUniqueId;
 	}
 
 	private static String getParameterBaseTopic(String agentUniqueId) {
@@ -140,7 +140,7 @@ public class ZenohHelper {
 	}
 
 	public static String getTelemetryBaseTopic(String agentUniqueId) {
-		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.TELEMETRY_TOPIC;
+		return ZenohHelper.TELEMETRY_TOPIC + ZenohHelper._TOPIC_SEPARATOR + agentUniqueId;
 	}
 
 	private ZenohHelper() {
