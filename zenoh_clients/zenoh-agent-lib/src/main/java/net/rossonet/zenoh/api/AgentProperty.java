@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.client.api;
+package net.rossonet.zenoh.api;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;

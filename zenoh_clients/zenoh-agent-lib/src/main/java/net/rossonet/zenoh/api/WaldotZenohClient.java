@@ -1,9 +1,10 @@
-package net.rossonet.zenoh.client.api;
+package net.rossonet.zenoh.api;
 
 import java.util.Collection;
 import java.util.Map;
 
 import net.rossonet.zenoh.WaldotZenohException;
+import net.rossonet.zenoh.api.message.TelemetryMessage;
 
 public interface WaldotZenohClient extends AutoCloseable {
 
@@ -27,9 +28,9 @@ public interface WaldotZenohClient extends AutoCloseable {
 
 	void removeErrorCallback(AgentErrorHandler agentErrorHandler);
 
-	boolean sendInternalTelemetry(TelemetryUpdate<?> telemetryData);
+	boolean sendInternalTelemetry(TelemetryMessage<?> telemetryData);
 
-	boolean sendTelemetry(TelemetryUpdate<?> telemetryData);
+	boolean sendTelemetry(TelemetryMessage<?> telemetryData);
 
 	void start() throws WaldotZenohException;
 

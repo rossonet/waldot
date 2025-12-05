@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.client.api;
+package net.rossonet.zenoh.api;
 
 public interface AgentErrorHandler {
 

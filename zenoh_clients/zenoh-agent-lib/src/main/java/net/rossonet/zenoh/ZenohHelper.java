@@ -139,6 +139,10 @@ public class ZenohHelper {
 		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.PARAMETER_TOPIC;
 	}
 
+	public static String getRpcCommandTopic(String agentUniqueId, String commandId) {
+		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + commandId;
+	}
+
 	public static String getTelemetryBaseTopic(String agentUniqueId) {
 		return ZenohHelper.TELEMETRY_TOPIC + ZenohHelper._TOPIC_SEPARATOR + agentUniqueId;
 	}

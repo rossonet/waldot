@@ -23,13 +23,13 @@ import io.zenoh.config.ZenohId;
 import net.rossonet.waldot.dtdl.DigitalTwinModelIdentifier;
 import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.utils.ThreadHelper;
-import net.rossonet.zenoh.client.api.AgentCommand;
-import net.rossonet.zenoh.client.api.AgentCommandParameter;
-import net.rossonet.zenoh.client.api.AgentConfigurationObject;
-import net.rossonet.zenoh.client.api.AgentControlHandler;
-import net.rossonet.zenoh.client.api.AgentProperty;
-import net.rossonet.zenoh.client.api.TelemetryData;
-import net.rossonet.zenoh.client.api.TelemetryUpdate;
+import net.rossonet.zenoh.api.AgentCommand;
+import net.rossonet.zenoh.api.AgentCommandParameter;
+import net.rossonet.zenoh.api.AgentConfigurationObject;
+import net.rossonet.zenoh.api.AgentControlHandler;
+import net.rossonet.zenoh.api.AgentProperty;
+import net.rossonet.zenoh.api.TelemetryData;
+import net.rossonet.zenoh.api.message.TelemetryMessage;
 
 public abstract class AbstractAgentAnnotationControlHandler implements AgentControlHandler {
 
@@ -147,7 +147,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	private ZenohId sessionZid;
 
-	private final ConcurrentLinkedQueue<TelemetryUpdate<?>> telemetryQueue = new ConcurrentLinkedQueue<>();
+	private final ConcurrentLinkedQueue<TelemetryMessage<?>> telemetryQueue = new ConcurrentLinkedQueue<>();
 
 	private int threadPriority;
 
@@ -360,7 +360,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	protected abstract void elaborateInfoMessage(InternalLogMessage errorMessage);
 
-	protected abstract void elaborateTelemetryUpdate(TelemetryUpdate<?> telemetry);
+	protected abstract void elaborateTelemetryUpdate(TelemetryMessage<?> telemetry);
 
 	@Override
 	public void executeCommand(AgentCommand agentCommand, JSONObject message) {
@@ -525,7 +525,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 	}
 
 	@Override
-	public void notifyTelemetry(TelemetryUpdate<?> telemetry) {
+	public void notifyTelemetry(TelemetryMessage<?> telemetry) {
 		telemetryQueue.offer(telemetry);
 	}
 
@@ -570,7 +570,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 							}
 						}
 						while (!telemetryQueue.isEmpty()) {
-							final TelemetryUpdate<?> telemetry = telemetryQueue.poll();
+							final TelemetryMessage<?> telemetry = telemetryQueue.poll();
 							try {
 								elaborateTelemetryUpdate(telemetry);
 							} catch (final Throwable t) {

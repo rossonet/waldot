@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.client.api;
+package net.rossonet.zenoh.api;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.Map;
 import org.json.JSONObject;
 
 import io.zenoh.config.ZenohId;
+import net.rossonet.zenoh.api.message.TelemetryMessage;
 
 public interface AgentControlHandler extends AutoCloseable {
 
@@ -61,7 +62,7 @@ public interface AgentControlHandler extends AutoCloseable {
 	default void notifyError(String message, Throwable exception) {
 	}
 
-	default void notifyTelemetry(TelemetryUpdate<?> telemetry) {
+	default void notifyTelemetry(TelemetryMessage<?> telemetry) {
 	}
 
 	default void notifyZenohSessionCreated(ZenohId zid, List<ZenohId> routersZid, List<ZenohId> peersZid) {

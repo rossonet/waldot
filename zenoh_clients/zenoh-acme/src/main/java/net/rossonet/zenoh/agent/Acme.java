@@ -6,8 +6,8 @@ import io.zenoh.Config;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.zenoh.WaldotZenohException;
 import net.rossonet.zenoh.annotation.AbstractAgentAnnotationControlHandler;
+import net.rossonet.zenoh.api.message.TelemetryMessage;
 import net.rossonet.zenoh.client.WaldotZenohClientImpl;
-import net.rossonet.zenoh.client.api.TelemetryUpdate;
 
 public class Acme {
 
@@ -36,7 +36,7 @@ public class Acme {
 		}
 
 		@Override
-		protected void elaborateTelemetryUpdate(TelemetryUpdate<?> telemetry) {
+		protected void elaborateTelemetryUpdate(TelemetryMessage<?> telemetry) {
 			System.out.println("Telemetry update: " + telemetry.toString());
 
 		}

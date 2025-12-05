@@ -21,12 +21,12 @@ import io.zenoh.sample.Sample;
 import io.zenoh.session.SessionInfo;
 import net.rossonet.zenoh.WaldotZenohException;
 import net.rossonet.zenoh.ZenohHelper;
-import net.rossonet.zenoh.client.api.AgentCommand;
-import net.rossonet.zenoh.client.api.AgentConfigurationObject;
-import net.rossonet.zenoh.client.api.AgentControlHandler;
-import net.rossonet.zenoh.client.api.AgentErrorHandler;
-import net.rossonet.zenoh.client.api.TelemetryUpdate;
-import net.rossonet.zenoh.client.api.WaldotZenohClient;
+import net.rossonet.zenoh.api.AgentCommand;
+import net.rossonet.zenoh.api.AgentConfigurationObject;
+import net.rossonet.zenoh.api.AgentControlHandler;
+import net.rossonet.zenoh.api.AgentErrorHandler;
+import net.rossonet.zenoh.api.WaldotZenohClient;
+import net.rossonet.zenoh.api.message.TelemetryMessage;
 
 public class WaldotZenohClientImpl implements WaldotZenohClient {
 
@@ -270,7 +270,7 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	}
 
 	@Override
-	public boolean sendInternalTelemetry(TelemetryUpdate<?> telemetryData) {
+	public boolean sendInternalTelemetry(TelemetryMessage<?> telemetryData) {
 		// TODO invia la telemetria relativa agli stati interni dell'agente
 		return false;
 	}
@@ -281,7 +281,7 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	}
 
 	@Override
-	public boolean sendTelemetry(TelemetryUpdate<?> telemetryData) {
+	public boolean sendTelemetry(TelemetryMessage<?> telemetryData) {
 		// TODO invia la telemetria relativa ai dati di processo
 		return false;
 	}

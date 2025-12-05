@@ -31,10 +31,10 @@ import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 import net.rossonet.waldot.utils.TextHelper;
 import net.rossonet.zenoh.WaldotZenohException;
 import net.rossonet.zenoh.ZenohHelper;
-import net.rossonet.zenoh.client.api.AgentCommand;
-import net.rossonet.zenoh.client.api.AgentConfigurationObject;
-import net.rossonet.zenoh.client.api.AgentProperty;
-import net.rossonet.zenoh.client.api.TelemetryData;
+import net.rossonet.zenoh.api.AgentCommand;
+import net.rossonet.zenoh.api.AgentConfigurationObject;
+import net.rossonet.zenoh.api.AgentProperty;
+import net.rossonet.zenoh.api.TelemetryData;
 import net.rossonet.zenoh.controller.command.StartAgentCommand;
 import net.rossonet.zenoh.controller.command.StopAgentCommand;
 
@@ -266,7 +266,7 @@ public class ZenohAgent {
 					return sendCommandToAgent(commandName, inputValues);
 				}
 			};
-			// agentLifeCycleManager.getNamespace().registerCommand(command);
+			agentLifeCycleManager.getNamespace().registerCommand(command);
 			activeCommands.put(commandName, command);
 			logger.info("Registered new command {} for agent {}", commandName, uniqueId);
 		}
@@ -286,7 +286,8 @@ public class ZenohAgent {
 	}
 
 	public Object[] sendCommandToAgent(String commandId, String[] inputValues) {
-		// TODO inviare il comando all'agente e recuperare il risultato con un lifetime
+		final String topic = ZenohHelper.getRpcCommandTopic(getUniqueId(), commandId);
+
 		return new Object[0];
 	}
 

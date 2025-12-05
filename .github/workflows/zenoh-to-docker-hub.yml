@@ -78,10 +78,10 @@ jobs:
           version: v0.59.1
           cache: true
       - run: |
-          docker pull --platform amd64 rossonet/zenohd:latest
+          docker pull --platform amd64 rossonet/zenohd:intel
           docker images
       - name: Avvia container filesystem 
-        run: docker run --rm --name test -d rossonet/zenohd:latest
+        run: docker run --rm --name test -d rossonet/zenohd:intel
       - name: Export container disk 
         run: docker export test -o trivy.export && mkdir trivy_disk && tar -xvf trivy.export -C trivy_disk
       - name: Stop container 
