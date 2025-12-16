@@ -19,7 +19,7 @@ public class ProvisioningLifeCycleProcedure {
 	}
 
 	private void checkManualRequestCompleted() {
-		// TODO Auto-generated method stub
+		// TODO completare provisioning client
 		manualRequestCompleted = false;
 	}
 
@@ -35,11 +35,11 @@ public class ProvisioningLifeCycleProcedure {
 	}
 
 	public void requestManualApprovation() throws ProvisioningException {
-		// TODO Auto-generated method stub
+		// TODO completare provisioning client
 	}
 
 	public void tokenProvisioning() throws ProvisioningException {
-		// TODO Auto-generated method stub
+		// TODO completare provisioning client
 
 	}
 

@@ -1,10 +1,10 @@
 package net.rossonet.zenoh.api;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,14 +17,14 @@ import net.rossonet.waldot.dtdl.Schema;
 import net.rossonet.zenoh.annotation.AnnotatedAgentController;
 import net.rossonet.zenoh.annotation.ExportedCommand;
 
-public class AgentCommand implements Serializable {
+public class AgentCommandMetadata implements Serializable {
 
 	private static final long serialVersionUID = 4027473144192607112L;
 
-	public static Map<String, AgentCommand> fromDtml(DtdlHandler dtmlHandler) {
-		final Map<String, AgentCommand> commands = new HashMap<>();
+	public static Map<String, AgentCommandMetadata> fromDtml(DtdlHandler dtmlHandler) {
+		final Map<String, AgentCommandMetadata> commands = new HashMap<>();
 		for (final CommandObject commandObject : dtmlHandler.getCommands()) {
-			final Set<AgentCommandParameter> parameters = new HashSet<>();
+			final List<AgentCommandParameter> parameters = new ArrayList<>();
 			final CommandPayload request = commandObject.getRequest();
 			if (request != null) {
 				final JSONArray paramsArray = request.getSchema().toSchemaJson().getJSONArray("parameters");
@@ -34,7 +34,7 @@ public class AgentCommand implements Serializable {
 					parameters.add(parameter);
 				}
 			}
-			final AgentCommand agentCommand = new AgentCommand(commandObject.getName(), null, "",
+			final AgentCommandMetadata agentCommand = new AgentCommandMetadata(commandObject.getName(), null, "",
 					commandObject.getResponse().getSchema().toSchemaString(), new ExportedCommand() {
 						@Override
 						public Class<? extends java.lang.annotation.Annotation> annotationType() {
@@ -72,14 +72,14 @@ public class AgentCommand implements Serializable {
 
 	private final String commandName;
 
-	private final Set<AgentCommandParameter> commandParameters;
+	private final List<AgentCommandParameter> commandParameters;
 
 	private final String methodName;
 
 	private final String methodReturnType;
 
-	public AgentCommand(String commandName, AnnotatedAgentController agentControl, String methodName, String methodReturnType,
-			ExportedCommand annotation, Set<AgentCommandParameter> commandParameters) {
+	public AgentCommandMetadata(String commandName, AnnotatedAgentController agentControl, String methodName,
+			String methodReturnType, ExportedCommand annotation, List<AgentCommandParameter> commandParameters) {
 		this.commandName = commandName;
 		this.agentControl = agentControl;
 		this.methodName = methodName;
@@ -139,7 +139,7 @@ public class AgentCommand implements Serializable {
 		return commandName;
 	}
 
-	public Set<AgentCommandParameter> getCommandParameters() {
+	public List<AgentCommandParameter> getCommandParameters() {
 		return commandParameters;
 	}
 
@@ -149,6 +149,14 @@ public class AgentCommand implements Serializable {
 
 	public String getMethodReturnType() {
 		return methodReturnType;
+	}
+
+	public Class<?>[] getParameterTypes() {
+		final List<Class<?>> paramTypes = new ArrayList<>();
+		for (final AgentCommandParameter param : commandParameters) {
+			paramTypes.add(param.getMethodParameter().getType());
+		}
+		return paramTypes.toArray(new Class<?>[0]);
 	}
 
 	public int getUserWriteMask() {

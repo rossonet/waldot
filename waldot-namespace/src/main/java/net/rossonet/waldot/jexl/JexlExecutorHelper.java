@@ -16,12 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.rules.ClonableMapContext;
-import net.rossonet.waldot.api.rules.ExecutorHelper;
+import net.rossonet.waldot.api.rules.RuleExecutorHelper;
 import net.rossonet.waldot.api.rules.Rule;
 import net.rossonet.waldot.api.rules.WaldotStepLogger;
 import net.rossonet.waldot.utils.LogHelper;
 
-public class JexlExecutorHelper implements ExecutorHelper {
+public class JexlExecutorHelper implements RuleExecutorHelper {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger("JEXEL EXECUTOR");
 

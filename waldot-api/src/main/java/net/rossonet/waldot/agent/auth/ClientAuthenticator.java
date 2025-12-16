@@ -2,9 +2,9 @@ package net.rossonet.waldot.agent.auth;
 
 import org.eclipse.milo.opcua.sdk.server.Session;
 
-import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 
-public interface AgentAuthenticator {
+public interface ClientAuthenticator {
 
 	public static String generateSessionDataForLogging(final Session session) {
 		final StringBuilder sb = new StringBuilder();
@@ -20,6 +20,6 @@ public interface AgentAuthenticator {
 		return sb.toString();
 	}
 
-	public void setAgentManagementStrategy(AgentManagementStrategy agentManagementStrategy);
+	public void setAgentManagementStrategy(ClientManagementStrategy agentManagementStrategy);
 
 }

@@ -17,12 +17,12 @@ import net.rossonet.waldot.api.models.WaldotVertex;
  *
  * <p>Rules consist of conditions and actions. Conditions determine whether a rule
  * should be executed, while actions define the operations to perform when the rule
- * is triggered. The rule engine evaluates rules using the {@link ExecutorHelper}
+ * is triggered. The rule engine evaluates rules using the {@link RuleExecutorHelper}
  * and manages their lifecycle, including registration, updates, and execution.</p>
  *
  * @see WaldotVertex
  * @see CachedRuleRecord
- * @see ExecutorHelper
+ * @see RuleExecutorHelper
  * @see RuleListener
  * @see Fact
  */

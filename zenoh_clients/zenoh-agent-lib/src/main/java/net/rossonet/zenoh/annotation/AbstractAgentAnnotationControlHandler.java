@@ -3,115 +3,56 @@ package net.rossonet.zenoh.annotation;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.json.JSONObject;
 
 import com.google.common.reflect.ClassPath;
+import com.jsoniter.output.JsonStream;
 
 import io.zenoh.config.ZenohId;
 import net.rossonet.waldot.dtdl.DigitalTwinModelIdentifier;
 import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.utils.ThreadHelper;
-import net.rossonet.zenoh.api.AgentCommand;
+import net.rossonet.zenoh.annotation.AnnotatedAgentController.ConfigurationChangeType;
+import net.rossonet.zenoh.api.AgentCommandMetadata;
 import net.rossonet.zenoh.api.AgentCommandParameter;
-import net.rossonet.zenoh.api.AgentConfigurationObject;
+import net.rossonet.zenoh.api.AgentConfigurationMetadata;
 import net.rossonet.zenoh.api.AgentControlHandler;
 import net.rossonet.zenoh.api.AgentProperty;
+import net.rossonet.zenoh.api.ExportedCommandData;
+import net.rossonet.zenoh.api.ExportedParameterData;
+import net.rossonet.zenoh.api.InternalLogMessage;
 import net.rossonet.zenoh.api.TelemetryData;
+import net.rossonet.zenoh.api.message.RpcCommand;
+import net.rossonet.zenoh.api.message.RpcConfiguration;
 import net.rossonet.zenoh.api.message.TelemetryMessage;
+import net.rossonet.zenoh.exception.ExecutionCommandException;
 
 public abstract class AbstractAgentAnnotationControlHandler implements AgentControlHandler {
 
-	private final class ExportedCommandData {
-		private final ExportedCommand exportedCommand;
-		public final Method method;
-		public final String name;
+	private static final int DEFAULT_VERSION_API = 1;
 
-		public ExportedCommandData(String name, Method method, ExportedCommand exportedCommand) {
-			this.name = name;
-			this.method = method;
-			this.exportedCommand = exportedCommand;
-		}
+	private final List<JSONObject> acknowledgeMessages = new ArrayList<>();
 
-		public ExportedCommand getExportedCommand() {
-			return exportedCommand;
-		}
-
-		public Method getMethod() {
-			return method;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-	}
-
-	private final class ExportedParameterData {
-		private final ExportedParameter exportedParameter;
-		public final Field field;
-		public final String name;
-
-		public ExportedParameterData(String name, Field field, ExportedParameter exportedParameter) {
-			this.name = name;
-			this.field = field;
-			this.exportedParameter = exportedParameter;
-		}
-
-		public ExportedParameter getExportedParameter() {
-			return exportedParameter;
-		}
-
-		public Field getField() {
-			return field;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
-
-	public static final class InternalLogMessage {
-		public final Throwable exception;
-		public final String message;
-
-		public InternalLogMessage(String message, Throwable exception) {
-			this.message = message;
-			this.exception = exception;
-		}
-
-		public Throwable getException() {
-			return exception;
-		}
-
-		public String getMessage() {
-			return message;
-		}
-
-		@Override
-		public String toString() {
-			return "InternalLogMessage [message=" + message + ", exception=" + exception + "]";
-		}
-	}
-
-	private JSONObject acknowledgeMessage;
-
-	private boolean active;
+	private volatile boolean active;
 
 	private final String basePackage;
 
-	private final Map<String, Object> configurations = new HashMap<>();
+	private final Map<Long, RpcConfiguration> configurations = new HashMap<>();
 
 	private boolean dataFlowActive = false;
 
@@ -121,33 +62,35 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	private Duration definedWaitTimeMs;
 
-	private final ConcurrentLinkedQueue<InternalLogMessage> errorQueue = new ConcurrentLinkedQueue<>();
-
 	private AnnotatedAgentController flowController;
 
-	private final ConcurrentLinkedQueue<InternalLogMessage> infoQueue = new ConcurrentLinkedQueue<>();
+	private volatile long lastControlParameterEpoch = 0;
 
 	private long maxWaitExecutionCycleTime;
 
+	private final BlockingQueue<InternalLogMessage> messageQueue = new LinkedBlockingQueue<>();
+
 	private List<ZenohId> peersZid;
 
-	private boolean registered;
+	private volatile boolean registered;
 
-	private final Map<String, AgentCommand> registeredCommands = new HashMap<>();
+	private final Map<String, AgentCommandMetadata> registeredCommands = new HashMap<>();
 
-	private final Map<String, AgentConfigurationObject> registeredConfigurationObjects = new HashMap<>();
+	private final Map<String, AgentConfigurationMetadata> registeredConfigurations = new HashMap<>();
+
+	private final Map<Long, TelemetryData> registeredInputTelemetries = new HashMap<>();
+
+	private final Map<Long, TelemetryData> registeredInternalTelemetries = new HashMap<>();
 
 	private final Map<String, AgentProperty> registeredProperties = new HashMap<>();
 
-	private final Map<String, TelemetryData> registeredTelemetries = new HashMap<>();
+	private final Map<Long, TelemetryData> registeredTelemetries = new HashMap<>();
 
 	private List<ZenohId> routersZid;
 
 	private long sessionCreatedMs;
 
 	private ZenohId sessionZid;
-
-	private final ConcurrentLinkedQueue<TelemetryMessage<?>> telemetryQueue = new ConcurrentLinkedQueue<>();
 
 	private int threadPriority;
 
@@ -166,17 +109,20 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		try {
 			elaborateAnnotations();
 		} catch (final IOException e) {
-			errorQueue.offer(new InternalLogMessage("Error elaborating annotations", e));
+			messageQueue.offer(
+					new InternalLogMessage(InternalLogMessage.MessageType.ERROR, "Error elaborating annotations", e));
 		}
 		startWorkerThread();
-		infoQueue.offer(new InternalLogMessage("AgentControlHandler started", null));
+		messageQueue.offer(
+				new InternalLogMessage(InternalLogMessage.MessageType.INFO, "AgentControlHandler started", null));
 	}
 
 	private void addCommandMetadata(ExportedCommandData commandData) {
 		final String commandName = commandData.getName();
 		final String methodName = commandData.getMethod().getName();
 		final ExportedCommand annotation = commandData.getExportedCommand();
-		final Set<AgentCommandParameter> commandParameters = new HashSet<>();
+		final List<AgentCommandParameter> commandParameters = new ArrayList<>();
+		int order = 0;
 		for (final Parameter methodParameter : commandData.getMethod().getParameters()) {
 			if (methodParameter.isAnnotationPresent(ExportedMethodParameter.class)) {
 				final ExportedMethodParameter methodParamAnnotation = methodParameter
@@ -185,15 +131,19 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 				if (parameterName.isEmpty()) {
 					parameterName = methodParameter.getName();
 				}
-				commandParameters.add(new AgentCommandParameter(parameterName, methodParameter, methodParamAnnotation));
+				commandParameters
+						.add(new AgentCommandParameter(parameterName, methodParameter, methodParamAnnotation, order));
+				order++;
 			} else {
-				errorQueue.offer(new InternalLogMessage("Method parameter " + methodParameter.getName() + " of command "
-						+ commandName + " is missing ExportedMethodParameter annotation", null));
+				messageQueue.offer(new InternalLogMessage(
+						InternalLogMessage.MessageType.ERROR, "Method parameter " + methodParameter.getName()
+								+ " of command " + commandName + " is missing ExportedMethodParameter annotation",
+						null));
 			}
 		}
-		final String methodRetunType = commandData.getMethod().getReturnType().getSimpleName();
-		registeredCommands.put(commandName, new AgentCommand(commandName, flowController, methodName, methodRetunType,
-				annotation, commandParameters));
+		final String methodReturnType = commandData.getMethod().getReturnType().getSimpleName();
+		registeredCommands.put(commandName, new AgentCommandMetadata(commandName, flowController, methodName,
+				methodReturnType, annotation, commandParameters));
 	}
 
 	private void addConfigurationObjectMetadata(Class<?> configClass,
@@ -221,14 +171,9 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 			properties.put(parameterData.getName(),
 					new AgentProperty(propertyName, flowController, fieldName, annotation));
 		}
-		registeredConfigurationObjects.put(configurationName, new AgentConfigurationObject(configurationName,
+		registeredConfigurations.put(configurationName, new AgentConfigurationMetadata(configurationName,
 				configurationClassName, description, properties, unique));
 
-	}
-
-	@Override
-	public void addConfigurationObjects(String name, JSONObject configurationObject) {
-		configurations.put(name, generateConfigurationObjectFromJson(name, configurationObject));
 	}
 
 	private void addPropertyMetadata(ExportedParameterData parameterData) {
@@ -240,16 +185,29 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 	}
 
 	@Override
-	public void close() throws Exception {
-		active = false;
-		flowController.stopDataFlow();
-		shutdown();
+	public void addUpdateOrDeleteConfigurationObjects(RpcConfiguration configuration) {
+		if (configurations.containsKey(configuration.getUniqueId())) {
+			updateOrDeleteConfiguration(configuration);
+			flowController.notifyConfigurationChanged(configuration.getConfigurationId(),
+					ConfigurationChangeType.OBJECT_CREATED);
+		} else {
+			configurations.put(configuration.getUniqueId(), configuration);
+		}
 	}
 
 	@Override
-	public void delConfigurationObjects(String name) {
-		configurations.remove(name);
+	public void close() throws Exception {
+		active = false;
+		flowController.stopDataFlow();
+		doShutdown();
 	}
+
+	@Override
+	public void delConfigurationObjects(long uniqueUid) {
+		configurations.remove(uniqueUid);
+	}
+
+	protected abstract void doShutdown();
 
 	private void elaborateAnnotations() throws IOException {
 		final ClassPath cp = ClassPath.from(Thread.currentThread().getContextClassLoader());
@@ -257,10 +215,10 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		for (final ClassPath.ClassInfo classInfo : cp.getTopLevelClassesRecursive(basePackage)) {
 			final Class<?> clazz = classInfo.load();
 			if (clazz.isAnnotationPresent(ExportedController.class)) {
-				infoQueue.offer(
-						new InternalLogMessage("Found AnnotatedAgentController class: " + clazz.getName(), null));
+				messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.INFO,
+						"Found AnnotatedAgentController class: " + clazz.getName(), null));
 				if (flowController != null) {
-					errorQueue.offer(new InternalLogMessage(
+					messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.ERROR,
 							"Multiple AnnotatedAgentController classes found. Only one is allowed. Class "
 									+ clazz.getName() + " will be ignored.",
 							null));
@@ -268,24 +226,26 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 				try {
 					flowController = (AnnotatedAgentController) clazz.getConstructor().newInstance();
 				} catch (final Exception e) {
-					errorQueue.offer(new InternalLogMessage(
+					messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.ERROR,
 							"Error instantiating AnnotatedAgentController from class " + clazz.getName(), e));
 				}
 
 			}
 			if (clazz.isAnnotationPresent(ExportedObject.class)) {
 				configurationObjects.add(clazz);
-				infoQueue.offer(
-						new InternalLogMessage("Found AgentConfigurationObject class: " + clazz.getName(), null));
+				messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.INFO,
+						"Found AgentConfigurationMetadata class: " + clazz.getName(), null));
 			}
 		}
 		if (flowController == null) {
-			errorQueue.offer(new InternalLogMessage("No AnnotatedAgentController class found.", null));
+			messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.ERROR,
+					"No AnnotatedAgentController class found.", null));
 		} else {
 			elaborateControllerAnnotations();
 		}
 		if (configurationObjects.isEmpty()) {
-			errorQueue.offer(new InternalLogMessage("No AgentConfigurationObject classes found.", null));
+			messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.ERROR,
+					"No AgentConfigurationMetadata classes found.", null));
 		} else {
 			for (final Class<?> configClass : configurationObjects) {
 				elaborateConfigurationObjectAnnotations(configClass);
@@ -360,20 +320,46 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	protected abstract void elaborateInfoMessage(InternalLogMessage errorMessage);
 
-	protected abstract void elaborateTelemetryUpdate(TelemetryMessage<?> telemetry);
+	protected abstract void elaborateTelemetryUpdate(TelemetryData node, TelemetryMessage<?> telemetry);
+
+	private RpcCommand execMethod(RpcCommand command)
+			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		final AgentCommandMetadata commandMetadata = registeredCommands.get(command.getCommandId());
+		final Method method = flowController.getClass().getMethod(commandMetadata.getMethodName(),
+				commandMetadata.getParameterTypes());
+		final Object[] parameters = command.getParameterInputValues();
+		final Object result = method.invoke(flowController, parameters);
+		final String serialize = JsonStream.serialize(result);
+		final RpcCommand response = new RpcCommand(command, new JSONObject(serialize));
+		return response;
+	}
 
 	@Override
-	public void executeCommand(AgentCommand agentCommand, JSONObject message) {
-		// TODO: eseguire il comando su flowController
+	public RpcCommand executeCommand(RpcCommand command) {
+		if (!registeredCommands.containsKey(command.getCommandId())) {
+			final String message = "Received command with unknown command ID: " + command.getCommandId();
+			final ExecutionCommandException ExecutionCommandException = new ExecutionCommandException(message);
+			messageQueue.offer(
+					new InternalLogMessage(InternalLogMessage.MessageType.ERROR, message, ExecutionCommandException));
+			final RpcCommand response = new RpcCommand(command, ExecutionCommandException);
+			return response;
+		}
+		try {
+			return execMethod(command);
+		} catch (final Throwable e) {
+			final String message = "Exception executing command with ID: " + command.getCommandId() + " - "
+					+ e.getMessage();
+			final ExecutionCommandException ExecutionCommandException = new ExecutionCommandException(message);
+			messageQueue.offer(
+					new InternalLogMessage(InternalLogMessage.MessageType.ERROR, message, ExecutionCommandException));
+			final RpcCommand response = new RpcCommand(command, ExecutionCommandException);
+			return response;
+		}
+
 	}
 
-	private Object generateConfigurationObjectFromJson(String name, JSONObject configurationObject) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public JSONObject getAcknowledgeMessage() {
-		return acknowledgeMessage;
+	public List<JSONObject> getAcknowledgeMessages() {
+		return acknowledgeMessages;
 	}
 
 	protected abstract String getAgentDescription();
@@ -385,18 +371,18 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 	}
 
 	@Override
-	public Map<String, AgentCommand> getCommandMetadatas() {
+	public Map<String, AgentCommandMetadata> getCommandMetadatas() {
 		return registeredCommands;
 	}
 
 	@Override
-	public Map<String, AgentConfigurationObject> getConfigurationObjectMetadatas() {
-		return registeredConfigurationObjects;
+	public Map<String, AgentConfigurationMetadata> getConfigurationMetadatas() {
+		return registeredConfigurations;
 	}
 
 	@Override
-	public Map<String, Object> getConfigurationObjects() {
-		return configurations;
+	public Collection<RpcConfiguration> getConfigurations() {
+		return configurations.values();
 	}
 
 	public long getDataFlowStartedAtMs() {
@@ -425,7 +411,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		dtdlHandler.setId(digitalTwinId);
 		dtdlHandler.setDisplayName(getAgentDisplayName());
 		dtdlHandler.setDescription(getAgentDescription());
-		for (final AgentConfigurationObject configObject : registeredConfigurationObjects.values()) {
+		for (final AgentConfigurationMetadata configObject : registeredConfigurations.values()) {
 			dtdlHandler.addRelationship(configObject.generateDtmlRelationshipObject().toMap());
 		}
 		for (final AgentProperty property : registeredProperties.values()) {
@@ -434,7 +420,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		for (final TelemetryData telemetry : registeredTelemetries.values()) {
 			dtdlHandler.addTelemetry(telemetry.generateDtmlTelemetryObject().toMap());
 		}
-		for (final AgentCommand command : registeredCommands.values()) {
+		for (final AgentCommandMetadata command : registeredCommands.values()) {
 			dtdlHandler.addCommand(command.generateDtmlCommandObject().toMap());
 		}
 		return dtdlHandler.toDtdlV2Json();
@@ -442,6 +428,26 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 
 	public AnnotatedAgentController getFlowController() {
 		return flowController;
+	}
+
+	@Override
+	public TelemetryData getIngressTelemetryMetadata(TelemetryMessage<?> telemetryData) {
+		return registeredInputTelemetries.get(telemetryData.getTelemetryDataId());
+	}
+
+	@Override
+	public Collection<TelemetryData> getIngressTelemetryMetadatas() {
+		return registeredInputTelemetries.values();
+	}
+
+	@Override
+	public TelemetryData getInternalTelemetryMetadata(TelemetryMessage<?> telemetryData) {
+		return registeredInternalTelemetries.get(telemetryData.getTelemetryDataId());
+	}
+
+	@Override
+	public Collection<TelemetryData> getInternalTelemetryMetadatas() {
+		return registeredTelemetries.values();
 	}
 
 	public long getMaxWaitExecutionCycleTime() {
@@ -452,19 +458,19 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		return peersZid;
 	}
 
-	public Map<String, AgentCommand> getRegisteredCommands() {
+	public Map<String, AgentCommandMetadata> getRegisteredCommands() {
 		return registeredCommands;
 	}
 
-	public Map<String, AgentConfigurationObject> getRegisteredConfigurationObjects() {
-		return registeredConfigurationObjects;
+	public Map<String, AgentConfigurationMetadata> getRegisteredConfigurationObjects() {
+		return registeredConfigurations;
 	}
 
 	public Map<String, AgentProperty> getRegisteredProperties() {
 		return registeredProperties;
 	}
 
-	public Map<String, TelemetryData> getRegisteredTelemetries() {
+	public Map<Long, TelemetryData> getRegisteredTelemetries() {
 		return registeredTelemetries;
 	}
 
@@ -480,8 +486,23 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		return sessionZid;
 	}
 
+	@Override
+	public TelemetryData getTelemetryMetadata(TelemetryMessage<?> telemetryData) {
+		return registeredTelemetries.get(telemetryData.getTelemetryDataId());
+	}
+
+	@Override
+	public Collection<TelemetryData> getTelemetryMetadatas() {
+		return registeredTelemetries.values();
+	}
+
 	public int getThreadPriority() {
 		return threadPriority;
+	}
+
+	@Override
+	public int getVersionApi() {
+		return DEFAULT_VERSION_API;
 	}
 
 	public boolean isActive() {
@@ -497,36 +518,39 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 	}
 
 	@Override
-	public void notifyAcknowledgeCommandReceived(JSONObject message) {
+	public void notifyAcknowledgeMessageReceived(JSONObject message) {
 		registered = true;
-		acknowledgeMessage = message;
-		infoQueue.offer(new InternalLogMessage("Acknowledge command received: " + message.toString(), null));
+		acknowledgeMessages.add(message);
+		messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.INFO,
+				"Acknowledge command received: " + message.toString(), null));
 	}
 
 	@Override
-	public void notifyDataFlowStartCommandReceived(JSONObject message) {
+	public void notifyDataFlowStartCommandReceived() {
 		dataFlowActive = true;
 		flowController.startDataFlow();
 		dataFlowStartedAtMs = System.currentTimeMillis();
-		infoQueue.offer(new InternalLogMessage("Data flow started command received: " + message.toString(), null));
+		messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.INFO,
+				"Data flow started command received", null));
 	}
 
 	@Override
-	public void notifyDataFlowStopCommandReceived(JSONObject message) {
+	public void notifyDataFlowStopCommandReceived() {
 		dataFlowActive = false;
 		flowController.stopDataFlow();
 		dataFlowStoppedAtMs = System.currentTimeMillis();
-		infoQueue.offer(new InternalLogMessage("Data flow stopped command received: " + message.toString(), null));
+		messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.INFO,
+				"Data flow stopped command received", null));
 	}
 
 	@Override
 	public void notifyError(String message, Throwable exception) {
-		errorQueue.offer(new InternalLogMessage(message, exception));
+		messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.ERROR, message, exception));
 	}
 
 	@Override
-	public void notifyTelemetry(TelemetryMessage<?> telemetry) {
-		telemetryQueue.offer(telemetry);
+	public void notifyInputTelemetry(TelemetryMessage<?> telemetry) {
+		messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.TELEMETRY, telemetry));
 	}
 
 	@Override
@@ -535,7 +559,7 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		this.sessionZid = zid;
 		this.routersZid = routersZid;
 		this.peersZid = peersZid;
-		infoQueue.offer(new InternalLogMessage(
+		messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.INFO,
 				"Zenoh session created with ZID: " + zid + ", routers: " + routersZid + ", peers: " + peersZid, null));
 	}
 
@@ -551,60 +575,87 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 		this.threadPriority = threadPriority;
 	}
 
-	protected abstract void shutdown();
-
 	private void startWorkerThread() {
 		active = true;
-		infoQueue.offer(new InternalLogMessage("worker thread started", null));
-		workerThread = new Thread(() -> {
+		messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.INFO, "worker thread started", null));
+		workerThread = ThreadHelper.ofVirtual().name("queue-worker", 0).unstarted(() -> {
 			while (active) {
 				try {
-					ThreadHelper.runWithTimeout(() -> {
-						while (!errorQueue.isEmpty()) {
-							final InternalLogMessage errorMessage = errorQueue.poll();
-							try {
-								elaborateErrorMessage(errorMessage);
-							} catch (final Throwable t) {
-								System.err.println("Error elaborating error message: " + errorMessage.toString());
-								t.printStackTrace();
-							}
+					while (!messageQueue.isEmpty()) {
+						final InternalLogMessage message = messageQueue.take();
+						switch (message.getType()) {
+						case INFO:
+							elaborateInfoMessage(message);
+							break;
+						case ERROR:
+							elaborateErrorMessage(message);
+							break;
+						case TELEMETRY:
+							elaborateTelemetryUpdate(getTelemetryMetadata(message.getTelemetry()),
+									message.getTelemetry());
+							break;
+						default:
+							// non dovrebbe mai capitare
+							break;
 						}
-						while (!telemetryQueue.isEmpty()) {
-							final TelemetryMessage<?> telemetry = telemetryQueue.poll();
-							try {
-								elaborateTelemetryUpdate(telemetry);
-							} catch (final Throwable t) {
-								errorQueue.offer(new InternalLogMessage(
-										"Error elaborating telemetry update: " + telemetry.toString(), t));
-							}
-						}
-						while (!infoQueue.isEmpty()) {
-							try {
-								final InternalLogMessage infoMessage = infoQueue.poll();
-								elaborateInfoMessage(infoMessage);
-							} catch (final Throwable t) {
-								errorQueue.offer(new InternalLogMessage("Error elaborating info message", t));
-							}
-						}
-						try {
-							Thread.sleep(definedWaitTimeMs);
-						} catch (final InterruptedException e) {
-							errorQueue.offer(new InternalLogMessage("Worker thread interrupted", e));
-						}
-					}, maxWaitExecutionCycleTime, TimeUnit.MILLISECONDS);
-				} catch (final Exception e) {
-					errorQueue.offer(new InternalLogMessage("Worker thread timeout", e));
+					}
+				} catch (final Throwable e) {
+					messageQueue.offer(
+							new InternalLogMessage(InternalLogMessage.MessageType.ERROR, "Worker thread exception", e));
 				}
 			}
-			infoQueue.offer(new InternalLogMessage("worker thread stopped", null));
-		}, "queue-thread");
+			messageQueue
+					.offer(new InternalLogMessage(InternalLogMessage.MessageType.INFO, "worker thread stopped", null));
+
+		});
 		workerThread.setPriority(threadPriority);
 		workerThread.start();
 	}
 
+	private void updateControlParameter(String key, Object value) {
+		if (!registeredProperties.containsKey(key)) {
+			messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.ERROR,
+					"Received control parameter update for unknown parameter key: " + key, null));
+			return;
+		}
+		final String fieldName = registeredProperties.get(key).getFieldName();
+		try {
+			final Field field = flowController.getClass().getDeclaredField(fieldName);
+			// field.setAccessible(true);
+			field.set(flowController, value);
+			messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.INFO,
+					"Control parameter updated: " + key + " = " + value + " (field: " + fieldName + ")", null));
+			flowController.notifyParameterChanged(key);
+		} catch (final NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			messageQueue.offer(new InternalLogMessage(InternalLogMessage.MessageType.ERROR,
+					"Error updating control parameter: " + key + " = " + value + " (field: " + fieldName + ")", e));
+		}
+
+	}
+
 	@Override
-	public void updateConfigurationObjects(String name, JSONObject configurationObject) {
-		// TODO aggiorna la configurazione partendo dal JSON
+	public void updateControlParameters(RpcConfiguration configuration) {
+		if (configuration.getEpoch() > lastControlParameterEpoch) {
+			for (final Entry<String, Object> parameter : configuration.getValues().entrySet()) {
+				updateControlParameter(parameter.getKey(), parameter.getValue());
+			}
+			lastControlParameterEpoch = configuration.getEpoch();
+		}
+	}
+
+	private void updateOrDeleteConfiguration(RpcConfiguration configuration) {
+		if (configuration.isDeleteMessage()) {
+			configurations.remove(configuration.getUniqueId());
+			flowController.notifyConfigurationChanged(configuration.getConfigurationId(),
+					ConfigurationChangeType.OBJECT_DELETED);
+		} else {
+			if (configurations.get(configuration.getUniqueId()).equals(configuration)
+					&& configuration.getEpoch() > configurations.get(configuration.getUniqueId()).getEpoch()) {
+				configurations.put(configuration.getUniqueId(), configuration);
+				flowController.notifyConfigurationChanged(configuration.getConfigurationId(),
+						ConfigurationChangeType.OBJECT_UPDATED);
+			}
+		}
 
 	}
 

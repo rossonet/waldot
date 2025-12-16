@@ -27,6 +27,7 @@ public class WaldotX509IdentityValidator extends X509IdentityValidator {
 	}
 
 	public WaldotX509IdentityValidator(final WaldotConfiguration configuration) {
+		// TODO completare
 		super(getAuthChallenge(configuration));
 	}
 

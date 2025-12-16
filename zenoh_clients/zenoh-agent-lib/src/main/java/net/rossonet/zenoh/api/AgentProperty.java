@@ -160,8 +160,8 @@ public class AgentProperty implements Serializable {
 		return annotation;
 	}
 
-	public String getName() {
-		return propertyName;
+	public String getFieldName() {
+		return fieldName;
 	}
 
 	public String getPropertyName() {

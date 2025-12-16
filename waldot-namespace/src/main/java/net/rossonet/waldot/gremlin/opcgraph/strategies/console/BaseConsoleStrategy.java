@@ -5,14 +5,14 @@ import org.slf4j.Logger;
 
 import net.rossonet.waldot.api.annotation.WaldotConsoleStrategy;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.rules.ExecutorHelper;
+import net.rossonet.waldot.api.rules.RuleExecutorHelper;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.jexl.JexlExecutorHelper;
 
 @WaldotConsoleStrategy
 public class BaseConsoleStrategy implements ConsoleStrategy {
 	private WaldotNamespace waldotNamespace;
-	private ExecutorHelper baseExecutor;
+	private RuleExecutorHelper baseExecutor;
 	private Logger logger;
 
 	@Override

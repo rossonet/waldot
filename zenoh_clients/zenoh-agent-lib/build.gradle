@@ -41,6 +41,7 @@ dependencies {
     api 'org.json:json:20250107'
     api project(':waldot-api')
     api("com.google.guava:guava:33.5.0-jre")
+    api("com.jsoniter:jsoniter:0.9.23")
     // TODO: implementare agente BGP
     //api("org.opendaylight.bgpcep:bgp-rib-impl:0.23.1")
     //api("org.opendaylight.bgpcep:bgp-mvpn:0.23.1")

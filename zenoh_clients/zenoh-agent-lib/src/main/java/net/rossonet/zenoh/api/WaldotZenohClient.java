@@ -1,10 +1,10 @@
 package net.rossonet.zenoh.api;
 
 import java.util.Collection;
-import java.util.Map;
 
-import net.rossonet.zenoh.WaldotZenohException;
+import io.zenoh.exceptions.ZError;
 import net.rossonet.zenoh.api.message.TelemetryMessage;
+import net.rossonet.zenoh.exception.WaldotZenohException;
 
 public interface WaldotZenohClient extends AutoCloseable {
 
@@ -13,10 +13,6 @@ public interface WaldotZenohClient extends AutoCloseable {
 	}
 
 	void addErrorCallback(AgentErrorHandler agentErrorHandler);
-
-	Map<String, AgentCommand> getCommands();
-
-	Map<String, AgentConfigurationObject> getConfigurationObjects();
 
 	String getRuntimeUniqueId();
 
@@ -27,6 +23,8 @@ public interface WaldotZenohClient extends AutoCloseable {
 	Collection<AgentErrorHandler> listErrorCallback();
 
 	void removeErrorCallback(AgentErrorHandler agentErrorHandler);
+
+	void scouting(long milliseconds) throws ZError, InterruptedException;
 
 	boolean sendInternalTelemetry(TelemetryMessage<?> telemetryData);
 

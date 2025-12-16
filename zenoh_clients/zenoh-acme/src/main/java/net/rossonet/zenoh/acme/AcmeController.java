@@ -39,6 +39,7 @@ public class AcmeController implements AnnotatedAgentController {
 	@ExportedCommand(description = "Get the list of simulated sensors", name = "Get Simulated Sensors", returnName = "Sensors", returnDescription = "List of simulated sensors that match the filter")
 	public List<String> getSimulatedSensors(
 			@ExportedMethodParameter(name = "filter", description = "selection filter", mandatary = false) String Filter) {
+		System.out.println("Command getSimulatedSensors called with filter: " + Filter);
 		return simulatedSensors;
 	}
 
@@ -55,7 +56,7 @@ public class AcmeController implements AnnotatedAgentController {
 	}
 
 	@Override
-	public void notifyObjectConfigurationChanged(String objectName, ConfigurationChangeType changeType) {
+	public void notifyConfigurationChanged(String objectName, ConfigurationChangeType changeType) {
 		// TODO Auto-generated method stub
 
 	}

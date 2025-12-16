@@ -13,12 +13,12 @@ import net.rossonet.waldot.dtdl.RelationshipObject;
 import net.rossonet.waldot.dtdl.Schema;
 import net.rossonet.zenoh.annotation.ExportedParameter;
 
-public class AgentConfigurationObject implements Serializable {
+public class AgentConfigurationMetadata implements Serializable {
 
 	private static final long serialVersionUID = 570922610537305674L;
 
-	public static Map<String, AgentConfigurationObject> fromDtml(DtdlHandler dtmlHandler) {
-		final Map<String, AgentConfigurationObject> configurations = new HashMap<>();
+	public static Map<String, AgentConfigurationMetadata> fromDtml(DtdlHandler dtmlHandler) {
+		final Map<String, AgentConfigurationMetadata> configurations = new HashMap<>();
 		for (final RelationshipObject configuration : dtmlHandler.getRelationships()) {
 			final Map<String, AgentProperty> props = new HashMap<>();
 			for (final var propertyObject : configuration.getProperties()) {
@@ -107,10 +107,10 @@ public class AgentConfigurationObject implements Serializable {
 				};
 				final AgentProperty agentProperty = new AgentProperty(propertyObject.getName(), null, null, annotation);
 
-				props.put(agentProperty.getName(), agentProperty);
+				props.put(agentProperty.getPropertyName(), agentProperty);
 			}
-			final AgentConfigurationObject configurationObject = new AgentConfigurationObject(configuration.getName(),
-					configuration.getTarget(), configuration.getDescription(), props,
+			final AgentConfigurationMetadata configurationObject = new AgentConfigurationMetadata(
+					configuration.getName(), configuration.getTarget(), configuration.getDescription(), props,
 					Boolean.valueOf(configuration.getComment()));
 			configurations.put(configurationObject.configurationName, configurationObject);
 		}
@@ -123,7 +123,7 @@ public class AgentConfigurationObject implements Serializable {
 	private final Map<String, AgentProperty> properties;
 	private final boolean unique;
 
-	public AgentConfigurationObject(String configurationName, String configurationClassName, String description,
+	public AgentConfigurationMetadata(String configurationName, String configurationClassName, String description,
 			Map<String, AgentProperty> properties, boolean unique) {
 		this.configurationName = configurationName;
 		this.configurationClassName = configurationClassName;

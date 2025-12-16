@@ -39,9 +39,9 @@ import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
+import net.rossonet.waldot.agent.auth.ClientRegisterAnonymousValidator;
+import net.rossonet.waldot.agent.auth.ClientRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.agent.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
@@ -55,7 +55,7 @@ import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
-import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.api.strategies.BootstrapStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
@@ -74,12 +74,12 @@ import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
-	private AgentRegisterAnonymousValidator agentAnonymousValidator;
+	private ClientRegisterAnonymousValidator agentAnonymousValidator;
 
-	private AgentRegisterUsernameIdentityValidator agentIdentityValidator;
+	private ClientRegisterUsernameIdentityValidator agentIdentityValidator;
 
-	private final AgentManagementStrategy agentManagementStrategy;
-	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
+	private final ClientManagementStrategy agentManagementStrategy;
+	private ClientRegisterX509IdentityValidator agentX509IdentityValidator;
 	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
 	private final BootstrapStrategy bootstrapProcedureStrategy;
 	private final String bootstrapUrl;
@@ -106,7 +106,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	public HomunculusNamespace(final WaldotOpcUaServer server, final MiloStrategy opcMappingStrategy,
 			HistoryStrategy historyStrategy, final ConsoleStrategy consoleStrategy,
 			final DefaultHomunculusConfiguration configuration, final BootstrapStrategy bootstrapProcedureStrategy,
-			final AgentManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
+			final ClientManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
@@ -138,7 +138,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public void addAssetAgentNode(UaNode assetManagerComponent) {
 		getStorageManager().addNode(assetManagerComponent);
-		agentManagementStrategy.getAssetAgentsFolderNode().addOrganizes(assetManagerComponent);
+		agentManagementStrategy.getAssetClientsFolderNode().addOrganizes(assetManagerComponent);
 	}
 
 	private void addBaseCommands() {
@@ -224,7 +224,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public AgentManagementStrategy getAgentManagementStrategy() {
+	public ClientManagementStrategy getAgentManagementStrategy() {
 		return agentManagementStrategy;
 	}
 
@@ -497,9 +497,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public void registerAgentValidators(final AgentRegisterAnonymousValidator agentAnonymousValidator,
-			final AgentRegisterUsernameIdentityValidator agentIdentityValidator,
-			final AgentRegisterX509IdentityValidator agentX509IdentityValidator) {
+	public void registerAgentValidators(final ClientRegisterAnonymousValidator agentAnonymousValidator,
+			final ClientRegisterUsernameIdentityValidator agentIdentityValidator,
+			final ClientRegisterX509IdentityValidator agentX509IdentityValidator) {
 		this.agentAnonymousValidator = agentAnonymousValidator;
 		this.agentIdentityValidator = agentIdentityValidator;
 		this.agentX509IdentityValidator = agentX509IdentityValidator;

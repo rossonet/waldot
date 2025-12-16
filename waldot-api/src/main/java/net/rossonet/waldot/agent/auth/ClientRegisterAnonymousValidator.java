@@ -13,26 +13,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.auth.WaldotAnonymousValidator;
-import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
-public class AgentRegisterAnonymousValidator extends WaldotAnonymousValidator implements AgentAuthenticator {
-	private AgentManagementStrategy agentManagementStrategy;
+public class ClientRegisterAnonymousValidator extends WaldotAnonymousValidator implements ClientAuthenticator {
+	private ClientManagementStrategy agentManagementStrategy;
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	public AgentRegisterAnonymousValidator(final WaldotOpcUaServer waldotOpcUaServer) {
+	public ClientRegisterAnonymousValidator(final WaldotOpcUaServer waldotOpcUaServer) {
 		super(waldotOpcUaServer.getWaldotConfiguration());
 	}
 
 	@Override
 	public Set<UserTokenType> getSupportedTokenTypes() {
-		// TODO Auto-generated method stub
+		// TODO completare
 		return Collections.emptySet();
 	}
 
 	@Override
-	public void setAgentManagementStrategy(final AgentManagementStrategy agentManagementStrategy) {
+	public void setAgentManagementStrategy(final ClientManagementStrategy agentManagementStrategy) {
 		this.agentManagementStrategy = agentManagementStrategy;
 
 	}
@@ -41,9 +41,9 @@ public class AgentRegisterAnonymousValidator extends WaldotAnonymousValidator im
 	public AnonymousIdentity validateAnonymousToken(final Session session, final AnonymousIdentityToken token,
 			final UserTokenPolicy tokenPolicy, final SignatureData tokenSignature) {
 		if (session.getEndpoint().getEndpointUrl().endsWith(WaldotOpcUaServer.REGISTER_PATH)) {
-			final String sessionDataForLogging = AgentAuthenticator.generateSessionDataForLogging(session);
+			final String sessionDataForLogging = ClientAuthenticator.generateSessionDataForLogging(session);
 			logger.info("\n *** NEW ANONYMOUS REGISTRATION AGENT REQUEST\n{}", sessionDataForLogging);
-			return agentManagementStrategy.registerNewAgentForApproval(session);
+			return agentManagementStrategy.registerNewClientForApproval(session);
 		} else {
 			throw new IllegalArgumentException(
 					"Agent validation is only allowed for sessions with endpoint URL ending with '"

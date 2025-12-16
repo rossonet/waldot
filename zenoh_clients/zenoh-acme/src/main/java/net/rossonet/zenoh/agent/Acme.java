@@ -4,10 +4,12 @@ import java.util.UUID;
 
 import io.zenoh.Config;
 import net.rossonet.waldot.utils.LogHelper;
-import net.rossonet.zenoh.WaldotZenohException;
 import net.rossonet.zenoh.annotation.AbstractAgentAnnotationControlHandler;
+import net.rossonet.zenoh.api.InternalLogMessage;
+import net.rossonet.zenoh.api.TelemetryData;
 import net.rossonet.zenoh.api.message.TelemetryMessage;
 import net.rossonet.zenoh.client.WaldotZenohClientImpl;
+import net.rossonet.zenoh.exception.WaldotZenohException;
 
 public class Acme {
 
@@ -19,13 +21,23 @@ public class Acme {
 		acme.startAgent();
 	}
 
+	private WaldotZenohClientImpl client;
+
 	private final AbstractAgentAnnotationControlHandler controlHandler = new AbstractAgentAnnotationControlHandler(
 			NET_ROSSONET_ZENOH_ACME) {
 
 		@Override
+		protected void doShutdown() {
+			System.out.println("Shutting down Acme agent");
+			System.exit(0);
+
+		}
+
+		@Override
 		protected void elaborateErrorMessage(InternalLogMessage errorMessage) {
 			System.err.println("ERROR: " + errorMessage.getMessage() + " stacktrace: "
-					+ LogHelper.stackTraceToString(errorMessage.getException()));
+					+ (errorMessage.getException() != null ? (LogHelper.stackTraceToString(errorMessage.getException()))
+							: ""));
 
 		}
 
@@ -36,8 +48,8 @@ public class Acme {
 		}
 
 		@Override
-		protected void elaborateTelemetryUpdate(TelemetryMessage<?> telemetry) {
-			System.out.println("Telemetry update: " + telemetry.toString());
+		protected void elaborateTelemetryUpdate(TelemetryData node, TelemetryMessage<?> telemetry) {
+			System.out.println("Telemetry update for node " + node + " with value " + telemetry.getValue());
 
 		}
 
@@ -61,13 +73,6 @@ public class Acme {
 			return "1";
 		}
 
-		@Override
-		protected void shutdown() {
-			System.out.println("Shutting down Acme agent");
-			System.exit(0);
-
-		}
-
 	};
 
 	private final String runtimeUniqueId;
@@ -77,7 +82,8 @@ public class Acme {
 	}
 
 	public void startAgent() {
-		try (WaldotZenohClientImpl client = new WaldotZenohClientImpl(runtimeUniqueId, controlHandler)) {
+		try {
+			client = new WaldotZenohClientImpl(runtimeUniqueId, controlHandler);
 			final Config config = Config.loadDefault();
 			client.setZenohConfig(config);
 			client.start();

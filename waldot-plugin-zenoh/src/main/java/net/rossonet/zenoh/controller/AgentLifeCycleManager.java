@@ -11,10 +11,9 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.zenoh.handlers.Callback;
-import io.zenoh.sample.Sample;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
+import net.rossonet.waldot.utils.ThreadHelper;
 import net.rossonet.zenoh.ZenohHelper;
 import net.rossonet.zenoh.client.ZenohClientFacade;
 
@@ -23,38 +22,13 @@ import net.rossonet.zenoh.client.ZenohClientFacade;
  * Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public class AgentLifeCycleManager extends AbstractOpcVertex {
-	public static class AgentDiscoveryHandler implements Callback<Sample> {
-
-		private final AgentLifeCycleManager lifeCycleManager;
-
-		public AgentDiscoveryHandler(AgentLifeCycleManager lifeCycleManager) {
-			this.lifeCycleManager = lifeCycleManager;
-		}
-
-		@Override
-		public void run(Sample sample) {
-			JSONObject payloadJson = null;
-			try {
-				payloadJson = new JSONObject(sample.getPayload().toString());
-			} catch (final Exception e) {
-				logger.error("Error parsing discovery message payload: {}", sample.getPayload(), e);
-			}
-			if (payloadJson == null) {
-				logger.warn("Received invalid discovery message: {}", sample.getPayload());
-				return;
-			} else {
-				lifeCycleManager.discoveryFromAgentReceived(sample.getKeyExpr().toString(), payloadJson);
-			}
-		}
-
-	}
 
 	private static final Logger logger = LoggerFactory.getLogger(AgentLifeCycleManager.class);
 	private boolean active = true;
+	private final AgentStore agentStore;
 	private boolean connected = false;
 	private final WaldotGraph graph;
 	private final Thread lifeCycleThread;
-	private final AgentStore agentStore;
 	private final ZenohClientFacade zenohClient;
 	private Vertex zenohClientVertex;
 
@@ -71,7 +45,7 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 		zenohClient.setLifeCycleManager(this);
 		agentStore.setAgentLifeCycleManager(this);
 		active = true;
-		lifeCycleThread = new Thread(() -> {
+		lifeCycleThread = ThreadHelper.ofVirtual().name("lifecycle").unstarted(() -> {
 			while (active) {
 				try {
 					checkClientConnection();
@@ -82,8 +56,8 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 						setConnected(false);
 					}
 					Thread.sleep(agentStore.getPeriodicallyCheckIntervalMs());
-				} catch (final Exception e) {
-					e.printStackTrace();
+				} catch (final Throwable e) {
+					logger.error("Error in AgentLifeCycleManager lifeCycleThread", e);
 				}
 			}
 		});
@@ -141,7 +115,6 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 			if (agentStore.registerNewAgent(agent)) {
 				logger.info("Registered new agent from discovery message: {}", discoveryMessage.toString(2));
 				agent.setManagedVertex(graph.addVertex(agent.getAgentVertexProperties()));
-				agent.sendAcknowLedgeMessage();
 			} else {
 				logger.warn("Agent from discovery message not registered by agentStore: {}",
 						discoveryMessage.toString(2));

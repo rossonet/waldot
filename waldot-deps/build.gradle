@@ -39,6 +39,8 @@ dependencies {
     api 'org.json:json:20250107'
     api 'org.yaml:snakeyaml:2.4'
     api 'org.apache.commons:commons-jexl3:3.4.0'
+    // libreria ICE
+    api("org.jitsi:ice4j:3.2-9-gb64c86f")
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
     api group: 'com.github.jsonld-java', name: 'jsonld-java', version: '0.13.6'
     // gremlin

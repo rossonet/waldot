@@ -1,6 +1,14 @@
 package net.rossonet.zenoh.api.message;
 
+import java.time.Instant;
+
 import org.json.JSONObject;
+
+import com.jsoniter.JsonIterator;
+import com.jsoniter.any.Any;
+import com.jsoniter.output.JsonStream;
+
+import net.rossonet.zenoh.exception.ZenohSerializationException;
 
 public final class TelemetryMessage<VALUE_TYPE> {
 
@@ -11,24 +19,23 @@ public final class TelemetryMessage<VALUE_TYPE> {
 	private static final String TELEMETRY_TYPE_FIELD = "t";
 	private static final String TELEMETRY_VALUE_FIELD = "v";
 
-	public static final TelemetryMessage<?> fromJson(JSONObject jsonObject) {
+	public static final TelemetryMessage<?> fromJson(JSONObject jsonObject) throws ZenohSerializationException {
 		final long id = jsonObject.getLong(TELEMETRY_ID_FIELD);
 		final String type = jsonObject.getString(TELEMETRY_TYPE_FIELD);
-		final Object v = jsonObject.get(TELEMETRY_VALUE_FIELD);
+		final JSONObject v = jsonObject.getJSONObject(TELEMETRY_VALUE_FIELD);
 		final int q = jsonObject.getInt(TELEMETRY_QUALITY_FIELD);
 		final long time = jsonObject.getLong(TELEMETRY_TIMESTAMP_FIELD);
 		final long ttl = jsonObject.getLong(TELEMETRY_TTL_FIELD);
-		switch (type) {
-		case "java.lang.Long":
-			return new TelemetryMessage<Long>(id, (Long) v, time, TelemetryQuality.fromCode(q), ttl);
-		case "java.lang.Integer":
-			return new TelemetryMessage<Integer>(id, (Integer) v, time, TelemetryQuality.fromCode(q), ttl);
-		case "java.lang.String":
-			return new TelemetryMessage<String>(id, (String) v, time, TelemetryQuality.fromCode(q), ttl);
-//TODO: completare tipo dati
+		final Any value = JsonIterator.deserialize(v.toString());
+		if (value.object() == null) {
+			throw new ZenohSerializationException("null value");
 		}
-		return null;
-
+		if (!value.object().getClass().getCanonicalName().equals(type)) {
+			throw new ZenohSerializationException(
+					"message with declared type: " + type + " but the generated object type is: "
+							+ value.object().getClass().getCanonicalName() + " -- value: " + v.toString(2));
+		}
+		return new TelemetryMessage<>(id, value.object(), time, TelemetryQuality.fromCode(q), ttl);
 	}
 
 	private final TelemetryQuality quality;
@@ -105,21 +112,16 @@ public final class TelemetryMessage<VALUE_TYPE> {
 		builder.append(", quality=");
 		builder.append(quality);
 		builder.append(", timestamp (ms since 1/1/1970)=");
-		builder.append(timestamp);
+		builder.append(", timestamp human readable=");
+		final Instant instant = Instant.ofEpochMilli(timestamp);
+		builder.append(instant.toString());
 		builder.append(", ttl (ms)=");
 		builder.append(ttlMs);
 		builder.append("]");
 		return builder.toString();
 	}
 
-	private Object valueToJson() {
-		final String canonical = value.getClass().getCanonicalName();
-		if ("java.lang.Long".equals(canonical) && "java.lang.Integer".equals(canonical)
-				&& "java.lang.String".equals(canonical)) {
-			return value;
-		} else {
-			// TODO: completa i tipi dato
-			return null;
-		}
+	private String valueToJson() {
+		return JsonStream.serialize(value);
 	}
 }

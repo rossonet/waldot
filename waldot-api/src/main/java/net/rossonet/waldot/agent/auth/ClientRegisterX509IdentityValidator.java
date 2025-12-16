@@ -7,23 +7,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.auth.WaldotX509IdentityValidator;
-import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
-public class AgentRegisterX509IdentityValidator extends WaldotX509IdentityValidator implements AgentAuthenticator {
-	private AgentManagementStrategy agentManagementStrategy;
+public class ClientRegisterX509IdentityValidator extends WaldotX509IdentityValidator implements ClientAuthenticator {
+	private ClientManagementStrategy agentManagementStrategy;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	public AgentRegisterX509IdentityValidator(final WaldotOpcUaServer waldotOpcUaServer) {
+	public ClientRegisterX509IdentityValidator(final WaldotOpcUaServer waldotOpcUaServer) {
 		super(waldotOpcUaServer.getWaldotConfiguration());
 
 	}
 
 	protected Object authenticateIdentityCertificate(final Session session, final X509Certificate identityCertificate) {
 		if (session.getEndpoint().getEndpointUrl().endsWith(WaldotOpcUaServer.REGISTER_PATH)) {
-			final String sessionDataForLogging = AgentAuthenticator.generateSessionDataForLogging(session);
+			final String sessionDataForLogging = ClientAuthenticator.generateSessionDataForLogging(session);
 			logger.info("\n *** NEW AGENT UPDATE CERTIFICATE REQUEST\n{}", sessionDataForLogging);
-			return agentManagementStrategy.updateAgentCertificate(session, identityCertificate);
+			return agentManagementStrategy.updateClientCertificate(session, identityCertificate);
 		} else {
 			throw new IllegalArgumentException(
 					"Agent validation is only allowed for sessions with endpoint URL ending with '"
@@ -32,7 +32,7 @@ public class AgentRegisterX509IdentityValidator extends WaldotX509IdentityValida
 	}
 
 	@Override
-	public void setAgentManagementStrategy(final AgentManagementStrategy agentManagementStrategy) {
+	public void setAgentManagementStrategy(final ClientManagementStrategy agentManagementStrategy) {
 		this.agentManagementStrategy = agentManagementStrategy;
 
 	}

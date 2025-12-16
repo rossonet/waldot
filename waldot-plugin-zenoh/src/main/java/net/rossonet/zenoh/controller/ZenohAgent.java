@@ -1,11 +1,17 @@
 package net.rossonet.zenoh.controller;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
@@ -16,36 +22,41 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.zenoh.bytes.Encoding;
+import io.zenoh.exceptions.ZError;
 import io.zenoh.handlers.Callback;
+import io.zenoh.keyexpr.KeyExpr;
+import io.zenoh.pubsub.CallbackSubscriber;
+import io.zenoh.pubsub.Publisher;
 import io.zenoh.pubsub.PutOptions;
-import io.zenoh.qos.CongestionControl;
-import io.zenoh.qos.Priority;
-import io.zenoh.qos.Reliability;
 import io.zenoh.sample.Sample;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.dtdl.DtdlHandler;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
+import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.TextHelper;
-import net.rossonet.zenoh.WaldotZenohException;
 import net.rossonet.zenoh.ZenohHelper;
-import net.rossonet.zenoh.api.AgentCommand;
-import net.rossonet.zenoh.api.AgentConfigurationObject;
+import net.rossonet.zenoh.api.AgentCommandMetadata;
+import net.rossonet.zenoh.api.AgentConfigurationMetadata;
 import net.rossonet.zenoh.api.AgentProperty;
 import net.rossonet.zenoh.api.TelemetryData;
+import net.rossonet.zenoh.api.message.RpcCommand;
 import net.rossonet.zenoh.controller.command.StartAgentCommand;
 import net.rossonet.zenoh.controller.command.StopAgentCommand;
+import net.rossonet.zenoh.controller.command.SuspendedCommand;
+import net.rossonet.zenoh.exception.WaldotZenohException;
+import net.rossonet.zenoh.exception.ZenohSerializationException;
 
 /**
  * * Represents a Zenoh Agent managed by the AgentLifeCycleManager
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public class ZenohAgent {
+public class ZenohAgent implements AutoCloseable {
 
 	private final static Logger logger = LoggerFactory.getLogger(ZenohAgent.class);
+	protected static final long TIMEOUT_COMMAND_MS = 10000;
 
 	public static ZenohAgent fromDiscoveryMessage(AgentLifeCycleManager agentLifeCycleManager,
 			JSONObject discoveryMessage, String agentOpcUaDirectory) throws WaldotZenohException {
@@ -57,21 +68,27 @@ public class ZenohAgent {
 				discoveryMessageTime);
 	}
 
-	private final Map<String, AbstractOpcCommand> activeAddObjectCommands = new HashMap<>();
-	private final Map<String, AbstractOpcCommand> activeCommands = new HashMap<>();
 	private transient AgentLifeCycleManager agentLifeCycleManager;
 	private Vertex agentManagerVertex;
 	private final int apiVersion;
 	private final String baseAgentsOpcDirectory;
-	private final Map<String, AgentConfigurationObject> configurationObjects = new HashMap<>();
+	private final Map<String, AgentConfigurationMetadata> configurationObjects = new HashMap<>();
 	private final Map<String, Vertex> configurationObjectVertices = new HashMap<>();
 	private DtdlHandler dtmlHandler;
 	private long lastDiscoveryMessageAtMs;
+	private volatile long lastSeenMs;
+	private final Map<String, AbstractOpcCommand> opcAddObjectCommands = new HashMap<>();
+	private final Map<String, AbstractOpcCommand> opcRegisterCommands = new HashMap<>();
 	private final Map<String, AgentProperty> propertyObjects = new HashMap<>();
-	private final Map<String, AgentCommand> registerCommands = new HashMap<>();
+	private final Map<String, Publisher> publishers = new ConcurrentHashMap<>();
+	private final Map<String, AgentCommandMetadata> registerCommands = new HashMap<>();
 	private final Map<String, TelemetryData> registerTelemetries = new HashMap<>();
+
 	private StartAgentCommand startCommand;
 	private StopAgentCommand stopCommand;
+	private final Map<String, CallbackSubscriber> subcribers = new ConcurrentHashMap<>();
+	private final Map<Long, SuspendedCommand> suspendedCommands = new ConcurrentHashMap<>();
+
 	private final String uniqueId;
 
 	public ZenohAgent(AgentLifeCycleManager agentLifeCycleManager, String uniqueId, String baseAgentsOpcuaDirectory,
@@ -86,16 +103,18 @@ public class ZenohAgent {
 			logger.error("Error parsing DTML from discovery info for agent {}", uniqueId, e);
 		}
 		this.apiVersion = apiVersion;
-		updateConfigurationObjects(AgentConfigurationObject.fromDtml(dtmlHandler));
-		updateCommands(AgentCommand.fromDtml(dtmlHandler));
-		updateTelemetryObjects(TelemetryData.fromDtml(dtmlHandler));
-		updatePropertyObjects(AgentProperty.fromDtml(dtmlHandler));
+		updateConfigurationMetadatas(AgentConfigurationMetadata.fromDtml(dtmlHandler));
+		updateCommandMetadatas(AgentCommandMetadata.fromDtml(dtmlHandler));
+		updateTelemetryMetadatas(TelemetryData.fromDtml(dtmlHandler));
+		updatePropertyMetadatas(AgentProperty.fromDtml(dtmlHandler));
 		subscribeToUpdateDiscoveryTopic();
+		subscribeToAgentCommandReplyTopic();
 		subscribeToAgentTelemetryTopic();
 		subscribeToAgentInternalTelemetryTopic();
-		subscribeToAgentKeepAliveTopic();
+		subscribeToAgentPongTopic();
 		subscribeToAgentConfigurationsTopic();
 		subscribeToAgentParametersTopic();
+		lastSeenMs = System.currentTimeMillis();
 	}
 
 	private void addBaseCommands() {
@@ -105,8 +124,8 @@ public class ZenohAgent {
 		agentLifeCycleManager.getNamespace().registerCommand(stopCommand);
 	}
 
-	private void addObjectAddCommand(String objectName, AgentConfigurationObject objectDetails) {
-		if (activeAddObjectCommands.containsKey(objectName)) {
+	private void addObjectAddCommand(String objectName, AgentConfigurationMetadata objectDetails) {
+		if (opcAddObjectCommands.containsKey(objectName)) {
 			logger.debug("Add Object Command {} already exists for agent {}, updating if necessary", objectName,
 					uniqueId);
 			// TODO: il cambio delle caratteristiche del comando se necessario
@@ -152,26 +171,93 @@ public class ZenohAgent {
 					logger.debug("Adding configuration object vertex with properties: {}", properties);
 					final Vertex objectVertex = agentLifeCycleManager.getGraph().addVertex(objects);
 					configurationObjectVertices.put(idToAdd, objectVertex);
-					sendObjectConfigurationUpdate(idToAdd, objectVertex);
+					sendConfigurationUpdate(idToAdd, objectVertex);
 					return new Object[] {};
 				}
 			};
 			command.addInputArgument("name", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 					LocalizedText.english("name of the object to add"));
 			agentLifeCycleManager.getNamespace().registerCommand(command);
-			activeAddObjectCommands.put(objectName, command);
+			opcAddObjectCommands.put(objectName, command);
 			logger.info("Registered new Add Object command {} for agent {}", objectName, uniqueId);
 		}
 
 	}
 
 	public void checkAgentStatus() {
-		// TODO controllare lo stato dell'agente e inviare un messaggio di keep alive se
-		// necessario
+		if (System.currentTimeMillis() - lastSeenMs > (ZenohHelper.AGENT_TIMEOUT_MS / 2)) {
+			sendPing();
+		}
+		// TODO: gestire agente considerato offline
+	}
+
+	@Override
+	public void close() throws Exception {
+		for (final CallbackSubscriber subscriber : subcribers.values()) {
+			subscriber.close();
+		}
+		subcribers.clear();
+		for (final Publisher publisher : publishers.values()) {
+			try {
+				publisher.close();
+			} catch (final Exception e) {
+				logger.error("Error closing publisher for agent {}", uniqueId, e);
+			}
+		}
+		publishers.clear();
+	}
+
+	private void elaborateCommandReplyMessage(Sample sample) {
+		JSONObject payloadJson = null;
+		try {
+			payloadJson = new JSONObject(sample.getPayload().toString());
+		} catch (final Exception e) {
+			logger.error("Error parsing command reply message payload: {}", sample.getPayload(), e);
+			return;
+		}
+		try {
+			final RpcCommand command = RpcCommand.fromJson(payloadJson);
+			if (!suspendedCommands.containsKey(command.getRelatedId())) {
+				logger.warn("Received reply for unknown command with id {} from agent {}", command.getUniqueId(),
+						uniqueId);
+				return;
+			} else {
+				final SuspendedCommand suspendedCommand = suspendedCommands.get(command.getRelatedId());
+				if (command.getAgentId() == null || !command.getAgentId().equals(uniqueId)) {
+					logger.warn(
+							"Received reply for command with id {} from different agent {} instead of expected agent {}",
+							command.getUniqueId(), command.getAgentId(), uniqueId);
+					return;
+				}
+				if (suspendedCommand.getCommandId() == null
+						|| !suspendedCommand.getCommandId().equals(command.getCommandId())) {
+					logger.warn(
+							"Received reply for command with id {} with different command id {} instead of expected command id {}",
+							command.getUniqueId(), command.getCommandId(), suspendedCommand.getCommandId());
+					return;
+				}
+				suspendedCommand.setReplyMessage(command.getReplyMessage());
+				suspendedCommand.setSuccess(command.getExecutionCommandException() == null);
+				suspendedCommand.setErrorMessage(command.getExecutionCommandException() != null
+						? command.getExecutionCommandException().getMessage()
+						: null);
+				suspendedCommand.setReplyTimeMs(Instant.now().toEpochMilli());
+				suspendedCommand.setStackTrace(command.getExecutionCommandException() != null
+						? LogHelper.stackTraceToString(command.getExecutionCommandException())
+						: null);
+				suspendedCommand.setCompleted(true);
+				synchronized (suspendedCommand) {
+					suspendedCommand.notifyAll();
+				}
+				suspendedCommands.remove(command.getUniqueId());
+			}
+		} catch (final ZenohSerializationException e) {
+			logger.error("Error deserializing command reply message payload: {}", payloadJson, e);
+		}
 
 	}
 
-	protected void elaborateConfigurationObjectsMessage(Sample sample) {
+	private void elaborateConfigurationMessage(Sample sample) {
 		// TODO elaborate messaggio di configurazione oggetti
 
 	}
@@ -181,28 +267,82 @@ public class ZenohAgent {
 
 	}
 
-	protected void elaborateKeepAliveMessage(Sample sample) {
-		// TODO elaborare messaggio di keep alive
-
-	}
-
-	protected void elaborateParameterMessage(Sample sample) {
+	private void elaborateParameterMessage(Sample sample) {
 		// TODO elaborare messaggio di parametro
 
 	}
 
-	protected void elaborateTelemetryMessage(Sample sample) {
-		// TODO elaborare messaggio di telemetria con controllo di flusso
+	private void elaboratePongMessage(Sample sample) {
+		lastSeenMs = System.currentTimeMillis();
+	}
+
+	public Future<SuspendedCommand> elaborateRemoteCommandOnAgent(String commandId, String[] inputValues) {
+		final String topic = ZenohHelper.getRpcCommandTopic(getUniqueId(), commandId);
+		// final AgentCommandMetadata meta = registerCommands.get(commandId);
+		final Map<String, Object> values = new HashMap<>();
+		final RpcCommand rpcCommand = new RpcCommand(getUniqueId(), commandId, values);
+		try {
+			final SuspendedCommand calledCommand = new SuspendedCommand(rpcCommand);
+			suspendedCommands.put(rpcCommand.getUniqueId(), calledCommand);
+			sendMessage(topic, rpcCommand.toJson(), ZenohHelper.getCommandPutOptions());
+			return new Future<SuspendedCommand>() {
+
+				@Override
+				public boolean cancel(boolean mayInterruptIfRunning) {
+					return false;
+				}
+
+				@Override
+				public SuspendedCommand get() {
+					if (!calledCommand.isCompleted()) {
+						try {
+							synchronized (calledCommand) {
+								calledCommand.wait();
+							}
+						} catch (final InterruptedException e) {
+							logger.error("Interrupted while waiting for command {} response from agent {}", commandId,
+									uniqueId, e);
+						}
+					}
+					return calledCommand;
+				}
+
+				@Override
+				public SuspendedCommand get(long timeout, java.util.concurrent.TimeUnit unit) {
+					if (!calledCommand.isCompleted()) {
+						try {
+							synchronized (calledCommand) {
+								calledCommand.wait(unit.toMillis(timeout));
+							}
+						} catch (final InterruptedException e) {
+							logger.error("Interrupted while waiting for command {} response from agent {}", commandId,
+									uniqueId, e);
+						}
+					}
+					return calledCommand;
+				}
+
+				@Override
+				public boolean isCancelled() {
+					return false;
+				}
+
+				@Override
+				public boolean isDone() {
+					return calledCommand.isCompleted();
+				}
+
+			};
+		} catch (final WaldotZenohException e) {
+			logger.error("Error sending RPC command {} to agent {}", commandId, uniqueId, e);
+			return null;
+		}
 
 	}
 
-	private PutOptions getAcknowledgePutOptions() {
-		final PutOptions putOptions = new PutOptions();
-		putOptions.setEncoding(Encoding.ZENOH_STRING);
-		putOptions.setCongestionControl(CongestionControl.BLOCK);
-		putOptions.setReliability(Reliability.RELIABLE);
-		putOptions.setPriority(Priority.INTERACTIVE_HIGH);
-		return putOptions;
+	private void elaborateTelemetryMessage(Sample sample) {
+		// TODO elaborare messaggio di telemetria con controllo di flusso
+
 	}
 
 	public AgentLifeCycleManager getAgentLifeCycleManager() {
@@ -243,13 +383,8 @@ public class ZenohAgent {
 		return agentLifeCycleManager.getNamespace();
 	}
 
-	private void initializeOpcAgent() {
-		updateManagedVertexObjects();
-		addBaseCommands();
-	}
-
-	private void manageCommandOpcUaVertex(String commandName, AgentCommand commandDetails) {
-		if (activeCommands.containsKey(commandName)) {
+	private void manageCommandOpcUaVertex(String commandName, AgentCommandMetadata commandDetails) {
+		if (opcRegisterCommands.containsKey(commandName)) {
 			logger.debug("Command {} already exists for agent {}, updating if necessary", commandName, uniqueId);
 			// TODO: gestire il cambio delle caratteristiche del comando se necessario
 		} else {
@@ -260,118 +395,159 @@ public class ZenohAgent {
 					UInteger.valueOf(commandDetails.getWriteMask()),
 					UInteger.valueOf(commandDetails.getUserWriteMask()), commandDetails.isExecutable(),
 					commandDetails.isUserExecutable()) {
-
+//TODO aggiungere gli argomenti di input e output del comando OPC UA
 				@Override
 				public Object[] runCommand(InvocationContext invocationContext, String[] inputValues) {
-					return sendCommandToAgent(commandName, inputValues);
+					try {
+						return elaborateRemoteCommandOnAgent(commandName, inputValues)
+								.get(TIMEOUT_COMMAND_MS, TimeUnit.MILLISECONDS).getOutputValues();
+					} catch (InterruptedException | ExecutionException | TimeoutException e) {
+						logger.error("Error executing command {} on agent {}", commandName, uniqueId, e);
+						return new SuspendedCommand(getUniqueId(), commandName, inputValues, e).getOutputValues();
+					}
 				}
 			};
 			agentLifeCycleManager.getNamespace().registerCommand(command);
-			activeCommands.put(commandName, command);
+			opcRegisterCommands.put(commandName, command);
 			logger.info("Registered new command {} for agent {}", commandName, uniqueId);
 		}
 
 	}
 
-	public void sendAcknowLedgeMessage() {
+	private void sendAcknowLedgeMessageToAgent() {
 		final String topic = ZenohHelper.getAcknowLedgeTopic(getUniqueId());
 		final JSONObject acknowledgeMessage = new JSONObject();
 		acknowledgeMessage.put(ZenohHelper.UNIQUE_ID_LABEL, uniqueId);
 		acknowledgeMessage.put(ZenohHelper.TIME_LABEL, System.currentTimeMillis());
 		try {
-			agentLifeCycleManager.getZenohClient().sendMessage(topic, acknowledgeMessage, getAcknowledgePutOptions());
+			sendMessage(topic, acknowledgeMessage, ZenohHelper.getAcknowledgePutOptions());
 		} catch (final WaldotZenohException e) {
 			logger.error("Error sending acknowledge message to agent {}", uniqueId, e);
 		}
 	}
 
-	public Object[] sendCommandToAgent(String commandId, String[] inputValues) {
-		final String topic = ZenohHelper.getRpcCommandTopic(getUniqueId(), commandId);
-
-		return new Object[0];
-	}
-
-	public void sendObjectConfigurationUpdate(String objectId, Vertex vertexRepresentation) {
+	public void sendConfigurationUpdate(String objectId, Vertex vertexRapresentation) {
 		// TODO invia aggiornamento configurazione oggetto all'agente
 
 	}
 
-	public void setManagedVertex(Vertex vertex) {
-		agentManagerVertex = vertex;
-		initializeOpcAgent();
+	private void sendMessage(String topic, JSONObject message, PutOptions putOption) throws WaldotZenohException {
+		if (!publishers.containsKey(topic)) {
+			try {
+				publishers.put(topic, agentLifeCycleManager.getZenohClient().getSession()
+						.declarePublisher(KeyExpr.tryFrom(topic), ZenohHelper.getGlobalPublisherOptions()));
+			} catch (final ZError e) {
+				logger.error("Error declaring publisher on topic {} for agent {}", topic, uniqueId, e);
+			}
+		}
+		try {
+			agentLifeCycleManager.getZenohClient().getSession().put(KeyExpr.tryFrom(topic), message.toString(),
+					putOption);
+			// publishers.get(topic).put(message.toString(), putOption);
+		} catch (final ZError e) {
+			logger.error("Error sending message on topic {} for agent {}", topic, uniqueId, e);
+		}
 	}
 
-	private void subscribeToAgentConfigurationsTopic() {
-		getAgentLifeCycleManager().getZenohClient()
-				.subscribe(ZenohHelper.getAgentConfigurationsTopicsAll(getUniqueId()), new Callback<Sample>() {
+	public void sendPing() {
+		final String topic = ZenohHelper.getPingTopic(getUniqueId());
+		final JSONObject pingMessage = new JSONObject();
+		pingMessage.put(ZenohHelper.UNIQUE_ID_LABEL, uniqueId);
+		pingMessage.put(ZenohHelper.TIME_LABEL, System.currentTimeMillis());
+		try {
+			sendMessage(topic, pingMessage, ZenohHelper.getPingPutOptions());
+		} catch (final WaldotZenohException e) {
+			logger.error("Error sending acknowledge message to agent {}", uniqueId, e);
+		}
+	}
+
+	public void setManagedVertex(Vertex vertex) {
+		agentManagerVertex = vertex;
+		updateManagedOpcVertexObjects();
+		addBaseCommands();
+		sendAcknowLedgeMessageToAgent();
+	}
+
+	private void subscribeToAgentCommandReplyTopic() {
+		final String agentControlReplyTopicsSubscriptionAll = ZenohHelper
+				.getAgentControlReplyTopicsSubscriptionAll(getUniqueId());
+		subcribers.put(agentControlReplyTopicsSubscriptionAll, getAgentLifeCycleManager().getZenohClient()
+				.subscribe(agentControlReplyTopicsSubscriptionAll, new Callback<Sample>() {
 
 					@Override
 					public void run(Sample sample) {
-						elaborateConfigurationObjectsMessage(sample);
+						elaborateCommandReplyMessage(sample);
 
 					}
 
-				});
+				}));
+
+	}
+
+	private void subscribeToAgentConfigurationsTopic() {
+		final String agentConfigurationsTopicsAll = ZenohHelper.getAgentConfigurationsTopicsAll(getUniqueId());
+		subcribers.put(agentConfigurationsTopicsAll, getAgentLifeCycleManager().getZenohClient()
+				.subscribe(agentConfigurationsTopicsAll, new Callback<Sample>() {
+					@Override
+					public void run(Sample sample) {
+						elaborateConfigurationMessage(sample);
+					}
+				}));
 
 	}
 
 	private void subscribeToAgentInternalTelemetryTopic() {
-		getAgentLifeCycleManager().getZenohClient()
-				.subscribe(ZenohHelper.getAgentInternalTelemetryTopicsAll(getUniqueId()), new Callback<Sample>() {
-
+		final String agentInternalTelemetryTopicsAll = ZenohHelper.getAgentInternalTelemetryTopicsAll(getUniqueId());
+		subcribers.put(agentInternalTelemetryTopicsAll, getAgentLifeCycleManager().getZenohClient()
+				.subscribe(agentInternalTelemetryTopicsAll, new Callback<Sample>() {
 					@Override
 					public void run(Sample sample) {
 						elaborateInternalTelemetryMessage(sample);
-
 					}
+				}));
 
-				});
-
-	}
-
-	private void subscribeToAgentKeepAliveTopic() {
-		getAgentLifeCycleManager().getZenohClient().subscribe(ZenohHelper.getAgentKeepAliveTopic(getUniqueId()),
-				new Callback<Sample>() {
-
-					@Override
-					public void run(Sample sample) {
-						elaborateKeepAliveMessage(sample);
-
-					}
-				});
 	}
 
 	private void subscribeToAgentParametersTopic() {
-		getAgentLifeCycleManager().getZenohClient().subscribe(ZenohHelper.getAgentParametersTopicsAll(getUniqueId()),
-				new Callback<Sample>() {
-
+		final String parameterTopic = ZenohHelper.getParameterTopic(getUniqueId());
+		subcribers.put(parameterTopic,
+				getAgentLifeCycleManager().getZenohClient().subscribe(parameterTopic, new Callback<Sample>() {
 					@Override
 					public void run(Sample sample) {
 						elaborateParameterMessage(sample);
-
 					}
-
-				});
+				}));
 
 	}
 
-	private void subscribeToAgentTelemetryTopic() {
-		getAgentLifeCycleManager().getZenohClient()
-				.subscribe(ZenohHelper.getAgentTelemetryTopicsSubscriptionAll(getUniqueId()), new Callback<Sample>() {
+	private void subscribeToAgentPongTopic() {
+		final String pongTopic = ZenohHelper.getPongTopic(getUniqueId());
+		subcribers.put(pongTopic,
+				getAgentLifeCycleManager().getZenohClient().subscribe(pongTopic, new Callback<Sample>() {
+					@Override
+					public void run(Sample sample) {
+						elaboratePongMessage(sample);
+					}
+				}));
+	}
 
+	private void subscribeToAgentTelemetryTopic() {
+		final String agentTelemetryTopicsSubscriptionAll = ZenohHelper
+				.getAgentTelemetryTopicsSubscriptionAll(getUniqueId());
+		subcribers.put(agentTelemetryTopicsSubscriptionAll, getAgentLifeCycleManager().getZenohClient()
+				.subscribe(agentTelemetryTopicsSubscriptionAll, new Callback<Sample>() {
 					@Override
 					public void run(Sample sample) {
 						elaborateTelemetryMessage(sample);
-
 					}
-				});
+				}));
 
 	}
 
 	private void subscribeToUpdateDiscoveryTopic() {
-		getAgentLifeCycleManager().getZenohClient().subscribe(ZenohHelper.getAgentUpdateDiscoveryTopic(getUniqueId()),
-				new Callback<Sample>() {
-
+		final String agentUpdateDiscoveryTopic = ZenohHelper.getAgentUpdateDiscoveryTopic(getUniqueId());
+		subcribers.put(agentUpdateDiscoveryTopic, getAgentLifeCycleManager().getZenohClient()
+				.subscribe(agentUpdateDiscoveryTopic, new Callback<Sample>() {
 					@Override
 					public void run(Sample sample) {
 						JSONObject payloadJson = null;
@@ -405,18 +581,17 @@ public class ZenohAgent {
 						} catch (final IOException e) {
 							logger.error("Error parsing DTML from discovery info for agent {}", uniqueId, e);
 						}
-						updateConfigurationObjects(AgentConfigurationObject.fromDtml(dtmlHandler));
-						updateCommands(AgentCommand.fromDtml(dtmlHandler));
-						updateTelemetryObjects(TelemetryData.fromDtml(dtmlHandler));
-						updatePropertyObjects(AgentProperty.fromDtml(dtmlHandler));
-						updateManagedVertexObjects();
-						sendAcknowLedgeMessage();
+						updateConfigurationMetadatas(AgentConfigurationMetadata.fromDtml(dtmlHandler));
+						updateCommandMetadatas(AgentCommandMetadata.fromDtml(dtmlHandler));
+						updateTelemetryMetadatas(TelemetryData.fromDtml(dtmlHandler));
+						updatePropertyMetadatas(AgentProperty.fromDtml(dtmlHandler));
+						updateManagedOpcVertexObjects();
 					}
-				});
+				}));
 	}
 
-	private void updateCommands(Map<String, AgentCommand> commands) {
-		for (final Map.Entry<String, AgentCommand> entry : commands.entrySet()) {
+	private void updateCommandMetadatas(Map<String, AgentCommandMetadata> commands) {
+		for (final Map.Entry<String, AgentCommandMetadata> entry : commands.entrySet()) {
 			if (!registerCommands.containsKey(entry.getKey())) {
 				registerCommands.put(entry.getKey(), entry.getValue());
 				logger.info("Registered new command {} for agent {}", entry.getKey(), uniqueId);
@@ -430,8 +605,8 @@ public class ZenohAgent {
 		}
 	}
 
-	private void updateConfigurationObjects(Map<String, AgentConfigurationObject> configurations) {
-		for (final Map.Entry<String, AgentConfigurationObject> entry : configurations.entrySet()) {
+	private void updateConfigurationMetadatas(Map<String, AgentConfigurationMetadata> configurations) {
+		for (final Map.Entry<String, AgentConfigurationMetadata> entry : configurations.entrySet()) {
 			if (!configurationObjects.containsKey(entry.getKey())) {
 				configurationObjects.put(entry.getKey(), entry.getValue());
 				logger.info("Registered new configuration object {} for agent {}", entry.getKey(), uniqueId);
@@ -445,11 +620,12 @@ public class ZenohAgent {
 		}
 	}
 
-	private void updateManagedVertexObjects() {
-		for (final Map.Entry<String, AgentConfigurationObject> configurationObject : configurationObjects.entrySet()) {
+	private void updateManagedOpcVertexObjects() {
+		for (final Map.Entry<String, AgentConfigurationMetadata> configurationObject : configurationObjects
+				.entrySet()) {
 			addObjectAddCommand(configurationObject.getKey(), configurationObject.getValue());
 		}
-		for (final Entry<String, AgentCommand> commandObject : registerCommands.entrySet()) {
+		for (final Entry<String, AgentCommandMetadata> commandObject : registerCommands.entrySet()) {
 			manageCommandOpcUaVertex(commandObject.getKey(), commandObject.getValue());
 		}
 		for (final Entry<String, AgentProperty> propertyObject : propertyObjects.entrySet()) {
@@ -461,7 +637,7 @@ public class ZenohAgent {
 
 	}
 
-	private void updatePropertyObjects(Map<String, AgentProperty> properties) {
+	private void updatePropertyMetadatas(Map<String, AgentProperty> properties) {
 		for (final Map.Entry<String, AgentProperty> entry : properties.entrySet()) {
 			if (!propertyObjects.containsKey(entry.getKey())) {
 				propertyObjects.put(entry.getKey(), entry.getValue());
@@ -477,7 +653,7 @@ public class ZenohAgent {
 
 	}
 
-	private void updateTelemetryObjects(Map<String, TelemetryData> telemetries) {
+	private void updateTelemetryMetadatas(Map<String, TelemetryData> telemetries) {
 		for (final Map.Entry<String, TelemetryData> entry : telemetries.entrySet()) {
 			if (!registerTelemetries.containsKey(entry.getKey())) {
 				registerTelemetries.put(entry.getKey(), entry.getValue());

@@ -12,7 +12,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.graalvm.buildtools.native' version '0.10.6'
+    // id 'org.graalvm.buildtools.native' version '0.10.6'
     id "com.gradleup.shadow" version "8.3.6"
 }
 
@@ -75,6 +75,7 @@ dependencies {
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.7'
     implementation group: 'info.picocli', name: 'picocli-shell-jline3', version: '4.7.7'
     implementation 'org.jline:jline:3.30.6'
+    implementation("com.googlecode.lanterna:lanterna:3.1.3")
 
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
@@ -150,6 +151,7 @@ application {
     applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
 }
 
+/*
 graalvmNative {
     toolchainDetection = false
     agent {
@@ -189,11 +191,11 @@ generateGraalReflectionConfig.doLast {
     }
 }
 
-/*
+
 tasks.named('nativeCompile') {
     dependsOn tasks.named('generateGraalReflectionConfig')
 }
-*/
+
 
 task generateManpageAsciiDoc(type: JavaExec) {
     dependsOn(classes)
@@ -203,3 +205,4 @@ task generateManpageAsciiDoc(type: JavaExec) {
     main 'picocli.codegen.docgen.manpage.ManPageGenerator'
     args "${mainPicocliCommandClass}", "--outdir=${project.buildDir}/generated-picocli-docs", "-v" //, "--template-dir=src/docs/mantemplates"
 }
+*/

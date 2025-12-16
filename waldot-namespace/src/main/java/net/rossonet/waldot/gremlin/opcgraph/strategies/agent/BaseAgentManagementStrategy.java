@@ -34,14 +34,14 @@ import org.eclipse.milo.opcua.stack.core.types.structured.UserNameIdentityToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
+import net.rossonet.waldot.agent.auth.ClientRegisterAnonymousValidator;
+import net.rossonet.waldot.agent.auth.ClientRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.agent.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 
-public class BaseAgentManagementStrategy implements AgentManagementStrategy {
+public class BaseAgentManagementStrategy implements ClientManagementStrategy {
 
 	private class GenerateAddProvisioningMethodInvocationHandler extends TemplateMethodInvocationHandler {
 
@@ -202,11 +202,11 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	private static final String PROVISIONING_STATUS_DESCRIPTION = "status of the provisioning request";
 	private static final String PROVISIONING_UNIQUE_ID = "provisioning-unique-id";
 	private static final String PROVISIONING_UNIQUE_ID_DESCRIPTION = "unique identifier of the provisioning session visualized in the client";
-	private AgentRegisterAnonymousValidator agentAnonymousValidator;
+	private ClientRegisterAnonymousValidator agentAnonymousValidator;
 	private UaFolderNode agentFolder;
-	private AgentRegisterUsernameIdentityValidator agentIdentityValidator;
+	private ClientRegisterUsernameIdentityValidator agentIdentityValidator;
 	private UaObjectNode agentLifeCycleRecord;
-	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
+	private ClientRegisterX509IdentityValidator agentX509IdentityValidator;
 	private UaFolderNode assetRootNode;
 	private UaFolderNode clientFolder;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -223,9 +223,9 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	private WaldotNamespace waldotNamespace;
 
 	@Override
-	public void activate(final AgentRegisterAnonymousValidator agentAnonymousValidator,
-			final AgentRegisterUsernameIdentityValidator agentIdentityValidator,
-			final AgentRegisterX509IdentityValidator agentX509IdentityValidator) {
+	public void activate(final ClientRegisterAnonymousValidator agentAnonymousValidator,
+			final ClientRegisterUsernameIdentityValidator agentIdentityValidator,
+			final ClientRegisterX509IdentityValidator agentX509IdentityValidator) {
 		this.agentAnonymousValidator = agentAnonymousValidator;
 		this.agentIdentityValidator = agentIdentityValidator;
 		this.agentX509IdentityValidator = agentX509IdentityValidator;
@@ -497,7 +497,7 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	}
 
 	@Override
-	public UaFolderNode getAssetAgentsFolderNode() {
+	public UaFolderNode getAssetClientsFolderNode() {
 		return agentFolder;
 	}
 
@@ -521,14 +521,14 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	}
 
 	@Override
-	public AnonymousIdentity registerNewAgentForApproval(final Session session) {
+	public AnonymousIdentity registerNewClientForApproval(final Session session) {
 		registerSessionIfNeeded(session, ProvisioningStatus.PENDING);
 		logger.info("New agent registered for approval: {}", session.getSessionId());
 		return (AnonymousIdentity) getSessionIdentity(session);
 	}
 
 	@Override
-	public UsernameIdentity registerNewAgentWithProvisioningPassword(final Session session,
+	public UsernameIdentity registerNewClientWithProvisioningPassword(final Session session,
 			final UserNameIdentityToken token) {
 		// TODO verificare il token
 		registerSessionIfNeeded(session, ProvisioningStatus.APPROVED);
@@ -557,7 +557,7 @@ public class BaseAgentManagementStrategy implements AgentManagementStrategy {
 	}
 
 	@Override
-	public Object updateAgentCertificate(final Session session, final X509Certificate identityCertificate) {
+	public Object updateClientCertificate(final Session session, final X509Certificate identityCertificate) {
 		// TODO controllare la validità del certificato
 		registerSessionIfNeeded(session, ProvisioningStatus.APPROVED);
 		return session.getSessionId();

@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -16,6 +15,7 @@ import org.slf4j.Logger;
 
 import net.rossonet.waldot.api.rules.Rule;
 import net.rossonet.waldot.api.rules.WaldotStepLogger;
+import net.rossonet.waldot.utils.ThreadHelper;
 
 public class RulesThreadManager implements AutoCloseable {
 
@@ -36,7 +36,7 @@ public class RulesThreadManager implements AutoCloseable {
 	public RulesThreadManager(final Map<NodeId, Rule> rules, final Logger logger) {
 		this.logger = logger;
 		this.rules = rules;
-		executor = Executors.newThreadPerTaskExecutor(new RuleThreadFactory());
+		executor = ThreadHelper.newVirtualThreadExecutor();
 		controlThread = getThread();
 	}
 
@@ -93,20 +93,17 @@ public class RulesThreadManager implements AutoCloseable {
 	}
 
 	private Thread getThread() {
-		return new Thread(new Runnable() {
-			@Override
-			public void run() {
-				Thread.currentThread().setName("RE Thread Manager");
-				Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-				logger.info("Rules Engine Thread Manager started with thread name " + Thread.currentThread().getName()
-						+ " and priority " + Thread.currentThread().getPriority());
-				while (active) {
-					try {
-						checkRules();
-						checkThread();
-					} catch (final Throwable e) {
-						logger.error("Error in Rules Thread Manager", e);
-					}
+		return ThreadHelper.ofVirtual().name("RE Thread Manager", 0).unstarted(() -> {
+			Thread.currentThread().setName("RE Thread Manager");
+			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+			logger.info("Rules Engine Thread Manager started with thread name " + Thread.currentThread().getName()
+					+ " and priority " + Thread.currentThread().getPriority());
+			while (active) {
+				try {
+					checkRules();
+					checkThread();
+				} catch (final Throwable e) {
+					logger.error("Error in Rules Thread Manager", e);
 				}
 			}
 		});
@@ -124,6 +121,10 @@ public class RulesThreadManager implements AutoCloseable {
 		if (controlThread != null) {
 			active = false;
 			logger.info("Stopping Rules Thread Manager");
+		}
+		if (executor != null) {
+			executor.shutdown();
+			logger.info("Rules Thread Manager stopped");
 		}
 	}
 

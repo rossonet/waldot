@@ -24,14 +24,14 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 
-import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
+import net.rossonet.waldot.agent.auth.ClientRegisterAnonymousValidator;
+import net.rossonet.waldot.agent.auth.ClientRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.agent.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
-import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
@@ -74,7 +74,7 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	QualifiedName generateQualifiedName(String label);
 
-	AgentManagementStrategy getAgentManagementStrategy();
+	ClientManagementStrategy getAgentManagementStrategy();
 
 	Logger getBootLogger();
 
@@ -166,9 +166,9 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	void opcuaUpdateEvent(UaNode sourceNode);
 
-	void registerAgentValidators(AgentRegisterAnonymousValidator agentAnonymousValidator,
-			AgentRegisterUsernameIdentityValidator agentIdentityValidator,
-			AgentRegisterX509IdentityValidator agentX509IdentityValidator);
+	void registerAgentValidators(ClientRegisterAnonymousValidator agentAnonymousValidator,
+			ClientRegisterUsernameIdentityValidator agentIdentityValidator,
+			ClientRegisterX509IdentityValidator agentX509IdentityValidator);
 
 	void registerCommand(WaldotCommand command);
 

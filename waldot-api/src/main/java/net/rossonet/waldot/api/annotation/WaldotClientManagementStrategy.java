@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to mark a class as a Waldot Agent Management Strategy. This
+ * Annotation to mark a class as a Waldot Client Management Strategy. This
  * annotation can be used to indicate that the class implements a specific
  * strategy for managing Waldot agents.
  * 
@@ -15,6 +15,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-public @interface WaldotAgentManagementStrategy {
+public @interface WaldotClientManagementStrategy {
 
 }

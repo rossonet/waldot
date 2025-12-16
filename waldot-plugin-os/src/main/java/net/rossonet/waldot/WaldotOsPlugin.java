@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
@@ -38,6 +37,7 @@ import net.rossonet.waldot.dataGenerator.DataGeneratorVertex;
 import net.rossonet.waldot.dataGenerator.DataGeneratorVertex.Algorithm;
 import net.rossonet.waldot.rules.SysCommandExecutor;
 import net.rossonet.waldot.rules.oshi.OsDataWrapper;
+import net.rossonet.waldot.utils.ThreadHelper;
 
 /**
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
@@ -55,7 +55,7 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	public static final long DEFAULT_UPDATE_DELAY = 20000;// 120_000;
 	public static final String DELAY_FIELD = "Delay";
 	public static boolean ENABLE_EXEC_COMMAND = false;
-	private final static ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+	private final static ExecutorService executor = ThreadHelper.newVirtualThreadExecutor();
 	private final static Logger logger = LoggerFactory.getLogger(WaldotOsPlugin.class);
 	public static final String MAX_VALUE_FIELD = "Max";
 

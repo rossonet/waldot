@@ -16,6 +16,7 @@ public class AgentCommandParameter implements Serializable {
 
 	public static AgentCommandParameter fromJsonObject(JSONObject paramObject) {
 		final String parameterNameCandidate = paramObject.getString("name");
+		final int position = paramObject.getInt("order");
 		final ExportedMethodParameter methodParamAnnotationCandidate = new ExportedMethodParameter() {
 
 			@Override
@@ -95,7 +96,7 @@ public class AgentCommandParameter implements Serializable {
 			}
 
 		};
-		return new AgentCommandParameter(parameterNameCandidate, null, methodParamAnnotationCandidate);
+		return new AgentCommandParameter(parameterNameCandidate, null, methodParamAnnotationCandidate, position);
 	}
 
 	private final ExportedMethodParameter methodParamAnnotation;
@@ -104,11 +105,14 @@ public class AgentCommandParameter implements Serializable {
 
 	private final String parameterName;
 
+	private final int position;
+
 	public AgentCommandParameter(String parameterName, Parameter methodParameter,
-			ExportedMethodParameter methodParamAnnotation) {
+			ExportedMethodParameter methodParamAnnotation, int position) {
 		this.parameterName = parameterName;
 		this.methodParameter = methodParameter;
 		this.methodParamAnnotation = methodParamAnnotation;
+		this.position = position;
 	}
 
 	public Parameter getMethodParameter() {
@@ -134,6 +138,7 @@ public class AgentCommandParameter implements Serializable {
 		map.put("textArea", methodParamAnnotation.textArea());
 		map.put("viewOrder", methodParamAnnotation.viewOrder());
 		map.put("writable", methodParamAnnotation.writable());
+		map.put("order", position);
 		return map;
 	}
 

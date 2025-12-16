@@ -1,4 +1,4 @@
-package net.rossonet.zenoh;
+package net.rossonet.zenoh.exception;
 
 public class WaldotZenohException extends Exception {
 

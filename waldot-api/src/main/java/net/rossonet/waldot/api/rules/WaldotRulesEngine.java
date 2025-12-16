@@ -12,7 +12,7 @@ import net.rossonet.waldot.api.models.WaldotVertex;
  * The {@code WaldotRulesEngine} interface defines methods for managing rules in the Waldot system.
  * It provides functionality for adding and removing listeners, registering and updating rules,
  * and managing observers. The rules engine integrates with other components such as
- * {@link Rule}, {@link CachedRuleRecord}, and {@link ExecutorHelper} to evaluate and execute rules.
+ * {@link Rule}, {@link CachedRuleRecord}, and {@link RuleExecutorHelper} to evaluate and execute rules.
  *
  * <p>Rules in the Waldot system are defined using the {@link Rule} interface, which includes
  * conditions, actions, and execution details. The rules engine facilitates the lifecycle
@@ -20,7 +20,7 @@ import net.rossonet.waldot.api.models.WaldotVertex;
  *
  * @see Rule
  * @see CachedRuleRecord
- * @see ExecutorHelper
+ * @see RuleExecutorHelper
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
@@ -41,12 +41,12 @@ public interface WaldotRulesEngine {
 	void deregisterRule(NodeId ruleNodeId);
 
 	/**
-	 * Retrieves the {@link ExecutorHelper} used by the rules engine for evaluating rules
+	 * Retrieves the {@link RuleExecutorHelper} used by the rules engine for evaluating rules
 	 * and executing expressions.
 	 *
-	 * @return the {@link ExecutorHelper} instance.
+	 * @return the {@link RuleExecutorHelper} instance.
 	 */
-	ExecutorHelper getJexlEngine();
+	RuleExecutorHelper getJexlEngine();
 
 	/**
 	 * Retrieves all listeners currently registered with the rules engine.

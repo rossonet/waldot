@@ -42,7 +42,7 @@ public class OsDataWrapper implements AutoCloseable {
 	private final List<OshiMethodWrapper> oshiDataMethods = new ArrayList<>();
 
 	private final HashMap<Object, Method> oshiObjectsToRefresh = new HashMap<>();
-	private final Thread systemDataThread = new Thread(() -> {
+	private final Thread systemDataThread = Thread.ofVirtual().unstarted(() -> {
 		while (active) {
 			try {
 				Thread.sleep(getUpdateDelay());
@@ -52,7 +52,7 @@ public class OsDataWrapper implements AutoCloseable {
 				break;
 			}
 		}
-	}, "oshi data refresh");
+	});
 
 	private SystemInfo systemInfo;
 

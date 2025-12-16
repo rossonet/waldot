@@ -19,8 +19,8 @@ public class WaldOTServerTest {
 
 	@Test
 	public void runServerAndTwoClient() throws Exception {
+		java.lang.System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "INFO");
 		WaldotZenohClientImpl.debugEnabled = true;
-
 		final WaldotGraph g = OpcFactory.getOpcGraph(new ZenohHistoryStrategy());
 		Thread.sleep(5_000);
 		final Acme client1 = new Acme("acme1");

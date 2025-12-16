@@ -34,7 +34,6 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.rules.CachedRuleRecord;
 import net.rossonet.waldot.api.rules.ClonableMapContext;
 import net.rossonet.waldot.api.rules.Rule;
-import net.rossonet.waldot.api.rules.WaldotRuleThread;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.rules.WaldotStepLogger;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
@@ -47,9 +46,7 @@ public class DefaultRule extends OpcVertex implements Rule {
 		public WaldotStepLogger call() throws Exception {
 			dirty.set(false);
 			evaluate();
-			return Thread.currentThread() instanceof WaldotRuleThread
-					? ((WaldotRuleThread) Thread.currentThread()).getStepRegister()
-					: null;
+			return stepRegister;
 		}
 
 	}
@@ -73,6 +70,8 @@ public class DefaultRule extends OpcVertex implements Rule {
 	private int priority = 5; // Default priority
 
 	private int refractoryPeriodMs = 1000;
+	final WaldotStepLogger stepRegister;
+
 	private final AtomicInteger threadCounter = new AtomicInteger(0);
 
 	private final WaldotRulesEngine waldotRulesEngine;
@@ -83,9 +82,22 @@ public class DefaultRule extends OpcVertex implements Rule {
 			final UByte eventNotifier, final long version, final WaldotRulesEngine waldotRulesEngine,
 			final String condition, final String action, final int priority, final long factsValidUntilMs,
 			final long factsValidDelayMs) {
+		this(typeDefinition, graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
+				eventNotifier, version, waldotRulesEngine, new DefaultWaldotStepLogger(), condition, action, priority,
+				factsValidUntilMs, factsValidDelayMs);
+
+	}
+
+	public DefaultRule(final NodeId typeDefinition, final WaldotGraph graph, final UaNodeContext context,
+			final NodeId nodeId, final QualifiedName browseName, final LocalizedText displayName,
+			final LocalizedText description, final UInteger writeMask, final UInteger userWriteMask,
+			final UByte eventNotifier, final long version, final WaldotRulesEngine waldotRulesEngine,
+			WaldotStepLogger stepRegister, final String condition, final String action, final int priority,
+			final long factsValidUntilMs, final long factsValidDelayMs) {
 		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
 				version);
 		this.waldotRulesEngine = waldotRulesEngine;
+		this.stepRegister = stepRegister;
 		this.condition = condition;
 		this.action = action;
 		this.priority = (priority > 0 && priority < 11) ? priority : 5;
@@ -138,64 +150,56 @@ public class DefaultRule extends OpcVertex implements Rule {
 	}
 
 	private void evaluate() {
-		if (Thread.currentThread() instanceof WaldotRuleThread) {
-			threadCounter.incrementAndGet();
-			final WaldotRuleThread waldotThread = (WaldotRuleThread) Thread.currentThread();
-			waldotThread.setRule(this);
-			final WaldotStepLogger stepRegister = waldotThread.getStepRegister();
+		threadCounter.incrementAndGet();
+
+		try {
+			for (final RuleListener l : getListeners()) {
+				final boolean lr = l.beforeEvaluate(stepRegister);
+				if (!lr) {
+					logger.info("Rule evaluation stopped by listener");
+					stepRegister.onEvaluateStoppedByListener(l);
+					return;
+				}
+			}
+			if (getDelayBeforeEvaluation() > 0) {
+				Thread.sleep(getDelayBeforeEvaluation());
+			}
+			boolean conditionPassed = false;
 			try {
-				for (final RuleListener l : getListeners()) {
-					final boolean lr = l.beforeEvaluate(stepRegister);
-					if (!lr) {
-						logger.info("Rule evaluation stopped by listener");
-						stepRegister.onEvaluateStoppedByListener(l);
-						return;
-					}
-				}
-				if (getDelayBeforeEvaluation() > 0) {
-					Thread.sleep(getDelayBeforeEvaluation());
-				}
-				boolean conditionPassed = false;
-				try {
-					conditionPassed = runCheck(stepRegister);
-				} catch (final Throwable e) {
-					logger.error("Error evaluating rule", e);
-					conditionPassed = false;
-					getListeners().stream().forEach(l -> l.onEvaluationError(stepRegister, e));
-				}
-				final boolean resultCondition = conditionPassed;
-				getListeners().stream().forEach(l -> l.afterEvaluate(stepRegister, resultCondition));
-				if (resultCondition) {
-					if (getDelayBeforeExecute() > 0) {
-						Thread.sleep(getDelayBeforeExecute());
-					}
-					getListeners().stream().forEach(l -> l.beforeExecute(stepRegister));
-					try {
-						final Object executionResult = runAction(stepRegister);
-						getListeners().stream().forEach(l -> l.afterExecute(stepRegister, executionResult));
-						generateEvent(executionResult);
-						for (final RuleListener l : getListeners()) {
-							l.onSuccess(stepRegister, resultCondition, executionResult);
-						}
-					} catch (final Throwable e) {
-						logger.error("Error executing rule action", e);
-						getListeners().stream().forEach(l -> l.onActionError(stepRegister, e));
-					}
-				}
-				if (isClearFactsAfterExecution()) {
-					clear();
-				}
-				lastRun = System.currentTimeMillis();
+				conditionPassed = runCheck(stepRegister);
 			} catch (final Throwable e) {
 				logger.error("Error evaluating rule", e);
-				getListeners().stream().forEach(l -> l.onFailure(stepRegister, e));
+				conditionPassed = false;
+				getListeners().stream().forEach(l -> l.onEvaluationError(stepRegister, e));
 			}
-			threadCounter.decrementAndGet();
-		} else {
-			logger.error("Rule evaluation must be run in a WaldotRuleThread");
-			getListeners().stream().forEach(l -> l.onFailure(null,
-					new IllegalStateException("Rule evaluation should be run in a WaldotRuleThread")));
+			final boolean resultCondition = conditionPassed;
+			getListeners().stream().forEach(l -> l.afterEvaluate(stepRegister, resultCondition));
+			if (resultCondition) {
+				if (getDelayBeforeExecute() > 0) {
+					Thread.sleep(getDelayBeforeExecute());
+				}
+				getListeners().stream().forEach(l -> l.beforeExecute(stepRegister));
+				try {
+					final Object executionResult = runAction(stepRegister);
+					getListeners().stream().forEach(l -> l.afterExecute(stepRegister, executionResult));
+					generateEvent(executionResult);
+					for (final RuleListener l : getListeners()) {
+						l.onSuccess(stepRegister, resultCondition, executionResult);
+					}
+				} catch (final Throwable e) {
+					logger.error("Error executing rule action", e);
+					getListeners().stream().forEach(l -> l.onActionError(stepRegister, e));
+				}
+			}
+			if (isClearFactsAfterExecution()) {
+				clear();
+			}
+			lastRun = System.currentTimeMillis();
+		} catch (final Throwable e) {
+			logger.error("Error evaluating rule", e);
+			getListeners().stream().forEach(l -> l.onFailure(stepRegister, e));
 		}
+		threadCounter.decrementAndGet();
 
 	}
 

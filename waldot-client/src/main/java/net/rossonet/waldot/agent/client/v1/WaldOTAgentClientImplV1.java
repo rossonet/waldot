@@ -47,45 +47,38 @@ import net.rossonet.waldot.utils.SslHelper.KeyStoreHelper;
 import net.rossonet.waldot.utils.ThreadHelper;
 
 public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
-	private final class WaldOTAgentThread extends Thread {
-
-		@Override
-		public void run() {
-			Thread.currentThread().setName("waldot-control");
-			Thread.currentThread().setPriority(CONTROL_THREAD_PRIORITY);
-			logger.info("Control thread started");
-			while (!status.equals(Status.CLOSED)) {
-				try {
-					periodicalCheck();
-					Thread.sleep(CONTROL_THREAD_SLEEP_TIME_MSEC);
-				} catch (final Throwable t) {
-					logger.warn("control thread error ", LogHelper.stackTraceToString(t, 5));
-				}
-			}
-			logger.info("Control thread terminated");
-		}
-
-	}
 
 	private final static Logger logger = LoggerFactory.getLogger(WaldOTAgentClient.class);
 	public static String SELFSIGNED_CERTIFICATE_ALIAS = "waldot-selfsigned";
 	public static String SIGNED_CERTIFICATE_ALIAS = "waldot-signed";
 
+	private transient Status _status = Status.INIT;
 	private boolean activeConnectionRequest = false;
 	private final KeyStoreHelper certificateHelper;
 	private transient OpcUaClient client = null;
 	private int clientFaultCounter;
-	private final WaldOTAgentClientConfiguration configuration;
 
-	private final WaldOTAgentThread controlThread = new WaldOTAgentThread();
+	private final WaldOTAgentClientConfiguration configuration;
+	private final Thread controlThread = Thread.ofVirtual().start(() -> {
+		Thread.currentThread().setName("waldot-control");
+		Thread.currentThread().setPriority(CONTROL_THREAD_PRIORITY);
+		logger.info("Control thread started");
+		while (!_status.equals(Status.CLOSED)) {
+			try {
+				periodicalCheck();
+				Thread.sleep(CONTROL_THREAD_SLEEP_TIME_MSEC);
+			} catch (final Throwable t) {
+				logger.warn("control thread error ", LogHelper.stackTraceToString(t, 5));
+			}
+		}
+		logger.info("Control thread terminated");
+	});
 
 	private ByteString lastNonce = null;
 
 	private transient OpcUaClient provisioningClient = null;
 
 	private final ProvisioningLifeCycleProcedure provisioningLifeCycle = new ProvisioningLifeCycleProcedure(this);
-
-	private transient Status status = Status.INIT;
 
 	private WaldotAgentClientObserver waldotAgentClientObserver;
 
@@ -109,7 +102,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	@Override
 	public void changeStatus(final Status newStatus) {
-		status = newStatus;
+		_status = newStatus;
 		if (waldotAgentClientObserver != null) {
 			waldotAgentClientObserver.onStatusChanged(newStatus);
 		}
@@ -261,7 +254,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 			if (checkClientConnected(client)) {
 				lastNonce = getClientSessionWithTimeout(client).getServerNonce();
 				if (clientFaultCounter > 0) {
-					logger.info("Client reconnected after {} control cycle in faulted status", clientFaultCounter);
+					logger.info("Client reconnected after {} control cycle in faulted _status", clientFaultCounter);
 					clientFaultCounter = 0;
 				}
 			} else {
@@ -426,7 +419,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	@Override
 	public Status getStatus() {
-		return status;
+		return _status;
 	}
 
 	private void logServerCertificate(final EndpointDescription endpoint) throws CertificateException {
@@ -455,7 +448,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	}
 
 	private void periodicalCheck() {
-		switch (status) {
+		switch (_status) {
 		case STARTING:
 			doActionClientStart();
 			break;
@@ -488,7 +481,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 			logger.info("Client is closed, the control thread will terminate");
 			break;
 		case FAULTED:
-			logger.error("Client is in faulted status, resetting connection");
+			logger.error("Client is in faulted _status, resetting connection");
 			try {
 				cleanConnectionObjects();
 			} catch (final UaException e) {
@@ -498,7 +491,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 			nextConnectionAction();
 			break;
 		case INIT:
-			logger.trace("Client is in INIT status, waiting for start");
+			logger.trace("Client is in INIT _status, waiting for start");
 			break;
 		case STOPPED:
 			logger.trace("Client is stopped");
