@@ -77,7 +77,7 @@ public class ZenohAgent implements AutoCloseable {
 	private DtdlHandler dtmlHandler;
 	private long lastDiscoveryMessageAtMs;
 	private volatile long lastSeenMs;
-	private final Map<String, AbstractOpcCommand> opcAddObjectCommands = new HashMap<>();
+	private final Map<String, AbstractOpcCommand> opcAddConfigurationCommands = new HashMap<>();
 	private final Map<String, AbstractOpcCommand> opcRegisterCommands = new HashMap<>();
 	private final Map<String, AgentProperty> propertyObjects = new HashMap<>();
 	private final Map<String, Publisher> publishers = new ConcurrentHashMap<>();
@@ -124,28 +124,28 @@ public class ZenohAgent implements AutoCloseable {
 		agentLifeCycleManager.getNamespace().registerCommand(stopCommand);
 	}
 
-	private void addObjectAddCommand(String objectName, AgentConfigurationMetadata objectDetails) {
-		if (opcAddObjectCommands.containsKey(objectName)) {
-			logger.debug("Add Object Command {} already exists for agent {}, updating if necessary", objectName,
+	private void addConfigurationAddCommand(String objectName, AgentConfigurationMetadata objectDetails) {
+		if (opcAddConfigurationCommands.containsKey(objectName)) {
+			logger.debug("Add Configuration Command {} already exists for agent {}, updating if necessary", objectName,
 					uniqueId);
-			// TODO: il cambio delle caratteristiche del comando se necessario
 		} else {
 			final AbstractOpcCommand command = new AbstractOpcCommand(agentLifeCycleManager.getGraph(),
 					agentLifeCycleManager.getNamespace(),
 					uniqueId + ".add." + TextHelper.cleanText(objectDetails.getConfigurationName()),
-					"add " + objectDetails.getConfigurationName(), "add object that " + objectDetails.getDescription(),
-					"agents/" + uniqueId, UInteger.valueOf(0), UInteger.valueOf(0), true, true) {
+					"add " + objectDetails.getConfigurationName(),
+					"add configuration " + objectDetails.getDescription(), "agents/" + uniqueId, UInteger.valueOf(0),
+					UInteger.valueOf(0), true, true) {
 
 				@Override
 				public Object[] runCommand(InvocationContext invocationContext, String[] inputValues) {
 					if (inputValues == null || inputValues.length == 0 || inputValues[0] == null
 							|| inputValues[0].isEmpty()) {
-						logger.warn("No name provided for object to add for agent {}", uniqueId);
-						return new Object[] {};
+						logger.warn("No name provided for configuration to add for agent {}", uniqueId);
+						return new Object[] { "No name provided for configuration to add." };
 					}
 					final String idToAdd = objectName + "." + inputValues[0];
 					final String label = inputValues[0];
-					logger.info("Adding object {} of type {} to agent {}", idToAdd,
+					logger.info("Adding configuration {} of type {} to agent {}", idToAdd,
 							objectDetails.getConfigurationClassName(), uniqueId);
 					final List<String> properties = new ArrayList<>();
 					properties.add("id");
@@ -161,25 +161,27 @@ public class ZenohAgent implements AutoCloseable {
 					properties.add("class-name");
 					properties.add(objectDetails.getConfigurationClassName());
 					for (final Entry<String, AgentProperty> propertyObject : objectDetails.getProperties().entrySet()) {
-						logger.debug("Adding property {} with default value {} to object {} of agent {}",
+						logger.debug("Adding property {} with default value {} to configuration {} of agent {}",
 								propertyObject.getKey(), propertyObject.getValue().getAnnotation().defaultValue(),
 								idToAdd, uniqueId);
 						properties.add(TextHelper.cleanText(propertyObject.getKey()));
 						properties.add(propertyObject.getValue().getAnnotation().defaultValue());
 					}
 					final Object[] objects = properties.toArray(new Object[properties.size()]);
-					logger.debug("Adding configuration object vertex with properties: {}", properties);
+					logger.debug("Adding configuration configuration vertex with properties: {}", properties);
 					final Vertex objectVertex = agentLifeCycleManager.getGraph().addVertex(objects);
 					configurationObjectVertices.put(idToAdd, objectVertex);
 					sendConfigurationUpdate(idToAdd, objectVertex);
-					return new Object[] {};
+					return new Object[] { "Configuration " + idToAdd + " added." };
 				}
 			};
 			command.addInputArgument("name", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
-					LocalizedText.english("name of the object to add"));
+					LocalizedText.english("name of the configuration to add"));
+			command.addOutputArgument("result", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+					LocalizedText.english("result of the add configuration command"));
 			agentLifeCycleManager.getNamespace().registerCommand(command);
-			opcAddObjectCommands.put(objectName, command);
-			logger.info("Registered new Add Object command {} for agent {}", objectName, uniqueId);
+			opcAddConfigurationCommands.put(objectName, command);
+			logger.info("Registered new Add Configuration command {} for agent {}", objectName, uniqueId);
 		}
 
 	}
@@ -294,6 +296,7 @@ public class ZenohAgent implements AutoCloseable {
 
 				@Override
 				public SuspendedCommand get() {
+					logger.debug("Waiting for command {} response from agent {}", commandId, uniqueId);
 					if (!calledCommand.isCompleted()) {
 						try {
 							synchronized (calledCommand) {
@@ -309,6 +312,8 @@ public class ZenohAgent implements AutoCloseable {
 
 				@Override
 				public SuspendedCommand get(long timeout, java.util.concurrent.TimeUnit unit) {
+					logger.debug("Waiting for command {} response from agent {} with timeout {} {}", commandId,
+							uniqueId, timeout, unit);
 					if (!calledCommand.isCompleted()) {
 						try {
 							synchronized (calledCommand) {
@@ -395,7 +400,7 @@ public class ZenohAgent implements AutoCloseable {
 					UInteger.valueOf(commandDetails.getWriteMask()),
 					UInteger.valueOf(commandDetails.getUserWriteMask()), commandDetails.isExecutable(),
 					commandDetails.isUserExecutable()) {
-//TODO aggiungere gli argomenti di input e output del comando OPC UA
+//TODO aggiungere gli argomenti di input del comando OPC UA
 				@Override
 				public Object[] runCommand(InvocationContext invocationContext, String[] inputValues) {
 					try {
@@ -407,6 +412,7 @@ public class ZenohAgent implements AutoCloseable {
 					}
 				}
 			};
+			SuspendedCommand.addStandardAgentCommandOutputArguments(command);
 			agentLifeCycleManager.getNamespace().registerCommand(command);
 			opcRegisterCommands.put(commandName, command);
 			logger.info("Registered new command {} for agent {}", commandName, uniqueId);
@@ -623,7 +629,7 @@ public class ZenohAgent implements AutoCloseable {
 	private void updateManagedOpcVertexObjects() {
 		for (final Map.Entry<String, AgentConfigurationMetadata> configurationObject : configurationObjects
 				.entrySet()) {
-			addObjectAddCommand(configurationObject.getKey(), configurationObject.getValue());
+			addConfigurationAddCommand(configurationObject.getKey(), configurationObject.getValue());
 		}
 		for (final Entry<String, AgentCommandMetadata> commandObject : registerCommands.entrySet()) {
 			manageCommandOpcUaVertex(commandObject.getKey(), commandObject.getValue());

@@ -25,14 +25,14 @@ public class ZenohHistoryStrategy implements HistoryStrategy {
 	@Override
 	public List<HistoryReadResult> historyRead(HistoryReadContext context, HistoryReadDetails readDetails,
 			TimestampsToReturn timestamps, List<HistoryReadValueId> readValueIds) {
-		// TODO Auto-generated method stub
+		// TODO utilizzare il bus zenoh per leggere la history
 		return null;
 	}
 
 	@Override
 	public List<HistoryUpdateResult> historyUpdate(HistoryUpdateContext context,
 			List<HistoryUpdateDetails> updateDetails) {
-		// TODO Auto-generated method stub
+		// TODO utilizzare il bus zenoh per leggere la history
 		return null;
 	}
 
@@ -43,25 +43,25 @@ public class ZenohHistoryStrategy implements HistoryStrategy {
 
 	@Override
 	public void onDataItemsCreated(List<DataItem> dataItems) {
-		// TODO Auto-generated method stub
+		// TODO utilizzare il bus zenoh per leggere la history
 
 	}
 
 	@Override
 	public void onDataItemsDeleted(List<DataItem> dataItems) {
-		// TODO Auto-generated method stub
+		// TODO utilizzare il bus zenoh per leggere la history
 
 	}
 
 	@Override
 	public void onDataItemsModified(List<DataItem> dataItems) {
-		// TODO Auto-generated method stub
+		// TODO utilizzare il bus zenoh per leggere la history
 
 	}
 
 	@Override
 	public void opcuaUpdateEvent(UaNode sourceNode) {
-		// TODO Auto-generated method stub
+		// TODO utilizzare il bus zenoh per leggere la history
 
 	}
 

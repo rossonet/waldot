@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +26,7 @@ import io.zenoh.pubsub.Publisher;
 import io.zenoh.sample.Sample;
 import io.zenoh.scouting.Hello;
 import io.zenoh.scouting.ScoutOptions;
+import net.rossonet.waldot.utils.ThreadHelper;
 import net.rossonet.zenoh.ZenohHelper;
 import net.rossonet.zenoh.api.AgentControlHandler;
 import net.rossonet.zenoh.api.AgentErrorHandler;
@@ -32,6 +34,7 @@ import net.rossonet.zenoh.api.WaldotZenohClient;
 import net.rossonet.zenoh.api.message.RpcCommand;
 import net.rossonet.zenoh.api.message.RpcConfiguration;
 import net.rossonet.zenoh.api.message.TelemetryMessage;
+import net.rossonet.zenoh.exception.ExecutionCommandException;
 import net.rossonet.zenoh.exception.WaldotZenohException;
 import net.rossonet.zenoh.exception.ZenohSerializationException;
 
@@ -48,6 +51,7 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 	private volatile boolean registered = false;
 	private final String runtimeUniqueId;
 	private final Map<String, CallbackSubscriber> subcribers = new ConcurrentHashMap<>();
+	private long timeoutCommandSeconds = 60;
 	private Session zenohClient;
 	private Config zenohConfig;
 
@@ -123,20 +127,55 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 					sendOkMessage(topic, controlMessage);
 					break;
 				default:
+					final String replyTopic = topic + ZenohHelper._TOPIC_SEPARATOR
+							+ ZenohHelper.CONTROL_REPLY_END_TOPIC;
+					if (!publishers.containsKey(replyTopic)) {
+						try {
+							publishers.put(replyTopic, zenohClient.declarePublisher(KeyExpr.tryFrom(replyTopic),
+									ZenohHelper.getGlobalPublisherOptions()));
+						} catch (final ZError e) {
+							elaborateErrorMessage("Error declaring publisher for reply topic: " + replyTopic, e);
+						}
+					}
 					if (mainApplicationController.getCommandMetadatas().containsKey(command)) {
 						try {
-							final RpcCommand response = mainApplicationController
-									.executeCommand(RpcCommand.fromJson(controlMessage));
-							if (!publishers.containsKey(topic)) {
-								publishers.put(topic, zenohClient.declarePublisher(KeyExpr.tryFrom(topic),
-										ZenohHelper.getGlobalPublisherOptions()));
-							}
-							publishers.get(topic).put(response.toJson().toString(), ZenohHelper.getCommandPutOptions());
-						} catch (final ZenohSerializationException | ZError e) {
+							ThreadHelper.runWithTimeout(new Runnable() {
+								@Override
+								public void run() {
+									try {
+										final RpcCommand response = mainApplicationController
+												.executeCommand(RpcCommand.fromJson(controlMessage));
+										publishers.get(replyTopic).put(response.toJson().toString(),
+												ZenohHelper.getCommandPutOptions());
+									} catch (ZError | ZenohSerializationException e) {
+										Thread.currentThread().interrupt();
+									}
+								}
+							}, timeoutCommandSeconds, TimeUnit.SECONDS);
+						} catch (final Throwable e) {
 							elaborateErrorMessage("Error executing command: " + command, e);
+							try {
+								final ExecutionCommandException exception = new ExecutionCommandException(
+										"Error executing command: " + command, e);
+								final RpcCommand response = new RpcCommand(RpcCommand.fromJson(controlMessage),
+										exception);
+								publishers.get(replyTopic).put(response.toJson().toString(),
+										ZenohHelper.getCommandPutOptions());
+							} catch (final Exception e1) {
+								elaborateErrorMessage("Error creating error response for command: " + command, e1);
+							}
 						}
 					} else {
 						elaborateErrorMessage("Unknown command received: " + command, null);
+						try {
+							final ExecutionCommandException exception = new ExecutionCommandException(
+									"Error executing command: unknown command " + command);
+							final RpcCommand response = new RpcCommand(RpcCommand.fromJson(controlMessage), exception);
+							publishers.get(replyTopic).put(response.toJson().toString(),
+									ZenohHelper.getCommandPutOptions());
+						} catch (final Exception e1) {
+							elaborateErrorMessage("Error creating error response for unknown command: " + command, e1);
+						}
 					}
 				}
 			}
@@ -199,6 +238,10 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 				return Status.ERROR;
 			}
 		}
+	}
+
+	public long getTimeoutCommandSeconds() {
+		return timeoutCommandSeconds;
 	}
 
 	public Config getZenohConfig() {
@@ -334,6 +377,10 @@ public class WaldotZenohClientImpl implements WaldotZenohClient {
 		}
 		publishers.get(agentUpdateDiscoveryTopic).put(discoveryMessage.toString(),
 				ZenohHelper.getDiscoveryPutOptions());
+	}
+
+	public void setTimeoutCommandSeconds(long timeoutCommandSeconds) {
+		this.timeoutCommandSeconds = timeoutCommandSeconds;
 	}
 
 	public void setZenohConfig(Config zenohConfig) {

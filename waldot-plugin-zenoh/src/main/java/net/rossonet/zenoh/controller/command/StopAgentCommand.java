@@ -20,6 +20,7 @@ public class StopAgentCommand extends AbstractOpcCommand {
 				"agents/" + zenohAgent.getUniqueId(), UInteger.valueOf(WriteMask.Executable.getValue()),
 				UInteger.valueOf(WriteMask.Executable.getValue()), true, true);
 		this.zenohAgent = zenohAgent;
+		SuspendedCommand.addStandardAgentCommandOutputArguments(this);
 	}
 
 	@Override

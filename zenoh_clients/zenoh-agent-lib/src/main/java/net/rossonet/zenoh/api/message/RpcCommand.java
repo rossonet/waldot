@@ -44,7 +44,7 @@ public final class RpcCommand implements Serializable {
 		final JSONObject ex = jsonObject.optJSONObject(RPC_EXCEPTION_FIELD);
 		ExecutionCommandException executionCommandException = null;
 		if (ex != null) {
-			executionCommandException = JsonIterator.deserialize(ex.toString(), ExecutionCommandException.class);
+			executionCommandException = ExecutionCommandException.fromJson(ex);
 		}
 		return new RpcCommand(uid, a, c, invalues, outjson, rel, executionCommandException);
 
@@ -166,7 +166,7 @@ public final class RpcCommand implements Serializable {
 			jsonObject.put(RPC_RELATED_FIELD, relatedId);
 		}
 		if (executionCommandException != null) {
-			jsonObject.put(RPC_EXCEPTION_FIELD, new JSONObject(JsonStream.serialize(executionCommandException)));
+			jsonObject.put(RPC_EXCEPTION_FIELD, executionCommandException.toJson());
 		}
 		jsonObject.put(RPC_INPUT_FIELD, valuesToJson(inputValues));
 		if (outputValue != null && !outputValue.isEmpty()) {

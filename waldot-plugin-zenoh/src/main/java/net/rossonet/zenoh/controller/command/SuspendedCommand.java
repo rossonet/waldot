@@ -2,12 +2,65 @@ package net.rossonet.zenoh.controller.command;
 
 import java.time.Instant;
 
+import org.eclipse.milo.opcua.sdk.core.ValueRanks;
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.json.JSONObject;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.opc.AbstractOpcCommand;
+import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.zenoh.api.message.RpcCommand;
 
 public class SuspendedCommand {
+
+	private static final @Nullable String AGENT_ID_DESCRIPTION = "identifier of the agent";
+	private static final String AGENT_ID_LABEL = "agentId";
+	private static final @Nullable String CALL_TIME_MS_DESCRIPTION = "timestamp in milliseconds when the command was called";
+	private static final String CALL_TIME_MS_LABEL = "callTimeMs";
+	private static final @Nullable String COMMAND_ID_DESCRIPTION = "identifier of the command";
+	private static final String COMMAND_ID_LABEL = "commandId";
+	private static final @Nullable String COMPLETED_DESCRIPTION = "indicates if the command execution is completed";
+	private static final String COMPLETED_LABEL = "completed";
+	private static final @Nullable String ERROR_MESSAGE_DESCRIPTION = "error message in case of command execution failure";
+	private static final String ERROR_MESSAGE_LABEL = "errorMessage";
+	private final static Logger logger = LoggerFactory.getLogger(SuspendedCommand.class);
+	private static final @Nullable String REPLY_MESSAGE_DESCRIPTION = "message returned by the agent as reply";
+	private static final String REPLY_MESSAGE_LABEL = "replyMessage";
+	private static final @Nullable String REPLY_TIME_MS_DESCRIPTION = "timestamp in milliseconds when the command reply was received";
+	private static final String REPLY_TIME_MS_LABEL = "replyTimeMs";
+	private static final @Nullable String RPC_UNIQUE_ID_DESCRIPTION = "unique identifier of the RPC command";
+	private static final String RPC_UNIQUE_ID_LABEL = "rpcUniqueId";
+	private static final @Nullable String STACK_TRACE_DESCRIPTION = "stack trace in case of command execution failure";
+	private static final String STACK_TRACE_LABEL = "stackTrace";
+	private static final @Nullable String SUCCESS_DESCRIPTION = "indicates if the command execution was successful";
+	private static final String SUCCESS_LABEL = "success";
+
+	public static void addStandardAgentCommandOutputArguments(AbstractOpcCommand command) {
+		command.addOutputArgument(AGENT_ID_LABEL, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(AGENT_ID_DESCRIPTION));
+		command.addOutputArgument(COMMAND_ID_LABEL, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(COMMAND_ID_DESCRIPTION));
+		command.addOutputArgument(RPC_UNIQUE_ID_LABEL, VariableNodeTypes.Int64.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(RPC_UNIQUE_ID_DESCRIPTION));
+		command.addOutputArgument(COMPLETED_LABEL, VariableNodeTypes.Boolean.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(COMPLETED_DESCRIPTION));
+		command.addOutputArgument(SUCCESS_LABEL, VariableNodeTypes.Boolean.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(SUCCESS_DESCRIPTION));
+		command.addOutputArgument(REPLY_MESSAGE_LABEL, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(REPLY_MESSAGE_DESCRIPTION));
+		command.addOutputArgument(ERROR_MESSAGE_LABEL, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(ERROR_MESSAGE_DESCRIPTION));
+		command.addOutputArgument(CALL_TIME_MS_LABEL, VariableNodeTypes.Int64.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(CALL_TIME_MS_DESCRIPTION));
+		command.addOutputArgument(REPLY_TIME_MS_LABEL, VariableNodeTypes.Int64.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(REPLY_TIME_MS_DESCRIPTION));
+		command.addOutputArgument(STACK_TRACE_LABEL, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(STACK_TRACE_DESCRIPTION));
+
+	}
 
 	private final String agentId;
 	private final long callTimeMs;
@@ -17,7 +70,9 @@ public class SuspendedCommand {
 	private JSONObject replyMessage = null;
 	private long replyTimeMs = -1;
 	private final long rpcUniqueId;
+
 	private String stackTrace = null;
+
 	private boolean success = false;
 
 	public SuspendedCommand(RpcCommand rpcCommand) {
@@ -61,8 +116,12 @@ public class SuspendedCommand {
 	}
 
 	public Object[] getOutputValues() {
-		return new Object[] { agentId, commandId, rpcUniqueId, completed, success, replyMessage, errorMessage,
-				callTimeMs, replyTimeMs, stackTrace };
+		logger.debug("SuspendedCommand getOutputValues called for commandId {} rpcUniqueId {}", commandId, rpcUniqueId);
+
+		return new Object[] { agentId, commandId, rpcUniqueId, completed, success,
+				replyMessage != null ? replyMessage.toString() : null, errorMessage, callTimeMs, replyTimeMs,
+				stackTrace };
+
 	}
 
 	public JSONObject getReplyMessage() {
