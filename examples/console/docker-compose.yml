@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  console:
+    build: .
+    restart: always
+    volumes:
+      - ./data:/store
+    ports:
+      - 6901:6901
+    networks:
+      - console
+
+networks:
+  console:
+    driver: bridge

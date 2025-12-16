@@ -11,10 +11,10 @@ services:
       - zenoh-internal
 
   zenoh:
-    image: rossonet/zenohd:latest
+    build: .
     restart: always
     volumes:
-      - ./zenoh:/store
+      - ./zenoh_data:/store
       - ./zenoh.json:/config/zenoh.json
     ports:
       - 7447:7447/tcp
