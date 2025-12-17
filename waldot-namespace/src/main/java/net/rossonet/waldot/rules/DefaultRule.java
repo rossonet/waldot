@@ -349,7 +349,7 @@ public class DefaultRule extends OpcVertex implements Rule {
 	@Override
 	protected void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
 		super.propertyUpdateValueEvent(node, attributeId, value);
-		// TODO aggiornare se necessario le label e i comprtamenti legati alle property
+		// FIXME aggiornare se necessario le label e i comprtamenti legati alle property
 	}
 
 	private Object runAction(final WaldotStepLogger stepRegister) throws UaException {

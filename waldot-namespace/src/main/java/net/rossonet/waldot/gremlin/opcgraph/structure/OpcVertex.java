@@ -35,7 +35,8 @@ public class OpcVertex extends AbstractOpcVertex {
 
 	@Override
 	protected void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
-		// TODO aggiornare se necessario le label e i comportamenti legati alle property
+		// FIXME aggiornare se necessario le label e i comportamenti legati alle
+		// property
 	}
 
 }

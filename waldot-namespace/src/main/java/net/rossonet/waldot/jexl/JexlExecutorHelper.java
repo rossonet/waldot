@@ -16,19 +16,19 @@ import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.rules.ClonableMapContext;
-import net.rossonet.waldot.api.rules.RuleExecutorHelper;
 import net.rossonet.waldot.api.rules.Rule;
+import net.rossonet.waldot.api.rules.RuleExecutorHelper;
 import net.rossonet.waldot.api.rules.WaldotStepLogger;
 import net.rossonet.waldot.utils.LogHelper;
 
 public class JexlExecutorHelper implements RuleExecutorHelper {
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger("JEXEL EXECUTOR");
-
 	private static final boolean DEBUG_FLAG = true;
 
+	protected static final Logger LOGGER = LoggerFactory.getLogger("JEXEL EXECUTOR");
+
 	protected static JexlEngine generateEngine() {
-		// TODO: provare la restrizione dei permessi o la sandbox
+		// XXX: provare la restrizione dei permessi o la sandbox
 		// return new
 		// JexlBuilder().permissions(classPermissions).debug(true).silent(false).strict(false).create();
 		final JexlEngine j = new JexlBuilder().permissions(JexlPermissions.UNRESTRICTED).debug(DEBUG_FLAG).silent(false)
@@ -36,16 +36,16 @@ public class JexlExecutorHelper implements RuleExecutorHelper {
 		return j;
 	}
 
-	protected JexlPermissions classPermissions = new JexlPermissions.ClassPermissions();
-
-	protected final Set<Class<?>> functionObjects = new HashSet<>();
-
-	private JexlEngine jexl = generateEngine();
-
 	protected final ClonableMapContext baseJexlContext = new ClonableMapContext();
 
-	protected transient Map<String, JexlScript> compiledConditions = new HashMap<>();
+	protected JexlPermissions classPermissions = new JexlPermissions.ClassPermissions();
+
 	protected transient Map<String, JexlScript> compiledActions = new HashMap<>();
+
+	protected transient Map<String, JexlScript> compiledConditions = new HashMap<>();
+
+	protected final Set<Class<?>> functionObjects = new HashSet<>();
+	private JexlEngine jexl = generateEngine();
 
 	@Override
 	public void close() throws Exception {

@@ -44,7 +44,6 @@ import net.rossonet.zenoh.api.TelemetryData;
 import net.rossonet.zenoh.api.message.RpcCommand;
 import net.rossonet.zenoh.controller.command.StartAgentCommand;
 import net.rossonet.zenoh.controller.command.StopAgentCommand;
-import net.rossonet.zenoh.controller.command.SuspendedCommand;
 import net.rossonet.zenoh.exception.WaldotZenohException;
 import net.rossonet.zenoh.exception.ZenohSerializationException;
 
@@ -87,7 +86,7 @@ public class ZenohAgent implements AutoCloseable {
 	private StartAgentCommand startCommand;
 	private StopAgentCommand stopCommand;
 	private final Map<String, CallbackSubscriber> subcribers = new ConcurrentHashMap<>();
-	private final Map<Long, SuspendedCommand> suspendedCommands = new ConcurrentHashMap<>();
+	private final Map<Long, CommandLifecycleRegister> suspendedCommands = new ConcurrentHashMap<>();
 
 	private final String uniqueId;
 
@@ -224,7 +223,7 @@ public class ZenohAgent implements AutoCloseable {
 						uniqueId);
 				return;
 			} else {
-				final SuspendedCommand suspendedCommand = suspendedCommands.get(command.getRelatedId());
+				final CommandLifecycleRegister suspendedCommand = suspendedCommands.get(command.getRelatedId());
 				if (command.getAgentId() == null || !command.getAgentId().equals(uniqueId)) {
 					logger.warn(
 							"Received reply for command with id {} from different agent {} instead of expected agent {}",
@@ -278,16 +277,16 @@ public class ZenohAgent implements AutoCloseable {
 		lastSeenMs = System.currentTimeMillis();
 	}
 
-	public Future<SuspendedCommand> elaborateRemoteCommandOnAgent(String commandId, String[] inputValues) {
+	public Future<CommandLifecycleRegister> elaborateRemoteCommandOnAgent(String commandId, String[] inputValues) {
 		final String topic = ZenohHelper.getRpcCommandTopic(getUniqueId(), commandId);
 		// final AgentCommandMetadata meta = registerCommands.get(commandId);
 		final Map<String, Object> values = new HashMap<>();
 		final RpcCommand rpcCommand = new RpcCommand(getUniqueId(), commandId, values);
 		try {
-			final SuspendedCommand calledCommand = new SuspendedCommand(rpcCommand);
+			final CommandLifecycleRegister calledCommand = new CommandLifecycleRegister(rpcCommand);
 			suspendedCommands.put(rpcCommand.getUniqueId(), calledCommand);
 			sendMessage(topic, rpcCommand.toJson(), ZenohHelper.getCommandPutOptions());
-			return new Future<SuspendedCommand>() {
+			return new Future<CommandLifecycleRegister>() {
 
 				@Override
 				public boolean cancel(boolean mayInterruptIfRunning) {
@@ -295,7 +294,7 @@ public class ZenohAgent implements AutoCloseable {
 				}
 
 				@Override
-				public SuspendedCommand get() {
+				public CommandLifecycleRegister get() {
 					logger.debug("Waiting for command {} response from agent {}", commandId, uniqueId);
 					if (!calledCommand.isCompleted()) {
 						try {
@@ -311,7 +310,7 @@ public class ZenohAgent implements AutoCloseable {
 				}
 
 				@Override
-				public SuspendedCommand get(long timeout, java.util.concurrent.TimeUnit unit) {
+				public CommandLifecycleRegister get(long timeout, java.util.concurrent.TimeUnit unit) {
 					logger.debug("Waiting for command {} response from agent {} with timeout {} {}", commandId,
 							uniqueId, timeout, unit);
 					if (!calledCommand.isCompleted()) {
@@ -408,11 +407,11 @@ public class ZenohAgent implements AutoCloseable {
 								.get(TIMEOUT_COMMAND_MS, TimeUnit.MILLISECONDS).getOutputValues();
 					} catch (InterruptedException | ExecutionException | TimeoutException e) {
 						logger.error("Error executing command {} on agent {}", commandName, uniqueId, e);
-						return new SuspendedCommand(getUniqueId(), commandName, inputValues, e).getOutputValues();
+						return new CommandLifecycleRegister(getUniqueId(), commandName, inputValues, e).getOutputValues();
 					}
 				}
 			};
-			SuspendedCommand.addStandardAgentCommandOutputArguments(command);
+			CommandLifecycleRegister.addStandardAgentCommandOutputArguments(command);
 			agentLifeCycleManager.getNamespace().registerCommand(command);
 			opcRegisterCommands.put(commandName, command);
 			logger.info("Registered new command {} for agent {}", commandName, uniqueId);

@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.controller.command;
+package net.rossonet.zenoh.controller;
 
 import java.time.Instant;
 
@@ -14,7 +14,7 @@ import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.zenoh.api.message.RpcCommand;
 
-public class SuspendedCommand {
+public class CommandLifecycleRegister {
 
 	private static final @Nullable String AGENT_ID_DESCRIPTION = "identifier of the agent";
 	private static final String AGENT_ID_LABEL = "agentId";
@@ -26,7 +26,7 @@ public class SuspendedCommand {
 	private static final String COMPLETED_LABEL = "completed";
 	private static final @Nullable String ERROR_MESSAGE_DESCRIPTION = "error message in case of command execution failure";
 	private static final String ERROR_MESSAGE_LABEL = "errorMessage";
-	private final static Logger logger = LoggerFactory.getLogger(SuspendedCommand.class);
+	private final static Logger logger = LoggerFactory.getLogger(CommandLifecycleRegister.class);
 	private static final @Nullable String REPLY_MESSAGE_DESCRIPTION = "message returned by the agent as reply";
 	private static final String REPLY_MESSAGE_LABEL = "replyMessage";
 	private static final @Nullable String REPLY_TIME_MS_DESCRIPTION = "timestamp in milliseconds when the command reply was received";
@@ -75,14 +75,14 @@ public class SuspendedCommand {
 
 	private boolean success = false;
 
-	public SuspendedCommand(RpcCommand rpcCommand) {
+	public CommandLifecycleRegister(RpcCommand rpcCommand) {
 		commandId = rpcCommand.getCommandId();
 		rpcUniqueId = rpcCommand.getUniqueId();
 		agentId = rpcCommand.getAgentId();
 		callTimeMs = Instant.now().toEpochMilli();
 	}
 
-	public SuspendedCommand(RpcCommand rpcCommand, Exception e) {
+	public CommandLifecycleRegister(RpcCommand rpcCommand, Exception e) {
 		this(rpcCommand);
 		this.errorMessage = e.getMessage();
 		this.success = false;
@@ -92,7 +92,7 @@ public class SuspendedCommand {
 		this.stackTrace = LogHelper.stackTraceToString(e);
 	}
 
-	public SuspendedCommand(String agentId, String commandName, String[] inputValues, Exception e) {
+	public CommandLifecycleRegister(String agentId, String commandName, String[] inputValues, Exception e) {
 		commandId = commandName;
 		rpcUniqueId = 0;
 		this.agentId = agentId;
@@ -116,7 +116,7 @@ public class SuspendedCommand {
 	}
 
 	public Object[] getOutputValues() {
-		logger.debug("SuspendedCommand getOutputValues called for commandId {} rpcUniqueId {}", commandId, rpcUniqueId);
+		logger.debug("CommandLifecycleRegister getOutputValues called for commandId {} rpcUniqueId {}", commandId, rpcUniqueId);
 
 		return new Object[] { agentId, commandId, rpcUniqueId, completed, success,
 				replyMessage != null ? replyMessage.toString() : null, errorMessage, callTimeMs, replyTimeMs,
@@ -175,7 +175,7 @@ public class SuspendedCommand {
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
-		builder.append("SuspendedCommand [agentId=");
+		builder.append("CommandLifecycleRegister [agentId=");
 		builder.append(agentId);
 		builder.append(", commandId=");
 		builder.append(commandId);

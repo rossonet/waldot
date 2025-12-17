@@ -8,6 +8,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.zenoh.ZenohHelper;
+import net.rossonet.zenoh.controller.CommandLifecycleRegister;
 import net.rossonet.zenoh.controller.ZenohAgent;
 
 public class StopAgentCommand extends AbstractOpcCommand {
@@ -20,7 +21,7 @@ public class StopAgentCommand extends AbstractOpcCommand {
 				"agents/" + zenohAgent.getUniqueId(), UInteger.valueOf(WriteMask.Executable.getValue()),
 				UInteger.valueOf(WriteMask.Executable.getValue()), true, true);
 		this.zenohAgent = zenohAgent;
-		SuspendedCommand.addStandardAgentCommandOutputArguments(this);
+		CommandLifecycleRegister.addStandardAgentCommandOutputArguments(this);
 	}
 
 	@Override
@@ -29,7 +30,7 @@ public class StopAgentCommand extends AbstractOpcCommand {
 			return zenohAgent.elaborateRemoteCommandOnAgent(ZenohHelper.FLOW_STOP_COMMAND_TOPIC, inputValues).get()
 					.getOutputValues();
 		} catch (InterruptedException | ExecutionException e) {
-			return new SuspendedCommand(zenohAgent.getUniqueId(), ZenohHelper.FLOW_STOP_COMMAND_TOPIC, inputValues, e)
+			return new CommandLifecycleRegister(zenohAgent.getUniqueId(), ZenohHelper.FLOW_STOP_COMMAND_TOPIC, inputValues, e)
 					.getOutputValues();
 		}
 

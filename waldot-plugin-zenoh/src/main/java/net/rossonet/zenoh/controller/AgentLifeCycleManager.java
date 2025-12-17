@@ -106,7 +106,8 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 
 	@Override
 	protected void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
-		// TODO aggiornare se necessario le label e i comportamenti legati alle property
+		// FIXME aggiornare se necessario le label e i comportamenti legati alle
+		// property
 	}
 
 	private void registerNewAgent(JSONObject discoveryMessage) {

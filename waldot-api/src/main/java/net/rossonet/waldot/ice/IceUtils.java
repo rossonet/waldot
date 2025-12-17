@@ -177,7 +177,7 @@ public class IceUtils {
 
 		long startTime = System.currentTimeMillis();
 
-		// TODO: component creation should probably be part of the library. it
+		// XXX: component creation should probably be part of the library. it
 		// should also be started after we've defined all components to be
 		// created so that we could run the harvesting for everyone of them
 		// simultaneously with the others.
