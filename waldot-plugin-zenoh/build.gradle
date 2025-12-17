@@ -40,6 +40,8 @@ dependencies {
     implementation project(':waldot-deps')
     api project(':waldot-api')
     api project(':zenoh-agent-lib')
+    // per raft "multi waldot"
+    api("io.microraft:microraft:0.7")
     testImplementation project(':waldot-namespace')
     testImplementation project(':zenoh-acme')
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
