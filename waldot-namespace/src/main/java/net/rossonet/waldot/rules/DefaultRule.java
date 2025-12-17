@@ -52,7 +52,6 @@ public class DefaultRule extends OpcVertex implements Rule {
 	}
 
 	private final String action;
-
 	private JexlContext cacheJexlContext;
 	private boolean clearFactsAfterExecution = true;
 	private final String condition;
@@ -64,16 +63,12 @@ public class DefaultRule extends OpcVertex implements Rule {
 	private long factsValidDelayMs = 0;
 	private long factsValidUntilMs = 0;
 	private long lastRun = 0;
-
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private boolean parallelExecution = false;
-	private int priority = 5; // Default priority
-
+	private int priority = 5;
 	private int refractoryPeriodMs = 1000;
 	final WaldotStepLogger stepRegister;
-
 	private final AtomicInteger threadCounter = new AtomicInteger(0);
-
 	private final WaldotRulesEngine waldotRulesEngine;
 
 	public DefaultRule(final NodeId typeDefinition, final WaldotGraph graph, final UaNodeContext context,
@@ -85,7 +80,6 @@ public class DefaultRule extends OpcVertex implements Rule {
 		this(typeDefinition, graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
 				eventNotifier, version, waldotRulesEngine, new DefaultWaldotStepLogger(), condition, action, priority,
 				factsValidUntilMs, factsValidDelayMs);
-
 	}
 
 	public DefaultRule(final NodeId typeDefinition, final WaldotGraph graph, final UaNodeContext context,
@@ -151,7 +145,6 @@ public class DefaultRule extends OpcVertex implements Rule {
 
 	private void evaluate() {
 		threadCounter.incrementAndGet();
-
 		try {
 			for (final RuleListener l : getListeners()) {
 				final boolean lr = l.beforeEvaluate(stepRegister);
@@ -200,7 +193,6 @@ public class DefaultRule extends OpcVertex implements Rule {
 			getListeners().stream().forEach(l -> l.onFailure(stepRegister, e));
 		}
 		threadCounter.decrementAndGet();
-
 	}
 
 	@Override
@@ -352,6 +344,12 @@ public class DefaultRule extends OpcVertex implements Rule {
 				+ " attributeId " + attributeId + " value " + value);
 		factsMemory.add(createCachedRuleRecord(node, attributeId, value));
 		changeState();
+	}
+
+	@Override
+	protected void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
+		super.propertyUpdateValueEvent(node, attributeId, value);
+		// TODO aggiornare se necessario le label e i comprtamenti legati alle property
 	}
 
 	private Object runAction(final WaldotStepLogger stepRegister) throws UaException {

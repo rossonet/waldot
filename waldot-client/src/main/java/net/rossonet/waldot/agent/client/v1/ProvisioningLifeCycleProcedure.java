@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.agent.client.api.WaldOTAgentClient;
-import net.rossonet.waldot.agent.exception.ProvisioningException;
+import net.rossonet.waldot.client.exception.ProvisioningException;
 
 public class ProvisioningLifeCycleProcedure {
 	private final static Logger logger = LoggerFactory.getLogger(ProvisioningLifeCycleProcedure.class);

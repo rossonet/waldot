@@ -3,7 +3,9 @@ package net.rossonet.waldot.dataGenerator;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -22,8 +24,8 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	}
 
 	private static final String VALUE_KEY = "generated";
-
 	private volatile boolean active = true;
+
 	private long actualValue;
 	private final Algorithm algorithm;
 	private final long delay;
@@ -69,7 +71,6 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 			logger.info("Thread for generator node " + getNodeId().toParseableString() + " stopped");
 		}
 	};
-
 	private long seed;
 
 	public DataGeneratorVertex(ExecutorService executor, WaldotGraph graph, UaNodeContext context, NodeId nodeId,
@@ -135,6 +136,11 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	protected void generateNextTriangular() {
 		actualValue = (long) (min + ((max - min) * (2 / Math.PI * Math.acos(Math.abs(Math.cos(seed++))))));
 		assignValue();
+	}
+
+	@Override
+	protected void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
+		// TODO aggiornare se necessario le label e i comportamenti legati alle property
 	}
 
 }

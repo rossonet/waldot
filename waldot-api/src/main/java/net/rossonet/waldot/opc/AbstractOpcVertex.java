@@ -49,9 +49,7 @@ import net.rossonet.waldot.api.models.base.GremlinElement;
 public abstract class AbstractOpcVertex extends GremlinElement implements WaldotVertex {
 
 	protected boolean allowNullPropertyValues = false;
-
 	protected final List<EventObserver> eventObservers = new ArrayList<>();
-
 	protected final WaldotGraph graph;
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 
@@ -82,7 +80,6 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public void addPropertyObserver(final PropertyObserver propertyObserver) {
 		propertyObservers.add(propertyObserver);
-
 	}
 
 	@Override
@@ -97,7 +94,6 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 		for (final WaldotEdge edge : values) {
 			edges.add(edge);
 		}
-
 		final Iterator<Edge> edgeIterator = edges.iterator();
 		return inComputerMode()
 				? IteratorUtils.filter(edgeIterator, edge -> getGraphComputerView().legalEdge(this, edge))
@@ -225,7 +221,6 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 			}
 			return VertexProperty.empty();
 		}
-
 		if (inComputerMode()) {
 			final VertexProperty<V> vertexProperty = getGraphComputerView().addProperty(this, key, value);
 			ElementHelper.attachProperties(vertexProperty, keyValues);
@@ -238,7 +233,10 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public void propertyChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
+		propertyChanged(node, attributeId, value);
 	}
+
+	protected abstract void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value);
 
 	@Override
 	public void remove() {

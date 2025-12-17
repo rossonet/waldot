@@ -191,6 +191,6 @@ public interface MiloStrategy {
 
 	void resetNameSpace();
 
-	void updateEventGenerator(Node sourceNode);
+	void updateEventGenerator(Node sourceNode, String eventName, String eventDisplayName, String message, int severity);
 
 }

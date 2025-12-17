@@ -1,4 +1,4 @@
-package net.rossonet.waldot.gremlin.opcgraph.strategies.agent;
+package net.rossonet.waldot.gremlin.opcgraph.strategies.client;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -34,14 +34,14 @@ import org.eclipse.milo.opcua.stack.core.types.structured.UserNameIdentityToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.agent.auth.ClientRegisterAnonymousValidator;
-import net.rossonet.waldot.agent.auth.ClientRegisterUsernameIdentityValidator;
-import net.rossonet.waldot.agent.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
+import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 
-public class BaseAgentManagementStrategy implements ClientManagementStrategy {
+public class BaseClientManagementStrategy implements ClientManagementStrategy {
 
 	private class GenerateAddProvisioningMethodInvocationHandler extends TemplateMethodInvocationHandler {
 

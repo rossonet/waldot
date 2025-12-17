@@ -1,7 +1,9 @@
 package net.rossonet.zenoh.controller;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -22,7 +24,6 @@ import net.rossonet.zenoh.client.ZenohClientFacade;
  * Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public class AgentLifeCycleManager extends AbstractOpcVertex {
-
 	private static final Logger logger = LoggerFactory.getLogger(AgentLifeCycleManager.class);
 	private boolean active = true;
 	private final AgentStore agentStore;
@@ -101,6 +102,11 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 	public ZenohClientFacade getZenohClient() {
 		return zenohClient;
 
+	}
+
+	@Override
+	protected void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
+		// TODO aggiornare se necessario le label e i comportamenti legati alle property
 	}
 
 	private void registerNewAgent(JSONObject discoveryMessage) {

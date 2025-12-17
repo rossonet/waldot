@@ -81,8 +81,7 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 
 	@Override
 	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
-		// not implemented
-		throw new UnsupportedOperationException("Method not implemented.");
+		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
 	}
 
 	@Override
@@ -147,7 +146,7 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 
 	@Override
 	public void propertyChanged(final UaNode sourceNode, final AttributeId attributeId, final Object value) {
-		propertyObservers.forEach(observer -> observer.propertyChanged(sourceNode, attributeId, value));
+		// TODO deve essere implementato nelle classi proprietà?
 
 	}
 

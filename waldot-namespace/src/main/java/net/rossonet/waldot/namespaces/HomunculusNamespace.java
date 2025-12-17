@@ -39,9 +39,6 @@ import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.agent.auth.ClientRegisterAnonymousValidator;
-import net.rossonet.waldot.agent.auth.ClientRegisterUsernameIdentityValidator;
-import net.rossonet.waldot.agent.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
@@ -55,11 +52,14 @@ import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
-import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.api.strategies.BootstrapStrategy;
+import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
+import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
@@ -490,9 +490,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		listeners.forEach(listener -> listener.onMonitoringModeChanged(monitoredItems));
 	}
 
+	// TODO distribuire gli eventi in tutto il codice
 	@Override
 	public void opcuaUpdateEvent(final UaNode sourceNode) {
-		opcMappingStrategy.updateEventGenerator(sourceNode);
+		opcMappingStrategy.updateEventGenerator(sourceNode, "update", "update",
+				"node " + sourceNode.getNodeId() + " updated", 0);
 		historyStrategy.opcuaUpdateEvent(sourceNode);
 	}
 

@@ -17,7 +17,7 @@ import net.rossonet.waldot.logger.TraceLogger;
 import net.rossonet.waldot.utils.LogHelper;
 
 @TestMethodOrder(OrderAnnotation.class)
-public class WaldotRulesEngineTest {
+public class WaldotRulesEngineBaseTest {
 
 	private final LoggerListener logger = new LoggerListener() {
 

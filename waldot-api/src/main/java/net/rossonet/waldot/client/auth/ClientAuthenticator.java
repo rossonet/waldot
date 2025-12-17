@@ -1,4 +1,4 @@
-package net.rossonet.waldot.agent.auth;
+package net.rossonet.waldot.client.auth;
 
 import org.eclipse.milo.opcua.sdk.server.Session;
 

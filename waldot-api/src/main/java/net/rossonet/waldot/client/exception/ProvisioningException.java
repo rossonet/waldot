@@ -1,4 +1,4 @@
-package net.rossonet.waldot.agent.exception;
+package net.rossonet.waldot.client.exception;
 
 public class ProvisioningException extends Exception {
 

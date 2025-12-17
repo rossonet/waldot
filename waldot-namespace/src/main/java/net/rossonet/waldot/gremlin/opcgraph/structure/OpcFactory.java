@@ -39,8 +39,8 @@ import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.agent.BaseAgentManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileBootstrapStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.client.BaseClientManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.BaseConsoleStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
@@ -286,7 +286,7 @@ public final class OpcFactory {
 		});
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),
 				historyStrategy, new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
-				new BaseAgentManagementStrategy(), "file:///tmp/boot.conf");
+				new BaseClientManagementStrategy(), "file:///tmp/boot.conf");
 		waldot.startup(namespace).get();
 		logger.info("Waldot OPC-UA Server started");
 		return waldot.getGremlinGraph();

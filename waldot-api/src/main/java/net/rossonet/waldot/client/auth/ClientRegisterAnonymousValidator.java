@@ -1,4 +1,4 @@
-package net.rossonet.waldot.agent.auth;
+package net.rossonet.waldot.client.auth;
 
 import java.util.Collections;
 import java.util.Set;

@@ -8,10 +8,10 @@ import org.eclipse.milo.opcua.sdk.server.identity.Identity.UsernameIdentity;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.stack.core.types.structured.UserNameIdentityToken;
 
-import net.rossonet.waldot.agent.auth.ClientRegisterAnonymousValidator;
-import net.rossonet.waldot.agent.auth.ClientRegisterUsernameIdentityValidator;
-import net.rossonet.waldot.agent.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 
 public interface ClientManagementStrategy {
 

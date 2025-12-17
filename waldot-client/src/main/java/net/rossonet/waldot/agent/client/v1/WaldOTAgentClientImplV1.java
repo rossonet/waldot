@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.agent.client.api.WaldOTAgentClient;
 import net.rossonet.waldot.agent.client.api.WaldOTAgentClientConfiguration;
 import net.rossonet.waldot.agent.client.api.WaldotAgentClientObserver;
-import net.rossonet.waldot.agent.exception.ProvisioningException;
+import net.rossonet.waldot.client.exception.ProvisioningException;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.SslHelper.KeyStoreHelper;
 import net.rossonet.waldot.utils.ThreadHelper;

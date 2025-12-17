@@ -1,4 +1,4 @@
-package net.rossonet.waldot.agent;
+package net.rossonet.waldot.client;
 
 import org.junit.jupiter.api.Test;
 
