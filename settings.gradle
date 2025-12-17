@@ -7,6 +7,7 @@ include 'waldot-client'
 include 'wotctl'
 include 'waldot-plugin-tinkerpop'
 include 'waldot-plugin-os'
+include 'waldot-plugin-generator'
 include 'waldot-plugin-zenoh'
 include 'zenoh-agent-lib'
 project(':zenoh-agent-lib').projectDir = file('zenoh_clients/zenoh-agent-lib')
