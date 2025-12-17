@@ -24,6 +24,7 @@ repositories {
        url "https://repo.craftyn.com/repository/snapshots/" 
     }
     maven { url 'https://jitpack.io' }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
 }
 
 apply plugin: 'java'
@@ -47,6 +48,8 @@ dependencies {
     api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
     // OPCUA
     api group: 'org.eclipse.milo', name: 'milo-sdk-server', version: '1.0.8'
+    // Steering Behaviors, Formation Motion, Pathfinding, Behavior Trees and Finite State Machines
+    api "com.badlogicgames.gdx:gdx-ai:1.8.1"
 }
 
 task eclipseClosedDependencies {}
