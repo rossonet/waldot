@@ -16,7 +16,7 @@ import org.jline.terminal.TerminalBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.jsonldjava.shaded.com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath;
 
 import net.rossonet.cli.jline.JLineHistory;
 import net.rossonet.cli.jline.history.HistoryStorage;
@@ -54,7 +54,7 @@ public class WaldotCommandRunner implements Callable<Void>, AutoCloseable {
 	private final SignalHandler signalHandler = new SignalHandler() {
 
 		@Override
-		public void handle(Signal signal) {
+		public void handle(final Signal signal) {
 			logger.info("received signal: " + signal.name());
 
 		}
@@ -160,7 +160,7 @@ public class WaldotCommandRunner implements Callable<Void>, AutoCloseable {
 		}
 	}
 
-	public void setCommandLine(CommandLine commandLine) {
+	public void setCommandLine(final CommandLine commandLine) {
 		rootCmd = commandLine;
 		for (final Entry<String, CommandLine> c : commandRegister.getCommands().entrySet()) {
 			rootCmd.addSubcommand(c.getKey(), c.getValue());
