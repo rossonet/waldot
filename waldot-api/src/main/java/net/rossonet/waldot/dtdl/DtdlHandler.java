@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.github.jsonldjava.utils.JsonUtils;
 
 /**
  * The {@code DtdlHandler} class is responsible for parsing and handling Digital
@@ -92,47 +91,42 @@ public class DtdlHandler {
 	@SuppressWarnings("unchecked")
 	public static DtdlHandler newFromDtdlV2(final String dtdlV2String) throws JsonParseException, IOException {
 		final DtdlHandler templateObject = new DtdlHandler();
-		final Object data = JsonUtils.fromString(dtdlV2String);
-		if (data instanceof Map) {
-			for (final Entry<String, Object> v : ((Map<String, Object>) data).entrySet()) {
-				switch (v.getKey()) {
-				case "@context":
-					if (!"dtmi:dtdl:context;2".equals(v.getValue())) {
-						throw new IllegalArgumentException(
-								"@context must be dtmi:dtdl:context;2 but is " + v.getValue());
-					}
-					break;
-				case "@type":
-					if (!"Interface".equals(v.getValue())) {
-						throw new IllegalArgumentException("@type must be Interface but is " + v.getValue());
-					}
-					templateObject.setType(v.getValue());
-					break;
-				case "@id":
-					templateObject.setId(DigitalTwinModelIdentifier.fromString(v.getValue().toString()));
-					break;
-				case "displayName":
-					templateObject.setDisplayName(v.getValue().toString());
-					break;
-				case "comment":
-					templateObject.setComment(v.getValue().toString());
-					break;
-				case "description":
-					templateObject.setDescription(v.getValue().toString());
-					break;
-				case "schemas":
-					templateObject.setSchemas(v.getValue());
-					break;
-				case "extends":
-					templateObject.setExtends(v.getValue());
-					break;
-				case "contents":
-					templateObject.setContents(v.getValue());
-					break;
+		final Map<String, Object> data = new JSONObject(dtdlV2String).toMap();
+		for (final Entry<String, Object> v : data.entrySet()) {
+			switch (v.getKey()) {
+			case "@context":
+				if (!"dtmi:dtdl:context;2".equals(v.getValue())) {
+					throw new IllegalArgumentException("@context must be dtmi:dtdl:context;2 but is " + v.getValue());
 				}
+				break;
+			case "@type":
+				if (!"Interface".equals(v.getValue())) {
+					throw new IllegalArgumentException("@type must be Interface but is " + v.getValue());
+				}
+				templateObject.setType(v.getValue());
+				break;
+			case "@id":
+				templateObject.setId(DigitalTwinModelIdentifier.fromString(v.getValue().toString()));
+				break;
+			case "displayName":
+				templateObject.setDisplayName(v.getValue().toString());
+				break;
+			case "comment":
+				templateObject.setComment(v.getValue().toString());
+				break;
+			case "description":
+				templateObject.setDescription(v.getValue().toString());
+				break;
+			case "schemas":
+				templateObject.setSchemas(v.getValue());
+				break;
+			case "extends":
+				templateObject.setExtends(v.getValue());
+				break;
+			case "contents":
+				templateObject.setContents(v.getValue());
+				break;
 			}
-		} else {
-			throw new IllegalArgumentException("dtdl must resolve to Map, but is " + data.getClass());
 		}
 		if (templateObject.getId() == null) {
 			throw new NullPointerException("@id is mandatory in DTDL v2");

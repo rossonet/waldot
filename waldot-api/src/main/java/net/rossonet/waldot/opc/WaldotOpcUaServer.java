@@ -60,7 +60,7 @@ import org.eclipse.milo.opcua.stack.transport.server.tcp.OpcTcpServerTransportCo
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.jsonldjava.shaded.com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 import net.rossonet.waldot.api.PluginListener;

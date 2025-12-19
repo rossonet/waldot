@@ -219,6 +219,8 @@ public class OsDataWrapper implements AutoCloseable {
 	}
 
 	private void updateSystemData() {
+		// FIXME verificare il funzionamento di questo metodo e aggiungere la capacita
+		// di aggiungere e togliere i nodi dinamicamente
 		for (final Map.Entry<Object, Method> entry : oshiObjectsToRefresh.entrySet()) {
 			final Object analizedObject = entry.getKey();
 			final Method method = entry.getValue();

@@ -43,13 +43,13 @@ dependencies {
     // libreria ICE
     api("org.jitsi:ice4j:3.2-9-gb64c86f")
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
-    api group: 'com.github.jsonld-java', name: 'jsonld-java', version: '0.13.6'
+    api("com.google.guava:guava:33.5.0-jre")
     // gremlin
     api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
     // OPCUA
     api group: 'org.eclipse.milo', name: 'milo-sdk-server', version: '1.0.8'
     // Steering Behaviors, Formation Motion, Pathfinding, Behavior Trees and Finite State Machines
-    api "com.badlogicgames.gdx:gdx-ai:1.8.1"
+    // api "com.badlogicgames.gdx:gdx-ai:1.8.2"
 }
 
 task eclipseClosedDependencies {}

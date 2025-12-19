@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -36,6 +37,7 @@ import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.TextHelper;
+import net.rossonet.waldot.utils.ThreadHelper;
 import net.rossonet.zenoh.ZenohHelper;
 import net.rossonet.zenoh.api.AgentCommandMetadata;
 import net.rossonet.zenoh.api.AgentConfigurationMetadata;
@@ -247,9 +249,7 @@ public class ZenohAgent implements AutoCloseable {
 						? LogHelper.stackTraceToString(command.getExecutionCommandException())
 						: null);
 				suspendedCommand.setCompleted(true);
-				synchronized (suspendedCommand) {
-					suspendedCommand.notifyAll();
-				}
+				suspendedCommand.getReentrantLock().unlock();
 				suspendedCommands.remove(command.getUniqueId());
 			}
 		} catch (final ZenohSerializationException e) {
@@ -297,14 +297,7 @@ public class ZenohAgent implements AutoCloseable {
 				public CommandLifecycleRegister get() {
 					logger.debug("Waiting for command {} response from agent {}", commandId, uniqueId);
 					if (!calledCommand.isCompleted()) {
-						try {
-							synchronized (calledCommand) {
-								calledCommand.wait();
-							}
-						} catch (final InterruptedException e) {
-							logger.error("Interrupted while waiting for command {} response from agent {}", commandId,
-									uniqueId, e);
-						}
+						calledCommand.getReentrantLock().lock();
 					}
 					return calledCommand;
 				}
@@ -315,12 +308,16 @@ public class ZenohAgent implements AutoCloseable {
 							uniqueId, timeout, unit);
 					if (!calledCommand.isCompleted()) {
 						try {
-							synchronized (calledCommand) {
-								calledCommand.wait(unit.toMillis(timeout));
-							}
-						} catch (final InterruptedException e) {
-							logger.error("Interrupted while waiting for command {} response from agent {}", commandId,
-									uniqueId, e);
+							ThreadHelper.runWithTimeout(new Callable<Void>() {
+								@Override
+								public Void call() throws Exception {
+									calledCommand.getReentrantLock().lock();
+									return null;
+								}
+							}, timeout, unit);
+						} catch (final Exception e) {
+							logger.error("Timeout waiting for command {} response from agent {}", commandId, uniqueId,
+									e);
 						}
 					}
 					return calledCommand;
@@ -407,7 +404,8 @@ public class ZenohAgent implements AutoCloseable {
 								.get(TIMEOUT_COMMAND_MS, TimeUnit.MILLISECONDS).getOutputValues();
 					} catch (InterruptedException | ExecutionException | TimeoutException e) {
 						logger.error("Error executing command {} on agent {}", commandName, uniqueId, e);
-						return new CommandLifecycleRegister(getUniqueId(), commandName, inputValues, e).getOutputValues();
+						return new CommandLifecycleRegister(getUniqueId(), commandName, inputValues, e)
+								.getOutputValues();
 					}
 				}
 			};

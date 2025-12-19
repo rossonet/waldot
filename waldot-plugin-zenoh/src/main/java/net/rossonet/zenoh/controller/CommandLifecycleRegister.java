@@ -1,6 +1,7 @@
 package net.rossonet.zenoh.controller;
 
 import java.time.Instant;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
@@ -67,12 +68,13 @@ public class CommandLifecycleRegister {
 	private final String commandId;
 	private boolean completed = false;
 	private String errorMessage = null;
+	private final ReentrantLock reentrantLock = new ReentrantLock();
 	private JSONObject replyMessage = null;
 	private long replyTimeMs = -1;
+
 	private final long rpcUniqueId;
 
 	private String stackTrace = null;
-
 	private boolean success = false;
 
 	public CommandLifecycleRegister(RpcCommand rpcCommand) {
@@ -116,12 +118,17 @@ public class CommandLifecycleRegister {
 	}
 
 	public Object[] getOutputValues() {
-		logger.debug("CommandLifecycleRegister getOutputValues called for commandId {} rpcUniqueId {}", commandId, rpcUniqueId);
+		logger.debug("CommandLifecycleRegister getOutputValues called for commandId {} rpcUniqueId {}", commandId,
+				rpcUniqueId);
 
 		return new Object[] { agentId, commandId, rpcUniqueId, completed, success,
 				replyMessage != null ? replyMessage.toString() : null, errorMessage, callTimeMs, replyTimeMs,
 				stackTrace };
 
+	}
+
+	public ReentrantLock getReentrantLock() {
+		return reentrantLock;
 	}
 
 	public JSONObject getReplyMessage() {

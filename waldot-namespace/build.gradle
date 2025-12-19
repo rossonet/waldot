@@ -24,6 +24,7 @@ repositories {
        url "https://repo.craftyn.com/repository/snapshots/" 
     }
     maven { url 'https://jitpack.io' }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
 }
 
 apply plugin: 'java'
