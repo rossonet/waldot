@@ -38,7 +38,7 @@ public class Success extends LeafTask {
 	 * @return {@link Status#SUCCEEDED}.
 	 */
 	@Override
-	public Status execute() {
+	public Status executeTick() {
 		return Status.SUCCEEDED;
 	}
 

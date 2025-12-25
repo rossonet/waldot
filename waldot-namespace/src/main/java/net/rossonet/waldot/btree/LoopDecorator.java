@@ -13,12 +13,8 @@ import net.rossonet.waldot.api.btree.Task;
  */
 public abstract class LoopDecorator extends Decorator {
 
-	/** Whether the {@link #run()} method must keep looping or not. */
+	/** Whether the {@link #tick()} method must keep looping or not. */
 	protected boolean loop;
-
-	/** Creates a loop decorator with no child task. */
-	public LoopDecorator() {
-	}
 
 	/**
 	 * Creates a loop decorator that wraps the given task.
@@ -29,14 +25,8 @@ public abstract class LoopDecorator extends Decorator {
 		super(child);
 	}
 
-	@Override
-	public void childRunning(final Task runningTask, final Task reporter) {
-		super.childRunning(runningTask, reporter);
-		loop = false;
-	}
-
 	/**
-	 * Whether the {@link #run()} method must keep looping or not.
+	 * Whether the {@link #tick()} method must keep looping or not.
 	 * 
 	 * @return {@code true} if it must keep looping; {@code false} otherwise.
 	 */
@@ -45,21 +35,27 @@ public abstract class LoopDecorator extends Decorator {
 	}
 
 	@Override
-	public void resetTask() {
+	public void doResetTask() {
 		loop = false;
-		super.resetTask();
+		super.doResetTask();
 	}
 
 	@Override
-	public void run() {
+	public void notifyChildRunning(final Task runningTask) {
+		super.notifyChildRunning(runningTask);
+		loop = false;
+	}
+
+	@Override
+	public void tick() {
 		loop = true;
 		while (condition()) {
-			if (child.getStatus() == Status.RUNNING) {
-				child.run();
+			if (child().getStatus() == Status.RUNNING) {
+				child().tick();
 			} else {
-				child.setControl(this);
-				child.start();
-				child.run();
+				child().setControl(this);
+				child().doStart();
+				child().tick();
 			}
 		}
 	}

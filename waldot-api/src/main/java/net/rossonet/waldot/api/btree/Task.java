@@ -27,65 +27,64 @@ public interface Task extends AutoCloseable {
 	 * @throws IllegalStateException if the child cannot be added for whatever
 	 *                               reason.
 	 */
-	int addChild(Task child);
+	int addChild(Task child) throws IllegalStateException;
 
 	/**
 	 * Terminates this task and all its running children. This method MUST be called
 	 * only if this task is running.
 	 */
-	void cancel();
+	void doCancel();
+
+	/**
+	 * This method will be called by {@link #notifySuccess()}, {@link #doFail()} or
+	 * {@link #doCancel()}, meaning that this task's status has just been set to
+	 * {@link Status#SUCCEEDED}, {@link Status#FAILED} or {@link Status#CANCELLED}
+	 * respectively.
+	 */
+	void doEnd();
+
+	/**
+	 * This method will be called in {@link #tick()} to inform control that this task
+	 * has finished running with a failure result
+	 */
+	void doFail();
+
+	Status getPreviousStatus();
+
+	Status getStatus();
 
 	/**
 	 * This method will be called when one of the children of this task fails
 	 * 
 	 * @param task the task that failed
 	 */
-	void childFail(Task task);
+	void notifyChildFail(Task task);
 
 	/**
 	 * This method will be called when one of the ancestors of this task needs to
 	 * run again
 	 * 
-	 * @param runningTask the task that needs to run again
-	 * @param reporter    the task that reports, usually one of this task's children
+	 * @param task the task that needs to run again
 	 */
-	void childRunning(Task runningTask, Task reporter);
+	void notifyChildRunning(Task task);
 
 	/**
 	 * This method will be called when one of the children of this task succeeds
 	 * 
 	 * @param task the task that succeeded
 	 */
-	void childSuccess(Task task);
-
-	/**
-	 * This method will be called by {@link #success()}, {@link #fail()} or
-	 * {@link #cancel()}, meaning that this task's status has just been set to
-	 * {@link Status#SUCCEEDED}, {@link Status#FAILED} or {@link Status#CANCELLED}
-	 * respectively.
-	 */
-	void end();
-
-	/**
-	 * This method will be called in {@link #run()} to inform control that this task
-	 * has finished running with a failure result
-	 */
-	void fail();
-
-	Status getPreviousStatus();
-
-	Status getStatus();
+	void notifyChildSuccess(Task task);
 
 	/** Resets this task to make it restart from scratch on next run. */
-	void resetTask();
+	void doResetTask();
 
-	void run();
+	void tick();
 
 	/**
-	 * This method will be called in {@link #run()} to inform control that this task
+	 * This method will be called in {@link #tick()} to inform control that this task
 	 * needs to run again
 	 */
-	void running();
+	void notifyRunning();
 
 	/**
 	 * This method will set a task as this task's control (parent)
@@ -95,12 +94,12 @@ public interface Task extends AutoCloseable {
 	void setControl(Task control);
 
 	/** This method will be called once before this task's first run. */
-	void start();
+	void doStart();
 
 	/**
-	 * This method will be called in {@link #run()} to inform control that this task
+	 * This method will be called in {@link #tick()} to inform control that this task
 	 * has finished running with a success result
 	 */
-	void success();
+	void notifySuccess();
 
 }

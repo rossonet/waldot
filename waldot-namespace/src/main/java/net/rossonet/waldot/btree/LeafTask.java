@@ -23,20 +23,8 @@ public abstract class LeafTask extends AbstractTask {
 	 * any children.
 	 */
 	@Override
-	public int addChildToTask(final Task child) {
+	public int addChild(final Task child) {
 		throw new IllegalStateException("A leaf task cannot have any children");
-	}
-
-	@Override
-	public final void childFail(final Task runningTask) {
-	}
-
-	@Override
-	public final void childRunning(final Task runningTask, final Task reporter) {
-	}
-
-	@Override
-	public final void childSuccess(final Task runningTask) {
 	}
 
 	/**
@@ -47,7 +35,7 @@ public abstract class LeafTask extends AbstractTask {
 	 * 
 	 * @return the status of this leaf task
 	 */
-	public abstract Status execute();
+	public abstract Status executeTick();
 
 	@Override
 	public Task getChild(final int i) {
@@ -59,25 +47,37 @@ public abstract class LeafTask extends AbstractTask {
 		return 0;
 	}
 
+	@Override
+	public final void notifyChildFail(final Task runningTask) {
+	}
+
+	@Override
+	public final void notifyChildRunning(final Task runningTask) {
+	}
+
+	@Override
+	public final void notifyChildSuccess(final Task runningTask) {
+	}
+
 	/**
 	 * This method contains the update logic of this task. The implementation
-	 * delegates the {@link #execute()} method.
+	 * delegates the {@link #executeTick()} method.
 	 */
 	@Override
-	public final void run() {
-		final Status result = execute();
+	public final void tick() {
+		final Status result = executeTick();
 		if (result == null) {
 			throw new IllegalStateException("Invalid status 'null' returned by the execute method");
 		}
 		switch (result) {
 		case SUCCEEDED:
-			success();
+			notifySuccess();
 			return;
 		case FAILED:
-			fail();
+			doFail();
 			return;
 		case RUNNING:
-			running();
+			notifyRunning();
 			return;
 		default:
 			throw new IllegalStateException("Invalid status '" + result.name() + "' returned by the execute method");

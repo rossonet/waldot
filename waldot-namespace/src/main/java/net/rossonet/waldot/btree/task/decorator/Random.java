@@ -71,38 +71,19 @@ public class Random extends Decorator {
 		this(ZERO_POINT_FIVE, task);
 	}
 
-	@Override
-	public void childFail(final Task runningTask) {
-		decide();
-	}
-
-	@Override
-	public void childSuccess(final Task runningTask) {
-		decide();
-	}
-
 	private void decide() {
 		final float randomNumber = (float) Math.random();
 		if (randomNumber <= success) {
-			success();
+			notifySuccess();
 		} else {
-			fail();
+			doFail();
 		}
 	}
 
 	@Override
-	public void resetTask() {
+	public void doResetTask() {
 		this.success = ZERO_POINT_FIVE;
-		super.resetTask();
-	}
-
-	@Override
-	public void run() {
-		if (child != null) {
-			super.run();
-		} else {
-			decide();
-		}
+		super.doResetTask();
 	}
 
 	/**
@@ -111,7 +92,26 @@ public class Random extends Decorator {
 	 * This method is called when the task is entered.
 	 */
 	@Override
-	public void start() {
+	public void doStart() {
 		// No action needed since success is a fixed float value
+	}
+
+	@Override
+	public void notifyChildFail(final Task runningTask) {
+		decide();
+	}
+
+	@Override
+	public void notifyChildSuccess(final Task runningTask) {
+		decide();
+	}
+
+	@Override
+	public void tick() {
+		if (child() != null) {
+			child().tick();
+		} else {
+			decide();
+		}
 	}
 }

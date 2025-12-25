@@ -36,22 +36,11 @@ public class Wait extends LeafTask {
 		this.seconds = seconds;
 	}
 
-	/**
-	 * Executes this {@code Wait} task.
-	 * 
-	 * @return {@link Status#SUCCEEDED} if the specified timeout has expired;
-	 *         {@link Status#RUNNING} otherwise.
-	 */
 	@Override
-	public Status execute() {
-		return (System.currentTimeMillis() / 1000f) - startTime < seconds ? Status.RUNNING : Status.SUCCEEDED;
-	}
-
-	@Override
-	public void resetTask() {
+	public void doResetTask() {
 		seconds = 0l;
 		startTime = 0;
-		super.resetTask();
+		super.doResetTask();
 	}
 
 	/**
@@ -67,8 +56,19 @@ public class Wait extends LeafTask {
 	 * </ul>
 	 */
 	@Override
-	public void start() {
+	public void doStart() {
 		startTime = System.currentTimeMillis() / 1000f;
+	}
+
+	/**
+	 * Executes this {@code Wait} task.
+	 * 
+	 * @return {@link Status#SUCCEEDED} if the specified timeout has expired;
+	 *         {@link Status#RUNNING} otherwise.
+	 */
+	@Override
+	public Status executeTick() {
+		return (System.currentTimeMillis() / 1000f) - startTime < seconds ? Status.RUNNING : Status.SUCCEEDED;
 	}
 
 }

@@ -58,7 +58,7 @@ import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
-import net.rossonet.waldot.btree.DefaultBehaviorTreesEngine;
+import net.rossonet.waldot.btree.DefaultBehaviorTreeEngine;
 import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
@@ -137,7 +137,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		listeners.forEach(listener -> listener.onNamespaceCreated(this));
 		bootstrapProcedureStrategy.initialize(this);
 		rulesEngine = new DefaultRulesEngine(this);
-		behaviorTrees = new DefaultBehaviorTreesEngine(this);
+		behaviorTrees = new DefaultBehaviorTreeEngine(this);
 	}
 
 	@Override

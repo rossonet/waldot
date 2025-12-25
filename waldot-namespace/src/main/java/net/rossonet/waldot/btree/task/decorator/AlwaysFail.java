@@ -8,16 +8,8 @@ import net.rossonet.waldot.btree.Decorator;
  * An {@code AlwaysFail} decorator will fail no matter the wrapped task fails or
  * succeeds.
  * 
- * @param type of the blackboard object that tasks use to read or modify game
- *             state
- * 
- * @author implicit-invocation
  */
 public class AlwaysFail extends Decorator {
-
-	/** Creates an {@code AlwaysFail} decorator with no child. */
-	public AlwaysFail() {
-	}
 
 	/**
 	 * Creates an {@code AlwaysFail} decorator with the given child.
@@ -29,8 +21,8 @@ public class AlwaysFail extends Decorator {
 	}
 
 	@Override
-	public void childSuccess(final Task runningTask) {
-		childFail(runningTask);
+	public void notifyChildSuccess(final Task runningTask) {
+		notifyChildFail(runningTask);
 	}
 
 }

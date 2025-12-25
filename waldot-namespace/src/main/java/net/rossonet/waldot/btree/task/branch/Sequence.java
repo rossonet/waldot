@@ -17,11 +17,6 @@ import net.rossonet.waldot.btree.SingleRunningChildBranch;
  */
 public class Sequence extends SingleRunningChildBranch {
 
-	/** Creates a {@code Sequence} branch with no children. */
-	public Sequence() {
-		super();
-	}
-
 	/**
 	 * Creates a {@code Sequence} branch with the given children.
 	 * 
@@ -41,18 +36,18 @@ public class Sequence extends SingleRunningChildBranch {
 	}
 
 	@Override
-	public void childFail(final Task runningTask) {
-		super.childFail(runningTask);
-		fail(); // Return failure status when a child says it failed
+	public void notifyChildFail(final Task runningTask) {
+		super.notifyChildFail(runningTask);
+		doFail(); // Return failure status when a child says it failed
 	}
 
 	@Override
-	public void childSuccess(final Task runningTask) {
-		super.childSuccess(runningTask);
+	public void notifyChildSuccess(final Task runningTask) {
+		super.notifyChildSuccess(runningTask);
 		if (++currentChildIndex < children.size()) {
-			run(); // Run next child
+			tick(); // Run next child
 		} else {
-			success(); // All children processed, return success status
+			notifySuccess(); // All children processed, return success status
 		}
 	}
 

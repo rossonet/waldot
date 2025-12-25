@@ -34,6 +34,7 @@ public class Include extends Decorator {
 	 * Creates a non-lazy {@code Include} decorator without specifying the subtree.
 	 */
 	public Include(final WaldotBehaviorTreesEngine engine) {
+		super();
 		this.engine = engine;
 	}
 
@@ -65,15 +66,11 @@ public class Include extends Decorator {
 		return rootTask;
 	}
 
-	public WaldotBehaviorTreesEngine getEngine() {
-		return engine;
-	}
-
 	@Override
-	public void resetTask() {
+	public void doResetTask() {
 		lazy = false;
 		subtree = null;
-		super.resetTask();
+		super.doResetTask();
 	}
 
 	/**
@@ -86,15 +83,19 @@ public class Include extends Decorator {
 	 * @throws UnsupportedOperationException if this {@code Include} is eager
 	 */
 	@Override
-	public void start() {
+	public void doStart() {
 		if (!lazy) {
 			throw new UnsupportedOperationException(
 					"A non-lazy " + Include.class.getSimpleName() + " isn't meant to be run!");
 		}
 
-		if (child == null) {
+		if (child() == null) {
 			// Lazy include is grafted at run-time
 			addChild(createSubtreeRootTask());
 		}
+	}
+
+	public WaldotBehaviorTreesEngine getEngine() {
+		return engine;
 	}
 }

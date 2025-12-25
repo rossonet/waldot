@@ -16,12 +16,6 @@ import net.rossonet.waldot.btree.SingleRunningChildBranch;
  * @author implicit-invocation
  */
 public class Selector extends SingleRunningChildBranch {
-
-	/** Creates a {@code Selector} branch with no children. */
-	public Selector() {
-		super();
-	}
-
 	/**
 	 * Creates a {@code Selector} branch with the given children.
 	 * 
@@ -41,19 +35,19 @@ public class Selector extends SingleRunningChildBranch {
 	}
 
 	@Override
-	public void childFail(final Task runningTask) {
-		super.childFail(runningTask);
+	public void notifyChildFail(final Task runningTask) {
+		super.notifyChildFail(runningTask);
 		if (++currentChildIndex < children.size()) {
-			run(); // Run next child
+			tick(); // Run next child
 		} else {
-			fail(); // All children processed, return failure status
+			doFail(); // All children processed, return failure status
 		}
 	}
 
 	@Override
-	public void childSuccess(final Task runningTask) {
-		super.childSuccess(runningTask);
-		success(); // Return success status when a child says it succeeded
+	public void notifyChildSuccess(final Task runningTask) {
+		super.notifyChildSuccess(runningTask);
+		notifySuccess(); // Return success status when a child says it succeeded
 	}
 
 }

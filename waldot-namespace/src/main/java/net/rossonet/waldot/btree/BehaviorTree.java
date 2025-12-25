@@ -100,7 +100,7 @@ public class BehaviorTree extends AbstractTask {
 	 * @throws IllegalStateException if the root task is already set.
 	 */
 	@Override
-	public int addChildToTask(final Task child) {
+	public int addChild(final Task child) {
 		if (this.rootTask != null) {
 			throw new IllegalStateException("A behavior tree cannot have more than one root task");
 		}
@@ -116,18 +116,11 @@ public class BehaviorTree extends AbstractTask {
 	}
 
 	@Override
-	public void childFail(final Task runningTask) {
-		fail();
-	}
-
-	@Override
-	public void childRunning(final Task runningTask, final Task reporter) {
-		running();
-	}
-
-	@Override
-	public void childSuccess(final Task runningTask) {
-		success();
+	public void doResetTask() {
+		removeListeners();
+		this.rootTask = null;
+		this.listeners = null;
+		super.doResetTask();
 	}
 
 	@Override
@@ -149,6 +142,21 @@ public class BehaviorTree extends AbstractTask {
 		}
 	}
 
+	@Override
+	public void notifyChildFail(final Task runningTask) {
+		doFail();
+	}
+
+	@Override
+	public void notifyChildRunning(final Task runningTask) {
+		notifyRunning();
+	}
+
+	@Override
+	public void notifyChildSuccess(final Task runningTask) {
+		notifySuccess();
+	}
+
 	public void notifyStatusUpdated(final Task task, final Status previousStatus) {
 		for (final Listener listener : listeners) {
 			listener.statusUpdated(task, previousStatus);
@@ -167,18 +175,6 @@ public class BehaviorTree extends AbstractTask {
 		}
 	}
 
-	@Override
-	public void resetTask() {
-		removeListeners();
-		this.rootTask = null;
-		this.listeners = null;
-		super.resetTask();
-	}
-
-	@Override
-	public void run() {
-	}
-
 	/**
 	 * This method should be called when game entity needs to make decisions: call
 	 * this in game loop or after a fixed time slice if the game is real-time, or on
@@ -186,11 +182,15 @@ public class BehaviorTree extends AbstractTask {
 	 */
 	public void step() {
 		if (rootTask.getStatus() == Status.RUNNING) {
-			rootTask.run();
+			rootTask.tick();
 		} else {
 			rootTask.setControl(this);
-			rootTask.start();
-			rootTask.run();
+			rootTask.doStart();
+			rootTask.tick();
 		}
+	}
+
+	@Override
+	public void tick() {
 	}
 }

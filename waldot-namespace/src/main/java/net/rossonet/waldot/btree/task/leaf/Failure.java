@@ -22,7 +22,7 @@ public class Failure extends LeafTask {
 	 * @return {@link Status#FAILED}.
 	 */
 	@Override
-	public Status execute() {
+	public Status executeTick() {
 		return Status.FAILED;
 	}
 

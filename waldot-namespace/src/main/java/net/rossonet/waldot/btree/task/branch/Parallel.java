@@ -61,15 +61,15 @@ public class Parallel extends BranchTask {
 
 					switch (child.getStatus()) {
 					case RUNNING:
-						child.run();
+						child.tick();
 						break;
 					case SUCCEEDED:
 					case FAILED:
 						break;
 					default:
 						child.setControl(parallel);
-						child.start();
-						child.run();
+						child.doStart();
+						child.tick();
 						break;
 					}
 
@@ -77,14 +77,14 @@ public class Parallel extends BranchTask {
 						parallel.cancelRunningChildren(parallel.noRunningTasks ? parallel.currentChildIndex + 1 : 0);
 						parallel.resetAllChildren();
 						if (parallel.lastResult) {
-							parallel.success();
+							parallel.notifySuccess();
 						} else {
-							parallel.fail();
+							parallel.doFail();
 						}
 						return;
 					}
 				}
-				parallel.running();
+				parallel.notifyRunning();
 			}
 		},
 		/**
@@ -99,25 +99,25 @@ public class Parallel extends BranchTask {
 						.size(); parallel.currentChildIndex++) {
 					final Task child = parallel.children.get(parallel.currentChildIndex);
 					if (child.getStatus() == Status.RUNNING) {
-						child.run();
+						child.tick();
 					} else {
 						child.setControl(parallel);
-						child.start();
+						child.doStart();
 
-						child.run();
+						child.tick();
 					}
 
 					if (parallel.lastResult != null) { // Current child has finished either with success or fail
 						parallel.cancelRunningChildren(parallel.noRunningTasks ? parallel.currentChildIndex + 1 : 0);
 						if (parallel.lastResult) {
-							parallel.success();
+							parallel.notifySuccess();
 						} else {
-							parallel.fail();
+							parallel.doFail();
 						}
 						return;
 					}
 				}
-				parallel.running();
+				parallel.notifyRunning();
 			}
 		};
 
@@ -311,30 +311,8 @@ public class Parallel extends BranchTask {
 	}
 
 	@Override
-	public void childFail(final Task runningTask) {
-		lastResult = policy.onChildFail(this);
-	}
-
-	@Override
-	public void childRunning(final Task task, final Task reporter) {
-		noRunningTasks = false;
-	}
-
-	@Override
-	public void childSuccess(final Task runningTask) {
-		lastResult = policy.onChildSuccess(this);
-	}
-
-	public void resetAllChildren() {
-		for (int i = 0, n = getChildCount(); i < n; i++) {
-			final Task child = getChild(i);
-			child.resetTask();
-		}
-	}
-
-	@Override
-	public void resetTask() {
-		super.resetTask();
+	public void doResetTask() {
+		super.doResetTask();
 		policy = Policy.Sequence;
 		orchestrator = Orchestrator.Resume;
 		noRunningTasks = true;
@@ -343,7 +321,29 @@ public class Parallel extends BranchTask {
 	}
 
 	@Override
-	public void run() {
+	public void notifyChildFail(final Task runningTask) {
+		lastResult = policy.onChildFail(this);
+	}
+
+	@Override
+	public void notifyChildRunning(final Task task) {
+		noRunningTasks = false;
+	}
+
+	@Override
+	public void notifyChildSuccess(final Task runningTask) {
+		lastResult = policy.onChildSuccess(this);
+	}
+
+	public void resetAllChildren() {
+		for (int i = 0, n = getChildCount(); i < n; i++) {
+			final Task child = getChild(i);
+			child.doResetTask();
+		}
+	}
+
+	@Override
+	public void tick() {
 		orchestrator.execute(this);
 	}
 }

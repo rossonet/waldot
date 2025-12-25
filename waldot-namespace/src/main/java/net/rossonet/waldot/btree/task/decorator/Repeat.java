@@ -57,33 +57,15 @@ public class Repeat extends LoopDecorator {
 	}
 
 	@Override
-	public void childFail(final Task runningTask) {
-		childSuccess(runningTask);
-	}
-
-	@Override
-	public void childSuccess(final Task runningTask) {
-		if (count > 0) {
-			count--;
-		}
-		if (count == 0) {
-			super.childSuccess(runningTask);
-			loop = false;
-		} else {
-			loop = true;
-		}
-	}
-
-	@Override
 	public boolean condition() {
 		return loop && count != 0;
 	}
 
 	@Override
-	public void resetTask() {
+	public void doResetTask() {
 		count = 0;
 		times = 0;
-		super.resetTask();
+		super.doResetTask();
 	}
 
 	/**
@@ -93,7 +75,25 @@ public class Repeat extends LoopDecorator {
 	 * This method is called when the task is entered.
 	 */
 	@Override
-	public void start() {
+	public void doStart() {
 		count = 0;
+	}
+
+	@Override
+	public void notifyChildFail(final Task runningTask) {
+		notifyChildSuccess(runningTask);
+	}
+
+	@Override
+	public void notifyChildSuccess(final Task runningTask) {
+		if (count > 0) {
+			count--;
+		}
+		if (count == 0) {
+			super.notifyChildSuccess(runningTask);
+			loop = false;
+		} else {
+			loop = true;
+		}
 	}
 }

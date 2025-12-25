@@ -81,42 +81,21 @@ public class SemaphoreGuard extends Decorator {
 	 * This method is called when the task exits.
 	 */
 	@Override
-	public void end() {
+	public void doEnd() {
 		if (semaphoreAcquired) {
 			if (semaphore() != null) {
 				semaphore().release();
 			}
 			semaphoreAcquired = false;
 		}
-		super.end();
-	}
-
-	public WaldotBehaviorTreesEngine getEngine() {
-		return engine;
+		super.doEnd();
 	}
 
 	@Override
-	public void resetTask() {
+	public void doResetTask() {
 		name = null;
 		semaphoreAcquired = false;
-		super.resetTask();
-	}
-
-	/**
-	 * Runs its child if the semaphore has been successfully acquired; immediately
-	 * fails otherwise.
-	 */
-	@Override
-	public void run() {
-		if (semaphoreAcquired) {
-			super.run();
-		} else {
-			fail();
-		}
-	}
-
-	private Semaphore semaphore() {
-		return engine.getSemaphore(name);
+		super.doResetTask();
 	}
 
 	/**
@@ -126,16 +105,37 @@ public class SemaphoreGuard extends Decorator {
 	 * This method is called when the task is entered.
 	 */
 	@Override
-	public void start() {
+	public void doStart() {
 		if (semaphore() == null) {
 			engine.createSemaphore(name);
 		}
 		try {
 			semaphore().acquire();
 		} catch (final InterruptedException e) {
-			fail();
+			doFail();
 		}
-		super.start();
+		super.doStart();
+	}
+
+	public WaldotBehaviorTreesEngine getEngine() {
+		return engine;
+	}
+
+	/**
+	 * Runs its child if the semaphore has been successfully acquired; immediately
+	 * fails otherwise.
+	 */
+	@Override
+	public void tick() {
+		if (semaphoreAcquired) {
+			super.tick();
+		} else {
+			doFail();
+		}
+	}
+
+	private Semaphore semaphore() {
+		return engine.getSemaphore(name);
 	}
 
 }

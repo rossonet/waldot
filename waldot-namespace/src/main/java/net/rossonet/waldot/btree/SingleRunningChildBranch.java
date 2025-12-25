@@ -27,11 +27,6 @@ public abstract class SingleRunningChildBranch extends BranchTask {
 	/** The child in the running status or {@code null} if no child is running. */
 	protected Task runningChild;
 
-	/** Creates a {@code SingleRunningChildBranch} task with no children */
-	public SingleRunningChildBranch() {
-		super();
-	}
-
 	/**
 	 * Creates a {@code SingleRunningChildBranch} task with a list of children
 	 * 
@@ -47,22 +42,6 @@ public abstract class SingleRunningChildBranch extends BranchTask {
 		runningChild = null;
 	}
 
-	@Override
-	public void childFail(final Task task) {
-		this.runningChild = null;
-	}
-
-	@Override
-	public void childRunning(final Task task, final Task reporter) {
-		runningChild = task;
-		running(); // Return a running status when a child says it's running
-	}
-
-	@Override
-	public void childSuccess(final Task task) {
-		this.runningChild = null;
-	}
-
 	protected AbstractTask[] createRandomChildren() {
 		final AbstractTask[] rndChildren = new AbstractTask[children.size()];
 		System.arraycopy(children, 0, rndChildren, 0, children.size());
@@ -70,17 +49,39 @@ public abstract class SingleRunningChildBranch extends BranchTask {
 	}
 
 	@Override
-	public void resetTask() {
-		super.resetTask();
+	public void doResetTask() {
+		super.doResetTask();
 		this.currentChildIndex = 0;
 		this.runningChild = null;
 		this.randomChildren = null;
 	}
 
 	@Override
-	public void run() {
+	public void doStart() {
+		this.currentChildIndex = 0;
+		runningChild = null;
+	}
+
+	@Override
+	public void notifyChildFail(final Task task) {
+		this.runningChild = null;
+	}
+
+	@Override
+	public void notifyChildRunning(final Task task) {
+		runningChild = task;
+		notifyRunning(); // Return a running status when a child says it's running
+	}
+
+	@Override
+	public void notifyChildSuccess(final Task task) {
+		this.runningChild = null;
+	}
+
+	@Override
+	public void tick() {
 		if (runningChild != null) {
-			runningChild.run();
+			runningChild.tick();
 		} else {
 			if (currentChildIndex < children.size()) {
 				if (randomChildren != null) {
@@ -98,19 +99,13 @@ public abstract class SingleRunningChildBranch extends BranchTask {
 					runningChild = children.get(currentChildIndex);
 				}
 				runningChild.setControl(this);
-				runningChild.start();
-				runningChild.run();
+				runningChild.doStart();
+				runningChild.tick();
 			} else {
 				// Should never happen; this case must be handled by subclasses in childXXX
 				// methods
 			}
 		}
-	}
-
-	@Override
-	public void start() {
-		this.currentChildIndex = 0;
-		runningChild = null;
 	}
 
 }

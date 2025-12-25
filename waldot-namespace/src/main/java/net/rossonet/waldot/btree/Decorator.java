@@ -15,11 +15,8 @@ import net.rossonet.waldot.api.btree.Task;
 //(minChildren = 1, maxChildren = 1)
 public abstract class Decorator extends AbstractTask {
 
-	/** The child task wrapped by this decorator */
-	protected Task child;
-
-	/** Creates a decorator with no child task. */
 	public Decorator() {
+		super();
 	}
 
 	/**
@@ -28,65 +25,67 @@ public abstract class Decorator extends AbstractTask {
 	 * @param child the task that will be wrapped
 	 */
 	public Decorator(final Task child) {
-		this.child = child;
+		super();
+		addChild(child);
 	}
 
 	@Override
 	public int addChild(final Task child) {
-		if (this.child != null) {
+		if (this.children.size() > 0) {
 			throw new IllegalStateException("A decorator task cannot have more than one child");
 		}
-		this.child = child;
+
 		return 0;
 	}
 
-	@Override
-	public int addChildToTask(final Task child) {
-		throw new UnsupportedOperationException("A decorator task cannot have more than one child");
+	protected Task child() {
+		if (children.isEmpty()) {
+			return null;
+		}
+		return children.get(0);
 	}
 
 	@Override
-	public void childFail(final Task runningTask) {
-		fail();
-	}
-
-	@Override
-	public void childRunning(final Task runningTask, final Task reporter) {
-		running();
-	}
-
-	@Override
-	public void childSuccess(final Task runningTask) {
-		success();
+	public void doResetTask() {
+		super.doResetTask();
 	}
 
 	@Override
 	public Task getChild(final int i) {
-		if (i == 0 && child != null) {
-			return child;
+		if (i == 0 && child() != null) {
+			return child();
 		}
 		throw new IndexOutOfBoundsException("index can't be >= size: " + i + " >= " + getChildCount());
 	}
 
 	@Override
 	public int getChildCount() {
-		return child == null ? 0 : 1;
+		return child() == null ? 0 : 1;
 	}
 
 	@Override
-	public void resetTask() {
-		child = null;
-		super.resetTask();
+	public void notifyChildFail(final Task runningTask) {
+		doFail();
 	}
 
 	@Override
-	public void run() {
-		if (child.getStatus() == Status.RUNNING) {
-			child.run();
+	public void notifyChildRunning(final Task runningTask) {
+		notifyRunning();
+	}
+
+	@Override
+	public void notifyChildSuccess(final Task runningTask) {
+		notifySuccess();
+	}
+
+	@Override
+	public void tick() {
+		if (child().getStatus() == Status.RUNNING) {
+			child().tick();
 		} else {
-			child.setControl(this);
-			child.start();
-			child.run();
+			child().setControl(this);
+			child().doStart();
+			child().tick();
 		}
 	}
 

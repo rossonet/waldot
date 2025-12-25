@@ -6,9 +6,9 @@ import net.rossonet.waldot.api.btree.Task;
 import net.rossonet.waldot.api.btree.WaldotBehaviorTreesEngine;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
-public class DefaultBehaviorTreesEngine implements WaldotBehaviorTreesEngine {
+public class DefaultBehaviorTreeEngine implements WaldotBehaviorTreesEngine {
 
-	public DefaultBehaviorTreesEngine(final WaldotNamespace waldotNamespace) {
+	public DefaultBehaviorTreeEngine(final WaldotNamespace waldotNamespace) {
 		// TODO Auto-generated constructor stub
 	}
 //TODO: completare la runtime BehaviorTrees

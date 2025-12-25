@@ -15,11 +15,6 @@ import net.rossonet.waldot.api.btree.Task;
  */
 public class RandomSequence extends Sequence {
 
-	/** Creates a {@code RandomSequence} branch with no children. */
-	public RandomSequence() {
-		super();
-	}
-
 	/**
 	 * Creates a {@code RandomSequence} branch with the given children.
 	 * 
@@ -39,8 +34,8 @@ public class RandomSequence extends Sequence {
 	}
 
 	@Override
-	public void start() {
-		super.start();
+	public void doStart() {
+		super.doStart();
 		if (randomChildren == null) {
 			randomChildren = createRandomChildren();
 		}

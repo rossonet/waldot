@@ -14,11 +14,6 @@ import net.rossonet.waldot.btree.Decorator;
  * @author implicit-invocation
  */
 public class Invert extends Decorator {
-
-	/** Creates an {@code Invert} decorator with no child. */
-	public Invert() {
-	}
-
 	/**
 	 * Creates an {@code Invert} decorator with the given child.
 	 * 
@@ -29,13 +24,13 @@ public class Invert extends Decorator {
 	}
 
 	@Override
-	public void childFail(final Task runningTask) {
-		super.childSuccess(runningTask);
+	public void notifyChildFail(final Task runningTask) {
+		super.notifyChildSuccess(runningTask);
 	}
 
 	@Override
-	public void childSuccess(final Task runningTask) {
-		super.childFail(runningTask);
+	public void notifyChildSuccess(final Task runningTask) {
+		super.notifyChildFail(runningTask);
 	}
 
 }

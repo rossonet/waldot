@@ -15,11 +15,6 @@ import net.rossonet.waldot.api.btree.Task;
  */
 public class RandomSelector extends Selector {
 
-	/** Creates a {@code RandomSelector} branch with no children. */
-	public RandomSelector() {
-		super();
-	}
-
 	/**
 	 * Creates a {@code RandomSelector} branch with the given children.
 	 * 
@@ -39,8 +34,8 @@ public class RandomSelector extends Selector {
 	}
 
 	@Override
-	public void start() {
-		super.start();
+	public void doStart() {
+		super.doStart();
 		if (randomChildren == null) {
 			randomChildren = createRandomChildren();
 		}

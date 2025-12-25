@@ -19,10 +19,6 @@ import net.rossonet.waldot.btree.LoopDecorator;
  */
 public class UntilFail extends LoopDecorator {
 
-	/** Creates an {@code UntilFail} decorator with no child. */
-	public UntilFail() {
-	}
-
 	/**
 	 * Creates an {@code UntilFail} decorator with the given child.
 	 * 
@@ -33,13 +29,13 @@ public class UntilFail extends LoopDecorator {
 	}
 
 	@Override
-	public void childFail(final Task runningTask) {
-		success();
+	public void notifyChildFail(final Task runningTask) {
+		notifySuccess();
 		loop = false;
 	}
 
 	@Override
-	public void childSuccess(final Task runningTask) {
+	public void notifyChildSuccess(final Task runningTask) {
 		loop = true;
 	}
 }
