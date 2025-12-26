@@ -46,7 +46,7 @@ class LanternaFeatureTest {
 	@BeforeAll
 	static void setup() throws IOException {
 		// Terminal & Screen
-		terminal = new DefaultTerminalFactory().setForceTextTerminal(true).createTerminal();
+		terminal = new DefaultTerminalFactory().setForceTextTerminal(false).createTerminal();
 		screen = new TerminalScreen(terminal);
 		screen.startScreen();
 		gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.RED));
@@ -122,9 +122,16 @@ class LanternaFeatureTest {
 			Executors.newSingleThreadExecutor().submit(() -> {
 				for (int i = 0; i <= 100; i++) {
 					final int val = i;
-					gui.getGUIThread().invokeLater(() -> bar.setValue(val));
+					final Runnable later = new Runnable() {
+						@Override
+						public void run() {
+							bar.setValue(val);
+							bar.setSize(new TerminalSize(1000 * val, 10));
+						}
+					};
 					try {
-						Thread.sleep(20);
+						gui.getGUIThread().invokeAndWait(later);
+						Thread.sleep(100);
 					} catch (final InterruptedException ignored) {
 					}
 				}
