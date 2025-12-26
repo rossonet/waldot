@@ -110,4 +110,6 @@ public interface WaldotConfiguration extends Serializable, Map<String, String> {
 
 	UInteger getWaldotCommandWriteMask();
 
+	String getZenohConfiguration();
+
 }

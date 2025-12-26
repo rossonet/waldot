@@ -40,6 +40,8 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType, Att
 
 	public List<UaMethodNode> getMethodNodes();
 
+	String[] getPropertiesAsStringArray();
+
 	List<PropertyObserver> getPropertyObservers();
 
 	ImmutableMap<String, WaldotVertexProperty<Object>> getVertexProperties();

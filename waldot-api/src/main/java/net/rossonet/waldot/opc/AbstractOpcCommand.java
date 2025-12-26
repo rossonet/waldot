@@ -96,7 +96,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	protected final WaldotNamespace waldotNamespace;
 
 	public AbstractOpcCommand(final WaldotGraph graph, final WaldotNamespace waldotNamespace, final String id,
-			final String command, final String description, String directory, final UInteger writeMask,
+			final String command, final String description, final String directory, final UInteger writeMask,
 			final UInteger userWriteMask, final Boolean executable, final Boolean userExecutable) {
 		super(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(id),
 				waldotNamespace.generateQualifiedName(command), LocalizedText.english(command),
@@ -221,6 +221,11 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
+	public String[] getPropertiesAsStringArray() {
+		return new String[] {};
+	}
+
+	@Override
 	public List<PropertyObserver> getPropertyObservers() {
 		return Collections.emptyList();
 	}
@@ -324,7 +329,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 			ElementHelper.attachProperties(vertexProperty, keyValues);
 			return vertexProperty;
 		} else {
-			return getNamespace().createOrUpdateWaldotVertexProperty((WaldotVertex) this, key, value);
+			return getNamespace().createOrUpdateWaldotVertexProperty(this, key, value);
 		}
 	}
 

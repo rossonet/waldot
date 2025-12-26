@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.utils.ThreadHelper;
 import net.rossonet.zenoh.ZenohHelper;
@@ -89,7 +90,7 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 
 	}
 
-	public void discoveryFromAgentReceived(String topic, JSONObject payload) {
+	public void discoveryFromAgentReceived(final String topic, final JSONObject payload) {
 		logger.info("discovery message received on topic {}: {}", topic, payload.toString(2));
 		registerNewAgent(payload);
 	}
@@ -105,12 +106,12 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 	}
 
 	@Override
-	protected void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
+	protected void propertyUpdateValueEvent(final UaNode node, final AttributeId attributeId, final Object value) {
 		// FIXME aggiornare se necessario le label e i comportamenti legati alle
 		// property
 	}
 
-	private void registerNewAgent(JSONObject discoveryMessage) {
+	private void registerNewAgent(final JSONObject discoveryMessage) {
 		ZenohAgent agent;
 		try {
 			agent = ZenohAgent.fromDiscoveryMessage(this, discoveryMessage, ZenohHelper.AGENTS_OPCUA_DIRECTORY);
@@ -121,7 +122,7 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 		if (agent != null) {
 			if (agentStore.registerNewAgent(agent)) {
 				logger.info("Registered new agent from discovery message: {}", discoveryMessage.toString(2));
-				agent.setManagedVertex(graph.addVertex(agent.getAgentVertexProperties()));
+				agent.setManagedVertex((WaldotVertex) graph.addVertex(agent.getAgentVertexProperties()));
 			} else {
 				logger.warn("Agent from discovery message not registered by agentStore: {}",
 						discoveryMessage.toString(2));
@@ -132,7 +133,7 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 
 	}
 
-	private void setConnected(boolean newStatus) {
+	private void setConnected(final boolean newStatus) {
 		if (connected != newStatus) {
 			connected = newStatus;
 			zenohClientVertex.property("online", Boolean.toString(connected));

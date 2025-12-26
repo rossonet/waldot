@@ -1,6 +1,7 @@
 package net.rossonet.zenoh.agent;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import io.zenoh.Config;
 import net.rossonet.waldot.utils.LogHelper;
@@ -15,7 +16,7 @@ public class Acme {
 
 	private static final String NET_ROSSONET_ZENOH_ACME = "net.rossonet.zenoh.acme";
 
-	public static void main(String[] args) throws WaldotZenohException {
+	public static void main(final String[] args) throws WaldotZenohException {
 		final String runtimeUniqueId = UUID.randomUUID().toString();
 		final Acme acme = new Acme(runtimeUniqueId);
 		acme.startAgent();
@@ -34,7 +35,7 @@ public class Acme {
 		}
 
 		@Override
-		protected void elaborateErrorMessage(InternalLogMessage errorMessage) {
+		protected void elaborateErrorMessage(final InternalLogMessage errorMessage) {
 			System.err.println("ERROR: " + errorMessage.getMessage() + " stacktrace: "
 					+ (errorMessage.getException() != null ? (LogHelper.stackTraceToString(errorMessage.getException()))
 							: ""));
@@ -42,13 +43,13 @@ public class Acme {
 		}
 
 		@Override
-		protected void elaborateInfoMessage(InternalLogMessage errorMessage) {
+		protected void elaborateInfoMessage(final InternalLogMessage errorMessage) {
 			System.out.println("INFO: " + errorMessage.getMessage());
 
 		}
 
 		@Override
-		protected void elaborateTelemetryUpdate(TelemetryData node, TelemetryMessage<?> telemetry) {
+		protected void elaborateTelemetryUpdate(final TelemetryData node, final TelemetryMessage<?> telemetry) {
 			System.out.println("Telemetry update for node " + node + " with value " + telemetry.getValue());
 
 		}
@@ -77,7 +78,7 @@ public class Acme {
 
 	private final String runtimeUniqueId;
 
-	public Acme(String runtimeUniqueId) {
+	public Acme(final String runtimeUniqueId) {
 		this.runtimeUniqueId = runtimeUniqueId;
 	}
 
@@ -90,6 +91,17 @@ public class Acme {
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void stop() throws WaldotZenohException {
+		if (client != null) {
+			client.stop();
+		}
+	}
+
+	public void waitForRegistration(final int delay, final TimeUnit seconds) throws Exception {
+		client.waitRegistration(delay, seconds);
+
 	}
 
 }

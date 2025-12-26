@@ -2,6 +2,7 @@ package net.rossonet.zenoh.api.message;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -13,7 +14,7 @@ import com.jsoniter.output.JsonStream;
 import net.rossonet.zenoh.exception.ZenohSerializationException;
 
 public final class RpcConfiguration implements Serializable {
-
+	public static final String EPOCH = "epoch";
 	private static final String KEY_FIELD = "k";
 	private static final String RPC_CONFIGURATION_ID_FIELD = "x";
 	private static final String RPC_DELETE_FIELD = "d";
@@ -23,7 +24,7 @@ public final class RpcConfiguration implements Serializable {
 	private static final long serialVersionUID = 481783288298046237L;
 	private static final String VALUE_FIELD = "v";
 
-	public static final RpcConfiguration fromJson(JSONObject jsonObject) throws ZenohSerializationException {
+	public static final RpcConfiguration fromJson(final JSONObject jsonObject) throws ZenohSerializationException {
 		final String c = jsonObject.getString(RPC_CONFIGURATION_ID_FIELD);
 		final long uid = jsonObject.getLong(RPC_UNIQUE_FIELD);
 		if (uid == 0) {
@@ -36,7 +37,12 @@ public final class RpcConfiguration implements Serializable {
 		return new RpcConfiguration(uid, epoch, c, values, d);
 	}
 
-	private static Map<String, Object> jsonToValues(JSONArray array) {
+	public static RpcConfiguration fromProperties(final String objectId, final List<String> properties) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private static Map<String, Object> jsonToValues(final JSONArray array) {
 		final Map<String, Object> values = new HashMap<>();
 		for (int i = 0; i < array.length(); i++) {
 			final JSONObject jsonObject = array.getJSONObject(i);
@@ -49,19 +55,21 @@ public final class RpcConfiguration implements Serializable {
 	}
 
 	private final String configurationId;
-
 	private final boolean deleteMessage;
 	private final long epoch;
+
 	private final long uniqueId;
+
 	private final Map<String, Object> values;
 
-	public RpcConfiguration(long uniqueId, long epoch, String configurationId, Map<String, Object> values) {
+	public RpcConfiguration(final long uniqueId, final long epoch, final String configurationId,
+			final Map<String, Object> values) {
 		this(uniqueId, epoch, configurationId, values, false);
 
 	}
 
-	public RpcConfiguration(long uniqueId, long epoch, String configurationId, Map<String, Object> values,
-			boolean deleteMessage) {
+	public RpcConfiguration(final long uniqueId, final long epoch, final String configurationId,
+			final Map<String, Object> values, final boolean deleteMessage) {
 		this.configurationId = configurationId;
 		this.values = values;
 		this.uniqueId = uniqueId;
@@ -101,7 +109,7 @@ public final class RpcConfiguration implements Serializable {
 		return jsonObject;
 	}
 
-	private JSONArray valuesToJson(Map<String, Object> values) {
+	private JSONArray valuesToJson(final Map<String, Object> values) {
 		final JSONArray array = new JSONArray();
 		for (final Map.Entry<String, Object> entry : values.entrySet()) {
 			final JSONObject record = new JSONObject();

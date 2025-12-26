@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ import net.rossonet.zenoh.controller.AgentLifeCycleManager;
 public class ZenohClientFacade {
 	private final static Logger logger = LoggerFactory.getLogger(ZenohClientFacade.class);
 
-	public static List<Hello> scouting(long milliseconds) throws ZError, InterruptedException {
+	public static List<Hello> scouting(final long milliseconds) throws ZError, InterruptedException {
 		final ScoutOptions scoutOptions = new ScoutOptions();
 		scoutOptions.setWhatAmI(Set.of(WhatAmI.Peer, WhatAmI.Router));
 		final var scout = Zenoh.scout(scoutOptions);
@@ -53,6 +54,12 @@ public class ZenohClientFacade {
 
 	private transient Session session;
 
+	private final JSONObject zenohConfiguration;
+
+	public ZenohClientFacade(final JSONObject zenohConfiguration) {
+		this.zenohConfiguration = zenohConfiguration;
+	}
+
 	public Session getSession() {
 		return session;
 	}
@@ -61,7 +68,7 @@ public class ZenohClientFacade {
 		if (agentLifeCycleManager == null) {
 			throw new IllegalStateException("LifeCycleManager not set");
 		}
-		this.session = ZenohHelper.createClient();
+		this.session = ZenohHelper.createClient(zenohConfiguration);
 		logger.info("Zenoh session created with router {}", session.info().routersZid());
 	}
 
@@ -75,12 +82,12 @@ public class ZenohClientFacade {
 		return false;
 	}
 
-	public void setLifeCycleManager(AgentLifeCycleManager agentLifeCycleManager) {
+	public void setLifeCycleManager(final AgentLifeCycleManager agentLifeCycleManager) {
 		this.agentLifeCycleManager = agentLifeCycleManager;
 
 	}
 
-	public CallbackSubscriber subscribe(String topic, Callback<Sample> handler) {
+	public CallbackSubscriber subscribe(final String topic, final Callback<Sample> handler) {
 		if (!isConnected()) {
 			throw new IllegalStateException("Zenoh client not connected");
 		}

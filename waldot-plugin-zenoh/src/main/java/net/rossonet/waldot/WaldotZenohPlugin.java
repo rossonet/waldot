@@ -4,6 +4,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,10 @@ public class WaldotZenohPlugin implements AutoCloseable, PluginListener {
 		final UaFolderNode zenohFolder = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
 				waldotNamespace.generateNodeId("asset.zenoh_folder"), waldotNamespace.generateQualifiedName("Zenoh"),
 				LocalizedText.english("Zenoh BUS agent administration folder"));
-		final ZenohClientFacade zenohClient = new ZenohClientFacade();
+		final ZenohClientFacade zenohClient = new ZenohClientFacade(
+				waldotNamespace.getConfiguration().getZenohConfiguration() != null
+						? new JSONObject(waldotNamespace.getConfiguration().getZenohConfiguration())
+						: null);
 		lifeCycleManager = new AgentLifeCycleManager(waldotNamespace.getGremlinGraph(),
 				waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId("asset.zenoh_bus_manager"),
 				waldotNamespace.generateQualifiedName("Zenoh Event Manager"),

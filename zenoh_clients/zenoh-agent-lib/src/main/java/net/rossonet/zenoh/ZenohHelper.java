@@ -2,17 +2,26 @@ package net.rossonet.zenoh;
 
 import static io.zenoh.Config.loadDefault;
 
+import org.json.JSONObject;
+
 import io.zenoh.Config;
 import io.zenoh.Session;
 import io.zenoh.Zenoh;
 import io.zenoh.bytes.Encoding;
 import io.zenoh.exceptions.ZError;
+import io.zenoh.handlers.Callback;
+import io.zenoh.keyexpr.KeyExpr;
+import io.zenoh.pubsub.CallbackSubscriber;
 import io.zenoh.pubsub.PublisherOptions;
 import io.zenoh.pubsub.PutOptions;
 import io.zenoh.qos.CongestionControl;
 import io.zenoh.qos.Priority;
 import io.zenoh.qos.Reliability;
+import io.zenoh.sample.Sample;
 import net.rossonet.zenoh.api.TelemetryData;
+import net.rossonet.zenoh.api.WaldotAgentEndpoint;
+import net.rossonet.zenoh.api.WaldotZenohClient;
+import net.rossonet.zenoh.exception.WaldotZenohException;
 
 public final class ZenohHelper {
 	public static final String _BASE_AGENT_TOPIC = "wa";
@@ -49,13 +58,9 @@ public final class ZenohHelper {
 	public static final String UNIQUE_ID_LABEL = "u";
 	public static final String UPDATE_DISCOVERY_TOPIC = "update";
 	public static final String VERSION_LABEL = "v";
+	public static final String MAIN_CONFIG_ID = "main";
 
-	public static Session createClient() throws ZError {
-		final Config config = loadDefault();
-		return createClient(config, false);
-	}
-
-	public static Session createClient(Config zenohConfig, boolean debug) throws ZError {
+	public static Session createClient(final Config zenohConfig, final boolean debug) throws ZError {
 		if (debug) {
 			System.setProperty("RUST_LOG", "zenoh=debug");
 			Zenoh.initLogFromEnvOr("debug");
@@ -64,6 +69,20 @@ public final class ZenohHelper {
 		}
 		final Session session = Zenoh.open(zenohConfig);
 		return session;
+	}
+
+	public static Session createClient(final JSONObject zenohClientConfig) throws ZError {
+		if (zenohClientConfig == null) {
+			final Config config = loadDefault();
+			return createClient(config, false);
+		} else {
+			final Config config = Config.fromJson5(zenohClientConfig.toString());
+			return createClient(config, false);
+		}
+	}
+
+	public static Config createDefaultConfig() {
+		return loadDefault();
 	}
 
 	public static PutOptions getAcknowledgePutOptions() {
@@ -75,49 +94,49 @@ public final class ZenohHelper {
 		return putOptions;
 	}
 
-	public static String getAcknowLedgeTopic(String agentUniqueId) {
+	public static String getAcknowLedgeTopic(final String agentUniqueId) {
 		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR
 				+ ZenohHelper.ACKNOWLEDGE_COMMAND_TOPIC;
 	}
 
-	public static String getAgentConfigurationsTopicsAll(String agentUniqueId) {
+	public static String getAgentConfigurationsTopicsAll(final String agentUniqueId) {
 		return getConfigurationsBaseTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC;
 	}
 
-	public static String getAgentControlReplyTopicsSubscriptionAll(String agentUniqueId) {
+	public static String getAgentControlReplyTopicsSubscriptionAll(final String agentUniqueId) {
 		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC
 				+ ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.CONTROL_REPLY_END_TOPIC;
 	}
 
-	public static String getAgentControlTopicsSubscriptionAll(String agentUniqueId) {
+	public static String getAgentControlTopicsSubscriptionAll(final String agentUniqueId) {
 		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC;
 	}
 
-	public static String getAgentInputDataTopicsSubscriptionAll(String agentUniqueId) {
+	public static String getAgentInputDataTopicsSubscriptionAll(final String agentUniqueId) {
 		return getInputDataBaseTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC;
 	}
 
-	public static String getAgentInternalTelemetryTopicsAll(String agentUniqueId) {
+	public static String getAgentInternalTelemetryTopicsAll(final String agentUniqueId) {
 		return getInternalTelemetryBaseTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC;
 	}
 
-	public static String getAgentKeepAliveTopic(String agentUniqueId) {
+	public static String getAgentKeepAliveTopic(final String agentUniqueId) {
 		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.KEEPALIVE_TOPIC;
 	}
 
-	public static String getAgentTelemetryTopicsSubscriptionAll(String agentUniqueId) {
+	public static String getAgentTelemetryTopicsSubscriptionAll(final String agentUniqueId) {
 		return getTelemetryBaseTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.JOLLY_TOPIC;
 	}
 
-	public static String getAgentUpdateDiscoveryTopic(String agentUniqueId) {
+	public static String getAgentUpdateDiscoveryTopic(final String agentUniqueId) {
 		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.UPDATE_DISCOVERY_TOPIC;
 	}
 
-	public static String getBaseAgentTopic(String agentUniqueId) {
+	public static String getBaseAgentTopic(final String agentUniqueId) {
 		return ZenohHelper._BASE_AGENT_TOPIC + ZenohHelper._TOPIC_SEPARATOR + agentUniqueId;
 	}
 
-	public static String getBaseControlTopic(String agentUniqueId) {
+	public static String getBaseControlTopic(final String agentUniqueId) {
 		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.BASE_CONTROL_TOPIC;
 	}
 
@@ -130,7 +149,7 @@ public final class ZenohHelper {
 		return putOptions;
 	}
 
-	private static String getConfigurationsBaseTopic(String agentUniqueId) {
+	public static String getConfigurationsBaseTopic(final String agentUniqueId) {
 		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.BASE_CONFIGURATIONS_TOPIC;
 	}
 
@@ -151,15 +170,15 @@ public final class ZenohHelper {
 		return publisherOptions;
 	}
 
-	private static String getInputDataBaseTopic(String agentUniqueId) {
+	private static String getInputDataBaseTopic(final String agentUniqueId) {
 		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.INPUT_DATA_TOPIC;
 	}
 
-	public static String getInternalTelemetryBaseTopic(String agentUniqueId) {
+	public static String getInternalTelemetryBaseTopic(final String agentUniqueId) {
 		return ZenohHelper.INTERNAL_TELEMETRY_TOPIC + ZenohHelper._TOPIC_SEPARATOR + agentUniqueId;
 	}
 
-	public static String getInternalTelemetryBaseTopic(String agentUniqueId, TelemetryData telemetryData) {
+	public static String getInternalTelemetryBaseTopic(final String agentUniqueId, final TelemetryData telemetryData) {
 		return ZenohHelper.INTERNAL_TELEMETRY_TOPIC + ZenohHelper._TOPIC_SEPARATOR + agentUniqueId
 				+ ZenohHelper._TOPIC_SEPARATOR + telemetryData.getUniqueId();
 	}
@@ -173,7 +192,7 @@ public final class ZenohHelper {
 		return putOptions;
 	}
 
-	public static String getParameterTopic(String agentUniqueId) {
+	public static String getParameterTopic(final String agentUniqueId) {
 		return getBaseAgentTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.PARAMETER_TOPIC;
 	}
 
@@ -186,19 +205,19 @@ public final class ZenohHelper {
 		return putOptions;
 	}
 
-	public static String getPingTopic(String agentUniqueId) {
+	public static String getPingTopic(final String agentUniqueId) {
 		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.PING_COMMAND_TOPIC;
 	}
 
-	public static String getPongTopic(String agentUniqueId) {
+	public static String getPongTopic(final String agentUniqueId) {
 		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.PONG_COMMAND_TOPIC;
 	}
 
-	public static String getRpcCommandTopic(String agentUniqueId, String commandId) {
+	public static String getRpcCommandTopic(final String agentUniqueId, final String commandId) {
 		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + commandId;
 	}
 
-	public static String getTelemetryBaseTopic(String agentUniqueId) {
+	public static String getTelemetryBaseTopic(final String agentUniqueId) {
 		return ZenohHelper.TELEMETRY_TOPIC + ZenohHelper._TOPIC_SEPARATOR + agentUniqueId;
 	}
 
@@ -209,6 +228,228 @@ public final class ZenohHelper {
 		putOptions.setReliability(Reliability.RELIABLE);
 		putOptions.setPriority(Priority.DATA_HIGH);
 		return putOptions;
+	}
+
+	public static boolean isConnected(final Session session) throws ZError {
+		return session != null && !session.isClosed() && session.info().routersZid() != null
+				&& session.info().routersZid().size() > 0;
+	}
+
+	public static void sendMessage(final WaldotAgentEndpoint zenohAgent, final String topic, final JSONObject message,
+			final PutOptions putOption) throws WaldotZenohException {
+		if (!zenohAgent.getPublishers().containsKey(topic)) {
+			try {
+				zenohAgent.getPublishers().put(topic, zenohAgent.getZenohClient()
+						.declarePublisher(KeyExpr.tryFrom(topic), ZenohHelper.getGlobalPublisherOptions()));
+			} catch (final ZError e) {
+				throw new WaldotZenohException("Error declaring publisher on topic " + topic, e);
+			}
+		}
+		try {
+			zenohAgent.getPublishers().get(topic).put(message.toString(), putOption);
+		} catch (final ZError e) {
+			throw new WaldotZenohException("Error sending message on topic " + topic + " message: " + message, e);
+		}
+	}
+
+	private static CallbackSubscriber subscribe(final Session zenohAgent, final String topic,
+			final Callback<Sample> callback) throws ZError {
+		if (!isConnected(zenohAgent)) {
+			throw new IllegalStateException("Zenoh client not connected");
+		}
+		return zenohAgent.declareSubscriber(KeyExpr.tryFrom(topic), callback);
+
+	}
+
+	public static void subscribeCommandTopic(final WaldotZenohClient waldotZenohClient) throws ZError {
+		final String agentControlTopicsSubscriptionAll = ZenohHelper
+				.getAgentControlTopicsSubscriptionAll(waldotZenohClient.getRuntimeUniqueId());
+		waldotZenohClient.getSubcribers().put(agentControlTopicsSubscriptionAll,
+				subscribe(waldotZenohClient.getSession(), agentControlTopicsSubscriptionAll, new Callback<Sample>() {
+
+					@Override
+					public void run(final Sample sample) {
+						try {
+							JSONObject payloadJson = null;
+							payloadJson = new JSONObject(new String(sample.getPayload().toBytes()));
+							final String topic = sample.getKeyExpr().toString();
+							if (topic.endsWith(ZenohHelper._TOPIC_SEPARATOR + ZenohHelper.CONTROL_REPLY_END_TOPIC)) {
+								// ignore reply messages
+								return;
+							}
+							waldotZenohClient.elaborateControlMessage(topic, payloadJson);
+						} catch (final Throwable e) {
+							waldotZenohClient.elaborateErrorMessage(
+									"Error parsing mainApplicationController messagepayload: " + sample.getPayload(),
+									e);
+						}
+					}
+
+				}));
+	}
+
+	public static void subscribeConfigurationTopics(final WaldotZenohClient waldotZenohClient) throws ZError {
+		final String agentConfigurationsTopicsAll = ZenohHelper
+				.getAgentConfigurationsTopicsAll(waldotZenohClient.getRuntimeUniqueId());
+		waldotZenohClient.getSubcribers().put(agentConfigurationsTopicsAll,
+				subscribe(waldotZenohClient.getSession(), agentConfigurationsTopicsAll, new Callback<Sample>() {
+
+					@Override
+					public void run(final Sample sample) {
+						JSONObject payloadJson = null;
+						try {
+							payloadJson = new JSONObject(sample.getPayload());
+						} catch (final Exception e) {
+							waldotZenohClient.elaborateErrorMessage(
+									"Error parsing configuration object message payload: " + sample.getPayload(), e);
+						}
+						final String topic = sample.getKeyExpr().toString();
+						waldotZenohClient.elaborateConfigurationObjectMessage(topic, payloadJson);
+					}
+
+				}));
+	}
+
+	public static void subscribeInputTelemetryTopics(final WaldotZenohClient waldotZenohClient) throws ZError {
+		final String agentInputDataTopicsSubscriptionAll = ZenohHelper
+				.getAgentInputDataTopicsSubscriptionAll(waldotZenohClient.getRuntimeUniqueId());
+		waldotZenohClient.getSubcribers().put(agentInputDataTopicsSubscriptionAll,
+				subscribe(waldotZenohClient.getSession(), agentInputDataTopicsSubscriptionAll, new Callback<Sample>() {
+
+					@Override
+					public void run(final Sample sample) {
+						JSONObject payloadJson = null;
+						try {
+							payloadJson = new JSONObject(sample.getPayload());
+						} catch (final Exception e) {
+							waldotZenohClient.elaborateErrorMessage(
+									"Error parsing input telemetry message payload: " + sample.getPayload(), e);
+						}
+						final String topic = sample.getKeyExpr().toString();
+						waldotZenohClient.elaborateInputTelemetryMessage(topic, payloadJson);
+					}
+
+				}));
+	}
+
+	public static void subscribeParameterTopics(final WaldotZenohClient waldotZenohClient) throws ZError {
+		final String parameterTopic = ZenohHelper.getParameterTopic(waldotZenohClient.getRuntimeUniqueId());
+		waldotZenohClient.getSubcribers().put(parameterTopic,
+				subscribe(waldotZenohClient.getSession(), parameterTopic, new Callback<Sample>() {
+
+					@Override
+					public void run(final Sample sample) {
+						JSONObject payloadJson = null;
+						try {
+							payloadJson = new JSONObject(sample.getPayload());
+						} catch (final Exception e) {
+							waldotZenohClient.elaborateErrorMessage(
+									"Error parsing parameter message payload: " + sample.getPayload(), e);
+						}
+						final String topic = sample.getKeyExpr().toString();
+						waldotZenohClient.elaborateParameterMessage(topic, payloadJson);
+					}
+
+				}));
+	}
+
+	private static void subscribeToAgentCommandReplyTopic(final WaldotAgentEndpoint zenohAgent) throws ZError {
+		final String agentControlReplyTopicsSubscriptionAll = ZenohHelper
+				.getAgentControlReplyTopicsSubscriptionAll(zenohAgent.getUniqueId());
+		zenohAgent.getSubcribers().put(agentControlReplyTopicsSubscriptionAll,
+				subscribe(zenohAgent.getZenohClient(), agentControlReplyTopicsSubscriptionAll, new Callback<Sample>() {
+
+					@Override
+					public void run(final Sample sample) {
+						zenohAgent.elaborateCommandReplyMessage(sample);
+
+					}
+
+				}));
+
+	}
+
+	private static void subscribeToAgentConfigurationsTopic(final WaldotAgentEndpoint zenohAgent) throws ZError {
+		final String agentConfigurationsTopicsAll = ZenohHelper
+				.getAgentConfigurationsTopicsAll(zenohAgent.getUniqueId());
+		zenohAgent.getSubcribers().put(agentConfigurationsTopicsAll,
+				subscribe(zenohAgent.getZenohClient(), agentConfigurationsTopicsAll, new Callback<Sample>() {
+					@Override
+					public void run(final Sample sample) {
+						zenohAgent.elaborateConfigurationMessage(sample);
+					}
+				}));
+
+	}
+
+	private static void subscribeToAgentInternalTelemetryTopic(final WaldotAgentEndpoint zenohAgent) throws ZError {
+		final String agentInternalTelemetryTopicsAll = ZenohHelper
+				.getAgentInternalTelemetryTopicsAll(zenohAgent.getUniqueId());
+		zenohAgent.getSubcribers().put(agentInternalTelemetryTopicsAll,
+				subscribe(zenohAgent.getZenohClient(), agentInternalTelemetryTopicsAll, new Callback<Sample>() {
+					@Override
+					public void run(final Sample sample) {
+						zenohAgent.elaborateInternalTelemetryMessage(sample);
+					}
+				}));
+
+	}
+
+	private static void subscribeToAgentParametersTopic(final WaldotAgentEndpoint zenohAgent) throws ZError {
+		final String parameterTopic = ZenohHelper.getParameterTopic(zenohAgent.getUniqueId());
+		zenohAgent.getSubcribers().put(parameterTopic,
+				subscribe(zenohAgent.getZenohClient(), parameterTopic, new Callback<Sample>() {
+					@Override
+					public void run(final Sample sample) {
+						zenohAgent.elaborateParameterMessage(sample);
+					}
+				}));
+
+	}
+
+	private static void subscribeToAgentPongTopic(final WaldotAgentEndpoint zenohAgent) throws ZError {
+		final String pongTopic = ZenohHelper.getPongTopic(zenohAgent.getUniqueId());
+		zenohAgent.getSubcribers().put(pongTopic,
+				subscribe(zenohAgent.getZenohClient(), pongTopic, new Callback<Sample>() {
+					@Override
+					public void run(final Sample sample) {
+						zenohAgent.elaboratePongMessage(sample);
+					}
+				}));
+	}
+
+	private static void subscribeToAgentTelemetryTopic(final WaldotAgentEndpoint zenohAgent) throws ZError {
+		final String agentTelemetryTopicsSubscriptionAll = ZenohHelper
+				.getAgentTelemetryTopicsSubscriptionAll(zenohAgent.getUniqueId());
+		zenohAgent.getSubcribers().put(agentTelemetryTopicsSubscriptionAll,
+				subscribe(zenohAgent.getZenohClient(), agentTelemetryTopicsSubscriptionAll, new Callback<Sample>() {
+					@Override
+					public void run(final Sample sample) {
+						zenohAgent.elaborateTelemetryMessage(sample);
+					}
+				}));
+
+	}
+
+	public static void subscribeToAgentTopicsFromWaldot(final WaldotAgentEndpoint zenohAgent) throws ZError {
+		subscribeToUpdateDiscoveryTopic(zenohAgent);
+		subscribeToAgentCommandReplyTopic(zenohAgent);
+		subscribeToAgentTelemetryTopic(zenohAgent);
+		subscribeToAgentInternalTelemetryTopic(zenohAgent);
+		subscribeToAgentPongTopic(zenohAgent);
+		subscribeToAgentConfigurationsTopic(zenohAgent);
+		subscribeToAgentParametersTopic(zenohAgent);
+	}
+
+	private static void subscribeToUpdateDiscoveryTopic(final WaldotAgentEndpoint zenohAgent) throws ZError {
+		final String agentUpdateDiscoveryTopic = ZenohHelper.getAgentUpdateDiscoveryTopic(zenohAgent.getUniqueId());
+		zenohAgent.getSubcribers().put(agentUpdateDiscoveryTopic,
+				subscribe(zenohAgent.getZenohClient(), agentUpdateDiscoveryTopic, new Callback<Sample>() {
+					@Override
+					public void run(final Sample sample) {
+						zenohAgent.elaborateUpdateDiscoveryMessage(sample);
+					}
+				}));
 	}
 
 	private ZenohHelper() {

@@ -49,6 +49,7 @@ import net.rossonet.waldot.api.models.base.GremlinElement;
 public abstract class AbstractOpcVertex extends GremlinElement implements WaldotVertex {
 
 	protected boolean allowNullPropertyValues = false;
+
 	protected final List<EventObserver> eventObservers = new ArrayList<>();
 	protected final WaldotGraph graph;
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
@@ -113,6 +114,19 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public WaldotNamespace getNamespace() {
 		return graph.getWaldotNamespace();
+	}
+
+	@Override
+	public String[] getPropertiesAsStringArray() {
+		final List<String> props = new ArrayList<>();
+		final ImmutableMap<String, WaldotVertexProperty<Object>> vertexProperties = getVertexProperties();
+		for (final Entry<String, WaldotVertexProperty<Object>> entry : vertexProperties.entrySet()) {
+			final String key = entry.getKey();
+			props.add(key);
+			final String value = entry.getValue().value().toString();
+			props.add(value);
+		}
+		return props.toArray(new String[0]);
 	}
 
 	@Override
@@ -226,7 +240,7 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 			ElementHelper.attachProperties(vertexProperty, keyValues);
 			return vertexProperty;
 		} else {
-			return getNamespace().createOrUpdateWaldotVertexProperty((WaldotVertex) this, key, value);
+			return getNamespace().createOrUpdateWaldotVertexProperty(this, key, value);
 		}
 	}
 

@@ -256,4 +256,9 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		return UInteger.valueOf(WriteMask.Executable.getValue());
 	}
 
+	@Override
+	public String getZenohConfiguration() {
+		return null;
+	}
+
 }
