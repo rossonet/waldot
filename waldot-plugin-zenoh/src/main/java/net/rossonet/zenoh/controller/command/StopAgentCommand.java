@@ -1,5 +1,6 @@
 package net.rossonet.zenoh.controller.command;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.milo.opcua.sdk.core.WriteMask;
@@ -27,11 +28,11 @@ public class StopAgentCommand extends AbstractOpcCommand {
 	@Override
 	public Object[] runCommand(InvocationContext invocationContext, String[] inputValues) {
 		try {
-			return zenohAgent.elaborateRemoteCommandOnAgent(ZenohHelper.FLOW_STOP_COMMAND_TOPIC, inputValues).get()
-					.getOutputValues();
+			return zenohAgent.elaborateRemoteCommandOnAgent(ZenohHelper.FLOW_STOP_COMMAND_TOPIC, List.of(), inputValues)
+					.get().getOutputValues();
 		} catch (InterruptedException | ExecutionException e) {
-			return new CommandLifecycleRegister(zenohAgent.getUniqueId(), ZenohHelper.FLOW_STOP_COMMAND_TOPIC, inputValues, e)
-					.getOutputValues();
+			return new CommandLifecycleRegister(zenohAgent.getUniqueId(), ZenohHelper.FLOW_STOP_COMMAND_TOPIC,
+					inputValues, e).getOutputValues();
 		}
 
 	}

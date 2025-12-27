@@ -1,7 +1,10 @@
 package net.rossonet.waldot.api.strategies;
 
+import java.util.Collection;
+
 import org.apache.commons.jexl3.JexlContext;
 
+import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
 /**
@@ -12,16 +15,20 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public interface ConsoleStrategy {
+	public static String COMMANDS_LABEL = "cmd";
 	public static String G_LABEL = "g";
 	public static String LOG_LABEL = "log";
-	public static String COMMANDS_LABEL = "cmd";
 	public static String SELF_LABEL = "self";
 
 	WaldotNamespace getWaldotNamespace();
 
 	void initialize(WaldotNamespace waldotNamespace);
 
-	void reset();
+	Collection<String> listConfiguredCommands();
+
+	void registerCommand(WaldotCommand command);
+
+	void removeCommand(WaldotCommand command);
 
 	Object runExpression(String expression);
 

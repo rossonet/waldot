@@ -10,9 +10,6 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.jsoniter.JsonIterator;
-import com.jsoniter.output.JsonStream;
-
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.zenoh.exception.ExecutionCommandException;
 import net.rossonet.zenoh.exception.ZenohSerializationException;
@@ -26,6 +23,7 @@ public final class RpcCommand implements Serializable {
 	private static final String RPC_INPUT_FIELD = "i";
 	private static final String RPC_OUTPUT_FIELD = "o";
 	private static final String RPC_RELATED_FIELD = "r";
+	private static final String RPC_STATUS_FIELD = "s";
 	private static final String RPC_UNIQUE_FIELD = "u";
 	private static final long serialVersionUID = -2725272535926420176L;
 	private static final String VALUE_FIELD = "v";
@@ -62,9 +60,8 @@ public final class RpcCommand implements Serializable {
 		for (int i = 0; i < array.length(); i++) {
 			final JSONObject jsonObject = array.getJSONObject(i);
 			final String key = jsonObject.getString(KEY_FIELD);
-			final JSONObject value = jsonObject.getJSONObject(VALUE_FIELD);
-			final Object objValue = JsonIterator.deserialize(value.toString());
-			values.put(key, objValue);
+			final String value = jsonObject.getString(VALUE_FIELD);
+			values.put(key, value);
 		}
 		return values;
 	}
@@ -167,6 +164,9 @@ public final class RpcCommand implements Serializable {
 		}
 		if (executionCommandException != null) {
 			jsonObject.put(RPC_EXCEPTION_FIELD, executionCommandException.toJson());
+			jsonObject.put(RPC_STATUS_FIELD, false);
+		} else {
+			jsonObject.put(RPC_STATUS_FIELD, true);
 		}
 		jsonObject.put(RPC_INPUT_FIELD, valuesToJson(inputValues));
 		if (outputValue != null && !outputValue.isEmpty()) {
@@ -216,8 +216,7 @@ public final class RpcCommand implements Serializable {
 		for (final Map.Entry<String, Object> entry : values.entrySet()) {
 			final JSONObject record = new JSONObject();
 			record.put(KEY_FIELD, entry.getKey());
-			final JSONObject json = new JSONObject(JsonStream.serialize(entry.getValue()));
-			record.put(VALUE_FIELD, json);
+			record.put(VALUE_FIELD, entry.getValue().toString());
 			array.put(record);
 		}
 		return array;

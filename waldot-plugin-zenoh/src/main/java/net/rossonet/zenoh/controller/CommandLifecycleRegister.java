@@ -1,6 +1,7 @@
 package net.rossonet.zenoh.controller;
 
 import java.time.Instant;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
@@ -67,13 +68,14 @@ public class CommandLifecycleRegister {
 	private final long callTimeMs;
 	private final String commandId;
 	private boolean completed = false;
+	private final Condition condition;
 	private String errorMessage = null;
-	private final ReentrantLock reentrantLock = new ReentrantLock();
+	private final ReentrantLock reentrantLock;
 	private JSONObject replyMessage = null;
+
 	private long replyTimeMs = -1;
 
 	private final long rpcUniqueId;
-
 	private String stackTrace = null;
 	private boolean success = false;
 
@@ -82,6 +84,8 @@ public class CommandLifecycleRegister {
 		rpcUniqueId = rpcCommand.getUniqueId();
 		agentId = rpcCommand.getAgentId();
 		callTimeMs = Instant.now().toEpochMilli();
+		reentrantLock = new ReentrantLock();
+		condition = reentrantLock.newCondition();
 	}
 
 	public CommandLifecycleRegister(RpcCommand rpcCommand, Exception e) {
@@ -99,6 +103,8 @@ public class CommandLifecycleRegister {
 		rpcUniqueId = 0;
 		this.agentId = agentId;
 		callTimeMs = Instant.now().toEpochMilli();
+		reentrantLock = new ReentrantLock();
+		condition = reentrantLock.newCondition();
 	}
 
 	public String getAgentId() {
@@ -111,6 +117,11 @@ public class CommandLifecycleRegister {
 
 	public String getCommandId() {
 		return commandId;
+	}
+
+	public Condition getCompleteCondition() {
+		return condition;
+
 	}
 
 	public String getErrorMessage() {

@@ -91,7 +91,8 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 	}
 
 	public void discoveryFromAgentReceived(final String topic, final JSONObject payload) {
-		logger.info("discovery message received on topic {}: {}", topic, payload.toString(2));
+		// logger.info("discovery message received on topic {}: {}", topic,
+		// payload.toString(2));
 		registerNewAgent(payload);
 	}
 
@@ -121,7 +122,8 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 		}
 		if (agent != null) {
 			if (agentStore.registerNewAgent(agent)) {
-				logger.info("Registered new agent from discovery message: {}", discoveryMessage.toString(2));
+				// logger.info("Registered new agent from discovery message: {}",
+				// discoveryMessage.toString(2));
 				agent.setManagedVertex((WaldotVertex) graph.addVertex(agent.getAgentVertexProperties()));
 			} else {
 				logger.warn("Agent from discovery message not registered by agentStore: {}",

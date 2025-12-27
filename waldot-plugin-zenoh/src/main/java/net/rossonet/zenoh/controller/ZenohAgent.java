@@ -43,6 +43,7 @@ import net.rossonet.waldot.utils.TextHelper;
 import net.rossonet.waldot.utils.ThreadHelper;
 import net.rossonet.zenoh.ZenohHelper;
 import net.rossonet.zenoh.api.AgentCommandMetadata;
+import net.rossonet.zenoh.api.AgentCommandParameter;
 import net.rossonet.zenoh.api.AgentConfigurationMetadata;
 import net.rossonet.zenoh.api.AgentProperty;
 import net.rossonet.zenoh.api.TelemetryData;
@@ -52,7 +53,6 @@ import net.rossonet.zenoh.api.message.RpcConfiguration;
 import net.rossonet.zenoh.controller.command.StartAgentCommand;
 import net.rossonet.zenoh.controller.command.StopAgentCommand;
 import net.rossonet.zenoh.exception.WaldotZenohException;
-import net.rossonet.zenoh.exception.ZenohSerializationException;
 
 /**
  * * Represents a Zenoh Agent managed by the AgentLifeCycleManager
@@ -220,12 +220,34 @@ public class ZenohAgent implements WaldotAgentEndpoint, AutoCloseable, PropertyO
 		publishers.clear();
 	}
 
+	private AbstractOpcCommand createCommandVertex(final String commandName,
+			final AgentCommandMetadata commandDetails) {
+		return new AbstractOpcCommand(agentLifeCycleManager.getGraph(), agentLifeCycleManager.getNamespace(),
+				uniqueId + "." + TextHelper.cleanText(commandDetails.getCommandName()), commandDetails.getCommandName(),
+				commandDetails.getAnnotation().description(), "agents/" + uniqueId,
+				UInteger.valueOf(commandDetails.getWriteMask()), UInteger.valueOf(commandDetails.getUserWriteMask()),
+				commandDetails.isExecutable(), commandDetails.isUserExecutable()) {
+//TODO aggiungere gli argomenti di input del comando OPC UA
+			@Override
+			public Object[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
+				try {
+					logger.info("Executing command {} on agent {}", commandName, uniqueId);
+					return elaborateRemoteCommandOnAgent(commandName, commandDetails.getCommandParameters(),
+							inputValues).get(TIMEOUT_COMMAND_MS, TimeUnit.MILLISECONDS).getOutputValues();
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					logger.error("Error executing command {} on agent {}", commandName, uniqueId, e);
+					return new CommandLifecycleRegister(getUniqueId(), commandName, inputValues, e).getOutputValues();
+				}
+			}
+		};
+	}
+
 	@Override
 	public void elaborateCommandReplyMessage(final Sample sample) {
 		JSONObject payloadJson = null;
 		try {
 			payloadJson = new JSONObject(sample.getPayload().toString());
-		} catch (final Exception e) {
+		} catch (final Throwable e) {
 			logger.error("Error parsing command reply message payload: {}", sample.getPayload(), e);
 			return;
 		}
@@ -260,10 +282,15 @@ public class ZenohAgent implements WaldotAgentEndpoint, AutoCloseable, PropertyO
 						? LogHelper.stackTraceToString(command.getExecutionCommandException())
 						: null);
 				suspendedCommand.setCompleted(true);
-				suspendedCommand.getReentrantLock().unlock();
+				suspendedCommand.getReentrantLock().lock();
+				try {
+					suspendedCommand.getCompleteCondition().signalAll();
+				} finally {
+					suspendedCommand.getReentrantLock().unlock();
+				}
 				suspendedCommands.remove(command.getUniqueId());
 			}
-		} catch (final ZenohSerializationException e) {
+		} catch (final Throwable e) {
 			logger.error("Error deserializing command reply message payload: {}", payloadJson, e);
 		}
 
@@ -293,10 +320,12 @@ public class ZenohAgent implements WaldotAgentEndpoint, AutoCloseable, PropertyO
 	}
 
 	public Future<CommandLifecycleRegister> elaborateRemoteCommandOnAgent(final String commandId,
-			final String[] inputValues) {
-		final String topic = ZenohHelper.getRpcCommandTopic(getUniqueId(), commandId);
-		// final AgentCommandMetadata meta = registerCommands.get(commandId);
+			List<AgentCommandParameter> parameters, final String[] inputValues) {
+		final String topic = ZenohHelper.getRpcCommandTopic(getUniqueId(), TextHelper.cleanText(commandId));
 		final Map<String, Object> values = new HashMap<>();
+		for (int i = 0; i < inputValues.length; i++) {
+			values.put(parameters.get(i).getParameterName(), inputValues[i]);
+		}
 		final RpcCommand rpcCommand = new RpcCommand(getUniqueId(), commandId, values);
 		try {
 			final CommandLifecycleRegister calledCommand = new CommandLifecycleRegister(rpcCommand);
@@ -328,6 +357,14 @@ public class ZenohAgent implements WaldotAgentEndpoint, AutoCloseable, PropertyO
 								@Override
 								public Void call() throws Exception {
 									calledCommand.getReentrantLock().lock();
+									try {
+										while (!calledCommand.isCompleted()) {
+											calledCommand.getCompleteCondition().await();
+										}
+									} finally {
+										calledCommand.getReentrantLock().unlock();
+									}
+
 									return null;
 								}
 							}, timeout, unit);
@@ -400,7 +437,6 @@ public class ZenohAgent implements WaldotAgentEndpoint, AutoCloseable, PropertyO
 		updateTelemetryMetadatas(TelemetryData.fromDtml(dtmlHandler));
 		updatePropertyMetadatas(AgentProperty.fromDtml(dtmlHandler));
 		updateManagedOpcVertexObjects();
-
 	}
 
 	public AgentLifeCycleManager getAgentLifeCycleManager() {
@@ -464,30 +500,11 @@ public class ZenohAgent implements WaldotAgentEndpoint, AutoCloseable, PropertyO
 			logger.debug("Command {} already exists for agent {}, updating if necessary", commandName, uniqueId);
 			// TODO: gestire il cambio delle caratteristiche del comando se necessario
 		} else {
-			final AbstractOpcCommand command = new AbstractOpcCommand(agentLifeCycleManager.getGraph(),
-					agentLifeCycleManager.getNamespace(),
-					uniqueId + "." + TextHelper.cleanText(commandDetails.getCommandName()),
-					commandDetails.getCommandName(), commandDetails.getAnnotation().description(), "agents/" + uniqueId,
-					UInteger.valueOf(commandDetails.getWriteMask()),
-					UInteger.valueOf(commandDetails.getUserWriteMask()), commandDetails.isExecutable(),
-					commandDetails.isUserExecutable()) {
-//TODO aggiungere gli argomenti di input del comando OPC UA
-				@Override
-				public Object[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
-					try {
-						return elaborateRemoteCommandOnAgent(commandName, inputValues)
-								.get(TIMEOUT_COMMAND_MS, TimeUnit.MILLISECONDS).getOutputValues();
-					} catch (InterruptedException | ExecutionException | TimeoutException e) {
-						logger.error("Error executing command {} on agent {}", commandName, uniqueId, e);
-						return new CommandLifecycleRegister(getUniqueId(), commandName, inputValues, e)
-								.getOutputValues();
-					}
-				}
-			};
+			final AbstractOpcCommand command = createCommandVertex(commandName, commandDetails);
 			CommandLifecycleRegister.addStandardAgentCommandOutputArguments(command);
 			agentLifeCycleManager.getNamespace().registerCommand(command);
 			opcRegisterCommands.put(commandName, command);
-			logger.info("Registered new command {} for agent {}", commandName, uniqueId);
+			// logger.info("Registered new command {} for agent {}", commandName, uniqueId);
 		}
 
 	}

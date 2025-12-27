@@ -43,6 +43,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinCommandVertex;
+import net.rossonet.waldot.utils.TextHelper;
 
 /**
  * AbstractOpcCommand is an abstract class that extends GremlinCommandVertex and
@@ -79,6 +80,8 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	protected boolean allowNullPropertyValues = false;
 
+	private final String command;
+
 	private final String directory;
 
 	protected final List<EventObserver> eventObservers = new ArrayList<>();
@@ -104,6 +107,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 		this.waldotNamespace = waldotNamespace;
 		this.graph = graph;
 		this.directory = directory;
+		this.command = command;
 	}
 
 	public AbstractOpcCommand(final WaldotGraph graph, final WaldotNamespace waldotNamespace, final String command,
@@ -179,6 +183,11 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	@Override
 	public UaMethodNode findMethodNode(final NodeId methodId) {
 		return null;
+	}
+
+	@Override
+	public String getConsoleCommand() {
+		return TextHelper.cleanText(directory != null ? directory + "_" + command : command);
 	}
 
 	@Override

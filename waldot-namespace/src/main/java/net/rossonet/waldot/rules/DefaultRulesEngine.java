@@ -15,14 +15,14 @@ import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.RuleListener;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.api.rules.RuleExecutorHelper;
 import net.rossonet.waldot.api.rules.Rule;
+import net.rossonet.waldot.api.rules.RuleExecutorHelper;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.jexl.JexlExecutorHelper;
 
 public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
-	private final RuleExecutorHelper jexlEngine = new JexlExecutorHelper();
+	private final RuleExecutorHelper jexlEngine = new JexlExecutorHelper("rules-engine");
 
 	private final List<RuleListener> listeners = new ArrayList<>();
 	private final Logger logger = LoggerFactory.getLogger(getClass());

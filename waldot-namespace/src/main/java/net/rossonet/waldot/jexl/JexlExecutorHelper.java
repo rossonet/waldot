@@ -1,8 +1,10 @@
 
 package net.rossonet.waldot.jexl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,8 +46,16 @@ public class JexlExecutorHelper implements RuleExecutorHelper {
 
 	protected transient Map<String, JexlScript> compiledConditions = new HashMap<>();
 
+	private final List<String> functionList = new ArrayList<>();
+
 	protected final Set<Class<?>> functionObjects = new HashSet<>();
+
 	private JexlEngine jexl = generateEngine();
+	private final String name;
+
+	public JexlExecutorHelper(String name) {
+		this.name = name;
+	}
 
 	@Override
 	public void close() throws Exception {
@@ -130,6 +140,10 @@ public class JexlExecutorHelper implements RuleExecutorHelper {
 
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	@Override
 	public void setContext(final String id, final Object context) {
 		baseJexlContext.set(id, context);
@@ -137,6 +151,7 @@ public class JexlExecutorHelper implements RuleExecutorHelper {
 
 	@Override
 	public void setFunctionObject(final String id, final Object function) {
+		functionList.add(id);
 		baseJexlContext.set(id, function);
 		functionObjects.add(function.getClass());
 		classPermissions = new JexlPermissions.ClassPermissions(functionObjects.toArray(new Class<?>[0]));

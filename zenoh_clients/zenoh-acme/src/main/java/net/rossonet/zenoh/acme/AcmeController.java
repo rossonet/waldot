@@ -15,8 +15,10 @@ public class AcmeController implements AnnotatedAgentController {
 		FAST, NORMAL, SLOW, VERY_FAST, VERY_SLOW
 	}
 
+	private String data;
 	@ExportedParameter(description = "Enable or disable the ACME sensor simulation", mandatary = true, name = "Enable Simulation", viewOrder = 1)
 	private boolean enableSimulation = false;
+
 	@ExportedParameter(description = "Maximum value for the simulated sensors", mandatary = true, name = "Max Simulation Value", viewOrder = 6)
 	private int maxSimulationValue = 100;
 	@ExportedParameter(description = "Minimum value for the simulated sensors", mandatary = true, name = "Min Simulation Value", viewOrder = 5)
@@ -27,6 +29,10 @@ public class AcmeController implements AnnotatedAgentController {
 	private String simulationDescription = "ACME Sensor Simulation";
 	@ExportedParameter(description = "Speed of the simulation", mandatary = true, name = "Simulation Speed", viewOrder = 3)
 	private SimulationSpeed simulationSpeed = SimulationSpeed.NORMAL;
+
+	public String getData() {
+		return data;
+	}
 
 	public int getMaxSimulationValue() {
 		return maxSimulationValue;
@@ -65,6 +71,12 @@ public class AcmeController implements AnnotatedAgentController {
 	public void notifyParameterChanged(String parameterName) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@ExportedCommand(description = "Set test data value", name = "Set Data Test", returnDescription = "", returnName = "")
+	public void setData(
+			@ExportedMethodParameter(name = "data", description = "last data to save", mandatary = false) String data) {
+		this.data = data;
 	}
 
 	public void setEnableSimulation(boolean enableSimulation) {

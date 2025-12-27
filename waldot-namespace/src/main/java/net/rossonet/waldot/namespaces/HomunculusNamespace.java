@@ -71,6 +71,7 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.jexl.RulesCmdFunction;
 import net.rossonet.waldot.logger.TraceLogger;
 import net.rossonet.waldot.logger.TraceLogger.ContexLogger;
+import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 import net.rossonet.waldot.rules.DefaultRulesEngine;
 
@@ -82,7 +83,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	private final ClientManagementStrategy agentManagementStrategy;
 	private ClientRegisterX509IdentityValidator agentX509IdentityValidator;
-	private WaldotBehaviorTreesEngine behaviorTrees;
+	private final WaldotBehaviorTreesEngine behaviorTrees;
 	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
 	private final BootstrapStrategy bootstrapProcedureStrategy;
 	private final String bootstrapUrl;
@@ -90,19 +91,19 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
 	private final ConsoleStrategy consoleStrategy;
 	private final DataTypeManager dictionaryManager;
+
 	private WaldotGraphComputerView graphComputerView;
 	private final WaldotGraph gremlin;
 	private final HistoryStrategy historyStrategy;
 	private final RulesCmdFunction jexlWaldotCommandHelper;
 	private final List<NamespaceListener> listeners = new ArrayList<>();
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-
 	private final Graph.Variables opcGraphVariables;
+
 	private final MiloStrategy opcMappingStrategy;
 	private final Set<PluginListener> plugins = new HashSet<>();
 	private final WaldotRulesEngine rulesEngine;
 	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
-
 	private final SubscriptionModel subscriptionModel;
 
 	private WaldotOpcUaServer waldotOpcUaServer;
@@ -228,11 +229,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		return newQualifiedName(text);
 	}
 
-	@Override
-	public ClientManagementStrategy getAgentManagementStrategy() {
-		return agentManagementStrategy;
-	}
-
 	public WaldotBehaviorTreesEngine getBehaviorTrees() {
 		return behaviorTrees;
 	}
@@ -248,6 +244,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
+	public ClientManagementStrategy getClientManagementStrategy() {
+		return agentManagementStrategy;
+	}
+
+	@Override
 	public Object getCommandsAsFunction() {
 		return jexlWaldotCommandHelper;
 	}
@@ -260,6 +261,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public Logger getConsoleLogger() {
 		return consoleLogger;
+	}
+
+	@Override
+	public ConsoleStrategy getConsoleStrategy() {
+		return consoleStrategy;
 	}
 
 	@Override
@@ -445,6 +451,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
+	public Collection<String> listConfiguredCommands() {
+		return consoleStrategy.listConfiguredCommands();
+	}
+
+	@Override
 	public Object namespaceParametersGet(final String key) {
 		return opcMappingStrategy.namespaceParametersGet(key);
 	}
@@ -520,6 +531,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public void registerCommand(final WaldotCommand command) {
 		opcMappingStrategy.registerCommand(command);
+		consoleStrategy.registerCommand(command);
+		getStorageManager().addNode((AbstractOpcCommand) command);
 		listeners.forEach(listener -> listener.onCommandRegistered(command));
 	}
 
@@ -534,6 +547,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public void removeCommand(final WaldotCommand command) {
 		opcMappingStrategy.removeCommand(command);
+		consoleStrategy.removeCommand(command);
+		getStorageManager().removeNode(command.getNodeId());
 		listeners.forEach(listener -> listener.onCommandRemoved(command));
 	}
 

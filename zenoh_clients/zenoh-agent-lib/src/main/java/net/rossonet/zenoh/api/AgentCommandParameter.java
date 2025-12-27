@@ -119,6 +119,10 @@ public class AgentCommandParameter implements Serializable {
 		return methodParameter;
 	}
 
+	public String getParameterName() {
+		return parameterName;
+	}
+
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		final String idString = "command.parameter:" + parameterName + ";1";

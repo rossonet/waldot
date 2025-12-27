@@ -16,8 +16,8 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 class ConsoleStrategyTest {
 
 	private ConsoleStrategy mockConsoleStrategy;
-	private WaldotNamespace mockNamespace;
 	private JexlContext mockJexlContext;
+	private WaldotNamespace mockNamespace;
 
 	@BeforeEach
 	void setUp() {
@@ -43,15 +43,6 @@ class ConsoleStrategyTest {
 		mockConsoleStrategy.initialize(mockNamespace);
 
 		verify(mockConsoleStrategy, times(1)).initialize(mockNamespace);
-	}
-
-	@Test
-	void testReset() {
-		doNothing().when(mockConsoleStrategy).reset();
-
-		mockConsoleStrategy.reset();
-
-		verify(mockConsoleStrategy, times(1)).reset();
 	}
 
 	@Test

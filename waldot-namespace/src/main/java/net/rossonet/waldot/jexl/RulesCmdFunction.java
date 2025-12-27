@@ -2,6 +2,7 @@ package net.rossonet.waldot.jexl;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
@@ -50,6 +51,10 @@ public class RulesCmdFunction {
 			}
 		}
 		return sb.toString();
+	}
+
+	public Collection<String> listCommands() {
+		return waldotNamespace.listConfiguredCommands();
 	}
 
 	public void reset() {

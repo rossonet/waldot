@@ -21,11 +21,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.json.JSONObject;
 
 import com.google.common.reflect.ClassPath;
-import com.jsoniter.output.JsonStream;
 
 import io.zenoh.config.ZenohId;
 import net.rossonet.waldot.dtdl.DigitalTwinModelIdentifier;
 import net.rossonet.waldot.dtdl.DtdlHandler;
+import net.rossonet.waldot.utils.TextHelper;
 import net.rossonet.waldot.utils.ThreadHelper;
 import net.rossonet.zenoh.annotation.AnnotatedAgentController.ConfigurationChangeType;
 import net.rossonet.zenoh.api.AgentCommandMetadata;
@@ -146,8 +146,9 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 			}
 		}
 		final String methodReturnType = commandData.getMethod().getReturnType().getSimpleName();
-		registeredCommands.put(commandName, new AgentCommandMetadata(commandName, flowController, methodName,
-				methodReturnType, annotation, commandParameters));
+		registeredCommands.put(TextHelper.cleanText(commandName),
+				new AgentCommandMetadata(TextHelper.cleanText(commandName), flowController, methodName,
+						methodReturnType, annotation, commandParameters));
 	}
 
 	private void addConfigurationObjectMetadata(final Class<?> configClass,
@@ -333,9 +334,13 @@ public abstract class AbstractAgentAnnotationControlHandler implements AgentCont
 				commandMetadata.getParameterTypes());
 		final Object[] parameters = command.getParameterInputValues();
 		final Object result = method.invoke(flowController, parameters);
-		final String serialize = JsonStream.serialize(result);
-		final RpcCommand response = new RpcCommand(command, new JSONObject(serialize));
-		return response;
+		if (result != null) {
+			return new RpcCommand(command, new JSONObject(result.toString()));
+		} else {
+			final JSONObject reply = new JSONObject();
+			reply.put("void", true);
+			return new RpcCommand(command, reply);
+		}
 	}
 
 	@Override

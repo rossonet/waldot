@@ -17,7 +17,7 @@ public class JexlRunnerTest {
 		final List<String> list = new ArrayList<String>();
 		list.add("one");
 		list.add("two");
-		final RuleExecutorHelper executor = new JexlExecutorHelper();
+		final RuleExecutorHelper executor = new JexlExecutorHelper("test");
 		executor.setContext("list", list);
 		executor.setFunctionObject("button", this);
 		executor.setFunctionObject("system", System.out);

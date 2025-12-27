@@ -49,7 +49,8 @@ import net.rossonet.waldot.utils.LogHelper;
 public class Schema {
 
 	public enum DigitalTwinPrimitive {
-		_boolean, _date, _dateTime, _double, _duration, _float, _integer, _list, _long, _map, _string, _time
+		_boolean, _date, _dateTime, _double, _duration, _float, _integer, _list, _long, _map, _string, _time, _unknown,
+		_void
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(Schema.class);
@@ -67,7 +68,7 @@ public class Schema {
 	 */
 	@SuppressWarnings("unchecked")
 	public Schema(final Object value) {
-		if (value instanceof String) {
+		if (value instanceof String && value != null && !value.toString().isEmpty()) {
 			if (value.toString().trim().startsWith("{") && value.toString().trim().endsWith("}")) {
 				jsonSchema = new JSONObject(value.toString());
 			} else if (!(value.toString().contains(":") || value.toString().contains(";"))) {

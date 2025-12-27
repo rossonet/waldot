@@ -29,6 +29,7 @@ import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
+import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
@@ -74,17 +75,19 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	QualifiedName generateQualifiedName(String label);
 
-	ClientManagementStrategy getAgentManagementStrategy();
-
 	Logger getBootLogger();
 
 	String getBootstrapUrl();
+
+	ClientManagementStrategy getClientManagementStrategy();
 
 	Object getCommandsAsFunction();
 
 	WaldotConfiguration getConfiguration();
 
 	Logger getConsoleLogger();
+
+	ConsoleStrategy getConsoleStrategy();
 
 	WaldotVertex getEdgeInVertex(WaldotEdge edge);
 
@@ -153,6 +156,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	boolean hasNodeId(NodeId nodeId);
 
 	boolean inComputerMode();
+
+	Collection<String> listConfiguredCommands();
 
 	Object namespaceParametersGet(String key);
 

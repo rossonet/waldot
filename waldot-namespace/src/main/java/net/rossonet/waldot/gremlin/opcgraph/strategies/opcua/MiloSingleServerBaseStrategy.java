@@ -654,7 +654,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				waldotNamespace.generateNodeId(waldotNamespace.getConfiguration().getAssetRootNodeId()),
 				waldotNamespace.generateQualifiedName(waldotNamespace.getConfiguration().getAssetRootNodeBrowseName()),
 				LocalizedText.english(waldotNamespace.getConfiguration().getAssetRootNodeDisplayName()));
-		waldotNamespace.getAgentManagementStrategy().generateAssetFolders(assetRootNode);
+		waldotNamespace.getClientManagementStrategy().generateAssetFolders(assetRootNode);
 		waldotNamespace.getStorageManager().addNode(getRootFolderNode());
 		waldotNamespace.getStorageManager().addNode(assetRootNode);
 		waldotNamespace.getStorageManager().addNode(interfaceRootNode);
@@ -777,15 +777,12 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 
 	@Override
 	public void registerCommand(final WaldotCommand command) {
-		waldotNamespace.getStorageManager().addNode((AbstractOpcCommand) command);
 		linkCommandDirectoryStructure((AbstractOpcCommand) command);
-
 	}
 
 	@Override
 	public void removeCommand(final WaldotCommand command) {
 		interfaceRootNode.removeComponent((AbstractOpcCommand) command);
-		waldotNamespace.getStorageManager().removeNode(command.getNodeId());
 	}
 
 	@Override

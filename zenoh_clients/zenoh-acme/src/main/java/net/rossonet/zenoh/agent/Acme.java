@@ -5,9 +5,11 @@ import java.util.concurrent.TimeUnit;
 
 import io.zenoh.Config;
 import net.rossonet.waldot.utils.LogHelper;
+import net.rossonet.zenoh.acme.AcmeController;
 import net.rossonet.zenoh.annotation.AbstractAgentAnnotationControlHandler;
 import net.rossonet.zenoh.api.InternalLogMessage;
 import net.rossonet.zenoh.api.TelemetryData;
+import net.rossonet.zenoh.api.WaldotZenohClient.Status;
 import net.rossonet.zenoh.api.message.TelemetryMessage;
 import net.rossonet.zenoh.client.WaldotZenohClientImpl;
 import net.rossonet.zenoh.exception.WaldotZenohException;
@@ -80,6 +82,14 @@ public class Acme {
 
 	public Acme(final String runtimeUniqueId) {
 		this.runtimeUniqueId = runtimeUniqueId;
+	}
+
+	public String getTestData() {
+		return ((AcmeController) controlHandler.getFlowController()).getData();
+	}
+
+	public boolean isRegistered() {
+		return client.getStatus().equals(Status.RUNNING);
 	}
 
 	public void startAgent() {

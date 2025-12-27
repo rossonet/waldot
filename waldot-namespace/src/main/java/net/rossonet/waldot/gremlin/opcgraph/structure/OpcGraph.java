@@ -149,13 +149,14 @@ public class OpcGraph extends AbstractOpcGraph {
 			throw new IllegalArgumentException("Namespace not set");
 		}
 		ElementHelper.legalPropertyKeyValueArray(keyValues);
-		for (int i = 0; i < keyValues.length; i = i + 2) {
-			logger.debug("Key: {}, Value: {}", keyValues[i], keyValues[i + 1]);
-		}
+		/*
+		 * for (int i = 0; i < keyValues.length; i = i + 2) {
+		 * logger.debug("Key: {}, Value: {}", keyValues[i], keyValues[i + 1]); }
+		 */
 		final Object readId = getIdValue(keyValues).orElse(null);
-		logger.debug("Read id: {}", readId);
+		// logger.debug("Read id: {}", readId);
 		NodeId nodeId = vertexIdManager.convert(this, readId);
-		logger.debug("NodeId determined: {}", nodeId);
+		// logger.debug("NodeId determined: {}", nodeId);
 		if (null != nodeId) {
 			if (opcNamespace.hasNodeId(nodeId)) {
 				throw Exceptions.vertexWithIdAlreadyExists(nodeId);

@@ -18,6 +18,7 @@ import io.zenoh.qos.CongestionControl;
 import io.zenoh.qos.Priority;
 import io.zenoh.qos.Reliability;
 import io.zenoh.sample.Sample;
+import net.rossonet.waldot.utils.TextHelper;
 import net.rossonet.zenoh.api.TelemetryData;
 import net.rossonet.zenoh.api.WaldotAgentEndpoint;
 import net.rossonet.zenoh.api.WaldotZenohClient;
@@ -45,6 +46,7 @@ public final class ZenohHelper {
 	public static final String INTERNAL_TELEMETRY_TOPIC = "self";
 	public static final String JOLLY_TOPIC = "**";
 	public static final String KEEPALIVE_TOPIC = "live";
+	public static final String MAIN_CONFIG_ID = "main";
 	public static final String OBJECTS_LABEL = "o";
 	private static final String PARAMETER_TOPIC = "pars";
 	public static final String PING_COMMAND_TOPIC = "ping";
@@ -58,7 +60,6 @@ public final class ZenohHelper {
 	public static final String UNIQUE_ID_LABEL = "u";
 	public static final String UPDATE_DISCOVERY_TOPIC = "update";
 	public static final String VERSION_LABEL = "v";
-	public static final String MAIN_CONFIG_ID = "main";
 
 	public static Session createClient(final Config zenohConfig, final boolean debug) throws ZError {
 		if (debug) {
@@ -214,7 +215,7 @@ public final class ZenohHelper {
 	}
 
 	public static String getRpcCommandTopic(final String agentUniqueId, final String commandId) {
-		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + commandId;
+		return getBaseControlTopic(agentUniqueId) + ZenohHelper._TOPIC_SEPARATOR + TextHelper.cleanText(commandId);
 	}
 
 	public static String getTelemetryBaseTopic(final String agentUniqueId) {
