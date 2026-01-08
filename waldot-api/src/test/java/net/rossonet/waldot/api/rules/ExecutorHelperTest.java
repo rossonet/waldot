@@ -16,7 +16,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 
 class ExecutorHelperTest {
 
-	private RuleExecutorHelper mockExecutorHelper;
+	private RuleExecutor mockExecutorHelper;
 	private WaldotNamespace mockNamespace;
 	private Rule mockRule;
 	private WaldotStepLogger mockStepLogger;
@@ -24,7 +24,7 @@ class ExecutorHelperTest {
 
 	@BeforeEach
 	void setUp() {
-		mockExecutorHelper = mock(RuleExecutorHelper.class);
+		mockExecutorHelper = mock(RuleExecutor.class);
 		mockNamespace = mock(WaldotNamespace.class);
 		mockRule = mock(Rule.class);
 		mockStepLogger = mock(WaldotStepLogger.class);

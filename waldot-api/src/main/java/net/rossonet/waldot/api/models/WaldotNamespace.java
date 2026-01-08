@@ -75,6 +75,8 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	QualifiedName generateQualifiedName(String label);
 
+	Object getAliasResolverAsFunction();
+
 	Logger getBootLogger();
 
 	String getBootstrapUrl();
@@ -174,6 +176,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	void registerAgentValidators(ClientRegisterAnonymousValidator agentAnonymousValidator,
 			ClientRegisterUsernameIdentityValidator agentIdentityValidator,
 			ClientRegisterX509IdentityValidator agentX509IdentityValidator);
+
+	void registerAlias(NodeId forNode, String alias, NodeId targetNode);
 
 	void registerCommand(WaldotCommand command);
 

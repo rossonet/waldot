@@ -6,11 +6,11 @@ import java.util.Collection;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
-public class RulesCmdFunction {
+public class JexlCmdFunction {
 
 	protected final WaldotNamespace waldotNamespace;
 
-	public RulesCmdFunction(final WaldotNamespace waldotNamespace) {
+	public JexlCmdFunction(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
 	}
 
@@ -64,7 +64,7 @@ public class RulesCmdFunction {
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
-		builder.append("jexl Command Helper [");
+		builder.append("jexl Command Function [");
 		if (waldotNamespace != null) {
 			builder.append("waldotNamespace=");
 			builder.append(waldotNamespace);

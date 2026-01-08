@@ -13,7 +13,7 @@ import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 
-public interface ClientManagementStrategy {
+public interface ClientManagementStrategy extends AutoCloseable {
 
 	void activate(ClientRegisterAnonymousValidator agentAnonymousValidator,
 			ClientRegisterUsernameIdentityValidator agentIdentityValidator,

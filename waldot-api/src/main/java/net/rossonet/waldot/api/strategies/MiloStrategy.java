@@ -35,9 +35,10 @@ import net.rossonet.waldot.api.models.WaldotVertexProperty;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface MiloStrategy {
+public interface MiloStrategy extends AutoCloseable {
 
 	public static final String ACTION_FIELD = "Action";
+	public static final String ALIAS_EDGE_PARAMETER = "alias";
 	public static final Predicate<Reference> COMPONENT_OF_PREDICATE = (reference) -> reference.isInverse()
 			&& Identifiers.HasComponent.equals(reference.getReferenceTypeId());
 	public static final String CONDITION_FIELD = "Condition";
@@ -51,6 +52,7 @@ public interface MiloStrategy {
 	public static final int DEFAULT_REFACTORY_PERIOD_MS = 0;
 	public static final String DESCRIPTION_PARAMETER = "description";
 	public static final String DIRECTORY_PARAMETER = "directory";
+	public static final String HAS_WALDOT_ALIAS = "HasAlias";
 	public static final String HAS_WALDOT_RULE = "HasRule";
 	public static final String ID_PARAMETER = "id";
 	public static final String LABEL_FIELD = "Label";

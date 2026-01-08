@@ -10,17 +10,23 @@ import org.slf4j.Logger;
 import net.rossonet.waldot.api.annotation.WaldotConsoleStrategy;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.rules.RuleExecutorHelper;
+import net.rossonet.waldot.api.rules.RuleExecutor;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
-import net.rossonet.waldot.jexl.JexlExecutorHelper;
+import net.rossonet.waldot.jexl.JexlExecutor;
 
 @WaldotConsoleStrategy
 public class BaseConsoleStrategy implements ConsoleStrategy {
-	private RuleExecutorHelper baseExecutor;
+	private RuleExecutor baseExecutor;
 	private final List<WaldotCommand> commands = new ArrayList<>();
 	private boolean dirty = false;
 	private Logger logger;
 	private WaldotNamespace waldotNamespace;
+
+	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
 
 	@Override
 	public WaldotNamespace getWaldotNamespace() {
@@ -58,7 +64,7 @@ public class BaseConsoleStrategy implements ConsoleStrategy {
 
 	private void reset() {
 		logger = waldotNamespace.getConsoleLogger();
-		baseExecutor = new JexlExecutorHelper("console");
+		baseExecutor = new JexlExecutor("console");
 		baseExecutor.setFunctionObject(ConsoleStrategy.LOG_LABEL, waldotNamespace.getConsoleLogger());
 		baseExecutor.setFunctionObject(ConsoleStrategy.G_LABEL, waldotNamespace.getGremlinGraph());
 		baseExecutor.setFunctionObject(ConsoleStrategy.COMMANDS_LABEL, waldotNamespace.getCommandsAsFunction());

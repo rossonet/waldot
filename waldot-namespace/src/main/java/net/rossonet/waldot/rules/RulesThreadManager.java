@@ -93,8 +93,8 @@ public class RulesThreadManager implements AutoCloseable {
 	}
 
 	private Thread getThread() {
-		return ThreadHelper.ofVirtual().name("RE Thread Manager", 0).unstarted(() -> {
-			Thread.currentThread().setName("RE Thread Manager");
+		return ThreadHelper.ofVirtual().name("RULES TM", 0).unstarted(() -> {
+			Thread.currentThread().setName("RULES TM");
 			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 			logger.info("Rules Engine Thread Manager started with thread name " + Thread.currentThread().getName()
 					+ " and priority " + Thread.currentThread().getPriority());

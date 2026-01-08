@@ -2,7 +2,7 @@ package net.rossonet.waldot.api.btree;
 
 import java.util.concurrent.Semaphore;
 
-public interface WaldotBehaviorTreesEngine {
+public interface WaldotBehaviorTreesEngine extends AutoCloseable {
 
 	Task createRootTask(String subtree);
 

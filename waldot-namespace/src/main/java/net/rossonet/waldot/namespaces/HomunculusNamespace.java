@@ -2,11 +2,13 @@ package net.rossonet.waldot.namespaces;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
@@ -68,7 +70,8 @@ import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
-import net.rossonet.waldot.jexl.RulesCmdFunction;
+import net.rossonet.waldot.jexl.AliasResolver;
+import net.rossonet.waldot.jexl.JexlCmdFunction;
 import net.rossonet.waldot.logger.TraceLogger;
 import net.rossonet.waldot.logger.TraceLogger.ContexLogger;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
@@ -81,29 +84,33 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	private ClientRegisterUsernameIdentityValidator agentIdentityValidator;
 
-	private final ClientManagementStrategy agentManagementStrategy;
 	private ClientRegisterX509IdentityValidator agentX509IdentityValidator;
+	private final AliasResolver aliasResolver;
+	private final Map<NodeId, Map<String, NodeId>> aliasTable = new ConcurrentHashMap<>();
 	private final WaldotBehaviorTreesEngine behaviorTrees;
 	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
 	private final BootstrapStrategy bootstrapProcedureStrategy;
 	private final String bootstrapUrl;
+	private final ClientManagementStrategy clientManagementStrategy;
 	private final WaldotConfiguration configuration;
 	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
+
 	private final ConsoleStrategy consoleStrategy;
 	private final DataTypeManager dictionaryManager;
-
 	private WaldotGraphComputerView graphComputerView;
 	private final WaldotGraph gremlin;
 	private final HistoryStrategy historyStrategy;
-	private final RulesCmdFunction jexlWaldotCommandHelper;
+	private final JexlCmdFunction jexlWaldotCommandHelper;
 	private final List<NamespaceListener> listeners = new ArrayList<>();
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private final Graph.Variables opcGraphVariables;
-
 	private final MiloStrategy opcMappingStrategy;
 	private final Set<PluginListener> plugins = new HashSet<>();
 	private final WaldotRulesEngine rulesEngine;
+
 	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
+
 	private final SubscriptionModel subscriptionModel;
 
 	private WaldotOpcUaServer waldotOpcUaServer;
@@ -117,10 +124,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		this.opcMappingStrategy = opcMappingStrategy;
 		this.historyStrategy = historyStrategy;
 		this.consoleStrategy = consoleStrategy;
-		this.jexlWaldotCommandHelper = new RulesCmdFunction(this);
+		this.jexlWaldotCommandHelper = new JexlCmdFunction(this);
+		this.aliasResolver = new AliasResolver(this);
 		this.configuration = configuration;
 		this.bootstrapProcedureStrategy = bootstrapProcedureStrategy;
-		this.agentManagementStrategy = agentManagementStrategy;
+		this.clientManagementStrategy = agentManagementStrategy;
 		this.bootstrapUrl = bootstrapUrl;
 		opcGraphVariables = new OpcGraphVariables(this);
 		subscriptionModel = new SubscriptionModel(server.getServer(), this);
@@ -144,7 +152,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public void addAssetAgentNode(UaNode assetManagerComponent) {
 		getStorageManager().addNode(assetManagerComponent);
-		agentManagementStrategy.getAssetClientsFolderNode().addOrganizes(assetManagerComponent);
+		clientManagementStrategy.getAssetClientsFolderNode().addOrganizes(assetManagerComponent);
 	}
 
 	private void addBaseCommands() {
@@ -177,8 +185,25 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public void close() throws Exception {
+		bootstrapProcedureStrategy.close();
+		logger.info("bootstrap procedure strategy closed");
+		consoleStrategy.close();
+		logger.info("console strategy closed");
 		plugins.forEach(plugin -> plugin.stop());
+		logger.info("all plugins stopped");
+		clientManagementStrategy.close();
+		logger.info("client management strategy closed");
+		opcMappingStrategy.close();
+		logger.info("opc mapping strategy closed");
+		historyStrategy.close();
+		logger.info("history strategy closed");
 
+		rulesEngine.close();
+		logger.info("rules engine closed");
+		behaviorTrees.close();
+		logger.info("behavior trees engine closed");
+		waldotOpcUaServer.close();
+		logger.info("opcua server closed");
 	}
 
 	@Override
@@ -229,6 +254,15 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		return newQualifiedName(text);
 	}
 
+	@Override
+	public AliasResolver getAliasResolverAsFunction() {
+		return aliasResolver;
+	}
+
+	public Map<NodeId, Map<String, NodeId>> getAliasTable() {
+		return aliasTable;
+	}
+
 	public WaldotBehaviorTreesEngine getBehaviorTrees() {
 		return behaviorTrees;
 	}
@@ -245,7 +279,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public ClientManagementStrategy getClientManagementStrategy() {
-		return agentManagementStrategy;
+		return clientManagementStrategy;
 	}
 
 	@Override
@@ -525,7 +559,21 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		this.agentAnonymousValidator = agentAnonymousValidator;
 		this.agentIdentityValidator = agentIdentityValidator;
 		this.agentX509IdentityValidator = agentX509IdentityValidator;
-		agentManagementStrategy.activate(agentAnonymousValidator, agentIdentityValidator, agentX509IdentityValidator);
+		clientManagementStrategy.activate(agentAnonymousValidator, agentIdentityValidator, agentX509IdentityValidator);
+	}
+
+	@Override
+	public void registerAlias(NodeId forNode, String alias, NodeId targetNode) {
+		if (forNode == null || alias == null || targetNode == null) {
+			throw new IllegalArgumentException("forNode, alias and targetNode cannot be null");
+		}
+		if (aliasTable.containsKey(forNode)) {
+			aliasTable.get(forNode).put(alias, targetNode);
+		} else {
+			final Map<String, NodeId> aliasMap = new HashMap<>();
+			aliasMap.put(alias, targetNode);
+			aliasTable.put(forNode, aliasMap);
+		}
 	}
 
 	@Override

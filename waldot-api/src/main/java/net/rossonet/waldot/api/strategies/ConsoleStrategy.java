@@ -14,7 +14,8 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface ConsoleStrategy {
+public interface ConsoleStrategy extends AutoCloseable {
+	public static String ALIAS_LABEL = "alias";
 	public static String COMMANDS_LABEL = "cmd";
 	public static String G_LABEL = "g";
 	public static String LOG_LABEL = "log";

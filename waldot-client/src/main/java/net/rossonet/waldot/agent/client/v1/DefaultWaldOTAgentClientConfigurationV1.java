@@ -3,6 +3,7 @@ package net.rossonet.waldot.agent.client.v1;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
@@ -12,6 +13,8 @@ import net.rossonet.waldot.agent.client.api.WaldOTAgentClientConfiguration;
 public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClientConfiguration {
 	public static int _DEFAULT_TCP_BIND_PORT = 12686;
 	public static String DEFAULT_ENDPOINT = "opc.tcp://localhost:" + _DEFAULT_TCP_BIND_PORT + "/waldot";
+	public static String DEFAULT_KEYSTORE_PASSWORD = "_pa_ss_wo_rd_";
+	public static String DEFAULT_KEYSTORE_PATH = "/tmp/waldot-client.ks";
 	public static String DEFAULT_NEW_CERTIFICATE_APPLICATION_URI = "urn:rossonet:waldot:agent";
 	// public static String DEFAULT_NEW_CERTIFICATE_COMMON_NAME = "";
 	public static String DEFAULT_NEW_CERTIFICATE_COUNTRY = "IT";
@@ -26,7 +29,7 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	public static final long serialVersionUID = 977371251684189681L;
 
 	private int acknowledgeTimeout = 5000;
-	private String agentUniqueName = null;
+	private String agentUniqueName = UUID.randomUUID().toString();
 	private String applicationUri = DEFAULT_NEW_CERTIFICATE_APPLICATION_URI;
 	private String baseWaldOTOpcEndpoint = DEFAULT_ENDPOINT;
 	private int channelLifetime = 60000;
@@ -58,6 +61,10 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 
 	private int keepAliveTimeout = 5000;
 
+	private String keyStorePassword = DEFAULT_KEYSTORE_PASSWORD;
+
+	private String keyStorePath = DEFAULT_KEYSTORE_PATH;
+
 	private int maxChunkCount = 0;
 
 	private int maxChunkSize = 8196;
@@ -71,13 +78,11 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	private String password;
 
 	private int requestTimeout = 60000;
-
 	private SecurityPolicy securityPolicy = SecurityPolicy.None;
-
 	private int sessionTimeout = 120000;
+	private boolean testAnonymousConnection = false;
+
 	private String username;
-	private String keyStorePassword;
-	private String keyStorePath;
 
 	@Override
 	public int getAcknowledgeTimeout() {
@@ -257,6 +262,11 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	}
 
 	@Override
+	public boolean isTestAnonymousConnection() {
+		return testAnonymousConnection;
+	}
+
+	@Override
 	public void setAcknowledgeTimeout(final int acknowledgeTimeout) {
 		this.acknowledgeTimeout = acknowledgeTimeout;
 	}
@@ -412,6 +422,11 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	@Override
 	public void setSessionTimeout(final int sessionTimeout) {
 		this.sessionTimeout = sessionTimeout;
+	}
+
+	@Override
+	public void setTestAnonymousConnection(boolean active) {
+		this.testAnonymousConnection = active;
 	}
 
 	@Override

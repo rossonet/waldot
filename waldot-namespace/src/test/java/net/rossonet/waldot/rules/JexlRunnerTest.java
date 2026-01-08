@@ -5,19 +5,19 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import net.rossonet.waldot.api.rules.RuleExecutorHelper;
-import net.rossonet.waldot.jexl.JexlExecutorHelper;
+import net.rossonet.waldot.api.rules.RuleExecutor;
+import net.rossonet.waldot.jexl.JexlExecutor;
 
 public class JexlRunnerTest {
 
 	public String prova = "init string";
 
-	private RuleExecutorHelper createExecutor() {
+	private RuleExecutor createExecutor() {
 
 		final List<String> list = new ArrayList<String>();
 		list.add("one");
 		list.add("two");
-		final RuleExecutorHelper executor = new JexlExecutorHelper("test");
+		final RuleExecutor executor = new JexlExecutor("test");
 		executor.setContext("list", list);
 		executor.setFunctionObject("button", this);
 		executor.setFunctionObject("system", System.out);
@@ -31,19 +31,19 @@ public class JexlRunnerTest {
 	@Test
 	public void simpleQueryTest() {
 
-		final RuleExecutorHelper executor = createExecutor();
+		final RuleExecutor executor = createExecutor();
 		System.out.println((boolean) executor.execute("true"));
 		System.out.flush();
-		final RuleExecutorHelper executor3 = createExecutor();
+		final RuleExecutor executor3 = createExecutor();
 		System.out.println((boolean) executor3.execute("true"));
 		System.out.flush();
-		final RuleExecutorHelper executor4 = createExecutor();
+		final RuleExecutor executor4 = createExecutor();
 		System.out.println(executor4.execute("button"));
 		System.out.flush();
-		final RuleExecutorHelper executor1 = createExecutor();
+		final RuleExecutor executor1 = createExecutor();
 		System.out.println(executor1.execute("button.prova()"));
 		System.out.flush();
-		final RuleExecutorHelper executor2 = createExecutor();
+		final RuleExecutor executor2 = createExecutor();
 		executor2.execute("LoggerFactory.getLogger('test').error('ciao');");
 		System.out.flush();
 		// executor.execute("for (item : list) { system:println(item) }");

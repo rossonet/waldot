@@ -232,6 +232,12 @@ public class BaseClientManagementStrategy implements ClientManagementStrategy {
 
 	}
 
+	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
 	protected void deleteProvisioningToken(final String id) {
 		waldotNamespace.getStorageManager().removeNode(tokenSecrets.get(id).getNodeId());
 		tokenSecrets.remove(id);

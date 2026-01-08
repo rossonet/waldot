@@ -16,13 +16,13 @@ import net.rossonet.waldot.api.RuleListener;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.rules.Rule;
-import net.rossonet.waldot.api.rules.RuleExecutorHelper;
+import net.rossonet.waldot.api.rules.RuleExecutor;
 import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
-import net.rossonet.waldot.jexl.JexlExecutorHelper;
+import net.rossonet.waldot.jexl.JexlExecutor;
 
-public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
-	private final RuleExecutorHelper jexlEngine = new JexlExecutorHelper("rules-engine");
+public class DefaultRulesEngine implements WaldotRulesEngine {
+	private final RuleExecutor jexlEngine = new JexlExecutor("rules-engine");
 
 	private final List<RuleListener> listeners = new ArrayList<>();
 	private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -35,6 +35,8 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 		jexlEngine.setFunctionObject(ConsoleStrategy.G_LABEL, waldotNamespace.getGremlinGraph());
 		jexlEngine.setFunctionObject(ConsoleStrategy.LOG_LABEL, waldotNamespace.getRulesLogger());
 		jexlEngine.setFunctionObject(ConsoleStrategy.COMMANDS_LABEL, waldotNamespace.getCommandsAsFunction());
+		jexlEngine.setFunctionObject(ConsoleStrategy.ALIAS_LABEL, waldotNamespace.getAliasResolverAsFunction());
+		// beavior trees
 		for (final PluginListener p : waldotNamespace.getPlugins()) {
 			for (final Entry<String, Object> f : p.getRuleFunctions().entrySet()) {
 				if (f.getKey() != null && f.getValue() != null) {
@@ -62,7 +64,6 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	@Override
 	public void close() throws Exception {
 		rulesThreadManager.stop();
-
 	}
 
 	@Override
@@ -71,7 +72,7 @@ public class DefaultRulesEngine implements WaldotRulesEngine, AutoCloseable {
 	}
 
 	@Override
-	public RuleExecutorHelper getJexlEngine() {
+	public RuleExecutor getJexlEngine() {
 		return jexlEngine;
 	}
 

@@ -59,8 +59,8 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	private int clientFaultCounter;
 
 	private final WaldOTAgentClientConfiguration configuration;
-	private final Thread controlThread = Thread.ofVirtual().start(() -> {
-		Thread.currentThread().setName("waldot-control");
+	private final Thread controlThread = Thread.ofVirtual().unstarted(() -> {
+		Thread.currentThread().setName("waldot-client");
 		Thread.currentThread().setPriority(CONTROL_THREAD_PRIORITY);
 		logger.info("Control thread started");
 		while (!_status.equals(Status.CLOSED)) {
@@ -401,6 +401,9 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	private KeyPair getKeyPairActualConnection() throws UnrecoverableKeyException, KeyStoreException,
 			NoSuchAlgorithmException, CertificateException, IOException {
+		if (configuration.isTestAnonymousConnection()) {
+			return certificateHelper.getKeyPair(SELFSIGNED_CERTIFICATE_ALIAS);
+		}
 		return certificateHelper.getKeyPair(SIGNED_CERTIFICATE_ALIAS);
 	}
 
@@ -515,7 +518,11 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		controlThread.start();
 		activeConnectionRequest = true;
 		nextConnectionAction();
+		if (configuration.isTestAnonymousConnection()) {
+			changeStatus(Status.STARTING);
+		}
 		return CompletableFuture.completedFuture(this);
+
 	}
 
 	@Override

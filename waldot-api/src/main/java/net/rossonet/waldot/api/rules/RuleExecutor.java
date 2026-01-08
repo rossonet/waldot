@@ -5,7 +5,7 @@ import org.apache.commons.jexl3.JexlContext;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 
 /**
- * The {@code RuleExecutorHelper} interface defines methods for evaluating
+ * The {@code RuleExecutor} interface defines methods for evaluating
  * rules, executing expressions, and managing contexts and function objects
  * within a {@link WaldotNamespace}. It serves as a core component of the rule
  * engine, enabling dynamic evaluation and execution of logic based on
@@ -26,7 +26,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
  * @see JexlContext
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface RuleExecutorHelper extends AutoCloseable {
+public interface RuleExecutor extends AutoCloseable {
 
 	public enum EvaluationType {
 		ATTRIBUTE, EVENT, PROPERTY

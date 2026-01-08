@@ -9,10 +9,10 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface BootstrapStrategy {
+public interface BootstrapStrategy extends AutoCloseable {
 
 	public enum AgentStatus {
-		INIT, BOOT, FAULT, READY
+		BOOT, FAULT, INIT, READY
 	}
 
 	AgentStatus getAgentStatus();

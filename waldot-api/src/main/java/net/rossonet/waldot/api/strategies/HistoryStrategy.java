@@ -13,7 +13,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadValueId;
 import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateDetails;
 import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateResult;
 
-public interface HistoryStrategy {
+public interface HistoryStrategy extends AutoCloseable {
 
 	List<HistoryReadResult> historyRead(HistoryReadContext context, HistoryReadDetails readDetails,
 			TimestampsToReturn timestamps, List<HistoryReadValueId> readValueIds);

@@ -197,6 +197,9 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 		hasPropertyReferenceType = generateReferenceTypeNode(MiloSingleServerBaseStrategy.HAS_WALDOT_RULE, "IsFiredBy",
 				"A rule fired by the events", Identifiers.HasComponent, false, false,
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
+		hasPropertyReferenceType = generateReferenceTypeNode(MiloSingleServerBaseStrategy.HAS_WALDOT_ALIAS,
+				"IsAliasFor", "A rule fired by the events", Identifiers.HasComponent, false, false,
+				miloSingleServerBaseV0Strategy.getWaldotNamespace());
 	}
 
 	static NodeId generateReferenceTypeNode(final String reference, final String inverse, final String description,

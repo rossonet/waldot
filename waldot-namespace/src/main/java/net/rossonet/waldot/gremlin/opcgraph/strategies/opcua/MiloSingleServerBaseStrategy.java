@@ -98,6 +98,11 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			description = sourceVertex.getDescription().getText() + " -- " + label + " -> "
 					+ targetVertex.getDescription().getText();
 			logger.debug(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
+		} else {
+			if (ALIAS_EDGE_PARAMETER.equals(label)) {
+				elaboratedLabel = HAS_WALDOT_ALIAS;
+				waldotNamespace.registerAlias(sourceVertex.getNodeId(), description, targetVertex.getNodeId());
+			}
 		}
 		// create the edge
 		// TODO parametrizzare tutto per la creazione dell'edge
@@ -223,6 +228,12 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			}
 			last = actual;
 		}
+	}
+
+	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -789,6 +800,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	public void removeEdge(final NodeId nodeId) {
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId).get();
 		// FIXME rimuovere dalla cartella giusta
+		// TODO deregister rule if edge is fire
+		// TODO deregister alias if edge is alias
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
 		// FIXME rimuovere tutti i nodi GremlinProperty collegati
@@ -799,6 +812,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	public void removeVertex(final NodeId nodeId) {
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId).get();
 		// FIXME rimuovere dalla cartella giusta
+		// TODO rimuovere registrazione regole se il vertice e' una regola
+		// TODO rimuovere beavior se il vertice e' un behavior tree
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		waldotNamespace.getRulesEngine().deregisterRule(node.getNodeId());
 		node.delete();

@@ -19,15 +19,15 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.rules.ClonableMapContext;
 import net.rossonet.waldot.api.rules.Rule;
-import net.rossonet.waldot.api.rules.RuleExecutorHelper;
+import net.rossonet.waldot.api.rules.RuleExecutor;
 import net.rossonet.waldot.api.rules.WaldotStepLogger;
 import net.rossonet.waldot.utils.LogHelper;
 
-public class JexlExecutorHelper implements RuleExecutorHelper {
+public class JexlExecutor implements RuleExecutor {
 
 	private static final boolean DEBUG_FLAG = true;
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger("JEXEL EXECUTOR");
+	protected static final Logger LOGGER = LoggerFactory.getLogger("JEXEL");
 
 	protected static JexlEngine generateEngine() {
 		// XXX: provare la restrizione dei permessi o la sandbox
@@ -53,7 +53,7 @@ public class JexlExecutorHelper implements RuleExecutorHelper {
 	private JexlEngine jexl = generateEngine();
 	private final String name;
 
-	public JexlExecutorHelper(String name) {
+	public JexlExecutor(String name) {
 		this.name = name;
 	}
 

@@ -14,6 +14,12 @@ public class DefaultBehaviorTreeEngine implements WaldotBehaviorTreesEngine {
 //TODO: completare la runtime BehaviorTrees
 
 	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public Task createRootTask(final String subtree) {
 		// TODO Auto-generated method stub
 		return null;

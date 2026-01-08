@@ -23,6 +23,12 @@ import net.rossonet.waldot.api.strategies.HistoryStrategy;
 public class BaseHistoryStrategy implements HistoryStrategy {
 
 	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public List<HistoryReadResult> historyRead(HistoryReadContext context, HistoryReadDetails readDetails,
 			TimestampsToReturn timestamps, List<HistoryReadValueId> readValueIds) {
 
