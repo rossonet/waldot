@@ -24,7 +24,7 @@ public class BaseConsoleStrategy implements ConsoleStrategy {
 
 	@Override
 	public void close() throws Exception {
-		// TODO Auto-generated method stub
+		// nothing to do
 
 	}
 

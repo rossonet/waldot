@@ -31,7 +31,7 @@ public class WaldotBaseNamespaceTest {
 	public void runKitchenSink() throws Exception {
 		final WaldotGraph d = OpcFactory.createKitchenSink();
 		Thread.sleep(4_000);
-		d.getWaldotNamespace().getOpcuaServer().close();
+		d.getWaldotNamespace().close();
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class WaldotBaseNamespaceTest {
 			Thread.sleep(4);
 		}
 		Thread.sleep(4_000);
-		g.getWaldotNamespace().getOpcuaServer().close();
+		g.getWaldotNamespace().close();
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class WaldotBaseNamespaceTest {
 		final WaldotGraph d = OpcFactory.createModern();
 		Thread.sleep(4_000);
 		System.out.println("closing server...");
-		d.getWaldotNamespace().getOpcuaServer().close();
+		d.getWaldotNamespace().close();
 	}
 
 	@Test
@@ -68,14 +68,14 @@ public class WaldotBaseNamespaceTest {
 		g.addVertex("label", "PrimoVertice", "id", "ciao", "custom-data", "variable1", "number-test", 10);
 		g.addVertex("label", "SecondoVertice", "id", 111, "custom-data", "variable1", "number-test", 10);
 		Thread.sleep(4_000);
-		g.getWaldotNamespace().getOpcuaServer().close();
+		g.getWaldotNamespace().close();
 	}
 
 	@Test
 	public void runServerTwoMinutes() throws Exception {
 		final WaldotGraph d = OpcFactory.getOpcGraph();
 		Thread.sleep(120_000);
-		d.getWaldotNamespace().getOpcuaServer().close();
+		d.getWaldotNamespace().close();
 	}
 
 	@Test
@@ -132,14 +132,14 @@ public class WaldotBaseNamespaceTest {
 			System.out.println(
 					"b1" + i + " - " + g.traversal().V().hasLabel("PrimoVertice").next().property("number-test", i));
 		}
-		g.getWaldotNamespace().getOpcuaServer().close();
+		g.getWaldotNamespace().close();
 	}
 
 	@Test
 	public void runTheCrew() throws Exception {
 		final WaldotGraph d = OpcFactory.createTheCrew();
 		Thread.sleep(4_000);
-		d.getWaldotNamespace().getOpcuaServer().close();
+		d.getWaldotNamespace().close();
 	}
 
 }

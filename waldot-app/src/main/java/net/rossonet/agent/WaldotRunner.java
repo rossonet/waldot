@@ -38,7 +38,7 @@ import picocli.CommandLine.Spec;
 public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger("WaldOT runner");
 
-	// TODO: completare con annotazioni Picocli
+	// FIXME: completare con annotazioni Picocli
 	public static void main(final String[] args) {
 		final WaldotRunner waldotRunner = new WaldotRunner();
 		try {

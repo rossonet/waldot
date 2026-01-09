@@ -120,7 +120,7 @@ public class AgentRpcTests {
 	public void setupEach() throws InterruptedException, ExecutionException, WaldotZenohException {
 		java.lang.System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "INFO");
 		WaldotZenohClientImpl.debugEnabled = false;
-		g = OpcFactory.getOpcGraph(new ZenohHistoryStrategy());
+		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new ZenohHistoryStrategy());
 		client1 = new Acme("acme1");
 		client2 = new Acme("acme2");
 		client1.startAgent();

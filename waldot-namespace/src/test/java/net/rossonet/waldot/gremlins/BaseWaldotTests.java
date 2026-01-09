@@ -112,12 +112,13 @@ public class BaseWaldotTests {
 
 	@Test
 	public void runRemoteConfigurationExpression() throws Exception {
-		simpleServerInit();
+		bootstrapUrlServerInit(
+				"https://raw.githubusercontent.com/rossonet/waldot/refs/heads/master/waldot-namespace/src/test/resources/remote_conf.txt");
 		assert g.getWaldotNamespace().getVerticesCount() == 1;
-		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
-		assert waldotTestClientHandler.checkVertexExists("test-id");
-		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("test-id", "value", 12);
-		assert waldotTestClientHandler.checkVertexValueEquals("test-id", "value", 12);
+		assert waldotTestClientHandler.checkOpcUaVertexExists("test-remote");
+		assert waldotTestClientHandler.checkVertexExists("test-remote");
+		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("test-remote", "value", 55);
+		assert waldotTestClientHandler.checkVertexValueEquals("test-remote", "value", 55);
 	}
 
 	@Test
