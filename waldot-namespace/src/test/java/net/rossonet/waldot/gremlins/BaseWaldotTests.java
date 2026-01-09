@@ -21,7 +21,7 @@ import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.NetworkHelper;
 
 @TestMethodOrder(OrderAnnotation.class)
-public class BaseQueryTests {
+public class BaseWaldotTests {
 	private WaldotGraph g;
 	private final NamespaceListener listener = new TestNamespaceListener();
 	private WaldotTestClientHandler waldotTestClientHandler;
@@ -87,6 +87,17 @@ public class BaseQueryTests {
 		assert waldotTestClientHandler.checkVertexExists("test-id");
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("test-id", "value", 12);
 		assert waldotTestClientHandler.checkVertexValueEquals("test-id", "value", 12);
+	}
+
+	@Test
+	public void runGraphExpressionViaClient() throws Exception {
+		simpleServerInit();
+		waldotTestClientHandler.runExpression("g.addVertex('id', 'test-id', 'label', 'test-query', 'value', 28)");
+		assert g.getWaldotNamespace().getVerticesCount() == 1;
+		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
+		assert waldotTestClientHandler.checkVertexExists("test-id");
+		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("test-id", "value", 28);
+		assert waldotTestClientHandler.checkVertexValueEquals("test-id", "value", 28);
 	}
 
 	@Test

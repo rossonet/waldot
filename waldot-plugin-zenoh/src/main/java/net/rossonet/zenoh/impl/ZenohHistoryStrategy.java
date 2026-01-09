@@ -23,6 +23,12 @@ public class ZenohHistoryStrategy implements HistoryStrategy {
 	private AgentLifeCycleManager lifeCycleManager;
 
 	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
 	public List<HistoryReadResult> historyRead(HistoryReadContext context, HistoryReadDetails readDetails,
 			TimestampsToReturn timestamps, List<HistoryReadValueId> readValueIds) {
 		// TODO utilizzare il bus zenoh per leggere la history

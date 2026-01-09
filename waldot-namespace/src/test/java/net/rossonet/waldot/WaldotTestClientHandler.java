@@ -115,6 +115,15 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	}
 
+	public List<String> runExpression(String expression) {
+		try {
+			return client.runExpression(expression);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public void writeOpcUaVertexValue(String nodeId, String valueLabel, Object newValue) {
 		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
 		final List<WriteValue> writeValues = new ArrayList<>();

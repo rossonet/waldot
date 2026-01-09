@@ -17,7 +17,7 @@ import oshi.hardware.HardwareAbstractionLayer;
 import oshi.software.os.OperatingSystem;
 
 @TestMethodOrder(OrderAnnotation.class)
-public class ObjectToCodeWithReflexionTest {
+public class ObjectToCodeWithReflexionStudio {
 
 	@Test
 	public void translateObjectToCode() throws IllegalArgumentException, IllegalAccessException,

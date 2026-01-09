@@ -9,7 +9,7 @@ import net.rossonet.waldot.agent.client.api.WaldotAgentClientObserver;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 
-public class RegistrationCycleTest {
+public class RegistrationClientTest {
 
 	@Test
 	public void runClientTwoMinutes() throws Exception {

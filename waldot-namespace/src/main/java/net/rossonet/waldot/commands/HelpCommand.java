@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class HelpCommand extends AbstractOpcCommand {
@@ -44,7 +45,7 @@ public class HelpCommand extends AbstractOpcCommand {
 
 	@Override
 	public String getDirectory() {
-		return "general";
+		return MiloStrategy.GENERAL_CMD_DIRECTORY;
 	}
 
 	@Override

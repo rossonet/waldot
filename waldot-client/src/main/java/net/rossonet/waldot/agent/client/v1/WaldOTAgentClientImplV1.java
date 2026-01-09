@@ -10,6 +10,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -25,10 +26,13 @@ import org.eclipse.milo.opcua.sdk.client.identity.AnonymousProvider;
 import org.eclipse.milo.opcua.sdk.client.identity.IdentityProvider;
 import org.eclipse.milo.opcua.sdk.client.identity.UsernameProvider;
 import org.eclipse.milo.opcua.sdk.client.identity.X509IdentityProvider;
+import org.eclipse.milo.opcua.sdk.client.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.security.CertificateValidator;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.UserTokenType;
@@ -41,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.agent.client.api.WaldOTAgentClient;
 import net.rossonet.waldot.agent.client.api.WaldOTAgentClientConfiguration;
 import net.rossonet.waldot.agent.client.api.WaldotAgentClientObserver;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.client.exception.ProvisioningException;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.SslHelper.KeyStoreHelper;
@@ -506,6 +511,17 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	private void refreshCertificateIfNeeded() {
 		// TODO rigenerare il certificato se necessario
+	}
+
+	public List<String> runExpression(String expression) throws UaException {
+		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace()
+				.getObjectNode(new NodeId(2, MiloStrategy.GENERAL_CMD_DIRECTORY));
+		final Variant[] outputs = cmdNode.callMethod("query", new Variant[] { new Variant(expression) });
+		final List<String> out = new ArrayList<>();
+		for (final Variant output : outputs) {
+			out.add((String) output.getValue());
+		}
+		return out;
 	}
 
 	@Override

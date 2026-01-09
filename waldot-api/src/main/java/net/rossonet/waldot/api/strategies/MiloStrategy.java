@@ -52,6 +52,7 @@ public interface MiloStrategy extends AutoCloseable {
 	public static final int DEFAULT_REFACTORY_PERIOD_MS = 0;
 	public static final String DESCRIPTION_PARAMETER = "description";
 	public static final String DIRECTORY_PARAMETER = "directory";
+	public static final String GENERAL_CMD_DIRECTORY = "general";
 	public static final String HAS_WALDOT_ALIAS = "HasAlias";
 	public static final String HAS_WALDOT_RULE = "HasRule";
 	public static final String ID_PARAMETER = "id";

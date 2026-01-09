@@ -1,4 +1,4 @@
-package net.rossonet.waldot.rules;
+package net.rossonet.waldot;
 
 import java.util.ArrayList;
 import java.util.List;
