@@ -32,6 +32,8 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.api.configuration.OpcConfiguration;
+import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
@@ -257,7 +259,7 @@ public final class OpcFactory {
 	}
 
 	public static WaldotGraph getOpcGraph() throws InterruptedException, ExecutionException {
-		return getOpcGraph(new BaseHistoryStrategy());
+		return getOpcGraph("file:///tmp/boot.conf", new BaseHistoryStrategy());
 	};
 
 	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {
@@ -265,10 +267,10 @@ public final class OpcFactory {
 		return getOpcGraph();
 	}
 
-	public static WaldotGraph getOpcGraph(HistoryStrategy historyStrategy)
+	public static WaldotGraph getOpcGraph(String bootStrapUrl, HistoryStrategy historyStrategy)
 			throws InterruptedException, ExecutionException {
-		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
-		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
+		final WaldotConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final OpcConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		final WaldotOpcUaServer waldot = new WaldotOpcUaServer(configuration, serverConfiguration,
 				new DefaultAnonymousValidator(configuration), new DefaultIdentityValidator(configuration),
 				new DefaultX509IdentityValidator(configuration));
@@ -286,7 +288,7 @@ public final class OpcFactory {
 		});
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),
 				historyStrategy, new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
-				new BaseClientManagementStrategy(), "file:///tmp/boot.conf");
+				new BaseClientManagementStrategy(), bootStrapUrl);
 		waldot.startup(namespace).get();
 		logger.info("Waldot OPC-UA Server started");
 		return waldot.getGremlinGraph();

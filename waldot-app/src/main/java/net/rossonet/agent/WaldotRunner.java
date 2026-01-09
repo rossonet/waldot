@@ -7,6 +7,8 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.api.configuration.OpcConfiguration;
+import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
 import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
@@ -419,10 +421,10 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	}
 
 	public void runWaldot() throws InterruptedException, ExecutionException {
-		Thread.currentThread().setName("WaldOT Agent");
+		Thread.currentThread().setName("WaldOT_main");
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
-		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
+		final WaldotConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final OpcConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		waldot = new WaldotOpcUaServer(configuration, serverConfiguration, new DefaultAnonymousValidator(configuration),
 				new DefaultIdentityValidator(configuration), new DefaultX509IdentityValidator(configuration));
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),

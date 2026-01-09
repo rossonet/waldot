@@ -12,7 +12,7 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	private static final long serialVersionUID = 4132363257864835403L;
 
-	public static DefaultHomunculusConfiguration getDefault() {
+	public static WaldotConfiguration getDefault() {
 		return new DefaultHomunculusConfiguration();
 	}
 

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import net.rossonet.waldot.WaldotTestClientHandler;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.NetworkHelper;
@@ -65,6 +66,15 @@ public class BaseWaldotTests {
 
 	}
 
+	private void bootstrapUrlServerInit(String url)
+			throws ConfigurationException, InterruptedException, ExecutionException {
+		LogHelper.changeJulLogLevel("fine");
+		g = OpcFactory.getOpcGraph(url, new BaseHistoryStrategy());
+		g.getWaldotNamespace().addListener(listener);
+		Thread.sleep(500);
+		waldotTestClientHandler = new WaldotTestClientHandler(g);
+	}
+
 	@Test
 	public void runAboutCommandExpression() throws Exception {
 		simpleServerInit();
@@ -101,6 +111,16 @@ public class BaseWaldotTests {
 	}
 
 	@Test
+	public void runRemoteConfigurationExpression() throws Exception {
+		simpleServerInit();
+		assert g.getWaldotNamespace().getVerticesCount() == 1;
+		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
+		assert waldotTestClientHandler.checkVertexExists("test-id");
+		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("test-id", "value", 12);
+		assert waldotTestClientHandler.checkVertexValueEquals("test-id", "value", 12);
+	}
+
+	@Test
 	public void runSimpleConfigurationExpression() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("g.addVertex(\"id\", \"test-id\", \"label\", \"test-query\", \"value\", 12);\n");
@@ -126,11 +146,7 @@ public class BaseWaldotTests {
 	}
 
 	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {
-		LogHelper.changeJulLogLevel("fine");
-		g = OpcFactory.getOpcGraph();
-		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
-		waldotTestClientHandler = new WaldotTestClientHandler(g);
+		bootstrapUrlServerInit("file:///tmp/boot.conf");
 	}
 
 	@Test

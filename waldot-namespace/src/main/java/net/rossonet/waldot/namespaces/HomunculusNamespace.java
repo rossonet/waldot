@@ -67,7 +67,6 @@ import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
-import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.jexl.AliasResolver;
@@ -117,7 +116,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	public HomunculusNamespace(final WaldotOpcUaServer server, final MiloStrategy opcMappingStrategy,
 			HistoryStrategy historyStrategy, final ConsoleStrategy consoleStrategy,
-			final DefaultHomunculusConfiguration configuration, final BootstrapStrategy bootstrapProcedureStrategy,
+			final WaldotConfiguration configuration, final BootstrapStrategy bootstrapProcedureStrategy,
 			final ClientManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.waldotOpcUaServer = server;

@@ -23,8 +23,7 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 
 	@Override
 	public void close() throws Exception {
-		// TODO Auto-generated method stub
-
+		// nothing to close
 	}
 
 	@Override

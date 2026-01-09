@@ -1,0 +1,1 @@
+g.addVertex('id', 'test-remote', 'label', 'test-query', 'value', 55)
