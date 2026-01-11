@@ -1,0 +1,178 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
+        classpath("org.jreleaser:org.jreleaser.gradle.plugin:1.21.0")
+    }
+}
+
+description = "WaldOT plugin for Reinforcement learning algorithms rappresentantion in OPCUA"
+group = 'net.rossonet.waldot'
+version = "${rootProject.version}"
+
+ext {
+    sourceCompatibility = 21
+    targetCompatibility = 21
+}
+
+repositories {
+    mavenCentral()
+    maven {
+       url "https://repo.craftyn.com/repository/snapshots/" 
+    }
+    maven { url 'https://jitpack.io' }
+}
+
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'eclipse'
+apply plugin: "com.gorylenko.gradle-git-properties"
+apply plugin: 'jacoco'
+apply plugin: 'distribution'
+apply plugin: 'signing'
+apply plugin: 'maven-publish'
+apply plugin: 'org.jreleaser'
+
+dependencies {
+    implementation project(':waldot-deps')
+    api project(':waldot-api')
+    implementation("org.deeplearning4j:rl4j:1.0.0-M1.1")
+    testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
+    testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
+    testImplementation(platform('org.junit:junit-bom:5.13.1'))
+	testImplementation('org.junit.jupiter:junit-jupiter')
+	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+}
+
+task eclipseClosedDependencies {}
+
+task eclipseClosedDependencies_ {}
+
+compileJava {
+    options.encoding = "UTF-8"
+    options.compilerArgs.addAll(['-XprintProcessorInfo'])
+}
+
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+task view { doLast { println "Working on project ${project.name} [ ${project.description} ]" } }
+
+jar {
+    enabled = true
+}
+
+jar.doLast { task ->
+	ant.checksum file: task.archivePath
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+gitProperties {
+    failOnNoGitDirectory = false
+    dotGitDirectory = project.rootProject.layout.projectDirectory.dir(".git")
+    dateFormat = "yyyy-MM-dd HH:mm:ssZ"
+    dateFormatTimeZone = 'GMT'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+javadoc{
+    destinationDir = file("${project.buildDir}/docs/javadoc/${project.name}/")
+    failOnError=false
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication){
+      artifactId = "${project.name}"
+      from components.java
+      versionMapping {
+        usage('java-api') {
+          fromResolutionOf('runtimeClasspath')
+        }
+        usage('java-runtime') {
+          fromResolutionResult()
+        }
+      }
+      pom {
+        name = "${project.name}"
+        description = "${project.description}"
+        url = 'https://www.rossonet.net/'
+        licenses {
+          license {
+            name = 'Apache-2.0 license'
+            url = 'https://www.apache.org/licenses/LICENSE-2.0'
+          }
+        }
+        developers {
+          developer {
+            id = 'ar4k'
+            name = 'Andrea Ambrosini'
+            email = 'andrea.ambrosini@rossonet.com'
+          }
+        }
+        scm {
+          connection = 'scm:git:git://github.com/rossonet/waldot.git'
+          developerConnection = 'scm:git:ssh://github.com:rossonet/waldot.git'
+          url = 'https://github.com/rossonet/waldot/tree/master'
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      name = 'staging'
+      url  = layout.buildDirectory.dir('staging-deploy')
+    }
+  }
+}
+
+jreleaser {
+  signing {
+    active = 'ALWAYS'
+    armored = true
+    secretKey = System.getenv('GPG_PRIVATE')
+    publicKey = System.getenv('GPG_PUBLIC')
+  }
+  deploy {
+    maven {
+      mavenCentral {
+        sonatype {
+          active = 'ALWAYS'
+          url = 'https://central.sonatype.com/api/v1/publisher'
+          stagingRepository(
+              layout.buildDirectory
+                     .dir('staging-deploy')
+                     .get()
+                     .asFile
+                     .absolutePath
+          )
+          username = System.getenv('OSSRH_USERNAME')
+          password = System.getenv('OSSRH_PASSWORD') 
+        }
+      }
+    }
+  }
+}
+
+tasks.named('publish').configure { dependsOn 'jreleaserDeploy' }
+tasks.named('jreleaserDeploy').configure { dependsOn 'publishAllPublicationsToStagingRepository' }
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}

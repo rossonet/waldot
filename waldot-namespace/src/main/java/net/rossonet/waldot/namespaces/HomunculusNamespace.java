@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
-import net.rossonet.waldot.api.btree.WaldotBehaviorTreesEngine;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.models.IdManager;
 import net.rossonet.waldot.api.models.WaldotCommand;
@@ -60,7 +59,6 @@ import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
-import net.rossonet.waldot.btree.DefaultBehaviorTreeEngine;
 import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
@@ -86,7 +84,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private ClientRegisterX509IdentityValidator agentX509IdentityValidator;
 	private final AliasResolver aliasResolver;
 	private final Map<NodeId, Map<String, NodeId>> aliasTable = new ConcurrentHashMap<>();
-	private final WaldotBehaviorTreesEngine behaviorTrees;
 	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
 	private final BootstrapStrategy bootstrapProcedureStrategy;
 	private final String bootstrapUrl;
@@ -145,7 +142,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		listeners.forEach(listener -> listener.onNamespaceCreated(this));
 		bootstrapProcedureStrategy.initialize(this);
 		rulesEngine = new DefaultRulesEngine(this);
-		behaviorTrees = new DefaultBehaviorTreeEngine(this);
 	}
 
 	@Override
@@ -199,8 +195,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 		rulesEngine.close();
 		logger.info("rules engine closed");
-		behaviorTrees.close();
-		logger.info("behavior trees engine closed");
 		waldotOpcUaServer.close();
 		logger.info("opcua server closed");
 	}
@@ -260,10 +254,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	public Map<NodeId, Map<String, NodeId>> getAliasTable() {
 		return aliasTable;
-	}
-
-	public WaldotBehaviorTreesEngine getBehaviorTrees() {
-		return behaviorTrees;
 	}
 
 	@Override

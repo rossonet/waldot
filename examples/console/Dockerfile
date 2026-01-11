@@ -17,6 +17,10 @@ RUN apt-get update \
     && curl -sSL https://pkgs.netbird.io/debian/public.key | gpg --dearmor --output /usr/share/keyrings/netbird-archive-keyring.gpg \
     && echo 'deb [signed-by=/usr/share/keyrings/netbird-archive-keyring.gpg] https://pkgs.netbird.io/debian stable main' | tee /etc/apt/sources.list.d/netbird.list \
     && apt-get update && apt-get install netbird -y
+RUN mkdir -p /etc/apt/keyrings && cd /etc/apt/keyrings && wget -q https://cyberbotics.com/Cyberbotics.asc
+RUN echo 'deb [arch=amd64 signed-by=/etc/apt/keyrings/Cyberbotics.asc] https://cyberbotics.com/debian binary-amd64/' | tee /etc/apt/sources.list.d/cyberbotics.list \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt install webots -y
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-client nmap tcpdump wireshark iproute2 iputils-arping iputils-ping traceroute firefox apt-utils libcanberra-gtk3-module curl wget git vim openjdk-21-jdk filezilla putty evince thunar-archive-plugin netcat-traditional \
     iperf iperf3 corkscrew ostinato iptables
