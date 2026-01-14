@@ -4,8 +4,8 @@ import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 
-import net.rossonet.waldot.api.rules.CachedRuleRecord;
-import net.rossonet.waldot.api.rules.WaldotStepLogger;
+import net.rossonet.waldot.jexl.CachedRuleRecord;
+import net.rossonet.waldot.jexl.WaldotStepLogger;
 
 /**
  * RuleListener interface for handling events related to rule evaluation and

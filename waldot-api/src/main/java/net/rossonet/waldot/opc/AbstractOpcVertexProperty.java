@@ -151,6 +151,12 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	}
 
 	@Override
+	public void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
+		throw new UnsupportedOperationException("Not implemented yet");
+
+	}
+
+	@Override
 	public void remove() {
 		getVertexPropertyReference().removeComponent(this);
 	}

@@ -2,6 +2,7 @@ package net.rossonet.waldot.api.strategies;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -36,31 +37,54 @@ import net.rossonet.waldot.api.models.WaldotVertexProperty;
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public interface MiloStrategy extends AutoCloseable {
-
-	public static final String ACTION_FIELD = "Action";
-	public static final String ALIAS_EDGE_PARAMETER = "alias";
 	public static final Predicate<Reference> COMPONENT_OF_PREDICATE = (reference) -> reference.isInverse()
 			&& Identifiers.HasComponent.equals(reference.getReferenceTypeId());
-	public static final String CONDITION_FIELD = "Condition";
-	public static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
-	public static final boolean DEFAULT_CLEAR_FACTS_AFTER_EXECUTION = false;
-	public static final String DEFAULT_CONDITION_VALUE = "true";
-	public static final int DEFAULT_DELAY_BEFORE_EVALUATION = 0;
-	public static final int DEFAULT_DELAY_BEFORE_EXECUTE = 0;
-	public static final boolean DEFAULT_PARALLEL_EXECUTION = false;
-	public static final int DEFAULT_PRIORITY_VALUE = 100;
-	public static final int DEFAULT_REFACTORY_PERIOD_MS = 0;
+	public static final String DEFAULT_EDGE_TYPE = "edge";
+	public static final String DEFAULT_VERTEX_LABEL = "vertex";
 	public static final String DESCRIPTION_PARAMETER = "description";
 	public static final String DIRECTORY_PARAMETER = "directory";
+	public static final String DIRECTORY_SPLIT_SIMBOL = "/";
+
+	public static final String EVENT_NOTIFIER_PARAMETER = "event-notifier";
 	public static final String GENERAL_CMD_DIRECTORY = "general";
-	public static final String HAS_WALDOT_ALIAS = "HasAlias";
-	public static final String HAS_WALDOT_RULE = "HasRule";
 	public static final String ID_PARAMETER = "id";
+
+	public static final String IS_FORWARD = "IsForward";
 	public static final String LABEL_FIELD = "Label";
-	public static final String OBSERVER_EDGE_PARAMETER = "fire";
-	public static final String PRIORITY_FIELD = "Priority";
-	public static final String RULE_NODE_PARAMETER = "rule";
-	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
+	public static final String PROPERTY_SPLIT_SIMBOL_IN_NODEID = "/";
+	public static final String REFERENCE_TYPE = "ReferenceType";
+	public static final String SOURCE_NODE = "SourceNode";
+	public static final String TARGET_NODE = "TargetNode";
+	public static final String TYPE_FIELD = "Type";
+	public static final String USER_WRITE_MASK_PARAMETER = "user-write-mask";
+	public static final String VERSION_PARAMETER = "version";
+	public static final String WRITE_MASK_PARAMETER = "write-mask";
+
+	public static Optional<Object> getIdValue(final Object... keyValues) {
+		for (int i = 0; i < keyValues.length; i = i + 2) {
+			if (keyValues[i] == null) {
+				continue;
+			}
+			final String name = keyValues[i].toString();
+			if (name != null && !name.isEmpty() && name.equals(MiloStrategy.ID_PARAMETER)) {
+				return Optional.ofNullable(keyValues[i + 1]);
+			}
+		}
+		return Optional.empty();
+	}
+
+	public static String getKeyValuesProperty(final Object[] propertyKeyValues, final String label) {
+		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
+			if (propertyKeyValues[i] == null) {
+				continue;
+			}
+			final String name = propertyKeyValues[i].toString();
+			if (name != null && !name.isEmpty() && label.equals(name)) {
+				return propertyKeyValues[i + 1].toString();
+			}
+		}
+		return null;
+	}
 
 	static IdManager<NodeId> getNodeIdManager() {
 		return new IdManager<NodeId>() {
@@ -169,6 +193,8 @@ public interface MiloStrategy extends AutoCloseable {
 	Map<NodeId, WaldotVertex> getVertices();
 
 	Map<NodeId, WaldotVertex> getVertices(WaldotVertex opcVertex, Direction direction, String[] edgeLabels);
+
+	WaldotNamespace getWaldotNamespace();
 
 	WaldotNamespace initialize(WaldotNamespace waldotNamespace);
 

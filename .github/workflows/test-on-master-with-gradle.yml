@@ -40,6 +40,18 @@ jobs:
         distribution: temurin
     - name: Test with Gradle
       run: ./gradlew waldot-client:test -Dorg.gradle.daemon=false --info
+  test_app:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: temurin
+    - name: Test with Gradle
+      run: ./gradlew waldot-app:test -Dorg.gradle.daemon=false --info
   test_plugin-os:
     runs-on: ubuntu-latest
     steps:
@@ -76,3 +88,39 @@ jobs:
           distribution: temurin
       - name: Test with Gradle
         run: ./gradlew waldot-plugin-zenoh:test -Dorg.gradle.daemon=false --info
+  test_plugin-reinforcement-learning:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Test with Gradle
+        run: ./gradlew waldot-plugin-reinforcement-learning:test -Dorg.gradle.daemon=false --info
+  test_plugin-behavior-tree:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Test with Gradle
+        run: ./gradlew waldot-plugin-behavior-tree:test -Dorg.gradle.daemon=false --info
+  test_plugin-rules-engine:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Test with Gradle
+        run: ./gradlew waldot-plugin-rules-engine:test -Dorg.gradle.daemon=false --info

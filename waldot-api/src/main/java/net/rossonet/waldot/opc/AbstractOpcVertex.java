@@ -247,10 +247,8 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public void propertyChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
-		propertyChanged(node, attributeId, value);
+		super.propertyChanged(node, attributeId, value);
 	}
-
-	protected abstract void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value);
 
 	@Override
 	public void remove() {
@@ -283,7 +281,7 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 					: IteratorUtils.map(this.edges(direction, edgeLabels),
 							edge -> edge.vertices(direction.opposite()).next());
 		}
-		return (Iterator) getNamespace().getVertices(this, direction, edgeLabels);
+		return (Iterator) getNamespace().getVertices(this, direction, edgeLabels).values().iterator();
 	}
 
 }

@@ -52,6 +52,7 @@ dependencies {
     implementation project(':waldot-deps')
     implementation project(':waldot-namespace')
     implementation project(':waldot-plugin-generator')
+    implementation project(':waldot-plugin-rules-engine')
 //    implementation project(':waldot-plugin-os')
 //    implementation project(':waldot-plugin-tinkerpop')
 //    implementation project(':waldot-plugin-zenoh')

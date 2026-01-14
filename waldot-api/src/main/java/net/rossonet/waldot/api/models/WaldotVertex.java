@@ -22,7 +22,7 @@ import net.rossonet.waldot.api.PropertyObserver;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType, AttributeObserver, PropertyObserver {
+public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType, AttributeObserver {
 
 	void addAttributeObserver(AttributeObserver observer);
 

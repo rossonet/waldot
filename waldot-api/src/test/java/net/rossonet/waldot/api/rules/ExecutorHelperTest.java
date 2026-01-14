@@ -13,14 +13,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.jexl.Rule;
+import net.rossonet.waldot.jexl.RuleExecutor;
+import net.rossonet.waldot.jexl.WaldotStepLogger;
 
 class ExecutorHelperTest {
 
 	private RuleExecutor mockExecutorHelper;
+	private JexlContext mockJexlContext;
 	private WaldotNamespace mockNamespace;
 	private Rule mockRule;
 	private WaldotStepLogger mockStepLogger;
-	private JexlContext mockJexlContext;
 
 	@BeforeEach
 	void setUp() {
@@ -35,7 +38,7 @@ class ExecutorHelperTest {
 	void testEvaluateRule() {
 		when(mockExecutorHelper.evaluateRule(mockNamespace, mockRule, mockStepLogger)).thenReturn(true);
 
-		boolean result = mockExecutorHelper.evaluateRule(mockNamespace, mockRule, mockStepLogger);
+		final boolean result = mockExecutorHelper.evaluateRule(mockNamespace, mockRule, mockStepLogger);
 
 		assertTrue(result);
 		verify(mockExecutorHelper, times(1)).evaluateRule(mockNamespace, mockRule, mockStepLogger);
@@ -43,10 +46,10 @@ class ExecutorHelperTest {
 
 	@Test
 	void testExecuteExpression() {
-		String expression = "2 + 2";
+		final String expression = "2 + 2";
 		when(mockExecutorHelper.execute(expression)).thenReturn(4);
 
-		Object result = mockExecutorHelper.execute(expression);
+		final Object result = mockExecutorHelper.execute(expression);
 
 		assertEquals(4, result);
 		verify(mockExecutorHelper, times(1)).execute(expression);
@@ -54,10 +57,10 @@ class ExecutorHelperTest {
 
 	@Test
 	void testExecuteExpressionWithContext() {
-		String expression = "x + y";
+		final String expression = "x + y";
 		when(mockExecutorHelper.execute(expression, mockJexlContext)).thenReturn(5);
 
-		Object result = mockExecutorHelper.execute(expression, mockJexlContext);
+		final Object result = mockExecutorHelper.execute(expression, mockJexlContext);
 
 		assertEquals(5, result);
 		verify(mockExecutorHelper, times(1)).execute(expression, mockJexlContext);
@@ -67,7 +70,7 @@ class ExecutorHelperTest {
 	void testExecuteRule() {
 		when(mockExecutorHelper.executeRule(mockNamespace, mockRule, mockStepLogger)).thenReturn("Success");
 
-		Object result = mockExecutorHelper.executeRule(mockNamespace, mockRule, mockStepLogger);
+		final Object result = mockExecutorHelper.executeRule(mockNamespace, mockRule, mockStepLogger);
 
 		assertEquals("Success", result);
 		verify(mockExecutorHelper, times(1)).executeRule(mockNamespace, mockRule, mockStepLogger);
@@ -75,8 +78,8 @@ class ExecutorHelperTest {
 
 	@Test
 	void testSetContext() {
-		String id = "contextId";
-		Object context = new Object();
+		final String id = "contextId";
+		final Object context = new Object();
 		doNothing().when(mockExecutorHelper).setContext(id, context);
 
 		mockExecutorHelper.setContext(id, context);
@@ -86,8 +89,8 @@ class ExecutorHelperTest {
 
 	@Test
 	void testSetFunctionObject() {
-		String id = "functionId";
-		Object function = new Object();
+		final String id = "functionId";
+		final Object function = new Object();
 		doNothing().when(mockExecutorHelper).setFunctionObject(id, function);
 
 		mockExecutorHelper.setFunctionObject(id, function);

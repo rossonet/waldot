@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import javax.naming.ConfigurationException;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -29,6 +30,27 @@ public class BaseWaldotTests {
 
 	@AfterEach
 	public void afterEach() {
+		clean();
+		System.out.println("Test completed");
+
+	}
+
+	@BeforeEach
+	public void beforeEach() {
+		System.out.println("Starting test...");
+		clean();
+	}
+
+	private void bootstrapUrlServerInit(String url)
+			throws ConfigurationException, InterruptedException, ExecutionException {
+		LogHelper.changeJulLogLevel("fine");
+		g = OpcFactory.getOpcGraph(url, new BaseHistoryStrategy());
+		g.getWaldotNamespace().addListener(listener);
+		Thread.sleep(500);
+		waldotTestClientHandler = new WaldotTestClientHandler(g);
+	}
+
+	private void clean() {
 		try {
 			Files.deleteIfExists(Path.of("/tmp/boot.conf"));
 		} catch (final IOException e) {
@@ -41,12 +63,15 @@ public class BaseWaldotTests {
 				e.printStackTrace();
 			}
 		}
-		try {
-			g.getWaldotNamespace().close();
-			System.out.println("Graph namespace closed");
-			g = null;
-		} catch (final Exception e) {
-			e.printStackTrace();
+		if (g != null && g.getWaldotNamespace() != null) {
+			try {
+
+				g.getWaldotNamespace().close();
+				System.out.println("Graph namespace closed");
+				g = null;
+			} catch (final Exception e) {
+				e.printStackTrace();
+			}
 		}
 		try {
 			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
@@ -62,17 +87,6 @@ public class BaseWaldotTests {
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Test completed");
-
-	}
-
-	private void bootstrapUrlServerInit(String url)
-			throws ConfigurationException, InterruptedException, ExecutionException {
-		LogHelper.changeJulLogLevel("fine");
-		g = OpcFactory.getOpcGraph(url, new BaseHistoryStrategy());
-		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
-		waldotTestClientHandler = new WaldotTestClientHandler(g);
 	}
 
 	@Test

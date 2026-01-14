@@ -2,8 +2,6 @@ package net.rossonet.waldot;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.slf4j.Logger;
@@ -46,12 +44,12 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 	}
 
 	@Override
-	public boolean containsObjectDefinition(NodeId typeDefinitionNodeId) {
+	public boolean containsVertexType(String typeDefinitionLabel) {
 		return false;
 	}
 
 	@Override
-	public boolean containsObjectLabel(String typeDefinitionLabel) {
+	public boolean containsVertexTypeNode(NodeId typeDefinitionNodeId) {
 		return false;
 	}
 
@@ -64,20 +62,19 @@ public class WaldotOsPlugin implements AutoCloseable, PluginListener {
 		}
 	}
 
-	@Override
-	public NodeId getObjectLabel(String typeDefinitionLabel) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getRuleFunctions() {
-		final Map<String, Object> ruleFunctions = new HashMap<>();
-		ruleFunctions.put("sys", sysCommandExecutor);
-		return ruleFunctions;
-	}
-
+	// TODO: valutare se serve ed eventualmente passare come comando
+	/*
+	 * @Override public Map<String, Object> getRuleFunctions() { final Map<String,
+	 * Object> ruleFunctions = new HashMap<>(); ruleFunctions.put("sys",
+	 * sysCommandExecutor); return ruleFunctions; }
+	 */
 	public long getUpdateDelay() {
 		return updateDelay;
+	}
+
+	@Override
+	public NodeId getVertexTypeNode(String typeDefinitionLabel) {
+		return null;
 	}
 
 	@Override

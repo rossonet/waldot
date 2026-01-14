@@ -39,7 +39,7 @@ apply plugin: 'org.jreleaser'
 dependencies {
     api project(':waldot-api')
     // OPCUA CLIENT
-    api group: 'org.eclipse.milo', name: 'milo-sdk-client', version: '1.0.8'
+    api group: 'org.eclipse.milo', name: 'milo-sdk-client', version: '1.1.0'
     // libreria ICE
     api("org.jitsi:ice4j:3.2-9-gb64c86f")
     // per gestione domini via DNS

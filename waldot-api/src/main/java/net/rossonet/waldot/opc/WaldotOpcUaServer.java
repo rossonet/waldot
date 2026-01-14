@@ -441,6 +441,11 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
+	public void updateReferenceTypeTree() {
+		server.updateReferenceTypeTree();
+
+	}
+
 	public void waitCompletion() throws InterruptedException, ExecutionException {
 		final CompletableFuture<Void> future = new CompletableFuture<>();
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> future.complete(null)));

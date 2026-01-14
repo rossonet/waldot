@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
-import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
@@ -74,8 +73,6 @@ public interface WaldotNamespace extends AutoCloseable {
 	NodeId generateNodeId(UUID nodeId);
 
 	QualifiedName generateQualifiedName(String label);
-
-	Object getAliasResolverAsFunction();
 
 	Logger getBootLogger();
 
@@ -135,10 +132,6 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	public ReferenceTypeTree getReferenceTypes();
 
-	WaldotRulesEngine getRulesEngine();
-
-	Logger getRulesLogger();
-
 	UaNodeManager getStorageManager();
 
 	Graph.Variables getVariables();
@@ -176,8 +169,6 @@ public interface WaldotNamespace extends AutoCloseable {
 	void registerAgentValidators(ClientRegisterAnonymousValidator agentAnonymousValidator,
 			ClientRegisterUsernameIdentityValidator agentIdentityValidator,
 			ClientRegisterX509IdentityValidator agentX509IdentityValidator);
-
-	void registerAlias(NodeId forNode, String alias, NodeId targetNode);
 
 	void registerCommand(WaldotCommand command);
 

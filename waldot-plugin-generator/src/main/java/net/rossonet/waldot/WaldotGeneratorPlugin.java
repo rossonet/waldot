@@ -2,8 +2,6 @@ package net.rossonet.waldot;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.lang3.EnumUtils;
@@ -69,15 +67,15 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 	}
 
 	@Override
-	public boolean containsObjectDefinition(NodeId typeDefinitionNodeId) {
-		return timerTypeNode.getNodeId().equals(typeDefinitionNodeId)
-				|| dataGeneratorTypeNode.getNodeId().equals(typeDefinitionNodeId);
+	public boolean containsVertexType(String typeDefinitionLabel) {
+		return TIMER_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel)
+				|| DATA_GENERATOR_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel);
 	}
 
 	@Override
-	public boolean containsObjectLabel(String typeDefinitionLabel) {
-		return TIMER_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel)
-				|| DATA_GENERATOR_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel);
+	public boolean containsVertexTypeNode(NodeId typeDefinitionNodeId) {
+		return timerTypeNode.getNodeId().equals(typeDefinitionNodeId)
+				|| dataGeneratorTypeNode.getNodeId().equals(typeDefinitionNodeId);
 	}
 
 	private WaldotVertex createDataGeneratorObject(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
@@ -224,10 +222,10 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 	}
 
 	@Override
-	public WaldotVertex createVertexObject(NodeId typeDefinitionNodeId, WaldotGraph graph, UaNodeContext context,
+	public WaldotVertex createVertex(NodeId typeDefinitionNodeId, WaldotGraph graph, UaNodeContext context,
 			NodeId nodeId, QualifiedName browseName, LocalizedText displayName, LocalizedText description,
 			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
-		if (!containsObjectDefinition(typeDefinitionNodeId)) {
+		if (!containsVertexTypeNode(typeDefinitionNodeId)) {
 			return null;
 		}
 		if (timerTypeNode.getNodeId().equals(typeDefinitionNodeId)) {
@@ -293,7 +291,7 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 	}
 
 	@Override
-	public NodeId getObjectLabel(String typeDefinitionLabel) {
+	public NodeId getVertexTypeNode(String typeDefinitionLabel) {
 		if (TIMER_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel)) {
 			return timerTypeNode.getNodeId();
 		} else if (DATA_GENERATOR_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel)) {
@@ -301,11 +299,6 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	public Map<String, Object> getRuleFunctions() {
-		return new HashMap<>();
 	}
 
 	@Override

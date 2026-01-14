@@ -107,7 +107,7 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 	}
 
 	@Override
-	protected void propertyUpdateValueEvent(final UaNode node, final AttributeId attributeId, final Object value) {
+	public void propertyUpdateValueEvent(final UaNode node, final AttributeId attributeId, final Object value) {
 		// FIXME aggiornare se necessario le label e i comportamenti legati alle
 		// property
 	}

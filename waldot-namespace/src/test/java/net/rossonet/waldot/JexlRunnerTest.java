@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import net.rossonet.waldot.api.rules.RuleExecutor;
 import net.rossonet.waldot.jexl.JexlExecutor;
+import net.rossonet.waldot.jexl.RuleExecutor;
 
 public class JexlRunnerTest {
 
@@ -29,7 +29,7 @@ public class JexlRunnerTest {
 	}
 
 	@Test
-	public void simpleQueryTest() {
+	public void simpleQueryTest() throws Exception {
 
 		final RuleExecutor executor = createExecutor();
 		System.out.println((boolean) executor.execute("true"));
@@ -48,6 +48,7 @@ public class JexlRunnerTest {
 		System.out.flush();
 		// executor.execute("for (item : list) { system:println(item) }");
 		System.out.flush();
+		executor.close();
 	}
 
 }

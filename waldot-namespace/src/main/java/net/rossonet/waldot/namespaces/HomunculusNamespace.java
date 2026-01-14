@@ -2,13 +2,11 @@ package net.rossonet.waldot.namespaces;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
@@ -26,8 +24,6 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.factories.EventFactory;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.NamespaceTable;
-import org.eclipse.milo.opcua.stack.core.types.DataTypeManager;
-import org.eclipse.milo.opcua.stack.core.types.DefaultDataTypeManager;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
@@ -53,7 +49,6 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
-import net.rossonet.waldot.api.rules.WaldotRulesEngine;
 import net.rossonet.waldot.api.strategies.BootstrapStrategy;
 import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
@@ -67,23 +62,18 @@ import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
-import net.rossonet.waldot.jexl.AliasResolver;
 import net.rossonet.waldot.jexl.JexlCmdFunction;
 import net.rossonet.waldot.logger.TraceLogger;
 import net.rossonet.waldot.logger.TraceLogger.ContexLogger;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
-import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
 	private ClientRegisterAnonymousValidator agentAnonymousValidator;
-
 	private ClientRegisterUsernameIdentityValidator agentIdentityValidator;
-
 	private ClientRegisterX509IdentityValidator agentX509IdentityValidator;
-	private final AliasResolver aliasResolver;
-	private final Map<NodeId, Map<String, NodeId>> aliasTable = new ConcurrentHashMap<>();
+
 	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
 	private final BootstrapStrategy bootstrapProcedureStrategy;
 	private final String bootstrapUrl;
@@ -92,7 +82,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
 
 	private final ConsoleStrategy consoleStrategy;
-	private final DataTypeManager dictionaryManager;
+	// private final DataTypeManager dictionaryManager;
 	private WaldotGraphComputerView graphComputerView;
 	private final WaldotGraph gremlin;
 	private final HistoryStrategy historyStrategy;
@@ -103,9 +93,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final Graph.Variables opcGraphVariables;
 	private final MiloStrategy opcMappingStrategy;
 	private final Set<PluginListener> plugins = new HashSet<>();
-	private final WaldotRulesEngine rulesEngine;
-
-	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
 
 	private final SubscriptionModel subscriptionModel;
 
@@ -121,14 +108,13 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		this.historyStrategy = historyStrategy;
 		this.consoleStrategy = consoleStrategy;
 		this.jexlWaldotCommandHelper = new JexlCmdFunction(this);
-		this.aliasResolver = new AliasResolver(this);
 		this.configuration = configuration;
 		this.bootstrapProcedureStrategy = bootstrapProcedureStrategy;
 		this.clientManagementStrategy = agentManagementStrategy;
 		this.bootstrapUrl = bootstrapUrl;
 		opcGraphVariables = new OpcGraphVariables(this);
 		subscriptionModel = new SubscriptionModel(server.getServer(), this);
-		dictionaryManager = new DefaultDataTypeManager();
+		// dictionaryManager = new DefaultDataTypeManager();
 		// getLifecycleManager().addLifecycle(dictionaryManager);
 		getLifecycleManager().addLifecycle(subscriptionModel);
 		getLifecycleManager().addStartupTask(this::runBootstrapProcedure);
@@ -138,10 +124,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		opcMappingStrategy.initialize(this);
 		consoleStrategy.initialize(this);
 		addBaseCommands();
-		logger.info("Namespace created");
+		logger.info("HomunculusNamespace initialized");
 		listeners.forEach(listener -> listener.onNamespaceCreated(this));
 		bootstrapProcedureStrategy.initialize(this);
-		rulesEngine = new DefaultRulesEngine(this);
 	}
 
 	@Override
@@ -192,9 +177,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		logger.info("opc mapping strategy closed");
 		historyStrategy.close();
 		logger.info("history strategy closed");
-
-		rulesEngine.close();
-		logger.info("rules engine closed");
 		waldotOpcUaServer.close();
 		logger.info("opcua server closed");
 	}
@@ -245,15 +227,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public QualifiedName generateQualifiedName(final String text) {
 		return newQualifiedName(text);
-	}
-
-	@Override
-	public AliasResolver getAliasResolverAsFunction() {
-		return aliasResolver;
-	}
-
-	public Map<NodeId, Map<String, NodeId>> getAliasTable() {
-		return aliasTable;
 	}
 
 	@Override
@@ -399,16 +372,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public WaldotRulesEngine getRulesEngine() {
-		return rulesEngine;
-	}
-
-	@Override
-	public Logger getRulesLogger() {
-		return rulesLogger;
-	}
-
-	@Override
 	public UaNodeManager getStorageManager() {
 		return getNodeManager();
 
@@ -533,11 +496,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		listeners.forEach(listener -> listener.onMonitoringModeChanged(monitoredItems));
 	}
 
-	// TODO distribuire gli eventi in tutto il codice
 	@Override
 	public void opcuaUpdateEvent(final UaNode sourceNode) {
 		opcMappingStrategy.updateEventGenerator(sourceNode, "update", "update",
 				"node " + sourceNode.getNodeId() + " updated", 0);
+		listeners.forEach(listener -> listener.onUpdateNode(sourceNode));
 		historyStrategy.opcuaUpdateEvent(sourceNode);
 	}
 
@@ -549,20 +512,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		this.agentIdentityValidator = agentIdentityValidator;
 		this.agentX509IdentityValidator = agentX509IdentityValidator;
 		clientManagementStrategy.activate(agentAnonymousValidator, agentIdentityValidator, agentX509IdentityValidator);
-	}
-
-	@Override
-	public void registerAlias(NodeId forNode, String alias, NodeId targetNode) {
-		if (forNode == null || alias == null || targetNode == null) {
-			throw new IllegalArgumentException("forNode, alias and targetNode cannot be null");
-		}
-		if (aliasTable.containsKey(forNode)) {
-			aliasTable.get(forNode).put(alias, targetNode);
-		} else {
-			final Map<String, NodeId> aliasMap = new HashMap<>();
-			aliasMap.put(alias, targetNode);
-			aliasTable.put(forNode, aliasMap);
-		}
 	}
 
 	@Override

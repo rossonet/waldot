@@ -13,7 +13,9 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
@@ -147,6 +149,12 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 			return Property.empty();
 		}
 		return getNamespace().createOrUpdateWaldotEdgeProperty(this, key, value);
+	}
+
+	@Override
+	public void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
+		// TODO cambio di parametri su edge se necessario
+
 	}
 
 	@Override

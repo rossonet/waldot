@@ -12,7 +12,7 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 public class RegistrationClientTest {
 //TODO test per il processo di enrollmento di un client WaldotOT tramite il client WaldotOTAgentClient
 	@Test
-	public void runClientTwoMinutes() throws Exception {
+	public void runClientOneMinutes() throws Exception {
 		final WaldotGraph d = OpcFactory.getOpcGraph();
 		final WaldOTAgentClientConfiguration configuration = WaldOTAgentClientConfiguration.getDefaultConfiguration();
 		final WaldOTAgentClient client = WaldOTAgentClient.withConfiguration(configuration);
@@ -24,12 +24,13 @@ public class RegistrationClientTest {
 			}
 		});
 		client.startConnectionProcedure();
-		final int limit = 120 / 5;
+		final int limit = 60 / 5;
 		for (int i = 0; i < limit; i++) {
 			final WaldOTAgentClient.Status status = client.getStatus();
 			Thread.sleep(5000);
 		}
 		client.stopConnectionProcedure();
+		d.getWaldotNamespace().close();
 	}
 
 }

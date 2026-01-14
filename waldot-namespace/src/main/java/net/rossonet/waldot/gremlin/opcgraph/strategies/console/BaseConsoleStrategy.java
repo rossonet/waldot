@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 import net.rossonet.waldot.api.annotation.WaldotConsoleStrategy;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.rules.RuleExecutor;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.jexl.JexlExecutor;
+import net.rossonet.waldot.jexl.RuleExecutor;
 
 @WaldotConsoleStrategy
 public class BaseConsoleStrategy implements ConsoleStrategy {

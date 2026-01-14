@@ -349,6 +349,12 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
+	public void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
+		throw new UnsupportedOperationException("Not implemented yet");
+
+	}
+
+	@Override
 	public void removeComponent(final WaldotElement waldotElement) {
 		LOGGER.warn("removeComponent not implemented for Command");
 

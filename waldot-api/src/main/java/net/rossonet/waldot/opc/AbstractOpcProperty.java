@@ -9,7 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Property;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
@@ -123,6 +125,12 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 	@Override
 	public <V> Property<V> property(final String key, final V value) {
 		return Property.empty();
+	}
+
+	@Override
+	public void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
+		throw new UnsupportedOperationException("Not implemented yet");
+
 	}
 
 	@Override

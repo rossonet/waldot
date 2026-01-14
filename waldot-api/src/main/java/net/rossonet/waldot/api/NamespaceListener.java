@@ -5,6 +5,7 @@ import java.util.List;
 import org.eclipse.milo.opcua.sdk.server.ManagedNamespaceWithLifecycle;
 import org.eclipse.milo.opcua.sdk.server.items.DataItem;
 import org.eclipse.milo.opcua.sdk.server.items.MonitoredItem;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 
 import net.rossonet.waldot.api.models.WaldotCommand;
 
@@ -41,6 +42,9 @@ public interface NamespaceListener {
 	}
 
 	default void onNamespaceReset() {
+	}
+
+	default void onUpdateNode(UaNode sourceNode) {
 	}
 
 }

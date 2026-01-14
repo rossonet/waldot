@@ -10,12 +10,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.rossonet.waldot.api.RuleListener;
+import net.rossonet.waldot.jexl.WaldotStepLogger;
 
 class WaldotStepLoggerTest {
 
-	private WaldotStepLogger mockLogger;
 	private JexlContext mockJexlContext;
 	private RuleListener mockListener;
+	private WaldotStepLogger mockLogger;
 
 	@BeforeEach
 	void setUp() {
@@ -35,7 +36,7 @@ class WaldotStepLoggerTest {
 
 	@Test
 	void testOnActionExecutionException() {
-		Exception exception = new Exception("Test Exception");
+		final Exception exception = new Exception("Test Exception");
 		doNothing().when(mockLogger).onActionExecutionException(mockJexlContext, exception);
 
 		mockLogger.onActionExecutionException(mockJexlContext, exception);
@@ -90,7 +91,7 @@ class WaldotStepLoggerTest {
 
 	@Test
 	void testOnConditionExecutionException() {
-		Exception exception = new Exception("Condition Exception");
+		final Exception exception = new Exception("Condition Exception");
 		doNothing().when(mockLogger).onConditionExecutionException(mockJexlContext, exception);
 
 		mockLogger.onConditionExecutionException(mockJexlContext, exception);
