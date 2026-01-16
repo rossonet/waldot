@@ -101,7 +101,6 @@ public class DefaultRule extends AbstractOpcVertex implements Rule {
 		this.factsValidDelayMs = factsValidDelayMs;
 	}
 
-	@Override
 	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		logger.info("for rule " + getBrowseName().getName() + " attribute changed node " + node.getNodeId()
 				+ " attributeId " + attributeId + " value " + value);
@@ -347,7 +346,6 @@ public class DefaultRule extends AbstractOpcVertex implements Rule {
 		return parallelExecution;
 	}
 
-	@Override
 	public void propertyChanged(final UaNode node, final AttributeId attributeId, final Object value) {
 		logger.info("for rule " + getBrowseName().getName() + " property changed node " + node.getNodeId()
 				+ " attributeId " + attributeId + " value " + value);
@@ -356,9 +354,9 @@ public class DefaultRule extends AbstractOpcVertex implements Rule {
 	}
 
 	@Override
-	public void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
-		// FIXME aggiornare se necessario le label e i comportamenti legati alle
-		// property
+	public void propertyChanged(UaNode sourceNode, String label, Object value) {
+		// TODO Auto-generated method stub
+
 	}
 
 	private Object runAction(final WaldotStepLogger stepRegister) throws UaException {

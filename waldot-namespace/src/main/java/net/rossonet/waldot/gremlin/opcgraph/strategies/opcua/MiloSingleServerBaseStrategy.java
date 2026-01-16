@@ -69,6 +69,8 @@ import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 @WaldotMiloStrategy
 public class MiloSingleServerBaseStrategy implements MiloStrategy {
 
+	private static final String EDGE_DIRECTORY_NODEID_PREFIX = "e";
+	private static final String VERTEX_DIRECTORY_NODEID_PREFIX = "v";
 	private UaFolderNode assetRootNode;
 	private final Map<String, UaFolderNode> edgeDirectories = new HashMap<>();
 	private final MiloSingleServerBaseFolderManager folderManager = new MiloSingleServerBaseFolderManager(this);
@@ -105,6 +107,11 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			nodeId = waldotNamespace.generateNodeId(sourceVertex.getNodeId().getIdentifier() + ":" + elaboratedLabel
 					+ ":" + targetVertex.getNodeId().getIdentifier());
 		}
+		String name = MiloStrategy.getKeyValuesProperty(propertyKeyValues, NAME_FIELD.toLowerCase());
+		if (name == null) {
+			name = elaboratedLabel;
+			logger.debug(NAME_FIELD.toLowerCase() + " not found in propertyKeyValues, using default name '{}'", name);
+		}
 		String description = MiloStrategy.getKeyValuesProperty(propertyKeyValues, DESCRIPTION_PARAMETER.toLowerCase());
 		if (description == null || description.isEmpty()) {
 			description = sourceVertex.getDisplayName().getText() + " -- " + label + " -> "
@@ -112,13 +119,14 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			logger.debug(DESCRIPTION_PARAMETER + " not found in propertyKeyValues, using default '{}'", description);
 		}
 		final OpcEdge edge = new OpcEdge(waldotNamespace.getGremlinGraph(), nodeId, sourceVertex, targetVertex,
-				elaboratedLabel, description, MiloSingleServerBaseReferenceNodeBuilder.getWriteMask(propertyKeyValues),
+				elaboratedLabel, name, description,
+				MiloSingleServerBaseReferenceNodeBuilder.getWriteMask(propertyKeyValues),
 				MiloSingleServerBaseReferenceNodeBuilder.getUserWriteMask(propertyKeyValues),
 				MiloSingleServerBaseReferenceNodeBuilder.getEventNotifier(propertyKeyValues),
 				MiloSingleServerBaseReferenceNodeBuilder.getVersion(propertyKeyValues));
 		waldotNamespace.getStorageManager().addNode(edge);
-		checkDirectoryParameterAndLinkNode(propertyKeyValues, edge, folderManager.getEdgesFolderNode(),
-				edgeDirectories);
+		checkDirectoryParameterAndLinkNode(propertyKeyValues, edge, folderManager.getEdgesFolderNode(), edgeDirectories,
+				EDGE_DIRECTORY_NODEID_PREFIX);
 		edge.addReference(new Reference(edge.getNodeId(), NodeIds.HasTypeDefinition,
 				MiloSingleServerBaseReferenceNodeBuilder.edgeTypeNode.getNodeId().expanded(), true));
 		final QualifiedProperty<String> labelProperty = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
@@ -182,8 +190,13 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			logger.debug(LABEL_FIELD.toLowerCase() + " not found in propertyKeyValues, using default label '{}'",
 					label);
 		}
-		final QualifiedName browseName = waldotNamespace.generateQualifiedName(label);
-		final LocalizedText displayName = new LocalizedText(label);
+		String name = MiloStrategy.getKeyValuesProperty(propertyKeyValues, NAME_FIELD.toLowerCase());
+		if (name == null) {
+			name = label;
+			logger.debug(NAME_FIELD.toLowerCase() + " not found in propertyKeyValues, using default name '{}'", name);
+		}
+		final QualifiedName browseName = waldotNamespace.generateQualifiedName(name);
+		final LocalizedText displayName = new LocalizedText(name);
 		String description = MiloStrategy.getKeyValuesProperty(propertyKeyValues, DESCRIPTION_PARAMETER.toLowerCase());
 		if (description == null) {
 			description = label;
@@ -203,7 +216,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	}
 
 	private void checkDirectoryParameterAndLinkNode(final Object[] propertyKeyValues, final GremlinElement vertex,
-			final UaFolderNode folderNode, final Map<String, UaFolderNode> directories) {
+			final UaFolderNode folderNode, final Map<String, UaFolderNode> directories, String suffix) {
 		final String directory = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
 				DIRECTORY_PARAMETER.toLowerCase());
 		if (directory == null || directory.isEmpty()) {
@@ -217,7 +230,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			actual = (actual == null ? "" : (actual + DIRECTORY_SPLIT_SIMBOL)) + components[counter].trim();
 			if (!directories.containsKey(actual)) {
 				directories.put(actual,
-						new UaFolderNode(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(actual),
+						new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
+								waldotNamespace.generateNodeId(suffix + ":" + actual),
 								waldotNamespace.generateQualifiedName(components[counter].trim()),
 								LocalizedText.english(components[counter].trim())));
 				waldotNamespace.getStorageManager().addNode(directories.get(actual));
@@ -270,7 +284,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		} else {
 			final UaNodeContext context = opcEdge.getNodeContext();
 			final LocalizedText description = LocalizedText
-					.english(key + " of edge property " + opcEdge.getBrowseName());
+					.english(key + " of edge property " + opcEdge.getBrowseName().getName());
 			final UInteger writeMask = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableWriteMask;
 			final UInteger userWriteMask = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableUserWriteMask;
 			final NodeId dataType = NodeIds.BaseDataType;
@@ -286,8 +300,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 					accessLevel, userAccessLevel, minimumSamplingInterval, historizing);
 			waldotNamespace.getStorageManager().addNode(property);
 			opcEdge.addReference(new Reference(opcEdge.getNodeId(),
-					MiloSingleServerBaseReferenceNodeBuilder.hasGremlinPropertyReferenceType, property.getNodeId().expanded(),
-					true));
+					MiloSingleServerBaseReferenceNodeBuilder.hasGremlinPropertyReferenceType,
+					property.getNodeId().expanded(), true));
 			return property;
 		}
 
@@ -310,7 +324,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		} else {
 			final UaNodeContext context = opcVertex.getNodeContext();
 			final LocalizedText description = LocalizedText
-					.english(key + " of vertex property " + opcVertex.getBrowseName());
+					.english(key + " of vertex property " + opcVertex.getBrowseName().getName());
 			final UInteger writeMask = MiloSingleServerBaseReferenceNodeBuilder.variableWriteMask;
 			final UInteger userWriteMask = MiloSingleServerBaseReferenceNodeBuilder.variableUserWriteMask;
 			final NodeId dataType = NodeIds.BaseDataType;
@@ -325,10 +339,9 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 					opcVertex, key, value, context, nodeId, description, writeMask, userWriteMask, dataType, valueRank,
 					arrayDimensions, accessLevel, userAccessLevel, minimumSamplingInterval, historizing, false);
 			waldotNamespace.getStorageManager().addNode(property);
-			property.addAttributeObserver(opcVertex);
 			opcVertex.addReference(new Reference(opcVertex.getNodeId(),
-					MiloSingleServerBaseReferenceNodeBuilder.hasGremlinPropertyReferenceType, property.getNodeId().expanded(),
-					true));
+					MiloSingleServerBaseReferenceNodeBuilder.hasGremlinPropertyReferenceType,
+					property.getNodeId().expanded(), true));
 			return property;
 		}
 	}
@@ -344,7 +357,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		vertex.addReference(
 				new Reference(vertex.getNodeId(), NodeIds.HasTypeDefinition, typeDefinition.expanded(), true));
 		checkDirectoryParameterAndLinkNode(propertyKeyValues, vertex, folderManager.getVerticesFolderNode(),
-				folderManager.getVertexDirectories());
+				folderManager.getVertexDirectories(), VERTEX_DIRECTORY_NODEID_PREFIX);
 		final QualifiedProperty<String> LABEL = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
 				LABEL_FIELD, MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
@@ -762,7 +775,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	public void removeEdge(final NodeId nodeId) {
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId).get();
 		// FIXME rimuovere dalla cartella giusta
-		// TODO deregister edge osservati dai plugin
+		// FIXME deregister edge osservati dai plugin
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
 		// FIXME rimuovere tutti i nodi GremlinProperty collegati
@@ -773,7 +786,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	public void removeVertex(final NodeId nodeId) {
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId).get();
 		// FIXME rimuovere dalla cartella giusta
-		// TODO notificare ai plugin la rimozione del vertex
+		// FIXME notificare ai plugin la rimozione del vertex
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
 		// FIXME rimuovere tutti i nodi OpcVertexProperty collegati

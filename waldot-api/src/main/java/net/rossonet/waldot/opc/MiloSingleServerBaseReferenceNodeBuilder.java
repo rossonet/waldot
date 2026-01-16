@@ -313,7 +313,7 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 
 	public static UInteger getUserWriteMask(Object[] propertyKeyValues) {
 		final String userWriteMask = getKeyValuesProperty(propertyKeyValues, MiloStrategy.USER_WRITE_MASK_PARAMETER);
-		// TODO capire come selezionare il valore corretto
+		// TODO parametrizzare correttamente user write mask
 		return vertexUserWriteMask;
 	}
 
@@ -327,7 +327,7 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 
 	public static UInteger getWriteMask(Object[] propertyKeyValues) {
 		final String writeMask = getKeyValuesProperty(propertyKeyValues, MiloStrategy.WRITE_MASK_PARAMETER);
-		// TODO capire come selezionare il valore corretto
+		// TODO parametrizzare correttamente write mask
 		return vertexWriteMask;
 	}
 

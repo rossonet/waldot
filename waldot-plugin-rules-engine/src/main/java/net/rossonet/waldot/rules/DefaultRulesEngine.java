@@ -93,7 +93,6 @@ public class DefaultRulesEngine implements WaldotRulesEngine {
 	public void registerObserver(final WaldotVertex eventVertex, final NodeId ruleNodeId) {
 		if (rules.containsKey(ruleNodeId)) {
 			// Register the vertex triggers to the rule
-			eventVertex.addAttributeObserver(rules.get(ruleNodeId));
 			eventVertex.addPropertyObserver(rules.get(ruleNodeId));
 			eventVertex.addEventObserver(rules.get(ruleNodeId));
 		} else {

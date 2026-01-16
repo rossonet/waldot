@@ -39,7 +39,7 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
  * @author Stephen Mallette (http://stephen.genoprime.com)
  */
 public class OpcGraphProvider extends AbstractGraphProvider {
-
+	// TODO completare test
 	private static final Set<Class> IMPLEMENTATION = new HashSet<Class>() {
 		{
 			add(OpcEdge.class);
@@ -53,14 +53,13 @@ public class OpcGraphProvider extends AbstractGraphProvider {
 
 	@Override
 	public void clear(Graph graph, Configuration configuration) throws Exception {
-		// TODO completare test
 
 	}
 
 	@Override
 	public Map<String, Object> getBaseConfiguration(String graphName, Class<?> test, String testMethodName,
 			GraphData loadGraphWith) {
-		// TODO completare test
+
 		return Collections.emptyMap();
 	}
 

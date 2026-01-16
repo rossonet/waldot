@@ -19,10 +19,9 @@ import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
@@ -162,11 +161,6 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
-	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
-		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
-	}
-
-	@Override
 	public Iterator<Edge> edges(final Direction direction, final String... edgeLabels) {
 		final Collection<WaldotEdge> values = getNamespace().getEdges(this, direction, edgeLabels).values();
 		final Collection<Edge> edges = new ArrayList<>();
@@ -255,6 +249,12 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
+	public void notifyPropertyValueChanging(String label, DataValue value) {
+		// not implemented for Command
+
+	}
+
+	@Override
 	public void postEvent(final BaseEventTypeNode event) {
 		LOGGER.warn("postEvent not implemented for Command");
 
@@ -340,18 +340,6 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 		} else {
 			return getNamespace().createOrUpdateWaldotVertexProperty(this, key, value);
 		}
-	}
-
-	@Override
-	public void propertyChanged(final UaNode sourceNode, final AttributeId attributeId, final Object value) {
-		LOGGER.warn("propertyChanged not implemented for Command");
-
-	}
-
-	@Override
-	public void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
-		throw new UnsupportedOperationException("Not implemented yet");
-
 	}
 
 	@Override

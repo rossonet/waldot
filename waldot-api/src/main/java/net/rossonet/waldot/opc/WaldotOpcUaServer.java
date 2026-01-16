@@ -88,8 +88,6 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	public static final String[] PLUGINS_BASE_SEARCH_PACKAGE = new String[] { "net.rossonet.waldot", "plugin",
 			"plugins" };
 
-	public static final String REGISTER_PATH = "/register";
-
 	private static final boolean USE_VIRTUAL_THREADS = true;
 
 	static {
@@ -271,7 +269,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 				final Builder builder = EndpointConfig.newBuilder().setBindAddress(bindAddress).setHostname(hostname)
 						.setPath(configuration.getPath()).setCertificate(certificate).addTokenPolicies(
 								USER_TOKEN_POLICY_ANONYMOUS, USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
-				// TODO gestire la configurazione delle policy da configurazione opc
+				// TODO gestire la configurazione delle policy di sicurezza (encryption)
 				final Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None)
 						.setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(noSecurityBuilder));
@@ -298,9 +296,12 @@ public class WaldotOpcUaServer implements AutoCloseable {
 						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(discoveryBuilder));
 				// endpointConfigurations.add(buildHttpsEndpoint(discoveryBuilder));
-				final Builder registerBuilder = builder.copy().setPath(configuration.getPath() + REGISTER_PATH)
-						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
-				endpointConfigurations.add(buildTcpEndpoint(registerBuilder));
+				/*
+				 * final Builder registerBuilder =
+				 * builder.copy().setPath(configuration.getPath() + REGISTER_PATH)
+				 * .setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.
+				 * None); endpointConfigurations.add(buildTcpEndpoint(registerBuilder));
+				 */
 				// endpointConfigurations.add(buildHttpsEndpoint(registerBuilder));
 			}
 		}

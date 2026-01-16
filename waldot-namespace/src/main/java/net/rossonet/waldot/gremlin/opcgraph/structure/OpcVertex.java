@@ -1,9 +1,7 @@
 
 package net.rossonet.waldot.gremlin.opcgraph.structure;
 
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -31,12 +29,6 @@ public class OpcVertex extends AbstractOpcVertex {
 		return new OpcVertex(graph, getNodeContext(), getNodeId(), getBrowseName(), getDisplayName(), getDescription(),
 				getWriteMask(), getUserWriteMask(), getEventNotifier(), version());
 
-	}
-
-	@Override
-	public void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
-		// FIXME aggiornare se necessario le label e i comportamenti legati alle
-		// property
 	}
 
 }

@@ -3,9 +3,7 @@ package net.rossonet.waldot.dataGenerator;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -136,12 +134,6 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	protected void generateNextTriangular() {
 		actualValue = (long) (min + ((max - min) * (2 / Math.PI * Math.acos(Math.abs(Math.cos(seed++))))));
 		assignValue();
-	}
-
-	@Override
-	public void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
-		// FIXME aggiornare se necessario le label e i comportamenti legati alle
-		// property
 	}
 
 }

@@ -80,7 +80,6 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	private int requestTimeout = 60000;
 	private SecurityPolicy securityPolicy = SecurityPolicy.None;
 	private int sessionTimeout = 120000;
-	private boolean testAnonymousConnection = false;
 
 	private String username;
 
@@ -241,13 +240,13 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 
 	@Override
 	public boolean hasCertificateAuthentication() {
-		// TODO Auto-generated method stub
+		// TODO completare metodo hashCertificateAuthentication
 		return false;
 	}
 
 	@Override
 	public boolean hasProvisioningToken() {
-		// TODO Auto-generated method stub
+		// TODO completare metodo hasProvisioningToken
 		return false;
 	}
 
@@ -259,11 +258,6 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	@Override
 	public boolean isIgnoreServiceFault() {
 		return ignoreServiceFault;
-	}
-
-	@Override
-	public boolean isTestAnonymousConnection() {
-		return testAnonymousConnection;
 	}
 
 	@Override
@@ -422,11 +416,6 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	@Override
 	public void setSessionTimeout(final int sessionTimeout) {
 		this.sessionTimeout = sessionTimeout;
-	}
-
-	@Override
-	public void setTestAnonymousConnection(boolean active) {
-		this.testAnonymousConnection = active;
 	}
 
 	@Override

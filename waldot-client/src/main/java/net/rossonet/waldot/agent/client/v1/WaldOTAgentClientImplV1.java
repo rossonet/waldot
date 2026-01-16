@@ -46,14 +46,15 @@ import net.rossonet.waldot.agent.client.api.WaldOTAgentClient;
 import net.rossonet.waldot.agent.client.api.WaldOTAgentClientConfiguration;
 import net.rossonet.waldot.agent.client.api.WaldotAgentClientObserver;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
-import net.rossonet.waldot.client.exception.ProvisioningException;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.SslHelper.KeyStoreHelper;
 import net.rossonet.waldot.utils.ThreadHelper;
 
 public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
+	private static final String ABOUT_COMMAND = "about";
 	private final static Logger logger = LoggerFactory.getLogger(WaldOTAgentClient.class);
+	private static final String QUERY_COMMAND = "query";
 	public static String SELFSIGNED_CERTIFICATE_ALIAS = "waldot-selfsigned";
 	public static String SIGNED_CERTIFICATE_ALIAS = "waldot-signed";
 
@@ -80,10 +81,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	});
 
 	private ByteString lastNonce = null;
-
-	private transient OpcUaClient provisioningClient = null;
-
-	private final ProvisioningLifeCycleProcedure provisioningLifeCycle = new ProvisioningLifeCycleProcedure(this);
 
 	private WaldotAgentClientObserver waldotAgentClientObserver;
 
@@ -132,10 +129,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 			client.disconnect();
 			logger.info("Disconnected from server");
 		}
-		if (provisioningClient != null) {
-			provisioningClient.disconnect();
-			logger.info("Disconnected from provisioning server");
-		}
 	}
 
 	@Override
@@ -163,7 +156,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		try {
 			if (activeConnectionRequest) {
 				if (checkClientConnected(client)) {
-					changeStatus(Status.CONNECTED);
+					changeStatus(Status.RUNNING);
 					logger.info("Connected to server");
 				} else {
 					client = createOpcClient(getGeneralConfigBuilder().build());
@@ -173,84 +166,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		} catch (final Exception e) {
 			logger.error("Error during control thread check: {}", LogHelper.stackTraceToString(e, 5));
 			changeStatus(Status.FAULTED);
-		}
-	}
-
-	private void doActionProvisioningClientManualStart() {
-		try {
-			if (activeConnectionRequest) {
-				if (checkClientConnected(provisioningClient)) {
-					changeStatus(Status.CONNECTED_PROVISIONING_MANUAL_APPROVAL);
-					logger.info("Connected to server for manual approval provisioning");
-				} else {
-					provisioningClient = createOpcClient(getGeneralConfigBuilder().build());
-					logger.info("Waiting for connection to server for manual approval provisioning...");
-				}
-			}
-		} catch (final Exception e) {
-			logger.error("Error during control thread check: {}", LogHelper.stackTraceToString(e, 5));
-			changeStatus(Status.FAULTED);
-		}
-	}
-
-	private void doActionProvisioningClientTokenStart() {
-		try {
-			if (activeConnectionRequest) {
-				if (checkClientConnected(provisioningClient)) {
-					changeStatus(Status.CONNECTED_PROVISIONING_TOKEN);
-					logger.info("Connected to server for token provisioning");
-				} else {
-					provisioningClient = createOpcClient(getGeneralConfigBuilder().build());
-					logger.info("Waiting for connection to server for token provisioning...");
-				}
-			}
-		} catch (final Exception e) {
-			logger.error("Error during control thread check: {}", LogHelper.stackTraceToString(e, 5));
-			changeStatus(Status.FAULTED);
-		}
-	}
-
-	private void doActionProvisioningManualRegistration() {
-		final Runnable approvalRequest = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					provisioningLifeCycle.requestManualApprovation();
-					changeStatus(WaldOTAgentClient.Status.COMPLETED_PROVISIONING_MANUAL_REQUEST);
-				} catch (final ProvisioningException e) {
-					logger.error("Error during manual approval provisioning: {}", LogHelper.stackTraceToString(e, 5));
-					checkFaultCounter();
-				}
-
-			}
-		};
-		try {
-			ThreadHelper.runWithTimeout(approvalRequest, TIMEOUT_PROVISIONING_ACTION_SEC, TimeUnit.SECONDS);
-		} catch (final Exception e) {
-			logger.error("Error during manual approval provisioning: {}", LogHelper.stackTraceToString(e, 5));
-			checkFaultCounter();
-		}
-	}
-
-	private void doActionProvisioningTokenRegistration() {
-		final Runnable tokenRequest = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					provisioningLifeCycle.tokenProvisioning();
-					changeStatus(WaldOTAgentClient.Status.COMPLETED_PROVISIONING_TOKEN);
-				} catch (final ProvisioningException e) {
-					logger.error("Error during token provisioning: {}", LogHelper.stackTraceToString(e, 5));
-					checkFaultCounter();
-				}
-
-			}
-		};
-		try {
-			ThreadHelper.runWithTimeout(tokenRequest, TIMEOUT_PROVISIONING_ACTION_SEC, TimeUnit.SECONDS);
-		} catch (final Exception e) {
-			logger.error("Error during token provisioning: {}", LogHelper.stackTraceToString(e, 5));
-			checkFaultCounter();
 		}
 	}
 
@@ -272,9 +187,17 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	private X509Certificate getCertificateActualConnection()
-			throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-		return certificateHelper.getCertificate(SIGNED_CERTIFICATE_ALIAS);
+	private X509Certificate getCertificateActualConnection() {
+		try {
+			return getKeyPairActualConnection().getPublic() instanceof X509Certificate
+					? (X509Certificate) getKeyPairActualConnection().getPublic()
+					: null;
+		} catch (final Exception e) {
+			logger.error("Error while getting certificate for actual connection: {}",
+					LogHelper.stackTraceToString(e, 7));
+			changeStatus(Status.FAULTED);
+			return null;
+		}
 	}
 
 	private OpcUaSession getClientSessionWithTimeout(final OpcUaClient clientOpc) throws Exception {
@@ -406,10 +329,18 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	private KeyPair getKeyPairActualConnection() throws UnrecoverableKeyException, KeyStoreException,
 			NoSuchAlgorithmException, CertificateException, IOException {
-		if (configuration.isTestAnonymousConnection()) {
+		try {
+			final KeyPair signed = certificateHelper.getKeyPair(SIGNED_CERTIFICATE_ALIAS);
+			if (signed != null) {
+				return signed;
+			} else {
+				return certificateHelper.getKeyPair(SELFSIGNED_CERTIFICATE_ALIAS);
+			}
+		} catch (final Exception e) {
+			logger.error("Error while getting signed certificate, falling back to self-signed: {}",
+					LogHelper.stackTraceToString(e, 2));
 			return certificateHelper.getKeyPair(SELFSIGNED_CERTIFICATE_ALIAS);
 		}
-		return certificateHelper.getKeyPair(SIGNED_CERTIFICATE_ALIAS);
 	}
 
 	public ByteString getLastNonce() {
@@ -418,11 +349,19 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	@Override
 	public OpcUaClient getOpcUaClient() {
-		if (client == null) {
-			return provisioningClient;
-		}
 		return client;
 
+	}
+
+	public List<String> getServerInfo() throws UaException {
+		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace()
+				.getObjectNode(new NodeId(2, MiloStrategy.GENERAL_CMD_DIRECTORY));
+		final Variant[] outputs = cmdNode.callMethod(ABOUT_COMMAND, new Variant[] {});
+		final List<String> out = new ArrayList<>();
+		for (final Variant output : outputs) {
+			out.add((String) output.getValue());
+		}
+		return out;
 	}
 
 	@Override
@@ -437,18 +376,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	private void nextConnectionAction() {
-		if (configuration.hasCertificateAuthentication()) {
-			changeStatus(Status.STARTING);
-		} else {
-			if (configuration.hasProvisioningToken()) {
-				changeStatus(Status.STARTING_PROVISIONING_TOKEN);
-			} else {
-				changeStatus(Status.STARTING_PROVISIONING_MANUAL_APPROVAL);
-			}
-		}
-	}
-
 	@Override
 	public void onServiceFault(final ServiceFault serviceFault) {
 		logger.error("Service fault received: {}", serviceFault);
@@ -457,33 +384,8 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	private void periodicalCheck() {
 		switch (_status) {
-		case STARTING:
-			doActionClientStart();
-			break;
-		case STARTING_PROVISIONING_MANUAL_APPROVAL:
-			doActionProvisioningClientManualStart();
-			break;
-		case STARTING_PROVISIONING_TOKEN:
-			doActionProvisioningClientTokenStart();
-			break;
-		case CONNECTED:
+		case RUNNING:
 			doConnectionCheck();
-			refreshCertificateIfNeeded();
-			break;
-		case CONNECTED_PROVISIONING_MANUAL_APPROVAL:
-			doActionProvisioningManualRegistration();
-			break;
-		case CONNECTED_PROVISIONING_TOKEN:
-			doActionProvisioningTokenRegistration();
-			break;
-		case COMPLETED_PROVISIONING_MANUAL_REQUEST:
-			changeStatus(Status.WAITING_PROVISIONING_MANUAL_APPROVAL);
-			break;
-		case COMPLETED_PROVISIONING_TOKEN:
-			changeStatus(Status.STARTING);
-			break;
-		case WAITING_PROVISIONING_MANUAL_APPROVAL:
-			waitingManualApprovation();
 			break;
 		case CLOSED:
 			logger.info("Client is closed, the control thread will terminate");
@@ -496,10 +398,11 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 				logger.error("Error during cleaning connection objects: {}", LogHelper.stackTraceToString(e, 5));
 			}
 			activeConnectionRequest = true;
-			nextConnectionAction();
+			changeStatus(Status.INIT);
 			break;
 		case INIT:
-			logger.trace("Client is in INIT _status, waiting for start");
+			doActionClientStart();
+			logger.info("Client is initializing");
 			break;
 		case STOPPED:
 			logger.trace("Client is stopped");
@@ -509,14 +412,10 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	private void refreshCertificateIfNeeded() {
-		// TODO rigenerare il certificato se necessario
-	}
-
 	public List<String> runExpression(String expression) throws UaException {
 		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace()
 				.getObjectNode(new NodeId(2, MiloStrategy.GENERAL_CMD_DIRECTORY));
-		final Variant[] outputs = cmdNode.callMethod("query", new Variant[] { new Variant(expression) });
+		final Variant[] outputs = cmdNode.callMethod(QUERY_COMMAND, new Variant[] { new Variant(expression) });
 		final List<String> out = new ArrayList<>();
 		for (final Variant output : outputs) {
 			out.add((String) output.getValue());
@@ -533,10 +432,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	public CompletableFuture<WaldOTAgentClient> startConnectionProcedure() {
 		controlThread.start();
 		activeConnectionRequest = true;
-		nextConnectionAction();
-		if (configuration.isTestAnonymousConnection()) {
-			changeStatus(Status.STARTING);
-		}
 		return CompletableFuture.completedFuture(this);
 
 	}
@@ -550,19 +445,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 			logger.error("Error during cleaning connection objects: {}", LogHelper.stackTraceToString(e, 5));
 		}
 		return CompletableFuture.completedFuture(this);
-	}
-
-	private void waitingManualApprovation() {
-		logger.info("Waiting for manual approval provisioning, please check the server for the approval request");
-		logger.info("REQUEST UNIQUE CODE IS: {}", provisioningLifeCycle.getRequestUniqueCode());
-		try {
-			Thread.sleep(MANUAL_APPROVAL_WAITING_TIME_SEC * 1000L);
-			if (provisioningLifeCycle.isManualRequestCompleted()) {
-				changeStatus(Status.CONNECTED_PROVISIONING_TOKEN);
-			}
-		} catch (final InterruptedException e) {
-			logger.warn("Thread interrupted during waiting for manual approval provisioning");
-		}
 	}
 
 }

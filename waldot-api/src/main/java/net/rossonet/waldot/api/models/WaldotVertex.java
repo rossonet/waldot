@@ -5,9 +5,8 @@ import java.util.List;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseObjectType;
-import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap;
 
@@ -22,17 +21,13 @@ import net.rossonet.waldot.api.PropertyObserver;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType, AttributeObserver {
-
-	void addAttributeObserver(AttributeObserver observer);
+public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 
 	void addEventObserver(EventObserver observer);
 
 	void addPropertyObserver(PropertyObserver observer);
 
 	public UaMethodNode findMethodNode(NodeId methodId);
-
-	void fireAttributeChanged(AttributeId attributeId, Object attributeValue);
 
 	List<EventObserver> getEventObservers();
 
@@ -48,9 +43,9 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType, Att
 
 	boolean inComputerMode();
 
-	void postEvent(BaseEventTypeNode event);
+	void notifyPropertyValueChanging(String label, DataValue value);
 
-	void removeAttributeObserver(AttributeObserver observer);
+	void postEvent(BaseEventTypeNode event);
 
 	void removeEventObserver(EventObserver observer);
 

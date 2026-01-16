@@ -5,8 +5,12 @@ import java.security.cert.X509Certificate;
 import org.eclipse.milo.opcua.sdk.server.Session;
 import org.eclipse.milo.opcua.sdk.server.identity.Identity.AnonymousIdentity;
 import org.eclipse.milo.opcua.sdk.server.identity.Identity.UsernameIdentity;
+import org.eclipse.milo.opcua.sdk.server.identity.Identity.X509UserIdentity;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
+import org.eclipse.milo.opcua.stack.core.types.structured.AnonymousIdentityToken;
+import org.eclipse.milo.opcua.stack.core.types.structured.SignatureData;
 import org.eclipse.milo.opcua.stack.core.types.structured.UserNameIdentityToken;
+import org.eclipse.milo.opcua.stack.core.types.structured.UserTokenPolicy;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
@@ -25,10 +29,12 @@ public interface ClientManagementStrategy extends AutoCloseable {
 
 	void initialize(WaldotNamespace waldotNamespace);
 
-	AnonymousIdentity registerNewClientForApproval(Session session);
+	AnonymousIdentity newAnonymousClientSession(Session session, AnonymousIdentityToken token,
+			UserTokenPolicy tokenPolicy, SignatureData tokenSignature);
 
-	UsernameIdentity registerNewClientWithProvisioningPassword(Session session, UserNameIdentityToken token);
+	UsernameIdentity newUsernameIdentityClientSession(Session session, UserNameIdentityToken token,
+			UserTokenPolicy tokenPolicy, SignatureData tokenSignature);
 
-	Object updateClientCertificate(Session session, X509Certificate identityCertificate);
+	X509UserIdentity newX509IdentityClientSession(Session session, X509Certificate identityCertificate);
 
 }

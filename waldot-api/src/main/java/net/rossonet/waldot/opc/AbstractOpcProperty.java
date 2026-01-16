@@ -9,9 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Property;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
@@ -45,11 +43,12 @@ import net.rossonet.waldot.utils.LogHelper;
 public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
 		implements WaldotProperty<DATA_TYPE> {
 	protected boolean allowNullPropertyValues = false;
-	protected final List<EventObserver> eventObservers = new ArrayList<>();
 
+	protected final List<EventObserver> eventObservers = new ArrayList<>();
 	protected final WaldotGraph graph;
 
 	private ByteString icon;
+
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 	private final WaldotEdge referenceEdge;
@@ -128,12 +127,6 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 	}
 
 	@Override
-	public void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value) {
-		throw new UnsupportedOperationException("Not implemented yet");
-
-	}
-
-	@Override
 	public void remove() {
 
 	}
@@ -142,6 +135,12 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 	public void setIcon(final ByteString icon) {
 		this.icon = icon;
 
+	}
+
+	@Override
+	public void setValue(DataValue value) {
+		referenceEdge.notifyPropertyValueChanging(key(), value);
+		super.setValue(value);
 	}
 
 	@Override

@@ -37,13 +37,12 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	public WaldotTestClientHandler(WaldotGraph g) {
 		final WaldOTAgentClientConfiguration configuration = new DefaultWaldOTAgentClientConfigurationV1();
-		configuration.setTestAnonymousConnection(true);
 		client = new WaldOTAgentClientImplV1(configuration);
 		client.startConnectionProcedure();
 		this.graph = g;
 		final int retry = 0;
 		while (retry < 10) {
-			if (client.getStatus().equals(Status.CONNECTED)) {
+			if (client.getStatus().equals(Status.RUNNING)) {
 				System.out.println("opc client connected");
 				break;
 			}
@@ -252,6 +251,10 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			e.printStackTrace();
 		}
 
+	}
+
+	public List<String> getServerInfo() throws UaException {
+		return client.getServerInfo();
 	}
 
 	public List<String> runExpression(String expression) {

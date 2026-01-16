@@ -179,7 +179,8 @@ public class ZenohAgent implements WaldotAgentEndpoint, AutoCloseable, PropertyO
 					logger.debug("Adding configuration configuration vertex with properties: {}", properties);
 					final WaldotVertex objectVertex = (WaldotVertex) agentLifeCycleManager.getGraph()
 							.addVertex(objects);
-					objectVertex.addPropertyObserver(this);
+					// TODO: perché osservato il comando?
+					// objectVertex.addPropertyObserver(this);
 					configurationObjectVertices.put(idToAdd, objectVertex);
 					sendConfigurationObjectVertexUpdateToAgent(idToAdd,
 							properties.toArray(new String[properties.size()]));
@@ -509,7 +510,6 @@ public class ZenohAgent implements WaldotAgentEndpoint, AutoCloseable, PropertyO
 
 	}
 
-	@Override
 	public void propertyChanged(final UaNode sourceNode, final AttributeId attributeId, final Object value) {
 		if (sourceNode.getNodeId().equals(agentManagerVertex.getNodeId())) {
 			sendAgentManagerVertexUpdateToAgent(agentManagerVertex.getPropertiesAsStringArray());
@@ -527,6 +527,12 @@ public class ZenohAgent implements WaldotAgentEndpoint, AutoCloseable, PropertyO
 				logger.warn("Property change on unknown node {} for agent {}", sourceNode.getNodeId(), uniqueId);
 			}
 		}
+
+	}
+
+	@Override
+	public void propertyChanged(UaNode sourceNode, String label, Object value) {
+		// TODO Auto-generated method stub
 
 	}
 

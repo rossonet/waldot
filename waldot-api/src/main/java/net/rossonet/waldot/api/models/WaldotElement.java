@@ -1,12 +1,8 @@
 package net.rossonet.waldot.api.models;
 
 import org.apache.tinkerpop.gremlin.structure.Element;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaServerNode;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
-
-import net.rossonet.waldot.api.PropertyObserver;
 
 /**
  * WaldotElement is an interface that extends Element and UaServerNode. It
@@ -15,7 +11,7 @@ import net.rossonet.waldot.api.PropertyObserver;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface WaldotElement extends Element, UaServerNode, PropertyObserver {
+public interface WaldotElement extends Element, UaServerNode {
 
 	void addComponent(WaldotElement waldotElement);
 
@@ -26,13 +22,6 @@ public interface WaldotElement extends Element, UaServerNode, PropertyObserver {
 	public String getNodeVersion();
 
 	boolean isRemoved();
-
-	@Override
-	default void propertyChanged(final UaNode node, final AttributeId attributeId, final Object value) {
-		propertyUpdateValueEvent(node, attributeId, value);
-	}
-
-	void propertyUpdateValueEvent(UaNode node, AttributeId attributeId, Object value);
 
 	void removeComponent(WaldotElement waldotElement);
 

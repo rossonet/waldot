@@ -6,6 +6,7 @@ import javax.naming.ConfigurationException;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -18,7 +19,7 @@ import net.rossonet.waldot.utils.LogHelper;
 @TestMethodOrder(OrderAnnotation.class)
 public class WaldotRulesEngineBaseTest {
 
-	private final LoggerListener logger = new LoggerListener() {
+	protected final LoggerListener logger = new LoggerListener() {
 
 		@Override
 		public void onEvent(final String messagePattern, final Object[] arguments, final Throwable throwable) {
@@ -29,7 +30,7 @@ public class WaldotRulesEngineBaseTest {
 		}
 	};
 
-	// @Disabled
+	@Disabled
 	@Test
 	public void runComplexRuleTest() throws InterruptedException, ExecutionException, ConfigurationException {
 		LogHelper.changeJulLogLevel("fine");

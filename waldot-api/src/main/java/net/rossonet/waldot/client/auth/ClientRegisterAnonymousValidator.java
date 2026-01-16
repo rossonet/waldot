@@ -1,6 +1,5 @@
 package net.rossonet.waldot.client.auth;
 
-import java.util.Collections;
 import java.util.Set;
 
 import org.eclipse.milo.opcua.sdk.server.Session;
@@ -17,7 +16,7 @@ import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 public class ClientRegisterAnonymousValidator extends WaldotAnonymousValidator implements ClientAuthenticator {
-	private ClientManagementStrategy agentManagementStrategy;
+	private ClientManagementStrategy clientManagementStrategy;
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -27,28 +26,21 @@ public class ClientRegisterAnonymousValidator extends WaldotAnonymousValidator i
 
 	@Override
 	public Set<UserTokenType> getSupportedTokenTypes() {
-		// TODO completare
-		return Collections.emptySet();
+		return Set.of(UserTokenType.Anonymous);
 	}
 
 	@Override
-	public void setAgentManagementStrategy(final ClientManagementStrategy agentManagementStrategy) {
-		this.agentManagementStrategy = agentManagementStrategy;
+	public void setAgentManagementStrategy(final ClientManagementStrategy clientManagementStrategy) {
+		this.clientManagementStrategy = clientManagementStrategy;
 
 	}
 
 	@Override
 	public AnonymousIdentity validateAnonymousToken(final Session session, final AnonymousIdentityToken token,
 			final UserTokenPolicy tokenPolicy, final SignatureData tokenSignature) {
-		if (session.getEndpoint().getEndpointUrl().endsWith(WaldotOpcUaServer.REGISTER_PATH)) {
-			final String sessionDataForLogging = ClientAuthenticator.generateSessionDataForLogging(session);
-			logger.info("\n *** NEW ANONYMOUS REGISTRATION AGENT REQUEST\n{}", sessionDataForLogging);
-			return agentManagementStrategy.registerNewClientForApproval(session);
-		} else {
-			throw new IllegalArgumentException(
-					"Agent validation is only allowed for sessions with endpoint URL ending with '"
-							+ WaldotOpcUaServer.REGISTER_PATH + "'");
-		}
+		final String sessionDataForLogging = ClientAuthenticator.generateSessionDataForLogging(session);
+		logger.info("\n *** NEW ANONYMOUS REGISTRATION CLIENT REQUEST\n{}", sessionDataForLogging);
+		return clientManagementStrategy.newAnonymousClientSession(session, token, tokenPolicy, tokenSignature);
 	}
 
 }

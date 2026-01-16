@@ -2,7 +2,6 @@ package net.rossonet.waldot.api.models;
 
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.eclipse.milo.opcua.sdk.server.model.variables.BaseVariableType;
-import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 
 /**
  * WaldotVertexProperty is an interface that extends VertexProperty,
@@ -13,8 +12,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface WaldotVertexProperty<DATA_TYPE>
-		extends VertexProperty<DATA_TYPE>, BaseVariableType, WaldotElement, AttributeObserver {
+public interface WaldotVertexProperty<DATA_TYPE> extends VertexProperty<DATA_TYPE>, BaseVariableType, WaldotElement {
 
 	WaldotVertex getVertexPropertyReference();
 

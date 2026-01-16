@@ -109,7 +109,7 @@ public final class OpcGraphComputerView implements WaldotGraphComputerView {
 
 	@Override
 	public <V> VertexProperty<V> addProperty(Vertex opcVertex, String key, V value) {
-		// FIXME Completare Gremlin OLAP
+		// XXX Completare Gremlin OLAP
 		return null;
 	}
 

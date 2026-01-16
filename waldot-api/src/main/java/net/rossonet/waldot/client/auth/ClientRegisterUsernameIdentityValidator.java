@@ -15,7 +15,7 @@ import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 public class ClientRegisterUsernameIdentityValidator extends WaldotIdentityValidator implements ClientAuthenticator {
-	private ClientManagementStrategy agentManagementStrategy;
+	private ClientManagementStrategy clientManagementStrategy;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public ClientRegisterUsernameIdentityValidator(final WaldotOpcUaServer waldotOpcUaServer,
@@ -24,23 +24,16 @@ public class ClientRegisterUsernameIdentityValidator extends WaldotIdentityValid
 	}
 
 	@Override
-	public void setAgentManagementStrategy(final ClientManagementStrategy agentManagementStrategy) {
-		this.agentManagementStrategy = agentManagementStrategy;
+	public void setAgentManagementStrategy(final ClientManagementStrategy clientManagementStrategy) {
+		this.clientManagementStrategy = clientManagementStrategy;
 
 	}
 
 	@Override
 	protected UsernameIdentity validateUsernameToken(final Session session, final UserNameIdentityToken token,
 			final UserTokenPolicy tokenPolicy, final SignatureData tokenSignature) throws UaException {
-		if (session.getEndpoint().getEndpointUrl().endsWith(WaldotOpcUaServer.REGISTER_PATH)) {
-			final String sessionDataForLogging = ClientAuthenticator.generateSessionDataForLogging(session);
-			logger.info("\n *** NEW AGENT REGISTRATION REQUEST WITH PROVISIONING PASSWORD\n{}", sessionDataForLogging);
-			return agentManagementStrategy.registerNewClientWithProvisioningPassword(session, token);
-		} else {
-			throw new IllegalArgumentException(
-					"Agent validation is only allowed for sessions with endpoint URL ending with '"
-							+ WaldotOpcUaServer.REGISTER_PATH + "'");
-		}
+		return clientManagementStrategy.newUsernameIdentityClientSession(session, token, tokenPolicy, tokenSignature);
+
 	}
 
 }

@@ -9,8 +9,7 @@ import net.rossonet.waldot.agent.client.api.WaldotAgentClientObserver;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 
-public class RegistrationClientTest {
-//TODO test per il processo di enrollmento di un client WaldotOT tramite il client WaldotOTAgentClient
+public class ClientTests {
 	@Test
 	public void runClientOneMinutes() throws Exception {
 		final WaldotGraph d = OpcFactory.getOpcGraph();

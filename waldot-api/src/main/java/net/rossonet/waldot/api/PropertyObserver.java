@@ -1,7 +1,6 @@
 package net.rossonet.waldot.api;
 
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 
 /**
  * PropertyObserver interface for handling changes in properties of OPC UA
@@ -12,5 +11,5 @@ import org.eclipse.milo.opcua.stack.core.AttributeId;
  */
 public interface PropertyObserver {
 
-	void propertyChanged(UaNode sourceNode, AttributeId attributeId, Object value);
+	void propertyChanged(UaNode sourceNode, String label, Object value);
 }

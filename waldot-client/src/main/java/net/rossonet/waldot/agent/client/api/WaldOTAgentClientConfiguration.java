@@ -87,8 +87,6 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 
 	boolean isIgnoreServiceFault();
 
-	boolean isTestAnonymousConnection();
-
 	void setAcknowledgeTimeout(int acknowledgeTimeout);
 
 	void setAgentUniqueName(String agentUniqueName);
@@ -150,8 +148,6 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 	void setSecurityPolicy(SecurityPolicy securityPolicy);
 
 	void setSessionTimeout(int sessionTimeout);
-
-	void setTestAnonymousConnection(boolean active);
 
 	void setUsername(String username);
 

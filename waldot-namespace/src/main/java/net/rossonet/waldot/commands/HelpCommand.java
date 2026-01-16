@@ -52,9 +52,9 @@ public class HelpCommand extends AbstractOpcCommand {
 	public String[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
 		Path target;
 		if (inputValues != null && inputValues.length > 0 && inputValues[0] != null && !inputValues[0].isEmpty()) {
-			target = Path.of(getNamespace().getConfiguration().getHelpDirectoryPath(), inputValues[0] + _TXT);
+			target = Path.of(getNamespace().getConfiguration().getHelpDirectory(), inputValues[0] + _TXT);
 		} else {
-			target = Path.of(getNamespace().getConfiguration().getHelpDirectoryPath(), INDEX_TXT);
+			target = Path.of(getNamespace().getConfiguration().getHelpDirectory(), INDEX_TXT);
 		}
 		if (Files.exists(target)) {
 			try {

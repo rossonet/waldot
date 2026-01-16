@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.jexl3.JexlContext;
 
 import net.rossonet.waldot.api.EventObserver;
+import net.rossonet.waldot.api.PropertyObserver;
 import net.rossonet.waldot.api.RuleListener;
 import net.rossonet.waldot.api.models.WaldotVertex;
 
@@ -33,7 +34,7 @@ import net.rossonet.waldot.api.models.WaldotVertex;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public interface Rule extends WaldotVertex, AutoCloseable, EventObserver {
+public interface Rule extends WaldotVertex, AutoCloseable, EventObserver, PropertyObserver {
 
 	/**
 	 * Clears all internal state and resets the rule.
@@ -163,14 +164,16 @@ public interface Rule extends WaldotVertex, AutoCloseable, EventObserver {
 	/**
 	 * Checks whether the rule supports parallel execution.
 	 *
-	 * @return {@code true} if parallel execution is supported, {@code false} otherwise.
+	 * @return {@code true} if parallel execution is supported, {@code false}
+	 *         otherwise.
 	 */
 	public boolean isParallelExecution();
 
 	/**
 	 * Sets whether facts should be cleared after the rule is executed.
 	 *
-	 * @param clearFactsAfterExecution {@code true} to clear facts, {@code false} otherwise.
+	 * @param clearFactsAfterExecution {@code true} to clear facts, {@code false}
+	 *                                 otherwise.
 	 */
 	void setClearFactsAfterExecution(boolean clearFactsAfterExecution);
 
@@ -191,7 +194,8 @@ public interface Rule extends WaldotVertex, AutoCloseable, EventObserver {
 	/**
 	 * Sets whether the rule supports parallel execution.
 	 *
-	 * @param parallelExecution {@code true} to enable parallel execution, {@code false} otherwise.
+	 * @param parallelExecution {@code true} to enable parallel execution,
+	 *                          {@code false} otherwise.
 	 */
 	void setParallelExecution(boolean parallelExecution);
 

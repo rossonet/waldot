@@ -11,9 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,16 +27,6 @@ class WaldotVertexTest {
 	@BeforeEach
 	void setUp() {
 		mockVertex = mock(WaldotVertex.class);
-	}
-
-	@Test
-	void testAddAttributeObserver() {
-		final AttributeObserver observer = mock(AttributeObserver.class);
-		doNothing().when(mockVertex).addAttributeObserver(observer);
-
-		mockVertex.addAttributeObserver(observer);
-
-		verify(mockVertex, times(1)).addAttributeObserver(observer);
 	}
 
 	@Test
@@ -71,17 +59,6 @@ class WaldotVertexTest {
 
 		assertEquals(methodNode, result);
 		verify(mockVertex, times(1)).findMethodNode(methodId);
-	}
-
-	@Test
-	void testFireAttributeChanged() {
-		final AttributeId attributeId = mock(AttributeId.class);
-		final Object attributeValue = new Object();
-		doNothing().when(mockVertex).fireAttributeChanged(attributeId, attributeValue);
-
-		mockVertex.fireAttributeChanged(attributeId, attributeValue);
-
-		verify(mockVertex, times(1)).fireAttributeChanged(attributeId, attributeValue);
 	}
 
 	@Test
@@ -159,16 +136,6 @@ class WaldotVertexTest {
 		mockVertex.postEvent(event);
 
 		verify(mockVertex, times(1)).postEvent(event);
-	}
-
-	@Test
-	void testRemoveAttributeObserver() {
-		final AttributeObserver observer = mock(AttributeObserver.class);
-		doNothing().when(mockVertex).removeAttributeObserver(observer);
-
-		mockVertex.removeAttributeObserver(observer);
-
-		verify(mockVertex, times(1)).removeAttributeObserver(observer);
 	}
 
 	@Test

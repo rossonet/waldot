@@ -35,19 +35,16 @@ public abstract class WaldotAnonymousValidator extends AbstractIdentityValidator
 
 			@Override
 			public Object getUserData() {
-				// TODO completare
 				return data;
 			}
 
 			@Override
 			public UserTokenType getUserTokenType() {
-				// TODO completare
 				return UserTokenType.Anonymous;
 			}
 
 			@Override
 			public void setUserData(@Nullable Object userData) {
-				// TODO completare
 				this.data = userData;
 			}
 		};
