@@ -1,8 +1,8 @@
 # WaldOT
 
-[![WaldOT logo](https://raw.githubusercontent.com/rossonet/waldot/refs/heads/master/artwork/logo.png)](https://github.com/rossonet/waldot)
-
 experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org/gremlin.html) and [Eclipse Milo OPCUA library](https://projects.eclipse.org/projects/iot.milo)
+
+[![WaldOT logo](https://raw.githubusercontent.com/rossonet/waldot/refs/heads/master/docs/artwork/logo.png)](https://github.com/rossonet/waldot)
 
 ## Docker image
 
