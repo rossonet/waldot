@@ -8,12 +8,19 @@ project(':waldot-client').projectDir = file('clients/waldot-client')
 include 'wotctl'
 project(':wotctl').projectDir = file('clients/wotctl')
 include 'waldot-plugin-tinkerpop'
+project(':waldot-plugin-tinkerpop').projectDir = file('plugins/waldot-plugin-tinkerpop')
 include 'waldot-plugin-os'
+project(':waldot-plugin-os').projectDir = file('plugins/waldot-plugin-os')
 include 'waldot-plugin-behavior-tree'
+project(':waldot-plugin-behavior-tree').projectDir = file('plugins/waldot-plugin-behavior-tree')
 include 'waldot-plugin-reinforcement-learning'
+project(':waldot-plugin-reinforcement-learning').projectDir = file('plugins/waldot-plugin-reinforcement-learning')
 include 'waldot-plugin-rules-engine'
+project(':waldot-plugin-rules-engine').projectDir = file('plugins/waldot-plugin-rules-engine')
 include 'waldot-plugin-generator'
+project(':waldot-plugin-generator').projectDir = file('plugins/waldot-plugin-generator')
 include 'waldot-plugin-zenoh'
+project(':waldot-plugin-zenoh').projectDir = file('plugins/waldot-plugin-zenoh')
 include 'zenoh-agent-lib'
 project(':zenoh-agent-lib').projectDir = file('zenoh_clients/zenoh-agent-lib')
 include 'zenoh-acme'
