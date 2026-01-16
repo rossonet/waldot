@@ -4,7 +4,9 @@ include 'waldot-deps'
 include 'waldot-namespace'
 include 'waldot-app'
 include 'waldot-client'
+project(':waldot-client').projectDir = file('clients/waldot-client')
 include 'wotctl'
+project(':wotctl').projectDir = file('clients/wotctl')
 include 'waldot-plugin-tinkerpop'
 include 'waldot-plugin-os'
 include 'waldot-plugin-behavior-tree'
