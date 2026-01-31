@@ -109,16 +109,15 @@ public final class OpcGraphComputerView implements WaldotGraphComputerView {
 
 	@Override
 	public <V> VertexProperty<V> addProperty(Vertex opcVertex, String key, V value) {
-		// FIXME Completare Gremlin OLAP
+		// XXX Completare Gremlin OLAP
 		return null;
 	}
 
 	/*
 	 * public <V> Property<V> addProperty(final OpcVertex vertex, final String key,
 	 * final V value) { ElementHelper.validateProperty(key, value); if
-	 * (isComputeKey(key)) { // TODO: attenzione al nodeId final
-	 * OpcVertexProperty<V> property = new OpcVertexProperty<V>(graph, null, vertex,
-	 * key, value) {
+	 * (isComputeKey(key)) { OpcVertexProperty<V> property = new
+	 * OpcVertexProperty<V>(graph, null, vertex, key, value) {
 	 * 
 	 * @Override public void remove() { removeProperty(vertex, key, this); } };
 	 * this.addValue(vertex, key, property); return property; } else { throw
@@ -200,7 +199,7 @@ public final class OpcGraphComputerView implements WaldotGraphComputerView {
 	}
 
 	private WaldotGraph open() {
-		// FIXME Completare Gremlin OLAP
+		// XXX Completare Gremlin OLAP
 		return null;
 	}
 

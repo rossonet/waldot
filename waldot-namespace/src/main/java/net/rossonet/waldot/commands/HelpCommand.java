@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class HelpCommand extends AbstractOpcCommand {
@@ -43,12 +44,17 @@ public class HelpCommand extends AbstractOpcCommand {
 	}
 
 	@Override
+	public String getDirectory() {
+		return MiloStrategy.GENERAL_CMD_DIRECTORY;
+	}
+
+	@Override
 	public String[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
 		Path target;
 		if (inputValues != null && inputValues.length > 0 && inputValues[0] != null && !inputValues[0].isEmpty()) {
-			target = Path.of(getNamespace().getConfiguration().getHelpDirectoryPath(), inputValues[0] + _TXT);
+			target = Path.of(getNamespace().getConfiguration().getHelpDirectory(), inputValues[0] + _TXT);
 		} else {
-			target = Path.of(getNamespace().getConfiguration().getHelpDirectoryPath(), INDEX_TXT);
+			target = Path.of(getNamespace().getConfiguration().getHelpDirectory(), INDEX_TXT);
 		}
 		if (Files.exists(target)) {
 			try {

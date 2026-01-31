@@ -17,10 +17,11 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
+import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
+import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -37,6 +38,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinElement;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 
 /**
  * AbstractOpcVertex is an abstract class that implements the WaldotVertex
@@ -51,7 +53,6 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	protected boolean allowNullPropertyValues = false;
 
 	protected final List<EventObserver> eventObservers = new ArrayList<>();
-
 	protected final WaldotGraph graph;
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 
@@ -82,12 +83,6 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public void addPropertyObserver(final PropertyObserver propertyObserver) {
 		propertyObservers.add(propertyObserver);
-
-	}
-
-	@Override
-	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
-		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
 	}
 
 	@Override
@@ -97,7 +92,6 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 		for (final WaldotEdge edge : values) {
 			edges.add(edge);
 		}
-
 		final Iterator<Edge> edgeIterator = edges.iterator();
 		return inComputerMode()
 				? IteratorUtils.filter(edgeIterator, edge -> getGraphComputerView().legalEdge(this, edge))
@@ -117,6 +111,19 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public WaldotNamespace getNamespace() {
 		return graph.getWaldotNamespace();
+	}
+
+	@Override
+	public String[] getPropertiesAsStringArray() {
+		final List<String> props = new ArrayList<>();
+		final ImmutableMap<String, WaldotVertexProperty<Object>> vertexProperties = getVertexProperties();
+		for (final Entry<String, WaldotVertexProperty<Object>> entry : vertexProperties.entrySet()) {
+			final String key = entry.getKey();
+			props.add(key);
+			final String value = entry.getValue().value().toString();
+			props.add(value);
+		}
+		return props.toArray(new String[0]);
 	}
 
 	@Override
@@ -145,6 +152,30 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 			return Collections.emptySet();
 		}
 		return inComputerMode() ? super.keys() : getVertexProperties().keySet();
+	}
+
+	@Override
+	public void notifyPropertyValueChanging(String label, DataValue value) {
+		if (label.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {
+			final QualifiedProperty<String> newLabel = new QualifiedProperty<String>(
+					graph.getWaldotNamespace().getNamespaceUri(), MiloStrategy.LABEL_FIELD,
+					MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(),
+					ValueRanks.Scalar, String.class);
+			setProperty(newLabel, (String) value.getValue().getValue());
+		}
+		if (label.equals(MiloStrategy.NAME_FIELD.toLowerCase())) {
+			final QualifiedName browseName = graph.getWaldotNamespace()
+					.generateQualifiedName((String) value.getValue().getValue());
+			final LocalizedText displayName = new LocalizedText((String) value.getValue().getValue());
+			setBrowseName(browseName);
+			setDisplayName(displayName);
+		}
+		if (label.equals(MiloStrategy.DESCRIPTION_PARAMETER.toLowerCase())) {
+			final LocalizedText description = new LocalizedText((String) value.getValue().getValue());
+			setDescription(description);
+		}
+		// TODO: gestire il cambio di directory
+		propertyObservers.forEach(observer -> observer.propertyChanged(this, label, value));
 	}
 
 	@Override
@@ -211,7 +242,6 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public <V> VertexProperty<V> property(final VertexProperty.Cardinality cardinality, final String key, final V value,
 			final Object... keyValues) {
-
 		if (this.isRemoved()) {
 			throw elementAlreadyRemoved(Vertex.class, this.getNodeId());
 		}
@@ -225,19 +255,13 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 			}
 			return VertexProperty.empty();
 		}
-
 		if (inComputerMode()) {
 			final VertexProperty<V> vertexProperty = getGraphComputerView().addProperty(this, key, value);
 			ElementHelper.attachProperties(vertexProperty, keyValues);
 			return vertexProperty;
 		} else {
-			return getNamespace().createOrUpdateWaldotVertexProperty((WaldotVertex) this, key, value);
+			return getNamespace().createOrUpdateWaldotVertexProperty(this, key, value);
 		}
-	}
-
-	@Override
-	public void propertyChanged(final UaNode node, final AttributeId attributeId, final Object value) {
-		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
 	}
 
 	@Override
@@ -271,7 +295,7 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 					: IteratorUtils.map(this.edges(direction, edgeLabels),
 							edge -> edge.vertices(direction.opposite()).next());
 		}
-		return (Iterator) getNamespace().getVertices(this, direction, edgeLabels);
+		return (Iterator) getNamespace().getVertices(this, direction, edgeLabels).values().iterator();
 	}
 
 }

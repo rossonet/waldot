@@ -21,7 +21,7 @@ public class WaldotX509IdentityValidator extends X509IdentityValidator {
 
 	private static Predicate<X509Certificate> getAuthChallenge(final WaldotConfiguration configuration) {
 		return (X509Challenge) -> {
-			logger.warn("X509Challenge: " + X509Challenge + ", certificate auhtntication not implemented yet");
+			logger.warn("X509Challenge: " + X509Challenge + ", certificate authentication not implemented yet");
 			return false;
 		};
 	}

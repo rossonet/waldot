@@ -12,9 +12,7 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
@@ -46,12 +44,14 @@ import net.rossonet.waldot.utils.LogHelper;
  */
 public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
 		implements WaldotVertexProperty<DATA_TYPE> {
-	protected boolean allowNullPropertyValues = false;
-	protected final WaldotGraph graph;
 
+	protected boolean allowNullPropertyValues = false;
+
+	protected final WaldotGraph graph;
 	private ByteString icon;
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
+
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 	private final WaldotVertex referenceVertex;
 
@@ -77,12 +77,6 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 			vertex.addComponent(this);
 			logger.error(LogHelper.stackTraceToString(a));
 		}
-	}
-
-	@Override
-	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
-		// not implemented
-		throw new UnsupportedOperationException("Method not implemented.");
 	}
 
 	@Override
@@ -146,12 +140,6 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	}
 
 	@Override
-	public void propertyChanged(final UaNode sourceNode, final AttributeId attributeId, final Object value) {
-		propertyObservers.forEach(observer -> observer.propertyChanged(sourceNode, attributeId, value));
-
-	}
-
-	@Override
 	public void remove() {
 		getVertexPropertyReference().removeComponent(this);
 	}
@@ -160,6 +148,12 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	public void setIcon(final ByteString icon) {
 		this.icon = icon;
 
+	}
+
+	@Override
+	public void setValue(DataValue value) {
+		referenceVertex.notifyPropertyValueChanging(key(), value);
+		super.setValue(value);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package net.rossonet.waldot.dtdl;
 
+import net.rossonet.waldot.utils.TextHelper;
+
 /**
  * The {@code DigitalTwinModelIdentifier} class represents a unique identifier
  * for a digital twin model as defined in the Digital Twin Definition Language
@@ -45,13 +47,20 @@ public class DigitalTwinModelIdentifier {
 	}
 
 	private final String path;
-
 	private final String scheme;
+
 	private final int version;
 
 	private DigitalTwinModelIdentifier(final String value) {
-		scheme = value.split(":")[0];
-		final String others = value.substring(scheme.length() + 1);
+		String cleanValue = value.toLowerCase().trim();
+		if (cleanValue == null || cleanValue.isEmpty()) {
+			throw new IllegalArgumentException("DigitalTwinModelIdentifier cannot be null or empty");
+		}
+		if (TextHelper.isDirtyValue(cleanValue)) {
+			cleanValue = TextHelper.cleanText(cleanValue);
+		}
+		scheme = cleanValue.split(":")[0];
+		final String others = cleanValue.substring(scheme.length() + 1);
 		path = others.split(";")[0];
 		version = Integer.valueOf(others.split(";")[1]);
 	}
@@ -130,22 +139,7 @@ public class DigitalTwinModelIdentifier {
 	 */
 	@Override
 	public String toString() {
-		final StringBuilder builder = new StringBuilder();
-		builder.append("Model Identifier [");
-		if (scheme != null) {
-			builder.append("scheme=");
-			builder.append(scheme);
-			builder.append(", ");
-		}
-		if (path != null) {
-			builder.append("path=");
-			builder.append(path);
-			builder.append(", ");
-		}
-		builder.append("version=");
-		builder.append(version);
-		builder.append("]");
-		return builder.toString();
+		return getScheme() + ":" + getPath() + ";" + getVersion();
 	}
 
 }

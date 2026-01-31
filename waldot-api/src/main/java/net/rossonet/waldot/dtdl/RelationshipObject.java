@@ -1,6 +1,7 @@
 package net.rossonet.waldot.dtdl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,13 +49,20 @@ public class RelationshipObject {
 	private String displayName;
 	private DigitalTwinModelIdentifier id;
 	private Integer maxMultiplicity;
+
 	private Integer minMultiplicity;
+
 	private String name;
+
 	private final List<PropertyObject> properties = new ArrayList<>();
 
 	private String target;
 
 	private boolean writable;
+
+	public RelationshipObject() {
+
+	}
 
 	/**
 	 * Constructs a {@code RelationshipObject} from a map of attributes defined in a
@@ -71,8 +79,8 @@ public class RelationshipObject {
 		for (final Entry<String, Object> record : relationship.entrySet()) {
 			switch (record.getKey()) {
 			case "@type":
-				if (!"Property".equals(record.getValue())) {
-					throw new IllegalArgumentException("@type must be Property but is " + record.getValue());
+				if (!"Relationship".equals(record.getValue())) {
+					throw new IllegalArgumentException("@type must be Relationship but is " + record.getValue());
 				}
 				break;
 			case "@id":
@@ -201,6 +209,34 @@ public class RelationshipObject {
 		return writable;
 	}
 
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public void setId(DigitalTwinModelIdentifier id) {
+		this.id = id;
+	}
+
+	public void setMaxMultiplicity(Integer maxMultiplicity) {
+		this.maxMultiplicity = maxMultiplicity;
+	}
+
+	public void setMinMultiplicity(Integer minMultiplicity) {
+		this.minMultiplicity = minMultiplicity;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	/**
 	 * Sets the properties of the relationship from a list of maps.
 	 *
@@ -220,6 +256,46 @@ public class RelationshipObject {
 			throw new IllegalArgumentException("properties must be a List but is " + props.getClass().getName());
 		}
 		return this;
+	}
+
+	public void setTarget(String target) {
+		this.target = target;
+	}
+
+	public void setWritable(boolean writable) {
+		this.writable = writable;
+	}
+
+	public Map<String, Object> toMap() {
+		final Map<String, Object> map = new HashMap<>();
+		map.put("@id", id.toString());
+		map.put("@type", "Relationship");
+		map.put("name", name);
+		map.put("target", target);
+		if (maxMultiplicity != null) {
+			map.put("maxMultiplicity", maxMultiplicity);
+		}
+		if (minMultiplicity != null) {
+			map.put("minMultiplicity", minMultiplicity);
+		}
+		map.put("writable", writable);
+		if (!properties.isEmpty()) {
+			final List<Map<String, Object>> props = new ArrayList<>();
+			for (final PropertyObject property : properties) {
+				props.add(property.toMap());
+			}
+			map.put("properties", props);
+		}
+		if (comment != null) {
+			map.put("comment", comment);
+		}
+		if (description != null) {
+			map.put("description", description);
+		}
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		return map;
 	}
 
 	/**

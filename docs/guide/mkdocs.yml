@@ -1,0 +1,35 @@
+site_name: Manuale WaldOT
+markdown_extensions:
+  - toc:
+      baselevel: "1"
+      toc_depth: "5"
+theme:
+   name: material
+   scheme: slate
+   logo: immagini/rossonet-logo-03_centered.png
+   favicon: immagini/icon.ico
+   features:
+   - search.suggest
+   palette:
+      primary: custom
+   font:
+      text: 20px Comfortaa,cursive
+extra_css:
+- stylesheets/extra.css
+plugins:
+- search
+- offline
+- with-pdf:
+   author: andrea.ambrosini@rossonet.com
+   toc_title: Indice dei contenuti
+   copyright: Rossonet s.c.a r.l.
+   cover: true
+   back_cover: false
+   cover_title: Manuale per utenti e sviluppatori del server OPCUA WaldOT
+   cover_subtitle: Version 0.0.1
+   cover_logo: immagini/rossonet-logo-02.png
+   verbose: true
+nav:
+- Manuale Utente WaldOT: manuale_utente.md
+- Guida integrazione Java WaldOT: manuale_integrazione.md
+- Guida realizzazione plugin Java per WaldOT: manuale_plugins.md

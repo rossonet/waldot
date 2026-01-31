@@ -19,10 +19,9 @@ import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
-import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
@@ -43,6 +42,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinCommandVertex;
+import net.rossonet.waldot.utils.TextHelper;
 
 /**
  * AbstractOpcCommand is an abstract class that extends GremlinCommandVertex and
@@ -79,6 +79,10 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	protected boolean allowNullPropertyValues = false;
 
+	private final String command;
+
+	private final String directory;
+
 	protected final List<EventObserver> eventObservers = new ArrayList<>();
 
 	protected final WaldotGraph graph;
@@ -93,14 +97,23 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	protected final WaldotNamespace waldotNamespace;
 
-	public AbstractOpcCommand(final WaldotGraph graph, final WaldotNamespace waldotNamespace, final String command,
-			final String description, final UInteger writeMask, final UInteger userWriteMask, final Boolean executable,
-			final Boolean userExecutable) {
-		super(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(command),
+	public AbstractOpcCommand(final WaldotGraph graph, final WaldotNamespace waldotNamespace, final String id,
+			final String command, final String description, final String directory, final UInteger writeMask,
+			final UInteger userWriteMask, final Boolean executable, final Boolean userExecutable) {
+		super(waldotNamespace.getOpcUaNodeContext(), waldotNamespace.generateNodeId(id),
 				waldotNamespace.generateQualifiedName(command), LocalizedText.english(command),
 				LocalizedText.english(description), writeMask, userWriteMask, executable, userExecutable);
 		this.waldotNamespace = waldotNamespace;
 		this.graph = graph;
+		this.directory = directory;
+		this.command = command;
+	}
+
+	public AbstractOpcCommand(final WaldotGraph graph, final WaldotNamespace waldotNamespace, final String command,
+			final String description, final UInteger writeMask, final UInteger userWriteMask, final Boolean executable,
+			final Boolean userExecutable) {
+		this(graph, waldotNamespace, command, command, description, null, writeMask, userWriteMask, executable,
+				userExecutable);
 	}
 
 	@Override
@@ -148,11 +161,6 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
-	public void attributeChanged(final UaNode node, final AttributeId attributeId, final Object value) {
-		propertyObservers.forEach(observer -> observer.propertyChanged(node, attributeId, value));
-	}
-
-	@Override
 	public Iterator<Edge> edges(final Direction direction, final String... edgeLabels) {
 		final Collection<WaldotEdge> values = getNamespace().getEdges(this, direction, edgeLabels).values();
 		final Collection<Edge> edges = new ArrayList<>();
@@ -169,6 +177,16 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	@Override
 	public UaMethodNode findMethodNode(final NodeId methodId) {
 		return null;
+	}
+
+	@Override
+	public String getConsoleCommand() {
+		return TextHelper.cleanText(directory != null ? directory + "_" + command : command);
+	}
+
+	@Override
+	public String getDirectory() {
+		return directory;
 	}
 
 	@Override
@@ -206,6 +224,11 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
+	public String[] getPropertiesAsStringArray() {
+		return new String[] {};
+	}
+
+	@Override
 	public List<PropertyObserver> getPropertyObservers() {
 		return Collections.emptyList();
 	}
@@ -223,6 +246,12 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	@Override
 	public boolean inComputerMode() {
 		return getNamespace().inComputerMode();
+	}
+
+	@Override
+	public void notifyPropertyValueChanging(String label, DataValue value) {
+		// not implemented for Command
+
 	}
 
 	@Override
@@ -309,14 +338,8 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 			ElementHelper.attachProperties(vertexProperty, keyValues);
 			return vertexProperty;
 		} else {
-			return getNamespace().createOrUpdateWaldotVertexProperty((WaldotVertex) this, key, value);
+			return getNamespace().createOrUpdateWaldotVertexProperty(this, key, value);
 		}
-	}
-
-	@Override
-	public void propertyChanged(final UaNode sourceNode, final AttributeId attributeId, final Object value) {
-		LOGGER.warn("propertyChanged not implemented for Command");
-
 	}
 
 	@Override

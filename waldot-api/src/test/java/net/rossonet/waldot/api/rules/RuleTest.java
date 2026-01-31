@@ -17,13 +17,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.rossonet.waldot.api.RuleListener;
+import net.rossonet.waldot.jexl.CachedRuleRecord;
+import net.rossonet.waldot.jexl.ClonableMapContext;
+import net.rossonet.waldot.jexl.Rule;
+import net.rossonet.waldot.jexl.WaldotStepLogger;
 
 class RuleTest {
 
-	private Rule mockRule;
+	private ClonableMapContext mockContext;
 	private CachedRuleRecord mockFact;
 	private RuleListener mockListener;
-	private ClonableMapContext mockContext;
+	private Rule mockRule;
 	private Callable<WaldotStepLogger> mockRunner;
 
 	@BeforeEach
@@ -96,7 +100,7 @@ class RuleTest {
 
 	@Test
 	void testGetFacts() {
-		Collection<CachedRuleRecord> facts = mockRule.getFacts();
+		final Collection<CachedRuleRecord> facts = mockRule.getFacts();
 		assertNotNull(facts);
 		assertEquals(1, facts.size());
 		assertTrue(facts.contains(mockFact));
@@ -105,7 +109,7 @@ class RuleTest {
 
 	@Test
 	void testGetListeners() {
-		Collection<RuleListener> listeners = mockRule.getListeners();
+		final Collection<RuleListener> listeners = mockRule.getListeners();
 		assertNotNull(listeners);
 		assertEquals(1, listeners.size());
 		assertTrue(listeners.contains(mockListener));

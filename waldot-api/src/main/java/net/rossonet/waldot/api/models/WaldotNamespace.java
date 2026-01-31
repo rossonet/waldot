@@ -24,14 +24,15 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 
-import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
-import net.rossonet.waldot.api.rules.WaldotRulesEngine;
-import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
+import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
+import net.rossonet.waldot.api.strategies.ConsoleStrategy;
+import net.rossonet.waldot.api.strategies.HistoryStrategy;
+import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
 /**
@@ -43,6 +44,8 @@ import net.rossonet.waldot.opc.WaldotOpcUaServer;
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public interface WaldotNamespace extends AutoCloseable {
+
+	void addAssetAgentNode(UaNode node);
 
 	WaldotEdge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex, String label, Object[] keyValues);
 
@@ -71,17 +74,19 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	QualifiedName generateQualifiedName(String label);
 
-	AgentManagementStrategy getAgentManagementStrategy();
-
 	Logger getBootLogger();
 
 	String getBootstrapUrl();
+
+	ClientManagementStrategy getClientManagementStrategy();
 
 	Object getCommandsAsFunction();
 
 	WaldotConfiguration getConfiguration();
 
 	Logger getConsoleLogger();
+
+	ConsoleStrategy getConsoleStrategy();
 
 	WaldotVertex getEdgeInVertex(WaldotEdge edge);
 
@@ -105,6 +110,8 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	WaldotGraph getGremlinGraph();
 
+	HistoryStrategy getHistoryStrategy();
+
 	Collection<NamespaceListener> getListeners();
 
 	NamespaceTable getNamespaceTable();
@@ -124,10 +131,6 @@ public interface WaldotNamespace extends AutoCloseable {
 	public <DATA_TYPE> WaldotEdge getPropertyReference(WaldotProperty<DATA_TYPE> property);
 
 	public ReferenceTypeTree getReferenceTypes();
-
-	WaldotRulesEngine getRulesEngine();
-
-	Logger getRulesLogger();
 
 	UaNodeManager getStorageManager();
 
@@ -149,6 +152,8 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	boolean inComputerMode();
 
+	Collection<String> listConfiguredCommands();
+
 	Object namespaceParametersGet(String key);
 
 	Set<String> namespaceParametersKeySet();
@@ -161,9 +166,9 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	void opcuaUpdateEvent(UaNode sourceNode);
 
-	void registerAgentValidators(AgentRegisterAnonymousValidator agentAnonymousValidator,
-			AgentRegisterUsernameIdentityValidator agentIdentityValidator,
-			AgentRegisterX509IdentityValidator agentX509IdentityValidator);
+	void registerAgentValidators(ClientRegisterAnonymousValidator agentAnonymousValidator,
+			ClientRegisterUsernameIdentityValidator agentIdentityValidator,
+			ClientRegisterX509IdentityValidator agentX509IdentityValidator);
 
 	void registerCommand(WaldotCommand command);
 

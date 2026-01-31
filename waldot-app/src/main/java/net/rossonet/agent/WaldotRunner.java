@@ -7,15 +7,18 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.api.configuration.OpcConfiguration;
+import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
 import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.agent.BaseAgentManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileBootstrapStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.client.BaseClientManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.BaseConsoleStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
 import net.rossonet.waldot.namespaces.HomunculusNamespace;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 import picocli.CommandLine.Command;
@@ -35,7 +38,7 @@ import picocli.CommandLine.Spec;
 public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger("WaldOT runner");
 
-	// TODO: completare con annotazioni Picocli
+	// FIXME: completare con annotazioni Picocli
 	public static void main(final String[] args) {
 		final WaldotRunner waldotRunner = new WaldotRunner();
 		try {
@@ -110,13 +113,13 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 
 	protected String helpCommandLabel;
 
-	protected String helpDirectory;
-
 	protected Boolean helpCommandUserExecutable;
 
 	protected UInteger helpCommandUserWriteMask;
 
 	protected UInteger helpCommandWriteMask;
+
+	protected String helpDirectory;
 
 	protected int httpsBindPort;
 
@@ -418,15 +421,15 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	}
 
 	public void runWaldot() throws InterruptedException, ExecutionException {
-		Thread.currentThread().setName("WaldOT Agent");
+		Thread.currentThread().setName("WaldOT_main");
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
-		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
+		final WaldotConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final OpcConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		waldot = new WaldotOpcUaServer(configuration, serverConfiguration, new DefaultAnonymousValidator(configuration),
 				new DefaultIdentityValidator(configuration), new DefaultX509IdentityValidator(configuration));
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),
-				new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
-				new BaseAgentManagementStrategy(), bootUrl);
+				new BaseHistoryStrategy(), new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
+				new BaseClientManagementStrategy(), bootUrl);
 		waldot.startup(namespace).get();
 		waldot.waitCompletion();
 	}

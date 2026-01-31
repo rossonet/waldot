@@ -40,7 +40,6 @@ public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implemen
 
 		@Override
 		public Object getAttribute(AttributeFilterContext ctx, AttributeId attributeId) {
-			// FIXME: gestione permessi per sessione
 			if (attributeId == AttributeId.UserAccessLevel) {
 				logger.debug("UserAccessLevel requested for {}", getNodeId());
 				// return AccessLevel.toValue(AccessLevel.READ_WRITE);

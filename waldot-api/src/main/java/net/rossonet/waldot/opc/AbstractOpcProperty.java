@@ -43,11 +43,12 @@ import net.rossonet.waldot.utils.LogHelper;
 public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
 		implements WaldotProperty<DATA_TYPE> {
 	protected boolean allowNullPropertyValues = false;
-	protected final List<EventObserver> eventObservers = new ArrayList<>();
 
+	protected final List<EventObserver> eventObservers = new ArrayList<>();
 	protected final WaldotGraph graph;
 
 	private ByteString icon;
+
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 	private final WaldotEdge referenceEdge;
@@ -134,6 +135,12 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 	public void setIcon(final ByteString icon) {
 		this.icon = icon;
 
+	}
+
+	@Override
+	public void setValue(DataValue value) {
+		referenceEdge.notifyPropertyValueChanging(key(), value);
+		super.setValue(value);
 	}
 
 	@Override

@@ -32,16 +32,20 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.api.configuration.OpcConfiguration;
+import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
 import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.configuration.DefaultOpcUaConfiguration;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.agent.BaseAgentManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileBootstrapStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.client.BaseClientManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.BaseConsoleStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
 import net.rossonet.waldot.namespaces.HomunculusNamespace;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
@@ -161,7 +165,7 @@ public final class OpcFactory {
 	public static void generateKitchenSink(final WaldotGraph graph) {
 		final GraphTraversalSource g = graph.traversal();
 		g.addV("loops").property(T.id, 1000).property("name", "loop").as("me").addE("self").to("me")
-				.property(T.id, 1001).iterate();
+				.property(T.id, 1001).property("test", "prova").iterate();
 		g.addV("message").property(T.id, 2000).property("name", "a").as("a").addV("message").property(T.id, 2001)
 				.property("name", "b").as("b").addE("link").from("a").to("b").property(T.id, 2002).addE("link")
 				.from("a").to("a").property(T.id, 2003).iterate();
@@ -189,7 +193,6 @@ public final class OpcFactory {
 		final Vertex peter = g.addVertex(T.id, 6, T.label, "person");
 		peter.property("name", "peter", T.id, 10l);
 		peter.property("age", 35, T.id, 11l);
-
 		marko.addEdge("knows", vadas, T.id, 7, "weight", 0.5d);
 		marko.addEdge("knows", josh, T.id, 8, "weight", 1.0d);
 		marko.addEdge("created", lop, T.id, 9, "weight", 0.4d);
@@ -202,52 +205,45 @@ public final class OpcFactory {
 	 * Generate the graph in {@link #createTheCrew()} into an existing graph.
 	 */
 	public static void generateTheCrew(final WaldotGraph g) {
-		final Vertex marko = g.addVertex(T.id, 1, T.label, "person", "name", "marko");
-		final Vertex stephen = g.addVertex(T.id, 7, T.label, "person", "name", "stephen");
-		final Vertex matthias = g.addVertex(T.id, 8, T.label, "person", "name", "matthias");
-		final Vertex daniel = g.addVertex(T.id, 9, T.label, "person", "name", "daniel");
-		final Vertex gremlin = g.addVertex(T.id, 10, T.label, "software", "name", "gremlin");
-		final Vertex tinkergraph = g.addVertex(T.id, 11, T.label, "software", "name", "tinkergraph");
-
+		final Vertex marko = g.addVertex(T.id, 1, T.label, "person", "name", "marko", "directory", "crew/marko");
+		final Vertex stephen = g.addVertex(T.id, 7, T.label, "person", "name", "stephen", "directory", "crew/stephen");
+		final Vertex matthias = g.addVertex(T.id, 8, T.label, "person", "name", "matthias", "directory",
+				"crew/matthias");
+		final Vertex daniel = g.addVertex(T.id, 9, T.label, "person", "name", "daniel", "directory", "crew/daniel");
+		final Vertex gremlin = g.addVertex(T.id, 10, T.label, "software", "name", "gremlin", "directory",
+				"crew/gremlin");
+		final Vertex tinkergraph = g.addVertex(T.id, 11, T.label, "software", "name", "tinkergraph", "directory",
+				"crew/tinkergraph");
 		marko.property(VertexProperty.Cardinality.list, "location", "san diego", "startTime", 1997, "endTime", 2001);
 		marko.property(VertexProperty.Cardinality.list, "location", "santa cruz", "startTime", 2001, "endTime", 2004);
 		marko.property(VertexProperty.Cardinality.list, "location", "brussels", "startTime", 2004, "endTime", 2005);
 		marko.property(VertexProperty.Cardinality.list, "location", "santa fe", "startTime", 2005);
-
 		stephen.property(VertexProperty.Cardinality.list, "location", "centreville", "startTime", 1990, "endTime",
 				2000);
 		stephen.property(VertexProperty.Cardinality.list, "location", "dulles", "startTime", 2000, "endTime", 2006);
 		stephen.property(VertexProperty.Cardinality.list, "location", "purcellville", "startTime", 2006);
-
 		matthias.property(VertexProperty.Cardinality.list, "location", "bremen", "startTime", 2004, "endTime", 2007);
 		matthias.property(VertexProperty.Cardinality.list, "location", "baltimore", "startTime", 2007, "endTime", 2011);
 		matthias.property(VertexProperty.Cardinality.list, "location", "oakland", "startTime", 2011, "endTime", 2014);
 		matthias.property(VertexProperty.Cardinality.list, "location", "seattle", "startTime", 2014);
-
 		daniel.property(VertexProperty.Cardinality.list, "location", "spremberg", "startTime", 1982, "endTime", 2005);
 		daniel.property(VertexProperty.Cardinality.list, "location", "kaiserslautern", "startTime", 2005, "endTime",
 				2009);
 		daniel.property(VertexProperty.Cardinality.list, "location", "aachen", "startTime", 2009);
-
-		marko.addEdge("develops", gremlin, T.id, 13, "since", 2009);
-		marko.addEdge("develops", tinkergraph, T.id, 14, "since", 2010);
-		marko.addEdge("uses", gremlin, T.id, 15, "skill", 4);
-		marko.addEdge("uses", tinkergraph, T.id, 16, "skill", 5);
-
-		stephen.addEdge("develops", gremlin, T.id, 17, "since", 2010);
-		stephen.addEdge("develops", tinkergraph, T.id, 18, "since", 2011);
-		stephen.addEdge("uses", gremlin, T.id, 19, "skill", 5);
-		stephen.addEdge("uses", tinkergraph, T.id, 20, "skill", 4);
-
-		matthias.addEdge("develops", gremlin, T.id, 21, "since", 2012);
-		matthias.addEdge("uses", gremlin, T.id, 22, "skill", 3);
-		matthias.addEdge("uses", tinkergraph, T.id, 23, "skill", 3);
-
-		daniel.addEdge("uses", gremlin, T.id, 24, "skill", 5);
-		daniel.addEdge("uses", tinkergraph, T.id, 25, "skill", 3);
-
-		gremlin.addEdge("traverses", tinkergraph, T.id, 26);
-
+		marko.addEdge("develops", gremlin, T.id, 13, "since", 2009, "directory", "crew/marko");
+		marko.addEdge("develops", tinkergraph, T.id, 14, "since", 2010, "directory", "crew/marko");
+		marko.addEdge("uses", gremlin, T.id, 15, "skill", 4, "directory", "crew/marko");
+		marko.addEdge("uses", tinkergraph, T.id, 16, "skill", 5, "directory", "crew/marko");
+		stephen.addEdge("develops", gremlin, T.id, 17, "since", 2010, "directory", "crew/stephen");
+		stephen.addEdge("develops", tinkergraph, T.id, 18, "since", 2011, "directory", "crew/stephen");
+		stephen.addEdge("uses", gremlin, T.id, 19, "skill", 5, "directory", "crew/stephen");
+		stephen.addEdge("uses", tinkergraph, T.id, 20, "skill", 4, "directory", "crew/stephen");
+		matthias.addEdge("develops", gremlin, T.id, 21, "since", 2012, "directory", "crew/matthias");
+		matthias.addEdge("uses", gremlin, T.id, 22, "skill", 3, "directory", "crew/matthias");
+		matthias.addEdge("uses", tinkergraph, T.id, 23, "skill", 3, "directory", "crew/matthias");
+		daniel.addEdge("uses", gremlin, T.id, 24, "skill", 5, "directory", "crew/daniel");
+		daniel.addEdge("uses", tinkergraph, T.id, 25, "skill", 3, "directory", "crew/daniel");
+		gremlin.addEdge("traverses", tinkergraph, T.id, 26, "since", 2009, "directory", "crew/gremlin");
 		g.variables().set("creator", "marko");
 		g.variables().set("lastModified", 2014);
 		g.variables().set("comment",
@@ -255,8 +251,18 @@ public final class OpcFactory {
 	}
 
 	public static WaldotGraph getOpcGraph() throws InterruptedException, ExecutionException {
-		final DefaultHomunculusConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
-		final DefaultOpcUaConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
+		return getOpcGraph("file:///tmp/boot.conf", new BaseHistoryStrategy());
+	};
+
+	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {
+		// TODO verificare come usare la configurazione originale
+		return getOpcGraph();
+	}
+
+	public static WaldotGraph getOpcGraph(String bootStrapUrl, HistoryStrategy historyStrategy)
+			throws InterruptedException, ExecutionException {
+		final WaldotConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		final OpcConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		final WaldotOpcUaServer waldot = new WaldotOpcUaServer(configuration, serverConfiguration,
 				new DefaultAnonymousValidator(configuration), new DefaultIdentityValidator(configuration),
 				new DefaultX509IdentityValidator(configuration));
@@ -273,16 +279,11 @@ public final class OpcFactory {
 			}
 		});
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),
-				new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
-				new BaseAgentManagementStrategy(), "file:///tmp/boot.conf");
+				historyStrategy, new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
+				new BaseClientManagementStrategy(), bootStrapUrl);
 		waldot.startup(namespace).get();
 		logger.info("Waldot OPC-UA Server started");
 		return waldot.getGremlinGraph();
-	}
-
-	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {
-		// TODO verificare come usare la configurazione originale
-		return getOpcGraph();
 	}
 
 	private OpcFactory() {

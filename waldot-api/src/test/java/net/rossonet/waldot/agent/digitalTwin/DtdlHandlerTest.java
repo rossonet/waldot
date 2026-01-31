@@ -9,6 +9,8 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
+import net.rossonet.waldot.dtdl.DtdlHandler;
+
 class DtdlHandlerTest {
 
 	@Test

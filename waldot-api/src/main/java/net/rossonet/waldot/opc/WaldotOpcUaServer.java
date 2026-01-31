@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -26,6 +28,7 @@ import org.eclipse.milo.opcua.sdk.server.EndpointConfig;
 import org.eclipse.milo.opcua.sdk.server.EndpointConfig.Builder;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServerConfig;
+import org.eclipse.milo.opcua.sdk.server.OpcUaServerConfigBuilder;
 import org.eclipse.milo.opcua.sdk.server.identity.AbstractIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.IdentityValidator;
@@ -53,14 +56,13 @@ import org.eclipse.milo.opcua.stack.transport.server.OpcServerTransport;
 import org.eclipse.milo.opcua.stack.transport.server.OpcServerTransportFactory;
 import org.eclipse.milo.opcua.stack.transport.server.tcp.OpcTcpServerTransport;
 import org.eclipse.milo.opcua.stack.transport.server.tcp.OpcTcpServerTransportConfig;
+import org.eclipse.milo.opcua.stack.transport.server.tcp.OpcTcpServerTransportConfigBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.jsonldjava.shaded.com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath;
 
-import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
+import io.netty.channel.nio.NioEventLoopGroup;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
 import net.rossonet.waldot.api.auth.FactoryPasswordValidator;
@@ -69,7 +71,11 @@ import net.rossonet.waldot.api.configuration.OpcConfiguration;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.utils.KeyStoreLoader;
+import net.rossonet.waldot.utils.ThreadHelper;
 
 /**
  * WaldotOpcUaServer is the main class for the Waldot OPC UA server. It handles
@@ -82,7 +88,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	public static final String[] PLUGINS_BASE_SEARCH_PACKAGE = new String[] { "net.rossonet.waldot", "plugin",
 			"plugins" };
 
-	public static final String REGISTER_PATH = "/register";
+	private static final boolean USE_VIRTUAL_THREADS = true;
 
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
@@ -96,20 +102,26 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
-	private final AgentRegisterAnonymousValidator agentAnonymousValidator;
+	private final ClientRegisterAnonymousValidator agentAnonymousValidator;
 
-	private final AgentRegisterUsernameIdentityValidator agentIdentityValidator;
+	private final ClientRegisterUsernameIdentityValidator agentIdentityValidator;
 
-	private final AgentRegisterX509IdentityValidator agentX509IdentityValidator;
+	private final ClientRegisterX509IdentityValidator agentX509IdentityValidator;
 
 	private final AbstractIdentityValidator anonymousValidator;
 
 	private OpcConfiguration configuration;
 
+	private NioEventLoopGroup eventLoop;
+
+	private ExecutorService executor;
 	private final UsernameIdentityValidator identityValidator;
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+
 	private WaldotNamespace managerNamespace;
+
+	private ScheduledExecutorService scheduledExecutor;
 
 	private OpcUaServer server;
 
@@ -125,11 +137,11 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		this.identityValidator = identityValidator;
 		this.x509IdentityValidator = x509IdentityValidator;
 		this.waldotConfiguration = waldotConfiguration;
-		agentAnonymousValidator = new AgentRegisterAnonymousValidator(this);
+		agentAnonymousValidator = new ClientRegisterAnonymousValidator(this);
 
-		agentIdentityValidator = new AgentRegisterUsernameIdentityValidator(this, new FactoryPasswordValidator());
+		agentIdentityValidator = new ClientRegisterUsernameIdentityValidator(this, new FactoryPasswordValidator());
 
-		agentX509IdentityValidator = new AgentRegisterX509IdentityValidator(this);
+		agentX509IdentityValidator = new ClientRegisterX509IdentityValidator(this);
 		try {
 			server = create(configuration, anonymousValidator, identityValidator, x509IdentityValidator);
 		} catch (final Exception e) {
@@ -156,6 +168,29 @@ public class WaldotOpcUaServer implements AutoCloseable {
 				logger.info("OPCUA Server shutdown completed");
 			} catch (final InterruptedException | ExecutionException | TimeoutException e) {
 				logger.error("Timeout during OPCUA Server shutdown", e);
+			}
+		}
+		if (eventLoop != null) {
+			eventLoop.shutdownGracefully();
+		}
+		if (scheduledExecutor != null) {
+			scheduledExecutor.shutdown();
+		}
+		if (executor != null) {
+			executor.shutdown();
+		}
+		if (scheduledExecutor != null) {
+			try {
+				scheduledExecutor.awaitTermination(10, TimeUnit.SECONDS);
+			} catch (final InterruptedException e) {
+				logger.error("Error shutting down scheduled executor", e);
+			}
+		}
+		if (executor != null) {
+			try {
+				executor.awaitTermination(10, TimeUnit.SECONDS);
+			} catch (final InterruptedException e) {
+				logger.error("Error shutting down executor", e);
 			}
 		}
 	}
@@ -234,7 +269,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 				final Builder builder = EndpointConfig.newBuilder().setBindAddress(bindAddress).setHostname(hostname)
 						.setPath(configuration.getPath()).setCertificate(certificate).addTokenPolicies(
 								USER_TOKEN_POLICY_ANONYMOUS, USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
-				// TODO gestire la configurazione delle policy da configurazione opc
+				// TODO gestire la configurazione delle policy di sicurezza (encryption)
 				final Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None)
 						.setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(noSecurityBuilder));
@@ -261,9 +296,12 @@ public class WaldotOpcUaServer implements AutoCloseable {
 						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
 				endpointConfigurations.add(buildTcpEndpoint(discoveryBuilder));
 				// endpointConfigurations.add(buildHttpsEndpoint(discoveryBuilder));
-				final Builder registerBuilder = builder.copy().setPath(configuration.getPath() + REGISTER_PATH)
-						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
-				endpointConfigurations.add(buildTcpEndpoint(registerBuilder));
+				/*
+				 * final Builder registerBuilder =
+				 * builder.copy().setPath(configuration.getPath() + REGISTER_PATH)
+				 * .setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.
+				 * None); endpointConfigurations.add(buildTcpEndpoint(registerBuilder));
+				 */
 				// endpointConfigurations.add(buildHttpsEndpoint(registerBuilder));
 			}
 		}
@@ -275,7 +313,8 @@ public class WaldotOpcUaServer implements AutoCloseable {
 			final CertificateManager certificateManager, final String applicationUri,
 			final Set<EndpointConfig> endpointConfigurations, final IdentityValidator anonymousValidator,
 			final UsernameIdentityValidator identityValidator, final X509IdentityValidator x509IdentityValidator) {
-		final OpcUaServerConfig serverConfig = OpcUaServerConfig.builder().setApplicationUri(applicationUri)
+		final OpcUaServerConfigBuilder serverConfigBuilder = OpcUaServerConfig.builder()
+				.setApplicationUri(applicationUri)
 				.setApplicationName(LocalizedText.english(configuration.getApplicationName()))
 				.setEndpoints(endpointConfigurations)
 				.setBuildInfo(new BuildInfo(configuration.getProductUri(), configuration.getManufacturerName(),
@@ -285,20 +324,39 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 				.setIdentityValidator(new CompositeValidator(agentAnonymousValidator, agentIdentityValidator,
 						agentX509IdentityValidator, anonymousValidator, identityValidator, x509IdentityValidator))
-				.setProductUri(configuration.getProductUri()).build();
+				.setProductUri(configuration.getProductUri());
+		if (USE_VIRTUAL_THREADS) {
+			if (executor == null) {
+				executor = ThreadHelper.newVirtualThreadExecutor();
+			}
+			serverConfigBuilder.setExecutor(executor);
+			if (scheduledExecutor == null) {
+				scheduledExecutor = ThreadHelper.newVirtualSchedulerExecutor("vsched-opcua-");
+			}
+			serverConfigBuilder.setScheduledExecutor(scheduledExecutor);
+		}
 		final OpcServerTransportFactory transportFactory = new OpcServerTransportFactory() {
 
 			@Override
 			public OpcServerTransport create(TransportProfile transportProfile) {
 				assert transportProfile == TransportProfile.TCP_UASC_UABINARY;
-
-				final OpcTcpServerTransportConfig transportConfig = OpcTcpServerTransportConfig.newBuilder().build();
-
-				return new OpcTcpServerTransport(transportConfig);
+				final OpcTcpServerTransportConfigBuilder transportConfigBuilder = OpcTcpServerTransportConfig
+						.newBuilder();
+				if (USE_VIRTUAL_THREADS) {
+					if (executor == null) {
+						executor = ThreadHelper.newVirtualThreadExecutor();
+					}
+					transportConfigBuilder.setExecutor(executor);
+					if (eventLoop == null) {
+						eventLoop = ThreadHelper.newVirtualEventLoopGroup("netty-evtloop-");
+					}
+					transportConfigBuilder.setEventLoop(eventLoop);
+				}
+				return new OpcTcpServerTransport(transportConfigBuilder.build());
 			}
 
 		};
-		final OpcUaServer opcUaServer = new OpcUaServer(serverConfig, transportFactory);
+		final OpcUaServer opcUaServer = new OpcUaServer(serverConfigBuilder.build(), transportFactory);
 		return opcUaServer;
 	}
 
@@ -382,6 +440,11 @@ public class WaldotOpcUaServer implements AutoCloseable {
 			logger.error("Error creating server", e);
 			return CompletableFuture.failedFuture(e);
 		}
+	}
+
+	public void updateReferenceTypeTree() {
+		server.updateReferenceTypeTree();
+
 	}
 
 	public void waitCompletion() throws InterruptedException, ExecutionException {

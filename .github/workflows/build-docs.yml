@@ -1,0 +1,41 @@
+name: Genera manuale italiano
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Print env
+      run: echo $GITHUB_ACTOR
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
+        architecture: 'x64'
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip     # install pip
+        python3 -m pip install mkdocs            # install mkdocs 
+        python3 -m pip install mkdocs-material   # install material theme
+        python3 -m pip install mkdocs-with-pdf
+    - name: Build Manuale
+      run: |
+        cd docs/guide
+        mkdocs build --config-file=mkdocs.yml -v -c -d manuale_wot
+        tar -czf manuale.tgz manuale_wot
+    - uses: actions/upload-artifact@v4
+      with:
+        name: manuale_waldot.pdf
+        path: docs/guide/manuale_wot/pdf/document.pdf
+    - uses: actions/upload-artifact@v4
+      with:
+        name: manuale_waldot_web
+        path: docs/guide/manuale.tgz
+
+

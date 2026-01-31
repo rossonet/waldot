@@ -1,5 +1,6 @@
 package net.rossonet.waldot.dtdl;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -39,10 +40,15 @@ public class ComponentObject {
 	private String comment;
 	private String description;
 	private String displayName;
+
 	private DigitalTwinModelIdentifier id;
+
 	private String name;
 
 	private Schema schema;
+
+	public ComponentObject() {
+	}
 
 	/**
 	 * Constructs a {@code ComponentObject} from a map of attributes defined in a
@@ -128,7 +134,7 @@ public class ComponentObject {
 	 */
 	public String getName() {
 		return name;
-	}
+	};
 
 	/**
 	 * Retrieves the schema of the component, which references another interface.
@@ -137,6 +143,52 @@ public class ComponentObject {
 	 */
 	public Schema getSchema() {
 		return schema;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public void setId(DigitalTwinModelIdentifier id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setSchema(Schema schema) {
+		this.schema = schema;
+	}
+
+	public Map<String, Object> toMap() {
+		final Map<String, Object> map = new HashMap<>();
+		map.put("@id", id.toString());
+		map.put("@type", "Component");
+		map.put("name", name);
+		if (schema != null && schema.isJson()) {
+			map.put("schema", schema.toSchemaJson());
+		} else {
+			map.put("schema", schema.toSchemaString());
+		}
+		if (comment != null) {
+			map.put("comment", comment);
+		}
+		if (description != null) {
+			map.put("description", description);
+		}
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		return map;
 	}
 
 	/**

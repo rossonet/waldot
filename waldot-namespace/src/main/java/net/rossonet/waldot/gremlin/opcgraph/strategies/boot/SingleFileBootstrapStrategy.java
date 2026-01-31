@@ -17,9 +17,14 @@ import net.rossonet.waldot.utils.LogHelper;
 @WaldotBootstrapStrategy
 public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 
-	private WaldotNamespace waldotNamespace;
 	private AgentStatus agentStatus = AgentStatus.INIT;
 	private Logger logger;
+	private WaldotNamespace waldotNamespace;
+
+	@Override
+	public void close() throws Exception {
+		// nothing to close
+	}
 
 	@Override
 	public AgentStatus getAgentStatus() {

@@ -24,18 +24,19 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.factories.EventFactory;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.NamespaceTable;
-import org.eclipse.milo.opcua.stack.core.types.DataTypeManager;
-import org.eclipse.milo.opcua.stack.core.types.DefaultDataTypeManager;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadDetails;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadResult;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadValueId;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateDetails;
+import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateResult;
 import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.agent.auth.AgentRegisterAnonymousValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterUsernameIdentityValidator;
-import net.rossonet.waldot.agent.auth.AgentRegisterX509IdentityValidator;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
@@ -48,66 +49,72 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
-import net.rossonet.waldot.api.rules.WaldotRulesEngine;
-import net.rossonet.waldot.api.strategies.AgentManagementStrategy;
 import net.rossonet.waldot.api.strategies.BootstrapStrategy;
+import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
+import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
+import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
+import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
-import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
-import net.rossonet.waldot.jexl.RulesCmdFunction;
+import net.rossonet.waldot.jexl.JexlCmdFunction;
 import net.rossonet.waldot.logger.TraceLogger;
 import net.rossonet.waldot.logger.TraceLogger.ContexLogger;
+import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
-import net.rossonet.waldot.rules.DefaultRulesEngine;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
-	private AgentRegisterAnonymousValidator agentAnonymousValidator;
-	private AgentRegisterUsernameIdentityValidator agentIdentityValidator;
-	private final AgentManagementStrategy agentManagementStrategy;
-	private AgentRegisterX509IdentityValidator agentX509IdentityValidator;
+	private ClientRegisterAnonymousValidator agentAnonymousValidator;
+	private ClientRegisterUsernameIdentityValidator agentIdentityValidator;
+	private ClientRegisterX509IdentityValidator agentX509IdentityValidator;
+
 	private final Logger bootLogger = new TraceLogger(ContexLogger.BOOT);
 	private final BootstrapStrategy bootstrapProcedureStrategy;
 	private final String bootstrapUrl;
+	private final ClientManagementStrategy clientManagementStrategy;
 	private final WaldotConfiguration configuration;
 	private final Logger consoleLogger = new TraceLogger(ContexLogger.CONSOLE);
+
 	private final ConsoleStrategy consoleStrategy;
-	private final DataTypeManager dictionaryManager;
+	// private final DataTypeManager dictionaryManager;
 	private WaldotGraphComputerView graphComputerView;
 	private final WaldotGraph gremlin;
-	private final RulesCmdFunction jexlWaldotCommandHelper;
+	private final HistoryStrategy historyStrategy;
+	private final JexlCmdFunction jexlWaldotCommandHelper;
 	private final List<NamespaceListener> listeners = new ArrayList<>();
-	private final Logger logger = LoggerFactory.getLogger(getClass());
 
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private final Graph.Variables opcGraphVariables;
 	private final MiloStrategy opcMappingStrategy;
 	private final Set<PluginListener> plugins = new HashSet<>();
-	private final WaldotRulesEngine rulesEngine;
-	private final Logger rulesLogger = new TraceLogger(ContexLogger.RULES);
+
 	private final SubscriptionModel subscriptionModel;
+
 	private WaldotOpcUaServer waldotOpcUaServer;
 
 	public HomunculusNamespace(final WaldotOpcUaServer server, final MiloStrategy opcMappingStrategy,
-			final ConsoleStrategy consoleStrategy, final DefaultHomunculusConfiguration configuration,
-			final BootstrapStrategy bootstrapProcedureStrategy, final AgentManagementStrategy agentManagementStrategy,
-			final String bootstrapUrl) {
+			HistoryStrategy historyStrategy, final ConsoleStrategy consoleStrategy,
+			final WaldotConfiguration configuration, final BootstrapStrategy bootstrapProcedureStrategy,
+			final ClientManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
+		this.historyStrategy = historyStrategy;
 		this.consoleStrategy = consoleStrategy;
-		this.jexlWaldotCommandHelper = new RulesCmdFunction(this);
+		this.jexlWaldotCommandHelper = new JexlCmdFunction(this);
 		this.configuration = configuration;
 		this.bootstrapProcedureStrategy = bootstrapProcedureStrategy;
-		this.agentManagementStrategy = agentManagementStrategy;
+		this.clientManagementStrategy = agentManagementStrategy;
 		this.bootstrapUrl = bootstrapUrl;
 		opcGraphVariables = new OpcGraphVariables(this);
 		subscriptionModel = new SubscriptionModel(server.getServer(), this);
-		dictionaryManager = new DefaultDataTypeManager();
+		// dictionaryManager = new DefaultDataTypeManager();
 		// getLifecycleManager().addLifecycle(dictionaryManager);
 		getLifecycleManager().addLifecycle(subscriptionModel);
 		getLifecycleManager().addStartupTask(this::runBootstrapProcedure);
@@ -117,10 +124,15 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		opcMappingStrategy.initialize(this);
 		consoleStrategy.initialize(this);
 		addBaseCommands();
-		logger.info("Namespace created");
+		logger.info("HomunculusNamespace initialized");
 		listeners.forEach(listener -> listener.onNamespaceCreated(this));
 		bootstrapProcedureStrategy.initialize(this);
-		rulesEngine = new DefaultRulesEngine(this);
+	}
+
+	@Override
+	public void addAssetAgentNode(UaNode assetManagerComponent) {
+		getStorageManager().addNode(assetManagerComponent);
+		clientManagementStrategy.getAssetClientsFolderNode().addOrganizes(assetManagerComponent);
 	}
 
 	private void addBaseCommands() {
@@ -153,8 +165,20 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public void close() throws Exception {
+		bootstrapProcedureStrategy.close();
+		logger.info("bootstrap procedure strategy closed");
+		consoleStrategy.close();
+		logger.info("console strategy closed");
 		plugins.forEach(plugin -> plugin.stop());
-
+		logger.info("all plugins stopped");
+		clientManagementStrategy.close();
+		logger.info("client management strategy closed");
+		opcMappingStrategy.close();
+		logger.info("opc mapping strategy closed");
+		historyStrategy.close();
+		logger.info("history strategy closed");
+		waldotOpcUaServer.close();
+		logger.info("opcua server closed");
 	}
 
 	@Override
@@ -206,11 +230,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public AgentManagementStrategy getAgentManagementStrategy() {
-		return agentManagementStrategy;
-	}
-
-	@Override
 	public Logger getBootLogger() {
 		return bootLogger;
 	}
@@ -218,6 +237,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public String getBootstrapUrl() {
 		return bootstrapUrl;
+	}
+
+	@Override
+	public ClientManagementStrategy getClientManagementStrategy() {
+		return clientManagementStrategy;
 	}
 
 	@Override
@@ -233,6 +257,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public Logger getConsoleLogger() {
 		return consoleLogger;
+	}
+
+	@Override
+	public ConsoleStrategy getConsoleStrategy() {
+		return consoleStrategy;
 	}
 
 	@Override
@@ -292,6 +321,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
+	public HistoryStrategy getHistoryStrategy() {
+		return historyStrategy;
+	}
+
+	@Override
 	public Collection<NamespaceListener> getListeners() {
 		return listeners;
 	}
@@ -335,16 +369,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public ReferenceTypeTree getReferenceTypes() {
 		return getServer().getReferenceTypeTree();
-	}
-
-	@Override
-	public WaldotRulesEngine getRulesEngine() {
-		return rulesEngine;
-	}
-
-	@Override
-	public Logger getRulesLogger() {
-		return rulesLogger;
 	}
 
 	@Override
@@ -396,8 +420,25 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
+	public List<HistoryReadResult> historyRead(HistoryReadContext context, HistoryReadDetails readDetails,
+			TimestampsToReturn timestamps, List<HistoryReadValueId> readValueIds) {
+		return historyStrategy.historyRead(context, readDetails, timestamps, readValueIds);
+	}
+
+	@Override
+	public List<HistoryUpdateResult> historyUpdate(HistoryUpdateContext context,
+			List<HistoryUpdateDetails> updateDetails) {
+		return historyStrategy.historyUpdate(context, updateDetails);
+	}
+
+	@Override
 	public boolean inComputerMode() {
 		return null != getGraphComputerView();
+	}
+
+	@Override
+	public Collection<String> listConfiguredCommands() {
+		return consoleStrategy.listConfiguredCommands();
 	}
 
 	@Override
@@ -431,18 +472,22 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	public void onDataItemsCreated(final List<DataItem> dataItems) {
 		subscriptionModel.onDataItemsCreated(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsCreated(dataItems));
+		historyStrategy.onDataItemsCreated(dataItems);
 	}
 
 	@Override
 	public void onDataItemsDeleted(final List<DataItem> dataItems) {
 		subscriptionModel.onDataItemsDeleted(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsDeleted(dataItems));
+		historyStrategy.onDataItemsDeleted(dataItems);
 	}
 
 	@Override
 	public void onDataItemsModified(final List<DataItem> dataItems) {
 		subscriptionModel.onDataItemsModified(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsModified(dataItems));
+		historyStrategy.onDataItemsModified(dataItems);
+		subscriptionModel.onDataItemsModified(dataItems);
 	}
 
 	@Override
@@ -453,23 +498,27 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public void opcuaUpdateEvent(final UaNode sourceNode) {
-		opcMappingStrategy.updateEventGenerator(sourceNode);
-
+		opcMappingStrategy.updateEventGenerator(sourceNode, "update", "update",
+				"node " + sourceNode.getNodeId() + " updated", 0);
+		listeners.forEach(listener -> listener.onUpdateNode(sourceNode));
+		historyStrategy.opcuaUpdateEvent(sourceNode);
 	}
 
 	@Override
-	public void registerAgentValidators(final AgentRegisterAnonymousValidator agentAnonymousValidator,
-			final AgentRegisterUsernameIdentityValidator agentIdentityValidator,
-			final AgentRegisterX509IdentityValidator agentX509IdentityValidator) {
+	public void registerAgentValidators(final ClientRegisterAnonymousValidator agentAnonymousValidator,
+			final ClientRegisterUsernameIdentityValidator agentIdentityValidator,
+			final ClientRegisterX509IdentityValidator agentX509IdentityValidator) {
 		this.agentAnonymousValidator = agentAnonymousValidator;
 		this.agentIdentityValidator = agentIdentityValidator;
 		this.agentX509IdentityValidator = agentX509IdentityValidator;
-		agentManagementStrategy.activate(agentAnonymousValidator, agentIdentityValidator, agentX509IdentityValidator);
+		clientManagementStrategy.activate(agentAnonymousValidator, agentIdentityValidator, agentX509IdentityValidator);
 	}
 
 	@Override
 	public void registerCommand(final WaldotCommand command) {
 		opcMappingStrategy.registerCommand(command);
+		consoleStrategy.registerCommand(command);
+		getStorageManager().addNode((AbstractOpcCommand) command);
 		listeners.forEach(listener -> listener.onCommandRegistered(command));
 	}
 
@@ -484,6 +533,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public void removeCommand(final WaldotCommand command) {
 		opcMappingStrategy.removeCommand(command);
+		consoleStrategy.removeCommand(command);
+		getStorageManager().removeNode(command.getNodeId());
 		listeners.forEach(listener -> listener.onCommandRemoved(command));
 	}
 

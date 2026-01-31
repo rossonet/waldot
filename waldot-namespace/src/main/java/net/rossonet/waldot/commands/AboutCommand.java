@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class AboutCommand extends AbstractOpcCommand {
@@ -60,15 +61,15 @@ public class AboutCommand extends AbstractOpcCommand {
 				waldotNamespace.getConfiguration().getAboutCommandUserWriteMask(),
 				waldotNamespace.getConfiguration().getAboutCommandExecutable(),
 				waldotNamespace.getConfiguration().getAboutCommandUserExecutable());
-		super.addOutputArgument(LABEL_NAME, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addOutputArgument(LABEL_NAME, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(LONG_LABEL_NAME));
-		super.addOutputArgument(LABEL_DESCRIPTION, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addOutputArgument(LABEL_DESCRIPTION, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(LONG_LABEL_DESCRIPTION));
-		super.addOutputArgument(LABEL_LICENSE, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addOutputArgument(LABEL_LICENSE, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(LONG_LABEL_LICENSE));
-		super.addOutputArgument(LABEL_LICENSE_URL, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addOutputArgument(LABEL_LICENSE_URL, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(LONG_LABEL_LICENSE_URL));
-		super.addOutputArgument(LABEL_REPOSITORY_URL, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addOutputArgument(LABEL_REPOSITORY_URL, VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(LONG_LABEL_REPOSITORY_URL));
 		aboutReplyList.add(SOFTWARE_NAME);
 		aboutReplyList.add(SOFTWARE_DESCRIPTION);
@@ -90,6 +91,11 @@ public class AboutCommand extends AbstractOpcCommand {
 	@Override
 	public Object clone() {
 		return new AboutCommand(this.waldotNamespace);
+	}
+
+	@Override
+	public String getDirectory() {
+		return MiloStrategy.GENERAL_CMD_DIRECTORY;
 	}
 
 	@Override

@@ -35,7 +35,7 @@ import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
 import net.rossonet.waldot.api.models.WaldotGraphComputerView;
 import net.rossonet.waldot.gremlin.opcgraph.structure.AbstractOpcGraph;
 
-//FIXME da implementare completamente la versione OLAP
+//XXX da implementare completamente la versione OLAP
 
 public final class OpcGraphComputer implements GraphComputer {
 

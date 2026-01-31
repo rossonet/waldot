@@ -1,6 +1,7 @@
 package net.rossonet.waldot.dtdl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,6 +56,9 @@ public class PropertyObject {
 	private Unit unit;
 
 	private boolean writable;
+
+	public PropertyObject() {
+	}
 
 	/**
 	 * Constructs a {@code PropertyObject} from a map of attributes defined in a
@@ -199,6 +203,77 @@ public class PropertyObject {
 	 */
 	public boolean isWritable() {
 		return writable;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public void setId(DigitalTwinModelIdentifier id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setSchema(Schema schema) {
+		this.schema = schema;
+	}
+
+	public void setTypes(List<String> types) {
+		this.types = types;
+	}
+
+	public void setUnit(Unit unit) {
+		this.unit = unit;
+	}
+
+	public void setWritable(boolean writable) {
+		this.writable = writable;
+	}
+
+	public Map<String, Object> toMap() {
+		final Map<String, Object> map = new HashMap<>();
+		map.put("@id", id.toString());
+		if (types != null && !types.isEmpty()) {
+			if (types.size() == 1) {
+				map.put("@type", types.get(0));
+			} else {
+				map.put("@type", types);
+			}
+		} else {
+			map.put("@type", "Property");
+		}
+		map.put("name", name);
+		if (schema != null && schema.isJson()) {
+			map.put("schema", schema.toSchemaJson());
+		} else {
+			map.put("schema", schema.toSchemaString());
+		}
+		if (comment != null) {
+			map.put("comment", comment);
+		}
+		if (description != null) {
+			map.put("description", description);
+		}
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		if (unit != null) {
+			map.put("unit", unit.toString());
+		}
+		map.put("writable", writable);
+		return map;
+
 	}
 
 	/**

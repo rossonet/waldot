@@ -1,5 +1,6 @@
 package net.rossonet.waldot.dtdl;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -41,11 +42,20 @@ public class CommandObject {
 
 	private String comment;
 	private String description;
+
 	private String displayName;
+
 	private DigitalTwinModelIdentifier id;
+
 	private String name;
+
 	private CommandPayload request;
+
 	private CommandPayload response;
+
+	public CommandObject() {
+
+	}
 
 	/**
 	 * Constructs a {@code CommandObject} from a map of attributes defined in a DTDL
@@ -168,6 +178,64 @@ public class CommandObject {
 	 */
 	public CommandPayload getResponse() {
 		return response;
+	}
+
+	public void setCommandType(String commandType) {
+		this.commandType = commandType;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public void setId(DigitalTwinModelIdentifier id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setRequest(CommandPayload request) {
+		this.request = request;
+	}
+
+	public void setResponse(CommandPayload response) {
+		this.response = response;
+	}
+
+	public Map<String, Object> toMap() {
+		final Map<String, Object> map = new HashMap<>();
+		map.put("@id", id.toString());
+		map.put("@type", "Command");
+		map.put("name", name);
+		if (comment != null) {
+			map.put("comment", comment);
+		}
+		if (description != null) {
+			map.put("description", description);
+		}
+		if (displayName != null) {
+			map.put("displayName", displayName);
+		}
+		if (commandType != null) {
+			map.put("commandType", commandType);
+		}
+		if (request != null) {
+			map.put("request", request.toMap());
+		}
+		if (response != null) {
+			map.put("response", response.toMap());
+		}
+		return map;
 	}
 
 	/**

@@ -10,9 +10,15 @@ import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 
 public class DefaultHomunculusConfiguration extends HashMap<String, String> implements WaldotConfiguration {
 
+	private static final String DEFAULT_ABOUT_COMMAND_DESCRIPTION = "info about this software";
+	private static final boolean DEFAULT_ABOUT_COMMAND_EXECUTABLE = true;
+	private static final String DEFAULT_ABOUT_COMMAND_LABEL = "about";
+	private static final boolean DEFAULT_ABOUT_COMMAND_USER_EXECUTABLE = true;
+	public static String DEFAULT_HELP_DIRECTORY = "/app/help";
+	private static final UInteger DEFAULT_WRITE_MASK = UInteger.valueOf(WriteMask.Executable.getValue());
 	private static final long serialVersionUID = 4132363257864835403L;
 
-	public static DefaultHomunculusConfiguration getDefault() {
+	public static WaldotConfiguration getDefault() {
 		return new DefaultHomunculusConfiguration();
 	}
 
@@ -21,32 +27,32 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public String getAboutCommandDescription() {
-		return "info about this software";
+		return DEFAULT_ABOUT_COMMAND_DESCRIPTION;
 	}
 
 	@Override
 	public Boolean getAboutCommandExecutable() {
-		return true;
+		return DEFAULT_ABOUT_COMMAND_EXECUTABLE;
 	}
 
 	@Override
 	public String getAboutCommandLabel() {
-		return "about";
+		return DEFAULT_ABOUT_COMMAND_LABEL;
 	}
 
 	@Override
 	public Boolean getAboutCommandUserExecutable() {
-		return true;
+		return DEFAULT_ABOUT_COMMAND_USER_EXECUTABLE;
 	}
 
 	@Override
 	public UInteger getAboutCommandUserWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
 	}
 
 	@Override
 	public UInteger getAboutCommandWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
 	}
 
 	@Override
@@ -61,7 +67,7 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public String getAssetRootNodeDisplayName() {
-		return "Asset Administration";
+		return "WaldOT Administration";
 	}
 
 	@Override
@@ -106,12 +112,12 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public UInteger getExecCommandUserWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
 	}
 
 	@Override
 	public UInteger getExecCommandWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
 	}
 
 	@Override
@@ -148,27 +154,27 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public UInteger getHelpCommandUserWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
 	}
 
 	@Override
 	public UInteger getHelpCommandWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
 	}
 
 	@Override
-	public String getHelpDirectoryPath() {
-		return "/app/help";
+	public String getHelpDirectory() {
+		return DEFAULT_HELP_DIRECTORY;
 	}
 
 	@Override
 	public String getInterfaceRootNodeBrowseName() {
-		return "WaldOT API & Commands Interface";
+		return "WaldOT Commands";
 	}
 
 	@Override
 	public String getInterfaceRootNodeDisplayName() {
-		return "WaldOT API & Commands Interface";
+		return "WaldOT Commands";
 	}
 
 	@Override
@@ -203,12 +209,12 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public UInteger getOsCheckDelayCommandUserWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
 	}
 
 	@Override
 	public UInteger getOsCheckDelayCommandWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
 	}
 
 	@Override
@@ -248,12 +254,17 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public UInteger getWaldotCommandUserWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
 	}
 
 	@Override
 	public UInteger getWaldotCommandWriteMask() {
-		return UInteger.valueOf(WriteMask.Executable.getValue());
+		return DEFAULT_WRITE_MASK;
+	}
+
+	@Override
+	public String getZenohConfiguration() {
+		return null;
 	}
 
 }

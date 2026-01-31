@@ -70,7 +70,7 @@ public interface WaldotConfiguration extends Serializable, Map<String, String> {
 
 	UInteger getHelpCommandWriteMask();
 
-	String getHelpDirectoryPath();
+	String getHelpDirectory();
 
 	String getInterfaceRootNodeBrowseName();
 
@@ -109,5 +109,7 @@ public interface WaldotConfiguration extends Serializable, Map<String, String> {
 	UInteger getWaldotCommandUserWriteMask();
 
 	UInteger getWaldotCommandWriteMask();
+
+	String getZenohConfiguration();
 
 }

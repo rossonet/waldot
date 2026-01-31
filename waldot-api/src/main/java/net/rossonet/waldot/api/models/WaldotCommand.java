@@ -25,6 +25,14 @@ public interface WaldotCommand extends WaldotVertex, MethodNode, UaServerNode {
 	void addOutputArgument(String name, NodeId dataType, Integer valueRank, UInteger[] arrayDimensions,
 			LocalizedText description);
 
+	default Object[] exec(String... methodInputs) {
+		return runCommand(methodInputs);
+	}
+
+	String getConsoleCommand();
+
+	String getDirectory();
+
 	@Override
 	public ByteString getIcon();
 
@@ -59,4 +67,5 @@ public interface WaldotCommand extends WaldotVertex, MethodNode, UaServerNode {
 
 	@Override
 	long version();
+
 }

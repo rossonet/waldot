@@ -3,8 +3,11 @@ buildscript {
         mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
     }
+    dependencies {
+        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
+        classpath("org.jreleaser:org.jreleaser.gradle.plugin:1.21.0")
+    }
 }
-
 
 description = "WaldOT dependencies"
 group = 'net.rossonet.waldot'
@@ -13,8 +16,6 @@ version = "${rootProject.version}"
 ext {
     sourceCompatibility = 21
     targetCompatibility = 21
-    ossrhPassword = System.getenv('OSSRH_PASSWORD')
-    ossrhUsername = System.getenv('OSSRH_USERNAME')
 }
 
 repositories {
@@ -23,6 +24,7 @@ repositories {
        url "https://repo.craftyn.com/repository/snapshots/" 
     }
     maven { url 'https://jitpack.io' }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
 }
 
 apply plugin: 'java'
@@ -32,18 +34,20 @@ apply plugin: 'jacoco'
 apply plugin: 'distribution'
 apply plugin: 'signing'
 apply plugin: 'maven-publish'
+apply plugin: 'org.jreleaser'
 
 dependencies {
     api 'org.json:json:20250107'
     api 'org.yaml:snakeyaml:2.4'
     api 'org.apache.commons:commons-jexl3:3.4.0'
+    // libreria ICE
+    api("org.jitsi:ice4j:3.2-9-gb64c86f")
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
-    //api platform("io.modelcontextprotocol.sdk:mcp")
-    api group: 'com.github.jsonld-java', name: 'jsonld-java', version: '0.13.6'
+    api("com.google.guava:guava:33.5.0-jre")
     // gremlin
     api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
     // OPCUA
-    api group: 'org.eclipse.milo', name: 'milo-sdk-server', version: '1.0.4'
+    api group: 'org.eclipse.milo', name: 'milo-sdk-server', version: '1.1.0'
 }
 
 task eclipseClosedDependencies {}
@@ -126,22 +130,45 @@ publishing {
   }
   repositories {
     maven {
-      url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-      name = "sonatype"
-      credentials {
-        username "${project.ext.ossrhUsername}"
-        password "${project.ext.ossrhPassword}"
+      name = 'staging'
+      url  = layout.buildDirectory.dir('staging-deploy')
+    }
+  }
+}
+
+jreleaser {
+  signing {
+    active = 'ALWAYS'
+    armored = true
+    secretKey = System.getenv('GPG_PRIVATE')
+    publicKey = System.getenv('GPG_PUBLIC')
+  }
+  deploy {
+    maven {
+      mavenCentral {
+        sonatype {
+          active = 'ALWAYS'
+          url = 'https://central.sonatype.com/api/v1/publisher'
+          stagingRepository(
+              layout.buildDirectory
+                     .dir('staging-deploy')
+                     .get()
+                     .asFile
+                     .absolutePath
+          )
+          username = System.getenv('OSSRH_USERNAME')
+          password = System.getenv('OSSRH_PASSWORD') 
+        }
       }
     }
   }
 }
 
+tasks.named('publish').configure { dependsOn 'jreleaserDeploy' }
+tasks.named('jreleaserDeploy').configure { dependsOn 'publishAllPublicationsToStagingRepository' }
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }

@@ -10,6 +10,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import net.rossonet.waldot.jexl.ClonableMapContext;
+
 class ClonableMapContextTest {
 
 	@Test

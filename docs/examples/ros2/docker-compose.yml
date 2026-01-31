@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  zenoh:
+    image: eclipse/zenoh:latest
+    networks: [rosnet]
+    restart: unless-stopped
+    ports:
+      - "7447:7447"
+
+  ros_ws:
+    build: ./ros_ws
+    environment:
+      - RMW_IMPLEMENTATION=rmw_zenoh_cpp
+      - ZENOH_PEERS=tcp/zenoh:7447
+    volumes:
+      - ./ros_ws/src:/root/ros2_ws/src
+    depends_on: [zenoh]
+    networks: [rosnet]
+    command: ros2 launch my_pkg sim_launch.py
+
+  gazebo:
+    build: ./gazebo
+    environment:
+      - RMW_IMPLEMENTATION=rmw_zenoh_cpp
+      - ZENOH_PEERS=tcp/zenoh:7447
+    depends_on: [zenoh]
+    ports:
+      - "6901:6901"
+    networks: [rosnet]
+
+networks:
+  rosnet:
+    driver: bridge

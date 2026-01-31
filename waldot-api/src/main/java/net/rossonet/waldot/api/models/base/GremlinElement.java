@@ -11,8 +11,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.models.WaldotElement;
 
@@ -31,8 +29,6 @@ public abstract class GremlinElement extends UaObjectNode implements WaldotEleme
 	}
 
 	protected long currentVersion;
-
-	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private boolean removed = false;
 

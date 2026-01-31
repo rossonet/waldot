@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -28,12 +27,12 @@ public class SystemCommandHelper {
 
 	public static class QuotedStringTokenizer {
 
+		private int index;
 		private final String line;
-		private final List<String> tokens = new ArrayList<>();
 
 		private final Matcher matcher;
 
-		private int index;
+		private final List<String> tokens = new ArrayList<>();
 
 		public QuotedStringTokenizer(final String line) {
 			this.line = line.trim();
@@ -72,9 +71,9 @@ public class SystemCommandHelper {
 	}
 
 	public static class StreamGobbler implements Runnable {
-		private final InputStream inputStream;
 		private final Consumer<String> consumer;
 		private final InputStream errorStream;
+		private final InputStream inputStream;
 
 		public StreamGobbler(final InputStream inputStream, final InputStream errorStream,
 				final Consumer<String> consumer) {
@@ -101,7 +100,7 @@ public class SystemCommandHelper {
 		final Process process = builder.start();
 		final StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), process.getErrorStream(),
 				consumer);
-		final Future<?> future = Executors.newSingleThreadExecutor().submit(streamGobbler);
+		final Future<?> future = ThreadHelper.newVirtualThreadExecutor().submit(streamGobbler);
 		if (timeoutMilliSeconds != 0) {
 			future.get(timeoutMilliSeconds, TimeUnit.MILLISECONDS);
 		} else {

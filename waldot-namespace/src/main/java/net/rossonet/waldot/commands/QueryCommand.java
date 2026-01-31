@@ -7,6 +7,7 @@ import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class QueryCommand extends AbstractOpcCommand {
@@ -32,6 +33,11 @@ public class QueryCommand extends AbstractOpcCommand {
 	@Override
 	public Object clone() {
 		return new QueryCommand(this.waldotNamespace);
+	}
+
+	@Override
+	public String getDirectory() {
+		return MiloStrategy.GENERAL_CMD_DIRECTORY;
 	}
 
 	@Override

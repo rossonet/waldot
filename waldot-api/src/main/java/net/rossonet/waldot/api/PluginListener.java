@@ -2,16 +2,20 @@ package net.rossonet.waldot.api;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 
+import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager.ObjectNodeConstructor;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.structured.AccessRestrictionType;
+import org.eclipse.milo.opcua.stack.core.types.structured.RolePermissionType;
 
 import net.rossonet.waldot.api.models.WaldotCommand;
+import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
@@ -25,15 +29,32 @@ import net.rossonet.waldot.api.models.WaldotVertex;
  */
 public interface PluginListener {
 
-	default boolean containsObjectDefinition(final NodeId typeDefinitionNodeId) {
+	public final static ObjectNodeConstructor objectNodeConstructor = new ObjectNodeConstructor() {
+
+		@Override
+		public UaObjectNode apply(UaNodeContext context, NodeId nodeId, QualifiedName browseName,
+				LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
+				RolePermissionType[] rolePermissions, RolePermissionType[] userRolePermissions,
+				AccessRestrictionType accessRestrictions) {
+			return new UaObjectNode(context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
+					rolePermissions, userRolePermissions, accessRestrictions);
+		}
+
+	};
+
+	default boolean containsEdgeType(String typeDefinitionLabel) {
 		return false;
 	}
 
-	default boolean containsObjectLabel(final String typeDefinitionLabel) {
+	default boolean containsVertexType(final String typeDefinitionLabel) {
 		return false;
 	}
 
-	default WaldotVertex createVertexObject(final NodeId typeDefinitionNodeId, final WaldotGraph graph,
+	default boolean containsVertexTypeNode(final NodeId typeDefinition) {
+		return false;
+	}
+
+	default WaldotVertex createVertex(final NodeId typeDefinitionNodeId, final WaldotGraph graph,
 			final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
 			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,
 			final UInteger userWriteMask, final UByte eventNotifier, final long version, Object[] propertyKeyValues) {
@@ -44,15 +65,15 @@ public interface PluginListener {
 		return Collections.emptyList();
 	}
 
-	default NodeId getObjectLabel(final String typeDefinitionLabel) {
+	default NodeId getVertexTypeNode(final String typeDefinitionLabel) {
 		return null;
 	}
 
-	default Map<String, Object> getRuleFunctions() {
-		return Collections.emptyMap();
-	}
-
 	void initialize(WaldotNamespace waldotNamespace);
+
+	default void notifyAddEdge(WaldotEdge edge, WaldotVertex sourceVertex, WaldotVertex targetVertex, String label,
+			String type, Object[] propertyKeyValues) {
+	}
 
 	default void reset() {
 
@@ -65,4 +86,5 @@ public interface PluginListener {
 	default void stop() {
 
 	}
+
 }

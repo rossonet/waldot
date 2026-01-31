@@ -35,19 +35,16 @@ public abstract class WaldotAnonymousValidator extends AbstractIdentityValidator
 
 			@Override
 			public Object getUserData() {
-				// TODO Auto-generated method stub
 				return data;
 			}
 
 			@Override
 			public UserTokenType getUserTokenType() {
-				// TODO Auto-generated method stub
 				return UserTokenType.Anonymous;
 			}
 
 			@Override
 			public void setUserData(@Nullable Object userData) {
-				// TODO Auto-generated method stub
 				this.data = userData;
 			}
 		};
