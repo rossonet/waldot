@@ -25,17 +25,17 @@ public class AboutCommand extends AbstractOpcCommand {
 	private static final String LABEL_LICENSE_URL = "licence URL";
 	private static final String LABEL_NAME = "name";
 	private static final String LABEL_REPOSITORY_URL = "repository URL";
-	private static final String LICENSE = "Apache License 2.0";
-	private static final String LICENSE_URL = "https://www.apache.org/licenses/LICENSE-2.0";
+	public static String LICENSE = "Apache License 2.0";
+	public static String LICENSE_URL = "https://www.apache.org/licenses/LICENSE-2.0";
 	private final static Logger logger = LoggerFactory.getLogger(AboutCommand.class);
 	private static final String LONG_LABEL_DESCRIPTION = "description of the software";
 	private static final String LONG_LABEL_LICENSE = "license of the software";
 	private static final String LONG_LABEL_LICENSE_URL = "URL of the license of the software";
 	private static final String LONG_LABEL_NAME = "the name of the software";
 	private static final String LONG_LABEL_REPOSITORY_URL = "URL of the repository of the software";
-	private static final String REPOSITORY_URL = "https://github.com/rossonet/waldot/";
-	private static final String SOFTWARE_DESCRIPTION = "basic WaldOT Agent with Rule Engine";
-	private static final String SOFTWARE_NAME = "WaldOT Agent";
+	public static String REPOSITORY_URL = "https://github.com/rossonet/waldot/";
+	public static String SOFTWARE_DESCRIPTION = "basic WaldOT Agent";
+	public static String SOFTWARE_NAME = "WaldOT Agent";
 
 	private static Properties loadProperties(final String propertiesFilename) {
 		final Properties prop = new Properties();

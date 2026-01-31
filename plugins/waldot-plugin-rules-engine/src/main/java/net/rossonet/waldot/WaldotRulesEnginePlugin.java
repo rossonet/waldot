@@ -306,7 +306,7 @@ public class WaldotRulesEnginePlugin implements PluginListener {
 	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
-		logger.info("Initializing Behavior Tree Plugin...");
+		logger.info("Initializing Rules Engine Plugin...");
 	}
 
 	public void popolateVertexPropertiesFromPropertyKeyValues(final Object[] propertyKeyValues,
