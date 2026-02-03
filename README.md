@@ -39,7 +39,7 @@ experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org
 
 [OPC 30270: Industry 4.0 Asset Administration Shell document](https://reference.opcfoundation.org/I4AAS/v100/docs/)
 
-[DTDL - Digital Twins Definition Language version 4](reference/digitaltwins/dtdl/DTDL/v4/DTDL.v4.md)
+[DTDL - Digital Twins Definition Language version 4](docs/reference/digitaltwins/dtdl/DTDL/v4/DTDL.v4.md)
 
 ### Project sponsor 
 
