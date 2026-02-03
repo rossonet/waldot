@@ -3,12 +3,19 @@ package net.rossonet.waldot.api;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.eclipse.milo.opcua.sdk.core.AccessLevel;
+import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager.ObjectNodeConstructor;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.stack.core.NodeIds;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.structured.AccessRestrictionType;
@@ -41,6 +48,20 @@ public interface PluginListener {
 		}
 
 	};
+
+	public static void addStringParameterToTypeNode(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
+			String variableId, NodeId dataType) {
+		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace.generateNodeId(typeNode.getNodeId().toParseableString() + "." + variableId))
+				.setAccessLevel(AccessLevel.READ_WRITE).setBrowseName(waldotNamespace.generateQualifiedName(variableId))
+				.setDisplayName(LocalizedText.english(variableId)).setDataType(dataType)
+				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
+		variable.addReference(new Reference(variable.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
+		variable.setValue(new DataValue(new Variant("NaN")));
+		typeNode.addComponent(variable);
+		waldotNamespace.getStorageManager().addNode(variable);
+	}
 
 	default boolean containsEdgeType(String typeDefinitionLabel) {
 		return false;

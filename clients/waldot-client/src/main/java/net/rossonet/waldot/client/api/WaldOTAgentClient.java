@@ -1,11 +1,11 @@
-package net.rossonet.waldot.agent.client.api;
+package net.rossonet.waldot.client.api;
 
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.ServiceFaultListener;
 
-import net.rossonet.waldot.agent.client.v1.WaldOTAgentClientImplV1;
+import net.rossonet.waldot.client.v1.WaldOTAgentClientImplV1;
 
 public interface WaldOTAgentClient extends ServiceFaultListener, AutoCloseable {
 

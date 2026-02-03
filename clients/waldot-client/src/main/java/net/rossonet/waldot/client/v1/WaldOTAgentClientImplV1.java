@@ -1,4 +1,4 @@
-package net.rossonet.waldot.agent.client.v1;
+package net.rossonet.waldot.client.v1;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,10 +42,10 @@ import org.eclipse.milo.opcua.stack.core.util.EndpointUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.agent.client.api.WaldOTAgentClient;
-import net.rossonet.waldot.agent.client.api.WaldOTAgentClientConfiguration;
-import net.rossonet.waldot.agent.client.api.WaldotAgentClientObserver;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
+import net.rossonet.waldot.client.api.WaldOTAgentClient;
+import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
+import net.rossonet.waldot.client.api.WaldotAgentClientObserver;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.SslHelper.KeyStoreHelper;
 import net.rossonet.waldot.utils.ThreadHelper;

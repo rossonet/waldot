@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.client.utils.WaldotTestClientHandler;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.gremlins.TestNamespaceListener;
 import net.rossonet.waldot.utils.LogHelper;

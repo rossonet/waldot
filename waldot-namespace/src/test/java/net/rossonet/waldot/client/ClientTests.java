@@ -2,11 +2,11 @@ package net.rossonet.waldot.client;
 
 import org.junit.jupiter.api.Test;
 
-import net.rossonet.waldot.agent.client.api.WaldOTAgentClient;
-import net.rossonet.waldot.agent.client.api.WaldOTAgentClient.Status;
-import net.rossonet.waldot.agent.client.api.WaldOTAgentClientConfiguration;
-import net.rossonet.waldot.agent.client.api.WaldotAgentClientObserver;
 import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.client.api.WaldOTAgentClient;
+import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
+import net.rossonet.waldot.client.api.WaldotAgentClientObserver;
+import net.rossonet.waldot.client.api.WaldOTAgentClient.Status;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 
 public class ClientTests {

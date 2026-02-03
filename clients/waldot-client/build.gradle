@@ -38,6 +38,7 @@ apply plugin: 'org.jreleaser'
 
 dependencies {
     api project(':waldot-api')
+    implementation project(':waldot-deps')
     // OPCUA CLIENT
     api group: 'org.eclipse.milo', name: 'milo-sdk-client', version: '1.1.0'
     // libreria ICE

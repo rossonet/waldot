@@ -1,4 +1,4 @@
-package net.rossonet.waldot.agent.client.api;
+package net.rossonet.waldot.client.api;
 
 public interface WaldotAgentClientObserver {
 

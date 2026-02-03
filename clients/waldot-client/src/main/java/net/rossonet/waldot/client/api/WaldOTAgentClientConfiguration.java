@@ -1,4 +1,4 @@
-package net.rossonet.waldot.agent.client.api;
+package net.rossonet.waldot.client.api;
 
 import java.io.Serializable;
 import java.security.PrivateKey;
@@ -8,7 +8,7 @@ import java.util.List;
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 
-import net.rossonet.waldot.agent.client.v1.DefaultWaldOTAgentClientConfigurationV1;
+import net.rossonet.waldot.client.v1.DefaultWaldOTAgentClientConfigurationV1;
 
 public interface WaldOTAgentClientConfiguration extends Serializable {
 

@@ -1,4 +1,4 @@
-package net.rossonet.waldot.agent.client.v1;
+package net.rossonet.waldot.client.v1;
 
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 
-import net.rossonet.waldot.agent.client.api.WaldOTAgentClientConfiguration;
+import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
 
 public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClientConfiguration {
 	public static int _DEFAULT_TCP_BIND_PORT = 12686;
