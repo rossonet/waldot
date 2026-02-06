@@ -117,7 +117,6 @@ public class GraphQueryTests {
 		g.getWaldotNamespace().addListener(listener);
 		Thread.sleep(500);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
-		Thread.sleep(5000000);
 	}
 
 	@Test

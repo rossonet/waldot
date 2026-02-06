@@ -43,6 +43,7 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 	private final boolean allowNullPropertyValues;
 
 	private final WaldotGraph graph;
+
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
@@ -61,6 +62,7 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 				LocalizedText.english(description), userWriteMask, userWriteMask, eventNotifier, currentVersion);
 		this.graph = graph;
 		this.allowNullPropertyValues = graph.features().edge().supportsNullPropertyValues();
+
 	}
 
 	@Override
@@ -136,8 +138,6 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 			final LocalizedText description = new LocalizedText((String) value.getValue().getValue());
 			setDescription(description);
 		}
-		// TODO: gestire il cambio di directory
-		// TODO: gestire i cambi di source/target e type
 		propertyObservers.forEach(observer -> observer.propertyChanged(this, label, value));
 
 	}

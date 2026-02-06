@@ -9,6 +9,9 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.sdk.client.AddressSpace.BrowseOptions;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaObjectNode;
+import org.eclipse.milo.opcua.sdk.client.subscriptions.MonitoredItemSynchronizationException;
+import org.eclipse.milo.opcua.sdk.client.subscriptions.OpcUaMonitoredItem;
+import org.eclipse.milo.opcua.sdk.client.subscriptions.OpcUaSubscription;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.UaException;
@@ -18,9 +21,12 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.BrowseDirection;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
+import org.eclipse.milo.opcua.stack.core.types.structured.ContentFilter;
+import org.eclipse.milo.opcua.stack.core.types.structured.EventFilter;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReferenceDescription;
+import org.eclipse.milo.opcua.stack.core.types.structured.SimpleAttributeOperand;
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteValue;
 
@@ -33,7 +39,14 @@ import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 
 public class WaldotTestClientHandler implements AutoCloseable {
 
+	public interface EventObserver {
+		default void onEvent(String nodeId, String eventType, Object value) {
+			System.out.println("Received event for node: " + nodeId + " event type: " + eventType + " value: " + value);
+		}
+	}
+
 	private final WaldOTAgentClientImplV1 client;
+
 	private final WaldotGraph graph;
 
 	public WaldotTestClientHandler(WaldotGraph g) {
@@ -278,6 +291,26 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	}
 
+	public String[] createEdge(String type, String sourceNodeId, String destinationNodeId, String[] keyValues) {
+		try {
+			return client.createEdge(type, sourceNodeId, destinationNodeId, keyValues);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return new String[] { "", e.getMessage() };
+		}
+
+	}
+
+	public String[] createVertex(String id, String label, String type, String[] keyValues) {
+		try {
+			return client.createVertex(id, label, type, keyValues);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return new String[] { "", e.getMessage() };
+		}
+
+	}
+
 	public void disconnect() {
 		try {
 			client.close();
@@ -311,6 +344,40 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public OpcUaSubscription subscribeToOpcUaVertexEventsMessage(String nodeId, EventObserver observer) {
+		final var subscription = new OpcUaSubscription(client.getOpcUaClient());
+		try {
+			subscription.create();
+		} catch (final UaException e) {
+			e.printStackTrace();
+		}
+		final EventFilter eventFilter = new EventFilter(new SimpleAttributeOperand[] {
+				new SimpleAttributeOperand(NodeIds.BaseEventType,
+						new QualifiedName[] { new QualifiedName(0, "EventId") }, AttributeId.Value.uid(), null),
+				new SimpleAttributeOperand(NodeIds.BaseEventType,
+						new QualifiedName[] { new QualifiedName(0, "EventType") }, AttributeId.Value.uid(), null),
+				new SimpleAttributeOperand(NodeIds.BaseEventType,
+						new QualifiedName[] { new QualifiedName(0, "Severity") }, AttributeId.Value.uid(), null),
+				new SimpleAttributeOperand(NodeIds.BaseEventType, new QualifiedName[] { new QualifiedName(0, "Time") },
+						AttributeId.Value.uid(), null),
+				new SimpleAttributeOperand(NodeIds.BaseEventType,
+						new QualifiedName[] { new QualifiedName(0, "Message") }, AttributeId.Value.uid(), null) },
+				new ContentFilter(null));
+
+		final var monitoredItem = OpcUaMonitoredItem.newEventItem(graph.getWaldotNamespace().generateNodeId(nodeId),
+				eventFilter);
+		monitoredItem.setEventValueListener((item, vs) -> {
+			observer.onEvent(nodeId, vs[1].getValue().toString(), vs[4].getValue());
+		});
+		subscription.addMonitoredItem(monitoredItem);
+		try {
+			subscription.synchronizeMonitoredItems();
+		} catch (final MonitoredItemSynchronizationException e) {
+			e.printStackTrace();
+		}
+		return subscription;
 	}
 
 	public void writeOpcUaVertexValue(String nodeId, String valueLabel, Object newValue) {

@@ -10,7 +10,7 @@ import java.util.Properties;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler.InvocationContext;
-import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,8 +83,8 @@ public class AboutCommand extends AbstractOpcCommand {
 					LocalizedText.english("git property " + key));
 			aboutReplyList.add(gitProperties.getProperty(key));
 		}
-		this.addReference(new Reference(this.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
+		this.addReference(new Reference(this.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
 
 	}
 

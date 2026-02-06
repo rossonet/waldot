@@ -43,7 +43,16 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 
 	boolean inComputerMode();
 
+	/**
+	 * called before a property value is changed in the graph database
+	 */
 	void notifyPropertyValueChanging(String label, DataValue value);
+
+	/**
+	 * called before the vertex is removed from the graph database
+	 */
+	default void notifyRemoveVertex() {
+	};
 
 	void postEvent(BaseEventTypeNode event);
 

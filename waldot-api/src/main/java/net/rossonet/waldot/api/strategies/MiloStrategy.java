@@ -14,7 +14,7 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
-import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
@@ -38,7 +38,7 @@ import net.rossonet.waldot.api.models.WaldotVertexProperty;
  */
 public interface MiloStrategy extends AutoCloseable {
 	public static final Predicate<Reference> COMPONENT_OF_PREDICATE = (reference) -> reference.isInverse()
-			&& Identifiers.HasComponent.equals(reference.getReferenceTypeId());
+			&& NodeIds.HasComponent.equals(reference.getReferenceTypeId());
 	public static final String DEFAULT_EDGE_TYPE = "edge";
 	public static final String DEFAULT_VERTEX_LABEL = "vertex";
 	public static final String DESCRIPTION_PARAMETER = "description";

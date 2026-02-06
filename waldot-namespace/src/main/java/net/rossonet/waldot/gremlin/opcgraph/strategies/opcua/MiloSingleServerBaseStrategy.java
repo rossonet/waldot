@@ -23,6 +23,7 @@ import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.core.nodes.Node;
+import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler.InvocationContext;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
@@ -63,6 +64,7 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcProperty;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
+import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 
@@ -81,6 +83,39 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	private UaFolderNode rootNode;
 
 	private WaldotNamespace waldotNamespace;
+
+	private void addDeletedCommand(GremlinElement vertex) {
+		final AbstractOpcCommand deleteCommand = new AbstractOpcCommand(waldotNamespace.getGremlinGraph(),
+				waldotNamespace, vertex.id().getIdentifier().toString() + ".delete", "delete",
+				"Delete " + vertex.getBrowseName().getName(), null,
+				waldotNamespace.getConfiguration().getWaldotCommandWriteMask(),
+				waldotNamespace.getConfiguration().getWaldotCommandUserWriteMask(),
+				waldotNamespace.getConfiguration().getWaldotCommandExecutable(),
+				waldotNamespace.getConfiguration().getWaldotCommandUserExecutable()) {
+
+			@Override
+			public Object[] runCommand(InvocationContext invocationContext, String[] inputValues) {
+				String output = "";
+				String error = "";
+				try {
+					waldotNamespace.getGremlinGraph().traversal().V(vertex.getNodeId().getIdentifier()).drop()
+							.iterate();
+				} catch (final Exception e) {
+					logger.error("Error deleting element {}: {}", vertex.getNodeId().getIdentifier(), e.getMessage());
+					error = e.getMessage();
+				}
+				output = waldotNamespace.getGremlinGraph().traversal().V(vertex.getNodeId().getIdentifier()).drop()
+						.iterate() + " element deleted";
+				return new String[] { output, error };
+			}
+		};
+		deleteCommand.addOutputArgument("output", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english("command output"));
+		deleteCommand.addOutputArgument("error", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english("command error"));
+		waldotNamespace.getStorageManager().addNode(deleteCommand);
+		vertex.addComponent((UaNode) deleteCommand);
+	}
 
 	@Override
 	public Edge addEdge(final WaldotVertex sourceVertex, final WaldotVertex targetVertex, final String label,
@@ -178,6 +213,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				p.notifyAddEdge(edge, sourceVertex, targetVertex, elaboratedLabel, type, propertyKeyValues);
 			}
 		}
+		addDeletedCommand(edge);
 		return edge;
 	}
 
@@ -208,11 +244,14 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			logger.debug(TYPE_FIELD.toLowerCase() + " not found in propertyKeyValues, using default type '{}'",
 					typeDefinition);
 		}
-		return createVertex(nodeId, typeDefinition, label, description, browseName, displayName, propertyKeyValues,
+		final AbstractOpcVertex vertex = createVertex(nodeId, typeDefinition, label, description, browseName,
+				displayName, propertyKeyValues,
 				MiloSingleServerBaseReferenceNodeBuilder.getWriteMask(propertyKeyValues),
 				MiloSingleServerBaseReferenceNodeBuilder.getUserWriteMask(propertyKeyValues),
 				MiloSingleServerBaseReferenceNodeBuilder.getEventNotifier(propertyKeyValues),
 				MiloSingleServerBaseReferenceNodeBuilder.getVersion(propertyKeyValues));
+		addDeletedCommand(vertex);
+		return vertex;
 	}
 
 	private void checkDirectoryParameterAndLinkNode(final Object[] propertyKeyValues, final GremlinElement vertex,
@@ -774,10 +813,25 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	@Override
 	public void removeEdge(final NodeId nodeId) {
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId).get();
-		// FIXME rimuovere dalla cartella giusta
-		// FIXME deregister edge osservati dai plugin
+		if (!(node instanceof WaldotEdge)) {
+			logger.warn("NodeId {} is not an edge", nodeId);
+			return;
+		} else {
+			final QualifiedProperty<String> typeProperty = new QualifiedProperty<String>(
+					waldotNamespace.getNamespaceUri(), TYPE_FIELD,
+					MiloSingleServerBaseReferenceNodeBuilder.labelEdgeTypeNode.getNodeId().expanded(),
+					ValueRanks.Scalar, String.class);
+			final WaldotEdge edge = (WaldotEdge) node;
+			final String type = edge.getProperty(typeProperty).get();
+			for (final PluginListener p : waldotNamespace.getPlugins()) {
+				if (p.containsEdgeType(type)) {
+					p.notifyRemoveEdge(edge);
+				}
+			}
+		}
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
+		// FIXME rimuovere dalla cartella giusta
 		// FIXME rimuovere tutti i nodi GremlinProperty collegati
 
 	}
@@ -785,11 +839,16 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	@Override
 	public void removeVertex(final NodeId nodeId) {
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId).get();
-		// FIXME rimuovere dalla cartella giusta
-		// FIXME notificare ai plugin la rimozione del vertex
+		if (!(node instanceof WaldotVertex)) {
+			logger.warn("NodeId {} is not a vertex", nodeId);
+			return;
+		} else {
+			((WaldotVertex) node).notifyRemoveVertex();
+		}
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
 		// FIXME rimuovere tutti i nodi OpcVertexProperty collegati
+		// FIXME rimuovere dalla cartella giusta
 	}
 
 	@Override
@@ -823,7 +882,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			eventNode.setReceiveTime(DateTime.NULL_VALUE);
 			eventNode.setMessage(LocalizedText.english(message));
 			eventNode.setSeverity(ushort(severity));
-			waldotNamespace.getOpcuaServer().getServer().getInternalEventBus().post(eventNode);
+			waldotNamespace.getEventBus().fire(eventNode);
 			eventNode.delete();
 		} catch (final Throwable e) {
 			logger.error("Error creating EventNode: {}", e.getMessage(), e);

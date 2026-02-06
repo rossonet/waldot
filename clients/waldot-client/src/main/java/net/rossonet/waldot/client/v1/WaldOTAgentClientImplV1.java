@@ -137,6 +137,25 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		changeStatus(Status.CLOSED);
 	}
 
+	public String[] createEdge(String label, String sourceNodeId, String destinationNodeId, String[] keyValues)
+			throws UaException {
+		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace().getObjectNode(new NodeId(2, "waldot/Edges"));
+		logger.info("Creating edge with label: {}, sourceNodeId: {}, destinationNodeId: {}, keyValues: {}", label,
+				sourceNodeId, destinationNodeId, String.join(",", keyValues));
+
+		final Variant sourceVariant = Variant.of(sourceNodeId);
+		final Variant labelVariant = Variant.of(label);
+		final Variant destinationVariant = Variant.of(destinationNodeId);
+		final Variant keyValuesVariant = Variant.of(String.join(",", keyValues));
+		final Variant[] outputs = cmdNode.callMethod("add edge",
+				new Variant[] { labelVariant, sourceVariant, destinationVariant, keyValuesVariant });
+		final List<String> out = new ArrayList<>();
+		for (final Variant output : outputs) {
+			out.add((String) output.getValue());
+		}
+		return out.toArray(new String[0]);
+	}
+
 	private OpcUaClient createOpcClient(final OpcUaClientConfig actualConfiguration) throws UaException {
 		final OpcUaClient createdClient = OpcUaClient.create(actualConfiguration);
 		createdClient.addFaultListener(this);
@@ -150,6 +169,24 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 				configuration.getGenerateCertLocality(), configuration.getGenerateCertState(),
 				configuration.getGenerateCertCountry(), null, configuration.getGenerateCertDns(),
 				configuration.getGenerateCertIp(), configuration.getGenerateCertDnsAlias());
+	}
+
+	public String[] createVertex(String id, String label, String type, String[] keyValues) throws UaException {
+		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace().getObjectNode(new NodeId(2, "waldot/Vertices"));
+		logger.info("Creating vertex with id: {}, label: {}, type: {}, keyValues: {}", id, label, type,
+				String.join(",", keyValues));
+
+		final Variant idVariant = Variant.of(id);
+		final Variant labelVariant = Variant.of(label);
+		final Variant typeVariant = Variant.of(type);
+		final Variant keyValuesVariant = Variant.of(String.join(",", keyValues));
+		final Variant[] outputs = cmdNode.callMethod("add vertex",
+				new Variant[] { idVariant, labelVariant, typeVariant, keyValuesVariant });
+		final List<String> out = new ArrayList<>();
+		for (final Variant output : outputs) {
+			out.add((String) output.getValue());
+		}
+		return out.toArray(new String[0]);
 	}
 
 	private void doActionClientStart() {

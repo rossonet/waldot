@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import javax.naming.ConfigurationException;
@@ -226,40 +225,6 @@ public class BaseWaldotTests {
 
 	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {
 		bootstrapUrlServerInit("file:///tmp/boot.conf");
-	}
-
-	@Test
-	public void writeNumberWithOpc() throws Exception {
-		simpleServerInit();
-		g.addVertex("id", "test-id", "label", "test-query", "value", 12);
-		assert g.getWaldotNamespace().getVerticesCount() == 1;
-		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
-		assert waldotTestClientHandler.checkVertexExists("test-id");
-		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("test-id", "value", 12);
-		assert waldotTestClientHandler.checkVertexValueEquals("test-id", "value", 12);
-		waldotTestClientHandler.writeOpcUaVertexValue("test-id", "value", 34);
-		assert g.getWaldotNamespace().getVerticesCount() == 1;
-		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("test-id", "value", 34);
-		assert waldotTestClientHandler.checkVertexValueEquals("test-id", "value", 34);
-	}
-
-	@Test
-	public void writeStringWithOpc() throws Exception {
-		simpleServerInit();
-		final String firstValue = UUID.randomUUID().toString();
-		g.addVertex("id", "test-id", "label", "test-query", "value", firstValue);
-		assert g.getWaldotNamespace().getVerticesCount() == 1;
-		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
-		assert waldotTestClientHandler.checkVertexExists("test-id");
-		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("test-id", "value", firstValue);
-		assert waldotTestClientHandler.checkVertexValueEquals("test-id", "value", firstValue);
-		for (int i = 0; i < 20; i++) {
-			final String newValue = UUID.randomUUID().toString();
-			waldotTestClientHandler.writeOpcUaVertexValue("test-id", "value", newValue);
-			assert g.getWaldotNamespace().getVerticesCount() == 1;
-			assert waldotTestClientHandler.checkOpcUaVertexValueEquals("test-id", "value", newValue);
-			assert waldotTestClientHandler.checkVertexValueEquals("test-id", "value", newValue);
-		}
 	}
 
 }

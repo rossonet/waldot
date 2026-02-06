@@ -49,7 +49,7 @@ public interface PluginListener {
 
 	};
 
-	public static void addStringParameterToTypeNode(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
+	public static UaVariableNode addParameterToTypeNode(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
 			String variableId, NodeId dataType) {
 		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
 				.setNodeId(waldotNamespace.generateNodeId(typeNode.getNodeId().toParseableString() + "." + variableId))
@@ -61,6 +61,7 @@ public interface PluginListener {
 		variable.setValue(new DataValue(new Variant("NaN")));
 		typeNode.addComponent(variable);
 		waldotNamespace.getStorageManager().addNode(variable);
+		return variable;
 	}
 
 	default boolean containsEdgeType(String typeDefinitionLabel) {
@@ -96,6 +97,9 @@ public interface PluginListener {
 			String type, Object[] propertyKeyValues) {
 	}
 
+	default void notifyRemoveEdge(WaldotEdge edge) {
+	}
+
 	default void reset() {
 
 	}
@@ -106,6 +110,6 @@ public interface PluginListener {
 
 	default void stop() {
 
-	}
+	};
 
 }

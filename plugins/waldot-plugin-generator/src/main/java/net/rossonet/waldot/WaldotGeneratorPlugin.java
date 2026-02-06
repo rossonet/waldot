@@ -11,7 +11,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
-import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
@@ -81,7 +81,8 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 	private WaldotVertex createDataGeneratorObject(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
 			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
 			UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
-		final String keyValuesPropertyDelay = getKeyValuesProperty(propertyKeyValues, DELAY_FIELD.toLowerCase());
+		final String keyValuesPropertyDelay = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+				DELAY_FIELD.toLowerCase());
 		long delay = DEFAULT_DELAY_FIELD;
 		if (keyValuesPropertyDelay != null && !keyValuesPropertyDelay.isEmpty()) {
 			if (delay < 100L) {
@@ -95,7 +96,8 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 					DELAY_FIELD, DEFAULT_DELAY_FIELD);
 		}
 
-		final String keyValuesPropertyMin = getKeyValuesProperty(propertyKeyValues, MIN_VALUE_FIELD.toLowerCase());
+		final String keyValuesPropertyMin = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+				MIN_VALUE_FIELD.toLowerCase());
 		long min = DEFAULT_MIN_VALUE_FIELD;
 		if (keyValuesPropertyMin != null && !keyValuesPropertyMin.isEmpty()) {
 			min = Long.valueOf(keyValuesPropertyMin);
@@ -104,7 +106,8 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 					MIN_VALUE_FIELD, DEFAULT_MIN_VALUE_FIELD);
 		}
 
-		final String keyValuesPropertyMax = getKeyValuesProperty(propertyKeyValues, MAX_VALUE_FIELD.toLowerCase());
+		final String keyValuesPropertyMax = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+				MAX_VALUE_FIELD.toLowerCase());
 		long max = DEFAULT_MAX_VALUE_FIELD;
 		if (keyValuesPropertyMax != null && !keyValuesPropertyMax.isEmpty()) {
 			max = Long.valueOf(keyValuesPropertyMax);
@@ -113,7 +116,7 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 					MAX_VALUE_FIELD, DEFAULT_MAX_VALUE_FIELD);
 		}
 
-		final String keyValuesPropertyAlgorithm = getKeyValuesProperty(propertyKeyValues,
+		final String keyValuesPropertyAlgorithm = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
 				ALGORITHM_FIELD.toLowerCase());
 		Algorithm algorithm = Algorithm.valueOf(DEFAULT_ALGORITHM_FIELD);
 		if (keyValuesPropertyAlgorithm != null && !keyValuesPropertyAlgorithm.isEmpty()) {
@@ -143,10 +146,10 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 						.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + MiloStrategy.LABEL_FIELD))
 				.setAccessLevel(AccessLevel.READ_WRITE)
 				.setBrowseName(waldotNamespace.generateQualifiedName(MiloStrategy.LABEL_FIELD))
-				.setDisplayName(LocalizedText.english(MiloStrategy.LABEL_FIELD)).setDataType(Identifiers.String)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		labelTimerTypeNode.addReference(new Reference(labelTimerTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
+				.setDisplayName(LocalizedText.english(MiloStrategy.LABEL_FIELD)).setDataType(NodeIds.String)
+				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
+		labelTimerTypeNode.addReference(new Reference(labelTimerTypeNode.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
 		labelTimerTypeNode.setValue(new DataValue(new Variant("NaN")));
 		dataGeneratorTypeNode.addComponent(labelTimerTypeNode);
 		waldotNamespace.getStorageManager().addNode(labelTimerTypeNode);
@@ -156,10 +159,10 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + DELAY_FIELD))
 				.setAccessLevel(AccessLevel.READ_WRITE)
 				.setBrowseName(waldotNamespace.generateQualifiedName(DELAY_FIELD))
-				.setDisplayName(LocalizedText.english(DELAY_FIELD)).setDataType(Identifiers.UInt64)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		delayMsTypeNode.addReference(new Reference(delayMsTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
+				.setDisplayName(LocalizedText.english(DELAY_FIELD)).setDataType(NodeIds.UInt64)
+				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
+		delayMsTypeNode.addReference(new Reference(delayMsTypeNode.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
 		delayMsTypeNode.setValue(new DataValue(new Variant(DEFAULT_DELAY_FIELD)));
 		dataGeneratorTypeNode.addComponent(delayMsTypeNode);
 		waldotNamespace.getStorageManager().addNode(delayMsTypeNode);
@@ -170,10 +173,10 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 						waldotNamespace.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + MAX_VALUE_FIELD))
 				.setAccessLevel(AccessLevel.READ_WRITE)
 				.setBrowseName(waldotNamespace.generateQualifiedName(MAX_VALUE_FIELD))
-				.setDisplayName(LocalizedText.english(MAX_VALUE_FIELD)).setDataType(Identifiers.UInt64)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		maxValueTypeNode.addReference(new Reference(maxValueTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
+				.setDisplayName(LocalizedText.english(MAX_VALUE_FIELD)).setDataType(NodeIds.UInt64)
+				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
+		maxValueTypeNode.addReference(new Reference(maxValueTypeNode.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
 		maxValueTypeNode.setValue(new DataValue(new Variant(DEFAULT_MAX_VALUE_FIELD)));
 		dataGeneratorTypeNode.addComponent(maxValueTypeNode);
 		waldotNamespace.getStorageManager().addNode(maxValueTypeNode);
@@ -184,10 +187,10 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 						waldotNamespace.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + MIN_VALUE_FIELD))
 				.setAccessLevel(AccessLevel.READ_WRITE)
 				.setBrowseName(waldotNamespace.generateQualifiedName(MIN_VALUE_FIELD))
-				.setDisplayName(LocalizedText.english(MIN_VALUE_FIELD)).setDataType(Identifiers.UInt64)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		minValueTypeNode.addReference(new Reference(minValueTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
+				.setDisplayName(LocalizedText.english(MIN_VALUE_FIELD)).setDataType(NodeIds.UInt64)
+				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
+		minValueTypeNode.addReference(new Reference(minValueTypeNode.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
 		minValueTypeNode.setValue(new DataValue(new Variant(DEFAULT_MIN_VALUE_FIELD)));
 		dataGeneratorTypeNode.addComponent(minValueTypeNode);
 		waldotNamespace.getStorageManager().addNode(minValueTypeNode);
@@ -198,18 +201,18 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 						waldotNamespace.generateNodeId("ObjectTypes/WaldOTDataGeneratorObjectType." + ALGORITHM_FIELD))
 				.setAccessLevel(AccessLevel.READ_WRITE)
 				.setBrowseName(waldotNamespace.generateQualifiedName(ALGORITHM_FIELD))
-				.setDisplayName(LocalizedText.english(ALGORITHM_FIELD)).setDataType(Identifiers.String)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		algorithmTypeNode.addReference(new Reference(algorithmTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
+				.setDisplayName(LocalizedText.english(ALGORITHM_FIELD)).setDataType(NodeIds.String)
+				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
+		algorithmTypeNode.addReference(new Reference(algorithmTypeNode.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
 		algorithmTypeNode.setValue(new DataValue(new Variant(DEFAULT_ALGORITHM_FIELD)));
 		dataGeneratorTypeNode.addComponent(algorithmTypeNode);
 		waldotNamespace.getStorageManager().addNode(algorithmTypeNode);
 
 		// add definition to the address space
 		waldotNamespace.getStorageManager().addNode(dataGeneratorTypeNode);
-		dataGeneratorTypeNode.addReference(new Reference(dataGeneratorTypeNode.getNodeId(), Identifiers.HasSubtype,
-				Identifiers.BaseObjectType.expanded(), false));
+		dataGeneratorTypeNode.addReference(new Reference(dataGeneratorTypeNode.getNodeId(), NodeIds.HasSubtype,
+				NodeIds.BaseObjectType.expanded(), false));
 		waldotNamespace.getObjectTypeManager().registerObjectType(dataGeneratorTypeNode.getNodeId(), UaObjectNode.class,
 				objectNodeConstructor);
 	}
@@ -250,10 +253,10 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 						waldotNamespace.generateNodeId("ObjectTypes/WaldOTTimerObjectType." + MiloStrategy.LABEL_FIELD))
 				.setAccessLevel(AccessLevel.READ_WRITE)
 				.setBrowseName(waldotNamespace.generateQualifiedName(MiloStrategy.LABEL_FIELD))
-				.setDisplayName(LocalizedText.english(MiloStrategy.LABEL_FIELD)).setDataType(Identifiers.String)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
-		labelTimerTypeNode.addReference(new Reference(labelTimerTypeNode.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
+				.setDisplayName(LocalizedText.english(MiloStrategy.LABEL_FIELD)).setDataType(NodeIds.String)
+				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
+		labelTimerTypeNode.addReference(new Reference(labelTimerTypeNode.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
 		labelTimerTypeNode.setValue(new DataValue(new Variant("NaN")));
 		timerTypeNode.addComponent(labelTimerTypeNode);
 		final UaVariableNode schedulingTimerTypeNode = new UaVariableNode.UaVariableNodeBuilder(
@@ -261,17 +264,17 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 				.setNodeId(waldotNamespace.generateNodeId("ObjectTypes/WaldOTTimerObjectType." + CRONTAB_FIELD))
 				.setAccessLevel(AccessLevel.READ_WRITE)
 				.setBrowseName(waldotNamespace.generateQualifiedName(CRONTAB_FIELD))
-				.setDisplayName(LocalizedText.english(CRONTAB_FIELD)).setDataType(Identifiers.String)
-				.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+				.setDisplayName(LocalizedText.english(CRONTAB_FIELD)).setDataType(NodeIds.String)
+				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
 		schedulingTimerTypeNode.addReference(new Reference(schedulingTimerTypeNode.getNodeId(),
-				Identifiers.HasModellingRule, Identifiers.ModellingRule_Mandatory.expanded(), true));
+				NodeIds.HasModellingRule, NodeIds.ModellingRule_Mandatory.expanded(), true));
 		schedulingTimerTypeNode.setValue(new DataValue(new Variant(DEFAULT_CRONTAB_FIELD)));
 		timerTypeNode.addComponent(schedulingTimerTypeNode);
 		waldotNamespace.getStorageManager().addNode(labelTimerTypeNode);
 		waldotNamespace.getStorageManager().addNode(schedulingTimerTypeNode);
 		waldotNamespace.getStorageManager().addNode(timerTypeNode);
-		timerTypeNode.addReference(new Reference(timerTypeNode.getNodeId(), Identifiers.HasSubtype,
-				Identifiers.BaseObjectType.expanded(), false));
+		timerTypeNode.addReference(
+				new Reference(timerTypeNode.getNodeId(), NodeIds.HasSubtype, NodeIds.BaseObjectType.expanded(), false));
 		waldotNamespace.getObjectTypeManager().registerObjectType(timerTypeNode.getNodeId(), UaObjectNode.class,
 				objectNodeConstructor);
 	}
@@ -279,15 +282,6 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 	@Override
 	public Collection<WaldotCommand> getCommands() {
 		return Arrays.asList();
-	}
-
-	private String getKeyValuesProperty(final Object[] propertyKeyValues, final String label) {
-		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
-			if (propertyKeyValues[i] instanceof String && label.equals(propertyKeyValues[i])) {
-				return propertyKeyValues[i + 1].toString();
-			}
-		}
-		return null;
 	}
 
 	@Override

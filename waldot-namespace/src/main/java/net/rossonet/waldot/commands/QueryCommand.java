@@ -3,7 +3,7 @@ package net.rossonet.waldot.commands;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler.InvocationContext;
-import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 
 import net.rossonet.waldot.api.models.WaldotNamespace;
@@ -26,8 +26,8 @@ public class QueryCommand extends AbstractOpcCommand {
 				LocalizedText.english("command error"));
 		super.addInputArgument("command", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("command to execute"));
-		this.addReference(new Reference(this.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
+		this.addReference(new Reference(this.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
 	}
 
 	@Override

@@ -12,4 +12,5 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 public interface PropertyObserver {
 
 	void propertyChanged(UaNode sourceNode, String label, Object value);
+
 }

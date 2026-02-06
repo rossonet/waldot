@@ -104,6 +104,12 @@ public class AgentLifeCycleManager extends AbstractOpcVertex {
 
 	}
 
+	@Override
+	public void notifyRemoveVertex() {
+		// TODO Auto-generated method stub
+
+	}
+
 	private void registerNewAgent(final JSONObject discoveryMessage) {
 		ZenohAgent agent;
 		try {

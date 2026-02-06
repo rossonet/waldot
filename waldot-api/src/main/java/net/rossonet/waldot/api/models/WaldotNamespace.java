@@ -12,6 +12,7 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
 import org.eclipse.milo.opcua.sdk.core.typetree.ReferenceTypeTree;
+import org.eclipse.milo.opcua.sdk.server.EventNotifier;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager;
 import org.eclipse.milo.opcua.sdk.server.UaNodeManager;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
@@ -21,7 +22,6 @@ import org.eclipse.milo.opcua.stack.core.NamespaceTable;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 
 import net.rossonet.waldot.api.NamespaceListener;
@@ -102,7 +102,7 @@ public interface WaldotNamespace extends AutoCloseable {
 
 	int getEdgesCount();
 
-	EventBus getEventBus();
+	EventNotifier getEventBus();
 
 	EventFactory getEventFactory();
 

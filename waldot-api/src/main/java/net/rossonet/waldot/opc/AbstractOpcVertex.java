@@ -1,5 +1,7 @@
 package net.rossonet.waldot.opc;
 
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +22,10 @@ import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
@@ -28,6 +33,8 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.EventObserver;
 import net.rossonet.waldot.api.PropertyObserver;
@@ -48,13 +55,17 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-public abstract class AbstractOpcVertex extends GremlinElement implements WaldotVertex {
+public abstract class AbstractOpcVertex extends GremlinElement implements WaldotVertex, AttributeObserver {
 
 	protected boolean allowNullPropertyValues = false;
 
-	protected final List<EventObserver> eventObservers = new ArrayList<>();
-	protected final WaldotGraph graph;
-	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
+	private transient boolean ensurePostActive = false;
+
+	protected transient final List<EventObserver> eventObservers = new ArrayList<>();
+	protected transient final WaldotGraph graph;
+	private transient final Logger logger = LoggerFactory.getLogger(getClass());
+
+	protected transient final List<PropertyObserver> propertyObservers = new ArrayList<>();
 
 	public AbstractOpcVertex(final WaldotGraph graph, final UaNodeContext context, final NodeId nodeId,
 			final QualifiedName browseName, final LocalizedText displayName, final LocalizedText description,
@@ -62,6 +73,7 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier, version);
 		this.graph = graph;
 		this.allowNullPropertyValues = graph.features().vertex().supportsNullPropertyValues();
+		addAttributeObserver(this);
 	}
 
 	@Override
@@ -83,6 +95,11 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public void addPropertyObserver(final PropertyObserver propertyObserver) {
 		propertyObservers.add(propertyObserver);
+	}
+
+	@Override
+	public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
+		logger.debug("Attribute changed: node {}, attribute {}, new value {}", node, attributeId, value);
 	}
 
 	@Override
@@ -174,13 +191,16 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 			final LocalizedText description = new LocalizedText((String) value.getValue().getValue());
 			setDescription(description);
 		}
-		// TODO: gestire il cambio di directory
 		propertyObservers.forEach(observer -> observer.propertyChanged(this, label, value));
 	}
 
 	@Override
 	public void postEvent(final BaseEventTypeNode event) {
-		getNamespace().getEventBus().post(event);
+		if (!ensurePostActive) {
+			setEventNotifier(ubyte(1));
+			ensurePostActive = true;
+		}
+		getNamespace().getEventBus().fire(event);
 		eventObservers.forEach(observer -> observer.fireEvent(this, event));
 	}
 
@@ -214,7 +234,6 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public <V> VertexProperty<V> property(final String key) {
 		if (this.isRemoved()) {

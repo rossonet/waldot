@@ -19,7 +19,7 @@ import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
-import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
@@ -55,14 +55,13 @@ import net.rossonet.waldot.utils.TextHelper;
 public abstract class AbstractOpcCommand extends GremlinCommandVertex implements WaldotCommand {
 
 	public enum VariableNodeTypes {
-		Boolean(Identifiers.Boolean), Byte(Identifiers.Byte), ByteString(Identifiers.ByteString),
-		DateTime(Identifiers.DateTime), Double(Identifiers.Double), Duration(Identifiers.Duration),
-		Float(Identifiers.Float), Guid(Identifiers.Guid), Int16(Identifiers.Int16), Int32(Identifiers.Int32),
-		Int64(Identifiers.Int64), Integer(Identifiers.Integer), LocalizedText(Identifiers.LocalizedText),
-		NodeId(Identifiers.NodeId), QualifiedName(Identifiers.QualifiedName), SByte(Identifiers.SByte),
-		String(Identifiers.String), UInt16(Identifiers.UInt16), UInt32(Identifiers.UInt32), UInt64(Identifiers.UInt64),
-		UInteger(Identifiers.UInteger), UtcTime(Identifiers.UtcTime), Variant(Identifiers.BaseDataType),
-		XmlElement(Identifiers.XmlElement);
+		Boolean(NodeIds.Boolean), Byte(NodeIds.Byte), ByteString(NodeIds.ByteString), DateTime(NodeIds.DateTime),
+		Double(NodeIds.Double), Duration(NodeIds.Duration), Float(NodeIds.Float), Guid(NodeIds.Guid),
+		Int16(NodeIds.Int16), Int32(NodeIds.Int32), Int64(NodeIds.Int64), Integer(NodeIds.Integer),
+		LocalizedText(NodeIds.LocalizedText), NodeId(NodeIds.NodeId), QualifiedName(NodeIds.QualifiedName),
+		SByte(NodeIds.SByte), String(NodeIds.String), UInt16(NodeIds.UInt16), UInt32(NodeIds.UInt32),
+		UInt64(NodeIds.UInt64), UInteger(NodeIds.UInteger), UtcTime(NodeIds.UtcTime), Variant(NodeIds.BaseDataType),
+		XmlElement(NodeIds.XmlElement);
 
 		private final NodeId nodeId;
 

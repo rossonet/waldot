@@ -12,7 +12,10 @@ import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty;
+import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
@@ -43,16 +46,17 @@ import net.rossonet.waldot.utils.LogHelper;
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
-		implements WaldotVertexProperty<DATA_TYPE> {
+		implements WaldotVertexProperty<DATA_TYPE>, AttributeObserver {
 
 	protected boolean allowNullPropertyValues = false;
 
 	protected final WaldotGraph graph;
+
 	private ByteString icon;
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
-
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
+
 	private final WaldotVertex referenceVertex;
 
 	public AbstractOpcVertexProperty(final WaldotGraph graph, final WaldotVertex vertex, final String key,
@@ -76,6 +80,14 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 			setValue(errorDataValue);
 			vertex.addComponent(this);
 			logger.error(LogHelper.stackTraceToString(a));
+		}
+		addAttributeObserver(this);
+	}
+
+	@Override
+	public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
+		if (attributeId.equals(AttributeId.Value) && value instanceof DataValue) {
+			referenceVertex.notifyPropertyValueChanging(key(), ((DataValue) value));
 		}
 	}
 
@@ -148,12 +160,6 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	public void setIcon(final ByteString icon) {
 		this.icon = icon;
 
-	}
-
-	@Override
-	public void setValue(DataValue value) {
-		referenceVertex.notifyPropertyValueChanging(key(), value);
-		super.setValue(value);
 	}
 
 	@Override

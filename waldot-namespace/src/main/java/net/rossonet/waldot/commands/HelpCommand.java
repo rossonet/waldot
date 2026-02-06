@@ -8,7 +8,7 @@ import java.util.List;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler.InvocationContext;
-import org.eclipse.milo.opcua.stack.core.Identifiers;
+import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +34,8 @@ public class HelpCommand extends AbstractOpcCommand {
 				LocalizedText.english("help message"));
 		super.addInputArgument("context", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("help context to search"));
-		this.addReference(new Reference(this.getNodeId(), Identifiers.HasModellingRule,
-				Identifiers.ModellingRule_Mandatory.expanded(), true));
+		this.addReference(new Reference(this.getNodeId(), NodeIds.HasModellingRule,
+				NodeIds.ModellingRule_Mandatory.expanded(), true));
 	}
 
 	@Override

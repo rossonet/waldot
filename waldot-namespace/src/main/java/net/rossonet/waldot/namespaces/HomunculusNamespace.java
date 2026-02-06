@@ -14,10 +14,12 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
 import org.eclipse.milo.opcua.sdk.core.typetree.ReferenceTypeTree;
+import org.eclipse.milo.opcua.sdk.server.EventNotifier;
 import org.eclipse.milo.opcua.sdk.server.ManagedNamespaceWithLifecycle;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager;
 import org.eclipse.milo.opcua.sdk.server.UaNodeManager;
 import org.eclipse.milo.opcua.sdk.server.items.DataItem;
+import org.eclipse.milo.opcua.sdk.server.items.EventItem;
 import org.eclipse.milo.opcua.sdk.server.items.MonitoredItem;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
@@ -33,7 +35,6 @@ import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadResult;
 import org.eclipse.milo.opcua.stack.core.types.structured.HistoryReadValueId;
 import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateDetails;
 import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateResult;
-import org.eclipse.milo.shaded.com.google.common.eventbus.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,6 +104,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 			final WaldotConfiguration configuration, final BootstrapStrategy bootstrapProcedureStrategy,
 			final ClientManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
+		// final UaNode serverNode =
+		// getServer().getAddressSpaceManager().getManagedNode(NodeIds.Server).orElse(null);
+		// if (serverNode instanceof ServerTypeNode) {
+		// ((ServerTypeNode) serverNode).setEventNotifier(ubyte(1));
+		// }
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
 		this.historyStrategy = historyStrategy;
@@ -301,8 +307,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public EventBus getEventBus() {
-		return getServer().getInternalEventBus();
+	public EventNotifier getEventBus() {
+		return getServer().getEventNotifier();
 	}
 
 	@Override
@@ -488,6 +494,28 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		listeners.forEach(listener -> listener.onDataItemsModified(dataItems));
 		historyStrategy.onDataItemsModified(dataItems);
 		subscriptionModel.onDataItemsModified(dataItems);
+	}
+
+	@Override
+	public void onEventItemsCreated(List<EventItem> eventItems) {
+		eventItems.stream().filter(MonitoredItem::isSamplingEnabled)
+				.forEach(item -> getServer().getEventNotifier().register(item));
+	}
+
+	@Override
+	public void onEventItemsDeleted(List<EventItem> eventItems) {
+		eventItems.forEach(item -> getServer().getEventNotifier().unregister(item));
+	}
+
+	@Override
+	public void onEventItemsModified(List<EventItem> eventItems) {
+		for (final EventItem item : eventItems) {
+			if (item.isSamplingEnabled()) {
+				getServer().getEventNotifier().register(item);
+			} else {
+				getServer().getEventNotifier().unregister(item);
+			}
+		}
 	}
 
 	@Override

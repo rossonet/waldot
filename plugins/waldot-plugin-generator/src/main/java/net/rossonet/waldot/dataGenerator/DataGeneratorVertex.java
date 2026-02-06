@@ -136,4 +136,10 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 		assignValue();
 	}
 
+	@Override
+	public void notifyRemoveVertex() {
+		// TODO Auto-generated method stub
+
+	}
+
 }
