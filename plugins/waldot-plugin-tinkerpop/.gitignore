@@ -1,4 +1,5 @@
 .gradle
+.security
 /build/
 bin
 !gradle/wrapper/gradle-wrapper.jar
