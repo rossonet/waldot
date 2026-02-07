@@ -38,6 +38,7 @@ public class DeleteVertexAndEdgeTests {
 	public void baseDeleteVertexTest() throws Exception {
 		simpleServerInit();
 		OpcFactory.generateModern(g);
+		// FIXME: completare i test per i delete
 	}
 
 	@BeforeEach
