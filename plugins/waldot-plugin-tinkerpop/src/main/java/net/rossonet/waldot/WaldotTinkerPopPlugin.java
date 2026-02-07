@@ -1,25 +1,25 @@
 package net.rossonet.waldot;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.tinkerpop.gremlin.server.GremlinServer;
-import org.apache.tinkerpop.gremlin.server.Settings;
-import org.apache.tinkerpop.gremlin.server.Settings.SerializerSettings;
-import org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer;
-import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
-import org.apache.tinkerpop.gremlin.util.ser.GraphSONMessageSerializerV1;
+import org.eclipse.milo.opcua.sdk.core.Reference;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
+import org.eclipse.milo.opcua.stack.core.NodeIds;
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
+import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.tinkerpop.WaldotGraphManager;
-import net.rossonet.waldot.tinkerpop.WaldotGremlinServer;
+import net.rossonet.waldot.api.models.WaldotVertex;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
+import net.rossonet.waldot.tinkerpop.GremlinVertex;
 
 /**
  * WaldotTinkerPopPlugin is a plugin for the Waldot framework that integrates
@@ -31,67 +31,80 @@ import net.rossonet.waldot.tinkerpop.WaldotGremlinServer;
  */
 @WaldotPlugin
 public class WaldotTinkerPopPlugin implements PluginListener {
-	static WaldotNamespace mainNamespace;
+	public static final String BIND_HOST_FIELD = "bind";
+	private static final String GREMLIN_TYPE_DISPLAY_NAME = "implementing the Gremlin Server protocol on a specific port";
+	private static final String GREMLIN_TYPE_LABEL = "gremlin";
+	private static final String GREMLIN_TYPE_NODE_ID = "GremlinServerObjectType";
+	public static final String PORT_FIELD = "port";
 
+	private UaObjectTypeNode gremlinTypeNode;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-
-	private GremlinServer server;
 
 	private WaldotNamespace waldotNamespace;
 
 	@Override
+	public boolean containsVertexType(String typeDefinitionLabel) {
+		return GREMLIN_TYPE_LABEL.equals(typeDefinitionLabel);
+	}
+
+	@Override
+	public boolean containsVertexTypeNode(NodeId typeDefinitionNodeId) {
+		return gremlinTypeNode.getNodeId().equals(typeDefinitionNodeId);
+	}
+
+	private WaldotVertex createGremlinVertexObject(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
+			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
+			UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
+		return new GremlinVertex(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
+				eventNotifier, version, propertyKeyValues);
+	}
+
+	@Override
+	public WaldotVertex createVertex(NodeId typeDefinitionNodeId, WaldotGraph graph, UaNodeContext context,
+			NodeId nodeId, QualifiedName browseName, LocalizedText displayName, LocalizedText description,
+			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
+		if (!containsVertexTypeNode(typeDefinitionNodeId)) {
+			logger.warn("TypeDefinitionNodeId: {} not managed by TinkerPopPlugin", typeDefinitionNodeId);
+			return null;
+		}
+		final WaldotVertex vertexObject = createGremlinVertexObject(graph, context, nodeId, browseName, displayName,
+				description, writeMask, userWriteMask, eventNotifier, version, propertyKeyValues);
+		return vertexObject;
+	}
+
+	private void generateGremlinTypeNode() {
+		gremlinTypeNode = UaObjectTypeNode.builder(waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace.generateNodeId(OBJECT_TYPES + GREMLIN_TYPE_NODE_ID))
+				.setBrowseName(waldotNamespace.generateQualifiedName(GREMLIN_TYPE_NODE_ID))
+				.setDisplayName(LocalizedText.english(GREMLIN_TYPE_DISPLAY_NAME)).setIsAbstract(false).build();
+		PluginListener.addParameterToTypeNode(waldotNamespace, gremlinTypeNode, MiloStrategy.LABEL_FIELD.toLowerCase(),
+				NodeIds.String);
+		PluginListener.addParameterToTypeNode(waldotNamespace, gremlinTypeNode, PORT_FIELD, NodeIds.Int16);
+		GremlinVertex.generateParameters(waldotNamespace, gremlinTypeNode);
+		waldotNamespace.getStorageManager().addNode(gremlinTypeNode);
+		gremlinTypeNode.addReference(new Reference(gremlinTypeNode.getNodeId(), NodeIds.HasSubtype,
+				NodeIds.BaseObjectType.expanded(), false));
+		waldotNamespace.getObjectTypeManager().registerObjectType(gremlinTypeNode.getNodeId(), UaObjectNode.class,
+				objectNodeConstructor);
+
+	}
+
+	@Override
+	public NodeId getVertexTypeNode(String typeDefinitionLabel) {
+		switch (typeDefinitionLabel) {
+		case GREMLIN_TYPE_LABEL:
+			return gremlinTypeNode.getNodeId();
+		default:
+			logger.warn("TypeDefinitionLabel: {} not managed by TinkerPopPlugin", typeDefinitionLabel);
+			return null;
+		}
+	}
+
+	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
+		generateGremlinTypeNode();
 		logger.info("Initializing Waldot TinkerPop Plugin");
-	}
-
-	@Override
-	public void start() {
-		final Settings overriddenSettings = new Settings();
-		overriddenSettings.channelizer = WsAndHttpChannelizer.class.getName();
-		overriddenSettings.graphManager = WaldotGraphManager.class.getName();
-		final Map<String, Object> arg = new HashMap<>();
-		arg.put("graph", waldotNamespace.getGremlinGraph());
-		arg.put("g", waldotNamespace.getGremlinGraph().traversal());
-		final Map<String, Object> method2arg = new HashMap<>();
-		method2arg.put("bindings", arg);
-		overriddenSettings.scriptEngines.get("gremlin-groovy").plugins
-				.put("org.apache.tinkerpop.gremlin.jsr223.BindingsGremlinPlugin", method2arg);
-		final SerializerSettings settingSerializerJson = new SerializerSettings();
-		settingSerializerJson.className = GraphSONMessageSerializerV1.class.getName();
-		settingSerializerJson.config = Collections.singletonMap("ioRegistries",
-				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1",
-						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV2",
-						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3"));
-		final SerializerSettings settingSerializerBin = new SerializerSettings();
-		settingSerializerBin.className = GraphBinaryMessageSerializerV1.class.getName();
-		settingSerializerBin.config = new HashMap<>();
-		settingSerializerBin.config.put("ioRegistries",
-				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1"));
-		settingSerializerBin.config.put("custom", List.of(
-				"org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;net.rossonet.waldot.gremlin.opcgraph.ser.NodeIdCustomTypeSerializer"));
-		overriddenSettings.serializers = new ArrayList<>();
-		overriddenSettings.serializers.add(settingSerializerBin);
-		overriddenSettings.serializers.add(settingSerializerJson);
-		WaldotTinkerPopPlugin.mainNamespace = waldotNamespace;
-		this.server = new WaldotGremlinServer(overriddenSettings);
-		try {
-			server.start();// .get();
-			logger.info("Gremlin Server started: " + server.toString());
-		} catch (final Exception e) {
-			logger.error("Failed to start Gremlin Server", e);
-		}
-	}
-
-	@Override
-	public void stop() {
-		if (server != null) {
-			try {
-				server.stop().get();
-			} catch (final Exception e) {
-				logger.error("Failed to stop Gremlin Server", e);
-			}
-		}
 	}
 
 }

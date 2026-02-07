@@ -42,6 +42,7 @@ import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotGraphComputerView;
 import net.rossonet.waldot.api.models.WaldotNamespace;
+import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinElement;
@@ -58,13 +59,12 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
 public abstract class AbstractOpcVertex extends GremlinElement implements WaldotVertex, AttributeObserver {
 
 	protected boolean allowNullPropertyValues = false;
-
 	private transient boolean ensurePostActive = false;
 
 	protected transient final List<EventObserver> eventObservers = new ArrayList<>();
 	protected transient final WaldotGraph graph;
-	private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
+	private transient final Logger logger = LoggerFactory.getLogger(getClass());
 	protected transient final List<PropertyObserver> propertyObservers = new ArrayList<>();
 
 	public AbstractOpcVertex(final WaldotGraph graph, final UaNodeContext context, final NodeId nodeId,
@@ -95,6 +95,12 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public void addPropertyObserver(final PropertyObserver propertyObserver) {
 		propertyObservers.add(propertyObserver);
+	}
+
+	@Override
+	public void addRelatedProperty(WaldotProperty<?> property) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -297,6 +303,12 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public void removePropertyObserver(final PropertyObserver observer) {
 		propertyObservers.remove(observer);
+	}
+
+	@Override
+	public void removeRelatedOpcUaNodes() {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override

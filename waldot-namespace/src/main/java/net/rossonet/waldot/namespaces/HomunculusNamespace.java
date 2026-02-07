@@ -59,6 +59,7 @@ import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.commands.AboutCommand;
+import net.rossonet.waldot.commands.DeleteDirectory;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
@@ -151,6 +152,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		if (configuration.getAboutCommandLabel() != null) {
 			registerCommand(new AboutCommand(this));
 		}
+		if (configuration.getDeleteDirectoryLabel() != null) {
+			registerCommand(new DeleteDirectory(this));
+		}
 	}
 
 	@Override
@@ -203,6 +207,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	public <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(final WaldotVertex opcVertex,
 			final String key, final DATA_TYPE value) {
 		return opcMappingStrategy.createOrUpdateWaldotVertexProperty(opcVertex, key, value);
+	}
+
+	@Override
+	public String deleteDirectory(String directoryNodeId) {
+		return opcMappingStrategy.deleteOpcNodeId(directoryNodeId);
 	}
 
 	@Override

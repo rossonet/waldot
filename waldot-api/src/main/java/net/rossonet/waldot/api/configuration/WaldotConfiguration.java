@@ -42,6 +42,16 @@ public interface WaldotConfiguration extends Serializable, Map<String, String> {
 
 	long getDefaultFactsValidUntilMs();
 
+	String getDeleteDirectoryDescription();
+
+	Boolean getDeleteDirectoryExecutable();
+
+	String getDeleteDirectoryLabel();
+
+	UInteger getDeleteDirectoryUserWriteMask();
+
+	UInteger getDeleteDirectoryWriteMask();
+
 	String getExecCommandDescription();
 
 	Boolean getExecCommandExecutable();

@@ -39,7 +39,6 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
  * @author Stephen Mallette (http://stephen.genoprime.com)
  */
 public class OpcGraphProvider extends AbstractGraphProvider {
-	// TODO completare test
 	private static final Set<Class> IMPLEMENTATION = new HashSet<Class>() {
 		{
 			add(OpcEdge.class);

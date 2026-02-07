@@ -91,6 +91,31 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 	}
 
 	@Override
+	public String getDeleteDirectoryDescription() {
+		return "delete directory by NodeId";
+	}
+
+	@Override
+	public Boolean getDeleteDirectoryExecutable() {
+		return true;
+	}
+
+	@Override
+	public String getDeleteDirectoryLabel() {
+		return "delete directory";
+	}
+
+	@Override
+	public UInteger getDeleteDirectoryUserWriteMask() {
+		return DEFAULT_WRITE_MASK;
+	}
+
+	@Override
+	public UInteger getDeleteDirectoryWriteMask() {
+		return DEFAULT_WRITE_MASK;
+	}
+
+	@Override
 	public String getExecCommandDescription() {
 		return "run system command";
 	}

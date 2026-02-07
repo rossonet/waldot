@@ -27,6 +27,8 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 
 	void addPropertyObserver(PropertyObserver observer);
 
+	void addRelatedProperty(WaldotProperty<?> property);
+
 	public UaMethodNode findMethodNode(NodeId methodId);
 
 	List<EventObserver> getEventObservers();
@@ -59,5 +61,7 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 	void removeEventObserver(EventObserver observer);
 
 	void removePropertyObserver(PropertyObserver observer);
+
+	void removeRelatedOpcUaNodes();
 
 }

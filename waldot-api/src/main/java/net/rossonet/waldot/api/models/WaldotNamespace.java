@@ -62,6 +62,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	<DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(WaldotVertex vertex, String key,
 			DATA_TYPE value);
 
+	String deleteDirectory(String directoryNodeId);
+
 	void dropGraphComputerView();
 
 	NodeId generateNodeId(Long nodeId);

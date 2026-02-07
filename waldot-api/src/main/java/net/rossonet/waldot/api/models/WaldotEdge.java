@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
+import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseObjectType;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.shaded.com.google.common.collect.ImmutableList;
@@ -22,6 +23,10 @@ public interface WaldotEdge extends Edge, WaldotElement, BaseObjectType {
 
 	void addPropertyObserver(PropertyObserver propertyObserver);
 
+	void addRelatedProperty(WaldotProperty<?> property);
+
+	void addRelatedReference(Reference reference);
+
 	ImmutableList<WaldotProperty<Object>> getProperties();
 
 	public <T> Optional<T> getProperty(QualifiedProperty<T> property);
@@ -31,5 +36,7 @@ public interface WaldotEdge extends Edge, WaldotElement, BaseObjectType {
 	void notifyPropertyValueChanging(String label, DataValue value);
 
 	void removePropertyObserver(PropertyObserver observer);
+
+	void removeRelatedOpcUaNodes();
 
 }

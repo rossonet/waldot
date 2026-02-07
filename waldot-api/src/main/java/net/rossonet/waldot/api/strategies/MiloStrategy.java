@@ -168,6 +168,8 @@ public interface MiloStrategy extends AutoCloseable {
 	<DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(WaldotVertex opcVertex, String key,
 			DATA_TYPE value);
 
+	String deleteOpcNodeId(String nodeId);
+
 	void dropGraphComputerView();
 
 	UaFolderNode getAssetRootFolderNode();

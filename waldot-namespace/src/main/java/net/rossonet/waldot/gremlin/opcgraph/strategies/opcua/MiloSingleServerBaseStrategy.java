@@ -188,12 +188,16 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		edge.addReference(
 				new Reference(edge.getNodeId(), MiloSingleServerBaseReferenceNodeBuilder.hasTargetNodeReferenceType,
 						targetVertex.getNodeId().expanded(), true));
-		sourceVertex.addReference(new Reference(sourceVertex.getNodeId(),
+		final Reference sourceReference = new Reference(sourceVertex.getNodeId(),
 				MiloSingleServerBaseReferenceNodeBuilder.hasReferenceDescriptionReferenceType,
-				edge.getNodeId().expanded(), true));
-		targetVertex.addReference(new Reference(targetVertex.getNodeId(),
+				edge.getNodeId().expanded(), true);
+		edge.addRelatedReference(sourceReference);
+		sourceVertex.addReference(sourceReference);
+		final Reference targetReference = new Reference(targetVertex.getNodeId(),
 				MiloSingleServerBaseReferenceNodeBuilder.hasReferenceDescriptionReferenceType,
-				edge.getNodeId().expanded(), true));
+				edge.getNodeId().expanded(), true);
+		edge.addRelatedReference(targetReference);
+		targetVertex.addReference(targetReference);
 		// create the main reference type if it does not exist
 		final NodeId mainReferenceTypeNodeId = getOrCreateReferenceType(type);
 		final QualifiedProperty<NodeId> edgeReferenceType = new QualifiedProperty<NodeId>(
@@ -205,8 +209,10 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				IS_FORWARD, MiloSingleServerBaseReferenceNodeBuilder.isForwardTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, Boolean.class);
 		edge.setProperty(forward, true);
-		sourceVertex.addReference(new Reference(sourceVertex.getNodeId(), mainReferenceTypeNodeId,
-				targetVertex.getNodeId().expanded(), true));
+		final Reference reference = new Reference(sourceVertex.getNodeId(), mainReferenceTypeNodeId,
+				targetVertex.getNodeId().expanded(), true);
+		edge.addRelatedReference(reference);
+		sourceVertex.addReference(reference);
 		popolateEdgePropertiesFromPropertyKeyValues(propertyKeyValues, edge);
 		for (final PluginListener p : waldotNamespace.getPlugins()) {
 			if (p.containsEdgeType(type)) {
@@ -301,7 +307,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			final Set<VertexComputeKey> VertexComputeKey) {
 		logger.info("createGraphComputerView: graph={}, graphFilter={}, VertexComputeKey={}", graph, graphFilter,
 				VertexComputeKey);
-		// XXX valutare come implementare GraphComputerView (per ora non si presuppone
+		// TODO valutare come implementare GraphComputerView (per ora non si presuppone
 		// l'uso di computazioni sul grafo)
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
@@ -338,6 +344,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 					value, context, nodeId, description, writeMask, userWriteMask, dataType, valueRank, arrayDimensions,
 					accessLevel, userAccessLevel, minimumSamplingInterval, historizing);
 			waldotNamespace.getStorageManager().addNode(property);
+			opcEdge.addRelatedProperty(property);
 			opcEdge.addReference(new Reference(opcEdge.getNodeId(),
 					MiloSingleServerBaseReferenceNodeBuilder.hasGremlinPropertyReferenceType,
 					property.getNodeId().expanded(), true));
@@ -423,10 +430,15 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	}
 
 	@Override
+	public String deleteOpcNodeId(String nodeId) {
+		return waldotNamespace.getStorageManager()
+				.removeNode(MiloStrategy.getNodeIdManager().convert(waldotNamespace.getGremlinGraph(), nodeId)).get()
+				.getNodeId().toParseableString();
+	}
+
+	@Override
 	public void dropGraphComputerView() {
 		logger.info("dropGraphComputerView");
-		// XXX valutare come implementare GraphComputerView (per ora non si presuppone
-		// l'uso di computazioni sul grafo)
 	}
 
 	private boolean edgeLabelsIsValid(String[] edgeLabels, WaldotEdge edge) {
@@ -823,6 +835,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 					ValueRanks.Scalar, String.class);
 			final WaldotEdge edge = (WaldotEdge) node;
 			final String type = edge.getProperty(typeProperty).get();
+			edge.removeRelatedOpcUaNodes();
 			for (final PluginListener p : waldotNamespace.getPlugins()) {
 				if (p.containsEdgeType(type)) {
 					p.notifyRemoveEdge(edge);
@@ -831,9 +844,6 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		}
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
-		// FIXME rimuovere dalla cartella giusta
-		// FIXME rimuovere tutti i nodi GremlinProperty collegati
-
 	}
 
 	@Override
@@ -844,11 +854,10 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			return;
 		} else {
 			((WaldotVertex) node).notifyRemoveVertex();
+			((WaldotVertex) node).removeRelatedOpcUaNodes();
 		}
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
-		// FIXME rimuovere tutti i nodi OpcVertexProperty collegati
-		// FIXME rimuovere dalla cartella giusta
 	}
 
 	@Override
@@ -856,13 +865,12 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId).get();
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
-		// FIXME rimuovere tutti i nodi GremlinProperty collegati
 	}
 
 	@Override
 	public void resetNameSpace() {
 		logger.info("resetNameSpace");
-		// FIXME cancellare tutto...
+		// TODO cancellare tutto il contenuto del namespace, compresi i folder
 
 	}
 

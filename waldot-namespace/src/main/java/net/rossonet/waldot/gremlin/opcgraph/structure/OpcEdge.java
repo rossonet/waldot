@@ -16,6 +16,7 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
+import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
@@ -68,6 +69,18 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 	@Override
 	public void addPropertyObserver(final PropertyObserver propertyObserver) {
 		propertyObservers.add(propertyObserver);
+	}
+
+	@Override
+	public void addRelatedProperty(WaldotProperty<?> property) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addRelatedReference(Reference reference) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -205,6 +218,12 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 	@Override
 	public void removePropertyObserver(final PropertyObserver observer) {
 		propertyObservers.remove(observer);
+	}
+
+	@Override
+	public void removeRelatedOpcUaNodes() {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
