@@ -12,7 +12,6 @@ buildscript {
 }
 
 plugins {
-    id 'org.graalvm.buildtools.native' version '0.10.6'
     id "com.gradleup.shadow" version "8.3.6"
 }
 
@@ -147,33 +146,4 @@ configurations {
 application {
     mainClass = "${mainClassName}"
     applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
-}
-
-graalvmNative {
-    toolchainDetection = false
-    binaries {
-        main {
-            verbose = true
-            sharedLibrary = false
-            mainClass = "${mainClassName}"
-        }
-    }
-}
-
-task generateGraalReflectionConfig (dependsOn: 'classes', type: JavaExec) {
-    group = "Build"
-    description = "Generate GraalVM Reflection Configuration."
-    main = 'picocli.codegen.aot.graalvm.ReflectionConfigGenerator'
-    classpath = configurations.annotationProcessor + sourceSets.main.runtimeClasspath
-    def outputFile = new File(project.buildDir, 'cli-reflect.json')
-    args = ["--output=$outputFile", "${mainPicocliCommandClass}"]
-}
-
-task generateManpageAsciiDoc(type: JavaExec) {
-    dependsOn(classes)
-    group = "Documentation"
-    description = "Generate AsciiDoc manpage."
-    classpath(configurations.compileClasspath, configurations.annotationProcessor, sourceSets.main.runtimeClasspath)
-    main 'picocli.codegen.docgen.manpage.ManPageGenerator'
-    args "${mainPicocliCommandClass}", "--outdir=${project.buildDir}/generated-picocli-docs", "-v" //, "--template-dir=src/docs/mantemplates"
 }

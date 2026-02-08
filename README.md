@@ -37,10 +37,6 @@ experimental integration between [Apache TinkerPop](https://tinkerpop.apache.org
 
 [OPCUA - AddressSpace concepts](https://reference.opcfoundation.org/Core/Part3/v104/docs/4)
 
-[OPC 30270: Industry 4.0 Asset Administration Shell document](https://reference.opcfoundation.org/I4AAS/v100/docs/)
-
-[DTDL - Digital Twins Definition Language version 4](docs/reference/digitaltwins/dtdl/DTDL/v4/DTDL.v4.md)
-
 ### Project sponsor 
 
 [![Rossonet s.c.a r.l.](https://raw.githubusercontent.com/rossonet/images/main/artwork/rossonet-logo/png/rossonet-logo_280_115.png)](https://www.rossonet.net)

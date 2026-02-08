@@ -7,12 +7,10 @@ buildscript {
         classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
         classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.11.2'
         classpath 'de.undercouch:gradle-download-task:5.6.0'
-//        classpath "com.palantir.gradle.docker:gradle-docker:0.36.0"
     }
 }
 
 plugins {
-    // id 'org.graalvm.buildtools.native' version '0.10.6'
     id "com.gradleup.shadow" version "8.3.6"
 }
 
@@ -151,59 +149,3 @@ application {
     mainClass = "${mainClassName}"
     applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
 }
-
-/*
-graalvmNative {
-    toolchainDetection = false
-    agent {
-        enabled = true
-        defaultMode = "standard"
-    }
-    binaries {
-        main {
-            verbose = true
-            sharedLibrary = false
-            mainClass = "${mainClassName}"
-        }
-    }
-}
-
-
-task generateGraalReflectionConfig (dependsOn: 'classes', type: JavaExec) {
-    group = "Build"
-    description = "Generate GraalVM Reflection Configuration."
-    main = 'picocli.codegen.aot.graalvm.ReflectionConfigGenerator'
-    classpath = configurations.picocliBuild + sourceSets.main.runtimeClasspath + configurations.compileClasspath
-    //def outputFile = new File(project.buildDir, 'cli-reflect.json')
-    def outputDir  = file("$buildDir/generated/native")
-    def outputFile = new File(outputDir, 'reflect-config.json')
-    outputs.file(outputFile)
-    doFirst {
-        outputDir.mkdirs()
-    }
-    args = ["--output=$outputFile", "${mainPicocliCommandClass}"]
-}
-
-generateGraalReflectionConfig.doLast {
-    copy {
-        from "$buildDir/generated/native/reflect-config.json"
-        into "$projectDir/src/main/resources/META-INF/native-image"
-        rename { 'reflect-config.json' }   // nome richiesto
-    }
-}
-
-
-tasks.named('nativeCompile') {
-    dependsOn tasks.named('generateGraalReflectionConfig')
-}
-
-
-task generateManpageAsciiDoc(type: JavaExec) {
-    dependsOn(classes)
-    group = "Documentation"
-    description = "Generate AsciiDoc manpage."
-    classpath(configurations.compileClasspath, configurations.picocliBuild, sourceSets.main.runtimeClasspath)
-    main 'picocli.codegen.docgen.manpage.ManPageGenerator'
-    args "${mainPicocliCommandClass}", "--outdir=${project.buildDir}/generated-picocli-docs", "-v" //, "--template-dir=src/docs/mantemplates"
-}
-*/
