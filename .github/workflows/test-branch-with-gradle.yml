@@ -1,4 +1,4 @@
-name: WaldOT Library Test
+name: Test all subprojects with Gradle
 
 on:
   workflow_dispatch:
@@ -16,6 +16,15 @@ jobs:
         distribution: temurin
     - name: Test with Gradle
       run: ./gradlew waldot-api:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz waldot-api/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_api
+        path: test_report.tgz
+
   test_namespace:
     runs-on: ubuntu-latest
     steps:
@@ -28,6 +37,15 @@ jobs:
         distribution: temurin
     - name: Test with Gradle
       run: ./gradlew waldot-namespace:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz waldot-namespace/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_namespace
+        path: test_report.tgz
+
   test_client:
     runs-on: ubuntu-latest
     steps:
@@ -40,6 +58,15 @@ jobs:
         distribution: temurin
     - name: Test with Gradle
       run: ./gradlew waldot-client:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz clients/waldot-client/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_client
+        path: test_report.tgz
+
   test_app:
     runs-on: ubuntu-latest
     steps:
@@ -52,6 +79,15 @@ jobs:
         distribution: temurin
     - name: Test with Gradle
       run: ./gradlew waldot-app:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz waldot-app/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_app
+        path: test_report.tgz
+
   test_plugin-os:
     runs-on: ubuntu-latest
     steps:
@@ -64,6 +100,15 @@ jobs:
         distribution: temurin
     - name: Test with Gradle
       run: ./gradlew waldot-plugin-os:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz plugins/waldot-plugin-os/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_plugin_os
+        path: test_report.tgz
+
   test_plugin-generator:
     runs-on: ubuntu-latest
     steps:
@@ -76,63 +121,117 @@ jobs:
         distribution: temurin
     - name: Test with Gradle
       run: ./gradlew waldot-plugin-generator:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz plugins/waldot-plugin-generator/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_plugin_generator
+        path: test_report.tgz
+
   test_plugin-zenoh:
-      runs-on: ubuntu-latest
-      steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Test with Gradle
-        run: ./gradlew waldot-plugin-zenoh:test -Dorg.gradle.daemon=false --info
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: temurin
+    - name: Test with Gradle
+      run: ./gradlew waldot-plugin-zenoh:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz plugins/waldot-plugin-zenoh/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_plugin_zenoh
+        path: test_report.tgz
+
   test_plugin-reinforcement-learning:
-      runs-on: ubuntu-latest
-      steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Test with Gradle
-        run: ./gradlew waldot-plugin-reinforcement-learning:test -Dorg.gradle.daemon=false --info
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: temurin
+    - name: Test with Gradle
+      run: ./gradlew waldot-plugin-reinforcement-learning:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz plugins/waldot-plugin-reinforcement-learning/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_plugin_reinforcement_learning
+        path: test_report.tgz
+
   test_plugin-behavior-tree:
-      runs-on: ubuntu-latest
-      steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Test with Gradle
-        run: ./gradlew waldot-plugin-behavior-tree:test -Dorg.gradle.daemon=false --info
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: temurin
+    - name: Test with Gradle
+      run: ./gradlew waldot-plugin-behavior-tree:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz plugins/waldot-plugin-behavior-tree/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_plugin_behavior_tree
+        path: test_report.tgz
+
   test_plugin-tinkerpop:
-      runs-on: ubuntu-latest
-      steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Test with Gradle
-        run: ./gradlew waldot-plugin-tinkerpop:test -Dorg.gradle.daemon=false --info
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: temurin
+    - name: Test with Gradle
+      run: ./gradlew waldot-plugin-tinkerpop:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz plugins/waldot-plugin-tinkerpop/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_plugin_tinkerpop
+        path: test_report.tgz
+
   test_plugin-rules-engine:
-      runs-on: ubuntu-latest
-      steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Test with Gradle
-        run: ./gradlew waldot-plugin-rules-engine:test -Dorg.gradle.daemon=false --info
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: temurin
+    - name: Test with Gradle
+      run: ./gradlew waldot-plugin-rules-engine:test -Dorg.gradle.daemon=false --info
+    - name: Prepare Report
+      if: failure()
+      run: tar -czf test_report.tgz plugins/waldot-plugin-rules-engine/build/reports
+    - uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: test_report_plugin_rules_engine
+        path: test_report.tgz
+

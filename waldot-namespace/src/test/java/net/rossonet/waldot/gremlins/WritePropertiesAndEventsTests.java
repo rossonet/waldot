@@ -38,6 +38,7 @@ import net.rossonet.waldot.utils.NetworkHelper;
 
 @TestMethodOrder(OrderAnnotation.class)
 public class WritePropertiesAndEventsTests {
+	protected int error;
 	private WaldotGraph g;
 	private final NamespaceListener listener = new TestNamespaceListener();
 	private WaldotTestClientHandler waldotTestClientHandler;
@@ -251,16 +252,22 @@ public class WritePropertiesAndEventsTests {
 
 			@Override
 			public void onEvent(String nodeId, String eventType, Object value) {
-				System.out.println(nodeId + ": event fired from OPCUA: " + value.toString());
-				final int check = Integer.valueOf(value.toString());
-				if (check != v) {
-					throw new RuntimeException("Unexpected event message, expected: " + v + " actual: " + check);
-				} else {
-					v++;
+				try {
+					System.out.println(nodeId + ": event fired from OPCUA: " + value.toString());
+					final int check = Integer.valueOf(((LocalizedText) value).getText());
+					if (check != v) {
+						throw new RuntimeException("Unexpected event message, expected: " + v + " actual: " + check);
+					} else {
+						v++;
+					}
+				} catch (final Exception e) {
+					e.printStackTrace();
+					error++;
 				}
 			}
 
 		};
+		error = 0;
 		waldotTestClientHandler.subscribeToOpcUaVertexEventsMessage("test-id", observer);
 
 		for (int i = 0; i < 20; i++) {
@@ -280,6 +287,8 @@ public class WritePropertiesAndEventsTests {
 			Thread.sleep(1000);
 			eventNode.delete();
 		}
+		assert eventObserver.v == 20;
+		assert error == 0;
 	}
 
 	@Test
