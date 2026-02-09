@@ -103,9 +103,13 @@ public class BaseWaldotTests {
 		final Object result = g.getWaldotNamespace().getConsoleStrategy().runExpression("about.exec()");
 		if (result != null && result instanceof String[]) {
 			final String[] aboutLines = (String[]) result;
+			System.out.println("About command output composed of " + aboutLines.length + " lines");
 			assert aboutLines.length == 5;
+			int lineCounter = 1;
 			for (final String line : aboutLines) {
 				comparation.add(line);
+				System.out.println("Line " + lineCounter + ": " + line);
+				lineCounter++;
 			}
 			assert aboutLines[3].equals("https://www.apache.org/licenses/LICENSE-2.0");
 		} else {
