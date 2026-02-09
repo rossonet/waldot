@@ -76,11 +76,6 @@ public abstract class GremlinElement extends UaObjectNode implements WaldotEleme
 	}
 
 	@Override
-	public String label() {
-		return getBrowseName().getName();
-	}
-
-	@Override
 	public void remove() {
 		this.removed = true;
 	}

@@ -12,6 +12,7 @@ import javax.naming.ConfigurationException;
 import org.apache.tinkerpop.gremlin.driver.Cluster;
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,49 @@ public class GremlinPluginTest {
 	public void beforeEach() {
 		System.out.println("Starting test...");
 		clean();
+	}
+
+	@Test
+	public void bindCreateInVertexTest() throws Exception {
+		simpleServerInit();
+		g.addVertex("id", "label1", "type", "gremlin", "bind", "127.0.0.9");
+		Thread.sleep(500);
+		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1", "127.0.0.9");
+		assert waldotTestClientHandler.checkOpcUaVertexBindReadOnly("label1");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1", "127.0.0.9");
+
+	}
+
+	@Test
+	public void bindReadOnlyInVertexTest() throws Exception {
+		simpleServerInit();
+		g.addVertex("id", "label1", "type", "gremlin");
+		Thread.sleep(500);
+		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1", "0.0.0.0");
+		assert waldotTestClientHandler.checkOpcUaVertexBindReadOnly("label1");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1", "0.0.0.0");
+
+	}
+
+	@Test
+	public void bindRewriteTest() throws Exception {
+		simpleServerInit();
+		final String baseBind = "127.0.0.";
+		int number = 1;
+		final Vertex v = g.addVertex("port", baseBind + String.valueOf(number), "id", "number2", "type", "gremlin");
+		Thread.sleep(500);
+		assert waldotTestClientHandler.checkOpcUaVertexExists("number2");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("number2", baseBind + String.valueOf(number));
+		for (int i = 0; i < 10; i++) {
+			number++;
+			v.property("port", baseBind + String.valueOf(number));
+			Thread.sleep(500);
+			assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("number2",
+					baseBind + String.valueOf(number));
+		}
+
 	}
 
 	private void bootstrapUrlServerInit(String url)
@@ -91,6 +135,47 @@ public class GremlinPluginTest {
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void portCreateInVertexTest() throws Exception {
+		simpleServerInit();
+		g.addVertex("id", "label1", "type", "gremlin", "port", "2686");
+		Thread.sleep(500);
+		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1", "2686");
+		assert waldotTestClientHandler.checkOpcUaVertexPortReadOnly("label1");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1", "2686");
+
+	}
+
+	@Test
+	public void portReadOnlyInVertexTest() throws Exception {
+		simpleServerInit();
+		g.addVertex("id", "label1", "type", "gremlin");
+		Thread.sleep(500);
+		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1", "1025");
+		assert waldotTestClientHandler.checkOpcUaVertexPortReadOnly("label1");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1", "1025");
+
+	}
+
+	@Test
+	public void portRewriteTest() throws Exception {
+		simpleServerInit();
+		int number = 8600;
+		final Vertex v = g.addVertex("port", String.valueOf(number), "id", "number2", "type", "gremlin");
+		Thread.sleep(500);
+		assert waldotTestClientHandler.checkOpcUaVertexExists("number2");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("number2", String.valueOf(number));
+		for (int i = 0; i < 10; i++) {
+			number++;
+			v.property("port", String.valueOf(number));
+			Thread.sleep(500);
+			assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("number2", String.valueOf(number));
+		}
+
 	}
 
 	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {

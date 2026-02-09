@@ -4,9 +4,11 @@ import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.sdk.client.AddressSpace.BrowseOptions;
+import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.client.subscriptions.MonitoredItemSynchronizationException;
@@ -16,6 +18,7 @@ import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
@@ -30,6 +33,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.SimpleAttributeOperand
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteValue;
 
+import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.client.api.WaldOTAgentClient.Status;
 import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
@@ -68,6 +72,193 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
+	public boolean checkOpcUaEdgeBrowserNameNameValueEquals(WaldotEdge edge, String expectedValue) {
+		try {
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(edge.getNodeId(), AttributeId.BrowseName.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = ((QualifiedName) results[0].value().getValue()).getName();
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean checkOpcUaEdgeDescriptionValueEquals(WaldotEdge edge, String expectedValue) {
+		try {
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(edge.getNodeId(), AttributeId.Description.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = ((LocalizedText) results[0].value().getValue()).getText();
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean checkOpcUaEdgeDisplayNameValueEquals(WaldotEdge edge, String expectedValue) {
+		try {
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(edge.getNodeId(), AttributeId.DisplayName.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = ((LocalizedText) results[0].value().getValue()).getText();
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean checkOpcUaEdgeLabelReadOnly(WaldotEdge edge) {
+		final NodeId completedNodeId = graph.getWaldotNamespace()
+				.generateNodeId(edge.getNodeId().getIdentifier().toString() + ".Label");
+		final OpcUaClient clientOpc = client.getOpcUaClient();
+		try {
+			final List<WriteValue> writeValues = new ArrayList<>();
+			writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+					DataValue.valueOnly(new Variant(UUID.randomUUID().toString()))));
+			final WriteResponse writeResponse = clientOpc.write(writeValues);
+			System.out.println("Write response: " + writeResponse);
+			if (writeResponse.getResults()[0].isGood()) {
+				System.out.println("Label is not read-only");
+				return false;
+			} else {
+				System.out.println("Label is read-only");
+				return true;
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return true;
+		}
+	}
+
+	public boolean checkOpcUaEdgeLabelValueEquals(WaldotEdge edge, String expectedValue) {
+		try {
+			final NodeId completedNodeId = graph.getWaldotNamespace()
+					.generateNodeId(edge.getNodeId().getIdentifier().toString() + ".Label");
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = (String) results[0].value().getValue();
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean checkOpcUaVertexBindReadOnly(String nodeId) {
+		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Bind");
+		final OpcUaClient clientOpc = client.getOpcUaClient();
+		try {
+			final List<WriteValue> writeValues = new ArrayList<>();
+			writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+					DataValue.valueOnly(new Variant(UUID.randomUUID().toString()))));
+			final WriteResponse writeResponse = clientOpc.write(writeValues);
+			System.out.println("Write response: " + writeResponse);
+			if (writeResponse.getResults()[0].isGood()) {
+				System.out.println("Port is not read-only");
+				return false;
+			} else {
+				System.out.println("Port is read-only");
+				return true;
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return true;
+		}
+	}
+
+	public boolean checkOpcUaVertexBindValueEquals(String nodeId, String expectedValue) {
+		try {
+			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Bind");
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = (String) results[0].value().getValue();
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean checkOpcUaVertexBrowserNameNameValueEquals(String nodeId, String expectedValue) {
+		try {
+			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.BrowseName.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = ((QualifiedName) results[0].value().getValue()).getName();
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean checkOpcUaVertexDescriptionValueEquals(String nodeId, String expectedValue) {
+		try {
+			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Description.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = ((LocalizedText) results[0].value().getValue()).getText();
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean checkOpcUaVertexDisplayNameValueEquals(String nodeId, String expectedValue) {
+		try {
+			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.DisplayName.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = ((LocalizedText) results[0].value().getValue()).getText();
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	public boolean checkOpcUaVertexEdge(long nodeOut, long nodeIn, String typeEdge) {
 		try {
 			final NodeId out = graph.getWaldotNamespace().generateNodeId(nodeOut);
@@ -94,7 +285,8 @@ public class WaldotTestClientHandler implements AutoCloseable {
 					if (nodeEdge == null) {
 						return false;
 					}
-					if (nodeEdge.getBrowseName().getName().equals(typeEdge)) {
+					final String edgeNodeLabel = graph.getWaldotNamespace().getEdgeNode(nodeEdge.getNodeId()).label();
+					if (edgeNodeLabel.equals(typeEdge)) {
 						descriptionOut = true;
 					}
 				}
@@ -132,9 +324,9 @@ public class WaldotTestClientHandler implements AutoCloseable {
 					if (nodeEdge == null) {
 						return false;
 					}
-					if (nodeEdge.getBrowseName().getName().equals(typeEdge)) {
+					final String edgeNodeLabel = graph.getWaldotNamespace().getEdgeNode(nodeEdge.getNodeId()).label();
+					if (edgeNodeLabel.equals(typeEdge)) {
 						descriptionIn = true;
-						break;
 					}
 				}
 			}
@@ -170,6 +362,104 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			return false;
 		}
 
+	}
+
+	public boolean checkOpcUaVertexLabelReadOnly(String nodeId) {
+		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Label");
+		final OpcUaClient clientOpc = client.getOpcUaClient();
+		try {
+			final List<WriteValue> writeValues = new ArrayList<>();
+			writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+					DataValue.valueOnly(new Variant(UUID.randomUUID().toString()))));
+			final WriteResponse writeResponse = clientOpc.write(writeValues);
+			System.out.println("Write response: " + writeResponse);
+			if (writeResponse.getResults()[0].isGood()) {
+				System.out.println("Label is not read-only");
+				return false;
+			} else {
+				System.out.println("Label is read-only");
+				return true;
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return true;
+		}
+	}
+
+	public boolean checkOpcUaVertexLabelValueEquals(String nodeId, String expectedValue) {
+		try {
+			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Label");
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = (String) results[0].value().getValue();
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean checkOpcUaVertexPortReadOnly(String nodeId) {
+		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Port");
+		final OpcUaClient clientOpc = client.getOpcUaClient();
+		try {
+			final List<WriteValue> writeValues = new ArrayList<>();
+			writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+					DataValue.valueOnly(new Variant(UUID.randomUUID().toString()))));
+			final WriteResponse writeResponse = clientOpc.write(writeValues);
+			System.out.println("Write response: " + writeResponse);
+			if (writeResponse.getResults()[0].isGood()) {
+				System.out.println("Port is not read-only");
+				return false;
+			} else {
+				System.out.println("Port is read-only");
+				return true;
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return true;
+		}
+	}
+
+	public boolean checkOpcUaVertexPortValueEquals(String nodeId, String expectedValue) {
+		try {
+			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Port");
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = String.valueOf(results[0].value().getValue());
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean checkOpcUaVertexTypeValueEquals(String nodeId, String expectedValue) {
+		try {
+			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Type");
+			final List<ReadValueId> readValueIds = new ArrayList<>();
+			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+					QualifiedName.NULL_VALUE));
+			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
+					TimestampsToReturn.Both, readValueIds);
+			final DataValue[] results = readResponse.getResults();
+			final String value = String.valueOf(results[0].value().getValue());
+			System.out.println("Read value: " + value + " expected: " + expectedValue);
+			return expectedValue.equals(value);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public boolean checkOpcUaVertexValueBetween(String nodeId, String valueLabel, int minValue, int maxValue) {

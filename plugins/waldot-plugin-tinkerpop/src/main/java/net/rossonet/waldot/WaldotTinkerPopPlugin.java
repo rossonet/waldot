@@ -31,11 +31,11 @@ import net.rossonet.waldot.tinkerpop.GremlinVertex;
  */
 @WaldotPlugin
 public class WaldotTinkerPopPlugin implements PluginListener {
-	public static final String BIND_HOST_FIELD = "bind";
+	public static final String BIND_HOST_FIELD = "Bind";
 	private static final String GREMLIN_TYPE_DISPLAY_NAME = "implementing the Gremlin Server protocol on a specific port";
 	private static final String GREMLIN_TYPE_LABEL = "gremlin";
 	private static final String GREMLIN_TYPE_NODE_ID = "GremlinServerObjectType";
-	public static final String PORT_FIELD = "port";
+	public static final String PORT_FIELD = "Port";
 
 	private UaObjectTypeNode gremlinTypeNode;
 	private final Logger logger = LoggerFactory.getLogger(getClass());

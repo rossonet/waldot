@@ -45,9 +45,17 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	private final WaldotGraph graph;
 
+	private final QualifiedProperty<String> labelProperty;
+
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+	private final Set<WaldotProperty<?>> propertiesToDelete = new HashSet<>();
+
 	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
+
+	private final Set<Reference> referencesToDelete = new HashSet<>();
+
+	private final QualifiedProperty<String> typeProperty;
 
 	public OpcEdge(WaldotGraph graph, final NodeId nodeId, final WaldotVertex outVertex, final WaldotVertex inVertex,
 			final String label, final String name, String description, UInteger writeMask, UInteger userWriteMask,
@@ -63,7 +71,13 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 				LocalizedText.english(description), userWriteMask, userWriteMask, eventNotifier, currentVersion);
 		this.graph = graph;
 		this.allowNullPropertyValues = graph.features().edge().supportsNullPropertyValues();
-
+		labelProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
+				MiloStrategy.LABEL_FIELD,
+				MiloSingleServerBaseReferenceNodeBuilder.labelEdgeTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				String.class);
+		typeProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
+				MiloStrategy.TYPE_FIELD, MiloSingleServerBaseReferenceNodeBuilder.edgeTypeNode.getNodeId().expanded(),
+				ValueRanks.Scalar, String.class);
 	}
 
 	@Override
@@ -73,13 +87,13 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	@Override
 	public void addRelatedProperty(WaldotProperty<?> property) {
-		// TODO Auto-generated method stub
+		propertiesToDelete.add(property);
 
 	}
 
 	@Override
 	public void addRelatedReference(Reference reference) {
-		// TODO Auto-generated method stub
+		referencesToDelete.add(reference);
 
 	}
 
@@ -132,13 +146,27 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 	}
 
 	@Override
+	public String label() {
+		return getProperty(labelProperty).get();
+	}
+
+	@Override
 	public void notifyPropertyValueChanging(String label, DataValue value) {
 		if (label.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {
-			final QualifiedProperty<String> newLabel = new QualifiedProperty<String>(
-					graph.getWaldotNamespace().getNamespaceUri(), MiloStrategy.LABEL_FIELD,
-					MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(),
-					ValueRanks.Scalar, String.class);
-			setProperty(newLabel, (String) value.getValue().getValue());
+			final String originalLabel = getProperty(labelProperty).get();
+			if (!originalLabel.equals(String.valueOf(value.getValue().getValue().toString()))) {
+				logger.warn("Changing label from {} to {} is not allowed, reverting to original value", originalLabel,
+						value.getValue().getValue().toString());
+				property(MiloStrategy.LABEL_FIELD.toLowerCase(), originalLabel);
+			}
+		}
+		if (label.equals(MiloStrategy.TYPE_FIELD.toLowerCase())) {
+			final String originalType = getProperty(typeProperty).get();
+			if (!originalType.equals(String.valueOf(value.getValue().getValue().toString()))) {
+				logger.warn("Changing type from {} to {} is not allowed, reverting to original value", originalType,
+						value.getValue().getValue().toString());
+				property(MiloStrategy.TYPE_FIELD.toLowerCase(), originalType);
+			}
 		}
 		if (label.equals(MiloStrategy.NAME_FIELD.toLowerCase())) {
 			final QualifiedName browseName = graph.getWaldotNamespace()
@@ -222,7 +250,12 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	@Override
 	public void removeRelatedOpcUaNodes() {
-		// TODO Auto-generated method stub
+		for (final WaldotProperty<?> property : propertiesToDelete) {
+			property.remove();
+		}
+		for (final Reference reference : referencesToDelete) {
+			graph.getWaldotNamespace().removeReference(reference);
+		}
 
 	}
 

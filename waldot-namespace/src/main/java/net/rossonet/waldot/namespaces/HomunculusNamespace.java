@@ -13,6 +13,7 @@ import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
+import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.typetree.ReferenceTypeTree;
 import org.eclipse.milo.opcua.sdk.server.EventNotifier;
 import org.eclipse.milo.opcua.sdk.server.ManagedNamespaceWithLifecycle;
@@ -584,6 +585,12 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public void removeListener(final NamespaceListener listener) {
 		listeners.remove(listener);
+	}
+
+	@Override
+	public void removeReference(Reference reference) {
+		opcMappingStrategy.removeReference(reference);
+
 	}
 
 	@Override

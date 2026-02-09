@@ -11,6 +11,7 @@ import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
+import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.core.typetree.ReferenceTypeTree;
 import org.eclipse.milo.opcua.sdk.server.EventNotifier;
 import org.eclipse.milo.opcua.sdk.server.ObjectTypeManager;
@@ -181,6 +182,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	void removeEdge(NodeId expandedNodeId);
 
 	void removeListener(NamespaceListener listener);
+
+	void removeReference(Reference reference);
 
 	void removeVertex(NodeId nodeId);
 

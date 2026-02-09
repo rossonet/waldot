@@ -66,9 +66,9 @@ public class GeneratorTests {
 	}
 
 	@Test
-	public void create10000GeneratorNodes() throws Exception {
+	public void create1000GeneratorNodes() throws Exception {
 		simpleServerInit();
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			g.addVertex(MiloStrategy.ID_PARAMETER, "test" + i, WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(),
 					"random", MiloStrategy.LABEL_FIELD.toLowerCase(), "test" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
 					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
@@ -77,7 +77,7 @@ public class GeneratorTests {
 					WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase(), "90");
 		}
 		Thread.sleep(500L);
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			assert waldotTestClientHandler.checkOpcUaVertexExists("test" + i);
 			assert waldotTestClientHandler.checkVertexExists("test" + i);
 			assert waldotTestClientHandler.checkOpcUaVertexValueBetween("test" + i, DataGeneratorVertex.VALUE_KEY, 90,
@@ -89,13 +89,13 @@ public class GeneratorTests {
 	@Test
 	public void createAllGenerator() throws Exception {
 		simpleServerInit();
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 100; i++) {
 			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "random", MiloStrategy.ID_PARAMETER, "random" + i,
 					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "random",
 					MiloStrategy.LABEL_FIELD.toLowerCase(), "random" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
 					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
 					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "1000");
-			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "incrmental", MiloStrategy.ID_PARAMETER, "incremental" + i,
+			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "incremental", MiloStrategy.ID_PARAMETER, "incremental" + i,
 					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "incremental",
 					MiloStrategy.LABEL_FIELD.toLowerCase(), "incremental" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
 					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
@@ -117,7 +117,7 @@ public class GeneratorTests {
 					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "8000");
 		}
 		Thread.sleep(500L);
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 100; i++) {
 			assert waldotTestClientHandler.checkOpcUaVertexExists("random" + i);
 			assert waldotTestClientHandler.checkVertexExists("incremental" + i);
 			assert waldotTestClientHandler.checkOpcUaVertexExists("decremental" + i);

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.tinkerpop.gremlin.server.GremlinServer;
 import org.apache.tinkerpop.gremlin.server.Settings;
@@ -17,6 +18,7 @@ import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
 import org.eclipse.milo.opcua.stack.core.NodeIds;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -42,14 +44,15 @@ public class GremlinVertex extends AbstractOpcVertex implements AutoCloseable {
 	}
 
 	private String baseDirectory;
+
 	private String host;
-
 	private final QualifiedProperty<String> hostProperty;
-	private final Logger logger = LoggerFactory.getLogger(getClass());
 
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private int port = 1025;
 
 	private final QualifiedProperty<Integer> portProperty;
+
 	private GremlinServer server;
 	private final WaldotNamespace waldotNamespace;
 
@@ -106,6 +109,24 @@ public class GremlinVertex extends AbstractOpcVertex implements AutoCloseable {
 		stop();
 	}
 
+	@Override
+	public void notifyPropertyValueChanging(String label, DataValue value) {
+		super.notifyPropertyValueChanging(label, value);
+		boolean restart = false;
+		if (label.equals(WaldotTinkerPopPlugin.PORT_FIELD.toLowerCase())) {
+			setProperty(portProperty, Integer.valueOf(value.getValue().getValue().toString()));
+			restart = true;
+		}
+		if (label.equals(WaldotTinkerPopPlugin.BIND_HOST_FIELD.toLowerCase())) {
+			setProperty(hostProperty, value.getValue().getValue().toString());
+			restart = true;
+		}
+		if (restart) {
+			stop(true);
+			start();
+		}
+	}
+
 	public void start() {
 		final Settings overriddenSettings = new Settings();
 		overriddenSettings.host = host;
@@ -145,9 +166,16 @@ public class GremlinVertex extends AbstractOpcVertex implements AutoCloseable {
 	}
 
 	public void stop() {
+		stop(false);
+	}
+
+	public void stop(boolean get) {
 		if (server != null) {
 			try {
-				server.stop();// .get();
+				final CompletableFuture<Void> f = server.stop();
+				if (get) {
+					f.get();
+				}
 				server = null;
 				logger.info("Gremlin Server stopped");
 			} catch (final Exception e) {

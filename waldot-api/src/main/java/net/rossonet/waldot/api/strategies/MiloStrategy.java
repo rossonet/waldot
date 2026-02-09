@@ -216,6 +216,8 @@ public interface MiloStrategy extends AutoCloseable {
 
 	void removeEdge(NodeId nodeId);
 
+	void removeReference(Reference reference);
+
 	void removeVertex(NodeId nodeId);
 
 	void removeVertexProperty(NodeId nodeId);

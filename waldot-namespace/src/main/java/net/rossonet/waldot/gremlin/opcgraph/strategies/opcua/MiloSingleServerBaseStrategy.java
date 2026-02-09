@@ -169,7 +169,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				ValueRanks.Scalar, String.class);
 		edge.setProperty(labelProperty, elaboratedLabel);
 		final QualifiedProperty<String> typeProperty = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
-				TYPE_FIELD, MiloSingleServerBaseReferenceNodeBuilder.labelEdgeTypeNode.getNodeId().expanded(),
+				TYPE_FIELD, MiloSingleServerBaseReferenceNodeBuilder.typeEdgeTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
 		edge.setProperty(typeProperty, type);
 		final QualifiedProperty<NodeId> sourceProperty = new QualifiedProperty<NodeId>(
@@ -404,10 +404,19 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				new Reference(vertex.getNodeId(), NodeIds.HasTypeDefinition, typeDefinition.expanded(), true));
 		checkDirectoryParameterAndLinkNode(propertyKeyValues, vertex, folderManager.getVerticesFolderNode(),
 				folderManager.getVertexDirectories(), VERTEX_DIRECTORY_NODEID_PREFIX);
-		final QualifiedProperty<String> LABEL = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
+		final QualifiedProperty<String> labelProperty = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
 				LABEL_FIELD, MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
-		vertex.setProperty(LABEL, label);
+		vertex.setProperty(labelProperty, label);
+		String type = MiloStrategy.getKeyValuesProperty(propertyKeyValues, TYPE_FIELD.toLowerCase());
+		final QualifiedProperty<String> typeProperty = new QualifiedProperty<String>(waldotNamespace.getNamespaceUri(),
+				TYPE_FIELD, MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode.getNodeId().expanded(),
+				ValueRanks.Scalar, String.class);
+		if (type == null || type.isEmpty()) {
+			type = "vertex";
+			logger.debug(TYPE_FIELD.toLowerCase() + " not found in propertyKeyValues, using default type '{}'", type);
+		}
+		vertex.setProperty(typeProperty, type);
 		popolateVertexPropertiesFromPropertyKeyValues(propertyKeyValues, vertex);
 		return vertex;
 	}
@@ -844,6 +853,11 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		}
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
+	}
+
+	@Override
+	public void removeReference(Reference reference) {
+		waldotNamespace.getStorageManager().removeReference(reference);
 	}
 
 	@Override
