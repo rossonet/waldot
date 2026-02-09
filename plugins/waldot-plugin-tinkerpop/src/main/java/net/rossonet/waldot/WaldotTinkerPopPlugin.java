@@ -77,9 +77,8 @@ public class WaldotTinkerPopPlugin implements PluginListener {
 				.setNodeId(waldotNamespace.generateNodeId(OBJECT_TYPES + GREMLIN_TYPE_NODE_ID))
 				.setBrowseName(waldotNamespace.generateQualifiedName(GREMLIN_TYPE_NODE_ID))
 				.setDisplayName(LocalizedText.english(GREMLIN_TYPE_DISPLAY_NAME)).setIsAbstract(false).build();
-		PluginListener.addParameterToTypeNode(waldotNamespace, gremlinTypeNode, MiloStrategy.LABEL_FIELD.toLowerCase(),
+		PluginListener.addParameterToTypeNode(waldotNamespace, gremlinTypeNode, MiloStrategy.LABEL_FIELD,
 				NodeIds.String);
-		PluginListener.addParameterToTypeNode(waldotNamespace, gremlinTypeNode, PORT_FIELD, NodeIds.Int16);
 		GremlinVertex.generateParameters(waldotNamespace, gremlinTypeNode);
 		waldotNamespace.getStorageManager().addNode(gremlinTypeNode);
 		gremlinTypeNode.addReference(new Reference(gremlinTypeNode.getNodeId(), NodeIds.HasSubtype,

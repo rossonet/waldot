@@ -16,6 +16,7 @@ import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.client.utils.WaldotTestClientHandler;
+import net.rossonet.waldot.dataGenerator.DataGeneratorVertex;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.NetworkHelper;
@@ -75,19 +76,20 @@ public class GeneratorTests {
 					WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase(), "100",
 					WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase(), "90");
 		}
-		Thread.sleep(5000L);
+		Thread.sleep(500L);
 		for (int i = 0; i < 10000; i++) {
 			assert waldotTestClientHandler.checkOpcUaVertexExists("test" + i);
 			assert waldotTestClientHandler.checkVertexExists("test" + i);
-			assert waldotTestClientHandler.checkOpcUaVertexValueBetween("test" + i, "generated", 90, 100);
-			assert waldotTestClientHandler.checkVertexValueBetween("test" + i, "generated", 90, 100);
+			assert waldotTestClientHandler.checkOpcUaVertexValueBetween("test" + i, DataGeneratorVertex.VALUE_KEY, 90,
+					100);
+			assert waldotTestClientHandler.checkVertexValueBetween("test" + i, DataGeneratorVertex.VALUE_KEY, 90, 100);
 		}
 	}
 
 	@Test
 	public void createAllGenerator() throws Exception {
 		simpleServerInit();
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 10000; i++) {
 			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "random", MiloStrategy.ID_PARAMETER, "random" + i,
 					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "random",
 					MiloStrategy.LABEL_FIELD.toLowerCase(), "random" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
@@ -114,8 +116,8 @@ public class GeneratorTests {
 					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
 					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "8000");
 		}
-		Thread.sleep(5000L);
-		for (int i = 0; i < 1000; i++) {
+		Thread.sleep(500L);
+		for (int i = 0; i < 10000; i++) {
 			assert waldotTestClientHandler.checkOpcUaVertexExists("random" + i);
 			assert waldotTestClientHandler.checkVertexExists("incremental" + i);
 			assert waldotTestClientHandler.checkOpcUaVertexExists("decremental" + i);
@@ -127,8 +129,8 @@ public class GeneratorTests {
 	@Test
 	public void createSingleDecremental() throws Exception {
 		simpleServerInit();
-		final Vertex v = g.addVertex(MiloStrategy.ID_PARAMETER, "inctest", MiloStrategy.LABEL_FIELD.toLowerCase(),
-				"inctest", MiloStrategy.TYPE_FIELD.toLowerCase(),
+		final Vertex v = g.addVertex(MiloStrategy.ID_PARAMETER, "dectest", MiloStrategy.LABEL_FIELD.toLowerCase(),
+				"dectest", MiloStrategy.TYPE_FIELD.toLowerCase(),
 				WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL, WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(),
 				"1000", WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "decremental",
 				WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase(), "100",
@@ -141,12 +143,12 @@ public class GeneratorTests {
 		long value = 0;
 		for (int i = 1; i < 20; i++) {
 			if (value == 0) {
-				value = waldotTestClientHandler.readIntOpcUaVertexValue("inctest", "generated");
+				value = waldotTestClientHandler.readIntOpcUaVertexValue("dectest", DataGeneratorVertex.VALUE_KEY);
 				System.out.println("start from " + value);
 				System.out.flush();
 			}
-			assert waldotTestClientHandler.checkOpcUaVertexValueEquals("inctest", "generated", value);
-			assert waldotTestClientHandler.checkVertexValueEquals("inctest", "generated", value);
+			assert waldotTestClientHandler.checkOpcUaVertexValueEquals("dectest", DataGeneratorVertex.VALUE_KEY, value);
+			assert waldotTestClientHandler.checkVertexValueEquals("dectest", DataGeneratorVertex.VALUE_KEY, value);
 			System.out.println("ok: " + value);
 			System.out.flush();
 			value--;
@@ -174,12 +176,12 @@ public class GeneratorTests {
 		long value = 0;
 		for (int i = 1; i < 20; i++) {
 			if (value == 0) {
-				value = waldotTestClientHandler.readIntOpcUaVertexValue("inctest", "generated");
+				value = waldotTestClientHandler.readIntOpcUaVertexValue("inctest", DataGeneratorVertex.VALUE_KEY);
 				System.out.println("start from " + value);
 				System.out.flush();
 			}
-			assert waldotTestClientHandler.checkOpcUaVertexValueEquals("inctest", "generated", value);
-			assert waldotTestClientHandler.checkVertexValueEquals("inctest", "generated", value);
+			assert waldotTestClientHandler.checkOpcUaVertexValueEquals("inctest", DataGeneratorVertex.VALUE_KEY, value);
+			assert waldotTestClientHandler.checkVertexValueEquals("inctest", DataGeneratorVertex.VALUE_KEY, value);
 			System.out.println("ok: " + value);
 			System.out.flush();
 			value++;
