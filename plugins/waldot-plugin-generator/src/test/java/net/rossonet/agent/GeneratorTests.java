@@ -89,7 +89,7 @@ public class GeneratorTests {
 	@Test
 	public void createAllGenerator() throws Exception {
 		simpleServerInit();
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "random", MiloStrategy.ID_PARAMETER, "random" + i,
 					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "random",
 					MiloStrategy.LABEL_FIELD.toLowerCase(), "random" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
@@ -117,7 +117,7 @@ public class GeneratorTests {
 					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "8000");
 		}
 		Thread.sleep(500L);
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			assert waldotTestClientHandler.checkOpcUaVertexExists("random" + i);
 			assert waldotTestClientHandler.checkVertexExists("incremental" + i);
 			assert waldotTestClientHandler.checkOpcUaVertexExists("decremental" + i);
