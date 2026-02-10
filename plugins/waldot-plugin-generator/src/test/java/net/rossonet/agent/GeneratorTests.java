@@ -9,7 +9,9 @@ import javax.naming.ConfigurationException;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import net.rossonet.waldot.WaldotGeneratorPlugin;
 import net.rossonet.waldot.api.NamespaceListener;
@@ -17,6 +19,7 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.client.utils.WaldotTestClientHandler;
 import net.rossonet.waldot.dataGenerator.DataGeneratorVertex;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.NetworkHelper;
@@ -28,8 +31,34 @@ public class GeneratorTests {
 
 	@AfterEach
 	public void afterEach() {
+		clean();
+		System.out.println("Test completed");
+
+	}
+
+	@BeforeEach
+	public void beforeEach(TestInfo testInfo) {
+		System.out.println("Starting test " + testInfo.getTestMethod().get().getName());
+		clean();
+	}
+
+	private void bootstrapUrlServerInit(String url)
+			throws ConfigurationException, InterruptedException, ExecutionException {
+		LogHelper.changeJulLogLevel("fine");
+		g = OpcFactory.getOpcGraph(url, new BaseHistoryStrategy());
+		g.getWaldotNamespace().addListener(listener);
+		Thread.sleep(500);
+		waldotTestClientHandler = new WaldotTestClientHandler(g);
+	}
+
+	private void clean() {
 		try {
 			Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+		} catch (final IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			Files.deleteIfExists(Path.of("/tmp/index.txt"));
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -40,12 +69,15 @@ public class GeneratorTests {
 				e.printStackTrace();
 			}
 		}
-		try {
-			g.getWaldotNamespace().close();
-			System.out.println("Graph namespace closed");
-			g = null;
-		} catch (final Exception e) {
-			e.printStackTrace();
+		if (g != null && g.getWaldotNamespace() != null) {
+			try {
+
+				g.getWaldotNamespace().close();
+				System.out.println("Graph namespace closed");
+				g = null;
+			} catch (final Exception e) {
+				e.printStackTrace();
+			}
 		}
 		try {
 			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
@@ -61,8 +93,6 @@ public class GeneratorTests {
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Test completed");
-
 	}
 
 	@Test
@@ -139,7 +169,7 @@ public class GeneratorTests {
 		for (final String k : v.keys()) {
 			System.out.println(k + ": " + v.property(k));
 		}
-		Thread.sleep(1000);
+		Thread.sleep(700);
 		long value = 0;
 		for (int i = 1; i < 20; i++) {
 			if (value == 0) {
@@ -172,7 +202,7 @@ public class GeneratorTests {
 		for (final String k : v.keys()) {
 			System.out.println(k + ": " + v.property(k));
 		}
-		Thread.sleep(1000);
+		Thread.sleep(700);
 		long value = 0;
 		for (int i = 1; i < 20; i++) {
 			if (value == 0) {
@@ -190,10 +220,6 @@ public class GeneratorTests {
 	}
 
 	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {
-		LogHelper.changeJulLogLevel("fine");
-		g = OpcFactory.getOpcGraph();
-		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
-		waldotTestClientHandler = new WaldotTestClientHandler(g);
+		bootstrapUrlServerInit("file:///tmp/boot.conf");
 	}
 }

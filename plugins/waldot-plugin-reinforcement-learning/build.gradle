@@ -38,7 +38,7 @@ apply plugin: 'org.jreleaser'
 
 dependencies {
     implementation project(':waldot-deps')
-    api project(':waldot-api')
+    api project(':waldot-plugin-rules-engine')
     implementation("org.deeplearning4j:rl4j:1.0.0-M1.1")
     // Steering Behaviors, Formation Motion, Pathfinding, Behavior Trees and Finite State Machines
     // api "com.badlogicgames.gdx:gdx-ai:1.8.2"

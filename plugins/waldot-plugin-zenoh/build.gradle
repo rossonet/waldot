@@ -38,7 +38,7 @@ apply plugin: 'org.jreleaser'
 
 dependencies {
     implementation project(':waldot-deps')
-    api project(':waldot-api')
+    api project(':waldot-plugin-rules-engine')
     api project(':zenoh-agent-lib')
     // per raft "multi waldot"
     api("io.microraft:microraft:0.7")

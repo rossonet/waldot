@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import net.rossonet.waldot.api.NamespaceListener;
@@ -38,8 +39,8 @@ public class BaseWaldotTests {
 	}
 
 	@BeforeEach
-	public void beforeEach() {
-		System.out.println("Starting test...");
+	public void beforeEach(TestInfo testInfo) {
+		System.out.println("Starting test " + testInfo.getTestMethod().get().getName());
 		clean();
 	}
 
@@ -113,6 +114,7 @@ public class BaseWaldotTests {
 			}
 			assert aboutLines[3].equals("https://www.apache.org/licenses/LICENSE-2.0");
 		} else {
+			System.out.println("About command did not return expected result " + result);
 			throw new Exception("About command did not return expected result");
 		}
 		final List<String> info = waldotTestClientHandler.getServerInfo();
