@@ -98,14 +98,12 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				String output = "";
 				String error = "";
 				try {
-					waldotNamespace.getGremlinGraph().traversal().V(vertex.getNodeId().getIdentifier()).drop()
-							.iterate();
+					output = waldotNamespace.getGremlinGraph().traversal().V(vertex.getNodeId().getIdentifier()).drop()
+							.iterate() + " element deleted";
 				} catch (final Exception e) {
 					logger.error("Error deleting element {}: {}", vertex.getNodeId().getIdentifier(), e.getMessage());
 					error = e.getMessage();
 				}
-				output = waldotNamespace.getGremlinGraph().traversal().V(vertex.getNodeId().getIdentifier()).drop()
-						.iterate() + " element deleted";
 				return new String[] { output, error };
 			}
 		};
@@ -220,7 +218,47 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			}
 		}
 		addDeletedCommand(edge);
+		addPropertyCommand(edge);
 		return edge;
+	}
+
+	private void addPropertyCommand(GremlinElement vertex) {
+		final AbstractOpcCommand propertyCommand = new AbstractOpcCommand(waldotNamespace.getGremlinGraph(),
+				waldotNamespace, vertex.id().getIdentifier().toString() + ".property", "property",
+				"Add or update vertex property" + vertex.getBrowseName().getName(), null,
+				waldotNamespace.getConfiguration().getWaldotCommandWriteMask(),
+				waldotNamespace.getConfiguration().getWaldotCommandUserWriteMask(),
+				waldotNamespace.getConfiguration().getWaldotCommandExecutable(),
+				waldotNamespace.getConfiguration().getWaldotCommandUserExecutable()) {
+
+			@Override
+			public Object[] runCommand(InvocationContext invocationContext, String[] inputValues) {
+				String output = "";
+				String error = "";
+				final String label = inputValues[0];
+				final String value = inputValues[1];
+				try {
+					output = waldotNamespace.getGremlinGraph().traversal().V(vertex.getNodeId().getIdentifier())
+							.property(label, value).iterate() + " property '" + label + "' updated with value '" + value
+							+ "'";
+				} catch (final Exception e) {
+					logger.error("Error updating property '{}' of element {}: {}", label,
+							vertex.getNodeId().getIdentifier(), e.getMessage());
+					error = e.getMessage();
+				}
+				return new String[] { output, error };
+			}
+		};
+		propertyCommand.addOutputArgument("output", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english("command output"));
+		propertyCommand.addOutputArgument("error", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english("command error"));
+		propertyCommand.addInputArgument("propertyLabel", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english("property to add or update"));
+		propertyCommand.addInputArgument("propertyValue", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english("value of the property"));
+		waldotNamespace.getStorageManager().addNode(propertyCommand);
+		vertex.addComponent((UaNode) propertyCommand);
 	}
 
 	@Override
@@ -257,6 +295,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				MiloSingleServerBaseReferenceNodeBuilder.getEventNotifier(propertyKeyValues),
 				MiloSingleServerBaseReferenceNodeBuilder.getVersion(propertyKeyValues));
 		addDeletedCommand(vertex);
+		addPropertyCommand(vertex);
 		return vertex;
 	}
 
@@ -348,6 +387,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			opcEdge.addReference(new Reference(opcEdge.getNodeId(),
 					MiloSingleServerBaseReferenceNodeBuilder.hasGremlinPropertyReferenceType,
 					property.getNodeId().expanded(), true));
+			opcEdge.notifyPropertyValueChanging(key, property.getValue());
 			return property;
 		}
 
@@ -388,6 +428,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			opcVertex.addReference(new Reference(opcVertex.getNodeId(),
 					MiloSingleServerBaseReferenceNodeBuilder.hasGremlinPropertyReferenceType,
 					property.getNodeId().expanded(), true));
+			opcVertex.notifyPropertyValueChanging(key, property.getValue());
 			return property;
 		}
 	}
@@ -872,6 +913,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		}
 		waldotNamespace.getStorageManager().removeNode(nodeId);
 		node.delete();
+		logger.info("Vertex with NodeId {} removed", nodeId);
 	}
 
 	@Override

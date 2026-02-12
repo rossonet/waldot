@@ -1,6 +1,7 @@
 package net.rossonet.waldot.api.strategies;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.jexl3.JexlContext;
 
@@ -20,6 +21,8 @@ public interface ConsoleStrategy extends AutoCloseable {
 	public static String G_LABEL = "g";
 	public static String LOG_LABEL = "log";
 	public static String SELF_LABEL = "self";
+
+	List<WaldotCommand> getCommands();
 
 	WaldotNamespace getWaldotNamespace();
 

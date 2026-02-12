@@ -189,6 +189,26 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		return out.toArray(new String[0]);
 	}
 
+	public String[] deleteVertex(int id) throws UaException {
+		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace().getObjectNode(new NodeId(2, id));
+		final Variant[] outputs = cmdNode.callMethod("delete", new Variant[0]);
+		final List<String> out = new ArrayList<>();
+		for (final Variant output : outputs) {
+			out.add((String) output.getValue());
+		}
+		return out.toArray(new String[0]);
+	}
+
+	public String[] deleteVertex(String id) throws UaException {
+		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace().getObjectNode(new NodeId(2, id));
+		final Variant[] outputs = cmdNode.callMethod("delete", new Variant[0]);
+		final List<String> out = new ArrayList<>();
+		for (final Variant output : outputs) {
+			out.add((String) output.getValue());
+		}
+		return out.toArray(new String[0]);
+	}
+
 	private void doActionClientStart() {
 		try {
 			if (activeConnectionRequest) {

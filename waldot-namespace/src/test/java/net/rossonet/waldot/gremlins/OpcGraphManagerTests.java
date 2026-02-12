@@ -53,9 +53,9 @@ public class OpcGraphManagerTests {
 	@Test
 	public void checkEdgeCreation() throws Exception {
 		simpleServerInit();
-		waldotTestClientHandler.createVertex("a", "A", null, new String[0]);
-		waldotTestClientHandler.createVertex("b", "B", null, new String[0]);
-		waldotTestClientHandler.createEdge("type_test", "ns=2;s=a", "ns=2;s=b", new String[0]);
+		waldotTestClientHandler.createVertexWithOpcUa("a", "A", null, new String[0]);
+		waldotTestClientHandler.createVertexWithOpcUa("b", "B", null, new String[0]);
+		waldotTestClientHandler.createEdgeWithOpcUa("type_test", "ns=2;s=a", "ns=2;s=b", new String[0]);
 		assert g.traversal().V().has("label", "A").toList().size() == 1;
 		assert g.traversal().V().has("label", "B").toList().size() == 1;
 		assert g.traversal().E().toList().size() == 1;
@@ -114,7 +114,7 @@ public class OpcGraphManagerTests {
 	@Test
 	public void writeNumberWithOpc() throws Exception {
 		simpleServerInit();
-		waldotTestClientHandler.createVertex("test-id", "test-query", null, new String[] { "value", "12" });
+		waldotTestClientHandler.createVertexWithOpcUa("test-id", "test-query", null, new String[] { "value", "12" });
 		System.out.println("VERTICES - " + g.getVerticesCount());
 		assert g.getWaldotNamespace().getVerticesCount() == 1;
 		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
@@ -146,7 +146,7 @@ public class OpcGraphManagerTests {
 	public void writeStringWithOpc() throws Exception {
 		simpleServerInit();
 		final String firstValue = UUID.randomUUID().toString();
-		waldotTestClientHandler.createVertex("test-id", "test-query", null, new String[] { "value", firstValue });
+		waldotTestClientHandler.createVertexWithOpcUa("test-id", "test-query", null, new String[] { "value", firstValue });
 		assert g.getWaldotNamespace().getVerticesCount() == 1;
 		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
 		assert waldotTestClientHandler.checkVertexExists("test-id");

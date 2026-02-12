@@ -11,14 +11,15 @@ import net.rossonet.waldot.api.annotation.WaldotConsoleStrategy;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
+import net.rossonet.waldot.jexl.BaseExecutor;
 import net.rossonet.waldot.jexl.JexlExecutor;
-import net.rossonet.waldot.jexl.RuleExecutor;
 
 @WaldotConsoleStrategy
 public class BaseConsoleStrategy implements ConsoleStrategy {
-	private RuleExecutor baseExecutor;
+	private BaseExecutor baseExecutor;
 	private final List<WaldotCommand> commands = new ArrayList<>();
 	private boolean dirty = false;
+
 	private Logger logger;
 	private WaldotNamespace waldotNamespace;
 
@@ -26,6 +27,11 @@ public class BaseConsoleStrategy implements ConsoleStrategy {
 	public void close() throws Exception {
 		// nothing to do
 
+	}
+
+	@Override
+	public List<WaldotCommand> getCommands() {
+		return commands;
 	}
 
 	@Override

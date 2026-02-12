@@ -185,9 +185,9 @@ public class GremlinPluginTest {
 	@Test
 	public void testGremlinServerConnection() throws Exception {
 		simpleServerInit();
-		waldotTestClientHandler.createVertex("a", "A", null, new String[0]);
+		waldotTestClientHandler.createVertexWithOpcUa("a", "A", null, new String[0]);
 		g.addVertex("label", "test gremlin", "type", "gremlin", "directory", "server", "port", "5623");
-		waldotTestClientHandler.createVertex("b", "B", null, new String[0]);
+		waldotTestClientHandler.createVertexWithOpcUa("b", "B", null, new String[0]);
 		final Cluster cluster = Cluster.build().addContactPoint("127.0.0.1") // host
 				.port(5623) // porta
 				.serializer( // GraphBinary è default da 3.7

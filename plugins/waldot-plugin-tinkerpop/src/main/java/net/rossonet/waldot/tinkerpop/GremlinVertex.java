@@ -114,11 +114,13 @@ public class GremlinVertex extends AbstractOpcVertex implements AutoCloseable {
 		super.notifyPropertyValueChanging(label, value);
 		boolean restart = false;
 		if (label.equals(WaldotTinkerPopPlugin.PORT_FIELD.toLowerCase())) {
-			setProperty(portProperty, Integer.valueOf(value.getValue().getValue().toString()));
+			port = Integer.valueOf(value.getValue().getValue().toString());
+			setProperty(portProperty, port);
 			restart = true;
 		}
 		if (label.equals(WaldotTinkerPopPlugin.BIND_HOST_FIELD.toLowerCase())) {
-			setProperty(hostProperty, value.getValue().getValue().toString());
+			final String host = value.getValue().getValue().toString();
+			setProperty(hostProperty, host);
 			restart = true;
 		}
 		if (restart) {

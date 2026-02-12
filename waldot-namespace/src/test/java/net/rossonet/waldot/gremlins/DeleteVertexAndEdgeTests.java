@@ -9,6 +9,7 @@ import javax.naming.ConfigurationException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -35,10 +36,44 @@ public class DeleteVertexAndEdgeTests {
 	}
 
 	@Test
+	@Disabled("Edge deletion is not tested yet")
+	public void baseDeleteEdgeWithOpcTest() throws Exception {
+		// TODO verifica cancellazione edge
+		simpleServerInit();
+		OpcFactory.generateModern(g);
+		System.out.println("Graph generated");
+		assert waldotTestClientHandler.checkOpcUaVertexExists(9);
+		// assert waldotTestClientHandler.checkOpcUaVertexEdge(1, 3, "created");
+		waldotTestClientHandler.deleteVertexWithOpcUa(9);
+		Thread.sleep(500);
+		assert !waldotTestClientHandler.checkOpcUaVertexExists(9);
+		// assert !waldotTestClientHandler.checkOpcUaVertexEdge(1, 3, "created");
+	}
+
+	@Test
 	public void baseDeleteVertexTest() throws Exception {
 		simpleServerInit();
 		OpcFactory.generateModern(g);
-		// FIXME: completare i test per i delete
+		System.out.println("Graph generated");
+		assert waldotTestClientHandler.checkOpcUaVertexExists(1);
+		assert waldotTestClientHandler.checkVertexExists(1);
+		g.traversal().V().has("name", "marko").drop().iterate();
+		Thread.sleep(500);
+		assert !waldotTestClientHandler.checkOpcUaVertexExists(1);
+		assert !waldotTestClientHandler.checkVertexExists(1);
+	}
+
+	@Test
+	public void baseDeleteVertexWithOpcTest() throws Exception {
+		simpleServerInit();
+		OpcFactory.generateModern(g);
+		System.out.println("Graph generated");
+		assert waldotTestClientHandler.checkOpcUaVertexExists(1);
+		assert waldotTestClientHandler.checkVertexExists(1);
+		waldotTestClientHandler.deleteVertexWithOpcUa(1);
+		Thread.sleep(500);
+		assert !waldotTestClientHandler.checkOpcUaVertexExists(1);
+		assert !waldotTestClientHandler.checkVertexExists(1);
 	}
 
 	@BeforeEach

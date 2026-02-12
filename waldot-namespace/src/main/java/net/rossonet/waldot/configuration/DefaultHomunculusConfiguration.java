@@ -62,12 +62,12 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public String getAssetRootNodeBrowseName() {
-		return "aas";
+		return "Administration";
 	}
 
 	@Override
 	public String getAssetRootNodeDisplayName() {
-		return "WaldOT Administration";
+		return "Administration";
 	}
 
 	@Override
@@ -194,12 +194,12 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public String getInterfaceRootNodeBrowseName() {
-		return "WaldOT Commands";
+		return "Commands";
 	}
 
 	@Override
 	public String getInterfaceRootNodeDisplayName() {
-		return "WaldOT Commands";
+		return "Commands";
 	}
 
 	@Override
@@ -244,12 +244,12 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 
 	@Override
 	public String getRootNodeBrowseName() {
-		return "WaldOT";
+		return "Gremlin Engine";
 	}
 
 	@Override
 	public String getRootNodeDisplayName() {
-		return "WaldOT Engine";
+		return "Gremlin Engine";
 	}
 
 	@Override

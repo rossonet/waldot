@@ -43,7 +43,7 @@ public class MiloSingleServerBaseFolderManager {
 						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
 								.toString() + "/Edges"),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Edges"),
-				LocalizedText.english("Gremlin Edges"));
+				LocalizedText.english("Edges"));
 		addEdgeCommand = new AbstractOpcCommand(miloSingleServerBaseV0Strategy.getWaldotNamespace().getGremlinGraph(),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace(),
 				miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier().toString()
@@ -104,7 +104,7 @@ public class MiloSingleServerBaseFolderManager {
 						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
 								.toString() + "/Variables"),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Variables"),
-				LocalizedText.english("Gremlin Variables"));
+				LocalizedText.english("Variables"));
 	}
 
 	private UaFolderNode createVerticesFolder() {
@@ -114,7 +114,7 @@ public class MiloSingleServerBaseFolderManager {
 						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
 								.toString() + "/Vertices"),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Vertices"),
-				LocalizedText.english("Gremlin Vertices"));
+				LocalizedText.english("Vertices"));
 		addVertexCommand = new AbstractOpcCommand(miloSingleServerBaseV0Strategy.getWaldotNamespace().getGremlinGraph(),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace(),
 				miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier().toString()
