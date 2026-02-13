@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.controller;
+package net.rossonet.zenoh.rpc.controller;
 
 public interface AgentStore {
 

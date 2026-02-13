@@ -1,11 +1,10 @@
-FROM eclipse-temurin:21-jdk AS builder
+FROM  --platform=$BUILDPLATFORM eclipse-temurin:21-jdk AS builder
 COPY . /workspace
 RUN cd /workspace && echo "build project" && ./gradlew clean waldot-app:generateGitProperties waldot-app:distTar -Dorg.gradle.daemon=false
 
 FROM eclipse-temurin:21-jre-alpine AS initial
 RUN apk update
 RUN apk upgrade
-RUN apk add rrdtool
 RUN mkdir -p /app
 RUN mkdir -p /app/help
 COPY ./docker/HELP.txt /app/help/index.txt

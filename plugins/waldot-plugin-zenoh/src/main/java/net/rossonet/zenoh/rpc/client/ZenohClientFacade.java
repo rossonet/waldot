@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.client;
+package net.rossonet.zenoh.rpc.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import io.zenoh.sample.Sample;
 import io.zenoh.scouting.Hello;
 import io.zenoh.scouting.ScoutOptions;
 import net.rossonet.zenoh.ZenohHelper;
-import net.rossonet.zenoh.controller.AgentLifeCycleManager;
+import net.rossonet.zenoh.rpc.controller.AgentLifeCycleManager;
 
 public class ZenohClientFacade {
 	private final static Logger logger = LoggerFactory.getLogger(ZenohClientFacade.class);

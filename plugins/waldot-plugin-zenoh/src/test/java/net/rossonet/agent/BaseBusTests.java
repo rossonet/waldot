@@ -6,7 +6,7 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.zenoh.agent.Acme;
 import net.rossonet.zenoh.client.WaldotZenohClientImpl;
-import net.rossonet.zenoh.impl.ZenohHistoryStrategy;
+import net.rossonet.zenoh.irpc.mpl.ZenohHistoryStrategy;
 
 public class BaseBusTests {
 	@Test

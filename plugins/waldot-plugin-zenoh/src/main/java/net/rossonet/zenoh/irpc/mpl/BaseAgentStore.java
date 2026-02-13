@@ -1,11 +1,11 @@
-package net.rossonet.zenoh.impl;
+package net.rossonet.zenoh.irpc.mpl;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import net.rossonet.zenoh.controller.AgentLifeCycleManager;
-import net.rossonet.zenoh.controller.AgentStore;
-import net.rossonet.zenoh.controller.ZenohAgent;
+import net.rossonet.zenoh.rpc.controller.AgentLifeCycleManager;
+import net.rossonet.zenoh.rpc.controller.AgentStore;
+import net.rossonet.zenoh.rpc.controller.ZenohAgent;
 
 public class BaseAgentStore implements AgentStore {
 

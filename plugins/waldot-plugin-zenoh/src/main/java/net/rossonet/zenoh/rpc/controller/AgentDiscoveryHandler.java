@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.controller;
+package net.rossonet.zenoh.rpc.controller;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;

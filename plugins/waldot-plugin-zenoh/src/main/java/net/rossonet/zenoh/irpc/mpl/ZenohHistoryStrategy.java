@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.impl;
+package net.rossonet.zenoh.irpc.mpl;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateResult;
 
 import net.rossonet.waldot.api.annotation.WaldotHistoryStrategy;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
-import net.rossonet.zenoh.controller.AgentLifeCycleManager;
+import net.rossonet.zenoh.rpc.controller.AgentLifeCycleManager;
 
 @WaldotHistoryStrategy
 public class ZenohHistoryStrategy implements HistoryStrategy {

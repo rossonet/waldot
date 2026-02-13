@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.controller.command;
+package net.rossonet.zenoh.rpc.controller.command;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -9,8 +9,8 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.zenoh.ZenohHelper;
-import net.rossonet.zenoh.controller.CommandLifecycleRegister;
-import net.rossonet.zenoh.controller.ZenohAgent;
+import net.rossonet.zenoh.rpc.controller.CommandLifecycleRegister;
+import net.rossonet.zenoh.rpc.controller.ZenohAgent;
 
 public class StopAgentCommand extends AbstractOpcCommand {
 

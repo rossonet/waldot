@@ -11,10 +11,10 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.zenoh.client.ZenohClientFacade;
-import net.rossonet.zenoh.controller.AgentLifeCycleManager;
-import net.rossonet.zenoh.impl.BaseAgentStore;
-import net.rossonet.zenoh.impl.ZenohHistoryStrategy;
+import net.rossonet.zenoh.irpc.mpl.BaseAgentStore;
+import net.rossonet.zenoh.irpc.mpl.ZenohHistoryStrategy;
+import net.rossonet.zenoh.rpc.client.ZenohClientFacade;
+import net.rossonet.zenoh.rpc.controller.AgentLifeCycleManager;
 
 /**
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
@@ -35,9 +35,7 @@ public class WaldotZenohPlugin implements AutoCloseable, PluginListener {
 		logger.info("WaldotZenohPlugin closed");
 	}
 
-	@Override
-	public void initialize(final WaldotNamespace waldotNamespace) {
-		this.waldotNamespace = waldotNamespace;
+	private void createZenohAssetObject(final WaldotNamespace waldotNamespace) {
 		// crea la cartella zenoh
 		final UaFolderNode zenohFolder = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
 				waldotNamespace.generateNodeId("asset.zenoh_folder"), waldotNamespace.generateQualifiedName("Zenoh"),
@@ -63,6 +61,12 @@ public class WaldotZenohPlugin implements AutoCloseable, PluginListener {
 			historyStrategy.initialize(lifeCycleManager);
 			logger.info("ZenohHistoryStrategy initialized in WaldotZenohPlugin");
 		}
+	}
+
+	@Override
+	public void initialize(final WaldotNamespace waldotNamespace) {
+		this.waldotNamespace = waldotNamespace;
+		// createZenohAssetObject(waldotNamespace);
 	}
 
 }

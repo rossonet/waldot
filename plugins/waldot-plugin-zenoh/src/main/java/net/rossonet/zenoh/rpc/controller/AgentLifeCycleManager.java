@@ -1,4 +1,4 @@
-package net.rossonet.zenoh.controller;
+package net.rossonet.zenoh.rpc.controller;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
@@ -16,7 +16,7 @@ import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.utils.ThreadHelper;
 import net.rossonet.zenoh.ZenohHelper;
-import net.rossonet.zenoh.client.ZenohClientFacade;
+import net.rossonet.zenoh.rpc.client.ZenohClientFacade;
 
 /**
  * Manages the lifecycle of Zenoh Agents on Waldot OPC UA Server * @Author
