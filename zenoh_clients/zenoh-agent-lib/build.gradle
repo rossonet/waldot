@@ -37,7 +37,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.jreleaser'
 
 dependencies {
-    api("org.eclipse.zenoh:zenoh-java:1.5.1")
+    api("org.eclipse.zenoh:zenoh-java:1.7.2")
     api 'org.json:json:20250107'
     api project(':waldot-api')
     api("com.google.guava:guava:33.5.0-jre")

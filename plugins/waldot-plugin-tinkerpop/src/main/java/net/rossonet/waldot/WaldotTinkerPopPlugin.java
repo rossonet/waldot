@@ -19,7 +19,7 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
-import net.rossonet.waldot.tinkerpop.GremlinVertex;
+import net.rossonet.waldot.tinkerpop.TinkerPopVertex;
 
 /**
  * WaldotTinkerPopPlugin is a plugin for the Waldot framework that integrates
@@ -55,7 +55,7 @@ public class WaldotTinkerPopPlugin implements PluginListener {
 	private WaldotVertex createGremlinVertexObject(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
 			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
 			UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
-		return new GremlinVertex(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
+		return new TinkerPopVertex(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
 				eventNotifier, version, propertyKeyValues);
 	}
 
@@ -79,7 +79,7 @@ public class WaldotTinkerPopPlugin implements PluginListener {
 				.setDisplayName(LocalizedText.english(GREMLIN_TYPE_DISPLAY_NAME)).setIsAbstract(false).build();
 		PluginListener.addParameterToTypeNode(waldotNamespace, gremlinTypeNode, MiloStrategy.LABEL_FIELD,
 				NodeIds.String);
-		GremlinVertex.generateParameters(waldotNamespace, gremlinTypeNode);
+		TinkerPopVertex.generateParameters(waldotNamespace, gremlinTypeNode);
 		waldotNamespace.getStorageManager().addNode(gremlinTypeNode);
 		gremlinTypeNode.addReference(new Reference(gremlinTypeNode.getNodeId(), NodeIds.HasSubtype,
 				NodeIds.BaseObjectType.expanded(), false));

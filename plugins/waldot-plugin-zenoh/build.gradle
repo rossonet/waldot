@@ -38,11 +38,12 @@ apply plugin: 'org.jreleaser'
 
 dependencies {
     implementation project(':waldot-deps')
-    api project(':waldot-plugin-rules-engine')
-    api project(':zenoh-agent-lib')
+    //api project(':zenoh-agent-lib')
     // per raft "multi waldot"
-    api("io.microraft:microraft:0.7")
+    //api("io.microraft:microraft:0.7")
+    api("org.eclipse.zenoh:zenoh-java:1.7.2")
     testImplementation project(':waldot-namespace')
+    testImplementation project(':waldot-plugin-rules-engine')
     testImplementation project(':zenoh-acme')
     testImplementation 'org.testcontainers:testcontainers:2.0.3'
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'

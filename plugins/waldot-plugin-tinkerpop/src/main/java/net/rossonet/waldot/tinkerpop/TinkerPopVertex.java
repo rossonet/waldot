@@ -35,7 +35,7 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 
-public class GremlinVertex extends AbstractOpcVertex implements AutoCloseable {
+public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable {
 	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode dockerTypeNode) {
 		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode, WaldotTinkerPopPlugin.PORT_FIELD,
 				NodeIds.Int16);
@@ -56,7 +56,7 @@ public class GremlinVertex extends AbstractOpcVertex implements AutoCloseable {
 	private GremlinServer server;
 	private final WaldotNamespace waldotNamespace;
 
-	public GremlinVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId, QualifiedName browseName,
+	public TinkerPopVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId, QualifiedName browseName,
 			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
 			UByte eventNotifier, long version, Object[] propertyKeyValues) {
 		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
@@ -99,7 +99,7 @@ public class GremlinVertex extends AbstractOpcVertex implements AutoCloseable {
 
 	@Override
 	public Object clone() {
-		return new GremlinVertex(graph, getNodeContext(), getNodeId(), getBrowseName(), getDisplayName(),
+		return new TinkerPopVertex(graph, getNodeContext(), getNodeId(), getBrowseName(), getDisplayName(),
 				getDescription(), getWriteMask(), getUserWriteMask(), getEventNotifier(), version(),
 				getPropertiesAsStringArray());
 	}
@@ -119,7 +119,7 @@ public class GremlinVertex extends AbstractOpcVertex implements AutoCloseable {
 			restart = true;
 		}
 		if (label.equals(WaldotTinkerPopPlugin.BIND_HOST_FIELD.toLowerCase())) {
-			final String host = value.getValue().getValue().toString();
+			host = value.getValue().getValue().toString();
 			setProperty(hostProperty, host);
 			restart = true;
 		}
