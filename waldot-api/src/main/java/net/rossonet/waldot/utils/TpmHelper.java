@@ -30,10 +30,12 @@ import tss.tpm.TPM2B_ID_OBJECT;
 import tss.tpm.TPM2B_PRIVATE;
 import tss.tpm.TPM2B_PUBLIC;
 import tss.tpm.TPM2B_PUBLIC_KEY_RSA;
+import tss.tpm.TPMA_NV;
 import tss.tpm.TPMA_OBJECT;
 import tss.tpm.TPML_HANDLE;
 import tss.tpm.TPMS_KEYEDHASH_PARMS;
 import tss.tpm.TPMS_NULL_ASYM_SCHEME;
+import tss.tpm.TPMS_NV_PUBLIC;
 import tss.tpm.TPMS_PCR_SELECTION;
 import tss.tpm.TPMS_RSA_PARMS;
 import tss.tpm.TPMS_SCHEME_HMAC;
@@ -57,8 +59,86 @@ import tss.tpm.TPM_SE;
 import tss.tpm.TPM_SU;
 
 public class TpmHelper {
+	/**
+	 * Definisce, scrive, legge e opzionalmente elimina un NV Index.
+	 */
+	public static class NvUtils {
+		/** Utility per definire un NV-Index con autorizzazione OWNER */
+		public static void defineIndex(Tpm tpm, TPM_HANDLE index, int size) {
+
+			// Tentativo di pulizia preventiva: ignora l’errore se l’index non esiste
+			tpm._allowErrors().NV_UndefineSpace(TPM_HANDLE.from(TPM_RH.OWNER), index);
+
+			// Costruzione attributi NV: lettura/scrittura consentita all’OWNER, no DA
+			final TPMA_NV attrs = new TPMA_NV(TPMA_NV.OWNERWRITE, TPMA_NV.OWNERREAD, TPMA_NV.NO_DA);
+
+			// Descrittore pubblico dell’area NV
+			final TPMS_NV_PUBLIC nvPub = new TPMS_NV_PUBLIC(index, // Handle NV
+					TPM_ALG_ID.SHA256, // nameAlg
+					attrs, // attributi
+					new byte[0], // authPolicy
+					(short) size); // dimensione dati
+
+			// authValue dell’NV spazio (vuoto = password “null”)
+			final byte[] nvAuth = new byte[0];
+
+			// Definizione dello spazio NV
+			tpm.NV_DefineSpace(TPM_HANDLE.from(TPM_RH.OWNER), nvAuth, nvPub);
+
+			print("NV index 0x%08X definito (%d byte)", index.handle, size);
+		}
+
+		/**
+		 * Legge tutti i dati da un NV index.
+		 */
+		public static byte[] nvRead(Tpm tpm, TPM_HANDLE index) {
+			final int size = tpm.NV_ReadPublic(index).nvPublic.dataSize;
+			final int maxNvRead = TpmHelpers.getTpmProperty(tpm, TPM_PT.NV_BUFFER_MAX);
+			final byte[] result = new byte[size];
+			int offset = 0;
+			while (offset < size) {
+				final int len = Math.min(maxNvRead, size - offset);
+				final byte[] chunk = tpm.NV_Read(index, index, len, offset);
+				System.arraycopy(chunk, 0, result, offset, len);
+				offset += len;
+			}
+			print("Letti %d byte da NV 0x%08X", size, index.handle);
+			return result;
+		}
+
+		/**
+		 * Scrive dati su un NV index; gestisce automaticamente chunking.
+		 */
+		public static void nvWrite(Tpm tpm, TPM_HANDLE index, byte[] data) {
+			final int maxNvWrite = TpmHelpers.getTpmProperty(tpm, TPM_PT.NV_BUFFER_MAX);
+			int offset = 0;
+			while (offset < data.length) {
+				final int len = Math.min(maxNvWrite, data.length - offset);
+				final byte[] chunk = Arrays.copyOfRange(data, offset, offset + len);
+				tpm.NV_Write(index, index, chunk, offset);
+				offset += len;
+			}
+			print("Scritti %d byte su NV 0x%08X", data.length, index.handle);
+		}
+
+		/**
+		 * Elimina (undefine) un NV index.
+		 */
+		public static void undefineIndex(Tpm tpm, TPM_HANDLE index) {
+			tpm._allowErrors().NV_UndefineSpace(TPM_HANDLE.from(TPM_RH.OWNER), index);
+			final TPM_RC rc = tpm._getLastResponseCode();
+			if (rc == TPM_RC.SUCCESS) {
+				print("NV index 0x%08X eliminato", index.handle);
+			} else if (rc == TPM_RC.HANDLE) {
+				print("NV index 0x%08X non esiste", index.handle);
+			} else {
+				print("Errore in NV_UndefineSpace: %s", rc.name());
+			}
+		}
+	}
 
 	public static final TPMT_SYM_DEF_OBJECT Aes128SymDef = new TPMT_SYM_DEF_OBJECT(TPM_ALG_ID.AES, 128, TPM_ALG_ID.CFB);
+
 	public static final TPM_HANDLE EK_PersHandle = TPM_HANDLE.persistent(0x00010001);
 	public static final TPMT_PUBLIC EK_Template = new TPMT_PUBLIC(
 			// TPMI_ALG_HASH nameAlg
@@ -73,8 +153,11 @@ public class TpmHelper {
 			// TPMU_PUBLIC_ID unique
 			new TPM2B_PUBLIC_KEY_RSA());
 	public static final TPM_HANDLE ID_KEY_PersHandle = TPM_HANDLE.persistent(0x00000100);
+
 	public static TPMS_SENSITIVE_CREATE IdKeySens = null;
+
 	public static TPMT_PUBLIC IdKeyTemplate = null;
+
 	public static final TPMT_SYM_DEF_OBJECT NullSymDef = new TPMT_SYM_DEF_OBJECT(TPM_ALG_ID.AES, 128, TPM_ALG_ID.CFB);
 	public static final TPM_HANDLE SRK_PersHandle = TPM_HANDLE.persistent(0x00000001);
 	public static final TPMT_PUBLIC SRK_Template = new TPMT_PUBLIC(
@@ -126,6 +209,33 @@ public class TpmHelper {
 			tpm.Shutdown(TPM_SU.CLEAR);
 		}
 		tpm.close();
+	}
+
+	/**
+	 * Crea e rende persistente una chiave di attestazione (AK/AIK) RSA.
+	 *
+	 * @param tpm    istanza di {@link Tpm}
+	 * @param handle handle persistente desiderato (es. 0x81010002)
+	 * @param bits   dimensione chiave RSA (2048 o 3072)
+	 * @return handle persistente dell’AK
+	 */
+	public static TPM_HANDLE createPersistentAkRsa(Tpm tpm, int handle, int bits) {
+		// Template AK RSA (restrictions: sign, fixedTPM, fixedParent,
+		// sensitiveDataOrigin, userWithAuth)
+		final TPMT_PUBLIC akTemplate = new TPMT_PUBLIC(TPM_ALG_ID.SHA256,
+				new TPMA_OBJECT(TPMA_OBJECT.restricted, TPMA_OBJECT.sign, TPMA_OBJECT.fixedTPM, TPMA_OBJECT.fixedParent,
+						TPMA_OBJECT.userWithAuth, TPMA_OBJECT.noDA),
+				new byte[0], new TPMS_RSA_PARMS(NullSymDef, new TPMS_SIG_SCHEME_RSASSA(TPM_ALG_ID.SHA256), bits, 0),
+				new TPM2B_PUBLIC_KEY_RSA(new byte[bits / 8]));
+
+		final CreatePrimaryResponse rsp = tpm.CreatePrimary(TPM_HANDLE.from(TPM_RH.ENDORSEMENT),
+				new TPMS_SENSITIVE_CREATE(), akTemplate, null, null);
+
+		final TPM_HANDLE persistent = TPM_HANDLE.persistent(handle);
+		tpm.EvictControl(TPM_HANDLE.from(TPM_RH.OWNER), rsp.handle, persistent);
+		tpm.FlushContext(rsp.handle);
+		print("AK RSA persistita in 0x%08X", persistent.handle);
+		return persistent;
 	}
 
 	public static TPM_HANDLE createPersistentEkRsa(Tpm tpm, int handle) {
@@ -190,6 +300,53 @@ public class TpmHelper {
 						new TPMS_SIG_SCHEME_RSASSA(TPM_ALG_ID.SHA256), bits, 65537),
 				new TPM2B_PUBLIC_KEY_RSA(new byte[(bits / 8)]));
 		return t;
+	}
+
+	/**
+	 * Esegue un'estensione su un PCR con il digest specificato.
+	 *
+	 * @param tpm      istanza di {@link Tpm}
+	 * @param pcrIndex indice del PCR da estendere (0-23)
+	 * @param digest   digest da estendere (lunghezza conforme ad hashAlg)
+	 * @param hashAlg  algoritmo hash del digest
+	 */
+	public static void extendPcr(Tpm tpm, int pcrIndex, byte[] digest, TPM_ALG_ID hashAlg) {
+		// Costruisce la mappa PCR: un solo indice, un solo digest
+		final TPML_HANDLE handles = new TPML_HANDLE(new TPM_HANDLE[] { TPM_HANDLE.pcr(pcrIndex) });
+		tpm.PCR_Event(handles.handle[0], digest);
+		print("PCR %d esteso con digest %s", pcrIndex, Helpers.toHex(digest));
+	}
+
+	/**
+	 * Elimina (Flush) tutti gli oggetti transienti e le sessioni caricate.
+	 *
+	 * @param tpm istanza di {@link Tpm}
+	 */
+	public static void flushAllTransientAndSessions(Tpm tpm) {
+		// Handles transient
+		final TPML_HANDLE hTrans = (TPML_HANDLE) tpm.GetCapability(TPM_CAP.HANDLES, TPM_HT.TRANSIENT.toInt() << 24,
+				64).capabilityData;
+		for (final TPM_HANDLE h : hTrans.handle) {
+			tpm.FlushContext(h);
+		}
+
+		// Handles session
+		final TPML_HANDLE hSess = (TPML_HANDLE) tpm.GetCapability(TPM_CAP.HANDLES, TPM_HT.LOADED_SESSION.toInt() << 24,
+				64).capabilityData;
+		for (final TPM_HANDLE h : hSess.handle) {
+			tpm.FlushContext(h);
+		}
+		print("Flush di %d transient e %d session completato", hTrans.handle.length, hSess.handle.length);
+	}
+
+	/**
+	 * Termina (Flush) la sessione indicata se ancora valida.
+	 */
+	public static void flushSessionSafe(Tpm tpm, TPM_HANDLE session) {
+		if (session != null && session.handle != 0) {
+			tpm.FlushContext(session);
+			print("Sessione 0x%08X chiusa", session.handle);
+		}
 	}
 
 	public static int getActivationBlob(Tpm tpm, byte[] ekPubBlob, int ekPubSize, byte[] srkPubBlob, int srkPubSize,
@@ -280,6 +437,53 @@ public class TpmHelper {
 
 	public static void print(String fmt, Object... args) {
 		System.out.printf(fmt + (fmt.endsWith("\n") ? "" : "\n"), args);
+	}
+
+	/**
+	 * Genera una quote firmata dei PCR indicati tramite una Attestation Key.
+	 *
+	 * @param tpm      istanza di {@link Tpm}
+	 * @param akHandle handle dell'AK (AUTH = null o impostata)
+	 * @param nonce    valore casuale fornito dal verificatore
+	 * @param pcrIdx   indici PCR da quotare
+	 * @param hashAlg  algoritmo hash per la quote
+	 * @return {@link tss.tpm.QuoteResponse} contenente attestazione e firma
+	 */
+	public static tss.tpm.QuoteResponse quotePcrs(Tpm tpm, TPM_HANDLE akHandle, byte[] nonce, int[] pcrIdx,
+			TPM_ALG_ID hashAlg) {
+		final TPMS_PCR_SELECTION sel = new TPMS_PCR_SELECTION(hashAlg, pcrIdx);
+		final TPMS_PCR_SELECTION[] selections = new TPMS_PCR_SELECTION[] { sel };
+
+		final tss.tpm.QuoteResponse qr = tpm.Quote(akHandle, nonce, new TPMS_SIG_SCHEME_RSASSA(hashAlg), selections);
+
+		print("Quote generata con AK 0x%08X su PCR %s", akHandle.handle, Arrays.toString(pcrIdx));
+		return qr;
+	}
+
+	/**
+	 * Legge i valori di uno o più PCR e li restituisce concatenati.
+	 *
+	 * @param tpm     istanza di {@link Tpm} già inizializzata
+	 * @param pcrIdx  array con gli indici PCR da leggere (0-23)
+	 * @param hashAlg algoritmo hash da usare (es. TPM_ALG_ID.SHA256)
+	 * @return array di byte contenente la concatenazione dei valori letti
+	 */
+	public static byte[] readPcrs(Tpm tpm, int[] pcrIdx, TPM_ALG_ID hashAlg) {
+		// Costruzione della selezione PCR
+		final TPMS_PCR_SELECTION sel = new TPMS_PCR_SELECTION(hashAlg, pcrIdx);
+		final TPMS_PCR_SELECTION[] selArr = new TPMS_PCR_SELECTION[] { sel };
+
+		// Esecuzione del comando PCR_Read
+		final tss.tpm.PCR_ReadResponse rsp = tpm.PCR_Read(selArr);
+
+		// Il valore restituito è un array di digests, ognuno di hashAlg.getHashSize()
+		// byte
+		final byte[][] results = new byte[rsp.pcrValues.length][];
+		for (int i = 0; i < rsp.pcrValues.length; i++) {
+			results[i] = rsp.pcrValues[i].buffer;
+		}
+		final byte[] out = tss.Helpers.concatenate(results);
+		return out;
 	}
 
 	public static Tpm remoteTpm(String hostname, int port) {
@@ -434,6 +638,33 @@ public class TpmHelper {
 		print("RunProvisioningSequence finished!");
 	}
 
+	/**
+	 * Seala (protegge) un blob di dati sotto SRK con policy di autorizzazione
+	 * semplice (Password).
+	 *
+	 * @param tpm       istanza di {@link Tpm}
+	 * @param data      dato da sigillare
+	 * @param authValue password (può essere array vuoto)
+	 * @return oggetto contenente le strutture PUBLIC e PRIVATE del sealed object
+	 */
+	public static CreateResponse sealData(Tpm tpm, byte[] data, byte[] authValue) {
+		// Template di un keyed-hash object per sequestro dati
+		final TPMT_PUBLIC sealTemplate = new TPMT_PUBLIC(TPM_ALG_ID.SHA256,
+				new TPMA_OBJECT(TPMA_OBJECT.fixedTPM, TPMA_OBJECT.fixedParent, TPMA_OBJECT.userWithAuth,
+						TPMA_OBJECT.noDA),
+				new byte[0], new TPMS_KEYEDHASH_PARMS(new TPMS_SCHEME_HMAC(TPM_ALG_ID.NULL)),
+				new TPM2B_DIGEST_KEYEDHASH());
+
+		final TPMS_SENSITIVE_CREATE sens = new TPMS_SENSITIVE_CREATE(authValue, data);
+
+		// Creazione del sealed object sotto SRK
+		final CreateResponse rsp = tpm.Create(SRK_PersHandle, sens, sealTemplate, new byte[0],
+				new TPMS_PCR_SELECTION[0]);
+
+		print("Creato sealed object (dim dati: %d)", data.length);
+		return rsp;
+	}
+
 	public static void setAuth(Tpm tpm, byte[] newAuth) {
 		final TPM_HANDLE platformHandle = TPM_HANDLE.from(TPM_RH.PLATFORM);
 		tpm.Clear(platformHandle);
@@ -472,6 +703,73 @@ public class TpmHelper {
 		final TPMS_SIG_SCHEME_RSASSA scheme = new TPMS_SIG_SCHEME_RSASSA(hashAlg);
 		final TPMU_SIGNATURE sig = tpm.Sign(keyHandle, digest, scheme, null);
 		return ((TPMS_SIGNATURE_RSASSA) sig).sig;
+	}
+
+	/**
+	 * Avvia una policy session HMAC-binded che potrà essere usata per comandi
+	 * protetti (PolicySession convenzionale).
+	 *
+	 * @param tpm      istanza di {@link Tpm}
+	 * @param authHash algoritmo hash (es. TPM_ALG_ID.SHA256)
+	 * @return handle della sessione aperta
+	 */
+	public static TPM_HANDLE startPolicySession(Tpm tpm, TPM_ALG_ID authHash) {
+		final TPM_HANDLE sess = tpm.StartAuthSession(TPM_HANDLE.NULL, TPM_HANDLE.NULL, Helpers.RandomBytes(20),
+				new byte[0], TPM_SE.POLICY, new TPMT_SYM_DEF(TPM_ALG_ID.NULL, 0, TPM_ALG_ID.NULL), authHash).handle;
+
+		print("Policy session avviata: 0x%08X", sess.handle);
+		return sess;
+	}
+
+	/**
+	 * Esegue una cifratura/decifratura simmetrica usando una chiave generata
+	 * on-the-fly nel TPM (non persistente).
+	 *
+	 * @param tpm     istanza di {@link Tpm}
+	 * @param encrypt true = cifra, false = decifra
+	 * @param keyBits dimensione chiave AES (128/256)
+	 * @param iv      vector di inizializzazione (CFB)
+	 * @param data    dati da cifrare/decifrare
+	 * @return dati elaborati
+	 */
+	public static byte[] symmetricCrypt(Tpm tpm, boolean encrypt, int keyBits, byte[] iv, byte[] data) {
+		final TPMT_SYM_DEF_OBJECT sym = new TPMT_SYM_DEF_OBJECT(TPM_ALG_ID.AES, keyBits, TPM_ALG_ID.CFB);
+
+		final TPMS_SENSITIVE_CREATE sens = new TPMS_SENSITIVE_CREATE(new byte[0], Helpers.RandomBytes(keyBits / 8));
+
+		final TPMT_PUBLIC symTemplate = new TPMT_PUBLIC(TPM_ALG_ID.SHA256,
+				new TPMA_OBJECT(TPMA_OBJECT.decrypt, TPMA_OBJECT.encrypt, TPMA_OBJECT.userWithAuth), new byte[0],
+				new TPMS_SYMCIPHER_PARMS(sym), new TPM2B_DIGEST());
+
+		final TPM_HANDLE hKey = tpm.CreatePrimary(TPM_HANDLE.from(TPM_RH.OWNER), sens, symTemplate, null, null).handle;
+
+		final byte mode = encrypt ? (byte) 0 : (byte) 1;
+		final byte[] output = tpm.EncryptDecrypt(hKey, mode, TPM_ALG_ID.CFB, iv, data).outData;
+
+		tpm.FlushContext(hKey);
+		return output;
+	}
+
+	/**
+	 * Carica e desigilla un oggetto creato con {@link #sealData}.
+	 *
+	 * @param tpm          istanza di {@link Tpm}
+	 * @param parentHandle handle del parent (tipicamente SRK persistente)
+	 * @param privBlob     parte PRIVATE del sealed object
+	 * @param pubArea      parte PUBLIC del sealed object
+	 * @param authValue    password usata in fase di sealing
+	 * @return dato in chiaro
+	 */
+	public static byte[] unsealData(Tpm tpm, TPM_HANDLE parentHandle, TPM2B_PRIVATE privBlob, TPMT_PUBLIC pubArea,
+			byte[] authValue) {
+		// Carica l’oggetto in TPM
+		final TPM_HANDLE hObj = tpm.Load(parentHandle, privBlob, pubArea);
+		hObj.AuthValue = authValue;
+
+		// Recupero dato
+		final byte[] unsealed = tpm.Unseal(hObj);
+		tpm.FlushContext(hObj);
+		return unsealed;
 	}
 
 	public static int verifyIdSignature(Tpm tpm, byte[] data, byte[] sig) {
