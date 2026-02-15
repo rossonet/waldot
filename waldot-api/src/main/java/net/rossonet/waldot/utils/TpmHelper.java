@@ -349,6 +349,61 @@ public class TpmHelper {
 		}
 	}
 
+	/**
+	 * Prepara e restituisce l’“activation blob” da inviare al dispositivo cliente.
+	 * L’algoritmo segue la procedura DRS (Device Registration Service) ed esegue le
+	 * seguenti fasi principali:
+	 *
+	 * 1. Decodifica delle chiavi pubbliche EK (Endorsement Key) e SRK (Storage Root
+	 * Key) trasmesse dal client: - Si ricostruiscono gli oggetti TPMT_PUBLIC a
+	 * partire dai blob ricevuti.
+	 *
+	 * 2. Apertura di una sessione di tipo POLICY: - StartAuthSession con tipo
+	 * TPM_SE_POLICY e hash SHA-256. - Applicazione della policy
+	 * TPM2_PolicyCommandCode(Duplicate) per autorizzare in seguito l’uso del
+	 * comando TPM2_Duplicate. - Si estrae il digest di policy (PolicyGetDigest) che
+	 * sarà inserito nel template della nuova chiave ID (IdKey) affinché possa
+	 * essere duplicata solo in presenza della stessa policy.
+	 *
+	 * 3. Creazione della nuova chiave “Device ID” (IdKey): - Si genera una chiave
+	 * simmetrica casuale (32 byte) da usare come secret della chiave HMAC
+	 * (TPM_ALG_SHA256, TPMA_OBJECT: sign|userWithAuth|noDA). - CreatePrimary in
+	 * gerarchia OWNER per ottenere handle e parte pubblica.
+	 *
+	 * 4. Preparazione dell’infrastruttura di duplicazione: - Caricamento esterno
+	 * della SRK pubblica (LoadExternal) per ottenere un handle temporaneo. -
+	 * Definizione dello schema simmetrico (AES-128-CFB) che proteggerà il blob
+	 * duplicato. - Esecuzione di TPM2_Duplicate (in sessione di policy) per
+	 * generare: • outSymSeed – seme cifrato per derivare la chiave di wrapping •
+	 * duplicate – blob privato della IdKey cifrato con la chiave di wrapping •
+	 * encryptionKeyOut – chiave simmetrica interna (innerWrapKey) usata come
+	 * “wrapping key” e successivamente come chiave AES per i dati URI - Flush
+	 * dell’handle SRK pubblico temporaneo.
+	 *
+	 * 5. Creazione di un credential blob destinato all’EK del client: - Caricamento
+	 * esterno della chiave pubblica EK del dispositivo. -
+	 * TPM2_MakeCredential(ekPubHandle, encryptionKeyOut, srkPub.name): produce
+	 * credentialBlob + secret che permetteranno al client di recuperare
+	 * encryptionKeyOut tramite TPM2_ActivateCredential. - Flush dell’handle EK e
+	 * della IdKey e chiusura della sessione di policy.
+	 *
+	 * 6. Uso temporaneo della encryptionKeyOut per cifrare i dati di provisioning
+	 * (URI): - Si crea al volo una chiave simmetrica TPM (AES-128-CFB) con
+	 * encryptionKeyOut come chiave sensibile (CreatePrimary su OWNER). - Si cifra
+	 * la stringa URI con TPM2_EncryptDecrypt. - Flush dell’handle della chiave
+	 * simmetrica appena creata.
+	 *
+	 * 7. Composizione dell’activation blob da inviare al client: - [uint16]
+	 * lunghezza e [blob] credentialBlob - [uint16] lunghezza e [blob] secret (per
+	 * ActivateCredential) - [TPM2B_PRIVATE] duplicate (blob della IdKey) - [uint16]
+	 * lunghezza e [blob] outSymSeed - [uint16] lunghezza e [blob] parte pubblica
+	 * della IdKey (TPM2B_PUBLIC) - [uint16] lunghezza e [blob] URI cifrato Il
+	 * buffer risultante viene copiato in actBlobBuffer e la funzione restituisce la
+	 * dimensione totale del blob.
+	 *
+	 * Ritorno: int – dimensione in byte dell’activation blob pronto per il
+	 * download.
+	 */
 	public static int getActivationBlob(Tpm tpm, byte[] ekPubBlob, int ekPubSize, byte[] srkPubBlob, int srkPubSize,
 			byte[] actBlobBuffer, int blobBufCapacity) {
 		final TPMT_PUBLIC ekPub = TPM2B_PUBLIC.fromBytes(ekPubBlob).publicArea;
@@ -500,6 +555,58 @@ public class TpmHelper {
 		return cipher;
 	}
 
+	/**
+	 * Esegue la sequenza di provisioning del dispositivo TPM-based mediante
+	 * interazione con il Device Registration Service (DRS).
+	 *
+	 * 1. Eventuale pulizia delle chiavi permanenti (opzione –clear / -c): • Rimuove
+	 * dalle NV gli handle persistenti di EK, SRK e ID Key.
+	 *
+	 * 2. Verifica / creazione delle chiavi primarie locali: •
+	 * _createPersistentPrimary_ crea (o carica se già presenti) ‑ EK (Endorsement
+	 * Key) in gerarchia ENDORSEMENT ‑ SRK (Storage Root Key) in gerarchia OWNER •
+	 * Si ottengono i relativi blob TPM2B_PUBLIC da spedire al server.
+	 *
+	 * 3. Richiesta dell’activation blob al server: • Invoca _getActivationBlob_
+	 * passando i blob EK/SRK; riceve in risposta actBlobBuffer con i componenti
+	 * necessari alla fase di attivazione.
+	 *
+	 * 4. Parsing dell’activation blob: • Estrazione sequenziale di: a.
+	 * credentialBlob (TPM2B_ID_OBJECT) b. encSecret (TPM2B_ENCRYPTED_SECRET) c.
+	 * idKeyDupBlob (TPM2B_PRIVATE) d. encWrapKey (TPM2B_ENCRYPTED_SECRET) e.
+	 * idKeyPub (TPM2B_PUBLIC) f. encUriData (TPM2B_DATA)
+	 *
+	 * 5. Apertura di una sessione di policy per ActivateCredential: •
+	 * StartAuthSession (TPM_SE_POLICY, hash SHA-256). • PolicySecret con authValue
+	 * della gerarchia ENDORSEMENT (Win TPM richiede questa policy per autorizzare
+	 * EK).
+	 *
+	 * 6. Recupero della chiave simmetrica interna (innerWrapKey): •
+	 * TPM2_ActivateCredential eseguito in dual-session (PW per SRK, Policy per EK)
+	 * decritta credentialBlob usando encSecret → ottiene innerWrapKey.
+	 *
+	 * 7. Import della nuova Device ID Key: • Definizione dei parametri simmetrici
+	 * (AES-CFB, lunghezza derivata) usati per l’unwrapping del blob di
+	 * duplicazione. • TPM2_Import con SRK, innerWrapKey, idKeyPub, idKeyDupBlob,
+	 * encWrapKey → ottiene il PRIVATE della IdKey per il TPM locale. • TPM2_Load
+	 * carica la chiave sotto la SRK. • EvictControl rende la chiave persistente su
+	 * _ID_KEY_PersHandle_. • FlushContext dell’handle temporaneo.
+	 *
+	 * 8. Decrittazione dei dati URI consegnati dal server: • Ricrea in TPM una
+	 * chiave simmetrica avente innerWrapKey come parte sensibile (Create + Load). •
+	 * TPM2_EncryptDecrypt in modalità decrypt (dir=1) con AES-CFB e IV nullo. •
+	 * Stampa la URI in chiaro per verifica.
+	 *
+	 * 9. Firma di un token con la nuova Device ID Key (esempio dimostrativo): •
+	 * Genera un buffer random (deviceIdData). • Firma tramite _signData_ usando la
+	 * IdKey appena importata. • Verifica la firma con la libreria server DRS (solo
+	 * per test).
+	 *
+	 * 10. Gestione degli errori: • Cattura TpmException per diagnosticare eventuali
+	 * TPM_RC. • Catch generale per altre eccezioni.
+	 *
+	 * Alla fine stampa “RunProvisioningSequence finished!”.
+	 */
 	public static void runProvisioningSequence(Tpm tpm) {
 		try {
 			if (CmdLine.isOptionPresent("clear", "c")) {
