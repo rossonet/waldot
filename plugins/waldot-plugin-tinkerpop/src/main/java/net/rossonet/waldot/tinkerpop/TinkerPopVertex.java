@@ -1,7 +1,6 @@
 package net.rossonet.waldot.tinkerpop;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,7 @@ import org.apache.tinkerpop.gremlin.server.Settings;
 import org.apache.tinkerpop.gremlin.server.Settings.SerializerSettings;
 import org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer;
 import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
-import org.apache.tinkerpop.gremlin.util.ser.GraphSONMessageSerializerV1;
+import org.apache.tinkerpop.gremlin.util.ser.GraphSONMessageSerializerV3;
 import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
@@ -135,6 +134,7 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 		overriddenSettings.port = port;
 		overriddenSettings.channelizer = WsAndHttpChannelizer.class.getName();
 		overriddenSettings.graphManager = WaldotGraphManager.class.getName();
+		/* bindings */
 		final Map<String, Object> arg = new HashMap<>();
 		arg.put("graph", waldotNamespace.getGremlinGraph());
 		arg.put("g", waldotNamespace.getGremlinGraph().traversal());
@@ -142,23 +142,29 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 		method2arg.put("bindings", arg);
 		overriddenSettings.scriptEngines.get("gremlin-groovy").plugins
 				.put("org.apache.tinkerpop.gremlin.jsr223.BindingsGremlinPlugin", method2arg);
-		final SerializerSettings settingSerializerJson = new SerializerSettings();
-		settingSerializerJson.className = GraphSONMessageSerializerV1.class.getName();
-		settingSerializerJson.config = Collections.singletonMap("ioRegistries",
-				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1",
+		/* === SERIALIZERS === */
+		// 1) GraphSON v3 – richiesto da Graph-Explorer
+		final SerializerSettings graphsonV3 = new SerializerSettings();
+		graphsonV3.className = GraphSONMessageSerializerV3.class.getName();
+		graphsonV3.config = Map.of("serializeResultToString", false, "ioRegistries",
+				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3",
 						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV2",
-						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3"));
-		final SerializerSettings settingSerializerBin = new SerializerSettings();
-		settingSerializerBin.className = GraphBinaryMessageSerializerV1.class.getName();
-		settingSerializerBin.config = new HashMap<>();
-		settingSerializerBin.config.put("ioRegistries",
-				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1"));
-		settingSerializerBin.config.put("custom", List.of(
-				"org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;net.rossonet.waldot.gremlin.opcgraph.ser.NodeIdCustomTypeSerializer"));
+						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1"));
+
+		// 2) (facoltativo) GraphBinary v1 per client WS high-performance
+		final SerializerSettings graphBinary = new SerializerSettings();
+		graphBinary.className = GraphBinaryMessageSerializerV1.class.getName();
+		graphBinary.config = Map.of("ioRegistries",
+				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3",
+						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV2",
+						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1"));
 		overriddenSettings.serializers = new ArrayList<>();
-		overriddenSettings.serializers.add(settingSerializerBin);
-		overriddenSettings.serializers.add(settingSerializerJson);
+		overriddenSettings.serializers.add(graphsonV3); // deve essere PRIMO
+		overriddenSettings.serializers.add(graphBinary);
+//		overriddenSettings.serializers.add(graphsonV1);
+
 		this.server = new WaldotGremlinServer(overriddenSettings);
+		// avvio server
 		try {
 			server.start();// .get();
 			logger.info("Gremlin Server started: " + server.toString());

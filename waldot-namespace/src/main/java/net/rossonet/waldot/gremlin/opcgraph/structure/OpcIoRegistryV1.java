@@ -40,6 +40,10 @@ import org.apache.tinkerpop.shaded.kryo.Kryo;
 import org.apache.tinkerpop.shaded.kryo.Serializer;
 import org.apache.tinkerpop.shaded.kryo.io.Input;
 import org.apache.tinkerpop.shaded.kryo.io.Output;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+
+import net.rossonet.waldot.gremlin.opcgraph.serializer.NodeIdCustomTypeSerializer;
+import net.rossonet.waldot.gremlin.opcgraph.serializer.NodeIdGraphSONSerializer;
 
 /**
  * An implementation of the {@link IoRegistry} interface that provides
@@ -57,41 +61,6 @@ import org.apache.tinkerpop.shaded.kryo.io.Output;
  * original author Stephen Mallette (http://stephen.genoprime.com)
  */
 public final class OpcIoRegistryV1 extends AbstractIoRegistry {
-
-	/**
-	 * Provides a method to serialize an entire {@link OpcGraph} into itself for
-	 * Gryo. This is useful when shipping small graphs around through Gremlin
-	 * Server. Reuses the existing Kryo instance for serialization.
-	 */
-	final static class TinkerGraphGryoSerializer extends Serializer<OpcGraph> {
-		@Override
-		public OpcGraph read(final Kryo kryo, final Input input, final Class<OpcGraph> tinkerGraphClass) {
-			final Configuration conf = new BaseConfiguration();
-			conf.setProperty("gremlin.tinkergraph.defaultVertexPropertyCardinality", "list");
-			final OpcGraph graph = OpcGraph.open(conf);
-			final int len = input.readInt();
-			final byte[] bytes = input.readBytes(len);
-			try (final ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
-				GryoReader.build().mapper(() -> kryo).create().readGraph(stream, graph);
-			} catch (final Exception io) {
-				throw new RuntimeException(io);
-			}
-
-			return graph;
-		}
-
-		@Override
-		public void write(final Kryo kryo, final Output output, final OpcGraph graph) {
-			try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
-				GryoWriter.build().mapper(() -> kryo).create().writeGraph(stream, graph);
-				final byte[] bytes = stream.toByteArray();
-				output.writeInt(bytes.length);
-				output.write(bytes);
-			} catch (final Exception io) {
-				throw new RuntimeException(io);
-			}
-		}
-	}
 
 	/**
 	 * Deserializes the edge list format.
@@ -236,6 +205,41 @@ public final class OpcIoRegistryV1 extends AbstractIoRegistry {
 
 	/**
 	 * Provides a method to serialize an entire {@link OpcGraph} into itself for
+	 * Gryo. This is useful when shipping small graphs around through Gremlin
+	 * Server. Reuses the existing Kryo instance for serialization.
+	 */
+	final static class TinkerGraphGryoSerializer extends Serializer<OpcGraph> {
+		@Override
+		public OpcGraph read(final Kryo kryo, final Input input, final Class<OpcGraph> tinkerGraphClass) {
+			final Configuration conf = new BaseConfiguration();
+			conf.setProperty("gremlin.tinkergraph.defaultVertexPropertyCardinality", "list");
+			final OpcGraph graph = OpcGraph.open(conf);
+			final int len = input.readInt();
+			final byte[] bytes = input.readBytes(len);
+			try (final ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
+				GryoReader.build().mapper(() -> kryo).create().readGraph(stream, graph);
+			} catch (final Exception io) {
+				throw new RuntimeException(io);
+			}
+
+			return graph;
+		}
+
+		@Override
+		public void write(final Kryo kryo, final Output output, final OpcGraph graph) {
+			try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+				GryoWriter.build().mapper(() -> kryo).create().writeGraph(stream, graph);
+				final byte[] bytes = stream.toByteArray();
+				output.writeInt(bytes.length);
+				output.write(bytes);
+			} catch (final Exception io) {
+				throw new RuntimeException(io);
+			}
+		}
+	}
+
+	/**
+	 * Provides a method to serialize an entire {@link OpcGraph} into itself for
 	 * GraphSON. This is useful when shipping small graphs around through Gremlin
 	 * Server.
 	 */
@@ -258,5 +262,9 @@ public final class OpcIoRegistryV1 extends AbstractIoRegistry {
 	private OpcIoRegistryV1() {
 		register(GryoIo.class, OpcGraph.class, new TinkerGraphGryoSerializer());
 		register(GraphSONIo.class, null, new TinkerModule());
+		register(GraphSONIo.class, NodeId.class, new NodeIdGraphSONSerializer());
+		register(GryoIo.class, NodeId.class, new NodeIdCustomTypeSerializer());
+		// register(GryoIo.class, UShort.class, new UShortCustomTypeSerializer());
+		// register(GraphSONIo.class, UShort.class, new UShortGraphSONSerializer());
 	}
 }

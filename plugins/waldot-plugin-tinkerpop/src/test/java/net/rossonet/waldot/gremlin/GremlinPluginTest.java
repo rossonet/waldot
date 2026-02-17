@@ -183,6 +183,18 @@ public class GremlinPluginTest {
 	}
 
 	@Test
+	public void test9090() throws Exception {
+		simpleServerInit();
+		g.addVertex("id", "server", "type", "gremlin", "port", "9090");
+		Thread.sleep(500);
+		assert waldotTestClientHandler.checkOpcUaVertexExists("server");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("server", "9090");
+		assert waldotTestClientHandler.checkOpcUaVertexBindReadOnly("server");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("server", "9090");
+
+	}
+
+	@Test
 	public void testGremlinServerConnection() throws Exception {
 		simpleServerInit();
 		waldotTestClientHandler.createVertexWithOpcUa("a", "A", null, new String[0]);
