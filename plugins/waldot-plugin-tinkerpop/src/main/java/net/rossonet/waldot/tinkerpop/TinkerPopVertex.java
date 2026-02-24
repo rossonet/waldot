@@ -142,6 +142,8 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 		method2arg.put("bindings", arg);
 		overriddenSettings.scriptEngines.get("gremlin-groovy").plugins
 				.put("org.apache.tinkerpop.gremlin.jsr223.BindingsGremlinPlugin", method2arg);
+		overriddenSettings.scriptEngines.get("gremlin-groovy").plugins
+				.put("net.rossonet.waldot.gremlin.opcgraph.jsr223.OpcGraphGremlinPlugin", method2arg);
 		/* === SERIALIZERS === */
 		// 1) GraphSON v3 – richiesto da Graph-Explorer
 		final SerializerSettings graphsonV3 = new SerializerSettings();
@@ -161,7 +163,6 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 		overriddenSettings.serializers = new ArrayList<>();
 		overriddenSettings.serializers.add(graphsonV3); // deve essere PRIMO
 		overriddenSettings.serializers.add(graphBinary);
-//		overriddenSettings.serializers.add(graphsonV1);
 
 		this.server = new WaldotGremlinServer(overriddenSettings);
 		// avvio server

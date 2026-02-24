@@ -27,11 +27,11 @@ public final class NodeIdGraphSONSerializer extends TinkerPopJacksonModule {
 		addSerializer(NodeId.class, new JsonSerializer<NodeId>() {
 			@Override
 			public void serialize(NodeId value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-				gen.writeStartObject();
-				gen.writeStringField(GraphSONTokens.TYPE, "NodeId");
-				gen.writeFieldName(GraphSONTokens.VALUE);
-				gen.writeString(value.toParseableString()); // oppure value.toString()
-				gen.writeEndObject();
+				// gen.writeStartObject();
+				// gen.writeStringField(GraphSONTokens.TYPE, "nodeId");
+				// gen.writeFieldName(GraphSONTokens.VALUE);
+				gen.writeString(value.toParseableString());
+				// gen.writeEndObject();
 			}
 
 			@Override
@@ -39,7 +39,7 @@ public final class NodeIdGraphSONSerializer extends TinkerPopJacksonModule {
 					TypeSerializer typeSer) throws IOException {
 				final WritableTypeId typeId = typeSer.writeTypePrefix(gen,
 						typeSer.typeId(value, JsonToken.VALUE_STRING));
-				serialize(value, gen, provider); // delega al metodo sopra
+				serialize(value, gen, provider);
 				typeSer.writeTypeSuffix(gen, typeId);
 			}
 
@@ -61,7 +61,8 @@ public final class NodeIdGraphSONSerializer extends TinkerPopJacksonModule {
 
 	@Override
 	public Map<Class, String> getTypeDefinitions() {
-		return Map.of(NodeId.class, "id");
+		return Map.of(NodeId.class, "nodeId");
+		// return Map.of();
 	}
 
 	@Override

@@ -495,20 +495,15 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		if (edgeLabels == null || edgeLabels.length == 0) {
 			return true;
 		}
-		if (edgeLabels.length % 2 != 0) {
-			logger.warn("edgeLabels length is not even: {}", edgeLabels.length);
-			return false;
-		}
 		try {
-			for (int i = 0; i < edgeLabels.length; i = i + 2) {
-				final String name = edgeLabels[i];
-				final String value = edgeLabels[i + 1];
-				final String target = (edge.property(name).isPresent()) ? edge.property(name).value().toString() : null;
-				if (target == null || !target.equals(value)) {
-					return false;
+			if (edge.label() != null && !edge.label().isEmpty()) {
+				for (final String label : edgeLabels) {
+					if (edge.label().equals(label)) {
+						return true;
+					}
 				}
 			}
-			return true;
+			return false;
 		} catch (final Exception e) {
 			logger.error("Error checking edge labels", e);
 			return false;
