@@ -42,10 +42,10 @@ import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotGraphComputerView;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinElement;
+import net.rossonet.waldot.api.strategies.HistoryStrategy;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 
 /**
@@ -58,15 +58,22 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
  */
 public abstract class AbstractOpcVertex extends GremlinElement implements WaldotVertex, AttributeObserver {
 
+	private transient boolean activeHistory = false;
+
 	protected boolean allowNullPropertyValues = false;
 	private transient boolean ensurePostActive = false;
 
 	protected transient final List<EventObserver> eventObservers = new ArrayList<>();
 	protected transient final WaldotGraph graph;
 
-	final QualifiedProperty<String> labelProperty;
+	private String historyContext = null;
+	private final QualifiedProperty<String> historyContextProperty;
+	private final QualifiedProperty<Boolean> historyProperty;
+	private final QualifiedProperty<String> labelProperty;
+
+	private final Set<WaldotVertexProperty<?>> linkedProperties = new HashSet<>();
 	private transient final Logger logger = LoggerFactory.getLogger(getClass());
-	private final Set<WaldotProperty<?>> propertiesToDelete = new HashSet<>();
+
 	protected transient final List<PropertyObserver> propertyObservers = new ArrayList<>();
 
 	private final QualifiedProperty<String> typeProperty;
@@ -85,6 +92,14 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 		typeProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.TYPE_FIELD, MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
+		historyProperty = new QualifiedProperty<Boolean>(graph.getWaldotNamespace().getNamespaceUri(),
+				MiloStrategy.HISTORY_FIELD,
+				MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				Boolean.class);
+		historyContextProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
+				MiloStrategy.HISTORY_CONTEXT_FIELD,
+				MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				String.class);
 	}
 
 	@Override
@@ -109,8 +124,9 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	}
 
 	@Override
-	public void addRelatedProperty(WaldotProperty<?> property) {
-		propertiesToDelete.add(property);
+	public void addRelatedProperty(WaldotVertexProperty<?> property) {
+		linkedProperties.add(property);
+		property.setHistorizing(activeHistory);
 
 	}
 
@@ -140,6 +156,10 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public WaldotGraphComputerView getGraphComputerView() {
 		return getNamespace().getGraphComputerView();
+	}
+
+	public String getHistoryContext() {
+		return historyContext != null ? historyContext : HistoryStrategy.DEFAULT_DATA_CONTEXT;
 	}
 
 	@Override
@@ -211,6 +231,26 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 				property(MiloStrategy.TYPE_FIELD.toLowerCase(), originalType);
 			}
 		}
+		if (label.equals(MiloStrategy.HISTORY_FIELD.toLowerCase())) {
+			final boolean newHistory = Boolean.parseBoolean(String.valueOf(value.getValue().getValue()));
+			if (newHistory) {
+				activeHistory = true;
+				logger.info("History activated for vertex {}", this);
+			} else {
+				activeHistory = false;
+				logger.info("History deactivated for vertex {}", this);
+			}
+			setProperty(historyProperty, activeHistory);
+			for (final WaldotVertexProperty<?> property : linkedProperties) {
+				property.setHistorizing(activeHistory);
+			}
+		}
+		if (label.equals(MiloStrategy.HISTORY_CONTEXT_FIELD.toLowerCase())) {
+			final String newContext = String.valueOf(value.getValue().getValue());
+			if (newContext != null && !newContext.isEmpty()) {
+				historyContext = newContext;
+			}
+		}
 		if (label.equals(MiloStrategy.NAME_FIELD.toLowerCase())) {
 			final QualifiedName browseName = graph.getWaldotNamespace()
 					.generateQualifiedName((String) value.getValue().getValue());
@@ -223,6 +263,9 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 			setDescription(description);
 		}
 		propertyObservers.forEach(observer -> observer.propertyChanged(this, label, value));
+		if (activeHistory) {
+			getNamespace().getHistoryStrategy().registerHistoryRecord(historyContext, this, label, value);
+		}
 	}
 
 	@Override

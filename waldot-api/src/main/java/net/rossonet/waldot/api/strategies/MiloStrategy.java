@@ -46,9 +46,11 @@ public interface MiloStrategy extends AutoCloseable {
 	public static final String DIRECTORY_SPLIT_SIMBOL = "/";
 	public static final String EVENT_NOTIFIER_PARAMETER = "event-notifier";
 	public static final String GENERAL_CMD_DIRECTORY = "general";
+	public static final String HISTORY_CONTEXT_FIELD = "HistoryContext";
+	public static final String HISTORY_FIELD = "IsHistory";
+
 	public static final String ID_PARAMETER = "id";
 	public static final String IS_FORWARD = "IsForward";
-
 	public static final String LABEL_FIELD = "Label";
 	public static final String NAME_FIELD = "Name";
 	public static final String PROPERTY_SPLIT_SIMBOL_IN_NODEID = "/";

@@ -16,7 +16,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.zenoh.agent.Acme;
 import net.rossonet.zenoh.client.WaldotZenohClientImpl;
@@ -120,7 +120,7 @@ public class AgentRpcTests {
 	public void setupEach() throws InterruptedException, ExecutionException, WaldotZenohException {
 		java.lang.System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "INFO");
 		WaldotZenohClientImpl.debugEnabled = false;
-		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new BaseHistoryStrategy());
+		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
 		client1 = new Acme("acme1");
 		client2 = new Acme("acme2");
 		client1.startAgent();

@@ -39,7 +39,6 @@ import net.rossonet.waldot.api.models.WaldotElement;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotGraphComputerView;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinCommandVertex;
@@ -161,7 +160,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	@Override
-	public void addRelatedProperty(WaldotProperty<?> property) {
+	public void addRelatedProperty(WaldotVertexProperty<?> property) {
 		// not needed for Command
 
 	}

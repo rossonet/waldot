@@ -36,6 +36,10 @@ public class WaldotTinkerPopPlugin implements PluginListener {
 	private static final String GREMLIN_TYPE_LABEL = "gremlin";
 	private static final String GREMLIN_TYPE_NODE_ID = "GremlinServerObjectType";
 	public static final String PORT_FIELD = "Port";
+	public static final String STATUS_FAILED = "Failed";
+	public static final String STATUS_FIELD = "Status";
+	public static final String STATUS_RUNNING = "Running";
+	public static final String STATUS_STOPPED = "Stopped";
 
 	private UaObjectTypeNode gremlinTypeNode;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -55,8 +59,8 @@ public class WaldotTinkerPopPlugin implements PluginListener {
 	private WaldotVertex createGremlinVertexObject(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
 			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
 			UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
-		return new TinkerPopVertex(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
-				eventNotifier, version, propertyKeyValues);
+		return new TinkerPopVertex(graph, context, nodeId, browseName, displayName, description, writeMask,
+				userWriteMask, eventNotifier, version, propertyKeyValues);
 	}
 
 	@Override

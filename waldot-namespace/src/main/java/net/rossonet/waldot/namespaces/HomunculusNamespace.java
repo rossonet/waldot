@@ -106,14 +106,10 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 			final WaldotConfiguration configuration, final BootstrapStrategy bootstrapProcedureStrategy,
 			final ClientManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
-		// final UaNode serverNode =
-		// getServer().getAddressSpaceManager().getManagedNode(NodeIds.Server).orElse(null);
-		// if (serverNode instanceof ServerTypeNode) {
-		// ((ServerTypeNode) serverNode).setEventNotifier(ubyte(1));
-		// }
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
 		this.historyStrategy = historyStrategy;
+		this.historyStrategy.setNamespace(this);
 		this.consoleStrategy = consoleStrategy;
 		this.jexlWaldotCommandHelper = new JexlCmdFunction(this);
 		this.configuration = configuration;

@@ -27,7 +27,7 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 
 	void addPropertyObserver(PropertyObserver observer);
 
-	void addRelatedProperty(WaldotProperty<?> property);
+	void addRelatedProperty(WaldotVertexProperty<?> property);
 
 	public UaMethodNode findMethodNode(NodeId methodId);
 

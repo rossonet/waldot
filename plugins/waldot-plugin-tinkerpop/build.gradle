@@ -36,6 +36,23 @@ apply plugin: 'signing'
 apply plugin: 'maven-publish'
 apply plugin: 'org.jreleaser'
 
+configurations.all {
+  resolutionStrategy {
+        //failOnVersionConflict()
+        force 'org.yaml:snakeyaml:2.5'
+        force 'org.slf4j:slf4j-api:2.0.17'
+        force 'org.bouncycastle:bcprov-jdk18on:1.83'
+        force 'org.bouncycastle:bcpkix-jdk18on:1.83'
+        force 'commons-logging:commons-logging:1.3.2'
+        eachDependency { details ->
+            if (details.requested.group == 'io.netty') {
+                details.useVersion '4.2.10.Final'
+                details.because 'Evita conflitto tra Netty 4.1 e 4.2 (IncompatibleClassChangeError)'
+            }
+        }
+    }
+}
+
 dependencies {
     implementation project(':waldot-deps')
     api project(':waldot-api')

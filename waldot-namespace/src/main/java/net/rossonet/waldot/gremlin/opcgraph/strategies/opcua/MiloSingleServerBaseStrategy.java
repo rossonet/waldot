@@ -428,6 +428,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			opcVertex.addReference(new Reference(opcVertex.getNodeId(),
 					MiloSingleServerBaseReferenceNodeBuilder.hasGremlinPropertyReferenceType,
 					property.getNodeId().expanded(), true));
+			opcVertex.addRelatedProperty(property);
 			opcVertex.notifyPropertyValueChanging(key, property.getValue());
 			return property;
 		}

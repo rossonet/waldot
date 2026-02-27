@@ -45,7 +45,7 @@ import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileBootstrapS
 import net.rossonet.waldot.gremlin.opcgraph.strategies.client.BaseClientManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.BaseConsoleStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseStrategy;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.namespaces.HomunculusNamespace;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
@@ -251,7 +251,7 @@ public final class OpcFactory {
 	}
 
 	public static WaldotGraph getOpcGraph() throws InterruptedException, ExecutionException {
-		return getOpcGraph("file:///tmp/boot.conf", new BaseHistoryStrategy());
+		return getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
 	};
 
 	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {

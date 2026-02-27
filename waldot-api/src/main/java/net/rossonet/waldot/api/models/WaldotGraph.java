@@ -46,7 +46,7 @@ public interface WaldotGraph extends Graph, AutoCloseable {
 		if (0 == ids.length) {
 			iterator = new WaldotGraphIterator<>(convertedList.values().iterator());
 		} else {
-			final List<Object> idList = Arrays.asList(ids);
+			final List<Object> idList = Arrays.asList((Object[]) ids);
 			return new WaldotGraphIterator<>(IteratorUtils.filter(IteratorUtils.map(idList, id -> {
 				if (null == id) {
 					return null;

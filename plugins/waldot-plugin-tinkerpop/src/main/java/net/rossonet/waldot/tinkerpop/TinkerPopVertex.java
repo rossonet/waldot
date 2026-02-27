@@ -40,6 +40,8 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 				NodeIds.Int16);
 		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode, WaldotTinkerPopPlugin.BIND_HOST_FIELD,
 				NodeIds.String);
+		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode, WaldotTinkerPopPlugin.STATUS_FIELD,
+				NodeIds.String);
 	}
 
 	private String baseDirectory;
@@ -53,6 +55,8 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 	private final QualifiedProperty<Integer> portProperty;
 
 	private GremlinServer server;
+	private final QualifiedProperty<String> statusProperty;
+
 	private final WaldotNamespace waldotNamespace;
 
 	public TinkerPopVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId, QualifiedName browseName,
@@ -93,6 +97,10 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 			host = "0.0.0.0";
 		}
 		setProperty(hostProperty, host);
+		statusProperty = new QualifiedProperty<String>(getNamespace().getNamespaceUri(),
+				WaldotTinkerPopPlugin.STATUS_FIELD,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				String.class);
 		start();
 	}
 
@@ -169,8 +177,10 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 		try {
 			server.start();// .get();
 			logger.info("Gremlin Server started: " + server.toString());
+			setProperty(statusProperty, WaldotTinkerPopPlugin.STATUS_RUNNING);
 		} catch (final Exception e) {
 			logger.error("Failed to start Gremlin Server", e);
+			setProperty(statusProperty, WaldotTinkerPopPlugin.STATUS_FAILED);
 		}
 	}
 
@@ -186,10 +196,13 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 					f.get();
 				}
 				server = null;
+				setProperty(statusProperty, WaldotTinkerPopPlugin.STATUS_STOPPED);
 				logger.info("Gremlin Server stopped");
 			} catch (final Exception e) {
 				logger.error("Failed to stop Gremlin Server", e);
+				setProperty(statusProperty, WaldotTinkerPopPlugin.STATUS_FAILED);
 			}
 		}
+
 	}
 }

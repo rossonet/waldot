@@ -3,7 +3,7 @@ package net.rossonet.agent;
 import org.junit.jupiter.api.Test;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.zenoh.agent.Acme;
 import net.rossonet.zenoh.client.WaldotZenohClientImpl;
@@ -21,7 +21,7 @@ public class BaseBusTests {
 	public void runServerAndTwoClient() throws Exception {
 		java.lang.System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "INFO");
 		WaldotZenohClientImpl.debugEnabled = true;
-		final WaldotGraph g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new BaseHistoryStrategy());
+		final WaldotGraph g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
 		Thread.sleep(2_000);
 		final Acme client1 = new Acme("acme1");
 		client1.startAgent();

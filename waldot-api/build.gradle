@@ -38,7 +38,9 @@ apply plugin: 'org.jreleaser'
 dependencies {
     compileOnly project(':waldot-deps')
     annotationProcessor group: 'org.apache.tinkerpop', name: 'gremlin-annotations', version: '3.7.3'
-
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.21.1'
+    api("com.google.guava:guava:33.5.0-jre")
+    implementation("org.jitsi:ice4j:3.2-12-gc2cbf61")
     testImplementation project(':waldot-deps')
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
