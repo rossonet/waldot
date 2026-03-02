@@ -1,5 +1,5 @@
 
-package net.rossonet.waldot.gremlin.opcgraph.structure;
+package net.rossonet.waldot.gremlin.opcgraph.structure.vertex;
 
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;

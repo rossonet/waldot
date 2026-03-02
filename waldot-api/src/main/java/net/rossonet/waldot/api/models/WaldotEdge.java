@@ -21,6 +21,8 @@ import net.rossonet.waldot.api.PropertyObserver;
  */
 public interface WaldotEdge extends Edge, WaldotElement, BaseObjectType {
 
+	void setMonitor(MonitoredEdge monitoredEdge);
+
 	void addPropertyObserver(PropertyObserver propertyObserver);
 
 	void addRelatedProperty(WaldotProperty<?> property);

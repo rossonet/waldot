@@ -1,12 +1,13 @@
-package net.rossonet.waldot.rules.edges;
+package net.rossonet.waldot.gremlin.opcgraph.structure.edge;
 
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 
+import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotEdge;
+import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 
 public class LinkMonitoredEdge extends MonitoredEdge {
 
@@ -16,7 +17,7 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 
 	private final LinkDirection direction;
 
-	public LinkMonitoredEdge(WaldotRulesEnginePlugin engine, LinkDirection direction, WaldotEdge edge,
+	public LinkMonitoredEdge(WaldotNamespace engine, LinkDirection direction, WaldotEdge edge,
 			WaldotVertex sourceVertex, WaldotVertex targetVertex) {
 		super(engine, edge, sourceVertex, targetVertex);
 		this.direction = direction;

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.WaldotOsPlugin;
+import net.rossonet.waldot.WaldotOsPluginOld;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.utils.GremlinHelper;
 import net.rossonet.waldot.utils.gremlin.OshiMethodWrapper;
@@ -58,9 +58,9 @@ public class OsDataWrapper implements AutoCloseable {
 
 	protected WaldotNamespace waldotNamespace;
 
-	private final WaldotOsPlugin waldotOsPlugin;
+	private final WaldotOsPluginOld waldotOsPlugin;
 
-	public OsDataWrapper(WaldotNamespace waldotNamespace, WaldotOsPlugin waldotOsPlugin) {
+	public OsDataWrapper(WaldotNamespace waldotNamespace, WaldotOsPluginOld waldotOsPlugin) {
 		this.waldotNamespace = waldotNamespace;
 		this.waldotOsPlugin = waldotOsPlugin;
 	}
@@ -88,7 +88,7 @@ public class OsDataWrapper implements AutoCloseable {
 		/*
 		 * try { final OSProcess javaProcess = operatingSystem.getCurrentProcess();
 		 * oshiDataMethods.addAll(
-		 * GremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(),
+		 * OshiGremlinHelper.elaborateInstance(waldotNamespace.getGremlinGraph(),
 		 * javaProcess, "javaProcess")); } catch (final Throwable e) {
 		 * logger.error("Error elaborating operating system data", e); }
 		 */

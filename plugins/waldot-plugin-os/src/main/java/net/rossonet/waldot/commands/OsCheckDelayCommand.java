@@ -8,15 +8,15 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.WaldotOsPlugin;
+import net.rossonet.waldot.WaldotOsPluginOld;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class OsCheckDelayCommand extends AbstractOpcCommand {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private final WaldotOsPlugin waldotOsPlugin;
+	private final WaldotOsPluginOld waldotOsPlugin;
 
-	public OsCheckDelayCommand(final WaldotNamespace waldotNamespace, WaldotOsPlugin waldotOsPlugin) {
+	public OsCheckDelayCommand(final WaldotNamespace waldotNamespace, WaldotOsPluginOld waldotOsPlugin) {
 		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
 				waldotNamespace.getConfiguration().getOsCheckDelayCommandLabel(),
 				waldotNamespace.getConfiguration().getOsCheckDelayCommandDescription(),
@@ -41,7 +41,7 @@ public class OsCheckDelayCommand extends AbstractOpcCommand {
 	@Override
 	public Long[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
 		try {
-			long timeout = WaldotOsPlugin.DEFAULT_UPDATE_DELAY;
+			long timeout = WaldotOsPluginOld.DEFAULT_UPDATE_DELAY;
 			for (int i = 0; i < inputValues.length; i++) {
 				final String label = getInputArguments()[i].getName();
 				if (inputValues[i] == null || inputValues[i].isEmpty()) {

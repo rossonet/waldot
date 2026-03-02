@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
@@ -70,6 +71,7 @@ import net.rossonet.waldot.logger.TraceLogger;
 import net.rossonet.waldot.logger.TraceLogger.ContexLogger;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
+import net.rossonet.waldot.utils.ThreadHelper;
 
 public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
 
@@ -98,6 +100,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	private final Set<PluginListener> plugins = new HashSet<>();
 
 	private final SubscriptionModel subscriptionModel;
+
+	private final ScheduledExecutorService timer = ThreadHelper.newVirtualSchedulerExecutor("timer");
 
 	private WaldotOpcUaServer waldotOpcUaServer;
 
@@ -172,6 +176,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public void close() throws Exception {
+		if (timer != null) {
+			timer.shutdownNow();
+		}
 		bootstrapProcedureStrategy.close();
 		logger.info("bootstrap procedure strategy closed");
 		consoleStrategy.close();
@@ -387,6 +394,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	public UaNodeManager getStorageManager() {
 		return getNodeManager();
 
+	}
+
+	@Override
+	public ScheduledExecutorService getTimer() {
+		return timer;
 	}
 
 	@Override

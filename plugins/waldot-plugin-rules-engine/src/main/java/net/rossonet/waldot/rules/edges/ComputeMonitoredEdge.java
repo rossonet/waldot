@@ -3,7 +3,9 @@ package net.rossonet.waldot.rules.edges;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 
+import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotEdge;
+import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 import net.rossonet.waldot.rules.vertices.ComputeVertex;
@@ -11,7 +13,7 @@ import net.rossonet.waldot.rules.vertices.FireableAbstractOpcVertex;
 
 public class ComputeMonitoredEdge extends MonitoredEdge {
 
-	public ComputeMonitoredEdge(WaldotRulesEnginePlugin engine, WaldotEdge edge, WaldotVertex sourceVertex,
+	public ComputeMonitoredEdge(WaldotNamespace engine, WaldotEdge edge, WaldotVertex sourceVertex,
 			WaldotVertex targetVertex) {
 		super(engine, edge, sourceVertex, targetVertex);
 	}

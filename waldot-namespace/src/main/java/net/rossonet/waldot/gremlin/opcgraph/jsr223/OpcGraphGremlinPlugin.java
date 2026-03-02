@@ -13,7 +13,6 @@ import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcMemory;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcMessenger;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcReduceEmitter;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcWorkerPool;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcEdge;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
@@ -21,9 +20,10 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcHelper;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV2;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcProperty;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
+import net.rossonet.waldot.gremlin.opcgraph.structure.edge.OpcEdge;
+import net.rossonet.waldot.gremlin.opcgraph.structure.vertex.OpcProperty;
+import net.rossonet.waldot.gremlin.opcgraph.structure.vertex.OpcVertex;
+import net.rossonet.waldot.gremlin.opcgraph.structure.vertex.OpcVertexProperty;
 
 public final class OpcGraphGremlinPlugin extends AbstractGremlinPlugin {
 	private static final String NAME = "tinkerpop.opcgraph";

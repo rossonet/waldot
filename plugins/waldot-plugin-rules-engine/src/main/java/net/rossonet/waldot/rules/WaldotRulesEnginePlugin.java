@@ -3,7 +3,6 @@ package net.rossonet.waldot.rules;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.jexl3.JexlEngine;
 import org.eclipse.milo.opcua.sdk.core.Reference;
@@ -21,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
+import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
@@ -31,13 +31,8 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.jexl.ClonableMapContext;
 import net.rossonet.waldot.jexl.JexlExecutor;
 import net.rossonet.waldot.rules.edges.ComputeMonitoredEdge;
-import net.rossonet.waldot.rules.edges.FireMonitoredEdge;
-import net.rossonet.waldot.rules.edges.LinkMonitoredEdge;
-import net.rossonet.waldot.rules.edges.LinkMonitoredEdge.LinkDirection;
-import net.rossonet.waldot.rules.edges.MonitoredEdge;
 import net.rossonet.waldot.rules.vertices.ComputeVertex;
 import net.rossonet.waldot.rules.vertices.RuleVertex;
-import net.rossonet.waldot.utils.ThreadHelper;
 
 /**
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
@@ -60,10 +55,7 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	public static final int DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE = 4;
 	private static final String EXECUTE_EDGE_LABEL = "execute";
 	public static final String EXECUTION_TIMEOUT_MS_FIELD = "execution-timeout-ms";
-	private static final String FIRE_EDGE_LABEL = "fire";
 	public static final String FIRE_EDGE_PARAMETER = "fire";
-	private static final String LINK_FROM_EDGE_LABEL = "link-from";
-	private static final String LINK_TO_EDGE_LABEL = "link-to";
 	private final static Logger logger = LoggerFactory.getLogger(WaldotRulesEnginePlugin.class);
 	public static final String PRIORITY_FACTOR_FIELD = "Factor";
 	public static final String PRIORITY_FIELD = "Priority";
@@ -80,7 +72,6 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	private UaObjectTypeNode computeTypeNode;
 	private JexlEngine jexlEngine;
 	private UaObjectTypeNode ruleTypeNode;
-	private final ScheduledExecutorService timer = ThreadHelper.newVirtualSchedulerExecutor("link delay timer");
 	protected WaldotNamespace waldotNamespace;
 
 	public ClonableMapContext baseJexlContext() {
@@ -89,7 +80,7 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		timer.shutdownNow();
+
 		for (final MonitoredEdge edge : activeEdges.values()) {
 			edge.remove();
 		}
@@ -98,8 +89,7 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 
 	@Override
 	public boolean containsEdgeType(String typeDefinitionLabel) {
-		return FIRE_EDGE_LABEL.equals(typeDefinitionLabel) || LINK_TO_EDGE_LABEL.equals(typeDefinitionLabel)
-				|| LINK_FROM_EDGE_LABEL.equals(typeDefinitionLabel) || EXECUTE_EDGE_LABEL.equals(typeDefinitionLabel);
+		return EXECUTE_EDGE_LABEL.equals(typeDefinitionLabel);
 	}
 
 	@Override
@@ -181,10 +171,6 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 		return jexlEngine;
 	}
 
-	public ScheduledExecutorService getTimer() {
-		return timer;
-	}
-
 	@Override
 	public NodeId getVertexTypeNode(String typeDefinitionLabel) {
 		if (RULE_NODE_PARAMETER.equals(typeDefinitionLabel)) {
@@ -216,19 +202,10 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 				return;
 			}
 			switch (type) {
-			case FIRE_EDGE_LABEL:
-				activeEdges.put(edge.getNodeId(), new FireMonitoredEdge(this, edge, sourceVertex, targetVertex));
-				break;
-			case LINK_TO_EDGE_LABEL:
-				activeEdges.put(edge.getNodeId(),
-						new LinkMonitoredEdge(this, LinkDirection.TO, edge, sourceVertex, targetVertex));
-				break;
-			case LINK_FROM_EDGE_LABEL:
-				activeEdges.put(edge.getNodeId(),
-						new LinkMonitoredEdge(this, LinkDirection.FROM, edge, sourceVertex, targetVertex));
-				break;
+
 			case EXECUTE_EDGE_LABEL:
-				activeEdges.put(edge.getNodeId(), new ComputeMonitoredEdge(this, edge, sourceVertex, targetVertex));
+				edge.setMonitor(new ComputeMonitoredEdge(waldotNamespace, edge, sourceVertex, targetVertex));
+
 				break;
 			default:
 				logger.warn("Edge {} has unknown type {}, skipping", edge.getNodeId(), type);

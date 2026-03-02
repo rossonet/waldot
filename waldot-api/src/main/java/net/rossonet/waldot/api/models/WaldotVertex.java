@@ -3,9 +3,11 @@ package net.rossonet.waldot.api.models;
 import java.util.List;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseObjectType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap;
@@ -31,6 +33,12 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 
 	public UaMethodNode findMethodNode(NodeId methodId);
 
+	default void fireEvent(UaNode node, BaseEventType event, int calcolatedPriority) {
+	}
+
+	default void fireProperty(UaNode node, String propertyLabel, Object value, int calcolatedPriority) {
+	}
+
 	List<EventObserver> getEventObservers();
 
 	WaldotGraphComputerView getGraphComputerView();
@@ -43,7 +51,7 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 
 	ImmutableMap<String, WaldotVertexProperty<Object>> getVertexProperties();
 
-	boolean inComputerMode();
+	boolean inComputerMode();;
 
 	/**
 	 * called before a property value is changed in the graph database
@@ -54,7 +62,7 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 	 * called before the vertex is removed from the graph database
 	 */
 	default void notifyRemoveVertex() {
-	};
+	}
 
 	void postEvent(BaseEventTypeNode event);
 

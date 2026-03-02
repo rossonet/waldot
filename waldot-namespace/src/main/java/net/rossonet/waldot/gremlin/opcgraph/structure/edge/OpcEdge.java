@@ -1,5 +1,5 @@
 
-package net.rossonet.waldot.gremlin.opcgraph.structure;
+package net.rossonet.waldot.gremlin.opcgraph.structure.edge;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.PropertyObserver;
+import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
@@ -37,6 +38,7 @@ import net.rossonet.waldot.api.models.WaldotProperty;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.base.GremlinElement;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.structure.AbstractOpcGraph;
 import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 
 public class OpcEdge extends GremlinElement implements WaldotEdge {
@@ -48,6 +50,8 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 	private final QualifiedProperty<String> labelProperty;
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+	private MonitoredEdge monitoredEdge;
 
 	private final Set<WaldotProperty<?>> propertiesToDelete = new HashSet<>();
 
@@ -78,6 +82,15 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 		typeProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.TYPE_FIELD, MiloSingleServerBaseReferenceNodeBuilder.edgeTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
+	}
+
+	@Override
+	public void setMonitor(MonitoredEdge monitoredEdge) {
+		if (this.monitoredEdge != null) {
+			this.monitoredEdge.remove();
+		}
+		this.monitoredEdge = monitoredEdge;
+
 	}
 
 	@Override
@@ -250,6 +263,10 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	@Override
 	public void removeRelatedOpcUaNodes() {
+		if (monitoredEdge != null) {
+			monitoredEdge.remove();
+			monitoredEdge = null;
+		}
 		for (final WaldotProperty<?> property : propertiesToDelete) {
 			property.remove();
 		}

@@ -1,4 +1,4 @@
-package net.rossonet.waldot.rules.edges;
+package net.rossonet.waldot.api.models;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,10 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.EventObserver;
 import net.rossonet.waldot.api.PropertyObserver;
-import net.rossonet.waldot.api.models.WaldotEdge;
-import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
-import net.rossonet.waldot.rules.vertices.FireableAbstractOpcVertex;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 
 public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
@@ -32,11 +29,11 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 	private static final String PROPERTY_ACTIVE_LABEL = "active-property";
 	private static final String SEPARATOR = ",";
 	private final WaldotEdge edge;
-	private final WaldotRulesEnginePlugin engine;
+	private final WaldotNamespace engine;
 	private final WaldotVertex sourceVertex;
 	private final WaldotVertex targetVertex;
 
-	public MonitoredEdge(WaldotRulesEnginePlugin engine, WaldotEdge edge, WaldotVertex sourceVertex,
+	public MonitoredEdge(WaldotNamespace engine, WaldotEdge edge, WaldotVertex sourceVertex,
 			WaldotVertex targetVertex) {
 		this.engine = engine;
 		this.edge = edge;
@@ -145,8 +142,9 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 	protected abstract Object getLastValue(String propertyLabel);
 
 	protected int getPriority() {
-		int calcolatedPriority = WaldotRulesEnginePlugin.DEFAULT_PRIORITY_VALUE;
-		final Property<Object> priorityValue = getEdge().property(WaldotRulesEnginePlugin.PRIORITY_FIELD.toLowerCase());
+		int calcolatedPriority = MiloStrategy.MONITOR_EDGE_DEFAULT_PRIORITY_VALUE;
+		final Property<Object> priorityValue = getEdge()
+				.property(MiloStrategy.MONITOR_EDGE_PRIORITY_FIELD.toLowerCase());
 		if (priorityValue.isPresent()) {
 			final Object priority = priorityValue.value();
 			if (priority instanceof Integer) {
@@ -156,11 +154,11 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 					calcolatedPriority = Integer.parseInt((String) priority);
 				} catch (final NumberFormatException e) {
 					logger.warn("Invalid priority value: {}", priorityValue);
-					calcolatedPriority = WaldotRulesEnginePlugin.DEFAULT_PRIORITY_VALUE;
+					calcolatedPriority = MiloStrategy.MONITOR_EDGE_DEFAULT_PRIORITY_VALUE;
 				}
 			} else {
 				logger.warn("Unsupported priority value type: {}", priorityValue.getClass());
-				calcolatedPriority = WaldotRulesEnginePlugin.DEFAULT_PRIORITY_VALUE;
+				calcolatedPriority = MiloStrategy.MONITOR_EDGE_DEFAULT_PRIORITY_VALUE;
 			}
 		}
 		return calcolatedPriority;
@@ -246,7 +244,7 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		// implementare le logiche di pulizia prima di rimuovere l'arco
 	}
 
-	protected void sendFireWithDelay(FireableAbstractOpcVertex destinationVertex, UaNode node, BaseEventType event,
+	protected void sendFireWithDelay(WaldotVertex destinationVertex, UaNode node, BaseEventType event,
 			int calcolatedPriority) {
 		engine.getTimer().schedule(() -> {
 			destinationVertex.fireEvent(node, event, calcolatedPriority);
@@ -254,8 +252,8 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
 	}
 
-	protected void sendFireWithDelay(FireableAbstractOpcVertex destinationVertex, UaNode node, String propertyLabel,
-			Object value, int calcolatedPriority) {
+	protected void sendFireWithDelay(WaldotVertex destinationVertex, UaNode node, String propertyLabel, Object value,
+			int calcolatedPriority) {
 		engine.getTimer().schedule(() -> {
 			destinationVertex.fireProperty(node, propertyLabel, value, calcolatedPriority);
 		}, checkLongInProperty(DELAY_LABEL), TimeUnit.MILLISECONDS);

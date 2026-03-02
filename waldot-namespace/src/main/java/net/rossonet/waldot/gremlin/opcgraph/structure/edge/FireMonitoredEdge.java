@@ -1,23 +1,24 @@
-package net.rossonet.waldot.rules.edges;
+package net.rossonet.waldot.gremlin.opcgraph.structure.edge;
 
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 
+import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotEdge;
+import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
-import net.rossonet.waldot.rules.vertices.FireableAbstractOpcVertex;
+import net.rossonet.waldot.opc.AbstractOpcVertex;
 
 public class FireMonitoredEdge extends MonitoredEdge {
 
-	public FireMonitoredEdge(WaldotRulesEnginePlugin engine, WaldotEdge edge, WaldotVertex sourceVertex,
+	public FireMonitoredEdge(WaldotNamespace engine, WaldotEdge edge, WaldotVertex sourceVertex,
 			WaldotVertex targetVertex) {
 		super(engine, edge, sourceVertex, targetVertex);
 	}
 
 	@Override
 	protected void createObserverNeeded() {
-		if (getTargetVertex() instanceof FireableAbstractOpcVertex) {
+		if (getTargetVertex() instanceof AbstractOpcVertex) {
 			getSourceVertex().addEventObserver(this);
 			getSourceVertex().addPropertyObserver(this);
 		}
@@ -25,12 +26,12 @@ public class FireMonitoredEdge extends MonitoredEdge {
 
 	@Override
 	public void fireEvent(UaNode node, BaseEventType event) {
-		if (isActive() && isEventNotificationActive() && getTargetVertex() instanceof FireableAbstractOpcVertex) {
+		if (isActive() && isEventNotificationActive() && getTargetVertex() instanceof AbstractOpcVertex) {
 			final int calcolatedPriority = getPriority();
 			if (isDelayProperty()) {
-				sendFireWithDelay((FireableAbstractOpcVertex) getTargetVertex(), node, event, calcolatedPriority);
+				sendFireWithDelay(getTargetVertex(), node, event, calcolatedPriority);
 			} else {
-				((FireableAbstractOpcVertex) getTargetVertex()).fireEvent(node, event, calcolatedPriority);
+				getTargetVertex().fireEvent(node, event, calcolatedPriority);
 			}
 		} else {
 			logger.debug("Event notification not active or target vertex is not fireable for event '{}'", event);
@@ -46,15 +47,13 @@ public class FireMonitoredEdge extends MonitoredEdge {
 	@Override
 	public void propertyChanged(UaNode node, String label, Object value) {
 		if (isActive() && isPropertyNotificationActive() && isMonitoredProperty(label)
-				&& getTargetVertex() instanceof FireableAbstractOpcVertex) {
+				&& getTargetVertex() instanceof AbstractOpcVertex) {
 			if (isDeadBandExceeded(label, value)) {
 				final int calcolatedPriority = getPriority();
 				if (isDelayProperty()) {
-					sendFireWithDelay((FireableAbstractOpcVertex) getTargetVertex(), node, label, value,
-							calcolatedPriority);
+					sendFireWithDelay(getTargetVertex(), node, label, value, calcolatedPriority);
 				} else {
-					((FireableAbstractOpcVertex) getTargetVertex()).fireProperty(node, label, value,
-							calcolatedPriority);
+					getTargetVertex().fireProperty(node, label, value, calcolatedPriority);
 				}
 			} else {
 				logger.debug("Deadband not exceeded for property '{}', value: {}", label, value);

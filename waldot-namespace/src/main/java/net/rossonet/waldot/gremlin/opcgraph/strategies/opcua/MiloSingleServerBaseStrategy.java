@@ -58,11 +58,13 @@ import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinElement;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcGraphComputerView;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcEdge;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcProperty;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
+import net.rossonet.waldot.gremlin.opcgraph.structure.edge.LinkMonitoredEdge;
+import net.rossonet.waldot.gremlin.opcgraph.structure.edge.LinkMonitoredEdge.LinkDirection;
+import net.rossonet.waldot.gremlin.opcgraph.structure.edge.OpcEdge;
+import net.rossonet.waldot.gremlin.opcgraph.structure.vertex.OpcProperty;
+import net.rossonet.waldot.gremlin.opcgraph.structure.vertex.OpcVertex;
+import net.rossonet.waldot.gremlin.opcgraph.structure.vertex.OpcVertexProperty;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
@@ -212,6 +214,13 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		edge.addRelatedReference(reference);
 		sourceVertex.addReference(reference);
 		popolateEdgePropertiesFromPropertyKeyValues(propertyKeyValues, edge);
+		if (type.equals(LINK_TO_EDGE_TYPE)) {
+			edge.setMonitor(new LinkMonitoredEdge(waldotNamespace, LinkDirection.TO, edge, sourceVertex, targetVertex));
+		}
+		if (type.equals(LINK_FROM_EDGE_TYPE)) {
+			edge.setMonitor(
+					new LinkMonitoredEdge(waldotNamespace, LinkDirection.FROM, edge, sourceVertex, targetVertex));
+		}
 		for (final PluginListener p : waldotNamespace.getPlugins()) {
 			if (p.containsEdgeType(type)) {
 				p.notifyAddEdge(edge, sourceVertex, targetVertex, elaboratedLabel, type, propertyKeyValues);

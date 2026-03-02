@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
@@ -136,6 +137,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	public ReferenceTypeTree getReferenceTypes();
 
 	UaNodeManager getStorageManager();
+
+	ScheduledExecutorService getTimer();
 
 	Graph.Variables getVariables();
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package net.rossonet.waldot.gremlin.opcgraph.structure;
+package net.rossonet.waldot.gremlin.opcgraph.structure.vertex;
 
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
