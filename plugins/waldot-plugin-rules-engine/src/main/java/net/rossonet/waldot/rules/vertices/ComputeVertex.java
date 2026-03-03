@@ -57,7 +57,7 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 						continue;
 					}
 					final DirtyNode dirty = dirtyNodes.take();
-					final FireableAbstractOpcVertex activeVertex = servedFireableNodes.get(dirty.getNodeId());
+					final ComputableFireableAbstractOpcVertex activeVertex = servedFireableNodes.get(dirty.getNodeId());
 					RunnableEvent newEvent = activeVertex.poll();
 					while (newEvent != null) {
 						final FireableAction action = newEvent.getAction(System.currentTimeMillis());
@@ -121,7 +121,7 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 	private double priorityFactor = WaldotRulesEnginePlugin.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE;
 	private final QualifiedProperty<Double> priorityFactorProperty;
 	public Map<Future<?>, FireableAction> runners = new ConcurrentHashMap<>();
-	private final ConcurrentHashMap<NodeId, FireableAbstractOpcVertex> servedFireableNodes = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<NodeId, ComputableFireableAbstractOpcVertex> servedFireableNodes = new ConcurrentHashMap<>();
 
 	private final Future<?> threadManager;
 
@@ -259,7 +259,7 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 			if (intSize > 0 && !dirtyNodes.stream()
 					.anyMatch(dirtyNode -> dirtyNode.getNodeId().equals(sourceNode.getNodeId()))) {
 				if (!servedFireableNodes.containsKey(sourceNode.getNodeId())) {
-					servedFireableNodes.put(sourceNode.getNodeId(), (FireableAbstractOpcVertex) sourceNode);
+					servedFireableNodes.put(sourceNode.getNodeId(), (ComputableFireableAbstractOpcVertex) sourceNode);
 				}
 				dirtyNodes.offer(new DirtyNode(sourceNode.getNodeId(), executorEdgePriority, intSize));
 			} else {

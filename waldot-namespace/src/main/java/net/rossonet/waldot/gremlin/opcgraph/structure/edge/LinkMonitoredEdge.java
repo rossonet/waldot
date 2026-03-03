@@ -3,6 +3,7 @@ package net.rossonet.waldot.gremlin.opcgraph.structure.edge;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 
 import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotEdge;
@@ -17,8 +18,8 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 
 	private final LinkDirection direction;
 
-	public LinkMonitoredEdge(WaldotNamespace engine, LinkDirection direction, WaldotEdge edge,
-			WaldotVertex sourceVertex, WaldotVertex targetVertex) {
+	public LinkMonitoredEdge(final WaldotNamespace engine, final LinkDirection direction, final WaldotEdge edge,
+			final WaldotVertex sourceVertex, final WaldotVertex targetVertex) {
 		super(engine, edge, sourceVertex, targetVertex);
 		this.direction = direction;
 	}
@@ -36,13 +37,13 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 	}
 
 	@Override
-	public void fireEvent(UaNode node, BaseEventType event) {
+	public void fireEvent(final UaNode node, final BaseEventType event) {
 		// per ora non faccio nulla, ma in futuro potrei voler propagare eventi anche
 		// con questo tipo di edge
 
 	}
 
-	private String getDestinationLabel(String propertyLabel) {
+	private String getDestinationLabel(final String propertyLabel) {
 		final Property<Object> destinationProperty = getEdge().property(propertyLabel);
 		if (destinationProperty.isPresent() && destinationProperty.value() instanceof String) {
 			return (String) destinationProperty.value();
@@ -52,12 +53,12 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 	}
 
 	@Override
-	protected Object getLastValue(String propertyLabel) {
+	protected Object getLastValue(final String propertyLabel) {
 		if (direction.equals(LinkDirection.TO)) {
-			return getTargetVertex().property(getDestinationLabel(propertyLabel));
+			return getTargetVertex().property(getDestinationLabel(propertyLabel)).value();
 		}
 		if (direction.equals(LinkDirection.FROM)) {
-			return getSourceVertex().property(getDestinationLabel(propertyLabel));
+			return getSourceVertex().property(getDestinationLabel(propertyLabel)).value();
 		} else {
 			logger.error("Invalid direction for LinkMonitoredEdge: {}", direction);
 			return null;
@@ -65,21 +66,21 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 	}
 
 	@Override
-	public void propertyChanged(UaNode sourceNode, String propertyLabel, Object value) {
+	public void propertyChanged(final UaNode sourceNode, final String propertyLabel, final DataValue value) {
 		if (isActive() && isPropertyNotificationActive() && isMonitoredProperty(propertyLabel)) {
 			if (isDeadBandExceeded(propertyLabel, value)) {
 				if (direction.equals(LinkDirection.TO)) {
 					if (isDelayProperty()) {
-						sendWithDelay(getTargetVertex(), propertyLabel, value);
+						sendWithDelay(getTargetVertex(), propertyLabel, value.getValue().getValue());
 					} else {
-						getTargetVertex().property(getDestinationLabel(propertyLabel), value);
+						getTargetVertex().property(getDestinationLabel(propertyLabel), value.getValue().getValue());
 					}
 				}
 				if (direction.equals(LinkDirection.FROM)) {
 					if (isDelayProperty()) {
-						sendWithDelay(getSourceVertex(), propertyLabel, value);
+						sendWithDelay(getSourceVertex(), propertyLabel, value.getValue().getValue());
 					} else {
-						getSourceVertex().property(getDestinationLabel(propertyLabel), value);
+						getSourceVertex().property(getDestinationLabel(propertyLabel), value.getValue().getValue());
 					}
 				}
 			}

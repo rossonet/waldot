@@ -2,31 +2,29 @@ package net.rossonet.waldot.gremlin.opcgraph.structure.edge;
 
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 
 import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.opc.AbstractOpcVertex;
 
 public class FireMonitoredEdge extends MonitoredEdge {
 
-	public FireMonitoredEdge(WaldotNamespace engine, WaldotEdge edge, WaldotVertex sourceVertex,
-			WaldotVertex targetVertex) {
+	public FireMonitoredEdge(final WaldotNamespace engine, final WaldotEdge edge, final WaldotVertex sourceVertex,
+			final WaldotVertex targetVertex) {
 		super(engine, edge, sourceVertex, targetVertex);
 	}
 
 	@Override
 	protected void createObserverNeeded() {
-		if (getTargetVertex() instanceof AbstractOpcVertex) {
-			getSourceVertex().addEventObserver(this);
-			getSourceVertex().addPropertyObserver(this);
-		}
+		getSourceVertex().addEventObserver(this);
+		getSourceVertex().addPropertyObserver(this);
 	}
 
 	@Override
-	public void fireEvent(UaNode node, BaseEventType event) {
-		if (isActive() && isEventNotificationActive() && getTargetVertex() instanceof AbstractOpcVertex) {
+	public void fireEvent(final UaNode node, final BaseEventType event) {
+		if (isActive() && isEventNotificationActive()) {
 			final int calcolatedPriority = getPriority();
 			if (isDelayProperty()) {
 				sendFireWithDelay(getTargetVertex(), node, event, calcolatedPriority);
@@ -39,15 +37,14 @@ public class FireMonitoredEdge extends MonitoredEdge {
 	}
 
 	@Override
-	protected Object getLastValue(String propertyLabel) {
-		// non è usata in questo tipo di edge
+	protected Object getLastValue(final String propertyLabel) {
+		// TODO: implementare una cache per gli ultimi valori per propertyLabel
 		return null;
 	}
 
 	@Override
-	public void propertyChanged(UaNode node, String label, Object value) {
-		if (isActive() && isPropertyNotificationActive() && isMonitoredProperty(label)
-				&& getTargetVertex() instanceof AbstractOpcVertex) {
+	public void propertyChanged(final UaNode node, final String label, final DataValue value) {
+		if (isActive() && isPropertyNotificationActive() && isMonitoredProperty(label)) {
 			if (isDeadBandExceeded(label, value)) {
 				final int calcolatedPriority = getPriority();
 				if (isDelayProperty()) {

@@ -44,7 +44,7 @@ import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 public class WaldotTestClientHandler implements AutoCloseable {
 
 	public interface EventObserver {
-		default void onEvent(String nodeId, String eventType, Object value) {
+		default void onEvent(final String nodeId, final String eventType, final Object value) {
 			System.out.println("Received event for node: " + nodeId + " event type: " + eventType + " value: " + value);
 		}
 	}
@@ -53,7 +53,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	private final WaldotGraph graph;
 
-	public WaldotTestClientHandler(WaldotGraph g) {
+	public WaldotTestClientHandler(final WaldotGraph g) {
 		final WaldOTAgentClientConfiguration configuration = new DefaultWaldOTAgentClientConfigurationV1();
 		client = new WaldOTAgentClientImplV1(configuration);
 		client.startConnectionProcedure();
@@ -72,7 +72,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaEdgeBrowserNameNameValueEquals(WaldotEdge edge, String expectedValue) {
+	public boolean checkOpcUaEdgeBrowserNameNameValueEquals(final WaldotEdge edge, final String expectedValue) {
 		try {
 			resetCache();
 			final List<ReadValueId> readValueIds = new ArrayList<>();
@@ -90,7 +90,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaEdgeDescriptionValueEquals(WaldotEdge edge, String expectedValue) {
+	public boolean checkOpcUaEdgeDescriptionValueEquals(final WaldotEdge edge, final String expectedValue) {
 		try {
 			resetCache();
 			final List<ReadValueId> readValueIds = new ArrayList<>();
@@ -108,7 +108,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaEdgeDisplayNameValueEquals(WaldotEdge edge, String expectedValue) {
+	public boolean checkOpcUaEdgeDisplayNameValueEquals(final WaldotEdge edge, final String expectedValue) {
 		try {
 			resetCache();
 			final List<ReadValueId> readValueIds = new ArrayList<>();
@@ -126,7 +126,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaEdgeLabelReadOnly(WaldotEdge edge) {
+	public boolean checkOpcUaEdgeLabelReadOnly(final WaldotEdge edge) {
 
 		final NodeId completedNodeId = graph.getWaldotNamespace()
 				.generateNodeId(edge.getNodeId().getIdentifier().toString() + ".Label");
@@ -151,7 +151,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaEdgeLabelValueEquals(WaldotEdge edge, String expectedValue) {
+	public boolean checkOpcUaEdgeLabelValueEquals(final WaldotEdge edge, final String expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace()
@@ -171,7 +171,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexBindReadOnly(String nodeId) {
+	public boolean checkOpcUaVertexBindReadOnly(final String nodeId) {
 		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Bind");
 		final OpcUaClient clientOpc = client.getOpcUaClient();
 		try {
@@ -194,7 +194,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexBindValueEquals(String nodeId, String expectedValue) {
+	public boolean checkOpcUaVertexBindValueEquals(final String nodeId, final String expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Bind");
@@ -213,7 +213,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexBrowserNameNameValueEquals(String nodeId, String expectedValue) {
+	public boolean checkOpcUaVertexBrowserNameNameValueEquals(final String nodeId, final String expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
@@ -232,7 +232,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexDescriptionValueEquals(String nodeId, String expectedValue) {
+	public boolean checkOpcUaVertexDescriptionValueEquals(final String nodeId, final String expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
@@ -251,7 +251,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexDisplayNameValueEquals(String nodeId, String expectedValue) {
+	public boolean checkOpcUaVertexDisplayNameValueEquals(final String nodeId, final String expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
@@ -270,7 +270,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexEdge(long nodeOut, long nodeIn, String typeEdge) {
+	public boolean checkOpcUaVertexEdge(final long nodeOut, final long nodeIn, final String typeEdge) {
 		try {
 			resetCache();
 			final NodeId out = graph.getWaldotNamespace().generateNodeId(nodeOut);
@@ -353,7 +353,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexExists(long nodeId) {
+	public boolean checkOpcUaVertexExists(final long nodeId) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
@@ -366,7 +366,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	}
 
-	public boolean checkOpcUaVertexExists(String nodeId) {
+	public boolean checkOpcUaVertexExists(final String nodeId) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
@@ -379,7 +379,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	}
 
-	public boolean checkOpcUaVertexLabelReadOnly(String nodeId) {
+	public boolean checkOpcUaVertexLabelReadOnly(final String nodeId) {
 		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Label");
 		final OpcUaClient clientOpc = client.getOpcUaClient();
 		try {
@@ -402,7 +402,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexLabelValueEquals(String nodeId, String expectedValue) {
+	public boolean checkOpcUaVertexLabelValueEquals(final String nodeId, final String expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Label");
@@ -421,7 +421,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexPortReadOnly(String nodeId) {
+	public boolean checkOpcUaVertexPortReadOnly(final String nodeId) {
 		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Port");
 		final OpcUaClient clientOpc = client.getOpcUaClient();
 		try {
@@ -444,7 +444,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexPortValueEquals(String nodeId, String expectedValue) {
+	public boolean checkOpcUaVertexPortValueEquals(final String nodeId, final String expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Port");
@@ -463,7 +463,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexTypeValueEquals(String nodeId, String expectedValue) {
+	public boolean checkOpcUaVertexTypeValueEquals(final String nodeId, final String expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Type");
@@ -482,7 +482,8 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexValueBetween(String nodeId, String valueLabel, int minValue, int maxValue) {
+	public boolean checkOpcUaVertexValueBetween(final String nodeId, final String valueLabel, final int minValue,
+			final int maxValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
@@ -501,7 +502,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkOpcUaVertexValueEquals(long nodeId, String valueLabel, Object expectedValue) {
+	public boolean checkOpcUaVertexValueEquals(final long nodeId, final String valueLabel, final Object expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
@@ -512,14 +513,15 @@ public class WaldotTestClientHandler implements AutoCloseable {
 					TimestampsToReturn.Both, readValueIds);
 			final DataValue[] results = readResponse.getResults();
 			final Object value = results[0].value().getValue();
-			return value.equals(expectedValue);
+			return value.toString().equals(expectedValue.toString());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
 
-	public boolean checkOpcUaVertexValueEquals(String nodeId, String valueLabel, Object expectedValue) {
+	public boolean checkOpcUaVertexValueEquals(final String nodeId, final String valueLabel,
+			final Object expectedValue) {
 		try {
 			resetCache();
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
@@ -531,14 +533,14 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			final DataValue[] results = readResponse.getResults();
 			final Object value = results[0].value().getValue();
 			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return value.equals(expectedValue);
+			return value.toString().equals(expectedValue.toString());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
 
-	public boolean checkVertexExists(long nodeId) {
+	public boolean checkVertexExists(final long nodeId) {
 		try {
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
 			final Vertex v = graph.vertex(completedNodeId);
@@ -549,7 +551,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkVertexExists(String nodeId) {
+	public boolean checkVertexExists(final String nodeId) {
 		try {
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
 			final Vertex v = graph.vertex(completedNodeId);
@@ -560,7 +562,8 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkVertexValueBetween(String nodeId, String valueLabel, int minValue, int maxValue) {
+	public boolean checkVertexValueBetween(final String nodeId, final String valueLabel, final int minValue,
+			final int maxValue) {
 		try {
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
 			final Vertex v = graph.vertex(completedNodeId);
@@ -573,25 +576,25 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public boolean checkVertexValueEquals(long nodeId, String valueLabel, Object expectedValue) {
+	public boolean checkVertexValueEquals(final long nodeId, final String valueLabel, final Object expectedValue) {
 		try {
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
 			final Vertex v = graph.vertex(completedNodeId);
 			final Object value = v.property(valueLabel).value();
-			return value.equals(expectedValue);
+			return value.toString().equals(expectedValue.toString());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
 		}
 	}
 
-	public boolean checkVertexValueEquals(String nodeId, String valueLabel, Object expectedValue) {
+	public boolean checkVertexValueEquals(final String nodeId, final String valueLabel, final Object expectedValue) {
 		try {
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
 			final Vertex v = graph.vertex(completedNodeId);
 			final Object value = v.property(valueLabel).value();
 			System.out.println("Vertex value: " + value + " expected: " + expectedValue);
-			return value.equals(expectedValue);
+			return value.toString().equals(expectedValue.toString());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
@@ -604,8 +607,8 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	}
 
-	public String[] createEdgeWithOpcUa(String type, String sourceNodeId, String destinationNodeId,
-			String[] keyValues) {
+	public String[] createEdgeWithOpcUa(final String type, final String sourceNodeId, final String destinationNodeId,
+			final String[] keyValues) {
 		try {
 			return client.createEdge(type, sourceNodeId, destinationNodeId, keyValues);
 		} catch (final Exception e) {
@@ -615,7 +618,8 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	}
 
-	public String[] createVertexWithOpcUa(String id, String label, String type, String[] keyValues) {
+	public String[] createVertexWithOpcUa(final String id, final String label, final String type,
+			final String[] keyValues) {
 		try {
 			return client.createVertex(id, label, type, keyValues);
 		} catch (final Exception e) {
@@ -625,7 +629,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	}
 
-	public String[] deleteVertexWithOpcUa(int id) {
+	public String[] deleteVertexWithOpcUa(final int id) {
 		try {
 			return client.deleteVertex(id);
 		} catch (final Exception e) {
@@ -634,7 +638,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public String[] deleteVertexWithOpcUa(String id) {
+	public String[] deleteVertexWithOpcUa(final String id) {
 		try {
 			return client.deleteVertex(id);
 		} catch (final Exception e) {
@@ -657,7 +661,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		return client.getServerInfo();
 	}
 
-	public long readIntOpcUaVertexValue(String nodeId, String valueLabel) throws UaException {
+	public long readIntOpcUaVertexValue(final String nodeId, final String valueLabel) throws UaException {
 		resetCache();
 		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
 		final List<ReadValueId> readValueIds = new ArrayList<>();
@@ -676,7 +680,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 
 	}
 
-	public List<String> runExpression(String expression) {
+	public List<String> runExpression(final String expression) {
 		try {
 			return client.runExpression(expression);
 		} catch (final Exception e) {
@@ -685,7 +689,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	public OpcUaSubscription subscribeToOpcUaVertexEventsMessage(String nodeId, EventObserver observer) {
+	public OpcUaSubscription subscribeToOpcUaVertexEventsMessage(final String nodeId, final EventObserver observer) {
 		final var subscription = new OpcUaSubscription(client.getOpcUaClient());
 		try {
 			subscription.create();
@@ -719,7 +723,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		return subscription;
 	}
 
-	public void writeOpcUaVertexValue(String nodeId, String valueLabel, Object newValue) {
+	public void writeOpcUaVertexValue(final String nodeId, final String valueLabel, final Object newValue) {
 		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
 		final List<WriteValue> writeValues = new ArrayList<>();
 		writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange

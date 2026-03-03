@@ -35,7 +35,7 @@ import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.utils.LogHelper;
 
-public class RuleVertex extends FireableAbstractOpcVertex {
+public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 
 	public enum DebugEventType {
 		AFTER_ACTION_COMPILE, AFTER_ACTION_COMPILE_EXCEPTION, AFTER_ACTION_EXECUTION, AFTER_ACTION_EXECUTION_EXCEPTION,

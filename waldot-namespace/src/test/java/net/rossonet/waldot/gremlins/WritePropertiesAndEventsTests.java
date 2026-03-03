@@ -56,7 +56,7 @@ public class WritePropertiesAndEventsTests {
 		clean();
 	}
 
-	private void bootstrapUrlServerInit(String url)
+	private void bootstrapUrlServerInit(final String url)
 			throws ConfigurationException, InterruptedException, ExecutionException {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.getOpcGraph(url, new LoggerHistoryStrategy());
@@ -136,8 +136,8 @@ public class WritePropertiesAndEventsTests {
 			}
 
 			@Override
-			public void propertyChanged(UaNode node, String propertyName, Object value) {
-				if (!(value instanceof DataValue) || !((DataValue) value).getValue().getValue().equals(expected)) {
+			public void propertyChanged(final UaNode node, final String propertyName, final DataValue value) {
+				if (!(value instanceof DataValue) || !value.getValue().getValue().equals(expected)) {
 					System.out.println(node + ": property changed: " + propertyName + " new value: " + value
 							+ " expected value: " + expected);
 					throw new RuntimeException("Unexpected property value");
@@ -146,7 +146,7 @@ public class WritePropertiesAndEventsTests {
 				}
 			}
 
-			public void setExpected(String newValue) {
+			public void setExpected(final String newValue) {
 				expected = newValue;
 
 			}
@@ -189,8 +189,8 @@ public class WritePropertiesAndEventsTests {
 			}
 
 			@Override
-			public void propertyChanged(UaNode node, String propertyName, Object value) {
-				if (!(value instanceof DataValue) || !((DataValue) value).getValue().getValue().equals(expected)) {
+			public void propertyChanged(final UaNode node, final String propertyName, final DataValue value) {
+				if (!(value instanceof DataValue) || !value.getValue().getValue().equals(expected)) {
 					System.out.println(node + ": property changed: " + propertyName + " new value: " + value
 							+ " expected value: " + expected);
 					throw new RuntimeException("Unexpected property value");
@@ -199,7 +199,7 @@ public class WritePropertiesAndEventsTests {
 				}
 			}
 
-			public void setExpected(String newValue) {
+			public void setExpected(final String newValue) {
 				expected = newValue;
 
 			}
@@ -233,7 +233,7 @@ public class WritePropertiesAndEventsTests {
 			int v = 0;
 
 			@Override
-			public void fireEvent(UaNode node, BaseEventType event) {
+			public void fireEvent(final UaNode node, final BaseEventType event) {
 				System.out.println(node + ": event fired: " + event.getMessage().getText());
 				final int check = Integer.valueOf(event.getMessage().getText());
 				if (check != v) {
@@ -251,7 +251,7 @@ public class WritePropertiesAndEventsTests {
 			int v = 0;
 
 			@Override
-			public void onEvent(String nodeId, String eventType, Object value) {
+			public void onEvent(final String nodeId, final String eventType, final Object value) {
 				try {
 					System.out.println(nodeId + ": event fired from OPCUA: " + value.toString());
 					final int check = Integer.valueOf(((LocalizedText) value).getText());

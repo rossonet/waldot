@@ -61,16 +61,16 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	private final QualifiedProperty<String> typeProperty;
 
-	public OpcEdge(WaldotGraph graph, final NodeId nodeId, final WaldotVertex outVertex, final WaldotVertex inVertex,
-			final String label, final String name, String description, UInteger writeMask, UInteger userWriteMask,
-			UByte eventNotifier, long currentVersion) {
+	public OpcEdge(final WaldotGraph graph, final NodeId nodeId, final WaldotVertex outVertex, final WaldotVertex inVertex,
+			final String label, final String name, final String description, final UInteger writeMask, final UInteger userWriteMask,
+			final UByte eventNotifier, final long currentVersion) {
 		this(graph, outVertex.getNodeContext(), nodeId, inVertex.getNodeId(), outVertex.getNodeId(), label, name,
 				description, writeMask, userWriteMask, eventNotifier, currentVersion);
 	}
 
-	private OpcEdge(WaldotGraph graph, UaNodeContext context, final NodeId nodeId, final NodeId inVertexId,
-			final NodeId outVertexId, final String label, final String name, String description, UInteger writeMask,
-			UInteger userWriteMask, UByte eventNotifier, final long currentVersion) {
+	private OpcEdge(final WaldotGraph graph, final UaNodeContext context, final NodeId nodeId, final NodeId inVertexId,
+			final NodeId outVertexId, final String label, final String name, final String description, final UInteger writeMask,
+			final UInteger userWriteMask, final UByte eventNotifier, final long currentVersion) {
 		super(context, nodeId, graph.getWaldotNamespace().generateQualifiedName(name), LocalizedText.english(name),
 				LocalizedText.english(description), userWriteMask, userWriteMask, eventNotifier, currentVersion);
 		this.graph = graph;
@@ -85,27 +85,18 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 	}
 
 	@Override
-	public void setMonitor(MonitoredEdge monitoredEdge) {
-		if (this.monitoredEdge != null) {
-			this.monitoredEdge.remove();
-		}
-		this.monitoredEdge = monitoredEdge;
-
-	}
-
-	@Override
 	public void addPropertyObserver(final PropertyObserver propertyObserver) {
 		propertyObservers.add(propertyObserver);
 	}
 
 	@Override
-	public void addRelatedProperty(WaldotProperty<?> property) {
+	public void addRelatedProperty(final WaldotProperty<?> property) {
 		propertiesToDelete.add(property);
 
 	}
 
 	@Override
-	public void addRelatedReference(Reference reference) {
+	public void addRelatedReference(final Reference reference) {
 		referencesToDelete.add(reference);
 
 	}
@@ -164,7 +155,7 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 	}
 
 	@Override
-	public void notifyPropertyValueChanging(String label, DataValue value) {
+	public void notifyPropertyValueChanging(final String label, final DataValue value) {
 		if (label.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {
 			final String originalLabel = getProperty(labelProperty).get();
 			if (!originalLabel.equals(String.valueOf(value.getValue().getValue().toString()))) {
@@ -274,6 +265,15 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 			graph.getWaldotNamespace().removeReference(reference);
 		}
 
+	}
+
+	@Override
+	public void setMonitor(final MonitoredEdge monitoredEdge) {
+		if (this.monitoredEdge != null) {
+			this.monitoredEdge.remove();
+		}
+		this.monitoredEdge = monitoredEdge;
+		this.monitoredEdge.initialize();
 	}
 
 	@Override

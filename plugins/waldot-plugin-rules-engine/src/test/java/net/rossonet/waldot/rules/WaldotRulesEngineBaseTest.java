@@ -7,11 +7,10 @@ import java.util.concurrent.ExecutionException;
 
 import javax.naming.ConfigurationException;
 
-import org.apache.commons.lang3.RandomUtils;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -36,13 +35,33 @@ public class WaldotRulesEngineBaseTest {
 
 	}
 
+	private void baseRulesGraph() throws ConfigurationException, InterruptedException, ExecutionException {
+		simpleServerInit();
+		final Vertex inputA = g.addVertex("id", "a", "name", "input A", "value", "10");
+		final Vertex inputB = g.addVertex("id", "b", "name", "input B", "value", "20");
+		final Vertex inputPassive = g.addVertex("id", "p", "name", "input P", "value", "40");
+		final Vertex rule = g.addVertex("id", "rule", "type", "rule", "name", "Regola", "condition", "", "action", "");
+		final Vertex compute = g.addVertex("id", "compute", "type", "compute", "name", "Compute", "condition", "",
+				"action", "");
+		final Edge executeEdge = compute.addEdge("runner", rule, "type", "execute");
+		final Edge fireEdgeA = inputA.addEdge("fireA", rule, "type", "fire");
+		final Edge fireEdgeB = inputB.addEdge("fireB", rule, "type", "fire");
+	}
+
+	@Test
+	public void baseRuleTest() throws InterruptedException, ExecutionException, ConfigurationException {
+		LogHelper.changeJulLogLevel("fine");
+		baseRulesGraph();
+		Thread.sleep(4_000);
+	}
+
 	@BeforeEach
-	public void beforeEach(TestInfo testInfo) {
+	public void beforeEach(final TestInfo testInfo) {
 		System.out.println("Starting test " + testInfo.getTestMethod().get().getName());
 		clean();
 	}
 
-	private void bootstrapUrlServerInit(String url)
+	private void bootstrapUrlServerInit(final String url)
 			throws ConfigurationException, InterruptedException, ExecutionException {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.getOpcGraph(url, new LoggerHistoryStrategy());
@@ -92,45 +111,6 @@ public class WaldotRulesEngineBaseTest {
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Test
-	public void fireEdgeTest() throws Exception {
-		simpleServerInit();
-	}
-
-	@Disabled
-	@Test
-	public void runComplexRuleTest() throws InterruptedException, ExecutionException, ConfigurationException {
-		LogHelper.changeJulLogLevel("fine");
-		final WaldotGraph g = OpcFactory.getOpcGraph();
-		// ((TraceLogger)
-		// g.getWaldotNamespace().getRulesLogger()).getDebugObservers().add(logger);
-		final Vertex test1 = g.addVertex("label", "test1");
-		final Vertex test2 = g.addVertex("label", "test2");
-		final Vertex rule1 = g.addVertex("label", "rule1", "type-node-id", "rule", "condition", "true", "action",
-				"let i = 33 ; log.info('!!! FireableAbstractOpcVertex 1 executed with ' + i);");
-		final Vertex rule2 = g.addVertex("label", "rule2", "type-node-id", "rule", "condition", "true", "action",
-				"cmd.echo(self)");
-		test1.addEdge("fire", rule1);
-		test2.addEdge("fire", rule2);
-		rule1.addEdge("fire", rule2);
-		for (int counter = 0; counter < 20; counter++) {
-			test1.property("inc", counter);
-			Thread.sleep(5000);
-			test2.property("inc", counter * 2);
-			Thread.sleep(5000);
-			test1.addEdge("link_" + counter, test2);
-			Thread.sleep(5000);
-			test1.property("inc", RandomUtils.nextInt(0, 100));
-			Thread.sleep(400);
-			test1.property("inc", RandomUtils.nextInt(0, 100));
-			Thread.sleep(200);
-			test1.property("inc", RandomUtils.nextInt(0, 100));
-			Thread.sleep(1000);
-			test1.property("inc", RandomUtils.nextInt(0, 100));
-		}
-		Thread.sleep(4_000);
 	}
 
 	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {

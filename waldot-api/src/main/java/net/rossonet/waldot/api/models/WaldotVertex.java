@@ -33,10 +33,10 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 
 	public UaMethodNode findMethodNode(NodeId methodId);
 
-	default void fireEvent(UaNode node, BaseEventType event, int calcolatedPriority) {
+	default void fireEvent(final UaNode node, final BaseEventType event, final int calcolatedPriority) {
 	}
 
-	default void fireProperty(UaNode node, String propertyLabel, Object value, int calcolatedPriority) {
+	default void fireProperty(final UaNode node, final String propertyLabel, final DataValue value, final int calcolatedPriority) {
 	}
 
 	List<EventObserver> getEventObservers();

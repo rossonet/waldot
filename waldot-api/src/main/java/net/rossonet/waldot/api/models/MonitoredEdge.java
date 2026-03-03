@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.tinkerpop.gremlin.structure.Property;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,33 +17,32 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
 
 public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
-	protected static final String ABSOLUTE = "absolute";
-	protected static final String ACTIVE_LABEL = "active";
-	protected static final String DEADBAND_LABEL = "deadband-value";
-	protected static final String DEADBAND_TYPE_LABEL = "deadband-type";
-	protected static final String DELAY_LABEL = "delay";
-	protected static final String EVENT_ACTIVE_LABEL = "active-event";
-	protected static final String JOLLY_LABEL = "*";
+	public static final String ABSOLUTE = "absolute";
+	public static final String ACTIVE_LABEL = "active";
+	public static final String DEADBAND_LABEL = "deadband-value";
+	public static final String DEADBAND_TYPE_LABEL = "deadband-type";
+	public static final String DELAY_LABEL = "delay";
+	public static final String EVENT_ACTIVE_LABEL = "active-event";
+	public static final String JOLLY_LABEL = "*";
 	protected final static Logger logger = LoggerFactory.getLogger(MonitoredEdge.class);
-	protected static final String MONITORED_PROPERTIES_LABEL = null;
-	protected static final String PERCENTAGE = "percentage";
-	private static final String PROPERTY_ACTIVE_LABEL = "active-property";
-	private static final String SEPARATOR = ",";
+	public static final String MONITORED_PROPERTIES_LABEL = "properties-to-monitor";
+	public static final String PERCENTAGE = "percentage";
+	public static final String PROPERTY_ACTIVE_LABEL = "active-property";
+	public static final String SEPARATOR = ",";
 	private final WaldotEdge edge;
 	private final WaldotNamespace engine;
 	private final WaldotVertex sourceVertex;
 	private final WaldotVertex targetVertex;
 
-	public MonitoredEdge(WaldotNamespace engine, WaldotEdge edge, WaldotVertex sourceVertex,
-			WaldotVertex targetVertex) {
+	public MonitoredEdge(final WaldotNamespace engine, final WaldotEdge edge, final WaldotVertex sourceVertex,
+			final WaldotVertex targetVertex) {
 		this.engine = engine;
 		this.edge = edge;
 		this.sourceVertex = sourceVertex;
 		this.targetVertex = targetVertex;
-		createObserverNeeded();
 	}
 
-	protected boolean checkBinaryInProperty(String propertyLabel) {
+	protected boolean checkBinaryInProperty(final String propertyLabel) {
 		try {
 			final Property<Object> property = edge.property(propertyLabel);
 			if (property.isPresent()) {
@@ -68,7 +68,7 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		}
 	}
 
-	protected boolean checkContainsInPropertyArray(String propertyLabel, String label) {
+	protected boolean checkContainsInPropertyArray(final String propertyLabel, final String label) {
 		if (label == null) {
 			logger.warn("Label is null, cannot check in property array");
 			return true;
@@ -88,11 +88,10 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 				final Object value = property.value();
 				if (value instanceof String && !((String) value).isEmpty()) {
 					final List<String> values = Arrays.asList(((String) value).split(SEPARATOR));
-					if (values.contains(JOLLY_LABEL)) {
+					if (values.contains(JOLLY_LABEL) || values.contains(label)) {
 						return true;
-					}
-					if (values.contains(label)) {
-						return true;
+					} else {
+						return false;
 					}
 				} else {
 					// se la proprietà è presente ma non è una stringa o è vuota, considero che non
@@ -113,15 +112,21 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
 	}
 
-	protected long checkLongInProperty(String propertyLabel) {
+	protected long checkLongInProperty(final String propertyLabel) {
 		try {
 			final Property<Object> property = edge.property(propertyLabel);
 			if (property.isPresent()) {
 				final Object value = property.value();
-				if (value instanceof Long) {
-					return (Long) value;
+				if (value instanceof Number) {
+					return ((Number) value).longValue();
 				} else if (value instanceof String) {
-					return Long.valueOf((String) value);
+					try {
+						return Long.parseLong((String) value);
+					} catch (final NumberFormatException e) {
+						logger.warn("Invalid long value for property '{}': '{}', defaulting to 0", propertyLabel,
+								value);
+						return 0;
+					}
 				} else {
 					return 0;
 				}
@@ -172,18 +177,31 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		return targetVertex;
 	}
 
+	public void initialize() {
+		createObserverNeeded();
+	}
+
 	protected boolean isActive() {
 		return checkBinaryInProperty(ACTIVE_LABEL);
 	}
 
 	// attenzione alle performance di questa logica, se è necessario potrebbe essere
 	// utile implementare un sistema di caching del valore del deadband
-	protected boolean isDeadBandExceeded(String propertyLabel, Object value) {
-		if (value == null || !(value instanceof Number)) {
-			return true; // se il valore non è numerico o è null, non applico il deadband
-		}
+	protected boolean isDeadBandExceeded(final String propertyLabel, final DataValue dataValue) {
 		final Property<Object> deadBandValue = edge.property(DEADBAND_LABEL);
 		if (deadBandValue.isPresent()) {
+			if (dataValue == null) {
+				logger.warn("DataValue is null for property '{}', cannot check deadband", propertyLabel);
+				return true; // se il DataValue è null, non applico il deadband
+			}
+			if (dataValue.getValue() == null) {
+				logger.warn("DataValue value is null for property '{}', cannot check deadband", propertyLabel);
+				return true; // se il valore del DataValue è null, non applico il deadband
+			}
+			final Object value = dataValue.getValue().getValue();
+			if (value == null || !(value instanceof Number)) {
+				return true; // se il valore non è numerico o è null, non applico il deadband
+			}
 			final Object dbValue = deadBandValue.value();
 			if (dbValue instanceof Number) {
 				final Property<Object> deadBandType = edge.property(DEADBAND_TYPE_LABEL);
@@ -197,42 +215,46 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 								// deadband percentuale
 								return Math.abs(((Number) value).doubleValue() - last) > Math
 										.abs(last * ((Number) dbValue).doubleValue() / 100);
-							} else {
+							} else if (ABSOLUTE.equalsIgnoreCase((String) dbType)) {
 								// deadband assoluto
 								return Math.abs(((Number) value).doubleValue() - last) > ((Number) dbValue)
 										.doubleValue();
+							} else {
+								logger.warn("Unsupported deadband type '{}', defaulting to no deadband", dbType);
+								return true; // se il tipo di deadband non è supportato, non applico il deadband
 							}
 						} else {
-							// se il tipo di deadband non è specificato, considero sempre superato
+							// se l'ultimo valore non è numerico, non applico il deadband
 							return true;
 						}
 					} else {
-						// se il tipo di deadband non è specificato, considero sempre superato
+						// se deadbant type non è una stringa, considero sempre superato
 						return true;
 					}
 				} else {
-					// se il deadband è specificato ma non è un numero, considero sempre superato
+					// se il deadband type non è specificato, considero sempre superato
 					return true;
 				}
 			} else {
-				// se non è specificato il deadband, considero sempre superato
+				// se il valore del deadband non è numerico, non applico il deadband
 				return true;
 			}
 		} else {
-			// se il valore non è numerico o è null, non applico il deadband
+			// se il valore del deadband non è specificato, considero sempre superato
 			return true;
 		}
 	}
 
 	protected boolean isDelayProperty() {
-		return checkLongInProperty(PROPERTY_ACTIVE_LABEL) > 0;
+		final long checkLongInProperty = checkLongInProperty(DELAY_LABEL);
+		return checkLongInProperty > 0;
 	}
 
 	protected boolean isEventNotificationActive() {
 		return checkBinaryInProperty(EVENT_ACTIVE_LABEL);
 	}
 
-	protected boolean isMonitoredProperty(String label) {
+	protected boolean isMonitoredProperty(final String label) {
 		return checkContainsInPropertyArray(MONITORED_PROPERTIES_LABEL, label);
 	}
 
@@ -244,23 +266,23 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		// implementare le logiche di pulizia prima di rimuovere l'arco
 	}
 
-	protected void sendFireWithDelay(WaldotVertex destinationVertex, UaNode node, BaseEventType event,
-			int calcolatedPriority) {
+	protected void sendFireWithDelay(final WaldotVertex destinationVertex, final UaNode node, final BaseEventType event,
+			final int calcolatedPriority) {
 		engine.getTimer().schedule(() -> {
 			destinationVertex.fireEvent(node, event, calcolatedPriority);
 		}, checkLongInProperty(DELAY_LABEL), TimeUnit.MILLISECONDS);
 
 	}
 
-	protected void sendFireWithDelay(WaldotVertex destinationVertex, UaNode node, String propertyLabel, Object value,
-			int calcolatedPriority) {
+	protected void sendFireWithDelay(final WaldotVertex destinationVertex, final UaNode node,
+			final String propertyLabel, final DataValue dataValue, final int calcolatedPriority) {
 		engine.getTimer().schedule(() -> {
-			destinationVertex.fireProperty(node, propertyLabel, value, calcolatedPriority);
+			destinationVertex.fireProperty(node, propertyLabel, dataValue, calcolatedPriority);
 		}, checkLongInProperty(DELAY_LABEL), TimeUnit.MILLISECONDS);
 
 	}
 
-	protected void sendWithDelay(WaldotVertex destinationVertex, String propertyLabel, Object value) {
+	protected void sendWithDelay(final WaldotVertex destinationVertex, final String propertyLabel, final Object value) {
 		engine.getTimer().schedule(() -> {
 			destinationVertex.property(propertyLabel, value);
 		}, checkLongInProperty(DELAY_LABEL), TimeUnit.MILLISECONDS);

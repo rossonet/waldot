@@ -16,14 +16,14 @@ import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.rules.events.RunnableEvent;
 
-public abstract class FireableAbstractOpcVertex extends AbstractOpcVertex implements AutoCloseable {
+public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVertex implements AutoCloseable {
 
 	private static final long CLEAN_UP_INTERVAL_MS = 10000L; // intervallo di pulizia della coda (10 secondi)
 	private final HysteresisPriorityQueue<RunnableEvent> eventQueue;
 	private long hysteresisTimeMs;
 	private final long lastCleanUpTimeMs = System.currentTimeMillis();
 
-	public FireableAbstractOpcVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId, QualifiedName browseName,
+	public ComputableFireableAbstractOpcVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId, QualifiedName browseName,
 			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
 			UByte eventNotifier, long version) {
 		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
