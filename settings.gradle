@@ -13,8 +13,6 @@ include 'waldot-plugin-os'
 project(':waldot-plugin-os').projectDir = file('plugins/waldot-plugin-os')
 include 'waldot-plugin-behavior-tree'
 project(':waldot-plugin-behavior-tree').projectDir = file('plugins/waldot-plugin-behavior-tree')
-include 'waldot-plugin-reinforcement-learning'
-project(':waldot-plugin-reinforcement-learning').projectDir = file('plugins/waldot-plugin-reinforcement-learning')
 include 'waldot-plugin-rules-engine'
 project(':waldot-plugin-rules-engine').projectDir = file('plugins/waldot-plugin-rules-engine')
 include 'waldot-plugin-generator'
