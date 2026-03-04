@@ -252,20 +252,25 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 
 	}
 
-	public void notifyQueueSizeChange(UaNode sourceNode, String queueSizeLabel, Object queueSize,
+	public void notifyQueueSizeChange(UaNode sourceNode, String queueSizeLabel, DataValue queueSize,
 			int executorEdgePriority) {
-		if (isActive() && queueSize instanceof Number) {
-			final int intSize = ((Number) queueSize).intValue();
-			if (intSize > 0 && !dirtyNodes.stream()
-					.anyMatch(dirtyNode -> dirtyNode.getNodeId().equals(sourceNode.getNodeId()))) {
-				if (!servedFireableNodes.containsKey(sourceNode.getNodeId())) {
-					servedFireableNodes.put(sourceNode.getNodeId(), (ComputableFireableAbstractOpcVertex) sourceNode);
+		final Object size = queueSize.getValue().getValue();
+		if (isActive() && size instanceof Number) {
+			final int intSize = ((Number) size).intValue();
+			if (intSize > 0) {
+				if (!dirtyNodes.stream().anyMatch(dirtyNode -> dirtyNode.getNodeId().equals(sourceNode.getNodeId()))) {
+					if (!servedFireableNodes.containsKey(sourceNode.getNodeId())) {
+						servedFireableNodes.put(sourceNode.getNodeId(),
+								(ComputableFireableAbstractOpcVertex) sourceNode);
+					}
+					dirtyNodes.offer(new DirtyNode(sourceNode.getNodeId(), executorEdgePriority, intSize));
+					property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), dirtyNodes.size());
 				}
-				dirtyNodes.offer(new DirtyNode(sourceNode.getNodeId(), executorEdgePriority, intSize));
 			} else {
 				// rimuovi il nodo sporco se la coda è vuota
 				dirtyNodes.removeIf(dirtyNode -> dirtyNode.getNodeId().equals(sourceNode.getNodeId()));
 				servedFireableNodes.remove(sourceNode.getNodeId());
+				property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), dirtyNodes.size());
 			}
 		}
 	}

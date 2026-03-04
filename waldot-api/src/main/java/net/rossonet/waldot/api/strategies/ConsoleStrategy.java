@@ -18,9 +18,12 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 public interface ConsoleStrategy extends AutoCloseable {
 	public static String ALIAS_LABEL = "alias";
 	public static String COMMANDS_LABEL = "cmd";
-	public static String G_LABEL = "g";
+	public static String GRAPH_LABEL = "graph";
 	public static String LOG_LABEL = "log";
+	public static final String MATH = "math";
+	public static final String RANDOM = "rand";
 	public static String SELF_LABEL = "self";
+	public static String TRAVERSE_LABEL = "g";
 
 	List<WaldotCommand> getCommands();
 

@@ -9,8 +9,8 @@ import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
-import net.rossonet.waldot.rules.vertices.ComputeVertex;
 import net.rossonet.waldot.rules.vertices.ComputableFireableAbstractOpcVertex;
+import net.rossonet.waldot.rules.vertices.ComputeVertex;
 
 public class ComputeMonitoredEdge extends MonitoredEdge {
 
@@ -21,8 +21,9 @@ public class ComputeMonitoredEdge extends MonitoredEdge {
 
 	@Override
 	protected void createObserverNeeded() {
-		if (getTargetVertex() instanceof ComputableFireableAbstractOpcVertex && getSourceVertex() instanceof ComputeVertex) {
-			getTargetVertex().addEventObserver(this);
+		if (getTargetVertex() instanceof ComputableFireableAbstractOpcVertex
+				&& getSourceVertex() instanceof ComputeVertex) {
+			getTargetVertex().addPropertyObserver(this);
 		}
 	}
 
@@ -42,7 +43,7 @@ public class ComputeMonitoredEdge extends MonitoredEdge {
 
 	@Override
 	public void propertyChanged(final UaNode node, final String label, final DataValue value) {
-		if (label.equalsIgnoreCase(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL)) {
+		if (label.equals(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase())) {
 			final int calcolatedPriority = getPriority();
 			((ComputeVertex) getSourceVertex()).notifyQueueSizeChange(node, label, value, calcolatedPriority);
 		}

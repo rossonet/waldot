@@ -61,6 +61,20 @@ public class JexlCmdFunction {
 		waldotNamespace.resetNameSpace();
 	}
 
+	public Number toNumber(Object value) {
+		if (value instanceof Number) {
+			return (Number) value;
+		} else if (value instanceof String) {
+			try {
+				return Double.parseDouble((String) value);
+			} catch (final NumberFormatException e) {
+				throw new IllegalArgumentException("Cannot convert value to number: " + value, e);
+			}
+		}
+		return 0;
+
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();

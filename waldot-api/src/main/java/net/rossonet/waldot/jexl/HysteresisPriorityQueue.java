@@ -81,8 +81,11 @@ public class HysteresisPriorityQueue<J> {
 	 */
 	public boolean offer(J message, int priority) {
 		final long now = System.currentTimeMillis();
+		if (!lastInsertion.containsKey(message)) {
+			lastInsertion.put(message, 0L);
+		}
 		final long last = lastInsertion.get(message);
-		if (last != 0 || now - last >= hysteresisMs) {
+		if (now - last >= hysteresisMs) {
 			pq.offer(new PrioritizedMessage<>(message, priority));
 			lastInsertion.put(message, now);
 			return true;

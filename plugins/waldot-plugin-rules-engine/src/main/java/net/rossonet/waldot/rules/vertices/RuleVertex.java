@@ -51,6 +51,7 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 			Thread.currentThread().setName(getNodeId().toParseableString());
 			if (!closed) {
 				try {
+					updateTotal();
 					if (compiledCondition == null) {
 						try {
 							sendDebugEvent(DebugEventType.BEFORE_CONDITION_COMPILE, null);
@@ -60,6 +61,7 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 							sendDebugEvent(DebugEventType.AFTER_CONDITION_COMPILE_EXCEPTION,
 									LogHelper.stackTraceToString(e, 2 + debug));
 							logger.error("Error compiling rule vertex condition", e);
+							updateThrowable();
 							return;
 						}
 					}
@@ -81,10 +83,12 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 						sendDebugEvent(DebugEventType.AFTER_CONDITION_EXECUTION_EXCEPTION,
 								LogHelper.stackTraceToString(e, 2 + debug));
 						logger.error("Error executing rule vertex condition", e);
+						updateThrowable();
 					}
 					if (!conditionResult) {
 						return;
 					}
+					updateExecuted();
 					if (compiledAction == null) {
 						try {
 							sendDebugEvent(DebugEventType.BEFORE_ACTION_COMPILE, null);
@@ -94,6 +98,7 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 							sendDebugEvent(DebugEventType.AFTER_ACTION_COMPILE_EXCEPTION,
 									LogHelper.stackTraceToString(e, 2 + debug));
 							logger.error("Error compiling rule vertex condition", e);
+							updateThrowable();
 							return;
 						}
 					}
@@ -107,10 +112,12 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 					} catch (final Throwable e) {
 						sendDebugEvent(DebugEventType.AFTER_ACTION_EXECUTION_EXCEPTION,
 								LogHelper.stackTraceToString(e, 2 + debug));
+						updateThrowable();
 						logger.error("Error executing rule vertex action", e);
 					}
 				} catch (final Throwable t) {
 					logger.error("Error executing rule vertex action", t);
+					updateThrowable();
 				}
 			}
 		}
@@ -126,16 +133,19 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 				NodeIds.String);
 		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode, WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL,
 				NodeIds.Int64);
+		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode, WaldotRulesEnginePlugin.TOTAL_SIZE_LABEL,
+				NodeIds.Int64);
+		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode,
+				WaldotRulesEnginePlugin.ACTION_EXECUTED_SIZE_LABEL, NodeIds.Int64);
+		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode,
+				WaldotRulesEnginePlugin.ERRORS_SIZE_LABEL, NodeIds.Int64);
 		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode,
 				WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL, NodeIds.Int16);
 	}
 
 	private String action = WaldotRulesEnginePlugin.DEFAULT_ACTION_VALUE;
-
 	private final QualifiedProperty<String> actionProperty;
-
 	private String baseDirectory;
-
 	private boolean closed = false;
 	private transient JexlScript compiledAction;
 	private transient JexlScript compiledCondition;
@@ -143,10 +153,17 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	private final QualifiedProperty<String> conditionProperty;
 	private int debug = 0;
 	private final QualifiedProperty<Integer> debugProperty;
+	private transient long errors = 0;
+	private final QualifiedProperty<Long> errorsSizeProperty;
+	private final QualifiedProperty<Long> execSizeProperty;
+	private transient long executed = 0;
+	private long hysteresis = 0;
+	private final QualifiedProperty<Long> hysteresisProperty;
 	private ClonableMapContext jexlContext;
 	private final QualifiedProperty<Long> queueSizeProperty;
+	private transient long total = 0;
+	private final QualifiedProperty<Long> totSizeProperty;
 	protected final WaldotNamespace waldotNamespace;
-
 	private final WaldotRulesEnginePlugin waldotRulesEnginePlugin;
 
 	public RuleVertex(WaldotRulesEnginePlugin waldotRulesEnginePlugin, WaldotGraph graph, UaNodeContext context,
@@ -196,11 +213,37 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 				WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL,
 				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
 				Integer.class);
-		setProperty(debugProperty, 0);
+		setProperty(debugProperty, debug);
+		final String keyValuesPropertyHysteresis = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+				WaldotRulesEnginePlugin.HYSTERESIS_LABEL.toLowerCase());
+		if (keyValuesPropertyHysteresis != null && !keyValuesPropertyHysteresis.isEmpty()) {
+			hysteresis = Long.valueOf(keyValuesPropertyHysteresis);
+		} else {
+			hysteresis = 0;
+		}
+		hysteresisProperty = new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
+				WaldotRulesEnginePlugin.HYSTERESIS_LABEL,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				Long.class);
+		setProperty(hysteresisProperty, hysteresis);
+		setHysteresisTimeMs(hysteresis);
 		queueSizeProperty = new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
 				WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL,
 				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
 				Long.class);
+		totSizeProperty = new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
+				WaldotRulesEnginePlugin.TOTAL_SIZE_LABEL,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				Long.class);
+		execSizeProperty = new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
+				WaldotRulesEnginePlugin.ACTION_EXECUTED_SIZE_LABEL,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				Long.class);
+		errorsSizeProperty = new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
+				WaldotRulesEnginePlugin.ERRORS_SIZE_LABEL,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				Long.class);
+
 	}
 
 	@Override
@@ -254,9 +297,26 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 			debug = Integer.valueOf(value.getValue().getValue().toString());
 			setProperty(debugProperty, debug);
 		}
+		if (label.equals(WaldotRulesEnginePlugin.HYSTERESIS_LABEL.toLowerCase())) {
+			hysteresis = Long.valueOf(value.getValue().getValue().toString());
+			setProperty(hysteresisProperty, hysteresis);
+			setHysteresisTimeMs(hysteresis);
+		}
 		if (label.equals(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase())) {
 			final Long newQueueSize = Long.valueOf(value.getValue().getValue().toString());
 			setProperty(queueSizeProperty, newQueueSize);
+		}
+		if (label.equals(WaldotRulesEnginePlugin.TOTAL_SIZE_LABEL.toLowerCase())) {
+			final Long newQueueSize = Long.valueOf(value.getValue().getValue().toString());
+			setProperty(totSizeProperty, newQueueSize);
+		}
+		if (label.equals(WaldotRulesEnginePlugin.ACTION_EXECUTED_SIZE_LABEL.toLowerCase())) {
+			final Long newQueueSize = Long.valueOf(value.getValue().getValue().toString());
+			setProperty(execSizeProperty, newQueueSize);
+		}
+		if (label.equals(WaldotRulesEnginePlugin.ERRORS_SIZE_LABEL.toLowerCase())) {
+			final Long newQueueSize = Long.valueOf(value.getValue().getValue().toString());
+			setProperty(errorsSizeProperty, newQueueSize);
 		}
 	}
 
@@ -284,7 +344,25 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 			} catch (final Throwable e) {
 				logger.error("Error sending debug event", e);
 			}
+			if (debug > 1) {
+				logger.info("Debug event, type: {}, message: {}", eventType, message);
+			}
 		}
+	}
+
+	public void updateExecuted() {
+		executed++;
+		property(WaldotRulesEnginePlugin.ACTION_EXECUTED_SIZE_LABEL.toLowerCase(), executed);
+	}
+
+	public void updateThrowable() {
+		errors++;
+		property(WaldotRulesEnginePlugin.ERRORS_SIZE_LABEL.toLowerCase(), errors);
+	}
+
+	public void updateTotal() {
+		total++;
+		property(WaldotRulesEnginePlugin.TOTAL_SIZE_LABEL.toLowerCase(), total);
 	}
 
 }

@@ -52,7 +52,8 @@ public class BaseConsoleStrategy implements ConsoleStrategy {
 		}
 		result.add(COMMANDS_LABEL);
 		result.add(LOG_LABEL);
-		result.add(G_LABEL);
+		result.add(TRAVERSE_LABEL);
+		result.add(GRAPH_LABEL);
 		return result;
 	}
 
@@ -72,7 +73,8 @@ public class BaseConsoleStrategy implements ConsoleStrategy {
 		logger = waldotNamespace.getConsoleLogger();
 		baseExecutor = new JexlExecutor("console");
 		baseExecutor.setFunctionObject(ConsoleStrategy.LOG_LABEL, waldotNamespace.getConsoleLogger());
-		baseExecutor.setFunctionObject(ConsoleStrategy.G_LABEL, waldotNamespace.getGremlinGraph());
+		baseExecutor.setFunctionObject(ConsoleStrategy.TRAVERSE_LABEL, waldotNamespace.getGremlinGraph().traversal());
+		baseExecutor.setFunctionObject(ConsoleStrategy.GRAPH_LABEL, waldotNamespace.getGremlinGraph());
 		baseExecutor.setFunctionObject(ConsoleStrategy.COMMANDS_LABEL, waldotNamespace.getCommandsAsFunction());
 		for (final WaldotCommand command : commands) {
 			logger.info("Registering console command: {}", command.getConsoleCommand());

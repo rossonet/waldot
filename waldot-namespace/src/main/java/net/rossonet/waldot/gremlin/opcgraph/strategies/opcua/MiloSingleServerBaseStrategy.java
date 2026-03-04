@@ -59,6 +59,7 @@ import net.rossonet.waldot.api.models.base.GremlinElement;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcGraphComputerView;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
+import net.rossonet.waldot.gremlin.opcgraph.structure.edge.FireMonitoredEdge;
 import net.rossonet.waldot.gremlin.opcgraph.structure.edge.LinkMonitoredEdge;
 import net.rossonet.waldot.gremlin.opcgraph.structure.edge.LinkMonitoredEdge.LinkDirection;
 import net.rossonet.waldot.gremlin.opcgraph.structure.edge.OpcEdge;
@@ -220,6 +221,9 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		if (type.equals(LINK_FROM_EDGE_TYPE)) {
 			edge.setMonitor(
 					new LinkMonitoredEdge(waldotNamespace, LinkDirection.FROM, edge, sourceVertex, targetVertex));
+		}
+		if (type.equals(FIRE_EDGE_TYPE)) {
+			edge.setMonitor(new FireMonitoredEdge(waldotNamespace, edge, sourceVertex, targetVertex));
 		}
 		for (final PluginListener p : waldotNamespace.getPlugins()) {
 			if (p.containsEdgeType(type)) {

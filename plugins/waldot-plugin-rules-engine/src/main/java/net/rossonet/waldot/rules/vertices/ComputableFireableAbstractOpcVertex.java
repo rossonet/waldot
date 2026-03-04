@@ -3,6 +3,7 @@ package net.rossonet.waldot.rules.vertices;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -19,16 +20,18 @@ import net.rossonet.waldot.rules.events.RunnableEvent;
 public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVertex implements AutoCloseable {
 
 	private static final long CLEAN_UP_INTERVAL_MS = 10000L; // intervallo di pulizia della coda (10 secondi)
-	private final HysteresisPriorityQueue<RunnableEvent> eventQueue;
-	private long hysteresisTimeMs;
+
+	private HysteresisPriorityQueue<RunnableEvent> eventQueue;
+
+	private long hysteresisTimeMs = 0;
+
 	private final long lastCleanUpTimeMs = System.currentTimeMillis();
 
-	public ComputableFireableAbstractOpcVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-			UByte eventNotifier, long version) {
+	public ComputableFireableAbstractOpcVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
+			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
+			UInteger userWriteMask, UByte eventNotifier, long version) {
 		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
 				version);
-		eventQueue = new HysteresisPriorityQueue<>(getHysteresisTimeMs());
 	}
 
 	private void cleanUpIfNeeded() {
@@ -41,13 +44,20 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 
 	}
 
-	public void fireEvent(UaNode node, BaseEventType event, int priority) {
-		eventQueue.offer(new RunnableEvent(node, event, getRunnableEvent(node, event)), priority);
+	@Override
+	public void close() throws Exception {
+		eventQueue.cleanUp();
+
 	}
 
-	public void fireProperty(UaNode node, String propertyLabel, Object value, int priority) {
-		eventQueue.offer(new RunnableEvent(node, propertyLabel, value, getRunnablePropertyEvent(node, propertyLabel)),
-				priority);
+	@Override
+	public void fireEvent(UaNode node, BaseEventType event, int priority) {
+		offer(new RunnableEvent(node, event, getRunnableEvent(node, event)), priority);
+	}
+
+	@Override
+	public void fireProperty(UaNode node, String propertyLabel, DataValue value, int priority) {
+		offer(new RunnableEvent(node, propertyLabel, value, getRunnablePropertyEvent(node, propertyLabel)), priority);
 	}
 
 	public long getHysteresisTimeMs() {
@@ -65,7 +75,7 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	public boolean offer(RunnableEvent message, int priority) {
 		final boolean ok = eventQueue.offer(message, priority);
 		if (ok) {
-			property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, eventQueue.size());
+			property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), eventQueue.size());
 		}
 		return ok;
 	}
@@ -73,19 +83,33 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	public RunnableEvent poll() {
 		final RunnableEvent poll = eventQueue.poll();
 		if (poll != null) {
-			property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, eventQueue.size());
+			property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), eventQueue.size());
 		}
 		cleanUpIfNeeded();
 		return poll;
 	}
 
 	protected void setHysteresisTimeMs(long hysteresisTimeMs) {
-		this.hysteresisTimeMs = hysteresisTimeMs;
+		if (hysteresisTimeMs < 0) {
+			throw new IllegalArgumentException("Hysteresis time must be non-negative");
+		}
+		if (this.hysteresisTimeMs != hysteresisTimeMs) {
+			this.hysteresisTimeMs = hysteresisTimeMs;
+			if (eventQueue != null) {
+				eventQueue.cleanUp();
+				eventQueue = null;
+			}
+			eventQueue = new HysteresisPriorityQueue<>(hysteresisTimeMs);
+		} else {
+			if (eventQueue == null) {
+				eventQueue = new HysteresisPriorityQueue<>(hysteresisTimeMs);
+			}
+		}
 	}
 
 	public RunnableEvent take() throws InterruptedException {
 		final RunnableEvent take = eventQueue.take();
-		property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, eventQueue.size());
+		property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), eventQueue.size());
 		cleanUpIfNeeded();
 		return take;
 	}

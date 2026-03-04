@@ -3,6 +3,7 @@ package net.rossonet.waldot.rules;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.jexl3.JexlEngine;
 import org.eclipse.milo.opcua.sdk.core.Reference;
@@ -40,6 +41,7 @@ import net.rossonet.waldot.rules.vertices.RuleVertex;
 @WaldotPlugin
 public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 
+	public static final String ACTION_EXECUTED_SIZE_LABEL = "Executed";
 	public static final String ACTION_FIELD = "Action";
 	private static final String COMPUTE_NODE_PARAMETER = "compute";
 	public static final String CONDITION_FIELD = "Condition";
@@ -52,16 +54,19 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	public static final long DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE = 120000; // 2 minuti;
 	public static final double DEFAULT_PRIORITY_FACTOR_IN_COMPUTE = 100.0;
 	public static final int DEFAULT_PRIORITY_VALUE = 100;
-	public static final int DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE = 4;
+	public static final int DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE = 1;
+	public static final String ERRORS_SIZE_LABEL = "Errors";
 	private static final String EXECUTE_EDGE_LABEL = "execute";
 	public static final String EXECUTION_TIMEOUT_MS_FIELD = "execution-timeout-ms";
 	public static final String FIRE_EDGE_PARAMETER = "fire";
+	public static final String HYSTERESIS_LABEL = "Hysteresis";
 	private final static Logger logger = LoggerFactory.getLogger(WaldotRulesEnginePlugin.class);
 	public static final String PRIORITY_FACTOR_FIELD = "Factor";
 	public static final String PRIORITY_FIELD = "Priority";
-	public static final String QUEUE_SIZE_LABEL = "Queue-size";
+	public static final String QUEUE_SIZE_LABEL = "Queue";
 	public static final String RULE_NODE_PARAMETER = "rule";
 	public static final String THREAD_POOL_SIZE_FIELD = "Threads";
+	public static final String TOTAL_SIZE_LABEL = "Total";
 	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
 	private static final String WALD_OT_COMPUTE_NAME = "Thread Manager";
 	private static final String WALD_OT_COMPUTE_OBJECT_TYPE = "WaldOTComputeObjectType";
@@ -226,8 +231,11 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	private void registerJexlEngine(final WaldotNamespace waldotNamespace) {
 		jexlEngine = JexlExecutor.generateEngine();
 		baseJexlContext.set(ConsoleStrategy.LOG_LABEL, logger);
-		baseJexlContext.set(ConsoleStrategy.G_LABEL, waldotNamespace.getGremlinGraph());
+		baseJexlContext.set(ConsoleStrategy.TRAVERSE_LABEL, waldotNamespace.getGremlinGraph().traversal());
+		baseJexlContext.set(ConsoleStrategy.GRAPH_LABEL, waldotNamespace.getGremlinGraph());
 		baseJexlContext.set(ConsoleStrategy.COMMANDS_LABEL, waldotNamespace.getCommandsAsFunction());
+		baseJexlContext.set(ConsoleStrategy.MATH, Math.class);
+		baseJexlContext.set(ConsoleStrategy.RANDOM, ThreadLocalRandom.current());
 		for (final WaldotCommand command : waldotNamespace.getConsoleStrategy().getCommands()) {
 			logger.info("Registering console command: {}", command.getConsoleCommand());
 			baseJexlContext.set(command.getConsoleCommand(), command);
