@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.PluginListener;
-import net.rossonet.waldot.api.annotation.WaldotPlugin;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.commands.ExecCommand;
@@ -19,7 +18,7 @@ import net.rossonet.waldot.rules.oshi.OsDataWrapper;
 /**
  * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
-@WaldotPlugin
+//@WaldotPlugin
 public class WaldotOsPluginOld implements AutoCloseable, PluginListener {
 	public static final long DEFAULT_UPDATE_DELAY = 20000;// 120_000;
 	public static final String DELAY_FIELD = "Delay";

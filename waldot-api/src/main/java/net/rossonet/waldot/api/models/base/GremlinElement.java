@@ -11,6 +11,9 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort;
+import org.eclipse.milo.opcua.stack.core.types.structured.AccessRestrictionType;
+import org.eclipse.milo.opcua.stack.core.types.structured.RolePermissionType;
 
 import net.rossonet.waldot.api.models.WaldotElement;
 
@@ -42,7 +45,9 @@ public abstract class GremlinElement extends UaObjectNode implements WaldotEleme
 	protected GremlinElement(final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
 			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,
 			final UInteger userWriteMask, final UByte eventNotifier, final long version) {
-		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier);
+		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
+				new RolePermissionType[0], new RolePermissionType[0], new AccessRestrictionType(UShort.valueOf(0)),
+				eventNotifier);
 		currentVersion = version;
 	}
 

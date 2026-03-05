@@ -47,7 +47,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	}
 
 	private transient boolean active = true;
-	private long actualValue;
+	private double actualValue;
 	private Algorithm algorithm;
 	private final QualifiedProperty<String> algorithmProperty;
 	private long delay;
@@ -120,7 +120,13 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 				WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase());
 		min = WaldotGeneratorPlugin.DEFAULT_MIN_VALUE_FIELD;
 		if (keyValuesPropertyMin != null && !keyValuesPropertyMin.isEmpty()) {
-			min = Long.valueOf(keyValuesPropertyMin);
+			try {
+				min = Long.valueOf(keyValuesPropertyMin);
+			} catch (final Exception e) {
+				logger.info("min value is not a number, using default {} '{}'", WaldotGeneratorPlugin.MIN_VALUE_FIELD,
+						WaldotGeneratorPlugin.DEFAULT_MIN_VALUE_FIELD);
+				min = WaldotGeneratorPlugin.DEFAULT_MIN_VALUE_FIELD;
+			}
 		} else {
 			logger.info(
 					WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase()
@@ -137,7 +143,13 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 				WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase());
 		max = WaldotGeneratorPlugin.DEFAULT_MAX_VALUE_FIELD;
 		if (keyValuesPropertyMax != null && !keyValuesPropertyMax.isEmpty()) {
-			max = Long.valueOf(keyValuesPropertyMax);
+			try {
+				max = Long.valueOf(keyValuesPropertyMax);
+			} catch (final Exception e) {
+				logger.info("max value is not a number, using default {} '{}'", WaldotGeneratorPlugin.MAX_VALUE_FIELD,
+						WaldotGeneratorPlugin.DEFAULT_MAX_VALUE_FIELD);
+				max = WaldotGeneratorPlugin.DEFAULT_MAX_VALUE_FIELD;
+			}
 		} else {
 			logger.info(
 					WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase()
@@ -259,17 +271,17 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	}
 
 	protected void generateNextRandom() {
-		actualValue = (long) (Math.random() * (max - min)) + min;
+		actualValue = Math.random() * (max - min) + min;
 		assignValue();
 	}
 
 	protected void generateNextSinusoidal() {
-		actualValue = (long) ((max - min) / 2 * Math.sin(seed++) + (max + min) / 2);
+		actualValue = (max - min) / 2 * Math.sin(seed++) + (max + min) / 2;
 		assignValue();
 	}
 
 	protected void generateNextTriangular() {
-		actualValue = (long) (min + ((max - min) * (2 / Math.PI * Math.acos(Math.abs(Math.cos(seed++))))));
+		actualValue = min + ((max - min) * (2 / Math.PI * Math.acos(Math.abs(Math.cos(seed++)))));
 		assignValue();
 	}
 

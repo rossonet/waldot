@@ -17,7 +17,6 @@ import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.Reference;
@@ -40,7 +39,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.eclipse.milo.opcua.stack.core.util.Tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,12 +75,18 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	private static final String EDGE_DIRECTORY_NODEID_PREFIX = "e";
 	private static final String VERTEX_DIRECTORY_NODEID_PREFIX = "v";
 	private UaFolderNode assetRootNode;
+	private transient final Map<NodeId, WaldotEdge> cachedEdges = new HashMap<>();
+	private transient final Map<NodeId, WaldotVertex> cachedVertices = new HashMap<>();
 	private final Map<String, UaFolderNode> edgeDirectories = new HashMap<>();
 	private final MiloSingleServerBaseFolderManager folderManager = new MiloSingleServerBaseFolderManager(this);
 	private UaFolderNode interfaceRootNode;
 	private final AtomicLong lastEventId = new AtomicLong(0);
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+
 	private Graph.Variables opcGraphVariables;
+
+	private transient Map<String, NodeId> referenceCache = new HashMap<>();
+
 	private UaFolderNode rootNode;
 
 	private WaldotNamespace waldotNamespace;
@@ -232,6 +236,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		}
 		addDeletedCommand(edge);
 		addPropertyCommand(edge);
+		cachedEdges.put(edge.getNodeId(), edge);
 		return edge;
 	}
 
@@ -309,6 +314,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				MiloSingleServerBaseReferenceNodeBuilder.getVersion(propertyKeyValues));
 		addDeletedCommand(vertex);
 		addPropertyCommand(vertex);
+		cachedVertices.put(vertex.getNodeId(), vertex);
 		return vertex;
 	}
 
@@ -350,6 +356,9 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	@Override
 	public void close() throws Exception {
 		resetNameSpace();
+		referenceCache.clear();
+		cachedVertices.clear();
+		cachedEdges.clear();
 		// quando rivedi il codice, ricorda di chiudere le risorse aperte!
 
 	}
@@ -495,9 +504,10 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 
 	@Override
 	public String deleteOpcNodeId(String nodeId) {
-		return waldotNamespace.getStorageManager()
-				.removeNode(MiloStrategy.getNodeIdManager().convert(waldotNamespace.getGremlinGraph(), nodeId)).get()
-				.getNodeId().toParseableString();
+		final NodeId nodeTargetId = MiloStrategy.getNodeIdManager().convert(waldotNamespace.getGremlinGraph(), nodeId);
+		cachedVertices.remove(nodeTargetId);
+		cachedEdges.remove(nodeTargetId);
+		return waldotNamespace.getStorageManager().removeNode(nodeTargetId).get().getNodeId().toParseableString();
 	}
 
 	@Override
@@ -549,20 +559,15 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 
 	@Override
 	public Map<NodeId, WaldotEdge> getEdges() {
-		final Map<NodeId, WaldotEdge> result = new HashMap<>();
-		for (final Node e : folderManager.getEdgesFolderNode().getOrganizesNodes()) {
-			if (e instanceof WaldotEdge) {
-				result.put(e.getNodeId(), (WaldotEdge) e);
-			}
-		}
-		for (final UaFolderNode f : edgeDirectories.values()) {
-			for (final Node e : f.getOrganizesNodes()) {
-				if (e instanceof WaldotEdge) {
-					result.put(e.getNodeId(), (WaldotEdge) e);
-				}
-			}
-		}
-		return result;
+		/*
+		 * final Map<NodeId, WaldotEdge> result = new HashMap<>(); for (final Node e :
+		 * folderManager.getEdgesFolderNode().getOrganizesNodes()) { if (e instanceof
+		 * WaldotEdge) { result.put(e.getNodeId(), (WaldotEdge) e); } } for (final
+		 * UaFolderNode f : edgeDirectories.values()) { for (final Node e :
+		 * f.getOrganizesNodes()) { if (e instanceof WaldotEdge) {
+		 * result.put(e.getNodeId(), (WaldotEdge) e); } } }
+		 */
+		return cachedEdges;
 	}
 
 	@Override
@@ -591,16 +596,22 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	}
 
 	private NodeId getOrCreateReferenceType(final String type) {
-		for (final Tree<org.eclipse.milo.opcua.sdk.core.typetree.ReferenceType> r : waldotNamespace.getReferenceTypes()
-				.getRoot().getChildren()) {
-			if (r.getValue().getBrowseName() != null && r.getValue().getBrowseName().getName().equals(type)) {
-				return r.getValue().getNodeId();
-			}
+		/*
+		 * for (final Tree<org.eclipse.milo.opcua.sdk.core.typetree.ReferenceType> r :
+		 * waldotNamespace.getReferenceTypes() .getRoot().getChildren()) { if
+		 * (r.getValue().getBrowseName() != null &&
+		 * r.getValue().getBrowseName().getName().equals(type)) { return
+		 * r.getValue().getNodeId(); } }
+		 */
+		if (referenceCache.containsKey(type)) {
+			return referenceCache.get(type);
+		} else {
+			final NodeId referenceTypeNode = MiloSingleServerBaseReferenceNodeBuilder.generateReferenceTypeNode(type,
+					"is a " + type + " of ", type + " reference type", NodeIds.NonHierarchicalReferences, false, false,
+					waldotNamespace);
+			referenceCache.put(type, referenceTypeNode);
+			return referenceTypeNode;
 		}
-		final NodeId referenceTypeNode = MiloSingleServerBaseReferenceNodeBuilder.generateReferenceTypeNode(type,
-				"is a " + type + " of ", type + " reference type", NodeIds.NonHierarchicalReferences, false, false,
-				waldotNamespace);
-		return referenceTypeNode;
 	}
 
 	private NodeId getParameterNodeId(final String key) {
@@ -688,20 +699,15 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 
 	@Override
 	public Map<NodeId, WaldotVertex> getVertices() {
-		final Map<NodeId, WaldotVertex> result = new HashMap<>();
-		for (final Node v : folderManager.getVerticesFolderNode().getOrganizesNodes()) {
-			if (v instanceof Vertex) {
-				result.put(v.getNodeId(), (WaldotVertex) v);
-			}
-		}
-		for (final UaFolderNode f : folderManager.getVertexDirectories().values()) {
-			for (final Node v : f.getOrganizesNodes()) {
-				if (v instanceof Vertex) {
-					result.put(v.getNodeId(), (WaldotVertex) v);
-				}
-			}
-		}
-		return result;
+		/*
+		 * final Map<NodeId, WaldotVertex> result = new HashMap<>(); for (final Node v :
+		 * folderManager.getVerticesFolderNode().getOrganizesNodes()) { if (v instanceof
+		 * Vertex) { result.put(v.getNodeId(), (WaldotVertex) v); } } for (final
+		 * UaFolderNode f : folderManager.getVertexDirectories().values()) { for (final
+		 * Node v : f.getOrganizesNodes()) { if (v instanceof Vertex) {
+		 * result.put(v.getNodeId(), (WaldotVertex) v); } } }
+		 */
+		return cachedVertices;
 	}
 
 	@Override
@@ -902,6 +908,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			}
 		}
 		waldotNamespace.getStorageManager().removeNode(nodeId);
+		cachedEdges.remove(nodeId);
 		node.delete();
 	}
 
@@ -921,6 +928,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			((WaldotVertex) node).removeRelatedOpcUaNodes();
 		}
 		waldotNamespace.getStorageManager().removeNode(nodeId);
+		cachedVertices.remove(nodeId);
 		node.delete();
 		logger.info("Vertex with NodeId {} removed", nodeId);
 	}
