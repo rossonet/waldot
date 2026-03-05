@@ -18,7 +18,7 @@ import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileBootstrapS
 import net.rossonet.waldot.gremlin.opcgraph.strategies.client.BaseClientManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.BaseConsoleStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseStrategy;
-import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.BaseHistoryStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.namespaces.HomunculusNamespace;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 import picocli.CommandLine.Command;
@@ -428,8 +428,8 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 		waldot = new WaldotOpcUaServer(configuration, serverConfiguration, new DefaultAnonymousValidator(configuration),
 				new DefaultIdentityValidator(configuration), new DefaultX509IdentityValidator(configuration));
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),
-				new BaseHistoryStrategy(), new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
-				new BaseClientManagementStrategy(), bootUrl);
+				new LoggerHistoryStrategy(), new BaseConsoleStrategy(), configuration,
+				new SingleFileBootstrapStrategy(), new BaseClientManagementStrategy(), bootUrl);
 		waldot.startup(namespace).get();
 		waldot.waitCompletion();
 	}

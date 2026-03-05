@@ -7,7 +7,6 @@ buildscript {
         classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
         classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.11.2'
         classpath 'de.undercouch:gradle-download-task:5.6.0'
-        classpath "com.palantir.gradle.docker:gradle-docker:0.36.0"
     }
 }
 
@@ -37,7 +36,6 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
-apply plugin: 'com.palantir.docker'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: "com.gorylenko.gradle-git-properties"
@@ -88,15 +86,6 @@ eclipse {
     }
 }
 
-docker {
-    name "rossonet/${project.name.replaceAll(/\B[A-Z]/) { '-' + it }.toLowerCase()}:${version}"
-    dockerfile file('Dockerfile.gradle')
-    files "$buildDir/distributions/${project.name}-${version}.tar"
-    pull true
-    noCache true
-}
-
-tasks.dockerPrepare.dependsOn("distTar")
 
 task view { doLast { println "Working on project ${project.name} [ ${project.description} ]" } }
 

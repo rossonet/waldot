@@ -28,12 +28,12 @@ import org.apache.tinkerpop.gremlin.AbstractGraphProvider;
 import org.apache.tinkerpop.gremlin.LoadGraphWith.GraphData;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcEdge;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcProperty;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertex;
-import net.rossonet.waldot.gremlin.opcgraph.structure.OpcVertexProperty;
+import net.rossonet.waldot.gremlin.opcgraph.structure.edge.OpcEdge;
+import net.rossonet.waldot.gremlin.opcgraph.structure.vertex.OpcProperty;
+import net.rossonet.waldot.gremlin.opcgraph.structure.vertex.OpcVertex;
+import net.rossonet.waldot.gremlin.opcgraph.structure.vertex.OpcVertexProperty;
 
 /**
  * @author Stephen Mallette (http://stephen.genoprime.com)
