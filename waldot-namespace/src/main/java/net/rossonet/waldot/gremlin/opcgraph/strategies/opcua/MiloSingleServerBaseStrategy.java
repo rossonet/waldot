@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
@@ -75,20 +76,16 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	private static final String EDGE_DIRECTORY_NODEID_PREFIX = "e";
 	private static final String VERTEX_DIRECTORY_NODEID_PREFIX = "v";
 	private UaFolderNode assetRootNode;
-	private transient final Map<NodeId, WaldotEdge> cachedEdges = new HashMap<>();
-	private transient final Map<NodeId, WaldotVertex> cachedVertices = new HashMap<>();
-	private final Map<String, UaFolderNode> edgeDirectories = new HashMap<>();
+	private transient final ConcurrentHashMap<NodeId, WaldotEdge> cachedEdges = new ConcurrentHashMap<>();
+	private transient final ConcurrentHashMap<NodeId, WaldotVertex> cachedVertices = new ConcurrentHashMap<>();
+	private transient final ConcurrentHashMap<String, UaFolderNode> edgeDirectories = new ConcurrentHashMap<>();
 	private final MiloSingleServerBaseFolderManager folderManager = new MiloSingleServerBaseFolderManager(this);
 	private UaFolderNode interfaceRootNode;
 	private final AtomicLong lastEventId = new AtomicLong(0);
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-
 	private Graph.Variables opcGraphVariables;
-
-	private transient Map<String, NodeId> referenceCache = new HashMap<>();
-
+	private transient ConcurrentHashMap<String, NodeId> referenceCache = new ConcurrentHashMap<>();
 	private UaFolderNode rootNode;
-
 	private WaldotNamespace waldotNamespace;
 
 	private void addDeletedCommand(GremlinElement vertex) {

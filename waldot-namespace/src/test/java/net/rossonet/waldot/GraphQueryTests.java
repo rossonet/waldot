@@ -103,7 +103,8 @@ public class GraphQueryTests {
 		assert g.traversal().V().has("name", "loop").in().toList().size() == 1;
 		assert g.traversal().V().has("name", "loop").in("test", "no").toList().size() == 0;
 		assert g.traversal().V().has("name", "loop").in("no", "prova").toList().size() == 0;
-		assert g.traversal().V().has("name", "loop").in("test", "prova").toList().size() == 1;
+		final int size = g.traversal().V().has("name", "loop").in("self", "prova").toList().size();
+		assert size == 1;
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals(1001, "test", "prova");
 		assert !waldotTestClientHandler.checkOpcUaVertexEdge(2001, 2000, "link");
 		assert waldotTestClientHandler.checkOpcUaVertexEdge(2000, 2001, "link");

@@ -139,7 +139,7 @@ public class BaseWaldotTests {
 	@Test
 	public void runGraphExpressionViaClient() throws Exception {
 		simpleServerInit();
-		waldotTestClientHandler.runExpression("g.addVertex('id', 'test-id', 'label', 'test-query', 'value', 28)");
+		waldotTestClientHandler.runExpression("graph.addVertex('id', 'test-id', 'label', 'test-query', 'value', 28)");
 		assert g.getWaldotNamespace().getVerticesCount() == 1;
 		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
 		assert waldotTestClientHandler.checkVertexExists("test-id");
@@ -183,7 +183,7 @@ public class BaseWaldotTests {
 		simpleServerInit();
 		g.addVertex("id", "test-id", "label", "test-query", "value", "prova");
 		final Object result = g.getWaldotNamespace().getConsoleStrategy()
-				.runExpression("query.exec(\"g.traversal().V().has('label', 'test-query').values('value').next()\")");
+				.runExpression("query.exec(\"g.V().has('label', 'test-query').values('value').next()\")");
 		if (result != null && result instanceof String[]) {
 			final String[] queryLines = (String[]) result;
 			assert queryLines.length > 0;
@@ -207,7 +207,7 @@ public class BaseWaldotTests {
 	@Test
 	public void runSimpleConfigurationExpression() throws Exception {
 		final StringBuilder sb = new StringBuilder();
-		sb.append("g.addVertex(\"id\", \"test-id\", \"label\", \"test-query\", \"value\", 12);\n");
+		sb.append("graph.addVertex(\"id\", \"test-id\", \"label\", \"test-query\", \"value\", 12);\n");
 		Files.writeString(Path.of("/tmp/boot.conf"), sb.toString());
 		simpleServerInit();
 		assert g.getWaldotNamespace().getVerticesCount() == 1;
@@ -221,7 +221,7 @@ public class BaseWaldotTests {
 	public void runSimpleConsoleExpression() throws Exception {
 		simpleServerInit();
 		g.getWaldotNamespace().getConsoleStrategy()
-				.runExpression("g.addVertex('id', 'test-id', 'label', 'test-query', 'value', 10)");
+				.runExpression("graph.addVertex('id', 'test-id', 'label', 'test-query', 'value', 10)");
 		assert g.getWaldotNamespace().getVerticesCount() == 1;
 		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
 		assert waldotTestClientHandler.checkVertexExists("test-id");
