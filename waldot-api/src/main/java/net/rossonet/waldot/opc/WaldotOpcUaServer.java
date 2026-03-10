@@ -129,6 +129,15 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	private final X509IdentityValidator x509IdentityValidator;
 
+	/**
+	 * Constructs a new WaldotOpcUaServer with the specified configuration and validators.
+	 *
+	 * @param waldotConfiguration the main Waldot configuration
+	 * @param serverConfiguration the OPC UA server configuration
+	 * @param anonymousValidator the validator for anonymous authentication
+	 * @param identityValidator the validator for username/password authentication
+	 * @param x509IdentityValidator the validator for X.509 certificate authentication
+	 */
 	public WaldotOpcUaServer(final WaldotConfiguration waldotConfiguration, final OpcConfiguration serverConfiguration,
 			final WaldotAnonymousValidator anonymousValidator, final UsernameIdentityValidator identityValidator,
 			final X509IdentityValidator x509IdentityValidator) {
@@ -159,6 +168,11 @@ public class WaldotOpcUaServer implements AutoCloseable {
 				.setBindPort(configuration.getTcpBindPort()).build();
 	}
 
+	/**
+	 * Shuts down the OPC UA server and releases all resources.
+	 * This method waits for the server to shutdown gracefully and closes all
+	 * executor services. This method blocks until shutdown is complete or timeout occurs.
+	 */
 	@Override
 	public void close() {
 		logger.info("Shutting down OPCUA Server");
@@ -360,23 +374,52 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		return opcUaServer;
 	}
 
+	/**
+	 * Returns the anonymous identity validator used for OPC UA authentication.
+	 *
+	 * @return the anonymous validator
+	 */
 	public IdentityValidator getAnonymousValidator() {
 		return anonymousValidator;
 	}
 
+	/**
+	 * Returns the OPC UA server configuration.
+	 *
+	 * @return the OPC configuration
+	 */
 	public OpcConfiguration getConfiguration() {
 		return configuration;
 	}
 
+	/**
+	 * Returns the Gremlin graph associated with this server's namespace.
+	 * The graph is used for storing and querying graph-based data.
+	 *
+	 * @return the Gremlin graph instance
+	 * @throws RuntimeException if the namespace is not initialized
+	 */
 	public WaldotGraph getGremlinGraph() {
 		return getManagerNamespace().getGremlinGraph();
 
 	}
 
+	/**
+	 * Returns the username/password identity validator used for OPC UA authentication.
+	 *
+	 * @return the username identity validator
+	 */
 	public UsernameIdentityValidator getIdentityValidator() {
 		return identityValidator;
 	}
 
+	/**
+	 * Returns the namespace manager for this OPC UA server.
+	 * The namespace manager handles the OPC UA address space and node management.
+	 *
+	 * @return the WaldotNamespace manager
+	 * @throws RuntimeException if the namespace has not been initialized
+	 */
 	public WaldotNamespace getManagerNamespace() {
 		if (managerNamespace == null) {
 			throw new RuntimeException("WaldotNamespace not initialized");
@@ -384,14 +427,29 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		return managerNamespace;
 	}
 
+	/**
+	 * Returns the underlying OPC UA server instance.
+	 *
+	 * @return the OpcUaServer instance
+	 */
 	public OpcUaServer getServer() {
 		return server;
 	}
 
+	/**
+	 * Returns the main Waldot configuration.
+	 *
+	 * @return the Waldot configuration
+	 */
 	public WaldotConfiguration getWaldotConfiguration() {
 		return waldotConfiguration;
 	}
 
+	/**
+	 * Returns the X.509 certificate identity validator used for OPC UA authentication.
+	 *
+	 * @return the X.509 identity validator
+	 */
 	public X509IdentityValidator getX509IdentityValidator() {
 		return x509IdentityValidator;
 	}
@@ -417,15 +475,28 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	}
 
 	/**
-	 * Comandi per l'interazione con il server OPC UA
-	 * 
-	 * @param query
-	 * @return
+	 * Executes a Gremlin expression query against the server's graph.
+	 * This method allows clients to run Gremlin traversal queries on the
+	 * underlying graph database through the OPC UA interface.
+	 *
+	 * @param query the Gremlin expression string to execute
+	 * @return the result of the expression execution, which may be a vertex,
+	 *         edge, list, or other Gremlin result type
 	 */
 	public Object runExpression(final String query) {
 		return getManagerNamespace().runExpression(query);
 	}
 
+	/**
+	 * Starts the OPC UA server with the specified namespace.
+	 * This method initializes the namespace, registers all plugins, and starts
+	 * the OPC UA server. The method blocks for approximately 2 seconds to allow
+	 * the server to fully start.
+	 *
+	 * @param waldotNamespace the namespace to use for the OPC UA address space
+	 * @return a CompletableFuture that will be completed with the running OpcUaServer
+	 *         instance when the server starts successfully
+	 */
 	public CompletableFuture<OpcUaServer> startup(final WaldotNamespace waldotNamespace) {
 		try {
 			managerNamespace = waldotNamespace;
@@ -442,11 +513,24 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		}
 	}
 
+	/**
+	 * Updates the reference type tree in the OPC UA server.
+	 * This method should be called after making changes to reference type
+	 * definitions to ensure the server's address space reflects the updates.
+	 */
 	public void updateReferenceTypeTree() {
 		server.updateReferenceTypeTree();
 
 	}
 
+	/**
+	 * Waits for the server to complete execution.
+	 * This method registers a shutdown hook and blocks until the JVM is shutting down.
+	 * It allows the server to run until explicitly terminated.
+	 *
+	 * @throws InterruptedException if the thread is interrupted while waiting
+	 * @throws ExecutionException if the future completes exceptionally
+	 */
 	public void waitCompletion() throws InterruptedException, ExecutionException {
 		final CompletableFuture<Void> future = new CompletableFuture<>();
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> future.complete(null)));

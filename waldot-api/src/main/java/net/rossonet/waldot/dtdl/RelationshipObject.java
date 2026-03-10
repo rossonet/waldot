@@ -209,30 +209,65 @@ public class RelationshipObject {
 		return writable;
 	}
 
+	/**
+	 * Sets the optional comment associated with the relationship.
+	 *
+	 * @param comment the comment string to set.
+	 */
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
+	/**
+	 * Sets the description of the relationship.
+	 *
+	 * @param description the description string to set.
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Sets the display name of the relationship.
+	 *
+	 * @param displayName the display name string to set.
+	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Sets the unique identifier of the relationship.
+	 *
+	 * @param id the {@link DigitalTwinModelIdentifier} representing the relationship's ID.
+	 */
 	public void setId(DigitalTwinModelIdentifier id) {
 		this.id = id;
 	}
 
+	/**
+	 * Sets the maximum multiplicity of the relationship.
+	 *
+	 * @param maxMultiplicity the maximum number of target digital twins allowed.
+	 */
 	public void setMaxMultiplicity(Integer maxMultiplicity) {
 		this.maxMultiplicity = maxMultiplicity;
 	}
 
+	/**
+	 * Sets the minimum multiplicity of the relationship.
+	 *
+	 * @param minMultiplicity the minimum number of target digital twins required.
+	 */
 	public void setMinMultiplicity(Integer minMultiplicity) {
 		this.minMultiplicity = minMultiplicity;
 	}
 
+	/**
+	 * Sets the name of the relationship.
+	 *
+	 * @param name the name string to set.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -258,14 +293,31 @@ public class RelationshipObject {
 		return this;
 	}
 
+	/**
+	 * Sets the target digital twin of the relationship.
+	 *
+	 * @param target the target string representing the target digital twin.
+	 */
 	public void setTarget(String target) {
 		this.target = target;
 	}
 
+	/**
+	 * Sets whether the relationship is writable.
+	 *
+	 * @param writable {@code true} if the relationship should be writable, {@code false} otherwise.
+	 */
 	public void setWritable(boolean writable) {
 		this.writable = writable;
 	}
 
+	/**
+	 * Converts the relationship object to a map representation conforming to DTDL v2 specification.
+	 *
+	 * @return a map containing the relationship's attributes, including @id, @type, name, target,
+	 *         maxMultiplicity, minMultiplicity, writable, properties,
+	 *         and optional metadata fields such as comment, description, and displayName.
+	 */
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());

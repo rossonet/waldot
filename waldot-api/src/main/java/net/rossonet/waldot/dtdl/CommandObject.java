@@ -180,38 +180,87 @@ public class CommandObject {
 		return response;
 	}
 
+	/**
+	 * Sets the deprecated commandType field of the command.
+	 *
+	 * @param commandType the command type string to set.
+	 * @deprecated This field is deprecated in DTDL v2.
+	 */
+	@Deprecated
 	public void setCommandType(String commandType) {
 		this.commandType = commandType;
 	}
 
+	/**
+	 * Sets the optional comment associated with the command.
+	 *
+	 * @param comment the comment string to set.
+	 */
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
+	/**
+	 * Sets the description of the command.
+	 *
+	 * @param description the description string to set.
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Sets the display name of the command.
+	 *
+	 * @param displayName the display name string to set.
+	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Sets the unique identifier of the command.
+	 *
+	 * @param id the {@link DigitalTwinModelIdentifier} representing the command's ID.
+	 */
 	public void setId(DigitalTwinModelIdentifier id) {
 		this.id = id;
 	}
 
+	/**
+	 * Sets the name of the command.
+	 *
+	 * @param name the name string to set.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Sets the input payload schema for the command.
+	 *
+	 * @param request the {@link CommandPayload} object representing the request payload.
+	 */
 	public void setRequest(CommandPayload request) {
 		this.request = request;
 	}
 
+	/**
+	 * Sets the output payload schema for the command.
+	 *
+	 * @param response the {@link CommandPayload} object representing the response payload.
+	 */
 	public void setResponse(CommandPayload response) {
 		this.response = response;
 	}
 
+	/**
+	 * Converts the command object to a map representation conforming to DTDL v2 specification.
+	 *
+	 * @return a map containing the command's attributes, including @id, @type, name,
+	 *         and optional metadata fields such as comment, description, displayName, commandType,
+	 *         request, and response.
+	 */
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());

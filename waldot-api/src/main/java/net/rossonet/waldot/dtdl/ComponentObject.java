@@ -145,30 +145,66 @@ public class ComponentObject {
 		return schema;
 	}
 
+	/**
+	 * Sets the optional comment associated with the component.
+	 *
+	 * @param comment the comment string to set.
+	 */
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
+	/**
+	 * Sets the description of the component.
+	 *
+	 * @param description the description string to set.
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Sets the display name of the component.
+	 *
+	 * @param displayName the display name string to set.
+	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Sets the unique identifier of the component.
+	 *
+	 * @param id the {@link DigitalTwinModelIdentifier} representing the component's ID.
+	 */
 	public void setId(DigitalTwinModelIdentifier id) {
 		this.id = id;
 	}
 
+	/**
+	 * Sets the name of the component.
+	 *
+	 * @param name the name string to set.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Sets the schema of the component, which references another interface.
+	 *
+	 * @param schema the {@link Schema} object representing the component's schema.
+	 */
 	public void setSchema(Schema schema) {
 		this.schema = schema;
 	}
 
+	/**
+	 * Converts the component object to a map representation conforming to DTDL v2 specification.
+	 *
+	 * @return a map containing the component's attributes, including @id, @type, name, schema,
+	 *         and optional metadata fields such as comment, description, and displayName.
+	 */
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());

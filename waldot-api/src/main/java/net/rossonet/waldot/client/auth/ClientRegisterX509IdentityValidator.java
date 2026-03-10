@@ -11,6 +11,13 @@ import net.rossonet.waldot.api.auth.WaldotX509IdentityValidator;
 import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
+/**
+ * Validates X.509 certificate-based identity credentials for client registration.
+ * This validator handles X.509 certificate authentication for OPC UA clients
+ * connecting to the Waldot server.
+ *
+ * @param waldotOpcUaServer the Waldot OPC UA server instance
+ */
 public class ClientRegisterX509IdentityValidator extends WaldotX509IdentityValidator implements ClientAuthenticator {
 	private ClientManagementStrategy clientManagementStrategy;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -28,6 +35,11 @@ public class ClientRegisterX509IdentityValidator extends WaldotX509IdentityValid
 
 	}
 
+	/**
+	 * Sets the client management strategy for handling client sessions.
+	 *
+	 * @param clientManagementStrategy the strategy for managing client sessions
+	 */
 	@Override
 	public void setAgentManagementStrategy(final ClientManagementStrategy clientManagementStrategy) {
 		this.clientManagementStrategy = clientManagementStrategy;

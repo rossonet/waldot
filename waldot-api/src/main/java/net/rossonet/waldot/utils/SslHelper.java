@@ -83,11 +83,33 @@ public class SslHelper {
 		private final String keyStoreFilePath;
 		private final String keyStorePassword;
 
+		/**
+		 * Creates a new KeyStoreHelper for managing certificates in a PKCS12 keystore.
+		 * 
+		 * @param keyStoreFilePath the path to the keystore file
+		 * @param keyStorePassword the password to protect the keystore
+		 */
 		public KeyStoreHelper(final String keyStoreFilePath, final String keyStorePassword) {
 			this.keyStoreFilePath = keyStoreFilePath;
 			this.keyStorePassword = keyStorePassword;
 		}
 
+		/**
+		 * Creates and stores a self-signed certificate in the keystore with the specified properties.
+		 * 
+		 * @param certificateLabel the alias for the certificate in the keystore
+		 * @param commonName       the common name (CN) for the certificate
+		 * @param organization     the organization (O) for the certificate
+		 * @param unit             the organizational unit (OU) for the certificate
+		 * @param locality         the locality (L) for the certificate
+		 * @param state            the state or province (ST) for the certificate
+		 * @param country          the country code (C) for the certificate
+		 * @param uri              the application URI for the certificate
+		 * @param dns              the primary DNS name for the certificate
+		 * @param ip               the IP address for the certificate
+		 * @param dnsAlias         an additional DNS alias for the certificate
+		 * @return true if the certificate was created successfully, false otherwise
+		 */
 		public synchronized boolean createSelfSignedCertificate(final String certificateLabel, final String commonName,
 				final String organization, final String unit, final String locality, final String state,
 				final String country, final String uri, final String dns, final String ip, final String dnsAlias) {
@@ -111,6 +133,18 @@ public class SslHelper {
 			return result;
 		}
 
+		/**
+		 * Generates a PKCS#10 Certificate Signing Request (CSR) for an existing certificate in the keystore.
+		 * 
+		 * @param certificateLabel the alias of the certificate to generate the CSR for
+		 * @return the PKCS#10 Certification Signing Request
+		 * @throws UnrecoverableKeyException   if the key cannot be recovered
+		 * @throws KeyStoreException           if the keystore cannot be accessed
+		 * @throws NoSuchAlgorithmException    if the algorithm is not available
+		 * @throws CertificateException       if the certificate cannot be loaded
+		 * @throws IOException                if an I/O error occurs
+		 * @throws OperatorCreationException   if the signature operator cannot be created
+		 */
 		public PKCS10CertificationRequest generateCertificateSigningRequest(final String certificateLabel)
 				throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException,
 				IOException, OperatorCreationException {
@@ -135,6 +169,16 @@ public class SslHelper {
 			return certificateRequest;
 		}
 
+		/**
+		 * Retrieves the X509 certificate for the given certificate label from the keystore.
+		 * 
+		 * @param certificateLabel the alias of the certificate to retrieve
+		 * @return the X509Certificate
+		 * @throws KeyStoreException        if the keystore cannot be accessed
+		 * @throws NoSuchAlgorithmException  if the algorithm is not available
+		 * @throws CertificateException     if the certificate cannot be loaded
+		 * @throws IOException              if an I/O error occurs
+		 */
 		public X509Certificate getCertificate(final String certificateLabel)
 				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 			final KeyStore keyStore = loadOrCreateKeyStore();
@@ -142,11 +186,32 @@ public class SslHelper {
 			return clientCertificate;
 		}
 
+		/**
+		 * Retrieves the certificate as a Base64-encoded string.
+		 * 
+		 * @param certificateLabel the alias of the certificate
+		 * @return the Base64-encoded certificate
+		 * @throws KeyStoreException        if the keystore cannot be accessed
+		 * @throws NoSuchAlgorithmException  if the algorithm is not available
+		 * @throws CertificateException     if the certificate cannot be loaded
+		 * @throws IOException              if an I/O error occurs
+		 */
 		public String getCertificateBase64(final String certificateLabel)
 				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 			return Base64.getEncoder().encodeToString(getCertificate(certificateLabel).getEncoded());
 		}
 
+		/**
+		 * Retrieves the KeyPair (public and private key) for the given certificate label.
+		 * 
+		 * @param certificateLabel the alias of the certificate
+		 * @return the KeyPair containing the public and private key
+		 * @throws UnrecoverableKeyException   if the key cannot be recovered
+		 * @throws KeyStoreException           if the keystore cannot be accessed
+		 * @throws NoSuchAlgorithmException    if the algorithm is not available
+		 * @throws CertificateException       if the certificate cannot be loaded
+		 * @throws IOException                if an I/O error occurs
+		 */
 		public KeyPair getKeyPair(final String certificateLabel) throws UnrecoverableKeyException, KeyStoreException,
 				NoSuchAlgorithmException, CertificateException, IOException {
 			final PrivateKey privateKey = getPrivateKey(certificateLabel);
@@ -154,6 +219,17 @@ public class SslHelper {
 			return new KeyPair(publicKey, privateKey);
 		}
 
+		/**
+		 * Retrieves the PrivateKey for the given certificate label.
+		 * 
+		 * @param certificateLabel the alias of the certificate
+		 * @return the PrivateKey
+		 * @throws UnrecoverableKeyException   if the key cannot be recovered
+		 * @throws KeyStoreException           if the keystore cannot be accessed
+		 * @throws NoSuchAlgorithmException    if the algorithm is not available
+		 * @throws CertificateException       if the certificate cannot be loaded
+		 * @throws IOException                if an I/O error occurs
+		 */
 		public PrivateKey getPrivateKey(final String certificateLabel) throws UnrecoverableKeyException,
 				KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 			final KeyStore keyStore = loadOrCreateKeyStore();
@@ -166,17 +242,48 @@ public class SslHelper {
 			}
 		}
 
+		/**
+		 * Retrieves the private key as a Base64-encoded string.
+		 * 
+		 * @param certificateLabel the alias of the certificate
+		 * @return the Base64-encoded private key
+		 * @throws UnrecoverableKeyException   if the key cannot be recovered
+		 * @throws KeyStoreException           if the keystore cannot be accessed
+		 * @throws NoSuchAlgorithmException    if the algorithm is not available
+		 * @throws CertificateException       if the certificate cannot be loaded
+		 * @throws IOException                if an I/O error occurs
+		 */
 		public String getPrivateKeyBase64(final String certificateLabel) throws UnrecoverableKeyException,
 				KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 			return Base64.getEncoder().encodeToString(getPrivateKey(certificateLabel).getEncoded());
 		}
 
+		/**
+		 * Retrieves the PublicKey for the given certificate label.
+		 * 
+		 * @param certificateLabel the alias of the certificate
+		 * @return the PublicKey
+		 * @throws KeyStoreException        if the keystore cannot be accessed
+		 * @throws NoSuchAlgorithmException  if the algorithm is not available
+		 * @throws CertificateException     if the certificate cannot be loaded
+		 * @throws IOException              if an I/O error occurs
+		 */
 		public PublicKey getPublicKey(final String certificateLabel)
 				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 			final X509Certificate certificate = getCertificate(certificateLabel);
 			return certificate.getPublicKey();
 		}
 
+		/**
+		 * Checks if a certificate with the given label exists in the keystore.
+		 * 
+		 * @param certificateLabel the alias of the certificate to check
+		 * @return true if the certificate exists, false otherwise
+		 * @throws KeyStoreException        if the keystore cannot be accessed
+		 * @throws NoSuchAlgorithmException  if the algorithm is not available
+		 * @throws CertificateException     if the certificate cannot be loaded
+		 * @throws IOException              if an I/O error occurs
+		 */
 		public boolean hasCertificate(final String certificateLabel)
 				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 			final KeyStore keyStore = loadOrCreateKeyStore();
@@ -201,6 +308,14 @@ public class SslHelper {
 			return keyStore;
 		}
 
+		/**
+		 * Stores a certificate and private key in the keystore from byte arrays.
+		 * 
+		 * @param certificateLabel the alias for the certificate in the keystore
+		 * @param certificate      the certificate bytes (X.509 format)
+		 * @param privateKey       the private key bytes (PKCS#8 format)
+		 * @return true if the certificate was stored successfully, false otherwise
+		 */
 		public synchronized boolean setCertificate(final String certificateLabel, final byte[] certificate,
 				final byte[] privateKey) {
 			boolean result = false;
@@ -227,12 +342,28 @@ public class SslHelper {
 			return result;
 		}
 
+		/**
+		 * Stores a certificate and private key in the keystore from PEM objects.
+		 * 
+		 * @param certificateLabel the alias for the certificate in the keystore
+		 * @param certificate      the certificate as a PemObject
+		 * @param privateKey      the private key as a PemObject
+		 * @return true if the certificate was stored successfully, false otherwise
+		 */
 		public boolean setCertificate(final String certificateLabel, final PemObject certificate,
 				final PemObject privateKey) {
 			return setCertificate(certificateLabel, certificate.getContent(), privateKey.getContent());
 
 		}
 
+		/**
+		 * Stores a certificate and private key in the keystore from Base64-encoded strings.
+		 * 
+		 * @param certificateLabel    the alias for the certificate in the keystore
+		 * @param base64Certificate  the Base64-encoded certificate
+		 * @param base64PrivateKey    the Base64-encoded private key
+		 * @return true if the certificate was stored successfully, false otherwise
+		 */
 		public boolean setCertificate(final String certificateLabel, final String base64Certificate,
 				final String base64PrivateKey) {
 			return setCertificate(certificateLabel, Base64.getDecoder().decode(base64Certificate),
@@ -247,12 +378,35 @@ public class SslHelper {
 	public static final int SUBJECT_ALT_NAME_IP_ADDRESS = GeneralName.iPAddress;
 	public static final int SUBJECT_ALT_NAME_URI = GeneralName.uniformResourceIdentifier;
 
+	/**
+	 * Verifies that a key pair can be used for signing by signing a payload with the private
+	 * key and verifying the signature with the public key using the default algorithm.
+	 * 
+	 * @param pubKey  the public key to use for verification
+	 * @param privKey the private key to use for signing
+	 * @return true if the signature verification succeeds, false otherwise
+	 * @throws NoSuchAlgorithmException if the signature algorithm is not available
+	 * @throws SignatureException        if the signature cannot be created or verified
+	 * @throws InvalidKeyException       if the keys are invalid
+	 */
 	public static boolean checkSignatureWithPayload(final PublicKey pubKey, final PrivateKey privKey)
 			throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
 		return checkSignatureWithPayload(pubKey, privKey, DEFAULT_SIGNATURE_ALGORITHM);
 
 	}
 
+	/**
+	 * Verifies that a key pair can be used for signing by signing a payload with the private
+	 * key and verifying the signature with the public key using the specified algorithm.
+	 * 
+	 * @param pubKey            the public key to use for verification
+	 * @param privKey           the private key to use for signing
+	 * @param signatureAlgorithm the signature algorithm to use (e.g., "SHA256withRSA")
+	 * @return true if the signature verification succeeds, false otherwise
+	 * @throws NoSuchAlgorithmException if the signature algorithm is not available
+	 * @throws SignatureException        if the signature cannot be created or verified
+	 * @throws InvalidKeyException       if the keys are invalid
+	 */
 	public static boolean checkSignatureWithPayload(final PublicKey pubKey, final PrivateKey privKey,
 			final String signatureAlgorithm) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
 		final Signature sig = Signature.getInstance(signatureAlgorithm);
@@ -265,6 +419,11 @@ public class SslHelper {
 		return sig.verify(signature);
 	}
 
+	/**
+	 * Gets the default character set (encoding) used by the JVM.
+	 * 
+	 * @return the name of the default character set
+	 */
 	public static String getDefaultCharSet() {
 		final OutputStreamWriter writer = new OutputStreamWriter(new ByteArrayOutputStream());
 		final String enc = writer.getEncoding();
@@ -347,6 +506,12 @@ public class SslHelper {
 		}
 	}
 
+	/**
+	 * Gets all subject alternative names from a certificate as GeneralName objects.
+	 * 
+	 * @param certificate the certificate to extract subject alternative names from
+	 * @return a list of GeneralName objects containing DNS names, IP addresses, and URIs
+	 */
 	public static List<GeneralName> getSubjectAltNames(final X509Certificate certificate) {
 		try {
 			final List<GeneralName> generalNames = new ArrayList<>();
@@ -375,6 +540,18 @@ public class SslHelper {
 		}
 	}
 
+	/**
+	 * Signs a certificate signing request (CSR) using a CA certificate and private key.
+	 * 
+	 * @param certificationRequest the PKCS#10 certificate signing request to sign
+	 * @param caCertificate        the CA certificate to sign with
+	 * @param caPrivateKey         the CA private key to use for signing
+	 * @param validity             the validity period in days
+	 * @return the signed X509Certificate
+	 * @throws IOException             if an I/O error occurs
+	 * @throws OperatorCreationException if the signature operator cannot be created
+	 * @throws CertificateException      if the certificate cannot be generated
+	 */
 	public static X509Certificate signCertificate(final PKCS10CertificationRequest certificationRequest,
 			final X509Certificate caCertificate, final PrivateKey caPrivateKey, final int validity)
 			throws IOException, OperatorCreationException, CertificateException {
@@ -382,6 +559,20 @@ public class SslHelper {
 				DEFAULT_SIGNATURE_ALGORITHM);
 	}
 
+	/**
+	 * Signs a certificate signing request (CSR) using a CA certificate and private key
+	 * with the specified signature algorithm.
+	 * 
+	 * @param certificationRequest the PKCS#10 certificate signing request to sign
+	 * @param caCertificate        the CA certificate to sign with
+	 * @param caPrivateKey         the CA private key to use for signing
+	 * @param validity             the validity period in days
+	 * @param signatureAlgorithm   the signature algorithm to use (e.g., "SHA256withRSA")
+	 * @return the signed X509Certificate
+	 * @throws IOException             if an I/O error occurs
+	 * @throws OperatorCreationException if the signature operator cannot be created
+	 * @throws CertificateException      if the certificate cannot be generated
+	 */
 	public static X509Certificate signCertificate(final PKCS10CertificationRequest certificationRequest,
 			final X509Certificate caCertificate, final PrivateKey caPrivateKey, final int validity,
 			final String signatureAlgorithm) throws IOException, OperatorCreationException, CertificateException {

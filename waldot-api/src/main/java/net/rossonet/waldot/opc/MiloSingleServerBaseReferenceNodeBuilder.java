@@ -141,6 +141,13 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 
 	}
 
+	/**
+	 * Generates all reference nodes required for the WaldOT OPC UA address space.
+	 * This includes vertex type nodes, edge type nodes, interface root nodes,
+	 * and custom reference types for connecting nodes in the graph structure.
+	 *
+	 * @param miloSingleServerBaseV0Strategy the Milo strategy instance used to generate nodes
+	 */
 	public static void generateRefereceNodes(final MiloStrategy miloSingleServerBaseV0Strategy) {
 		generateVertexTypeNode(miloSingleServerBaseV0Strategy);
 		generateEdgeTypeNode(miloSingleServerBaseV0Strategy);
@@ -159,6 +166,19 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
 	}
 
+	/**
+	 * Generates a custom OPC UA reference type node and registers it in the address space.
+	 * Reference types define how nodes in the OPC UA address space relate to each other.
+	 *
+	 * @param reference the browse name of the reference type
+	 * @param inverse the inverse browse name for the reference
+	 * @param description the description of the reference type
+	 * @param subTypeId the node ID of the parent reference type
+	 * @param isAbstract whether this reference type is abstract
+	 * @param isSymmetric whether this reference type is symmetric
+	 * @param waldotNamespace the namespace manager to register the type with
+	 * @return the node ID of the newly created reference type
+	 */
 	public static NodeId generateReferenceTypeNode(final String reference, final String inverse,
 			final String description, final NodeId subTypeId, final boolean isAbstract, final boolean isSymmetric,
 			final WaldotNamespace waldotNamespace) {
@@ -228,6 +248,14 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 				.registerObjectType(vertexTypeNode.getNodeId(), UaObjectNode.class, objectNodeConstructor);
 	}
 
+	/**
+	 * Extracts the event notifier value from the property key values.
+	 * The event notifier determines whether a node can subscribe to events
+	 * and whether it can forward events to subscribers.
+	 *
+	 * @param propertyKeyValues an array of key-value pairs containing node properties
+	 * @return the event notifier value (1 for active/enabled, 0 for disabled)
+	 */
 	public static UByte getEventNotifier(Object[] propertyKeyValues) {
 		final String event = getKeyValuesProperty(propertyKeyValues, MiloStrategy.EVENT_NOTIFIER_PARAMETER);
 		if (event != null && !event.isEmpty()) {
@@ -250,12 +278,27 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 		return null;
 	}
 
+	/**
+	 * Extracts the user write mask from the property key values.
+	 * The user write mask specifies which attributes of a node can be modified
+	 * by the current user.
+	 *
+	 * @param propertyKeyValues an array of key-value pairs containing node properties
+	 * @return the user write mask value
+	 */
 	public static UInteger getUserWriteMask(Object[] propertyKeyValues) {
 		final String userWriteMask = getKeyValuesProperty(propertyKeyValues, MiloStrategy.USER_WRITE_MASK_PARAMETER);
 		// TODO parametrizzare correttamente user write mask
 		return vertexUserWriteMask;
 	}
 
+	/**
+	 * Extracts the version from the property key values.
+	 * The version is used for caching and concurrency control in the OPC UA address space.
+	 *
+	 * @param propertyKeyValues an array of key-value pairs containing node properties
+	 * @return the version number, or the default version if not specified
+	 */
 	public static long getVersion(Object[] propertyKeyValues) {
 		final String found = getKeyValuesProperty(propertyKeyValues, MiloStrategy.VERSION_PARAMETER);
 		if (found == null || found.isEmpty()) {
@@ -264,6 +307,13 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 		return Long.parseLong(found);
 	}
 
+	/**
+	 * Extracts the write mask from the property key values.
+	 * The write mask specifies which attributes of a node can be modified.
+	 *
+	 * @param propertyKeyValues an array of key-value pairs containing node properties
+	 * @return the write mask value
+	 */
 	public static UInteger getWriteMask(Object[] propertyKeyValues) {
 		final String writeMask = getKeyValuesProperty(propertyKeyValues, MiloStrategy.WRITE_MASK_PARAMETER);
 		// TODO parametrizzare correttamente write mask

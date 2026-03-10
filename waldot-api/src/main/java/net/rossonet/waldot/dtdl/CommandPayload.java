@@ -137,30 +137,66 @@ public class CommandPayload {
 		return schema;
 	}
 
+	/**
+	 * Sets the optional comment associated with the command payload.
+	 *
+	 * @param comment the comment string to set.
+	 */
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
+	/**
+	 * Sets the description of the command payload.
+	 *
+	 * @param description the description string to set.
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Sets the display name of the command payload.
+	 *
+	 * @param displayName the display name string to set.
+	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Sets the unique identifier of the command payload.
+	 *
+	 * @param id the {@link DigitalTwinModelIdentifier} representing the payload's ID.
+	 */
 	public void setId(DigitalTwinModelIdentifier id) {
 		this.id = id;
 	}
 
+	/**
+	 * Sets the name of the command payload.
+	 *
+	 * @param name the name string to set.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Sets the schema of the command payload, which defines the data type or structure of its value.
+	 *
+	 * @param schema the {@link Schema} object representing the payload's schema.
+	 */
 	public void setSchema(Schema schema) {
 		this.schema = schema;
 	}
 
+	/**
+	 * Converts the command payload object to a map representation conforming to DTDL v2 specification.
+	 *
+	 * @return a map containing the payload's attributes, including @id, name, schema,
+	 *         and optional metadata fields such as comment, description, and displayName.
+	 */
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());

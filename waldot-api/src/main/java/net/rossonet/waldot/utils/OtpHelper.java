@@ -48,6 +48,17 @@ public final class OtpHelper {
 
 	private final static int[] DIGITS_POWER = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 };
 
+	/**
+	 * Validates a TOTP (Time-based One-Time Password) code against a seed.
+	 * The validation checks multiple time windows around the current time to account for clock skew.
+	 * 
+	 * @param algorithm     the HMAC algorithm to use (HMAC_SHA1, HMAC_SHA256, or HMAC_SHA512)
+	 * @param seedOTP       the secret seed as a hexadecimal string
+	 * @param otpCode       the OTP code to validate
+	 * @param finestraOTP   the time window in seconds to check before and after current time
+	 * @param returnDigits  the number of digits in the OTP (e.g., "6" for 6-digit codes)
+	 * @return true if the OTP code is valid, false otherwise
+	 */
 	public static boolean checkTOTP(final Algorithm algorithm, final String seedOTP, final String otpCode,
 			final int finestraOTP, final String returnDigits) {
 		boolean result = false;
@@ -67,6 +78,15 @@ public final class OtpHelper {
 		return result;
 	}
 
+	/**
+	 * Generates a TOTP (Time-based One-Time Password) for a given time.
+	 * 
+	 * @param algorithm     the HMAC algorithm to use (HMAC_SHA1, HMAC_SHA256, or HMAC_SHA512)
+	 * @param key           the secret key as a hexadecimal string
+	 * @param timeMs        the time in milliseconds since epoch
+	 * @param returnDigits  the number of digits to return (e.g., "6" for 6-digit codes)
+	 * @return the generated OTP as a zero-padded string
+	 */
 	public static String generateTOTP(final Algorithm algorithm, final String key, final long timeMs,
 			final String returnDigits) {
 		final int codeDigits = Integer.decode(returnDigits).intValue();
@@ -89,6 +109,12 @@ public final class OtpHelper {
 		return result;
 	}
 
+	/**
+	 * Generates a random hexadecimal string of specified length.
+	 * 
+	 * @param numchars the number of hexadecimal characters to generate
+	 * @return a random hexadecimal string of the specified length
+	 */
 	public static String getRandomHexString(final int numchars) {
 		final Random r = new Random();
 		final StringBuffer sb = new StringBuffer();

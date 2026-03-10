@@ -191,38 +191,84 @@ public class TelemetryObject {
 		return unit;
 	}
 
+	/**
+	 * Sets the optional comment associated with the telemetry.
+	 *
+	 * @param comment the comment string to set.
+	 */
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
+	/**
+	 * Sets the description of the telemetry.
+	 *
+	 * @param description the description string to set.
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Sets the display name of the telemetry.
+	 *
+	 * @param displayName the display name string to set.
+	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Sets the unique identifier of the telemetry.
+	 *
+	 * @param id the {@link DigitalTwinModelIdentifier} representing the telemetry's ID.
+	 */
 	public void setId(DigitalTwinModelIdentifier id) {
 		this.id = id;
 	}
 
+	/**
+	 * Sets the name of the telemetry.
+	 *
+	 * @param name the name string to set.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Sets the schema of the telemetry, which defines the data type of its value.
+	 *
+	 * @param schema the {@link Schema} object representing the telemetry's schema.
+	 */
 	public void setSchema(Schema schema) {
 		this.schema = schema;
 	}
 
+	/**
+	 * Sets the list of types associated with the telemetry.
+	 *
+	 * @param types a list of type strings, which must include "Telemetry".
+	 */
 	public void setTypes(List<String> types) {
 		this.types = types;
 	}
 
+	/**
+	 * Sets the unit of measurement for the telemetry value.
+	 *
+	 * @param unit the {@link Unit} object representing the telemetry's unit.
+	 */
 	public void setUnit(Unit unit) {
 		this.unit = unit;
 	}
 
+	/**
+	 * Converts the telemetry object to a map representation conforming to DTDL v2 specification.
+	 *
+	 * @return a map containing the telemetry's attributes, including @id, @type, name, schema,
+	 *         and optional metadata fields such as comment, description, displayName, and unit.
+	 */
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());

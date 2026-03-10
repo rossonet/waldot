@@ -22,6 +22,11 @@ public class JexlExecutor implements BaseExecutor {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger("JEXEL");
 
+	/**
+	 * Generates a new JEXL engine with unrestricted permissions.
+	 * 
+	 * @return a new JexlEngine instance configured for unrestricted expression evaluation
+	 */
 	public static JexlEngine generateEngine() {
 		// XXX: provare la restrizione dei permessi o la sandbox
 		// return new
@@ -42,6 +47,11 @@ public class JexlExecutor implements BaseExecutor {
 	private JexlEngine jexl = generateEngine();
 	private final String name;
 
+	/**
+	 * Creates a new JexlExecutor with the given name.
+	 * 
+	 * @param name the name identifier for this executor instance
+	 */
 	public JexlExecutor(String name) {
 		this.name = name;
 	}
@@ -74,6 +84,11 @@ public class JexlExecutor implements BaseExecutor {
 		}
 	}
 
+	/**
+	 * Returns the name identifier of this executor.
+	 * 
+	 * @return the name of this executor instance
+	 */
 	public String getName() {
 		return name;
 	}

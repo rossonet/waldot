@@ -15,6 +15,13 @@ import net.rossonet.waldot.api.auth.WaldotAnonymousValidator;
 import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 
+/**
+ * Validates anonymous identity for client registration.
+ * This validator handles anonymous authentication for OPC UA clients
+ * connecting to the Waldot server without providing credentials.
+ *
+ * @param waldotOpcUaServer the Waldot OPC UA server instance
+ */
 public class ClientRegisterAnonymousValidator extends WaldotAnonymousValidator implements ClientAuthenticator {
 	private ClientManagementStrategy clientManagementStrategy;
 
@@ -24,11 +31,22 @@ public class ClientRegisterAnonymousValidator extends WaldotAnonymousValidator i
 		super(waldotOpcUaServer.getWaldotConfiguration());
 	}
 
+	/**
+	 * Returns the set of supported user token types.
+	 * This validator supports only anonymous authentication.
+	 *
+	 * @return a set containing only UserTokenType.Anonymous
+	 */
 	@Override
 	public Set<UserTokenType> getSupportedTokenTypes() {
 		return Set.of(UserTokenType.Anonymous);
 	}
 
+	/**
+	 * Sets the client management strategy for handling client sessions.
+	 *
+	 * @param clientManagementStrategy the strategy for managing client sessions
+	 */
 	@Override
 	public void setAgentManagementStrategy(final ClientManagementStrategy clientManagementStrategy) {
 		this.clientManagementStrategy = clientManagementStrategy;

@@ -205,42 +205,93 @@ public class PropertyObject {
 		return writable;
 	}
 
+	/**
+	 * Sets the optional comment associated with the property.
+	 *
+	 * @param comment the comment string to set.
+	 */
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
+	/**
+	 * Sets the description of the property.
+	 *
+	 * @param description the description string to set.
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Sets the display name of the property.
+	 *
+	 * @param displayName the display name string to set.
+	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 
+	/**
+	 * Sets the unique identifier of the property.
+	 *
+	 * @param id the {@link DigitalTwinModelIdentifier} representing the property's ID.
+	 */
 	public void setId(DigitalTwinModelIdentifier id) {
 		this.id = id;
 	}
 
+	/**
+	 * Sets the name of the property.
+	 *
+	 * @param name the name string to set.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Sets the schema of the property, which defines the data type or structure of its value.
+	 *
+	 * @param schema the {@link Schema} object representing the property's schema.
+	 */
 	public void setSchema(Schema schema) {
 		this.schema = schema;
 	}
 
+	/**
+	 * Sets the list of types associated with the property.
+	 *
+	 * @param types a list of type strings, which must include "Property".
+	 */
 	public void setTypes(List<String> types) {
 		this.types = types;
 	}
 
+	/**
+	 * Sets the unit of measurement for the property value.
+	 *
+	 * @param unit the {@link Unit} object representing the property's unit.
+	 */
 	public void setUnit(Unit unit) {
 		this.unit = unit;
 	}
 
+	/**
+	 * Sets whether the property is writable.
+	 *
+	 * @param writable {@code true} if the property should be writable, {@code false} otherwise.
+	 */
 	public void setWritable(boolean writable) {
 		this.writable = writable;
 	}
 
+	/**
+	 * Converts the property object to a map representation conforming to DTDL v2 specification.
+	 *
+	 * @return a map containing the property's attributes, including @id, @type, name, schema,
+	 *         and optional metadata fields such as comment, description, displayName, unit, and writable.
+	 */
 	public Map<String, Object> toMap() {
 		final Map<String, Object> map = new HashMap<>();
 		map.put("@id", id.toString());

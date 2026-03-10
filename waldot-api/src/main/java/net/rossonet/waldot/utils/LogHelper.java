@@ -19,6 +19,13 @@ import javax.naming.ConfigurationException;
  */
 public final class LogHelper {
 
+	/**
+	 * Changes the Java Util Logging (JUL) level for all handlers in the root logger.
+	 * 
+	 * @param logLevel the desired log level. Valid values are: all, config, fine, finer,
+	 *                 finest, info, off, severe, warning
+	 * @throws ConfigurationException if the specified log level is not valid
+	 */
 	public static void changeJulLogLevel(final String logLevel) throws ConfigurationException {
 		final Logger rootLogger = Logger.getLogger("");
 		Level targetLevel = Level.INFO;
@@ -60,11 +67,23 @@ public final class LogHelper {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #changeJulLogLevel(String)} instead.
+	 * 
+	 * @param logLevel the desired log level
+	 * @throws ConfigurationException if the specified log level is not valid
+	 */
 	@Deprecated
 	public static void changeLogLevel(final String logLevel) throws ConfigurationException {
 		changeJulLogLevel(logLevel);
 	}
 
+	/**
+	 * Converts a Throwable's stack trace to a string representation including the cause message.
+	 * 
+	 * @param throwable the throwable to convert
+	 * @return a string containing the cause message (if available) and the full stack trace
+	 */
 	public static String stackTraceToString(final Throwable throwable) {
 		final StringWriter sw = new StringWriter();
 		final PrintWriter pw = new PrintWriter(sw);
@@ -78,6 +97,14 @@ public final class LogHelper {
 		return response;
 	}
 
+	/**
+	 * Converts a Throwable's stack trace to a string representation with a limited number of lines.
+	 * If an error occurs during truncation, falls back to the full stack trace.
+	 * 
+	 * @param throwable the throwable to convert
+	 * @param numLines  the maximum number of lines to include in the output
+	 * @return a string containing up to the specified number of lines of the stack trace
+	 */
 	public static String stackTraceToString(final Throwable throwable, final int numLines) {
 		try {
 			final List<String> lines = Arrays.asList(stackTraceToString(throwable).split("\n"));

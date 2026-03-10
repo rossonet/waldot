@@ -99,10 +99,20 @@ public class Schema {
 		}
 	}
 
+	/**
+	 * Checks whether the schema is defined as a JSON object.
+	 *
+	 * @return {@code true} if the schema is a JSON schema, {@code false} otherwise.
+	 */
 	public boolean isJson() {
 		return jsonSchema != null;
 	}
 
+	/**
+	 * Converts the schema to a JSON object representation.
+	 *
+	 * @return the {@link JSONObject} representing the schema, or an empty JSONObject if no JSON schema is defined.
+	 */
 	public JSONObject toSchemaJson() {
 		if (jsonSchema != null) {
 			return jsonSchema;
@@ -111,6 +121,13 @@ public class Schema {
 		}
 	}
 
+	/**
+	 * Converts the schema to a string representation.
+	 *
+	 * @return a string representation of the schema, which can be a primitive type name,
+	 *         a model identifier string, or a JSON string depending on the schema type.
+	 *         Returns "unknown" if no schema is defined.
+	 */
 	public String toSchemaString() {
 		if (digitalTwinPrimitive != null) {
 			return digitalTwinPrimitive.toString().substring(1);

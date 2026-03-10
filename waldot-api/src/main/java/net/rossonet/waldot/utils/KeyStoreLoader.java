@@ -54,18 +54,45 @@ public class KeyStoreLoader {
 	private X509Certificate[] serverCertificateChain;
 	private KeyPair serverKeyPair;
 
+	/**
+	 * Gets the server certificate from the loaded keystore.
+	 * 
+	 * @return the server X509Certificate, or null if not loaded
+	 */
 	public X509Certificate getServerCertificate() {
 		return serverCertificate;
 	}
 
+	/**
+	 * Gets the server certificate chain from the loaded keystore.
+	 * 
+	 * @return an array of X509Certificate representing the certificate chain,
+	 *         or null if not loaded
+	 */
 	public X509Certificate[] getServerCertificateChain() {
 		return serverCertificateChain;
 	}
 
+	/**
+	 * Gets the server key pair (public and private key) from the loaded keystore.
+	 * 
+	 * @return the server KeyPair, or null if not loaded
+	 */
 	public KeyPair getServerKeyPair() {
 		return serverKeyPair;
 	}
 
+	/**
+	 * Loads a PKCS#12 keystore from the specified directory, or creates a new one with a
+	 * self-signed certificate if it does not exist. The keystore is expected to be named
+	 * "example-server.pfx" in the base directory.
+	 * 
+	 * @param baseDir the directory containing the keystore file
+	 * @return this KeyStoreLoader instance for method chaining
+	 * @throws Exception if the keystore cannot be loaded or created
+	 * @deprecated This class is deprecated and will be removed in a future release.
+	 *             Use {@link SslHelper.KeyStoreHelper} instead.
+	 */
 	@Deprecated
 	public KeyStoreLoader load(final Path baseDir) throws Exception {
 		final KeyStore keyStore = KeyStore.getInstance("PKCS12");

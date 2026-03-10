@@ -126,6 +126,20 @@ public class IceUtils {
 		return createAgent(rtpPort, isTrickling, null);
 	}
 
+	/**
+	 * Creates an ICE <tt>Agent</tt> (vanilla or trickle, depending on the value of
+	 * <tt>isTrickling</tt>) and adds to it an audio and a video stream with RTP and
+	 * RTCP components. This version allows specifying custom candidate harvesters.
+	 *
+	 * @param rtpPort the port that we should try to bind the RTP component on (the
+	 *                RTCP one would automatically go to rtpPort + 1)
+	 * @param isTrickling indicates whether the newly created agent should be
+	 *                    performing trickle ICE
+	 * @param harvesters the list of candidate harvesters to use, or null to use default
+	 *                    STUN and UPnP harvesters
+	 * @return an ICE <tt>Agent</tt> with an audio stream with RTP and RTCP components
+	 * @throws Throwable if anything goes wrong
+	 */
 	protected static Agent createAgent(int rtpPort, boolean isTrickling, List<CandidateHarvester> harvesters)
 			throws Throwable {
 		final long startTime = System.currentTimeMillis();

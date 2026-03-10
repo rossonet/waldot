@@ -22,23 +22,56 @@ import io.netty.channel.nio.NioEventLoopGroup;
  */
 public final class ThreadHelper {
 
+	/**
+	 * Creates a new NioEventLoopGroup using virtual threads.
+	 * 
+	 * @param name the base name for the thread factory
+	 * @return a new NioEventLoopGroup configured with virtual threads
+	 */
 	public static NioEventLoopGroup newVirtualEventLoopGroup(String name) {
 		return new NioEventLoopGroup(Runtime.getRuntime().availableProcessors(),
 				Thread.ofVirtual().name(name, 0).factory());
 	}
 
+	/**
+	 * Creates a new ScheduledExecutorService using virtual threads.
+	 * 
+	 * @param name the base name for the thread factory
+	 * @return a new ScheduledExecutorService configured with virtual threads
+	 */
 	public static ScheduledExecutorService newVirtualSchedulerExecutor(String name) {
 		return Executors.newScheduledThreadPool(Thread.activeCount(), Thread.ofVirtual().name(name, 0).factory());
 	}
 
+	/**
+	 * Creates a new ExecutorService that uses virtual threads for each task.
+	 * 
+	 * @return a new ExecutorService using virtual thread per task execution
+	 */
 	public static ExecutorService newVirtualThreadExecutor() {
 		return Executors.newVirtualThreadPerTaskExecutor();
 	}
 
+	/**
+	 * Returns a Thread.Builder for creating virtual threads.
+	 * 
+	 * @return a new Thread.Builder configured for virtual threads
+	 */
 	public static OfVirtual ofVirtual() {
 		return Thread.ofVirtual();
 	}
 
+	/**
+	 * Executes a Callable with a timeout. If the callable does not complete within
+	 * the specified time, the task is cancelled and a TimeoutException is thrown.
+	 * 
+	 * @param <RETURN_TYPE> the return type of the callable
+	 * @param callable     the callable to execute
+	 * @param timeout      the maximum time to wait
+	 * @param timeUnit     the unit of the timeout
+	 * @return the result returned by the callable
+	 * @throws Exception if the callable throws an exception, or if timeout occurs
+	 */
 	public static <RETURN_TYPE> RETURN_TYPE runWithTimeout(final Callable<RETURN_TYPE> callable, final long timeout,
 			final TimeUnit timeUnit) throws Exception {
 		final ExecutorService executor = newVirtualThreadExecutor();
@@ -61,6 +94,15 @@ public final class ThreadHelper {
 		}
 	}
 
+	/**
+	 * Executes a Runnable with a timeout. If the runnable does not complete within
+	 * the specified time, the task is cancelled and a TimeoutException is thrown.
+	 * 
+	 * @param runnable     the runnable to execute
+	 * @param timeout      the maximum time to wait
+	 * @param timeUnit     the unit of the timeout
+	 * @throws Exception if an exception occurs during execution, or if timeout occurs
+	 */
 	public static void runWithTimeout(final Runnable runnable, final long timeout, final TimeUnit timeUnit)
 			throws Exception {
 		runWithTimeout(new Callable<Object>() {

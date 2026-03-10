@@ -13,8 +13,8 @@ import net.rossonet.waldot.api.configuration.WaldotConfiguration;
  * WaldotX509IdentityValidator is an implementation of X509IdentityValidator
  * that provides a specific validation mechanism for X.509 certificates in the
  * Waldot context.
- * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ *
+ * @param configuration the Waldot configuration containing authentication settings
  */
 public class WaldotX509IdentityValidator extends X509IdentityValidator {
 	private static final Logger logger = LoggerFactory.getLogger(WaldotX509IdentityValidator.class);

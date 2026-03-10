@@ -13,11 +13,14 @@ import net.rossonet.waldot.api.models.WaldotCommand;
  * AbstractMethodInvocationHandler and implements the invocation logic for
  * WaldotCommand methods. It handles the input and output arguments, invoking
  * the command with the provided input values.
- * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public class CommandInvocationHandler extends AbstractMethodInvocationHandler {
 
+	/**
+	 * Creates a new CommandInvocationHandler for the given method node.
+	 *
+	 * @param method the UA method node to handle invocation for
+	 */
 	public CommandInvocationHandler(final UaMethodNode method) {
 		super(method);
 	}

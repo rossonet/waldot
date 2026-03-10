@@ -33,8 +33,6 @@ import org.apache.tinkerpop.gremlin.util.iterator.StoreIteratorCounter;
  * counter in coordination with gremlin-test suite can be used to detect cases
  * when the query processor does not gracefully release the underlying
  * resources.
- * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
  */
 public class WaldotGraphIterator<E> implements CloseableIterator<E> {
 	/**

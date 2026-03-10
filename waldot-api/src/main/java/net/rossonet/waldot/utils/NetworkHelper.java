@@ -34,6 +34,13 @@ public final class NetworkHelper {
 			4294965248L, 4294966272L, 4294966784L, 4294967040L, 4294967168L, 4294967232L, 4294967264L, 4294967280L,
 			4294967288L, 4294967292L, 4294967294L, 4294967295L };
 
+	/**
+	 * Checks if a local TCP port is available for binding.
+	 * 
+	 * @param port the port number to check (1-65535)
+	 * @return true if the port is available (not in use), false if the port is already in use
+	 * @throws IOException if an I/O error occurs while checking the port
+	 */
 	public static boolean checkLocalPortAvailable(final int port) throws IOException {
 		boolean portTaken = false;
 		ServerSocket socket = null;
@@ -50,6 +57,15 @@ public final class NetworkHelper {
 		return !portTaken;
 	}
 
+	/**
+	 * Checks if a TCP port is reachable at the specified socket address.
+	 * The check is performed with a timeout to avoid hanging on unreachable hosts.
+	 * 
+	 * @param inetSocketAddress     the socket address to check (host and port)
+	 * @param socketTimeoutSeconds the timeout in seconds for the connection attempt
+	 * @return true if the port is reachable, false otherwise (including timeout)
+	 * @throws IOException if an I/O error occurs during the check
+	 */
 	public static boolean checkTcpPort(final SocketAddress inetSocketAddress, final int socketTimeoutSeconds)
 			throws IOException {
 		final AtomicBoolean ok = new AtomicBoolean(false);
@@ -81,6 +97,13 @@ public final class NetworkHelper {
 		}
 	}
 
+	/**
+	 * Finds an available port that can be bound. This method binds to port 0 (an ephemeral port),
+	 * immediately releases it, and returns the port number that was assigned.
+	 * 
+	 * @param faultPort the port to return if no available port can be found
+	 * @return an available port number, or faultPort if an error occurs
+	 */
 	public static int findAvailablePort(final int faultPort) {
 		try {
 			final ServerSocket socket = new ServerSocket(0);
@@ -93,6 +116,13 @@ public final class NetworkHelper {
 		}
 	}
 
+	/**
+	 * Retrieves the MAC addresses of all network interfaces on the system.
+	 * 
+	 * @return a list of MAC addresses in hexadecimal format (e.g., "00-1A-2B-3C-4D-5E"),
+	 *         or an empty list if no interfaces have MAC addresses
+	 * @throws SocketException if an I/O error occurs while retrieving network interfaces
+	 */
 	public static List<String> getAllNetworkMacAddress() throws SocketException {
 		final List<String> result = new ArrayList<>();
 		final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
@@ -110,8 +140,10 @@ public final class NetworkHelper {
 		return result;
 	}
 
-	/*
-	 * @return the local hostname, if possible. Failure results in "localhost".
+	/**
+	 * Gets the local hostname of the machine.
+	 * 
+	 * @return the hostname, or "localhost" if the hostname cannot be determined
 	 */
 	public static String getHostname() {
 		try {
@@ -121,6 +153,15 @@ public final class NetworkHelper {
 		}
 	}
 
+	/**
+	 * Gets all hostnames associated with a given IP address or hostname.
+	 * If the address is a wildcard address (0.0.0.0), returns hostnames for all network interfaces.
+	 * 
+	 * @param address the IP address or hostname to resolve
+	 * @return a set of hostnames including the hostname, IP address, and canonical hostname
+	 * @throws UnknownHostException if the address cannot be resolved
+	 * @throws SocketException      if an I/O error occurs while retrieving network interfaces
+	 */
 	public static Set<String> getHostnames(final String address) throws UnknownHostException, SocketException {
 		final Set<String> hostnames = new HashSet<>();
 
@@ -147,6 +188,13 @@ public final class NetworkHelper {
 		return hostnames;
 	}
 
+	/**
+	 * Gets the MAC address of the network interface associated with a hostname or IP address.
+	 * 
+	 * @param hostname the hostname or IP address to look up
+	 * @return the MAC address as a lowercase hexadecimal string, or null if not found
+	 * @throws Exception if the hostname cannot be resolved or the MAC address cannot be retrieved
+	 */
 	public static String getMacAddressAsString(final String hostname) throws Exception {
 		InetAddress ip = null;
 
@@ -184,6 +232,12 @@ public final class NetworkHelper {
 		return -1;
 	}
 
+	/**
+	 * Validates whether a string is a valid IPv4 address.
+	 * 
+	 * @param ip the string to validate
+	 * @return true if the string is a valid IPv4 address, false otherwise
+	 */
 	public static boolean isValidIPAddress(final String ip) {
 		final String zeroTo255 = "(\\d{1,2}|(0|1)\\" + "d{2}|2[0-4]\\d|25[0-5])";
 		final String regex = zeroTo255 + "\\." + zeroTo255 + "\\." + zeroTo255 + "\\." + zeroTo255;
@@ -195,6 +249,13 @@ public final class NetworkHelper {
 		return m.matches();
 	}
 
+	/**
+	 * Validates whether a string is a valid MAC address.
+	 * Supports formats: AA:BB:CC:DD:EE:FF, AA-BB-CC-DD-EE-FF, AABB.CCDD.EEFF
+	 * 
+	 * @param macAddress the MAC address string to validate
+	 * @return true if the string is a valid MAC address, false otherwise
+	 */
 	public static boolean isValidMacAddress(final String macAddress) {
 		final String regex = "^([0-9A-Fa-f]{2}[:-])" + "{5}([0-9A-Fa-f]{2})|" + "([0-9a-fA-F]{4}\\."
 				+ "[0-9a-fA-F]{4}\\." + "[0-9a-fA-F]{4})$";
@@ -206,6 +267,13 @@ public final class NetworkHelper {
 		return m.matches();
 	}
 
+	/**
+	 * Validates whether a string is a valid subnet mask (IPv4).
+	 * A valid subnet mask must be a valid IP address and have contiguous 1s followed by 0s.
+	 * 
+	 * @param subnetMask the subnet mask string to validate
+	 * @return true if the string is a valid subnet mask, false otherwise
+	 */
 	public static boolean isValidSubnetMask(final String subnetMask) {
 		if (subnetMask != null && isValidIPAddress(subnetMask)) {
 			final long lSubnetMask = ipAddressToLong(subnetMask);
