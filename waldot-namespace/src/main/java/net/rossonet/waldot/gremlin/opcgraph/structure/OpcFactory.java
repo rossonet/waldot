@@ -122,9 +122,9 @@ public final class OpcFactory {
 	 */
 	public static WaldotGraph createTheCrew() throws InterruptedException, ExecutionException {
 		final Configuration conf = new BaseConfiguration();
+		final WaldotGraph g = getOpcGraph(conf);
 		conf.setProperty(OpcGraph.GREMLIN_OPCGRAPH_DEFAULT_VERTEX_PROPERTY_CARDINALITY,
 				VertexProperty.Cardinality.list.name());
-		final WaldotGraph g = getOpcGraph(conf);
 		generateTheCrew(g);
 		return g;
 	}
