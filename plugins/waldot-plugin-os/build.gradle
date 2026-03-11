@@ -40,6 +40,7 @@ dependencies {
     implementation project(':waldot-deps')
     api project(':waldot-api')
     api("com.github.oshi:oshi-core-java11:6.8.2")
+    api("com.pi4j:pi4j-plugin-raspberrypi:4.0.0")
     testImplementation project(':waldot-namespace')
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'

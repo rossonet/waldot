@@ -66,10 +66,6 @@ dependencies {
     api("org.bouncycastle:bcprov-jdk18on:1.83")
     api("org.bouncycastle:bcpkix-jdk18on:1.83")
     api("org.bouncycastle:bcutil-jdk18on:1.83")
-    // libreria ICE
-    //api("org.jitsi:ice4j:3.2-9-gb64c86f")
-    //api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.3'
-    //api("com.google.guava:guava:33.5.0-jre")
     // gremlin
     api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
     // OPCUA
