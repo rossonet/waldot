@@ -33,10 +33,7 @@ jobs:
     needs: [build]
     steps:
       - name: Install Trivy
-        uses: aquasecurity/setup-trivy@v0.2.2
-        with:
-          version: v0.59.1
-          cache: true
+        uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
       - run: |
           docker pull --platform amd64 rossonet/waldot:latest
           docker images
