@@ -59,6 +59,7 @@ public class KeyStoreLoader {
 	 * 
 	 * @return the server X509Certificate, or null if not loaded
 	 */
+	@Deprecated
 	public X509Certificate getServerCertificate() {
 		return serverCertificate;
 	}
@@ -66,9 +67,10 @@ public class KeyStoreLoader {
 	/**
 	 * Gets the server certificate chain from the loaded keystore.
 	 * 
-	 * @return an array of X509Certificate representing the certificate chain,
-	 *         or null if not loaded
+	 * @return an array of X509Certificate representing the certificate chain, or
+	 *         null if not loaded
 	 */
+	@Deprecated
 	public X509Certificate[] getServerCertificateChain() {
 		return serverCertificateChain;
 	}
@@ -78,14 +80,15 @@ public class KeyStoreLoader {
 	 * 
 	 * @return the server KeyPair, or null if not loaded
 	 */
+	@Deprecated
 	public KeyPair getServerKeyPair() {
 		return serverKeyPair;
 	}
 
 	/**
-	 * Loads a PKCS#12 keystore from the specified directory, or creates a new one with a
-	 * self-signed certificate if it does not exist. The keystore is expected to be named
-	 * "example-server.pfx" in the base directory.
+	 * Loads a PKCS#12 keystore from the specified directory, or creates a new one
+	 * with a self-signed certificate if it does not exist. The keystore is expected
+	 * to be named "example-server.pfx" in the base directory.
 	 * 
 	 * @param baseDir the directory containing the keystore file
 	 * @return this KeyStoreLoader instance for method chaining
@@ -106,12 +109,11 @@ public class KeyStoreLoader {
 
 			final KeyPair keyPair = SelfSignedCertificateGenerator.generateRsaKeyPair(2048);
 
-			final String applicationUri = "urn:eclipse:milo:examples:server:" + UUID.randomUUID();
+			final String applicationUri = "urn:rossonet:waldot:camillo:" + UUID.randomUUID();
 
 			final SelfSignedCertificateBuilder builder = new SelfSignedCertificateBuilder(keyPair)
-					.setCommonName("Eclipse Milo Example Server").setOrganization("digitalpetri")
-					.setOrganizationalUnit("dev").setLocalityName("Folsom").setStateName("CA").setCountryCode("US")
-					.setApplicationUri(applicationUri);
+					.setCommonName("WaldOT OPC Server").setOrganization("Rossonet scarl").setOrganizationalUnit("dev")
+					.setLocalityName("Imola").setStateName("BO").setCountryCode("IT").setApplicationUri(applicationUri);
 
 			// Get as many hostnames and IP addresses as we can listed in the certificate.
 			final Set<String> hostnames = Sets.union(Sets.newHashSet(HostnameUtil.getHostname()),
