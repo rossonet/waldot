@@ -61,19 +61,23 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	private transient boolean activeHistory = false;
 
 	protected boolean allowNullPropertyValues = false;
+
 	private transient boolean ensurePostActive = false;
 
 	protected transient final List<EventObserver> eventObservers = new ArrayList<>();
+
 	protected transient final WaldotGraph graph;
 
 	private String historyContext = null;
+
 	private final QualifiedProperty<String> historyContextProperty;
+
 	private final QualifiedProperty<Boolean> historyProperty;
+
 	private final QualifiedProperty<String> labelProperty;
-
 	private final Set<WaldotVertexProperty<?>> linkedProperties = new HashSet<>();
-	private transient final Logger logger = LoggerFactory.getLogger(getClass());
 
+	private transient final Logger logger = LoggerFactory.getLogger(getClass());
 	protected transient final List<PropertyObserver> propertyObservers = new ArrayList<>();
 
 	private final QualifiedProperty<String> typeProperty;
@@ -148,6 +152,18 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 				: edgeIterator;
 	}
 
+	protected Boolean getBooleanProperty(Object[] propertyKeyValues, String label, QualifiedProperty<Boolean> property,
+			String key) {
+		property = initBooleanProperty(label);
+		final String value = MiloStrategy.getKeyValuesProperty(propertyKeyValues, key);
+		if (value != null && !value.isEmpty()) {
+			final Boolean boolValue = Boolean.parseBoolean(value);
+			setProperty(property, boolValue);
+			return boolValue;
+		}
+		return null;
+	}
+
 	@Override
 	public List<EventObserver> getEventObservers() {
 		return eventObservers;
@@ -160,6 +176,38 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 
 	public String getHistoryContext() {
 		return historyContext != null ? historyContext : HistoryStrategy.DEFAULT_DATA_CONTEXT;
+	}
+
+	protected Integer getIntProperty(Object[] propertyKeyValues, String label, QualifiedProperty<Integer> property,
+			String key) {
+		property = initIntProperty(label);
+		final String value = MiloStrategy.getKeyValuesProperty(propertyKeyValues, key);
+		if (value != null && !value.isEmpty()) {
+			try {
+				final Integer intValue = Integer.valueOf(value);
+				setProperty(property, intValue);
+				return intValue;
+			} catch (final Throwable e) {
+				return null;
+			}
+		}
+		return null;
+	}
+
+	protected Long getLongProperty(Object[] propertyKeyValues, String label, QualifiedProperty<Long> property,
+			String key) {
+		property = initLongProperty(label);
+		final String value = MiloStrategy.getKeyValuesProperty(propertyKeyValues, key);
+		if (value != null && !value.isEmpty()) {
+			try {
+				final Long longValue = Long.valueOf(value);
+				setProperty(property, longValue);
+				return longValue;
+			} catch (final NumberFormatException e) {
+				return null;
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -185,6 +233,19 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 		return propertyObservers;
 	}
 
+	protected String getStringProperty(Object[] propertyKeyValues, String label, QualifiedProperty<String> property,
+			String key, boolean required) {
+		property = new QualifiedProperty<String>(getNamespace().getNamespaceUri(), label,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				String.class);
+		final String value = MiloStrategy.getKeyValuesProperty(propertyKeyValues, key);
+		if (value != null && !value.isEmpty()) {
+			setProperty(property, value);
+			return value;
+		}
+		return null;
+	}
+
 	@Override
 	public ImmutableMap<String, WaldotVertexProperty<Object>> getVertexProperties() {
 		return ImmutableMap.copyOf(getNamespace().getVertexProperties(this));
@@ -198,6 +259,24 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	@Override
 	public boolean inComputerMode() {
 		return getNamespace().inComputerMode();
+	}
+
+	protected QualifiedProperty<Boolean> initBooleanProperty(String label) {
+		return new QualifiedProperty<Boolean>(getNamespace().getNamespaceUri(), label,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				Boolean.class);
+	}
+
+	private QualifiedProperty<Integer> initIntProperty(String label) {
+		return new QualifiedProperty<Integer>(getNamespace().getNamespaceUri(), label,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				Integer.class);
+	}
+
+	private QualifiedProperty<Long> initLongProperty(String label) {
+		return new QualifiedProperty<Long>(getNamespace().getNamespaceUri(), label,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				Long.class);
 	}
 
 	@Override
