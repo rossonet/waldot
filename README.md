@@ -320,7 +320,7 @@ public class MyIndustrialPlugin implements PluginListener {
 
 ### CI/CD Status
 
-[![WaldOT Library Test](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/test-on-master-with-gradle.yml)
+[![Test all subprojects with Gradle](https://github.com/rossonet/waldot/actions/workflows/test-branch-with-gradle.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/test-branch-with-gradle.yml)
 [![Build WaldOT shadowJar](https://github.com/rossonet/waldot/actions/workflows/build-shadowjar-app.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/build-shadowjar-app.yml)
 [![Build and publish WaldOT docker image to Docker Hub](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/publish-to-docker-hub.yml)
 [![Publish Java artifacts to Maven Central](https://github.com/rossonet/waldot/actions/workflows/publish-to-maven.yml/badge.svg)](https://github.com/rossonet/waldot/actions/workflows/publish-to-maven.yml)
