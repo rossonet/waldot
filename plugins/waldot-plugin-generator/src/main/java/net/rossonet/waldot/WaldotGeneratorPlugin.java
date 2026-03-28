@@ -33,8 +33,6 @@ import net.rossonet.waldot.utils.ThreadHelper;
  */
 @WaldotPlugin
 public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
-	private static final String WALD_OT_DATA_GENERATOR_DISPLAY_NAME = "WaldOT Data Generator";
-	private static final String WALD_OT_DATA_GENERATOR_OBJECT_TYPE = "WaldOTDataGeneratorObjectType";
 	public static final String ALGORITHM_FIELD = "Algorithm";
 	public static final String DATA_GENERATOR_OBJECT_TYPE_LABEL = "generator";
 	public static final String DEFAULT_ALGORITHM_FIELD = Algorithm.incremental.toString();
@@ -45,6 +43,8 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 	private final static Logger logger = LoggerFactory.getLogger(WaldotGeneratorPlugin.class);
 	public static final String MAX_VALUE_FIELD = "Max";
 	public static final String MIN_VALUE_FIELD = "Min";
+	private static final String WALDOT_DATA_GENERATOR_DISPLAY_NAME = "WaldOT Data Generator";
+	private static final String WALDOT_DATA_GENERATOR_OBJECT_TYPE = "WaldOTDataGeneratorObjectType";
 	private UaObjectTypeNode dataGeneratorTypeNode;
 
 	private final ExecutorService executor = ThreadHelper.newVirtualThreadExecutor();
@@ -68,9 +68,9 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 
 	private void createDataGeneratorTypeNode() {
 		dataGeneratorTypeNode = UaObjectTypeNode.builder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId(OBJECT_TYPES + WALD_OT_DATA_GENERATOR_OBJECT_TYPE))
-				.setBrowseName(waldotNamespace.generateQualifiedName(WALD_OT_DATA_GENERATOR_OBJECT_TYPE))
-				.setDisplayName(LocalizedText.english(WALD_OT_DATA_GENERATOR_DISPLAY_NAME)).setIsAbstract(false).build();
+				.setNodeId(waldotNamespace.generateNodeId(OBJECT_TYPES + WALDOT_DATA_GENERATOR_OBJECT_TYPE))
+				.setBrowseName(waldotNamespace.generateQualifiedName(WALDOT_DATA_GENERATOR_OBJECT_TYPE))
+				.setDisplayName(LocalizedText.english(WALDOT_DATA_GENERATOR_DISPLAY_NAME)).setIsAbstract(false).build();
 		PluginListener.addParameterToTypeNode(waldotNamespace, dataGeneratorTypeNode, MiloStrategy.LABEL_FIELD,
 				NodeIds.String);
 		DataGeneratorVertex.generateParameters(waldotNamespace, dataGeneratorTypeNode);
