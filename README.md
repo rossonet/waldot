@@ -299,6 +299,30 @@ rule = graph.addVertex(
 )
 ```
 
+### waldot-plugin-generator
+
+Dynamic data simulation for testing, development, and demonstrations.
+
+**Features:**
+- 6 generation algorithms (incremental, decremental, random, sinusoidal, triangular, stopped)
+- Real-time configurable update intervals
+- Virtual threads for thousands of concurrent generators
+- Full OPC-UA synchronization
+- Perfect for testing without physical hardware
+
+**Documentation:** [plugins/waldot-plugin-generator/README.md](plugins/waldot-plugin-generator/README.md)
+
+**Quick Example:**
+```groovy
+tempSensor = graph.addVertex(
+    "type", "generator",
+    "Algorithm", "sinusoidal",
+    "Min", "18",
+    "Max", "26",
+    "Delay", "5000"  // Simulates temperature sensor
+)
+```
+
 ---
 
 ## Advanced Features

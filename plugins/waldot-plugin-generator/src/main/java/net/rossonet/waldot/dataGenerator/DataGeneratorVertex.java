@@ -26,15 +26,119 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 
+/**
+ * WaldOT vertex that generates continuously changing data values using various algorithms.
+ * <p>
+ * DataGeneratorVertex simula un sensore o dispositivo IoT generando valori che cambiano
+ * nel tempo secondo algoritmi configurabili. Ogni generatore esegue in un thread virtuale
+ * dedicato che aggiorna la proprietà "data" a intervalli regolari.
+ * </p>
+ * 
+ * <h2>Generation Algorithms</h2>
+ * <ul>
+ *   <li><b>incremental</b>: Value increases by 1 from min to max, then wraps to min</li>
+ *   <li><b>decremental</b>: Value decreases by 1 from max to min, then wraps to max</li>
+ *   <li><b>random</b>: Random value uniformly distributed between min and max</li>
+ *   <li><b>sinusoidal</b>: Smooth sine wave: (max-min)/2 * sin(seed++) + (max+min)/2</li>
+ *   <li><b>triangular</b>: Triangle wave using arccos transformation</li>
+ *   <li><b>stopped</b>: No generation, value remains constant</li>
+ * </ul>
+ * 
+ * <h2>Configuration Properties</h2>
+ * <ul>
+ *   <li><b>Algorithm</b>: Generation algorithm name (String)</li>
+ *   <li><b>Delay</b>: Update interval in milliseconds (Long, min: 10ms)</li>
+ *   <li><b>Min</b>: Minimum value (Long, default: 0)</li>
+ *   <li><b>Max</b>: Maximum value (Long, default: 20000)</li>
+ * </ul>
+ * 
+ * <h2>Generated Value</h2>
+ * <p>
+ * The generated value is stored in the "data" property and updated at each interval.
+ * The value is accessible via:
+ * <ul>
+ *   <li>TinkerPop graph: {@code vertex.property("data").value()}</li>
+ *   <li>OPC-UA client: Browse to vertex and read "data" property</li>
+ * </ul>
+ * </p>
+ * 
+ * <h2>Lifecycle</h2>
+ * <ol>
+ *   <li>Constructor initializes properties and starts generation thread</li>
+ *   <li>Thread runs loop: generate value → update property → sleep(delay)</li>
+ *   <li>close() stops thread and terminates generation</li>
+ * </ol>
+ * 
+ * <h2>Thread Safety</h2>
+ * <p>
+ * Each generator runs in its own virtual thread. Property updates are thread-safe
+ * thanks to the underlying WaldOT framework synchronization.
+ * </p>
+ * 
+ * <h2>Example Usage</h2>
+ * <pre>{@code
+ * // Create sinusoidal generator simulating temperature sensor
+ * Vertex tempSensor = graph.addVertex(
+ *     "type", "generator",
+ *     "label", "office-temp",
+ *     "Algorithm", "sinusoidal",
+ *     "Min", "18",
+ *     "Max", "26",
+ *     "Delay", "5000"  // Update every 5 seconds
+ * );
+ * 
+ * // Read current value
+ * double temperature = tempSensor.property("data").value();
+ * 
+ * // Change algorithm at runtime
+ * tempSensor.property("Algorithm", "random");
+ * 
+ * // Stop generation
+ * tempSensor.property("Algorithm", "stopped");
+ * }</pre>
+ * 
+ * @see WaldotGeneratorPlugin
+ * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @since 0.4.0
+ */
 public class DataGeneratorVertex extends AbstractOpcVertex implements AutoCloseable {
 
+	/**
+	 * Available data generation algorithms.
+	 * <p>
+	 * Algoritmi disponibili per la generazione dei dati.
+	 * </p>
+	 */
 	public enum Algorithm {
-		decremental, incremental, random, sinusoidal, stopped, triangular
+		/** Value decreases from max to min, wraps around */
+		decremental,
+		/** Value increases from min to max, wraps around */
+		incremental,
+		/** Random value between min and max */
+		random,
+		/** Smooth sine wave pattern */
+		sinusoidal,
+		/** No generation, value stays constant */
+		stopped,
+		/** Triangle wave pattern */
+		triangular
 	}
 
+	/** Minimum allowed delay between updates (10ms) */
 	private static final long MIN_DELAY = 10L;
+	
+	/** Property key for generated value */
 	public static final String VALUE_KEY = "data";
 
+	/**
+	 * Registers OPC-UA properties for data generator type node.
+	 * <p>
+	 * Aggiunge le proprietà Algorithm, Delay, Min, Max al tipo OPC-UA del generatore.
+	 * </p>
+	 * 
+	 * @param waldotNamespace WaldOT namespace
+	 * @param dataGeneratorTypeNode OPC-UA type node for generators
+	 */
 	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode dataGeneratorTypeNode) {
 		PluginListener.addParameterToTypeNode(waldotNamespace, dataGeneratorTypeNode,
 				WaldotGeneratorPlugin.ALGORITHM_FIELD, NodeIds.String);
@@ -46,26 +150,57 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 				WaldotGeneratorPlugin.MAX_VALUE_FIELD, NodeIds.UInt64);
 	}
 
+	// Flag per controllare l'attività del thread di generazione
 	private transient boolean active = true;
+	
+	// Valore attuale generato
 	private double actualValue;
+	
+	// Algoritmo di generazione corrente
 	private Algorithm algorithm;
+	
+	// Proprietà OPC-UA per l'algoritmo
 	private final QualifiedProperty<String> algorithmProperty;
+	
+	// Ritardo tra gli aggiornamenti (ms)
 	private long delay;
+	
+	// Proprietà OPC-UA per il delay
 	private final QualifiedProperty<Long> delayProperty;
+	
+	// Executor per il thread virtuale del generatore
 	private final ExecutorService executor;
+	
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+	
+	// Valore massimo
 	private long max;
 
+	// Proprietà OPC-UA per il massimo
 	private final QualifiedProperty<Long> maxProperty;
+	
+	// Valore minimo
 	private long min;
+	
+	// Proprietà OPC-UA per il minimo
 	private final QualifiedProperty<Long> minProperty;
+	/**
+	 * Runnable per il thread di generazione dei dati.
+	 * <p>
+	 * Loop infinito che genera valori secondo l'algoritmo configurato
+	 * e aggiorna la proprietà "data" a intervalli regolari.
+	 * </p>
+	 */
 	private transient Runnable runner = new Runnable() {
 
 		@Override
 		public void run() {
 			logger.info("Thread for generator node " + getNodeId().toParseableString() + " started");
 			Thread.currentThread().setName(getNodeId().toParseableString());
+			
+			// Loop principale di generazione
 			while (active == true) {
+				// Seleziona l'algoritmo di generazione
 				switch (algorithm) {
 				case decremental:
 					generateNextDecremental();
@@ -83,12 +218,14 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 					generateNextTriangular();
 					break;
 				case stopped:
+					// Non genera nulla, mantiene il valore corrente
 					break;
 				default:
 					logger.warn("algorithm not implemented: " + algorithm);
 					break;
 				}
 				try {
+					// Attende prima della prossima generazione
 					Thread.sleep(delay);
 				} catch (final InterruptedException e) {
 					logger.info("exception in generator", e);
@@ -97,9 +234,32 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 			logger.info("Thread for generator node " + getNodeId().toParseableString() + " stopped");
 		}
 	};
+	
+	// Seed per algoritmi sinusoidali e triangolari
 	private long seed;
+	
 	private final WaldotNamespace waldotNamespace;
 
+	/**
+	 * Creates a new data generator vertex.
+	 * <p>
+	 * Costruisce un generatore dati inizializzando le proprietà Min, Max, Delay, Algorithm
+	 * dai valori forniti o usando i default. Avvia immediatamente il thread di generazione.
+	 * </p>
+	 * 
+	 * @param executor executor service for virtual thread
+	 * @param graph WaldOT graph instance
+	 * @param context OPC-UA node context
+	 * @param nodeId OPC-UA node ID
+	 * @param browseName OPC-UA browse name
+	 * @param displayName OPC-UA display name
+	 * @param description OPC-UA description
+	 * @param writeMask OPC-UA write mask
+	 * @param userWriteMask OPC-UA user write mask
+	 * @param eventNotifier OPC-UA event notifier
+	 * @param version vertex version
+	 * @param propertyKeyValues initial property key-value pairs
+	 */
 	public DataGeneratorVertex(ExecutorService executor, WaldotGraph graph, UaNodeContext context, NodeId nodeId,
 			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
 			UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
@@ -172,16 +332,36 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 				String.class);
 		setProperty(algorithmProperty, algorithm.name());
 
+		// Inizializza seed con valore casuale nel range
 		seed = (long) (Math.random() * (max - min)) + min;
 		actualValue = seed;
+		
+		// Avvia il thread di generazione
 		executor.submit(runner);
 	}
 
+	/**
+	 * Updates the "data" property with the current generated value.
+	 * <p>
+	 * Aggiorna la proprietà "data" del vertice con il valore attuale generato.
+	 * L'aggiornamento propaga sia al grafo TinkerPop che all'OPC-UA address space.
+	 * </p>
+	 */
 	private void assignValue() {
 		property(Cardinality.single, VALUE_KEY, actualValue);
 
 	}
 
+	/**
+	 * Validates and sets the algorithm from a string value.
+	 * <p>
+	 * Valida che l'algoritmo richiesto esista nell'enum Algorithm.
+	 * Se valido, imposta il nuovo algoritmo; altrimenti mantiene quello corrente.
+	 * </p>
+	 * 
+	 * @param keyValuesNewAlgorithm algorithm name to set
+	 * @return true if algorithm valid and set, false otherwise
+	 */
 	private boolean checkAlgorithm(final String keyValuesNewAlgorithm) {
 		boolean ok = false;
 		if (keyValuesNewAlgorithm != null && !keyValuesNewAlgorithm.isEmpty()) {
@@ -215,6 +395,16 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 		return ok;
 	}
 
+	/**
+	 * Validates and sets the delay from a string value.
+	 * <p>
+	 * Valida che il delay sia un numero >= MIN_DELAY (10ms).
+	 * Se valido, imposta il nuovo delay; altrimenti mantiene quello corrente.
+	 * </p>
+	 * 
+	 * @param keyValuesNewDelay delay in milliseconds as string
+	 * @return true if delay valid and set, false otherwise
+	 */
 	private boolean checkDelay(final String keyValuesNewDelay) {
 		boolean ok = false;
 		if (keyValuesNewDelay != null && !keyValuesNewDelay.isEmpty()) {
@@ -241,6 +431,11 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 		return ok;
 	}
 
+	/**
+	 * Clones this vertex.
+	 * 
+	 * @return cloned DataGeneratorVertex instance
+	 */
 	@Override
 	public Object clone() {
 		return new DataGeneratorVertex(executor, graph, getNodeContext(), getNodeId(), getBrowseName(),
@@ -249,11 +444,27 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 
 	}
 
+	/**
+	 * Stops the generation thread.
+	 * <p>
+	 * Ferma il thread di generazione impostando active = false.
+	 * Il thread terminerà al prossimo ciclo del loop.
+	 * </p>
+	 */
 	@Override
 	public void close() {
 		active = false;
 	}
 
+	/**
+	 * Generates next value using decremental algorithm.
+	 * <p>
+	 * Decrementa il valore di 1. Quando raggiunge min, ritorna a max (wrap-around).
+	 * </p>
+	 * <p>
+	 * Formula: value--, if value < min then value = max
+	 * </p>
+	 */
 	protected void generateNextDecremental() {
 		actualValue--;
 		if (actualValue < min) {
@@ -262,6 +473,15 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 		assignValue();
 	}
 
+	/**
+	 * Generates next value using incremental algorithm.
+	 * <p>
+	 * Incrementa il valore di 1. Quando raggiunge max, ritorna a min (wrap-around).
+	 * </p>
+	 * <p>
+	 * Formula: value++, if value > max then value = min
+	 * </p>
+	 */
 	protected void generateNextIncremental() {
 		actualValue++;
 		if (actualValue > max) {
@@ -270,28 +490,81 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 		assignValue();
 	}
 
+	/**
+	 * Generates next value using random algorithm.
+	 * <p>
+	 * Genera un valore casuale uniformemente distribuito tra min e max.
+	 * </p>
+	 * <p>
+	 * Formula: random() * (max - min) + min
+	 * </p>
+	 */
 	protected void generateNextRandom() {
 		actualValue = Math.random() * (max - min) + min;
 		assignValue();
 	}
 
+	/**
+	 * Generates next value using sinusoidal algorithm.
+	 * <p>
+	 * Genera un'onda sinusoidale che oscilla tra min e max.
+	 * Usa seed come parametro temporale incrementale.
+	 * </p>
+	 * <p>
+	 * Formula: (max-min)/2 * sin(seed++) + (max+min)/2
+	 * </p>
+	 * <p>
+	 * Creates smooth periodic oscillation centered at (max+min)/2 with amplitude (max-min)/2.
+	 * </p>
+	 */
 	protected void generateNextSinusoidal() {
 		actualValue = (max - min) / 2 * Math.sin(seed++) + (max + min) / 2;
 		assignValue();
 	}
 
+	/**
+	 * Generates next value using triangular algorithm.
+	 * <p>
+	 * Genera un'onda triangolare che sale e scende linearmente tra min e max.
+	 * Usa trasformazione arccos per creare rampe lineari.
+	 * </p>
+	 * <p>
+	 * Formula: min + (max-min) * (2/π * acos(|cos(seed++)|))
+	 * </p>
+	 * <p>
+	 * Creates triangle wave with linear ramps up and down between min and max.
+	 * </p>
+	 */
 	protected void generateNextTriangular() {
 		actualValue = min + ((max - min) * (2 / Math.PI * Math.acos(Math.abs(Math.cos(seed++)))));
 		assignValue();
 	}
 
+	/**
+	 * Returns the WaldOT namespace.
+	 * 
+	 * @return WaldOT namespace instance
+	 */
 	public WaldotNamespace getWaldotNamespace() {
 		return waldotNamespace;
 	}
 
+	/**
+	 * Handles property value changes.
+	 * <p>
+	 * Chiamato quando una proprietà del vertice viene modificata (da OPC-UA o grafo).
+	 * Valida e applica i nuovi valori per Algorithm, Delay, Min, Max.
+	 * Le modifiche non valide vengono rifiutate e il valore originale ripristinato.
+	 * </p>
+	 * 
+	 * @param label property name
+	 * @param value new property value
+	 */
 	@Override
 	public void notifyPropertyValueChanging(String label, DataValue value) {
 		super.notifyPropertyValueChanging(label, value);
+		
+		// Gestisce modifica del Delay
 		if (label.equals(WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase())) {
 			final String delayTarget = value.value().value().toString();
 			if (checkDelay(delayTarget)) {
@@ -302,6 +575,8 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 				property(WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), delay);
 			}
 		}
+		
+		// Gestisce modifica dell'Algorithm
 		if (label.equals(WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase())) {
 			final String algorithmTarget = value.value().value().toString();
 			if (checkAlgorithm(algorithmTarget)) {
@@ -312,14 +587,26 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 				property(WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), algorithm.name());
 			}
 		}
+		
+		// Gestisce modifica del Min
 		if (label.equals(WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase())) {
-			setProperty(minProperty, Long.valueOf(value.getValue().getValue().toString()));
+			min = Long.valueOf(value.getValue().getValue().toString());
+			setProperty(minProperty, min);
 		}
+		
+		// Gestisce modifica del Max
 		if (label.equals(WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase())) {
-			setProperty(maxProperty, Long.valueOf(value.getValue().getValue().toString()));
+			max = Long.valueOf(value.getValue().getValue().toString());
+			setProperty(maxProperty, max);
 		}
 	}
 
+	/**
+	 * Handles vertex removal notification.
+	 * <p>
+	 * Chiamato quando il vertice viene rimosso dal grafo. Ferma il thread di generazione.
+	 * </p>
+	 */
 	@Override
 	public void notifyRemoveVertex() {
 		close();

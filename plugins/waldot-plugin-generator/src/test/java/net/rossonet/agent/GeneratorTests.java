@@ -24,6 +24,16 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.NetworkHelper;
 
+/**
+ * Integration tests for WaldOT Data Generator Plugin.
+ * <p>
+ * Test suite che verifica il funzionamento dei generatori di dati:
+ * creazione di vertici generatori, verifica degli algoritmi, lettura valori
+ * sia dal grafo TinkerPop che via client OPC-UA.
+ * </p>
+ * 
+ * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public class GeneratorTests {
 	private WaldotGraph g;
 	private final NamespaceListener listener = new TestNamespaceListener();
@@ -95,9 +105,15 @@ public class GeneratorTests {
 		}
 	}
 
+	/**
+	 * Test di carico: crea 1000 nodi generatori con algoritmo random.
+	 * Verifica che tutti i nodi siano creati correttamente e generino valori
+	 * nel range atteso (90-100).
+	 */
 	@Test
 	public void create1000GeneratorNodes() throws Exception {
 		simpleServerInit();
+		// Crea 1000 generatori random
 		for (int i = 0; i < 1000; i++) {
 			g.addVertex(MiloStrategy.ID_PARAMETER, "test" + i, WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(),
 					"random", MiloStrategy.LABEL_FIELD.toLowerCase(), "test" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
@@ -116,9 +132,15 @@ public class GeneratorTests {
 		}
 	}
 
+	/**
+	 * Test di tutti gli algoritmi: crea 100 generatori per ogni algoritmo disponibile
+	 * (random, incremental, decremental, sinusoidal, triangular).
+	 * Verifica che tutti i nodi siano accessibili via OPC-UA e grafo.
+	 */
 	@Test
 	public void createAllGenerator() throws Exception {
 		simpleServerInit();
+		// Crea 100 generatori per ogni algoritmo
 		for (int i = 0; i < 100; i++) {
 			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "random", MiloStrategy.ID_PARAMETER, "random" + i,
 					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "random",
@@ -156,9 +178,14 @@ public class GeneratorTests {
 		}
 	}
 
+	/**
+	 * Test algoritmo decrementale: verifica che il valore decresca correttamente
+	 * da 100 a 1 con wrap-around. Controlla la sincronizzazione tra grafo e OPC-UA.
+	 */
 	@Test
 	public void createSingleDecremental() throws Exception {
 		simpleServerInit();
+		// Crea generatore decrementale
 		final Vertex v = g.addVertex(MiloStrategy.ID_PARAMETER, "dectest", MiloStrategy.LABEL_FIELD.toLowerCase(),
 				"dectest", MiloStrategy.TYPE_FIELD.toLowerCase(),
 				WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL, WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(),
@@ -189,9 +216,14 @@ public class GeneratorTests {
 		}
 	}
 
+	/**
+	 * Test algoritmo incrementale: verifica che il valore cresca correttamente
+	 * da 1 a 100 con wrap-around. Controlla la sincronizzazione tra grafo e OPC-UA.
+	 */
 	@Test
 	public void createSingleIncremetal() throws Exception {
 		simpleServerInit();
+		// Crea generatore incrementale
 		final Vertex v = g.addVertex(MiloStrategy.ID_PARAMETER, "inctest", MiloStrategy.LABEL_FIELD.toLowerCase(),
 				"inctest", MiloStrategy.TYPE_FIELD.toLowerCase(),
 				WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL, WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(),

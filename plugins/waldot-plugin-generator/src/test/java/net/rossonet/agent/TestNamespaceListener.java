@@ -9,6 +9,15 @@ import org.eclipse.milo.opcua.sdk.server.items.MonitoredItem;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.models.WaldotCommand;
 
+/**
+ * Test listener for WaldOT namespace events.
+ * <p>
+ * Listener di test che stampa sulla console tutti gli eventi del namespace WaldOT
+ * durante l'esecuzione dei test. Utile per debugging e verifica del comportamento.
+ * </p>
+ * 
+ * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ */
 public class TestNamespaceListener implements NamespaceListener {
 
 	@Override
