@@ -47,27 +47,44 @@ These queries run **directly on the OPC UA server**, without external databases 
 
 ### Reactive Rules Engine
 
-WaldOT includes a sophisticated **rules engine** that enables edge computing logic without external systems. Define rules using simple IF-THEN patterns with full access to graph traversal:
+WaldOT includes a sophisticated **rules engine** via the `waldot-plugin-rules-engine` plugin that enables edge computing logic without external systems. Define IF-THEN-THAT rules using JEXL expressions with full access to graph traversal:
 
 **Example: Temperature Monitoring**
-```javascript
-// Condition: Check if any sensor exceeds threshold
-g.V().has('type', 'sensor')
-  .has('temperature', gt(80))
-  .hasNext()
+```groovy
+// Create compute vertex for rule execution
+compute = graph.addVertex(
+    "type", "compute",
+    "label", "main-compute",
+    "Threads", "4"
+)
 
-// Action: Create alarm and notify
-alarmTemp = g.V().has('type','sensor').has('temperature',gt(80)).values('temperature').next();
-graph.addVertex('type', 'alarm', 'temperature', alarmTemp, 'timestamp', System.currentTimeMillis());
-log.error('High temperature alert: ' + alarmTemp + '°C');
+// Create rule: IF temperature > 80 THEN log warning
+rule = graph.addVertex(
+    "type", "rule",
+    "label", "temp-alarm",
+    "Condition", "temperature > 80.0",
+    "Action", "log.warn('High temperature alert: ' + temperature + '°C')",
+    "Priority", "100",
+    "Hysteresis", "5000"  // 5 second deduplication
+)
+
+// Connect rule to compute for execution
+rule.addEdge("execute", compute, "Priority", "100")
+
+// Monitor temperature sensor
+tempSensor.addEdge("fire", rule, "monitor-property", "temperature")
 ```
 
-Rules can:
-- **Query the graph** using Gremlin in conditions
-- **Modify the graph** creating/updating vertices in actions
-- **React to events** with configurable hysteresis (debouncing)
-- **Execute in parallel** with priority-based scheduling
-- **Integrate with external systems** via HTTP, message buses, etc.
+**Rules Engine Features:**
+- **Event-driven**: React to OPC-UA events and property changes in real-time
+- **JEXL expressions**: Powerful scripting for conditions and actions
+- **Priority queuing**: Events processed by priority with hysteresis deduplication
+- **Thread management**: Virtual thread pool for lightweight concurrent execution
+- **Graph integration**: Full Gremlin traversal access in rules
+- **Debug support**: OPC-UA debug events and comprehensive metrics
+- **Edge computing**: Runs on-device with low latency and offline capability
+
+**Documentation**: See [waldot-plugin-rules-engine](plugins/waldot-plugin-rules-engine/README.md) for complete guide
 
 ### Edge-First Architecture
 
@@ -254,6 +271,35 @@ graph.traversal()
 
 // OPC UA: Browse to opc.tcp://localhost:4840 and navigate the address space
 ```
+
+## Available Plugins
+
+WaldOT's plugin architecture enables extensibility for domain-specific functionality. Currently available plugins:
+
+### waldot-plugin-rules-engine
+
+Event-driven IF-THEN-THAT rule execution system with JEXL expressions, priority queuing, and virtual thread management.
+
+**Features:**
+- Event-driven rule execution
+- JEXL scripting for conditions and actions
+- Priority-based event queuing with hysteresis
+- Virtual thread pool for concurrent execution
+- Full graph access via Gremlin traversal
+- OPC-UA integration with debug events
+
+**Documentation:** [plugins/waldot-plugin-rules-engine/README.md](plugins/waldot-plugin-rules-engine/README.md)
+
+**Quick Example:**
+```groovy
+rule = graph.addVertex(
+    "type", "rule",
+    "Condition", "temperature > 80.0 && pressure > 100.0",
+    "Action", "log.error('CRITICAL state detected')"
+)
+```
+
+---
 
 ## Advanced Features
 

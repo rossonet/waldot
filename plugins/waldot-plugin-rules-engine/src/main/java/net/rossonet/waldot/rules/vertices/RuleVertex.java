@@ -35,8 +35,108 @@ import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.utils.LogHelper;
 
+/**
+ * Represents an IF-THEN-THAT rule in the WaldOT graph.
+ * <p>
+ * RuleVertex è il cuore del sistema di regole. Rappresenta una regola di tipo
+ * IF-THEN che viene attivata da eventi o modifiche di proprietà filtrati da
+ * un FireMonitoredEdge. Quando sollecitato, valuta la condizione JEXL e se vera
+ * esegue l'azione JEXL.
+ * </p>
+ * 
+ * <h2>Architecture</h2>
+ * <pre>
+ * [Source Node] --property/event--> [FireMonitoredEdge] --filters--> [RuleVertex]
+ *                                                                          |
+ *                                                              (enqueues action)
+ *                                                                          ↓
+ *                                                          [ComputeMonitoredEdge]
+ *                                                                          ↓
+ *                                                                   [ComputeVertex]
+ *                                                                          ↓
+ *                                                                   (executes)
+ * </pre>
+ * 
+ * <h2>Rule Execution Flow</h2>
+ * <ol>
+ *   <li><b>Event arrival</b>: FireMonitoredEdge filters and fires RuleVertex</li>
+ *   <li><b>Enqueue</b>: Event enqueued in priority queue (with hysteresis)</li>
+ *   <li><b>Condition compile</b>: JEXL condition script compiled (cached)</li>
+ *   <li><b>Condition evaluate</b>: Condition executed with JEXL context</li>
+ *   <li><b>Action compile</b>: If condition true, JEXL action script compiled (cached)</li>
+ *   <li><b>Action execute</b>: Action executed with JEXL context</li>
+ *   <li><b>Metrics update</b>: Total, executed, errors counters updated</li>
+ * </ol>
+ * 
+ * <h2>JEXL Context</h2>
+ * <p>
+ * Rules execute with a cloned JEXL context containing:
+ * <ul>
+ *   <li><code>log</code>: SLF4J logger</li>
+ *   <li><code>g</code>: Gremlin traversal (graph queries)</li>
+ *   <li><code>graph</code>: TinkerPop graph</li>
+ *   <li><code>commands</code>: WaldOT console commands</li>
+ *   <li><code>self</code>: Reference to this RuleVertex</li>
+ *   <li><code>Math</code>: Java Math class</li>
+ *   <li><code>random</code>: ThreadLocalRandom</li>
+ * </ul>
+ * </p>
+ * 
+ * <h2>Example Usage</h2>
+ * <pre>{@code
+ * // Create rule: IF temperature > 80 THEN log warning
+ * Vertex rule = graph.addVertex(
+ *     "type", "rule",
+ *     "label", "temp-alarm",
+ *     "Condition", "temperature > 80.0",
+ *     "Action", "log.warn('Temperature alarm: ' + temperature + '°C')",
+ *     "Priority", "100",
+ *     "Hysteresis", "5000",  // 5 seconds deduplication
+ *     "Debug", "1"  // Enable debug events
+ * );
+ * 
+ * // Connect to compute for execution
+ * rule.addEdge("execute", computeVertex);
+ * 
+ * // Monitor temperature sensor
+ * tempSensor.addEdge("fire", rule, "monitor-property", "temperature");
+ * }</pre>
+ * 
+ * <h2>Properties</h2>
+ * <ul>
+ *   <li><b>Condition</b>: JEXL expression for IF clause (must return boolean)</li>
+ *   <li><b>Action</b>: JEXL expression for THEN clause</li>
+ *   <li><b>Hysteresis</b>: Time window (ms) for event deduplication</li>
+ *   <li><b>Debug</b>: Debug level (0=off, 1=events, 2=events+logs)</li>
+ *   <li><b>Queue</b>: Current queue size (read-only)</li>
+ *   <li><b>Total</b>: Total events received (read-only)</li>
+ *   <li><b>Executed</b>: Actions executed (condition true) (read-only)</li>
+ *   <li><b>Errors</b>: Errors during execution (read-only)</li>
+ * </ul>
+ * 
+ * <h2>Debug Events</h2>
+ * <p>
+ * When Debug > 0, RuleVertex publishes OPC-UA events for each execution phase:
+ * BEFORE/AFTER condition compile/execute, BEFORE/AFTER action compile/execute.
+ * Useful for debugging rule logic and monitoring execution.
+ * </p>
+ * 
+ * @see ComputableFireableAbstractOpcVertex
+ * @see ComputeVertex
+ * @see net.rossonet.waldot.gremlin.opcgraph.structure.edge.FireMonitoredEdge
+ * 
+ * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @since 0.4.0
+ */
 public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 
+	/**
+	 * Debug event types published during rule execution.
+	 * <p>
+	 * Tipi di eventi debug pubblicati durante l'esecuzione della regola
+	 * quando Debug > 0.
+	 * </p>
+	 */
 	public enum DebugEventType {
 		AFTER_ACTION_COMPILE, AFTER_ACTION_COMPILE_EXCEPTION, AFTER_ACTION_EXECUTION, AFTER_ACTION_EXECUTION_EXCEPTION,
 		AFTER_CONDITION_COMPILE, AFTER_CONDITION_COMPILE_EXCEPTION, AFTER_CONDITION_EXECUTION,

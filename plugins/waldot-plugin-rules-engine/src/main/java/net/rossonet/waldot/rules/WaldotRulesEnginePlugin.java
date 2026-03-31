@@ -36,7 +36,101 @@ import net.rossonet.waldot.rules.vertices.ComputeVertex;
 import net.rossonet.waldot.rules.vertices.RuleVertex;
 
 /**
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * WaldOT Rules Engine Plugin - Event-driven IF-THEN-THAT rule execution system.
+ * <p>
+ * This plugin implements a rule engine for WaldOT that allows defining and executing
+ * IF-THEN-THAT style rules triggered by events and property changes in the OPC-UA graph.
+ * Rules are expressed using JEXL (Java Expression Language) for both conditions and actions.
+ * </p>
+ * 
+ * <h2>Architecture Overview</h2>
+ * <p>
+ * The plugin provides two main vertex types:
+ * <ul>
+ *   <li><b>RuleVertex</b>: Represents an IF-THEN rule with JEXL condition and action</li>
+ *   <li><b>ComputeVertex</b>: Thread manager that executes rule actions with priority queuing</li>
+ * </ul>
+ * </p>
+ * 
+ * <h2>Event Flow</h2>
+ * <pre>
+ * [OPC-UA Node] --property-change/event--> [FireMonitoredEdge] 
+ *                                               |
+ *                                               v (filters)
+ *                                          [RuleVertex]
+ *                                               |
+ *                                               v (enqueues)
+ *                                          [ComputeMonitoredEdge]
+ *                                               |
+ *                                               v (priority queue)
+ *                                          [ComputeVertex]
+ *                                               |
+ *                                               v (executes action)
+ *                                          [Thread Pool]
+ * </pre>
+ * 
+ * <h2>Key Features</h2>
+ * <ul>
+ *   <li><b>Event-driven</b>: Rules react to OPC-UA events and property changes</li>
+ *   <li><b>JEXL expressions</b>: Powerful scripting for conditions and actions</li>
+ *   <li><b>Priority queuing</b>: Events processed by priority with hysteresis support</li>
+ *   <li><b>Thread management</b>: ComputeVertex manages execution with configurable thread pool</li>
+ *   <li><b>Monitoring edges</b>: FireMonitoredEdge filters events, ComputeMonitoredEdge routes to compute</li>
+ *   <li><b>Debug support</b>: Configurable debug levels with OPC-UA event publishing</li>
+ * </ul>
+ * 
+ * <h2>Example Usage</h2>
+ * <pre>{@code
+ * // Create ComputeVertex (thread manager)
+ * Vertex compute = graph.addVertex(
+ *     "type", "compute",
+ *     "label", "main-compute",
+ *     "Threads", "4"  // 4 worker threads
+ * );
+ * 
+ * // Create RuleVertex (IF temperature > 80 THEN log warning)
+ * Vertex rule = graph.addVertex(
+ *     "type", "rule",
+ *     "label", "temp-alarm",
+ *     "Condition", "temperature > 80.0",
+ *     "Action", "log.warn('Temperature alarm: ' + temperature)"
+ * );
+ * 
+ * // Connect rule to compute for execution
+ * rule.addEdge("execute", compute, "Priority", "100");
+ * 
+ * // Connect temperature sensor to rule with fire edge
+ * tempSensor.addEdge("fire", rule, "monitor-property", "temperature");
+ * 
+ * // When temperature property changes:
+ * // 1. FireMonitoredEdge checks filters and fires RuleVertex
+ * // 2. RuleVertex evaluates condition "temperature > 80.0"
+ * // 3. If true, enqueues action in priority queue
+ * // 4. ComputeVertex picks up action and executes in thread pool
+ * // 5. Action logs warning message
+ * }</pre>
+ * 
+ * <h2>JEXL Context Variables</h2>
+ * <p>
+ * Available in rule condition and action scripts:
+ * <ul>
+ *   <li><code>log</code>: SLF4J logger for logging</li>
+ *   <li><code>g</code>: Gremlin traversal source for graph queries</li>
+ *   <li><code>graph</code>: TinkerPop graph instance</li>
+ *   <li><code>commands</code>: WaldOT console commands</li>
+ *   <li><code>self</code>: Reference to the RuleVertex itself</li>
+ *   <li><code>Math</code>: Java Math class for calculations</li>
+ *   <li><code>random</code>: ThreadLocalRandom for random numbers</li>
+ * </ul>
+ * </p>
+ * 
+ * @see RuleVertex
+ * @see ComputeVertex
+ * @see ComputableFireableAbstractOpcVertex
+ * @see net.rossonet.waldot.gremlin.opcgraph.structure.edge.FireMonitoredEdge
+ * 
+ * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @since 0.4.0
  */
 @WaldotPlugin
 public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
@@ -79,13 +173,28 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	private UaObjectTypeNode ruleTypeNode;
 	protected WaldotNamespace waldotNamespace;
 
+	/**
+	 * Returns the base JEXL context shared by all rules.
+	 * <p>
+	 * Questo contesto contiene variabili globali disponibili a tutte le regole:
+	 * log, graph traversal, commands, Math, random, etc.
+	 * </p>
+	 * 
+	 * @return base JEXL context
+	 */
 	public ClonableMapContext baseJexlContext() {
 		return baseJexlContext;
 	}
 
+	/**
+	 * Closes the plugin and removes all monitored edges.
+	 * <p>
+	 * Rimuove tutti gli edge monitorati attivi per cleanup graceful.
+	 * </p>
+	 */
 	@Override
 	public void close() throws Exception {
-
+		// Rimuove tutti gli edge monitorati attivi
 		for (final MonitoredEdge edge : activeEdges.values()) {
 			edge.remove();
 		}
@@ -196,6 +305,21 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 		registerJexlEngine(waldotNamespace);
 	}
 
+	/**
+	 * Handles edge addition and creates appropriate monitored edges.
+	 * <p>
+	 * Quando viene aggiunto un edge "execute" tra RuleVertex e ComputeVertex,
+	 * crea un ComputeMonitoredEdge che monitora la coda del RuleVertex e
+	 * notifica il ComputeVertex quando ci sono eventi da elaborare.
+	 * </p>
+	 * 
+	 * @param edge edge being added
+	 * @param sourceVertex source vertex of the edge
+	 * @param targetVertex target vertex of the edge (ComputeVertex)
+	 * @param label edge label
+	 * @param type edge type ("execute" for compute edges)
+	 * @param propertyKeyValues edge properties
+	 */
 	@Override
 	public void notifyAddEdge(WaldotEdge edge, WaldotVertex sourceVertex, WaldotVertex targetVertex, String label,
 			String type, Object[] propertyKeyValues) {
@@ -209,6 +333,7 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 			switch (type) {
 
 			case EXECUTE_EDGE_LABEL:
+				// Crea ComputeMonitoredEdge per collegare RuleVertex → ComputeVertex
 				edge.setMonitor(new ComputeMonitoredEdge(waldotNamespace, edge, sourceVertex, targetVertex));
 
 				break;
@@ -228,14 +353,29 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 		}
 	}
 
+	/**
+	 * Registers JEXL engine and populates base context with global variables.
+	 * <p>
+	 * Registra il motore JEXL e popola il contesto base con variabili globali
+	 * disponibili a tutte le regole: log, graph traversal, commands, Math, random, etc.
+	 * Ogni RuleVertex clona questo contesto e aggiunge 'self' reference.
+	 * </p>
+	 * 
+	 * @param waldotNamespace WaldOT namespace instance
+	 */
 	private void registerJexlEngine(final WaldotNamespace waldotNamespace) {
+		// Crea motore JEXL per eseguire script nelle regole
 		jexlEngine = JexlExecutor.generateEngine();
+		
+		// Popola contesto base con variabili globali
 		baseJexlContext.set(ConsoleStrategy.LOG_LABEL, logger);
 		baseJexlContext.set(ConsoleStrategy.TRAVERSE_LABEL, waldotNamespace.getGremlinGraph().traversal());
 		baseJexlContext.set(ConsoleStrategy.GRAPH_LABEL, waldotNamespace.getGremlinGraph());
 		baseJexlContext.set(ConsoleStrategy.COMMANDS_LABEL, waldotNamespace.getCommandsAsFunction());
 		baseJexlContext.set(ConsoleStrategy.MATH, Math.class);
 		baseJexlContext.set(ConsoleStrategy.RANDOM, ThreadLocalRandom.current());
+		
+		// Registra tutti i comandi console come funzioni JEXL
 		for (final WaldotCommand command : waldotNamespace.getConsoleStrategy().getCommands()) {
 			logger.info("Registering console command: {}", command.getConsoleCommand());
 			baseJexlContext.set(command.getConsoleCommand(), command);

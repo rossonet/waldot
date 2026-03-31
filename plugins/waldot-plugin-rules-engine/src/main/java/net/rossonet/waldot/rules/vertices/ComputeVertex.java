@@ -33,8 +33,109 @@ import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.rules.events.RunnableEvent;
 import net.rossonet.waldot.utils.ThreadHelper;
 
+/**
+ * Thread manager vertex that executes rule actions from multiple RuleVertices.
+ * <p>
+ * ComputeVertex è il "motore di esecuzione" del sistema di regole. Gestisce un pool
+ * di thread virtuali che eseguono le azioni delle regole con priorità e timeout.
+ * Riceve notifiche dai RuleVertex tramite ComputeMonitoredEdge quando ci sono eventi
+ * in coda da elaborare.
+ * </p>
+ * 
+ * <h2>Architecture</h2>
+ * <pre>
+ * [RuleVertex 1] --execute--> [ComputeMonitoredEdge 1]
+ *                                       |
+ * [RuleVertex 2] --execute--> [ComputeMonitoredEdge 2] --> [ComputeVertex]
+ *                                       |                        |
+ * [RuleVertex N] --execute--> [ComputeMonitoredEdge N]          |
+ *                                                                v
+ *                                                      [Priority Queue]
+ *                                                                |
+ *                                                                v
+ *                                                   [Virtual Thread Pool]
+ * </pre>
+ * 
+ * <h2>Execution Flow</h2>
+ * <ol>
+ *   <li><b>Queue notification</b>: ComputeMonitoredEdge notifies queue size change</li>
+ *   <li><b>Priority calculation</b>: Weight = edge_priority * factor + queue_size</li>
+ *   <li><b>Dirty node queue</b>: RuleVertex added to priority queue by weight</li>
+ *   <li><b>Thread manager</b>: Polls dirty nodes and checks thread availability</li>
+ *   <li><b>Event polling</b>: Polls RunnableEvent from RuleVertex queue</li>
+ *   <li><b>Action execution</b>: Submits action to virtual thread pool</li>
+ *   <li><b>Timeout monitoring</b>: Cancels actions exceeding execution timeout</li>
+ * </ol>
+ * 
+ * <h2>Priority Mechanism</h2>
+ * <p>
+ * ComputeVertex prioritizes RuleVertices based on:
+ * <ul>
+ *   <li><b>Edge priority</b>: Priority of ComputeMonitoredEdge (from edge property)</li>
+ *   <li><b>Queue size</b>: Number of pending events in RuleVertex</li>
+ *   <li><b>Priority factor</b>: Multiplier for edge priority (default: 100.0)</li>
+ * </ul>
+ * </p>
+ * <p>
+ * Formula: <code>weight = edge_priority * priority_factor + queue_size</code>
+ * </p>
+ * <p>
+ * Higher weight = higher priority. This ensures urgent rules (high edge priority)
+ * and backed-up rules (large queue) get processed first.
+ * </p>
+ * 
+ * <h2>Thread Management</h2>
+ * <p>
+ * Uses Java 21+ virtual threads for lightweight concurrency:
+ * <ul>
+ *   <li>Configurable thread pool size (default: 1)</li>
+ *   <li>Execution timeout per action (default: 2 minutes)</li>
+ *   <li>Automatic timeout cancellation</li>
+ *   <li>Concurrent execution tracking</li>
+ * </ul>
+ * </p>
+ * 
+ * <h2>Example Usage</h2>
+ * <pre>{@code
+ * // Create compute vertex with 4 threads
+ * Vertex compute = graph.addVertex(
+ *     "type", "compute",
+ *     "label", "main-compute",
+ *     "Threads", "4",  // 4 concurrent actions
+ *     "execution-timeout-ms", "60000",  // 1 minute timeout
+ *     "Factor", "100.0"  // Priority factor
+ * );
+ * 
+ * // Connect multiple rules to compute
+ * rule1.addEdge("execute", compute, "Priority", "100");  // High priority
+ * rule2.addEdge("execute", compute, "Priority", "50");   // Medium priority
+ * rule3.addEdge("execute", compute, "Priority", "10");   // Low priority
+ * }</pre>
+ * 
+ * <h2>Properties</h2>
+ * <ul>
+ *   <li><b>Threads</b>: Thread pool size (default: 1)</li>
+ *   <li><b>execution-timeout-ms</b>: Action timeout in ms (default: 120000)</li>
+ *   <li><b>Factor</b>: Priority factor multiplier (default: 100.0)</li>
+ *   <li><b>Queue</b>: Number of dirty nodes awaiting execution (read-only)</li>
+ * </ul>
+ * 
+ * @see RuleVertex
+ * @see ComputeMonitoredEdge
+ * @see ComputableFireableAbstractOpcVertex
+ * 
+ * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @since 0.4.0
+ */
 public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 
+	/**
+	 * Thread manager runnable that polls dirty nodes and executes actions.
+	 * <p>
+	 * Runnable che gestisce il polling dei nodi sporchi e l'esecuzione delle azioni
+	 * nel thread pool.
+	 * </p>
+	 */
 	private final class ComputeThreadManager implements Runnable {
 
 		@Override
