@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  waldot-instance-1:
+    image: rossonet/waldot:latest
+    container_name: waldot-instance-1
+    
+    ports:
+      - "12686:12686"
+      - "8443:8443"
+    
+    command:
+      - "--application-name"
+      - "WaldOT Instance 1"
+      - "--root-node-display-name"
+      - "Engine 1"
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -an | grep 12686 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - waldot-network
+
+  waldot-instance-2:
+    image: rossonet/waldot:latest
+    container_name: waldot-instance-2
+    
+    ports:
+      - "12687:12687"
+      - "8444:8444"
+    
+    command:
+      - "--tcp-port"
+      - "12687"
+      - "--https-port"
+      - "8444"
+      - "--application-name"
+      - "WaldOT Instance 2"
+      - "--root-node-display-name"
+      - "Engine 2"
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -an | grep 12687 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - waldot-network
+
+  waldot-instance-3:
+    image: rossonet/waldot:latest
+    container_name: waldot-instance-3
+    
+    ports:
+      - "12688:12688"
+      - "8445:8445"
+    
+    command:
+      - "--tcp-port"
+      - "12688"
+      - "--https-port"
+      - "8445"
+      - "--application-name"
+      - "WaldOT Instance 3"
+      - "--root-node-display-name"
+      - "Engine 3"
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -an | grep 12688 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    networks:
+      - waldot-network
+
+networks:
+  waldot-network:
+    driver: bridge

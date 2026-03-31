@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  waldot:
+    image: rossonet/waldot:latest
+    container_name: waldot-production
+    
+    ports:
+      - "12686:12686"
+      - "8443:8443"
+    
+    # Production configuration with custom branding
+    command:
+      - "--tcp-port"
+      - "12686"
+      - "--https-port"
+      - "8443"
+      - "--application-name"
+      - "Production OPC UA Server"
+      - "--product-name"
+      - "Industrial WaldOT"
+      - "--manufacturer-name"
+      - "Your Company Name"
+      - "--anonymous-access"
+      - "false"
+      - "--factory-username"
+      - "production_admin"
+      - "--factory-password"
+      - "${WALDOT_ADMIN_PASSWORD:-ChangeMe123!}"
+      - "--root-node-display-name"
+      - "Production Engine"
+      - "--endpoint-path"
+      - "/production"
+    
+    # Persistent volumes
+    volumes:
+      - waldot-security:/app/.security
+      - waldot-help:/app/help:ro
+      - ./boot-production.conf:/waldot/boot.conf:ro
+    
+    # Environment variables
+    environment:
+      - TZ=Europe/Rome
+      - JAVA_OPTS=-Xmx4g -Xms2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200
+    
+    restart: always
+    
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -an | grep 12686 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 8G
+        reservations:
+          cpus: '2.0'
+          memory: 2G
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+    
+    # Network configuration
+    networks:
+      - waldot-prod-network
+
+networks:
+  waldot-prod-network:
+    driver: bridge
+
+volumes:
+  waldot-security:
+    driver: local
+  waldot-help:
+    driver: local

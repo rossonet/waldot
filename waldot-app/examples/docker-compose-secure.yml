@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  waldot:
+    image: rossonet/waldot:latest
+    container_name: waldot-secure
+    
+    ports:
+      - "12686:12686"
+      - "8443:8443"
+    
+    # Secure configuration with authentication required
+    command:
+      - "--anonymous-access"
+      - "false"
+      - "--factory-username"
+      - "industrial_admin"
+      - "--factory-password"
+      - "SecureP@ssw0rd!"
+      - "--application-name"
+      - "WaldOT Secure Server"
+    
+    # Mount volume for persistent security certificates
+    volumes:
+      - ./security:/app/.security
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -an | grep 12686 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Security: Run as non-root user
+    user: "1000:1000"

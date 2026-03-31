@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  waldot:
+    image: rossonet/waldot:latest
+    container_name: waldot-custom-ports
+    
+    # Custom port mapping
+    ports:
+      - "4840:4840"    # Standard OPC UA port
+      - "8080:8080"    # Custom HTTPS port
+    
+    # Override default ports using Picocli parameters
+    command:
+      - "--tcp-port"
+      - "4840"
+      - "--https-port"
+      - "8080"
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -an | grep 4840 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

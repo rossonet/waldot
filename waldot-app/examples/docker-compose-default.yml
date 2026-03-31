@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  waldot:
+    image: rossonet/waldot:latest
+    container_name: waldot-default
+    ports:
+      - "12686:12686"  # OPC UA TCP
+      - "8443:8443"    # HTTPS
+    restart: unless-stopped
+    
+    # Health check to ensure server is running
+    healthcheck:
+      test: ["CMD", "sh", "-c", "netstat -an | grep 12686 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
