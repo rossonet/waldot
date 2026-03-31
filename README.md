@@ -193,8 +193,17 @@ graph.addVertex('type', 'maintenance_request', 'equipment', 'pump1', 'priority',
 ## Resources
 
 ### Documentation
+
+#### Core Documentation
+- **[WaldOT Reference Documentation (English)](docs/reference/waldot/README_EN.md)** - Complete architecture, OPC UA + TinkerPop integration, plugin system, and use cases
+- **[WaldOT Documentazione di Riferimento (Italiano)](docs/reference/waldot/README_IT.md)** - Documentazione completa: architettura, integrazione OPC UA + TinkerPop, sistema plugin e casi d'uso
+- **[Plugin Development Guide](docs/guide/docs/manuale_plugins.md)** - Complete guide to creating WaldOT plugins with virtual threads
 - [Agent Documentation](AGENT.md) - Developer guide for AI agents and contributors
-- [Architecture Overview](docs/) - Detailed technical documentation
+
+#### Plugin Documentation
+- [waldot-plugin-generator](plugins/waldot-plugin-generator/README.md) - Data generator plugin for testing and simulation
+- [waldot-plugin-rules-engine](plugins/waldot-plugin-rules-engine/README.md) - Event-driven IF-THEN-THAT rule execution
+- [waldot-plugin-tinkerpop](plugins/waldot-plugin-tinkerpop/README.md) - Embedded Gremlin Server for remote access
 
 ### Links
 - **Docker Images**: [DockerHub - WaldOT](https://hub.docker.com/r/rossonet/waldot) | [Zenoh Router](https://hub.docker.com/r/rossonet/zenohd)
@@ -373,11 +382,21 @@ g.V().connectedComponent().by('component').group().by('component')
 
 ### Extensibility via Plugins
 
-Create custom vertex types and behaviors:
+WaldOT's **plugin architecture** enables custom vertex types, behaviors, and integrations. Plugins leverage **Java 21+ virtual threads** for massive concurrency - run thousands of active objects with minimal resource overhead.
+
+**Key Features:**
+- **Auto-discovery**: Plugins annotated with `@WaldotPlugin` are automatically loaded
+- **Virtual threads**: Lightweight concurrency for polling, monitoring, event processing
+- **Bi-directional sync**: Plugin vertices automatically sync with OPC UA
+- **Full graph access**: Plugins can use Gremlin queries for complex logic
+
+**Example Plugin:**
 
 ```java
 @WaldotPlugin
-public class MyIndustrialPlugin implements PluginListener {
+public class MyIndustrialPlugin implements AutoCloseable, PluginListener {
+    private final ExecutorService executor = ThreadHelper.newVirtualThreadExecutor();
+    
     @Override
     public void initialize(WaldotNamespace namespace) {
         // Register custom "Conveyor" vertex type in OPC UA
@@ -386,10 +405,20 @@ public class MyIndustrialPlugin implements PluginListener {
     
     @Override
     public WaldotVertex createVertex(NodeId typeNodeId, ...) {
-        return new ConveyorVertex(...);  // Custom logic
+        // Create vertex with virtual thread for continuous operation
+        return new ConveyorVertex(executor, ...);  // Runs in virtual thread
+    }
+    
+    @Override
+    public void close() throws Exception {
+        executor.shutdownNow();  // Clean shutdown
     }
 }
 ```
+
+**Learn More:**
+- **[Plugin Development Guide](docs/guide/docs/manuale_plugins.md)** - Complete guide with virtual threads, patterns, and examples
+- **[Reference Documentation](docs/reference/waldot/README_EN.md)** - Architecture details and advanced topics
 
 ### Integration Capabilities
 
