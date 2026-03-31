@@ -216,22 +216,106 @@ Il file `/waldot/boot.conf` viene eseguito all'avvio del server e permette di:
 - Inizializzare plugin (generator, rules-engine, tinkerpop)
 - Definire relazioni tra componenti
 
-### Sintassi del File
+### Formati Supportati
 
-Il file usa la sintassi **Gremlin/Groovy**. Ogni comando crea elementi nel grafo che sono automaticamente sincronizzati con l'address space OPC UA.
+WaldOT supporta **DUE formati** di configurazione bootstrap, con **rilevamento automatico**:
 
-### Struttura Base
+#### Formato 1: Line-by-Line (Legacy)
+
+Ogni riga contiene un singolo comando Groovy. Commenti con `#`:
 
 ```groovy
-// Commenti con //
+# Commento vecchio stile
+graph.addVertex('id', 'sensor1', 'label', 'temp-sensor')
+graph.addVertex('id', 'sensor2', 'label', 'pressure-sensor')
+```
+
+**Quando viene usato**: File semplici senza variabili, funzioni o strutture complesse.
+
+#### Formato 2: Script Groovy Completo (Raccomandato)
+
+Intero file eseguito come script Groovy. Commenti con `//` o `/* */`:
+
+```groovy
+// Funzione helper
+def createSensor(name, type) {
+  g.addV('generator')
+    .property('type', 'generator')
+    .property('label', name)
+    .property('Algorithm', type)
+    .next()
+}
+
+// Usa la funzione
+sensor1 = createSensor('temp-sensor', 'sinusoidal')
+sensor2 = createSensor('pressure-sensor', 'random')
+
+log.info("Sensors created successfully")
+```
+
+**Quando viene usato**: Automaticamente quando il file contiene:
+- Variabili: `variabile = valore`
+- Funzioni: `def nomeFunzione()`
+- Commenti Groovy: `//` o `/* */`
+- Catene multi-linea indentate
+- Strutture controllo: `if`, `for`, `while`, `.times {}`
+
+### Rilevamento Automatico
+
+WaldOT **rileva automaticamente** quale formato usare analizzando il contenuto:
+
+```groovy
+// Questo file verrà rilevato come SCRIPT MODE perché ha:
+// 1. Commenti con //
+// 2. Variabile (sensor =)
+// 3. Catene multi-linea indentate
+
+sensor = g.addV('generator')
+  .property('type', 'generator')
+  .property('label', 'my-sensor')
+  .next()
+```
+
+```groovy
+# Questo file verrà rilevato come LINE-BY-LINE MODE perché ha:
+# 1. Solo commenti con #
+# 2. Nessuna variabile o funzione
+# 3. Comandi semplici su singole righe
+
+graph.addVertex('id', 'sensor1', 'label', 'test')
+graph.addVertex('id', 'sensor2', 'label', 'test')
+```
+
+### Struttura Base Script Mode
+
+```groovy
+// Commenti con // o /* */
 
 // Creare un vertice
 g.addV('tipo')
   .property('chiave', 'valore')
   .property('altra_chiave', 123)
+  .next()
 
 // Creare una relazione (edge)
-v1.addEdge('etichetta_relazione', v2, 'proprietà', 'valore')
+edge = v1.addEdge('etichetta_relazione', v2, 'proprietà', 'valore')
+
+// Funzioni
+def miaFunzione(parametro) {
+  // corpo funzione
+}
+
+// Cicli
+3.times { i ->
+  // ripeti 3 volte
+}
+
+// Condizioni
+if (condizione) {
+  // esegui
+} else {
+  // altrimenti
+}
 ```
 
 ### Esempio 1: Configurazione Minima
@@ -479,7 +563,7 @@ log.info("Sistema multi-zona attivo")
 
 ### Montare il File boot.conf
 
-**Opzione 1: Volume Mount**
+**Opzione 1: Volume Mount (File Locale)**
 ```bash
 docker run \
   -v /percorso/locale/boot.conf:/waldot/boot.conf:ro \
@@ -494,9 +578,11 @@ services:
     image: rossonet/waldot:latest
     volumes:
       - ./boot.conf:/waldot/boot.conf:ro
+    ports:
+      - "12686:12686"
 ```
 
-**Opzione 3: Variabile d'Ambiente (path alternativo)**
+**Opzione 3: Variabile d'Ambiente (Path Alternativo)**
 ```bash
 docker run \
   -e WALDOT_BOOT_URL=file:///config/mio-boot.conf \
@@ -504,6 +590,71 @@ docker run \
   -p 12686:12686 \
   rossonet/waldot:latest
 ```
+
+**Opzione 4: URL Remoto (NUOVO!)**
+
+Puoi caricare la configurazione da URL remoto (HTTP/HTTPS):
+
+```bash
+docker run \
+  -e WALDOT_BOOT_URL=https://raw.githubusercontent.com/myuser/waldot-configs/main/production.groovy \
+  -p 12686:12686 \
+  rossonet/waldot:latest
+```
+
+**Vantaggi URL remoto**:
+- ✅ Configurazione centralizzata
+- ✅ Versionamento con Git
+- ✅ Deploy rapido senza ricostruzione immagine
+- ✅ Aggiornamenti dinamici
+
+**Esempio configurazione remota**:
+
+1. Crea file `waldot-config.groovy` in repository GitHub:
+```groovy
+// Configurazione produzione WaldOT
+// https://github.com/mycompany/waldot-configs
+
+def createProductionLine(name, sensors) {
+  line = g.addV('production-line')
+    .property('label', name)
+    .property('status', 'active')
+    .next()
+  
+  sensors.each { sensorName ->
+    sensor = g.addV('generator')
+      .property('type', 'generator')
+      .property('label', "${name}-${sensorName}")
+      .property('Algorithm', 'random')
+      .next()
+    
+    sensor.addEdge('belongs-to', line)
+  }
+  
+  return line
+}
+
+// Crea linee produzione
+createProductionLine('line-1', ['temp', 'pressure', 'vibration'])
+createProductionLine('line-2', ['temp', 'flow', 'level'])
+
+log.info("Production environment configured")
+```
+
+2. Usa il raw URL:
+```bash
+export CONFIG_URL=https://raw.githubusercontent.com/mycompany/waldot-configs/main/waldot-config.groovy
+
+docker run \
+  -e WALDOT_BOOT_URL=$CONFIG_URL \
+  -p 12686:12686 \
+  rossonet/waldot:latest
+```
+
+**Sicurezza URL Remoti**:
+- ⚠️ Usa HTTPS per configurazioni sensibili
+- ⚠️ Considera autenticazione per repository privati
+- ⚠️ Valida sempre la fonte della configurazione
 
 ### Debug del boot.conf
 

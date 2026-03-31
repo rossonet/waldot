@@ -136,14 +136,64 @@ WALDOT_FACTORY_PASSWORD=${SECURE_RANDOM_PASSWORD}  # Use secrets management!
 |----------|---------|-------------|---------|
 | `WALDOT_NAMESPACE_URI` | `urn:rossonet:waldot:engine` | OPC UA namespace URI for WaldOT nodes | `urn:company:waldot:production` |
 | `WALDOT_HELP_DIRECTORY` | `/app/help` | Directory for help documentation files | `/custom/help` |
-| `WALDOT_BOOT_URL` | `file:///waldot/boot.conf` | Bootstrap configuration file URL | `file:///config/init.conf` |
+| `WALDOT_BOOT_URL` | `file:///waldot/boot.conf` | Bootstrap configuration URL (local file or remote HTTP/HTTPS) | `file:///config/init.conf` or `https://example.com/config.groovy` |
 | `WALDOT_FACTS_VALID_DELAY` | `0` | Delay (ms) before facts become valid | `1000` |
 | `WALDOT_FACTS_VALID_UNTIL` | `0` | Expiration time (ms) for facts (0=never) | `3600000` |
 
 **Application Settings Tips**:
 - Mount custom bootstrap config: `-v ./boot.conf:/waldot/boot.conf:ro`
+- **Or use remote URL**: `-e WALDOT_BOOT_URL=https://example.com/config.groovy`
 - Mount custom help directory: `-v ./help:/app/help:ro`
 - Use namespace URI to segregate multiple WaldOT instances
+
+**Bootstrap Configuration Formats**:
+
+WaldOT automatically detects the configuration format:
+
+1. **Script Mode** (recommended for complex setups):
+```bash
+# Create config.groovy with functions and logic
+cat > config.groovy << 'EOF'
+// Function to create sensors
+def createSensor(name, algorithm) {
+  g.addV('generator')
+    .property('type', 'generator')
+    .property('label', name)
+    .property('Algorithm', algorithm)
+    .next()
+}
+
+// Create multiple sensors
+createSensor('temp-sensor', 'sinusoidal')
+createSensor('pressure-sensor', 'random')
+
+log.info("Sensors configured")
+EOF
+
+# Use with Docker
+docker run \
+  -e WALDOT_BOOT_URL=file:///config/config.groovy \
+  -v ./config.groovy:/config/config.groovy:ro \
+  rossonet/waldot:latest
+```
+
+2. **Line Mode** (legacy, backward compatible):
+```bash
+# Simple one-command-per-line
+cat > boot.conf << 'EOF'
+# Hash comments
+graph.addVertex('id', 'sensor1', 'label', 'temp')
+graph.addVertex('id', 'sensor2', 'label', 'pressure')
+EOF
+```
+
+3. **Remote URL** (centralized configuration):
+```bash
+# Load from GitHub, GitLab, web server, etc.
+docker run \
+  -e WALDOT_BOOT_URL=https://raw.githubusercontent.com/myorg/waldot-configs/main/production.groovy \
+  rossonet/waldot:latest
+```
 
 ### Node Configuration
 

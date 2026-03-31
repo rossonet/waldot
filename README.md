@@ -109,13 +109,64 @@ Built on proven open standards:
 
 ```bash
 docker pull rossonet/waldot:latest
-docker run -p 4840:4840 -p 8182:8182 -p 8080:8080 rossonet/waldot
+docker run -p 12686:12686 -p 8443:8443 rossonet/waldot:latest
 ```
 
 Access:
-- **OPC UA Server**: `opc.tcp://localhost:4840`
-- **Gremlin Console**: `ws://localhost:8182/gremlin`
-- **REST API**: `http://localhost:8080/api`
+- **OPC UA Server**: `opc.tcp://localhost:12686/waldot`
+- **Gremlin Console**: Available via waldot-plugin-tinkerpop (port 8182)
+- **HTTPS API**: `https://localhost:8443`
+
+### Docker with Custom Bootstrap Configuration
+
+WaldOT supports loading initial graph configuration from a file or URL. You can use either:
+
+**Simple Line-by-Line Format** (legacy):
+```groovy
+# boot.conf - Simple commands
+graph.addVertex('id', 'sensor1', 'label', 'temperature')
+graph.addVertex('id', 'sensor2', 'label', 'pressure')
+```
+
+**Advanced Groovy Script Format** (recommended):
+```groovy
+// boot.conf - Full Groovy script with functions and logic
+def createSensor(name, type, min, max) {
+  g.addV('generator')
+    .property('type', 'generator')
+    .property('label', name)
+    .property('Algorithm', type)
+    .property('Min', min.toString())
+    .property('Max', max.toString())
+    .next()
+}
+
+// Create multiple sensors
+createSensor('temp-office', 'sinusoidal', '18', '26')
+createSensor('pressure-tank', 'random', '0', '100')
+
+log.info("Sensors configured successfully")
+```
+
+Mount your configuration file:
+```bash
+docker run \
+  -v ./my-boot.conf:/waldot/boot.conf:ro \
+  -p 12686:12686 \
+  rossonet/waldot:latest
+```
+
+Or use a remote URL:
+```bash
+docker run \
+  -e WALDOT_BOOT_URL=https://example.com/waldot-config.groovy \
+  -p 12686:12686 \
+  rossonet/waldot:latest
+```
+
+The bootstrap strategy automatically detects the format:
+- **Script Mode**: If it finds functions (`def`), variables (`=`), Groovy comments (`//`), or multi-line chains
+- **Line Mode**: For simple one-command-per-line files with `#` comments (legacy)
 
 ### Build from Source
 

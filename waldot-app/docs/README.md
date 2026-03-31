@@ -406,21 +406,84 @@ WaldOT supports custom plugins. See the [Plugin Development Guide](../../docs/gu
 
 ### Bootstrap Configuration
 
-Create a `boot.conf` file with graph initialization commands:
+WaldOT supports two configuration formats with automatic detection:
+
+#### Format 1: Simple Line-by-Line (Legacy)
 
 ```groovy
-// Create a temperature sensor
-g.addV('generator')
-  .property('type', 'generator')
-  .property('Algorithm', 'sinusoidal')
-  .property('Min', '18')
-  .property('Max', '26')
-
-// Create monitoring rule
-g.addV('rule')
-  .property('Condition', 'temperature > 25')
-  .property('Action', "log.warn('High temp')")
+# Simple commands, one per line
+graph.addVertex('id', 'sensor1', 'label', 'temp-sensor')
+graph.addVertex('id', 'sensor2', 'label', 'pressure-sensor')
 ```
+
+#### Format 2: Full Groovy Script (Recommended)
+
+```groovy
+// Full Groovy script with functions and logic
+def createSensor(name, type, min, max) {
+  g.addV('generator')
+    .property('type', 'generator')
+    .property('label', name)
+    .property('Algorithm', type)
+    .property('Min', min.toString())
+    .property('Max', max.toString())
+    .next()
+}
+
+// Create sensors
+temp = createSensor('office-temp', 'sinusoidal', '18', '26')
+pressure = createSensor('tank-pressure', 'random', '0', '100')
+
+// Create rule
+compute = g.addV('compute')
+  .property('type', 'compute')
+  .property('Threads', '4')
+  .next()
+
+rule = g.addV('rule')
+  .property('type', 'rule')
+  .property('Condition', 'temperature > 25')
+  .property('Action', "log.warn('High temp: ' + temperature)")
+  .next()
+
+rule.addEdge('execute', compute)
+temp.addEdge('fire', rule, 'monitor-property', 'temperature', 'active', 'true')
+
+log.info("Configuration loaded successfully")
+```
+
+#### Automatic Format Detection
+
+The bootstrap strategy automatically selects the appropriate mode:
+
+**Script Mode triggers when it finds:**
+- Functions: `def myFunction()`
+- Variables: `sensor = ...`
+- Groovy comments: `//` or `/* */`
+- Multi-line chains with indentation
+- Control structures: `if`, `for`, `while`, `.times {}`
+
+**Line-by-Line Mode for:**
+- Simple one-command-per-line files
+- Hash comments `#`
+- No complex Groovy constructs
+
+#### Remote Configuration URLs
+
+Load configuration from HTTP/HTTPS:
+
+```bash
+docker run \
+  -e WALDOT_BOOT_URL=https://example.com/waldot-config.groovy \
+  -p 12686:12686 \
+  rossonet/waldot:latest
+```
+
+Benefits:
+- Centralized configuration management
+- Version control with Git
+- Quick deployment without rebuilding images
+- Dynamic updates
 
 ### Performance Tuning
 

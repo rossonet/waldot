@@ -142,8 +142,66 @@ Configured in `DefaultOpcUaConfiguration` and `DefaultHomunculusConfiguration` c
 
 #### Bootstrap URL (`--boot-url`, `-bu`)
 - **Default**: "file:///waldot/boot.conf"
-- **Purpose**: Startup configuration file
-- **Example**: `--boot-url file:///config/custom-boot.conf`
+- **Purpose**: Startup configuration file (local or remote)
+- **Formats Supported**: 
+  - Line-by-line (legacy): `# comments`, one command per line
+  - Groovy script (new): Functions, variables, multi-line, `//` comments
+- **Remote URLs**: Supports HTTP/HTTPS for centralized configuration
+- **Examples**: 
+  - Local: `--boot-url file:///config/custom-boot.conf`
+  - Remote: `--boot-url https://raw.githubusercontent.com/user/repo/main/config.groovy`
+
+**Bootstrap Configuration Modes**:
+
+The bootstrap strategy automatically detects the format:
+
+1. **Script Mode** - Used when file contains:
+   - Function definitions (`def myFunc()`)
+   - Variable assignments (`sensor = ...`)
+   - Groovy comments (`//`, `/* */`)
+   - Multi-line method chains with indentation
+   - Control structures (`if`, `for`, `while`, `.times {}`)
+
+2. **Line-by-Line Mode** - Used for:
+   - Simple one-command-per-line files
+   - Hash comments (`#`)
+   - Backward compatibility with existing configs
+
+**Script Mode Example**:
+```groovy
+// Advanced configuration with functions
+def createZone(name, tempMin, tempMax) {
+  sensor = g.addV('generator')
+    .property('type', 'generator')
+    .property('label', "temp-${name}")
+    .property('Algorithm', 'random')
+    .property('Min', tempMin.toString())
+    .property('Max', tempMax.toString())
+    .next()
+  
+  rule = g.addV('rule')
+    .property('type', 'rule')
+    .property('Condition', "temperature > ${tempMax - 2}")
+    .property('Action', "log.warn('High temp in ${name}')")
+    .next()
+  
+  return [sensor, rule]
+}
+
+// Create zones
+3.times { i ->
+  createZone("zone-${i}", 18, 26)
+}
+
+log.info("Configuration complete")
+```
+
+**Line Mode Example** (legacy):
+```groovy
+# Simple configuration
+graph.addVertex('id', 'sensor1', 'label', 'temp')
+graph.addVertex('id', 'sensor2', 'label', 'pressure')
+```
 
 ## Common Scenarios
 
