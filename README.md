@@ -323,6 +323,31 @@ tempSensor = graph.addVertex(
 )
 ```
 
+### waldot-plugin-tinkerpop
+
+Native TinkerPop/Gremlin client access to WaldOT graphs.
+
+**Features:**
+- Embedded Gremlin Server as graph vertices
+- Dual protocol: OPC-UA + Gremlin simultaneously
+- GraphSON v3 and GraphBinary v1 serializers
+- Graph visualization tools support (Graph-Explorer)
+- Standard TinkerPop client compatibility
+- Live bidirectional synchronization
+
+**Documentation:** [plugins/waldot-plugin-tinkerpop/README.md](plugins/waldot-plugin-tinkerpop/README.md)
+
+**Quick Example:**
+```groovy
+gremlinServer = graph.addVertex(
+    "type", "gremlin",
+    "Port", "8182",
+    "Bind", "0.0.0.0"  // Enables TinkerPop client connections
+)
+
+// Connect from Gremlin Console, drivers, or Graph-Explorer
+```
+
 ---
 
 ## Advanced Features

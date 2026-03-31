@@ -34,7 +34,19 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 
+/**
+ * Vertex that embeds Apache TinkerPop Gremlin Server for native client connections.
+ * Exposes WaldOT graph via WebSocket+HTTP with GraphSON v3 and GraphBinary v1 serializers.
+ * Supports standard TinkerPop clients (Console, drivers, Graph-Explorer).
+ * 
+ * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @since 0.4.0
+ */
 public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable {
+	/**
+	 * Registers OPC-UA properties for Gremlin Server type node.
+	 * Aggiunge le proprietà Port, Bind, Status al tipo OPC-UA.
+	 */
 	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode dockerTypeNode) {
 		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode, WaldotTinkerPopPlugin.PORT_FIELD,
 				NodeIds.Int16);
@@ -44,17 +56,24 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 				NodeIds.String);
 	}
 
+	// Directory OPC-UA per organizzare i server
 	private String baseDirectory;
 
+	// Indirizzo bind del server
 	private String host;
 	private final QualifiedProperty<String> hostProperty;
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+	
+	// Porta del server Gremlin
 	private int port = 1025;
 
 	private final QualifiedProperty<Integer> portProperty;
 
+	// Istanza Gremlin Server embedded
 	private GremlinServer server;
+	
+	// Proprietà Status (Running/Stopped/Failed)
 	private final QualifiedProperty<String> statusProperty;
 
 	private final WaldotNamespace waldotNamespace;
@@ -136,6 +155,11 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 		}
 	}
 
+	/**
+	 * Starts the Gremlin Server with configured settings.
+	 * Configura e avvia il server con GraphSON v3 e GraphBinary v1 serializers,
+	 * bindings per graph e g, e custom OpcIoRegistry.
+	 */
 	public void start() {
 		final Settings overriddenSettings = new Settings();
 		overriddenSettings.host = host;
