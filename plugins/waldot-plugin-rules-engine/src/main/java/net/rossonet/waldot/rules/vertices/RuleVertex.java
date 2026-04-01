@@ -125,7 +125,7 @@ import net.rossonet.waldot.utils.LogHelper;
  * @see ComputeVertex
  * @see net.rossonet.waldot.gremlin.opcgraph.structure.edge.FireMonitoredEdge
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0
  */
 public class RuleVertex extends ComputableFireableAbstractOpcVertex {

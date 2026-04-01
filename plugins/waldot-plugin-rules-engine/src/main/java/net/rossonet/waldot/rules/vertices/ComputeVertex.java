@@ -124,7 +124,7 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * @see ComputeMonitoredEdge
  * @see ComputableFireableAbstractOpcVertex
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0
  */
 public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {

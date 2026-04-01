@@ -36,7 +36,7 @@ import org.apache.commons.jexl3.JexlContext;
  * executor.close();
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @see JexlContext
  */
 public interface BaseExecutor extends AutoCloseable {

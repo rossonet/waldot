@@ -33,7 +33,7 @@ import net.rossonet.waldot.utils.text.PlaceHolder;
  * byte arrays to hex strings, and performing encryption and decryption using a
  * specified algorithm.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public final class TextHelper {
 

@@ -23,7 +23,7 @@ import net.rossonet.waldot.api.models.WaldotElement;
  * graph model, including methods for managing components, versioning, and
  * removal status.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public abstract class GremlinElement extends UaObjectNode implements WaldotElement {
 	protected static IllegalStateException elementAlreadyRemoved(final Class<? extends Element> clazz,

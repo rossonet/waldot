@@ -4,7 +4,7 @@ package net.rossonet.waldot.utils.text;
  * PlaceHolder class is used to handle text data that may contain placeholder
  * tags. It allows for the extraction of the data without the placeholder tags.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public class PlaceHolder {
 

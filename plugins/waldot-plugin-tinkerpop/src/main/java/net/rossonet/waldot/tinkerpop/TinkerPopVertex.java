@@ -39,7 +39,7 @@ import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
  * Exposes WaldOT graph via WebSocket+HTTP with GraphSON v3 and GraphBinary v1 serializers.
  * Supports standard TinkerPop clients (Console, drivers, Graph-Explorer).
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0
  */
 public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable {

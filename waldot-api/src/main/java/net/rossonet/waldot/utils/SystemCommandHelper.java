@@ -21,14 +21,14 @@ import java.util.regex.Pattern;
  * tokenizer for parsing quoted strings and a stream gobbler for consuming
  * process output.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public class SystemCommandHelper {
 
 	/**
 	 * Tokenizer for parsing command lines with quoted strings.
 	 * 
-	 * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+	 * @author Andrea Ambrosini - Rossonet s.c.a r.l.
 	 */
 	public static class QuotedStringTokenizer {
 
@@ -104,7 +104,7 @@ public class SystemCommandHelper {
 	/**
 	 * Runnable that consumes input and error streams from a process.
 	 * 
-	 * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+	 * @author Andrea Ambrosini - Rossonet s.c.a r.l.
 	 */
 	public static class StreamGobbler implements Runnable {
 		private final Consumer<String> consumer;

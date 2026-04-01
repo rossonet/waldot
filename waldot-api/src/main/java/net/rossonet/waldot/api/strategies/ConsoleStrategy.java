@@ -37,7 +37,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
  * }
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public interface ConsoleStrategy extends AutoCloseable {
 	/**

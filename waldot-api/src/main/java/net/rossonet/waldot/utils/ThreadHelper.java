@@ -18,7 +18,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
  * timeout, throwing an exception if the task does not complete within the
  * allotted time.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public final class ThreadHelper {
 

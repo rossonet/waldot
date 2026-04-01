@@ -59,7 +59,7 @@ import net.rossonet.waldot.api.models.WaldotVertex;
  * }
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public interface PluginListener {
 	public static final String OBJECT_TYPES = "ObjectTypes/";

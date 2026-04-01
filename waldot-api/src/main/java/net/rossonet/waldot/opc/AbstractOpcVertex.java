@@ -54,7 +54,7 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
  * graph model, including property management, event handling, and edge
  * management.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public abstract class AbstractOpcVertex extends GremlinElement implements WaldotVertex, AttributeObserver {
 

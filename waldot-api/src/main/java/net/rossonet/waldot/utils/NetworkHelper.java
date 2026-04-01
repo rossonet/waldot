@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * checking port availability, validating IP addresses and MAC addresses, and
  * retrieving network interface information.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public final class NetworkHelper {
 

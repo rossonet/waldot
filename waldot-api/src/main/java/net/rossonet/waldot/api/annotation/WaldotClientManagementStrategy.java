@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * annotation can be used to indicate that the class implements a specific
  * strategy for managing Waldot agents.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 @Retention(RUNTIME)
 @Target(TYPE)

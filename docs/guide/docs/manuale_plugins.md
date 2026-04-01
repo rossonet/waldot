@@ -1178,4 +1178,4 @@ WaldOT's plugin architecture combines the power of OPC UA industrial standards w
 ---
 
 *WaldOT Plugin Development Guide - Version 0.6.1*
-*Andrea Ambrosini - Rossonet s.c.a.r.l.*
+*Andrea Ambrosini - Rossonet s.c.a r.l.*

@@ -38,7 +38,7 @@ import net.rossonet.waldot.utils.LogHelper;
  * icons, and event observers.
  * 
  * @param <DATA_TYPE> the type of data stored in the property
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
 		implements WaldotProperty<DATA_TYPE> {

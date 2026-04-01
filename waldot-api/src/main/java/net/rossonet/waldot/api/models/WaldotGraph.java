@@ -55,7 +55,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
  * WaldotNamespace ns = graph.getWaldotNamespace();
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @see Graph
  * @see Vertex
  * @see Edge

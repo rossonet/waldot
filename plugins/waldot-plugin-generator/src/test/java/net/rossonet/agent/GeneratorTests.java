@@ -32,7 +32,7 @@ import net.rossonet.waldot.utils.NetworkHelper;
  * sia dal grafo TinkerPop che via client OPC-UA.
  * </p>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public class GeneratorTests {
 	private WaldotGraph g;

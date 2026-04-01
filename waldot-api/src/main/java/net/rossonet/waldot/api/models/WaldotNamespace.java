@@ -79,7 +79,7 @@ import net.rossonet.waldot.opc.WaldotOpcUaServer;
  * namespace.runExpression("g.V().count()");
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public interface WaldotNamespace extends AutoCloseable {
 

@@ -9,7 +9,7 @@ import net.rossonet.waldot.api.configuration.WaldotConfiguration;
  * UsernameIdentityValidator to provide a specific implementation for validating
  * user identities in the Waldot context.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public abstract class WaldotIdentityValidator extends UsernameIdentityValidator {
 

@@ -106,7 +106,7 @@ import net.rossonet.waldot.tinkerpop.TinkerPopVertex;
  * @see TinkerPopVertex
  * @see WaldotGremlinServer
  * @see WaldotGraphManager
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0
  */
 @WaldotPlugin

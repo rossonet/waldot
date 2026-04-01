@@ -129,7 +129,7 @@ import net.rossonet.waldot.rules.vertices.RuleVertex;
  * @see ComputableFireableAbstractOpcVertex
  * @see net.rossonet.waldot.gremlin.opcgraph.structure.edge.FireMonitoredEdge
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0
  */
 @WaldotPlugin

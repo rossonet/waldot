@@ -26,7 +26,7 @@ import net.rossonet.waldot.api.models.WaldotGraph;
  * providing methods to manage its state, versioning, and removal.
  * 
  * @param <DATA_TYPE> the type of data stored in the property
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implements WaldotElement {
 	protected static IllegalStateException elementAlreadyRemoved(final Class<? extends Element> clazz,

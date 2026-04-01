@@ -32,7 +32,7 @@ import org.eclipse.milo.opcua.sdk.server.model.variables.BaseVariableType;
  * boolean isSingle = prop.isSingle();
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @see VertexProperty
  * @see BaseVariableType
  * @see WaldotElement

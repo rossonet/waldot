@@ -314,7 +314,7 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) file for 
 
 ## Authors
 
-- Andrea Ambrosini - Rossonet s.c.a.r.l. - Initial development
+- Andrea Ambrosini - Rossonet s.c.a r.l. - Initial development
 
 ## See Also
 

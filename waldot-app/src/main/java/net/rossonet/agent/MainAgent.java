@@ -40,7 +40,7 @@ import picocli.CommandLine;
  *   <li>2 - Runtime error</li>
  * </ul>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @see WaldotRunner
  * @see <a href="https://picocli.info/">Picocli Documentation</a>
  */

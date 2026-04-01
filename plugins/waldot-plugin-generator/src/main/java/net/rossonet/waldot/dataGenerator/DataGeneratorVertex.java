@@ -98,7 +98,7 @@ import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
  * }</pre>
  * 
  * @see WaldotGeneratorPlugin
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0
  */
 public class DataGeneratorVertex extends AbstractOpcVertex implements AutoCloseable {

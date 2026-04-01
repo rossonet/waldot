@@ -33,7 +33,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
  * String securityDir = opcConfig.getSecurityTempDir();
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public interface OpcConfiguration extends Serializable, Map<String, String> {
 

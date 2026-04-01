@@ -24,7 +24,7 @@ import net.rossonet.waldot.api.strategies.ClientManagementStrategy;
  * System.out.println(sessionLog);
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @see ClientManagementStrategy
  * @see Session
  */

@@ -213,7 +213,7 @@ Apache License 2.0. See [LICENSE](LICENSE).
 
 ## Authors
 
-Andrea Ambrosini - Rossonet s.c.a.r.l.
+Andrea Ambrosini - Rossonet s.c.a r.l.
 
 ## See Also
 

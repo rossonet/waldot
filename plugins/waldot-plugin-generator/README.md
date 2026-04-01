@@ -188,7 +188,7 @@ Apache License 2.0. See [LICENSE](LICENSE) for details.
 
 ## Authors
 
-Andrea Ambrosini - Rossonet s.c.a.r.l.
+Andrea Ambrosini - Rossonet s.c.a r.l.
 
 ## See Also
 

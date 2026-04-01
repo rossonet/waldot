@@ -53,7 +53,7 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
  * view.removeProperty(vertex, "oldProperty", vertexProperty);
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public interface WaldotGraphComputerView {
 

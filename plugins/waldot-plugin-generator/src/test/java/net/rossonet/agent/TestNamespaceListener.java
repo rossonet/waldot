@@ -16,7 +16,7 @@ import net.rossonet.waldot.api.models.WaldotCommand;
  * durante l'esecuzione dei test. Utile per debugging e verifica del comportamento.
  * </p>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public class TestNamespaceListener implements NamespaceListener {
 

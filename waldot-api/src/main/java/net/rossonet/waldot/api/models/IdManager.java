@@ -26,7 +26,7 @@ package net.rossonet.waldot.api.models;
  *
  * @param <T> the type of ID managed by this IdManager
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @see WaldotGraph
  */
 public interface IdManager<T> {

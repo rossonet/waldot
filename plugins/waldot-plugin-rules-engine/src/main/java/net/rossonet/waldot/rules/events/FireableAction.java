@@ -29,7 +29,7 @@ package net.rossonet.waldot.rules.events;
  * @see RuleVertex.RuleVertexFireableAction
  * @see ComputeVertex
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0
  */
 public abstract class FireableAction implements Runnable {

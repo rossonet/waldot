@@ -42,7 +42,7 @@ import net.rossonet.waldot.api.PropertyObserver;
  * edge.addPropertyObserver(new MyPropertyObserver());
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @see Edge
  * @see WaldotElement
  * @see BaseObjectType

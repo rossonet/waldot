@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * containing a self-signed server certificate and private key. It provides
  * methods to retrieve the server's certificate chain and key pair.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a.r.l.
+ * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 @Deprecated
 public class KeyStoreLoader {
