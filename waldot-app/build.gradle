@@ -22,7 +22,7 @@ ext {
     sourceCompatibility = 21
     targetCompatibility = 21
     mainClassName = "net.rossonet.agent.MainAgent"
-    mainPicocliCommandClass = "net.rossonet.agent.WaldotEngine"
+    mainPicocliCommandClass = "net.rossonet.agent.WaldotRunner"
     debianName = "${project.name}"
     packageName = "${project.name}"
     ossrhPassword = System.getenv('OSSRH_PASSWORD')
