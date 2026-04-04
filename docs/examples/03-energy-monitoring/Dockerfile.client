@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install OPC UA client library
+RUN pip install --no-cache-dir asyncua==1.0.6
+
+# Copy client script
+COPY opcua-client.py /app/
+
+# Make executable
+RUN chmod +x /app/opcua-client.py
+
+# Run client
+CMD ["python", "/app/opcua-client.py"]

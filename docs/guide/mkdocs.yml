@@ -1,35 +1,123 @@
-site_name: Manuale WaldOT
+site_name: WaldOT Documentation
+site_description: Complete documentation for WaldOT - Digital Twin Engine bridging OPC UA and Apache TinkerPop
+site_author: Rossonet s.c.a r.l.
+site_url: https://github.com/rossonet/waldot
+
 markdown_extensions:
   - toc:
       baselevel: "1"
       toc_depth: "5"
+      permalink: true
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.details
+  - pymdownx.emoji
+
 theme:
-   name: material
-   scheme: slate
-   logo: immagini/rossonet-logo-03_centered.png
-   favicon: immagini/icon.ico
-   features:
-   - search.suggest
-   palette:
-      primary: custom
-   font:
-      text: 20px Comfortaa,cursive
+  name: material
+  scheme: slate
+  logo: immagini/rossonet-logo-03_centered.png
+  favicon: immagini/icon.ico
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+  palette:
+    primary: custom
+  font:
+    text: 20px Comfortaa,cursive
+
 extra_css:
-- stylesheets/extra.css
+  - stylesheets/extra.css
+
 plugins:
-- search
-- offline
-- with-pdf:
-   author: andrea.ambrosini@rossonet.com
-   toc_title: Indice dei contenuti
-   copyright: Rossonet s.c.a r.l.
-   cover: true
-   back_cover: false
-   cover_title: Manuale per utenti e sviluppatori del server OPCUA WaldOT
-   cover_subtitle: Version 0.0.1
-   cover_logo: immagini/rossonet-logo-02.png
-   verbose: true
+  - search
+  - offline
+  - with-pdf:
+      author: andrea.ambrosini@rossonet.com
+      toc_title: Table of Contents / Indice dei contenuti
+      copyright: Rossonet s.c.a r.l.
+      cover: true
+      back_cover: false
+      cover_title: WaldOT - Digital Twin Engine Documentation
+      cover_subtitle: Complete Guide for Users, Developers, and Architects - Version 0.6.1
+      cover_logo: immagini/rossonet-logo-02.png
+      verbose: true
+
 nav:
-- Manuale Utente WaldOT: manuale_utente.md
-- Guida integrazione Java WaldOT: manuale_integrazione.md
-- Guida realizzazione plugin Java per WaldOT: manuale_plugins.md
+  - Home:
+      - Documentation Hub: docs/README.md
+      - Quick Start: docs/USER_GUIDE.md
+
+  - For Decision Makers & Architects:
+      - Architecture Overview: docs/ARCHITECTURE_OVERVIEW.md
+      - Business Value: docs/ARCHITECTURE_OVERVIEW.md#business-value-proposition
+      - Technology Stack: docs/ARCHITECTURE_OVERVIEW.md#technology-stack
+      - Deployment Architectures: docs/ARCHITECTURE_OVERVIEW.md#deployment-architectures
+      - Integration Scenarios: docs/ARCHITECTURE_OVERVIEW.md#integration-scenarios
+      - Security & Compliance: docs/ARCHITECTURE_OVERVIEW.md#security-considerations
+      - Decision Framework: docs/ARCHITECTURE_OVERVIEW.md#decision-framework
+
+  - For Developers:
+      - Developer Guide: docs/DEVELOPER_GUIDE.md
+      - Quick Start: docs/DEVELOPER_GUIDE.md#quick-start
+      - Core Concepts: docs/DEVELOPER_GUIDE.md#core-concepts
+      - Plugin Development: docs/DEVELOPER_GUIDE.md#plugin-development
+      - Working with Generator: docs/DEVELOPER_GUIDE.md#working-with-generator-plugin
+      - Working with Rules Engine: docs/DEVELOPER_GUIDE.md#working-with-rules-engine
+      - Bootstrap Configuration: docs/DEVELOPER_GUIDE.md#bootstrap-configuration
+      - Testing: docs/DEVELOPER_GUIDE.md#testing
+      - Best Practices: docs/DEVELOPER_GUIDE.md#best-practices
+      - Plugin Development Manual (IT): manuale_plugins.md
+
+  - For End Users & Operators:
+      - User Guide: docs/USER_GUIDE.md
+      - Docker Deployment: docs/USER_GUIDE.md#docker-deployment
+      - Configuration: docs/USER_GUIDE.md#configuration
+      - OPC UA Interface: docs/USER_GUIDE.md#using-opc-ua-interface
+      - Gremlin Queries: docs/USER_GUIDE.md#gremlin-query-basics
+      - Working with Plugins: docs/USER_GUIDE.md#working-with-plugins
+      - Monitoring & Troubleshooting: docs/USER_GUIDE.md#monitoring-and-troubleshooting
+      - Security Best Practices: docs/USER_GUIDE.md#security-best-practices
+      - User Manual (IT): manuale_utente.md
+
+  - Examples:
+      - Examples Overview: ../examples/README.md
+      - 01 - Industrial Monitoring: ../examples/01-industrial-monitoring/README.md
+      - 02 - Production Simulation: ../examples/02-production-simulation/README.md
+      - 03 - Energy Monitoring: ../examples/03-energy-monitoring/README.md
+      - 04 - Quality Control: ../examples/04-quality-control/README.md
+      - 05 - Predictive Maintenance: ../examples/05-predictive-maintenance/README.md
+
+  - Plugin Documentation:
+      - Generator Plugin: ../../plugins/waldot-plugin-generator/README.md
+      - Rules Engine Plugin: ../../plugins/waldot-plugin-rules-engine/README.md
+      - TinkerPop Server Plugin: ../../plugins/waldot-plugin-tinkerpop/README.md
+
+  - Reference Documentation:
+      - WaldOT Reference (EN): ../reference/waldot/README_EN.md
+      - WaldOT Reference (IT): ../reference/waldot/README_IT.md
+      - Configuration Reference: ../../waldot-app/CONFIGURATION.md
+      - Environment Variables: ../../waldot-app/ENVIRONMENT_VARIABLES.md
+      - Bootstrap Configuration: ../../waldot-namespace/BOOTSTRAP_CONFIGURATION.md
+
+  - Legacy Documentation (Italian):
+      - Manuale Utente WaldOT: manuale_utente.md
+      - Guida Integrazione Java: manuale_integrazione.md
+      - Guida Realizzazione Plugin: manuale_plugins.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/rossonet/waldot
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/rossonet/waldot
+  version:
+    provider: mike

@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  waldot:
+    image: rossonet/waldot:latest
+    container_name: waldot-predictive-maintenance
+    ports:
+      - "12690:12686" # Map external 12690 to internal 12686
+      - "8447:8443"
+    environment:
+      - WALDOT_APPLICATION_NAME=Predictive Maintenance System
+      - WALDOT_BIND_ADDRESSES=0.0.0.0
+      - WALDOT_BIND_HOSTNAME=waldot
+      - WALDOT_ANONYMOUS_ACCESS=true
+      - WALDOT_BOOT_URL=file:///waldot/boot.conf
+    volumes:
+      - ./boot.conf:/waldot/boot.conf:ro
+      - waldot-security:/app/.security
+    networks:
+      - waldot-network
+
+  opcua-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: waldot-client-05
+    depends_on:
+      - waldot
+    networks:
+      - waldot-network
+    environment:
+      - PYTHONUNBUFFERED=1
+
+networks:
+  waldot-network:
+    driver: bridge
+
+volumes:
+  waldot-security:

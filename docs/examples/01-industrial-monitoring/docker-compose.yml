@@ -1,0 +1,74 @@
+version: "3.8"
+
+services:
+  waldot:
+    image: rossonet/waldot:latest
+    container_name: waldot-industrial-monitoring
+    ports:
+      - "12686:12686" # OPC UA TCP port
+      - "8443:8443" # HTTPS port
+    environment:
+      # Server Identity
+      - WALDOT_APPLICATION_NAME=Industrial Monitoring System
+      - WALDOT_PRODUCT_NAME=WaldOT Industrial Monitor
+      - WALDOT_MANUFACTURER_NAME=Rossonet s.c.a r.l.
+
+      # Network Configuration
+      - WALDOT_TCP_PORT=12686
+      - WALDOT_HTTPS_PORT=8443
+      - WALDOT_BIND_ADDRESSES=0.0.0.0
+      - WALDOT_BIND_HOSTNAME=waldot
+
+      # Security (Development mode - change for production!)
+      - WALDOT_ANONYMOUS_ACCESS=true
+      - WALDOT_FACTORY_USERNAME=admin
+      - WALDOT_FACTORY_PASSWORD=monitor123
+
+      # Bootstrap Configuration
+      - WALDOT_BOOT_URL=file:///waldot/boot.conf
+
+      # Node Configuration
+      - WALDOT_ROOT_NODE_DISPLAY_NAME=Industrial Monitor
+
+    volumes:
+      # Mount bootstrap configuration
+      - ./boot.conf:/waldot/boot.conf:ro
+
+      # Persist security certificates
+      - waldot-security:/app/.security
+
+    networks:
+      - waldot-network
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh",
+          "-c",
+          "timeout 2 bash -c '</dev/tcp/localhost/12686' 2>/dev/null || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  opcua-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: waldot-client-01
+    depends_on:
+      - waldot
+    networks:
+      - waldot-network
+    environment:
+      - PYTHONUNBUFFERED=1
+
+networks:
+  waldot-network:
+    driver: bridge
+
+volumes:
+  waldot-security:
+    driver: local
