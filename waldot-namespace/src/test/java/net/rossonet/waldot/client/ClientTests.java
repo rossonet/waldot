@@ -23,14 +23,16 @@ import net.rossonet.waldot.client.api.WaldotAgentClientObserver;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 
 public class ClientTests {
-	private WaldotGraph d;
 	private WaldOTAgentClient client;
+	private WaldotGraph d;
 
 	private boolean checkOpcUaVertexExists(final String nodeId) {
 		try {
 			resetCache();
-			final NodeId completedNodeId = d.getWaldotNamespace().generateNodeId(nodeId);
-			final UaNode node = client.getOpcUaClient().getAddressSpace().getNode(completedNodeId);
+			final NodeId completedNodeId = d.getWaldotNamespace()
+					.generateNodeId(nodeId);
+			final UaNode node = client.getOpcUaClient().getAddressSpace()
+					.getNode(completedNodeId);
 			return node != null;
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -38,13 +40,15 @@ public class ClientTests {
 		}
 	}
 
-	private boolean checkOpcUaVertexValueEquals(final String nodeId, final String valueLabel,
-			final Object expectedValue) {
+	private boolean checkOpcUaVertexValueEquals(final String nodeId,
+			final String valueLabel, final Object expectedValue) {
 		try {
 			resetCache();
-			final NodeId completedNodeId = d.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
+			final NodeId completedNodeId = d.getWaldotNamespace()
+					.generateNodeId(nodeId + "/" + valueLabel);
 			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
+			readValueIds.add(new ReadValueId(completedNodeId,
+					AttributeId.Value.uid(), null, // indexRange
 					QualifiedName.NULL_VALUE));
 			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
 					TimestampsToReturn.Both, readValueIds);
@@ -59,7 +63,8 @@ public class ClientTests {
 
 	private boolean checkVertexExists(final String nodeId) {
 		try {
-			final NodeId completedNodeId = d.getWaldotNamespace().generateNodeId(nodeId);
+			final NodeId completedNodeId = d.getWaldotNamespace()
+					.generateNodeId(nodeId);
 			final Vertex v = d.vertex(completedNodeId);
 			return v != null;
 		} catch (final Exception e) {
@@ -68,9 +73,11 @@ public class ClientTests {
 		}
 	}
 
-	private boolean checkVertexValueEquals(final String nodeId, final String valueLabel, final Object expectedValue) {
+	private boolean checkVertexValueEquals(final String nodeId,
+			final String valueLabel, final Object expectedValue) {
 		try {
-			final NodeId completedNodeId = d.getWaldotNamespace().generateNodeId(nodeId);
+			final NodeId completedNodeId = d.getWaldotNamespace()
+					.generateNodeId(nodeId);
 			final Vertex v = d.vertex(completedNodeId);
 			final Object value = v.property(valueLabel).value();
 			return value.toString().equals(expectedValue.toString());
@@ -88,7 +95,8 @@ public class ClientTests {
 	@Test
 	public void runClientOneMinutes() throws Exception {
 		d = OpcFactory.getOpcGraph();
-		final WaldOTAgentClientConfiguration configuration = WaldOTAgentClientConfiguration.getDefaultConfiguration();
+		final WaldOTAgentClientConfiguration configuration = WaldOTAgentClientConfiguration
+				.getDefaultConfiguration();
 		client = WaldOTAgentClient.withConfiguration(configuration);
 		client.setStatusObserver(new WaldotAgentClientObserver() {
 
@@ -103,8 +111,10 @@ public class ClientTests {
 			final WaldOTAgentClient.Status status = client.getStatus();
 			Thread.sleep(5000);
 		}
-		final Vertex source = d.addVertex("id", "source", "name", "source vertex", "a", "1", "b", "2");
-		final Vertex destination = d.addVertex("id", "destination", "name", "destination vertex", "a", "3", "b", "4");
+		final Vertex source = d.addVertex("id", "source", "name",
+				"source vertex", "a", "1", "b", "2");
+		final Vertex destination = d.addVertex("id", "destination", "name",
+				"destination vertex", "a", "3", "b", "4");
 		assert checkVertexExists("source");
 		assert checkVertexExists("destination");
 		assert checkOpcUaVertexExists("source");

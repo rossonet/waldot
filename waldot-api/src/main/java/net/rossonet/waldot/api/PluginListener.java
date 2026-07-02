@@ -26,6 +26,7 @@ import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
+import net.rossonet.waldot.exception.PluginBlockingException;
 
 /**
  * PluginListener interface for handling events related to Waldot plugins.
@@ -66,40 +67,60 @@ public interface PluginListener {
 	public final static ObjectNodeConstructor objectNodeConstructor = new ObjectNodeConstructor() {
 
 		@Override
-		public UaObjectNode apply(UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-				LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-				RolePermissionType[] rolePermissions, RolePermissionType[] userRolePermissions,
+		public UaObjectNode apply(UaNodeContext context, NodeId nodeId,
+				QualifiedName browseName, LocalizedText displayName,
+				LocalizedText description, UInteger writeMask,
+				UInteger userWriteMask, RolePermissionType[] rolePermissions,
+				RolePermissionType[] userRolePermissions,
 				AccessRestrictionType accessRestrictions) {
-			return new UaObjectNode(context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
-					rolePermissions, userRolePermissions, accessRestrictions);
+			return new UaObjectNode(context, nodeId, browseName, displayName,
+					description, writeMask, userWriteMask, rolePermissions,
+					userRolePermissions, accessRestrictions);
 		}
 
 	};
 
-	public static UaVariableNode addParameterToTypeNode(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
+	public static UaVariableNode addParameterToTypeNode(
+			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
 			String variableId, NodeId dataType) {
-		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId(typeNode.getNodeId().toParseableString() + "." + variableId))
-				.setAccessLevel(AccessLevel.READ_WRITE).setBrowseName(waldotNamespace.generateQualifiedName(variableId))
-				.setDisplayName(LocalizedText.english(variableId)).setDataType(dataType)
+		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace
+						.generateNodeId(typeNode.getNodeId().toParseableString()
+								+ "." + variableId))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(
+						waldotNamespace.generateQualifiedName(variableId))
+				.setDisplayName(LocalizedText.english(variableId))
+				.setDataType(dataType)
 				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
-		variable.addReference(new Reference(variable.getNodeId(), NodeIds.HasModellingRule,
-				NodeIds.ModellingRule_Mandatory.expanded(), true));
+		variable.addReference(
+				new Reference(variable.getNodeId(), NodeIds.HasModellingRule,
+						NodeIds.ModellingRule_Mandatory.expanded(), true));
 		variable.setValue(new DataValue(new Variant("NaN")));
 		typeNode.addComponent(variable);
 		waldotNamespace.getStorageManager().addNode(variable);
 		return variable;
 	}
 
-	public static UaVariableNode addParameterToTypeNode(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
+	public static UaVariableNode addParameterToTypeNode(
+			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
 			String variableId, NodeId dataType, UInteger[] arrayDimensions) {
-		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId(typeNode.getNodeId().toParseableString() + "." + variableId))
-				.setAccessLevel(AccessLevel.READ_WRITE).setBrowseName(waldotNamespace.generateQualifiedName(variableId))
-				.setDisplayName(LocalizedText.english(variableId)).setDataType(dataType)
-				.setTypeDefinition(NodeIds.BaseDataVariableType).setArrayDimensions(arrayDimensions).build();
-		variable.addReference(new Reference(variable.getNodeId(), NodeIds.HasModellingRule,
-				NodeIds.ModellingRule_Mandatory.expanded(), true));
+		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace
+						.generateNodeId(typeNode.getNodeId().toParseableString()
+								+ "." + variableId))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(
+						waldotNamespace.generateQualifiedName(variableId))
+				.setDisplayName(LocalizedText.english(variableId))
+				.setDataType(dataType)
+				.setTypeDefinition(NodeIds.BaseDataVariableType)
+				.setArrayDimensions(arrayDimensions).build();
+		variable.addReference(
+				new Reference(variable.getNodeId(), NodeIds.HasModellingRule,
+						NodeIds.ModellingRule_Mandatory.expanded(), true));
 		variable.setValue(new DataValue(new Variant("NaN")));
 		typeNode.addComponent(variable);
 		waldotNamespace.getStorageManager().addNode(variable);
@@ -193,10 +214,13 @@ public interface PluginListener {
 	 * @see WaldotVertex
 	 * @see WaldotGraph
 	 */
-	default WaldotVertex createVertex(final NodeId typeDefinitionNodeId, final WaldotGraph graph,
-			final UaNodeContext context, final NodeId nodeId, final QualifiedName browseName,
-			final LocalizedText displayName, final LocalizedText description, final UInteger writeMask,
-			final UInteger userWriteMask, final UByte eventNotifier, final long version, Object[] propertyKeyValues) {
+	default WaldotVertex createVertex(final NodeId typeDefinitionNodeId,
+			final WaldotGraph graph, final UaNodeContext context,
+			final NodeId nodeId, final QualifiedName browseName,
+			final LocalizedText displayName, final LocalizedText description,
+			final UInteger writeMask, final UInteger userWriteMask,
+			final UByte eventNotifier, final long version,
+			Object[] propertyKeyValues) {
 		return null;
 	}
 
@@ -274,8 +298,9 @@ public interface PluginListener {
 	 * @see WaldotEdge
 	 * @see WaldotVertex
 	 */
-	default void notifyAddEdge(WaldotEdge edge, WaldotVertex sourceVertex, WaldotVertex targetVertex, String label,
-			String type, Object[] propertyKeyValues) {
+	default void notifyAddEdge(WaldotEdge edge, WaldotVertex sourceVertex,
+			WaldotVertex targetVertex, String label, String type,
+			Object[] propertyKeyValues) throws PluginBlockingException {
 	}
 
 	/**

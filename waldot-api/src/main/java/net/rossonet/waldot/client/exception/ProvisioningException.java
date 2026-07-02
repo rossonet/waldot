@@ -23,4 +23,8 @@ public class ProvisioningException extends WaldotException {
 
 	private static final long serialVersionUID = -4035397403688831965L;
 
+	public ProvisioningException(String message) {
+		super(message);
+	}
+
 }
