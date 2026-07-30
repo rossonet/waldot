@@ -111,25 +111,49 @@ public final class TextHelper {
 
 	private static String encryptionAlgorithm = "AES";
 
+	public static String calculateMd5sum(byte[] data)
+			throws NoSuchAlgorithmException {
+		final java.security.MessageDigest md = java.security.MessageDigest
+				.getInstance("MD5");
+		final byte[] array = md.digest(data);
+		final StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < array.length; ++i) {
+			sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100)
+					.substring(1, 3));
+		}
+		return sb.toString();
+	}
+
+	public static String calculateMd5sum(String data)
+			throws NoSuchAlgorithmException {
+		return calculateMd5sum(data.getBytes());
+	}
+
 	public static String cleanText(String dirtyText) {
-		return dirtyText.toLowerCase().trim().replaceAll("[^\\w;:]+", "_").replaceAll("[ ]+", "_");
+		return dirtyText.toLowerCase().trim().replaceAll("[^\\w;:]+", "_")
+				.replaceAll("[ ]+", "_");
 	}
 
 	public static String convertByteArrayToHexString(final byte[] arrayBytes) {
 		final StringBuffer stringBuffer = new StringBuffer();
 		for (int i = 0; i < arrayBytes.length; i++) {
-			stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16).substring(1));
+			stringBuffer.append(Integer
+					.toString((arrayBytes[i] & 0xff) + 0x100, 16).substring(1));
 		}
 		return stringBuffer.toString();
 	}
 
-	public static byte[] decryptData(final byte[] encryptedData, final byte[] key) throws InvalidKeyException,
-			NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	public static byte[] decryptData(final byte[] encryptedData,
+			final byte[] key) throws InvalidKeyException,
+			NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException {
 		return decryptData(encryptedData, key, encryptionAlgorithm);
 	}
 
-	public static byte[] decryptData(final byte[] encryptedData, final byte[] key, final String encryptionAlgorithm)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException,
+	public static byte[] decryptData(final byte[] encryptedData,
+			final byte[] key, final String encryptionAlgorithm)
+			throws NoSuchAlgorithmException, NoSuchPaddingException,
+			InvalidKeyException, IllegalBlockSizeException,
 			BadPaddingException {
 		final Cipher c = Cipher.getInstance(encryptionAlgorithm);
 		final SecretKeySpec k = new SecretKeySpec(key, encryptionAlgorithm);
@@ -137,13 +161,17 @@ public final class TextHelper {
 		return c.doFinal(encryptedData);
 	}
 
-	public static byte[] encryptData(final byte[] dataToEncrypt, final byte[] key) throws IllegalBlockSizeException,
-			BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
+	public static byte[] encryptData(final byte[] dataToEncrypt,
+			final byte[] key) throws IllegalBlockSizeException,
+			BadPaddingException, NoSuchAlgorithmException,
+			NoSuchPaddingException, InvalidKeyException {
 		return encryptData(dataToEncrypt, key, encryptionAlgorithm);
 	}
 
-	public static byte[] encryptData(final byte[] dataToEncrypt, final byte[] key, final String encryptionAlgorithm)
-			throws IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException,
+	public static byte[] encryptData(final byte[] dataToEncrypt,
+			final byte[] key, final String encryptionAlgorithm)
+			throws IllegalBlockSizeException, BadPaddingException,
+			NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeyException {
 		final Cipher c = Cipher.getInstance(encryptionAlgorithm);
 		final SecretKeySpec k = new SecretKeySpec(key, encryptionAlgorithm);
@@ -151,25 +179,33 @@ public final class TextHelper {
 		return c.doFinal(dataToEncrypt);
 	}
 
-	public static Map<String, PlaceHolder> extractPlaceHolderFromText(final String originalText,
-			final String startPlaceholderText, final String stopPlaceholderText) {
-		final Pattern pattern = Pattern.compile(startPlaceholderText + ".+?" + stopPlaceholderText);
-		return extractPlaceHolderFromText(originalText, startPlaceholderText, stopPlaceholderText, pattern);
+	public static Map<String, PlaceHolder> extractPlaceHolderFromText(
+			final String originalText, final String startPlaceholderText,
+			final String stopPlaceholderText) {
+		final Pattern pattern = Pattern
+				.compile(startPlaceholderText + ".+?" + stopPlaceholderText);
+		return extractPlaceHolderFromText(originalText, startPlaceholderText,
+				stopPlaceholderText, pattern);
 	}
 
-	public static Map<String, PlaceHolder> extractPlaceHolderFromText(final String originalText,
-			final String startPlaceholderText, final String stopPlaceholderText, final Pattern pattern) {
+	public static Map<String, PlaceHolder> extractPlaceHolderFromText(
+			final String originalText, final String startPlaceholderText,
+			final String stopPlaceholderText, final Pattern pattern) {
 		final Matcher m = pattern.matcher(originalText);
 		final Map<String, PlaceHolder> placeHolders = new HashMap<>();
 		if (m.find()) {
 			do {
 				final String placeholder = m.group();
-				final PlaceHolder dataPlaceholder = new PlaceHolder(placeholder, startPlaceholderText,
-						stopPlaceholderText);
+				final PlaceHolder dataPlaceholder = new PlaceHolder(placeholder,
+						startPlaceholderText, stopPlaceholderText);
 				if (dataPlaceholder.getDataWithoutPlaceholderTag() != null
-						&& !dataPlaceholder.getDataWithoutPlaceholderTag().isEmpty()) {
-					if (!placeHolders.containsKey(dataPlaceholder.getDataWithoutPlaceholderTag())) {
-						placeHolders.put(dataPlaceholder.getDataWithoutPlaceholderTag(), dataPlaceholder);
+						&& !dataPlaceholder.getDataWithoutPlaceholderTag()
+								.isEmpty()) {
+					if (!placeHolders.containsKey(
+							dataPlaceholder.getDataWithoutPlaceholderTag())) {
+						placeHolders.put(
+								dataPlaceholder.getDataWithoutPlaceholderTag(),
+								dataPlaceholder);
 					}
 				}
 			} while (m.find());
@@ -197,7 +233,8 @@ public final class TextHelper {
 		return map;
 	}
 
-	public static Map<String, String> getParametersInUrlQuery(final String query) {
+	public static Map<String, String> getParametersInUrlQuery(
+			final String query) {
 		final String[] params = query.split("&");
 		final Map<String, String> map = new HashMap<String, String>();
 
@@ -214,7 +251,8 @@ public final class TextHelper {
 		return !value.matches("[^\\w+]+") && !value.matches("[ ]+");
 	}
 
-	public static String joinCollection(final Collection<?> data, final String separator) {
+	public static String joinCollection(final Collection<?> data,
+			final String separator) {
 		if (data.isEmpty()) {
 			return "";
 		}
@@ -232,16 +270,19 @@ public final class TextHelper {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <O extends Serializable> O objectFromString(final String string, final Class<O> clazz)
+	public static <O extends Serializable> O objectFromString(
+			final String string, final Class<O> clazz)
 			throws IOException, ClassNotFoundException {
 		final byte[] data = Base64.getDecoder().decode(string);
-		final ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+		final ObjectInputStream ois = new ObjectInputStream(
+				new ByteArrayInputStream(data));
 		final Object o = ois.readObject();
 		ois.close();
 		return (O) o;
 	}
 
-	public static String objectToString(final Serializable object) throws IOException {
+	public static String objectToString(final Serializable object)
+			throws IOException {
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		final ObjectOutputStream oos = new ObjectOutputStream(baos);
 		oos.writeObject(object);
@@ -249,41 +290,53 @@ public final class TextHelper {
 		return Base64.getEncoder().encodeToString(baos.toByteArray());
 	}
 
-	public static String popolateTextPlaceholdersFromData(final String originalText, final Map<String, String> data,
-			final String startPlaceholderText, final String stopPlaceholderText) {
-		final Pattern pattern = Pattern.compile(startPlaceholderText + ".+?" + stopPlaceholderText);
-		return popolateTextPlaceholdersFromData(originalText, data, startPlaceholderText, stopPlaceholderText, pattern);
+	public static String popolateTextPlaceholdersFromData(
+			final String originalText, final Map<String, String> data,
+			final String startPlaceholderText,
+			final String stopPlaceholderText) {
+		final Pattern pattern = Pattern
+				.compile(startPlaceholderText + ".+?" + stopPlaceholderText);
+		return popolateTextPlaceholdersFromData(originalText, data,
+				startPlaceholderText, stopPlaceholderText, pattern);
 	}
 
-	public static String popolateTextPlaceholdersFromData(final String originalText, final Map<String, String> data,
-			final String startPlaceholderText, final String stopPlaceholderText, final Pattern PATTERN) {
+	public static String popolateTextPlaceholdersFromData(
+			final String originalText, final Map<String, String> data,
+			final String startPlaceholderText, final String stopPlaceholderText,
+			final Pattern PATTERN) {
 		final Matcher m = PATTERN.matcher(originalText);
 		final StringBuilder reply = new StringBuilder();
 		if (m.find()) {
 			int indexStart = 0;
 			do {
 				reply.append(originalText.substring(indexStart, m.start()));
-				final String placeHoldername = m.group().replaceAll("^" + startPlaceholderText, "")
+				final String placeHoldername = m.group()
+						.replaceAll("^" + startPlaceholderText, "")
 						.replaceAll(stopPlaceholderText + "$", "");
 				if (data.containsKey(placeHoldername)) {
 					reply.append(data.get(placeHoldername));
 				} else {
-					new UnsupportedOperationException("found placeholder without key: " + placeHoldername);
+					new UnsupportedOperationException(
+							"found placeholder without key: "
+									+ placeHoldername);
 				}
 				indexStart = m.end();
 			} while (m.find());
-			reply.append(originalText.substring(indexStart, originalText.length()));
+			reply.append(
+					originalText.substring(indexStart, originalText.length()));
 		} else {
 			reply.append(originalText);
 		}
 		return reply.toString();
 	}
 
-	public static void setDefaultEncryptionAlgorithm(final String encryptionAlgorithm) {
+	public static void setDefaultEncryptionAlgorithm(
+			final String encryptionAlgorithm) {
 		TextHelper.encryptionAlgorithm = encryptionAlgorithm;
 	}
 
-	public static List<String> splitFixSize(final String s, final int chunkSize) {
+	public static List<String> splitFixSize(final String s,
+			final int chunkSize) {
 		final List<String> chunks = new ArrayList<>();
 		for (int i = 0; i < s.length(); i += chunkSize) {
 			chunks.add(s.substring(i, Math.min(s.length(), i + chunkSize)));
