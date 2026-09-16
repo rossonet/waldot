@@ -101,7 +101,9 @@ import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
  * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0
  */
-public class DataGeneratorVertex extends AbstractOpcVertex implements AutoCloseable {
+public class DataGeneratorVertex extends AbstractOpcVertex
+		implements
+			AutoCloseable {
 
 	/**
 	 * Available data generation algorithms.
@@ -126,7 +128,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 
 	/** Minimum allowed delay between updates (10ms) */
 	private static final long MIN_DELAY = 10L;
-	
+
 	/** Property key for generated value */
 	public static final String VALUE_KEY = "data";
 
@@ -139,51 +141,67 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	 * @param waldotNamespace WaldOT namespace
 	 * @param dataGeneratorTypeNode OPC-UA type node for generators
 	 */
-	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode dataGeneratorTypeNode) {
-		PluginListener.addParameterToTypeNode(waldotNamespace, dataGeneratorTypeNode,
-				WaldotGeneratorPlugin.ALGORITHM_FIELD, NodeIds.String);
-		PluginListener.addParameterToTypeNode(waldotNamespace, dataGeneratorTypeNode, WaldotGeneratorPlugin.DELAY_FIELD,
-				NodeIds.UInt64);
-		PluginListener.addParameterToTypeNode(waldotNamespace, dataGeneratorTypeNode,
-				WaldotGeneratorPlugin.MIN_VALUE_FIELD, NodeIds.UInt64);
-		PluginListener.addParameterToTypeNode(waldotNamespace, dataGeneratorTypeNode,
-				WaldotGeneratorPlugin.MAX_VALUE_FIELD, NodeIds.UInt64);
+	public static void generateParameters(WaldotNamespace waldotNamespace,
+			UaObjectTypeNode dataGeneratorTypeNode) {
+		PluginListener.addParameterToTypeNode(waldotNamespace,
+				dataGeneratorTypeNode, WaldotGeneratorPlugin.ALGORITHM_FIELD,
+				NodeIds.String,
+				WaldotGeneratorPlugin.ALGORITHM_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace,
+				dataGeneratorTypeNode, WaldotGeneratorPlugin.DELAY_FIELD,
+				NodeIds.UInt64, WaldotGeneratorPlugin.DELAY_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace,
+				dataGeneratorTypeNode, WaldotGeneratorPlugin.MIN_VALUE_FIELD,
+				NodeIds.UInt64, WaldotGeneratorPlugin.MIN_VALUE_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace,
+				dataGeneratorTypeNode, WaldotGeneratorPlugin.MAX_VALUE_FIELD,
+				NodeIds.UInt64, WaldotGeneratorPlugin.MAX_VALUE_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace,
+				dataGeneratorTypeNode,
+				WaldotGeneratorPlugin.POST_NODE_ID_DATA_FIELD, NodeIds.String,
+				WaldotGeneratorPlugin.POST_NODE_ID_DATA_DESCRIPTION);
 	}
 
 	// Flag per controllare l'attività del thread di generazione
 	private transient boolean active = true;
-	
+
 	// Valore attuale generato
 	private double actualValue;
-	
+
 	// Algoritmo di generazione corrente
 	private Algorithm algorithm;
-	
+
 	// Proprietà OPC-UA per l'algoritmo
 	private final QualifiedProperty<String> algorithmProperty;
-	
+
+	private boolean alternativeDataNode = false;
+
 	// Ritardo tra gli aggiornamenti (ms)
 	private long delay;
-	
+
 	// Proprietà OPC-UA per il delay
 	private final QualifiedProperty<Long> delayProperty;
-	
+
 	// Executor per il thread virtuale del generatore
 	private final ExecutorService executor;
-	
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	
+
 	// Valore massimo
 	private long max;
 
 	// Proprietà OPC-UA per il massimo
 	private final QualifiedProperty<Long> maxProperty;
-	
+
 	// Valore minimo
 	private long min;
-	
+
 	// Proprietà OPC-UA per il minimo
 	private final QualifiedProperty<Long> minProperty;
+	private String postNodeIdData = null;
+
+	private final QualifiedProperty<String> postNodeIdDataProperty;
+
 	/**
 	 * Runnable per il thread di generazione dei dati.
 	 * <p>
@@ -195,34 +213,35 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 
 		@Override
 		public void run() {
-			logger.info("Thread for generator node " + getNodeId().toParseableString() + " started");
+			logger.info("Thread for generator node "
+					+ getNodeId().toParseableString() + " started");
 			Thread.currentThread().setName(getNodeId().toParseableString());
-			
+
 			// Loop principale di generazione
 			while (active == true) {
 				// Seleziona l'algoritmo di generazione
 				switch (algorithm) {
-				case decremental:
-					generateNextDecremental();
-					break;
-				case incremental:
-					generateNextIncremental();
-					break;
-				case random:
-					generateNextRandom();
-					break;
-				case sinusoidal:
-					generateNextSinusoidal();
-					break;
-				case triangular:
-					generateNextTriangular();
-					break;
-				case stopped:
-					// Non genera nulla, mantiene il valore corrente
-					break;
-				default:
-					logger.warn("algorithm not implemented: " + algorithm);
-					break;
+					case decremental :
+						generateNextDecremental();
+						break;
+					case incremental :
+						generateNextIncremental();
+						break;
+					case random :
+						generateNextRandom();
+						break;
+					case sinusoidal :
+						generateNextSinusoidal();
+						break;
+					case triangular :
+						generateNextTriangular();
+						break;
+					case stopped :
+						// Non genera nulla, mantiene il valore corrente
+						break;
+					default :
+						logger.warn("algorithm not implemented: " + algorithm);
+						break;
 				}
 				try {
 					// Attende prima della prossima generazione
@@ -231,13 +250,14 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 					logger.info("exception in generator", e);
 				}
 			}
-			logger.info("Thread for generator node " + getNodeId().toParseableString() + " stopped");
+			logger.info("Thread for generator node "
+					+ getNodeId().toParseableString() + " stopped");
 		}
 	};
-	
+
 	// Seed per algoritmi sinusoidali e triangolari
 	private long seed;
-	
+
 	private final WaldotNamespace waldotNamespace;
 
 	/**
@@ -260,82 +280,132 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	 * @param version vertex version
 	 * @param propertyKeyValues initial property key-value pairs
 	 */
-	public DataGeneratorVertex(ExecutorService executor, WaldotGraph graph, UaNodeContext context, NodeId nodeId,
-			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
-			UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
-		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
-				version);
+	public DataGeneratorVertex(ExecutorService executor, WaldotGraph graph,
+			UaNodeContext context, NodeId nodeId, QualifiedName browseName,
+			LocalizedText displayName, LocalizedText description,
+			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier,
+			long version, Object[] propertyKeyValues) {
+		super(graph, context, nodeId, browseName, displayName, description,
+				writeMask, userWriteMask, eventNotifier, version);
 		this.executor = executor;
 		waldotNamespace = graph.getWaldotNamespace();
 
-		final String keyValuesPropertyDelay = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+		final String keyValuesPropertyDelay = MiloStrategy.getKeyValuesProperty(
+				propertyKeyValues,
 				WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase());
-		delay = WaldotGeneratorPlugin.DEFAULT_DELAY_FIELD;
+		delay = WaldotGeneratorPlugin.DEFAULT_DELAY;
 		checkDelay(keyValuesPropertyDelay);
-		delayProperty = new QualifiedProperty<Long>(getNamespace().getNamespaceUri(), WaldotGeneratorPlugin.DELAY_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Long.class);
+		delayProperty = new QualifiedProperty<Long>(
+				getNamespace().getNamespaceUri(),
+				WaldotGeneratorPlugin.DELAY_FIELD,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, Long.class);
 		setProperty(delayProperty, delay);
-		final String keyValuesPropertyMin = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+		final String keyValuesPropertyMin = MiloStrategy.getKeyValuesProperty(
+				propertyKeyValues,
 				WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase());
-		min = WaldotGeneratorPlugin.DEFAULT_MIN_VALUE_FIELD;
+		min = WaldotGeneratorPlugin.DEFAULT_MIN_VALUE;
 		if (keyValuesPropertyMin != null && !keyValuesPropertyMin.isEmpty()) {
 			try {
 				min = Long.valueOf(keyValuesPropertyMin);
 			} catch (final Exception e) {
-				logger.info("min value is not a number, using default {} '{}'", WaldotGeneratorPlugin.MIN_VALUE_FIELD,
-						WaldotGeneratorPlugin.DEFAULT_MIN_VALUE_FIELD);
-				min = WaldotGeneratorPlugin.DEFAULT_MIN_VALUE_FIELD;
+				logger.info("min value is not a number, using default {} '{}'",
+						WaldotGeneratorPlugin.MIN_VALUE_FIELD,
+						WaldotGeneratorPlugin.DEFAULT_MIN_VALUE);
+				min = WaldotGeneratorPlugin.DEFAULT_MIN_VALUE;
 			}
 		} else {
-			logger.info(
-					WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase()
-							+ " not found in propertyKeyValues, using default {} '{}'",
-					WaldotGeneratorPlugin.MIN_VALUE_FIELD, WaldotGeneratorPlugin.DEFAULT_MIN_VALUE_FIELD);
+			logger.info(WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase()
+					+ " not found in propertyKeyValues, using default {} '{}'",
+					WaldotGeneratorPlugin.MIN_VALUE_FIELD,
+					WaldotGeneratorPlugin.DEFAULT_MIN_VALUE);
 		}
-		minProperty = new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
+		minProperty = new QualifiedProperty<Long>(
+				getNamespace().getNamespaceUri(),
 				WaldotGeneratorPlugin.MIN_VALUE_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Long.class);
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, Long.class);
 		setProperty(minProperty, min);
 
-		final String keyValuesPropertyMax = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+		final String keyValuesPropertyMax = MiloStrategy.getKeyValuesProperty(
+				propertyKeyValues,
 				WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase());
-		max = WaldotGeneratorPlugin.DEFAULT_MAX_VALUE_FIELD;
+		max = WaldotGeneratorPlugin.DEFAULT_MAX_VALUE;
 		if (keyValuesPropertyMax != null && !keyValuesPropertyMax.isEmpty()) {
 			try {
 				max = Long.valueOf(keyValuesPropertyMax);
 			} catch (final Exception e) {
-				logger.info("max value is not a number, using default {} '{}'", WaldotGeneratorPlugin.MAX_VALUE_FIELD,
-						WaldotGeneratorPlugin.DEFAULT_MAX_VALUE_FIELD);
-				max = WaldotGeneratorPlugin.DEFAULT_MAX_VALUE_FIELD;
+				logger.info("max value is not a number, using default {} '{}'",
+						WaldotGeneratorPlugin.MAX_VALUE_FIELD,
+						WaldotGeneratorPlugin.DEFAULT_MAX_VALUE);
+				max = WaldotGeneratorPlugin.DEFAULT_MAX_VALUE;
 			}
 		} else {
-			logger.info(
-					WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase()
-							+ " not found in propertyKeyValues, using default {} '{}'",
-					WaldotGeneratorPlugin.MAX_VALUE_FIELD, WaldotGeneratorPlugin.DEFAULT_MAX_VALUE_FIELD);
+			logger.info(WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase()
+					+ " not found in propertyKeyValues, using default {} '{}'",
+					WaldotGeneratorPlugin.MAX_VALUE_FIELD,
+					WaldotGeneratorPlugin.DEFAULT_MAX_VALUE);
 		}
-		maxProperty = new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
+		maxProperty = new QualifiedProperty<Long>(
+				getNamespace().getNamespaceUri(),
 				WaldotGeneratorPlugin.MAX_VALUE_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Long.class);
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, Long.class);
 		setProperty(maxProperty, max);
 
-		final String keyValuesPropertyAlgorithm = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase());
-		algorithm = Algorithm.valueOf(WaldotGeneratorPlugin.DEFAULT_ALGORITHM_FIELD);
+		final String keyValuesPropertypostNodeId = MiloStrategy
+				.getKeyValuesProperty(propertyKeyValues,
+						WaldotGeneratorPlugin.POST_NODE_ID_DATA_FIELD
+								.toLowerCase());
+		postNodeIdData = WaldotGeneratorPlugin.DEFAULT_POST_NODE_ID_DATA;
+		if (keyValuesPropertypostNodeId != null
+				&& !keyValuesPropertypostNodeId.isEmpty()) {
+			try {
+				postNodeIdData = keyValuesPropertypostNodeId;
+			} catch (final Exception e) {
+				logger.info(
+						"postNodeIdData is not a string, using default {} '{}'",
+						WaldotGeneratorPlugin.POST_NODE_ID_DATA_FIELD,
+						WaldotGeneratorPlugin.DEFAULT_POST_NODE_ID_DATA);
+				postNodeIdData = WaldotGeneratorPlugin.DEFAULT_POST_NODE_ID_DATA;
+			}
+		} else {
+			logger.info(WaldotGeneratorPlugin.POST_NODE_ID_DATA_FIELD
+					.toLowerCase()
+					+ " not found in propertyKeyValues, using default {} '{}'",
+					WaldotGeneratorPlugin.POST_NODE_ID_DATA_FIELD,
+					WaldotGeneratorPlugin.DEFAULT_POST_NODE_ID_DATA);
+		}
+		postNodeIdDataProperty = new QualifiedProperty<String>(
+				getNamespace().getNamespaceUri(),
+				WaldotGeneratorPlugin.POST_NODE_ID_DATA_FIELD,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, String.class);
+		setProperty(postNodeIdDataProperty, postNodeIdData);
+
+		final String keyValuesPropertyAlgorithm = MiloStrategy
+				.getKeyValuesProperty(propertyKeyValues,
+						WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase());
+		algorithm = Algorithm.valueOf(WaldotGeneratorPlugin.DEFAULT_ALGORITHM);
 		checkAlgorithm(keyValuesPropertyAlgorithm);
-		algorithmProperty = new QualifiedProperty<String>(getNamespace().getNamespaceUri(),
+		algorithmProperty = new QualifiedProperty<String>(
+				getNamespace().getNamespaceUri(),
 				WaldotGeneratorPlugin.ALGORITHM_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				String.class);
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, String.class);
 		setProperty(algorithmProperty, algorithm.name());
 
 		// Inizializza seed con valore casuale nel range
 		seed = (long) (Math.random() * (max - min)) + min;
 		actualValue = seed;
-		
+		if (postNodeIdData != null && !postNodeIdData.isEmpty()) {
+			preparePostNodeIdData();
+		}
 		// Avvia il thread di generazione
 		executor.submit(runner);
 	}
@@ -348,8 +418,11 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	 * </p>
 	 */
 	private void assignValue() {
-		property(Cardinality.single, VALUE_KEY, actualValue);
-
+		if (alternativeDataNode) {
+			// TODO: scrivere il valore in un nodo alternativo se specificato
+		} else {
+			property(Cardinality.single, VALUE_KEY, actualValue);
+		}
 	}
 
 	/**
@@ -367,22 +440,27 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 		if (keyValuesNewAlgorithm != null && !keyValuesNewAlgorithm.isEmpty()) {
 			if (EnumUtils.isValidEnum(Algorithm.class, keyValuesNewAlgorithm)) {
 				try {
-					final Algorithm targetAlgorithm = Algorithm.valueOf(keyValuesNewAlgorithm);
+					final Algorithm targetAlgorithm = Algorithm
+							.valueOf(keyValuesNewAlgorithm);
 					if (targetAlgorithm != null) {
 						algorithm = targetAlgorithm;
 						ok = true;
 					} else {
-						logger.info("Algorithm {} not found", keyValuesNewAlgorithm);
+						logger.info("Algorithm {} not found",
+								keyValuesNewAlgorithm);
 						ok = false;
 					}
 				} catch (final Exception e) {
-					logger.info("Algorithm {} not found", keyValuesNewAlgorithm);
+					logger.info("Algorithm {} not found",
+							keyValuesNewAlgorithm);
 					ok = false;
 				}
 			} else {
-				logger.info("Algorithm {} not found, using {} '{}'", keyValuesNewAlgorithm,
+				logger.info("Algorithm {} not found, using {} '{}'",
+						keyValuesNewAlgorithm,
 						WaldotGeneratorPlugin.ALGORITHM_FIELD, algorithm);
-				logger.info("Available algorithms are: {}", EnumUtils.getEnumList(Algorithm.class).toString());
+				logger.info("Available algorithms are: {}",
+						EnumUtils.getEnumList(Algorithm.class).toString());
 				ok = false;
 			}
 		} else {
@@ -415,7 +493,9 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 				logger.info("delay is not a number");
 			}
 			if (targetDelay < MIN_DELAY) {
-				logger.info(WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase() + " is less than {}ms, using {} '{}'",
+				logger.info(
+						WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase()
+								+ " is less than {}ms, using {} '{}'",
 						MIN_DELAY, WaldotGeneratorPlugin.DELAY_FIELD, delay);
 				ok = false;
 			} else {
@@ -424,7 +504,8 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 			}
 		} else {
 			logger.info(
-					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase() + " not found in propertyKeyValues, using {} '{}'",
+					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase()
+							+ " not found in propertyKeyValues, using {} '{}'",
 					WaldotGeneratorPlugin.DELAY_FIELD, delay);
 			ok = false;
 		}
@@ -438,9 +519,10 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	 */
 	@Override
 	public Object clone() {
-		return new DataGeneratorVertex(executor, graph, getNodeContext(), getNodeId(), getBrowseName(),
-				getDisplayName(), getDescription(), getWriteMask(), getUserWriteMask(), getEventNotifier(), version(),
-				getPropertiesAsStringArray());
+		return new DataGeneratorVertex(executor, graph, getNodeContext(),
+				getNodeId(), getBrowseName(), getDisplayName(),
+				getDescription(), getWriteMask(), getUserWriteMask(),
+				getEventNotifier(), version(), getPropertiesAsStringArray());
 
 	}
 
@@ -536,7 +618,8 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	 * </p>
 	 */
 	protected void generateNextTriangular() {
-		actualValue = min + ((max - min) * (2 / Math.PI * Math.acos(Math.abs(Math.cos(seed++)))));
+		actualValue = min + ((max - min)
+				* (2 / Math.PI * Math.acos(Math.abs(Math.cos(seed++)))));
 		assignValue();
 	}
 
@@ -563,41 +646,57 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	@Override
 	public void notifyPropertyValueChanging(String label, DataValue value) {
 		super.notifyPropertyValueChanging(label, value);
-		
+
 		// Gestisce modifica del Delay
 		if (label.equals(WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase())) {
 			final String delayTarget = value.value().value().toString();
 			if (checkDelay(delayTarget)) {
 				setProperty(delayProperty, delay);
 			} else {
-				logger.warn("Changing delay from {} to {} is not allowed, reverting to original value", delay,
-						value.getValue().getValue().toString());
-				property(WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), delay);
+				logger.warn(
+						"Changing delay from {} to {} is not allowed, reverting to original value",
+						delay, value.getValue().getValue().toString());
+				property(WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(),
+						delay);
 			}
 		}
-		
+
 		// Gestisce modifica dell'Algorithm
 		if (label.equals(WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase())) {
 			final String algorithmTarget = value.value().value().toString();
 			if (checkAlgorithm(algorithmTarget)) {
 				setProperty(algorithmProperty, algorithm.name());
 			} else {
-				logger.warn("Changing algorithm from {} to {} is not allowed, reverting to original value",
-						algorithm.name(), value.getValue().getValue().toString());
-				property(WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), algorithm.name());
+				logger.warn(
+						"Changing algorithm from {} to {} is not allowed, reverting to original value",
+						algorithm.name(),
+						value.getValue().getValue().toString());
+				property(WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(),
+						algorithm.name());
 			}
 		}
-		
+
 		// Gestisce modifica del Min
 		if (label.equals(WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase())) {
 			min = Long.valueOf(value.getValue().getValue().toString());
 			setProperty(minProperty, min);
 		}
-		
+
 		// Gestisce modifica del Max
 		if (label.equals(WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase())) {
 			max = Long.valueOf(value.getValue().getValue().toString());
 			setProperty(maxProperty, max);
+		}
+
+		// Gestisce modifica del postNodeIdData (non consentita a runtime)
+		if (label.equals(
+				WaldotGeneratorPlugin.POST_NODE_ID_DATA_FIELD.toLowerCase())) {
+			logger.warn(
+					"Changing postNodeIdData in runtime from {} to {} is not allowed, reverting to original value",
+					postNodeIdData, value.getValue().getValue().toString());
+			property(
+					WaldotGeneratorPlugin.POST_NODE_ID_DATA_FIELD.toLowerCase(),
+					postNodeIdData);
 		}
 	}
 
@@ -610,7 +709,11 @@ public class DataGeneratorVertex extends AbstractOpcVertex implements AutoClosea
 	@Override
 	public void notifyRemoveVertex() {
 		close();
+	}
 
+	private void preparePostNodeIdData() {
+		alternativeDataNode = true;
+		// TODO: preparare il nodo alternativo per postNodeIdData
 	}
 
 }

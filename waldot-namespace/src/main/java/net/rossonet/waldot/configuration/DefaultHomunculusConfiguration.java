@@ -8,15 +8,18 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 
-public class DefaultHomunculusConfiguration extends HashMap<String, String> implements WaldotConfiguration {
+public class DefaultHomunculusConfiguration extends HashMap<String, String>
+		implements
+			WaldotConfiguration {
 
-	private static final String DEFAULT_ABOUT_COMMAND_DESCRIPTION = "info about this software";
-	private static final boolean DEFAULT_ABOUT_COMMAND_EXECUTABLE = true;
-	private static final String DEFAULT_ABOUT_COMMAND_LABEL = "about";
-	private static final boolean DEFAULT_ABOUT_COMMAND_USER_EXECUTABLE = true;
+	public static final String DEFAULT_ABOUT_COMMAND_DESCRIPTION = "info about this software";
+	public static final boolean DEFAULT_ABOUT_COMMAND_EXECUTABLE = true;
+	public static final String DEFAULT_ABOUT_COMMAND_LABEL = "about";
+	public static final boolean DEFAULT_ABOUT_COMMAND_USER_EXECUTABLE = true;
 	public static String DEFAULT_HELP_DIRECTORY = "/app/help";
-	private static final UInteger DEFAULT_WRITE_MASK = UInteger.valueOf(WriteMask.Executable.getValue());
-	private static final long serialVersionUID = 4132363257864835403L;
+	public static final UInteger DEFAULT_WRITE_MASK = UInteger
+			.valueOf(WriteMask.Executable.getValue());
+	public static final long serialVersionUID = 4132363257864835403L;
 
 	public static WaldotConfiguration getDefault() {
 		return new DefaultHomunculusConfiguration();
@@ -358,11 +361,13 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		this.aboutCommandLabel = aboutCommandLabel;
 	}
 
-	public void setAboutCommandUserExecutable(Boolean aboutCommandUserExecutable) {
+	public void setAboutCommandUserExecutable(
+			Boolean aboutCommandUserExecutable) {
 		this.aboutCommandUserExecutable = aboutCommandUserExecutable;
 	}
 
-	public void setAboutCommandUserWriteMask(UInteger aboutCommandUserWriteMask) {
+	public void setAboutCommandUserWriteMask(
+			UInteger aboutCommandUserWriteMask) {
 		this.aboutCommandUserWriteMask = aboutCommandUserWriteMask;
 	}
 
@@ -398,11 +403,13 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		this.defaultFactsValidUntilMs = defaultFactsValidUntilMs;
 	}
 
-	public void setDeleteDirectoryDescription(String deleteDirectoryDescription) {
+	public void setDeleteDirectoryDescription(
+			String deleteDirectoryDescription) {
 		this.deleteDirectoryDescription = deleteDirectoryDescription;
 	}
 
-	public void setDeleteDirectoryExecutable(Boolean deleteDirectoryExecutable) {
+	public void setDeleteDirectoryExecutable(
+			Boolean deleteDirectoryExecutable) {
 		this.deleteDirectoryExecutable = deleteDirectoryExecutable;
 	}
 
@@ -410,7 +417,8 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		this.deleteDirectoryLabel = deleteDirectoryLabel;
 	}
 
-	public void setDeleteDirectoryUserWriteMask(UInteger deleteDirectoryUserWriteMask) {
+	public void setDeleteDirectoryUserWriteMask(
+			UInteger deleteDirectoryUserWriteMask) {
 		this.deleteDirectoryUserWriteMask = deleteDirectoryUserWriteMask;
 	}
 
@@ -430,7 +438,8 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		this.execCommandLabel = execCommandLabel;
 	}
 
-	public void setExecCommandUserExecutable(Boolean execCommandUserExecutable) {
+	public void setExecCommandUserExecutable(
+			Boolean execCommandUserExecutable) {
 		this.execCommandUserExecutable = execCommandUserExecutable;
 	}
 
@@ -462,7 +471,8 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		this.helpCommandLabel = helpCommandLabel;
 	}
 
-	public void setHelpCommandUserExecutable(Boolean helpCommandUserExecutable) {
+	public void setHelpCommandUserExecutable(
+			Boolean helpCommandUserExecutable) {
 		this.helpCommandUserExecutable = helpCommandUserExecutable;
 	}
 
@@ -478,11 +488,13 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		this.helpDirectory = helpDirectory;
 	}
 
-	public void setInterfaceRootNodeBrowseName(String interfaceRootNodeBrowseName) {
+	public void setInterfaceRootNodeBrowseName(
+			String interfaceRootNodeBrowseName) {
 		this.interfaceRootNodeBrowseName = interfaceRootNodeBrowseName;
 	}
 
-	public void setInterfaceRootNodeDisplayName(String interfaceRootNodeDisplayName) {
+	public void setInterfaceRootNodeDisplayName(
+			String interfaceRootNodeDisplayName) {
 		this.interfaceRootNodeDisplayName = interfaceRootNodeDisplayName;
 	}
 
@@ -494,11 +506,13 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		this.managerNamespaceUri = managerNamespaceUri;
 	}
 
-	public void setOsCheckDelayCommandDescription(String osCheckDelayCommandDescription) {
+	public void setOsCheckDelayCommandDescription(
+			String osCheckDelayCommandDescription) {
 		this.osCheckDelayCommandDescription = osCheckDelayCommandDescription;
 	}
 
-	public void setOsCheckDelayCommandExecutable(Boolean osCheckDelayCommandExecutable) {
+	public void setOsCheckDelayCommandExecutable(
+			Boolean osCheckDelayCommandExecutable) {
 		this.osCheckDelayCommandExecutable = osCheckDelayCommandExecutable;
 	}
 
@@ -506,15 +520,18 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		this.osCheckDelayCommandLabel = osCheckDelayCommandLabel;
 	}
 
-	public void setOsCheckDelayCommandUserExecutable(Boolean osCheckDelayCommandUserExecutable) {
+	public void setOsCheckDelayCommandUserExecutable(
+			Boolean osCheckDelayCommandUserExecutable) {
 		this.osCheckDelayCommandUserExecutable = osCheckDelayCommandUserExecutable;
 	}
 
-	public void setOsCheckDelayCommandUserWriteMask(UInteger osCheckDelayCommandUserWriteMask) {
+	public void setOsCheckDelayCommandUserWriteMask(
+			UInteger osCheckDelayCommandUserWriteMask) {
 		this.osCheckDelayCommandUserWriteMask = osCheckDelayCommandUserWriteMask;
 	}
 
-	public void setOsCheckDelayCommandWriteMask(UInteger osCheckDelayCommandWriteMask) {
+	public void setOsCheckDelayCommandWriteMask(
+			UInteger osCheckDelayCommandWriteMask) {
 		this.osCheckDelayCommandWriteMask = osCheckDelayCommandWriteMask;
 	}
 
@@ -542,11 +559,13 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String> impl
 		this.waldotCommandLabel = waldotCommandLabel;
 	}
 
-	public void setWaldotCommandUserExecutable(Boolean waldotCommandUserExecutable) {
+	public void setWaldotCommandUserExecutable(
+			Boolean waldotCommandUserExecutable) {
 		this.waldotCommandUserExecutable = waldotCommandUserExecutable;
 	}
 
-	public void setWaldotCommandUserWriteMask(UInteger waldotCommandUserWriteMask) {
+	public void setWaldotCommandUserWriteMask(
+			UInteger waldotCommandUserWriteMask) {
 		this.waldotCommandUserWriteMask = waldotCommandUserWriteMask;
 	}
 

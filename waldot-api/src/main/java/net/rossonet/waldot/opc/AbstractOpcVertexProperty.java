@@ -45,8 +45,12 @@ import net.rossonet.waldot.utils.LogHelper;
  * @param <DATA_TYPE> the type of data stored in the vertex property
  * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
-public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
-		implements WaldotVertexProperty<DATA_TYPE>, AttributeObserver {
+public abstract class AbstractOpcVertexProperty<DATA_TYPE>
+		extends
+			GremlinProperty<DATA_TYPE>
+		implements
+			WaldotVertexProperty<DATA_TYPE>,
+			AttributeObserver {
 
 	protected boolean allowNullPropertyValues = false;
 
@@ -59,24 +63,32 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 
 	private final WaldotVertex referenceVertex;
 
-	public AbstractOpcVertexProperty(final WaldotGraph graph, final WaldotVertex vertex, final String key,
-			final DATA_TYPE value, final UaNodeContext context, final NodeId nodeId, final LocalizedText description,
-			final UInteger writeMask, final UInteger userWriteMask, final NodeId dataType, final Integer valueRank,
-			final UInteger[] arrayDimensions, final UByte accessLevel, final UByte userAccessLevel,
+	public AbstractOpcVertexProperty(final WaldotGraph graph,
+			final WaldotVertex vertex, final String key, final DATA_TYPE value,
+			final UaNodeContext context, final NodeId nodeId,
+			final LocalizedText description, final UInteger writeMask,
+			final UInteger userWriteMask, final NodeId dataType,
+			final Integer valueRank, final UInteger[] arrayDimensions,
+			final UByte accessLevel, final UByte userAccessLevel,
 			final Double minimumSamplingInterval, final boolean historizing) {
-		super(graph, key, value, context, nodeId, description, writeMask, userWriteMask, dataType, valueRank,
-				arrayDimensions, accessLevel, userAccessLevel, minimumSamplingInterval, historizing);
+		super(graph, key, value, context, nodeId, description, writeMask,
+				userWriteMask, dataType, valueRank, arrayDimensions,
+				accessLevel, userAccessLevel, minimumSamplingInterval,
+				historizing);
 		this.referenceVertex = vertex;
 		this.graph = graph;
-		this.allowNullPropertyValues = graph.features().vertex().supportsNullPropertyValues();
+		this.allowNullPropertyValues = graph.features().vertex()
+				.supportsNullPropertyValues();
 		try {
 			final Variant variant = new Variant(value);
-			final DataValue dataValue = DataValue.newValue().setStatus(StatusCode.GOOD).setSourceTime(DateTime.now())
+			final DataValue dataValue = DataValue.newValue()
+					.setStatus(StatusCode.GOOD).setSourceTime(DateTime.now())
 					.setValue(variant).build();
 			setValue(dataValue);
 			vertex.addComponent(this);
 		} catch (final Exception a) {
-			final DataValue errorDataValue = DataValue.newValue().setStatus(StatusCode.BAD).build();
+			final DataValue errorDataValue = DataValue.newValue()
+					.setStatus(StatusCode.BAD).build();
 			setValue(errorDataValue);
 			vertex.addComponent(this);
 			logger.error(LogHelper.stackTraceToString(a));
@@ -85,9 +97,15 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 	}
 
 	@Override
-	public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
-		if (attributeId.equals(AttributeId.Value) && value instanceof DataValue) {
-			referenceVertex.notifyPropertyValueChanging(key(), ((DataValue) value));
+	public void attributeChanged(UaNode node, AttributeId attributeId,
+			Object value) {
+		if (attributeId.equals(AttributeId.Value)
+				&& value instanceof DataValue) {
+			referenceVertex.notifyPropertyValueChanging(key(),
+					((DataValue) value));
+		} else {
+			logger.warn("Attribute changed: " + attributeId + " with value: "
+					+ value + " is not handled");
 		}
 	}
 
@@ -168,8 +186,10 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE> extends GremlinProper
 			return WaldotGraph.EMPTY_VERTEX_PROPERTY;
 		}
 		final String valueString = String.valueOf(value());
-		return WaldotGraph.VP + WaldotGraph.L_BRACKET + getBrowseName().getName() + WaldotGraph.ARROW
-				+ StringUtils.abbreviate(valueString, 20) + WaldotGraph.R_BRACKET;
+		return WaldotGraph.VP + WaldotGraph.L_BRACKET
+				+ getBrowseName().getName() + WaldotGraph.ARROW
+				+ StringUtils.abbreviate(valueString, 20)
+				+ WaldotGraph.R_BRACKET;
 	}
 
 	@SuppressWarnings("unchecked")

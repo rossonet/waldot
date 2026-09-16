@@ -105,6 +105,30 @@ public interface PluginListener {
 
 	public static UaVariableNode addParameterToTypeNode(
 			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
+			String variableId, NodeId dataType, String description) {
+		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(
+				waldotNamespace.getOpcUaNodeContext())
+				.setNodeId(waldotNamespace
+						.generateNodeId(typeNode.getNodeId().toParseableString()
+								+ "." + variableId))
+				.setAccessLevel(AccessLevel.READ_WRITE)
+				.setBrowseName(
+						waldotNamespace.generateQualifiedName(variableId))
+				.setDisplayName(LocalizedText.english(variableId))
+				.setDescription(LocalizedText.english(description))
+				.setDataType(dataType)
+				.setTypeDefinition(NodeIds.BaseDataVariableType).build();
+		variable.addReference(
+				new Reference(variable.getNodeId(), NodeIds.HasModellingRule,
+						NodeIds.ModellingRule_Mandatory.expanded(), true));
+		variable.setValue(new DataValue(new Variant("NaN")));
+		typeNode.addComponent(variable);
+		waldotNamespace.getStorageManager().addNode(variable);
+		return variable;
+	}
+
+	public static UaVariableNode addParameterToTypeNode(
+			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
 			String variableId, NodeId dataType, UInteger[] arrayDimensions) {
 		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(
 				waldotNamespace.getOpcUaNodeContext())
