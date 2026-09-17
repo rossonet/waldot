@@ -8,6 +8,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 
 /**
  * 
@@ -15,42 +16,91 @@ import net.rossonet.waldot.api.models.WaldotGraph;
  */
 public class GremlinHelper {
 
-	public static List<String[]> dumpGraphEdges(WaldotGraph graph) {
-		final List<String[]> result = new ArrayList<>();
+	public static final class EdgeDump {
+
+		private final String[] parameters;
+		private final String source;
+		private final String target;
+
+		public EdgeDump(String source, String target, String[] parameters) {
+			this.source = source;
+			this.target = target;
+			this.parameters = parameters;
+		}
+
+		public String[] getParameters() {
+			return parameters;
+		}
+
+		public String getSource() {
+			return source;
+		}
+
+		public String getTarget() {
+			return target;
+		}
+
+	}
+
+	public static List<EdgeDump> dumpGraphEdges(WaldotGraph graph,
+			boolean includeEphemeral) {
+		final List<EdgeDump> result = new ArrayList<>();
 		final List<Edge> edges = graph.traversal().E().toList();
 		for (final Edge e : edges) {
-			final String[] edgeData = new String[(e.keys().size() + 2) * 2];
-			edgeData[0] = "source";
-			edgeData[1] = ((NodeId) e.outVertex().id()).toParseableString();
-			edgeData[2] = "destination";
-			edgeData[3] = ((NodeId) e.inVertex().id()).toParseableString();
-			int counter = 4;
+			boolean positiveEphemeral = false;
+			final List<String> edgeData = new ArrayList<>();
+			final String source = ((NodeId) e.outVertex().id())
+					.toParseableString();
+			final String target = ((NodeId) e.inVertex().id())
+					.toParseableString();
 			for (int i = 0; i < e.keys().size(); i++) {
 				final String key = (String) e.keys().toArray()[i];
-				edgeData[counter] = key;
-				counter++;
-				edgeData[counter] = e.property(key).value().toString();
-				counter++;
+				edgeData.add(key);
+				edgeData.add(e.property(key).value().toString());
+				if (key.equals(MiloStrategy.EPHEMERAL_PARAMETER.toLowerCase())
+						&& e.property(key).value().toString().equals("true")) {
+					positiveEphemeral = true;
+				}
 			}
-			result.add(edgeData);
+			if (positiveEphemeral && !includeEphemeral) {
+				continue;
+			}
+			result.add(new EdgeDump(source, target,
+					edgeData.toArray(new String[0])));
 		}
 		return result;
 	}
 
-	public static List<String[]> dumpGraphVertices(WaldotGraph graph) {
+	public static List<String[]> dumpGraphVertices(WaldotGraph graph,
+			boolean includeEphemeral) {
 		final List<String[]> result = new ArrayList<>();
 		final List<Vertex> vertices = graph.traversal().V().toList();
 		for (final Vertex v : vertices) {
-			final String[] vertexData = new String[v.keys().size() * 2];
-			int counter = 0;
+			final List<String> vertexData = new ArrayList<>();
+			boolean positiveEphemeral = false;
+			boolean foundNodeId = false;
 			for (int i = 0; i < v.keys().size(); i++) {
 				final String key = (String) v.keys().toArray()[i];
-				vertexData[counter] = key;
-				counter++;
-				vertexData[counter] = v.property(key).value().toString();
-				counter++;
+				vertexData.add(key);
+				vertexData.add(v.property(key).value().toString());
+				if (key.equals(MiloStrategy.EPHEMERAL_PARAMETER.toLowerCase())
+						&& v.property(key).value().toString().equals("true")) {
+					positiveEphemeral = true;
+				}
+				if (key.equals(MiloStrategy.ID_PARAMETER.toLowerCase())
+						&& v.property(key).value().toString().equals(
+								((NodeId) v.id()).toParseableString())) {
+					foundNodeId = true;
+				}
 			}
-			result.add(vertexData);
+			if (!foundNodeId) {
+				vertexData.add(MiloStrategy.ID_PARAMETER.toLowerCase());
+				vertexData.add(((NodeId) v.id()).toParseableString());
+			}
+			if (positiveEphemeral && !includeEphemeral) {
+				continue;
+			}
+			result.add(vertexData.toArray(new String[0]));
 		}
 		return result;
 	}

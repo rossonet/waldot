@@ -78,8 +78,9 @@ public interface MiloStrategy extends AutoCloseable {
 	/**
 	 * Predicate for filtering component references.
 	 */
-	public static final Predicate<Reference> COMPONENT_OF_PREDICATE = (reference) -> reference.isInverse()
-			&& NodeIds.HasComponent.equals(reference.getReferenceTypeId());
+	public static final Predicate<Reference> COMPONENT_OF_PREDICATE = (
+			reference) -> reference.isInverse() && NodeIds.HasComponent
+					.equals(reference.getReferenceTypeId());
 	/**
 	 * Default edge type label.
 	 */
@@ -101,6 +102,10 @@ public interface MiloStrategy extends AutoCloseable {
 	 */
 	public static final String DIRECTORY_SPLIT_SIMBOL = "/";
 	/**
+	 * Field for ephemeral flag.
+	 */
+	public static final String EPHEMERAL_PARAMETER = "ephemeral";
+	/**
 	 * Parameter name for event notifier.
 	 */
 	public static final String EVENT_NOTIFIER_PARAMETER = "event-notifier";
@@ -120,11 +125,11 @@ public interface MiloStrategy extends AutoCloseable {
 	 * Field name for history flag.
 	 */
 	public static final String HISTORY_FIELD = "IsHistory";
+
 	/**
 	 * Parameter name for ID.
 	 */
 	public static final String ID_PARAMETER = "id";
-
 	/**
 	 * Field name for forward reference flag.
 	 */
@@ -200,7 +205,8 @@ public interface MiloStrategy extends AutoCloseable {
 				continue;
 			}
 			final String name = keyValues[i].toString();
-			if (name != null && !name.isEmpty() && name.equals(MiloStrategy.ID_PARAMETER)) {
+			if (name != null && !name.isEmpty()
+					&& name.equals(MiloStrategy.ID_PARAMETER)) {
 				return Optional.ofNullable(keyValues[i + 1]);
 			}
 		}
@@ -214,7 +220,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @param label the property label to find
 	 * @return the property value as String, or null if not found
 	 */
-	public static String getKeyValuesProperty(final Object[] propertyKeyValues, final String label) {
+	public static String getKeyValuesProperty(final Object[] propertyKeyValues,
+			final String label) {
 		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
 			if (propertyKeyValues[i] == null) {
 				continue;
@@ -280,7 +287,8 @@ public interface MiloStrategy extends AutoCloseable {
 			public NodeId getNextId(final WaldotGraph graph) {
 				boolean found = false;
 				while (!found) {
-					final NodeId id = graph.getWaldotNamespace().generateNodeId(graph.getGeneratedId());
+					final NodeId id = graph.getWaldotNamespace()
+							.generateNodeId(graph.getGeneratedId());
 					if (!graph.getWaldotNamespace().hasNodeId(id)) {
 						found = true;
 						return id;
@@ -289,11 +297,14 @@ public interface MiloStrategy extends AutoCloseable {
 				return null;
 			}
 
-			private NodeId getNodeIdFromNumber(final WaldotGraph graph, final Integer nodeId) {
-				return graph.getWaldotNamespace().generateNodeId(UInteger.valueOf(nodeId));
+			private NodeId getNodeIdFromNumber(final WaldotGraph graph,
+					final Integer nodeId) {
+				return graph.getWaldotNamespace()
+						.generateNodeId(UInteger.valueOf(nodeId));
 			}
 
-			private NodeId getNodeIdFromString(final WaldotGraph graph, final String nodeId) {
+			private NodeId getNodeIdFromString(final WaldotGraph graph,
+					final String nodeId) {
 				try {
 					return NodeId.parse(nodeId);
 				} catch (final Exception e) {
@@ -314,7 +325,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @return the created Edge
 	 * @see Edge
 	 */
-	Edge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex, String label, Object[] keyValues);
+	Edge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex,
+			String label, Object[] keyValues);
 
 	/**
 	 * Adds a new vertex to the graph.
@@ -335,8 +347,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @return the created WaldotGraphComputerView
 	 * @see WaldotGraphComputerView
 	 */
-	WaldotGraphComputerView createGraphComputerView(WaldotGraph graph, GraphFilter graphFilter,
-			Set<VertexComputeKey> vertexComputeKey);
+	WaldotGraphComputerView createGraphComputerView(WaldotGraph graph,
+			GraphFilter graphFilter, Set<VertexComputeKey> vertexComputeKey);
 
 	/**
 	 * Creates or updates a property on an edge.
@@ -348,8 +360,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @return the created or updated WaldotProperty
 	 * @see WaldotProperty
 	 */
-	<DATA_TYPE> WaldotProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(WaldotEdge opcEdge, String key,
-			DATA_TYPE value);
+	<DATA_TYPE> WaldotProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(
+			WaldotEdge opcEdge, String key, DATA_TYPE value);
 
 	/**
 	 * Creates or updates a property on a vertex.
@@ -361,8 +373,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @return the created or updated WaldotVertexProperty
 	 * @see WaldotVertexProperty
 	 */
-	<DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(WaldotVertex opcVertex, String key,
-			DATA_TYPE value);
+	<DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(
+			WaldotVertex opcVertex, String key, DATA_TYPE value);
 
 	/**
 	 * Deletes an OPC UA node by its NodeId string.
@@ -420,7 +432,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @param edgeLabels optional edge label filter
 	 * @return map of NodeId to WaldotEdge
 	 */
-	Map<NodeId, WaldotEdge> getEdges(WaldotVertex opcVertex, Direction direction, String[] edgeLabels);
+	Map<NodeId, WaldotEdge> getEdges(WaldotVertex opcVertex,
+			Direction direction, String[] edgeLabels);
 
 	/**
 	 * Returns all properties of an edge.
@@ -438,7 +451,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @param <DATA_TYPE> the type of the property value
 	 * @return the owning WaldotEdge
 	 */
-	<DATA_TYPE> WaldotEdge getPropertyReference(WaldotProperty<DATA_TYPE> opcProperty);
+	<DATA_TYPE> WaldotEdge getPropertyReference(
+			WaldotProperty<DATA_TYPE> opcProperty);
 
 	/**
 	 * Returns the root folder node.
@@ -455,7 +469,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @param <DATA_TYPE> the type of property values
 	 * @return map of property name to WaldotVertexProperty
 	 */
-	<DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(WaldotVertex opcVertex);
+	<DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(
+			WaldotVertex opcVertex);
 
 	/**
 	 * Returns the vertex that owns a property.
@@ -464,7 +479,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @param <DATA_TYPE> the type of the property value
 	 * @return the owning WaldotVertex
 	 */
-	<DATA_TYPE> WaldotVertex getVertexPropertyReference(WaldotVertexProperty<DATA_TYPE> opcVertexProperty);
+	<DATA_TYPE> WaldotVertex getVertexPropertyReference(
+			WaldotVertexProperty<DATA_TYPE> opcVertexProperty);
 
 	/**
 	 * Returns all vertices in the graph.
@@ -481,7 +497,8 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @param edgeLabels optional edge label filter
 	 * @return map of NodeId to WaldotVertex
 	 */
-	Map<NodeId, WaldotVertex> getVertices(WaldotVertex opcVertex, Direction direction, String[] edgeLabels);
+	Map<NodeId, WaldotVertex> getVertices(WaldotVertex opcVertex,
+			Direction direction, String[] edgeLabels);
 
 	/**
 	 * Returns the WaldotNamespace.
@@ -595,6 +612,7 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @param severity the severity level
 	 * @see Node
 	 */
-	void updateEventGenerator(Node sourceNode, String eventName, String eventDisplayName, String message, int severity);
+	void updateEventGenerator(Node sourceNode, String eventName,
+			String eventDisplayName, String message, int severity);
 
 }
