@@ -19,23 +19,31 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
 	public static final String ABSOLUTE = "absolute";
 	public static final String ACTIVE_LABEL = "active";
+	public static final String DEADBAND_DESCRIPTION = null;
 	public static final String DEADBAND_LABEL = "deadband-value";
+	public static final String DEADBAND_TYPE_DESCRIPTION = null;
 	public static final String DEADBAND_TYPE_LABEL = "deadband-type";
 	public static final String DELAY_LABEL = "delay";
+	public static final String EVENT_ACTIVE_DESCRIPTION = null;
 	public static final String EVENT_ACTIVE_LABEL = "active-event";
 	public static final String JOLLY_LABEL = "*";
-	protected final static Logger logger = LoggerFactory.getLogger(MonitoredEdge.class);
+	protected final static Logger logger = LoggerFactory
+			.getLogger(MonitoredEdge.class);
+	public static final String MONITORED_PROPERTIES_DESCRIPTION = null;
 	public static final String MONITORED_PROPERTIES_LABEL = "properties-to-monitor";
 	public static final String PERCENTAGE = "percentage";
+	public static final String PROPERTY_ACTIVE_DESCRIPTION = null;
 	public static final String PROPERTY_ACTIVE_LABEL = "active-property";
+	public static final String PROPERTY_EDGE_INVERTED_DESCRIPTION = null;
+	public static final String PROPERTY_EDGE_INVERTED_LABEL = null;
 	public static final String SEPARATOR = ",";
 	private final WaldotEdge edge;
 	private final WaldotNamespace engine;
 	private final WaldotVertex sourceVertex;
 	private final WaldotVertex targetVertex;
 
-	public MonitoredEdge(final WaldotNamespace engine, final WaldotEdge edge, final WaldotVertex sourceVertex,
-			final WaldotVertex targetVertex) {
+	public MonitoredEdge(final WaldotNamespace engine, final WaldotEdge edge,
+			final WaldotVertex sourceVertex, final WaldotVertex targetVertex) {
 		this.engine = engine;
 		this.edge = edge;
 		this.sourceVertex = sourceVertex;
@@ -52,29 +60,32 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 				} else if (value instanceof String) {
 					return Boolean.parseBoolean((String) value);
 				} else {
-					// se esiste la proprietà e non è un booleano o string, considero la volontà di
-					// inattivarla
+					// se esiste la proprietà e non è un booleano o string,
+					// considero la volontà di inattivarla
 					return false;
 				}
 			}
-			return true; // se la proprietà non esiste, considero che non sia stata specificata la
-							// volontà di inattivarla
+			return true; // se la proprietà non esiste, considero che non sia
+							// stata specificata la volontà di inattivarla
 		} catch (final Exception e) {
-			// in caso di errori di conversione, per ora considero la volontà di mantenere
-			// attiva la notifica
-			logger.warn("Error checking binary property '{}', defaulting to active. Error: {}", propertyLabel,
-					e.getMessage());
+			// in caso di errori di conversione, per ora considero la volontà di
+			// mantenere attiva la notifica
+			logger.warn(
+					"Error checking binary property '{}', defaulting to active. Error: {}",
+					propertyLabel, e.getMessage());
 			return true;
 		}
 	}
 
-	protected boolean checkContainsInPropertyArray(final String propertyLabel, final String label) {
+	protected boolean checkContainsInPropertyArray(final String propertyLabel,
+			final String label) {
 		if (label == null) {
 			logger.warn("Label is null, cannot check in property array");
 			return true;
 		}
 		if (label.contains(SEPARATOR)) {
-			logger.warn("Label contains separator '{}', which may cause issues in property array parsing: {}",
+			logger.warn(
+					"Label contains separator '{}', which may cause issues in property array parsing: {}",
 					SEPARATOR, label);
 			return true;
 		}
@@ -87,25 +98,30 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 			if (property.isPresent()) {
 				final Object value = property.value();
 				if (value instanceof String && !((String) value).isEmpty()) {
-					final List<String> values = Arrays.asList(((String) value).split(SEPARATOR));
-					if (values.contains(JOLLY_LABEL) || values.contains(label)) {
+					final List<String> values = Arrays
+							.asList(((String) value).split(SEPARATOR));
+					if (values.contains(JOLLY_LABEL)
+							|| values.contains(label)) {
 						return true;
 					} else {
 						return false;
 					}
 				} else {
-					// se la proprietà è presente ma non è una stringa o è vuota, considero che non
-					// abbia specificato alcuna proprietà da monitorare, quindi considero che non
-					// sia monitorata
+					// se la proprietà è presente ma non è una stringa o è
+					// vuota, considero che non abbia specificato alcuna
+					// proprietà da monitorare, quindi considero che non sia
+					// monitorata
 					return false;
 				}
 			}
-			return true; // se la proprietà non esiste, considero che non sia stata specificata la
-							// volontà di monitorare tutte le proprietà
+			return true; // se la proprietà non esiste, considero che non sia
+							// stata specificata la volontà di monitorare tutte
+							// le proprietà
 		} catch (final Exception e) {
-			// in caso di errori di conversione, per ora considero la volontà di monitorare
-			// la proprietà
-			logger.warn("Error checking property array '{}', defaulting to include label '{}'. Error: {}",
+			// in caso di errori di conversione, per ora considero la volontà di
+			// monitorare la proprietà
+			logger.warn(
+					"Error checking property array '{}', defaulting to include label '{}'. Error: {}",
 					propertyLabel, label, e.getMessage());
 			return true;
 		}
@@ -123,8 +139,9 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 					try {
 						return Long.parseLong((String) value);
 					} catch (final NumberFormatException e) {
-						logger.warn("Invalid long value for property '{}': '{}', defaulting to 0", propertyLabel,
-								value);
+						logger.warn(
+								"Invalid long value for property '{}': '{}', defaulting to 0",
+								propertyLabel, value);
 						return 0;
 					}
 				} else {
@@ -133,7 +150,9 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 			}
 			return 0;
 		} catch (final Exception e) {
-			logger.warn("Error checking long property '{}', defaulting to 0. Error: {}", propertyLabel, e.getMessage());
+			logger.warn(
+					"Error checking long property '{}', defaulting to 0. Error: {}",
+					propertyLabel, e.getMessage());
 			return 0;
 		}
 	}
@@ -148,8 +167,8 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
 	protected int getPriority() {
 		int calcolatedPriority = MiloStrategy.MONITOR_EDGE_DEFAULT_PRIORITY_VALUE;
-		final Property<Object> priorityValue = getEdge()
-				.property(MiloStrategy.MONITOR_EDGE_PRIORITY_FIELD.toLowerCase());
+		final Property<Object> priorityValue = getEdge().property(
+				MiloStrategy.MONITOR_EDGE_PRIORITY_FIELD.toLowerCase());
 		if (priorityValue.isPresent()) {
 			final Object priority = priorityValue.value();
 			if (priority instanceof Integer) {
@@ -162,7 +181,8 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 					calcolatedPriority = MiloStrategy.MONITOR_EDGE_DEFAULT_PRIORITY_VALUE;
 				}
 			} else {
-				logger.warn("Unsupported priority value type: {}", priorityValue.getClass());
+				logger.warn("Unsupported priority value type: {}",
+						priorityValue.getClass());
 				calcolatedPriority = MiloStrategy.MONITOR_EDGE_DEFAULT_PRIORITY_VALUE;
 			}
 		}
@@ -185,62 +205,86 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		return checkBinaryInProperty(ACTIVE_LABEL);
 	}
 
-	// attenzione alle performance di questa logica, se è necessario potrebbe essere
-	// utile implementare un sistema di caching del valore del deadband
-	protected boolean isDeadBandExceeded(final String propertyLabel, final DataValue dataValue) {
+	// attenzione alle performance di questa logica, se è necessario potrebbe
+	// essere utile implementare un sistema di caching del valore del deadband
+	protected boolean isDeadBandExceeded(final String propertyLabel,
+			final DataValue dataValue) {
 		final Property<Object> deadBandValue = edge.property(DEADBAND_LABEL);
 		if (deadBandValue.isPresent()) {
 			if (dataValue == null) {
-				logger.warn("DataValue is null for property '{}', cannot check deadband", propertyLabel);
+				logger.warn(
+						"DataValue is null for property '{}', cannot check deadband",
+						propertyLabel);
 				return true; // se il DataValue è null, non applico il deadband
 			}
 			if (dataValue.getValue() == null) {
-				logger.warn("DataValue value is null for property '{}', cannot check deadband", propertyLabel);
-				return true; // se il valore del DataValue è null, non applico il deadband
+				logger.warn(
+						"DataValue value is null for property '{}', cannot check deadband",
+						propertyLabel);
+				return true; // se il valore del DataValue è null, non applico
+								// il deadband
 			}
 			final Object value = dataValue.getValue().getValue();
 			if (value == null || !(value instanceof Number)) {
-				return true; // se il valore non è numerico o è null, non applico il deadband
+				return true; // se il valore non è numerico o è null, non
+								// applico il deadband
 			}
 			final Object dbValue = deadBandValue.value();
 			if (dbValue instanceof Number) {
-				final Property<Object> deadBandType = edge.property(DEADBAND_TYPE_LABEL);
+				final Property<Object> deadBandType = edge
+						.property(DEADBAND_TYPE_LABEL);
 				if (deadBandValue.isPresent()) {
 					final Object dbType = deadBandType.value();
 					if (dbType instanceof String) {
 						final Object lastVal = getLastValue(propertyLabel);
 						if (lastVal instanceof Number) {
-							final double last = ((Number) lastVal).doubleValue();
+							final double last = ((Number) lastVal)
+									.doubleValue();
 							if (PERCENTAGE.equalsIgnoreCase((String) dbType)) {
 								// deadband percentuale
-								return Math.abs(((Number) value).doubleValue() - last) > Math
-										.abs(last * ((Number) dbValue).doubleValue() / 100);
-							} else if (ABSOLUTE.equalsIgnoreCase((String) dbType)) {
+								return Math.abs(((Number) value).doubleValue()
+										- last) > Math
+												.abs(last
+														* ((Number) dbValue)
+																.doubleValue()
+														/ 100);
+							} else if (ABSOLUTE
+									.equalsIgnoreCase((String) dbType)) {
 								// deadband assoluto
-								return Math.abs(((Number) value).doubleValue() - last) > ((Number) dbValue)
-										.doubleValue();
+								return Math.abs(((Number) value).doubleValue()
+										- last) > ((Number) dbValue)
+												.doubleValue();
 							} else {
-								logger.warn("Unsupported deadband type '{}', defaulting to no deadband", dbType);
-								return true; // se il tipo di deadband non è supportato, non applico il deadband
+								logger.warn(
+										"Unsupported deadband type '{}', defaulting to no deadband",
+										dbType);
+								return true; // se il tipo di deadband non è
+												// supportato, non applico il
+												// deadband
 							}
 						} else {
-							// se l'ultimo valore non è numerico, non applico il deadband
+							// se l'ultimo valore non è numerico, non applico il
+							// deadband
 							return true;
 						}
 					} else {
-						// se deadbant type non è una stringa, considero sempre superato
+						// se deadbant type non è una stringa, considero sempre
+						// superato
 						return true;
 					}
 				} else {
-					// se il deadband type non è specificato, considero sempre superato
+					// se il deadband type non è specificato, considero sempre
+					// superato
 					return true;
 				}
 			} else {
-				// se il valore del deadband non è numerico, non applico il deadband
+				// se il valore del deadband non è numerico, non applico il
+				// deadband
 				return true;
 			}
 		} else {
-			// se il valore del deadband non è specificato, considero sempre superato
+			// se il valore del deadband non è specificato, considero sempre
+			// superato
 			return true;
 		}
 	}
@@ -266,7 +310,8 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		// implementare le logiche di pulizia prima di rimuovere l'arco
 	}
 
-	protected void sendFireWithDelay(final WaldotVertex destinationVertex, final UaNode node, final BaseEventType event,
+	protected void sendFireWithDelay(final WaldotVertex destinationVertex,
+			final UaNode node, final BaseEventType event,
 			final int calcolatedPriority) {
 		engine.getTimer().schedule(() -> {
 			destinationVertex.fireEvent(node, event, calcolatedPriority);
@@ -274,15 +319,18 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
 	}
 
-	protected void sendFireWithDelay(final WaldotVertex destinationVertex, final UaNode node,
-			final String propertyLabel, final DataValue dataValue, final int calcolatedPriority) {
+	protected void sendFireWithDelay(final WaldotVertex destinationVertex,
+			final UaNode node, final String propertyLabel,
+			final DataValue dataValue, final int calcolatedPriority) {
 		engine.getTimer().schedule(() -> {
-			destinationVertex.fireProperty(node, propertyLabel, dataValue, calcolatedPriority);
+			destinationVertex.fireProperty(node, propertyLabel, dataValue,
+					calcolatedPriority);
 		}, checkLongInProperty(DELAY_LABEL), TimeUnit.MILLISECONDS);
 
 	}
 
-	protected void sendWithDelay(final WaldotVertex destinationVertex, final String propertyLabel, final Object value) {
+	protected void sendWithDelay(final WaldotVertex destinationVertex,
+			final String propertyLabel, final Object value) {
 		engine.getTimer().schedule(() -> {
 			destinationVertex.property(propertyLabel, value);
 		}, checkLongInProperty(DELAY_LABEL), TimeUnit.MILLISECONDS);

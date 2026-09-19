@@ -15,19 +15,28 @@ public class DeleteDirectory extends AbstractOpcCommand {
 	public DeleteDirectory(WaldotNamespace waldotNamespace) {
 		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
 				waldotNamespace.getConfiguration().getDeleteDirectoryLabel(),
-				waldotNamespace.getConfiguration().getDeleteDirectoryDescription(),
-				waldotNamespace.getConfiguration().getDeleteDirectoryWriteMask(),
-				waldotNamespace.getConfiguration().getDeleteDirectoryUserWriteMask(),
-				waldotNamespace.getConfiguration().getDeleteDirectoryExecutable(),
-				waldotNamespace.getConfiguration().getDeleteDirectoryExecutable());
-		super.addOutputArgument("output", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				waldotNamespace.getConfiguration()
+						.getDeleteDirectoryDescription(),
+				waldotNamespace.getConfiguration()
+						.getDeleteDirectoryWriteMask(),
+				waldotNamespace.getConfiguration()
+						.getDeleteDirectoryUserWriteMask(),
+				waldotNamespace.getConfiguration()
+						.getDeleteDirectoryExecutable(),
+				waldotNamespace.getConfiguration()
+						.getDeleteDirectoryExecutable());
+		super.addOutputArgument("output", VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null,
 				LocalizedText.english("operation output"));
-		super.addOutputArgument("error", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		super.addOutputArgument("error", VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null,
 				LocalizedText.english("operation error"));
-		super.addInputArgument("directory", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		super.addInputArgument("directory",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("directory to delete"));
-		this.addReference(new Reference(this.getNodeId(), NodeIds.HasModellingRule,
-				NodeIds.ModellingRule_Mandatory.expanded(), true));
+		this.addReference(
+				new Reference(this.getNodeId(), NodeIds.HasModellingRule,
+						NodeIds.ModellingRule_Mandatory.expanded(), true));
 	}
 
 	@Override
@@ -37,14 +46,16 @@ public class DeleteDirectory extends AbstractOpcCommand {
 
 	@Override
 	public String getDirectory() {
-		return MiloStrategy.GENERAL_CMD_DIRECTORY;
+		return MiloStrategy.MANAGE_CMD_DIRECTORY;
 	}
 
 	@Override
-	public String[] runCommand(InvocationContext invocationContext, String[] inputValues) {
+	public String[] runCommand(InvocationContext invocationContext,
+			String[] inputValues) {
 		final String[] output = new String[2];
 		try {
-			final Object runExpression = getNamespace().deleteDirectory(inputValues[0]);
+			final Object runExpression = getNamespace()
+					.deleteDirectory(inputValues[0]);
 			if (runExpression != null) {
 				output[0] = runExpression.toString();
 				output[1] = "";

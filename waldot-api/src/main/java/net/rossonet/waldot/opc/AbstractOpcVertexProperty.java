@@ -104,7 +104,7 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE>
 			referenceVertex.notifyPropertyValueChanging(key(),
 					((DataValue) value));
 		} else {
-			logger.warn("Attribute changed: " + attributeId + " with value: "
+			logger.debug("Attribute changed: " + attributeId + " with value: "
 					+ value + " is not handled");
 		}
 	}

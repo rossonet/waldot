@@ -114,10 +114,6 @@ public interface MiloStrategy extends AutoCloseable {
 	 */
 	public static final String FIRE_EDGE_TYPE = "fire";
 	/**
-	 * Directory for general commands.
-	 */
-	public static final String GENERAL_CMD_DIRECTORY = "general";
-	/**
 	 * Field name for history context.
 	 */
 	public static final String HISTORY_CONTEXT_FIELD = "HistoryContext";
@@ -125,11 +121,15 @@ public interface MiloStrategy extends AutoCloseable {
 	 * Field name for history flag.
 	 */
 	public static final String HISTORY_FIELD = "IsHistory";
-
 	/**
 	 * Parameter name for ID.
 	 */
 	public static final String ID_PARAMETER = "id";
+
+	/**
+	 * Directory for general commands.
+	 */
+	public static final String INFOMATION_CMD_DIRECTORY = "information";
 	/**
 	 * Field name for forward reference flag.
 	 */
@@ -146,6 +146,7 @@ public interface MiloStrategy extends AutoCloseable {
 	 * Edge type for link-to references.
 	 */
 	public static final String LINK_TO_EDGE_TYPE = "link-to";
+	public static final String MANAGE_CMD_DIRECTORY = "manage";
 	/**
 	 * Default priority value for monitored edges.
 	 */

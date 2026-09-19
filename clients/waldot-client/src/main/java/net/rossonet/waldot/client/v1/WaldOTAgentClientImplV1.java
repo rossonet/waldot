@@ -412,7 +412,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	public List<String> getServerInfo() throws UaException {
 		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace()
-				.getObjectNode(new NodeId(2, MiloStrategy.GENERAL_CMD_DIRECTORY));
+				.getObjectNode(new NodeId(2, MiloStrategy.INFOMATION_CMD_DIRECTORY));
 		final Variant[] outputs = cmdNode.callMethod(ABOUT_COMMAND, new Variant[] {});
 		final List<String> out = new ArrayList<>();
 		for (final Variant output : outputs) {
@@ -471,7 +471,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	public List<String> runExpression(String expression) throws UaException {
 		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace()
-				.getObjectNode(new NodeId(2, MiloStrategy.GENERAL_CMD_DIRECTORY));
+				.getObjectNode(new NodeId(2, MiloStrategy.INFOMATION_CMD_DIRECTORY));
 		final Variant[] outputs = cmdNode.callMethod(QUERY_COMMAND, new Variant[] { new Variant(expression) });
 		final List<String> out = new ArrayList<>();
 		for (final Variant output : outputs) {

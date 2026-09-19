@@ -1,4 +1,4 @@
-package net.rossonet.waldot.dataGenerator.commands;
+package net.rossonet.waldot.rules.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,48 +14,35 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.WaldotGeneratorPlugin;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
+import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 
-public class CreateSimulatorCommand extends AbstractOpcCommand {
-	private static final String CONTEXT_DIRECTORY = "simulator";
-	private static final String CREATE_SIMULATION_COMMAND_DESCRIPTION = "create data simulator vertex";
-	private static final String CREATE_SIMULATION_COMMAND_NAME = "create generator";
+public class CreateComputeVertexCommand extends AbstractOpcCommand {
+	private static final String CONTEXT_DIRECTORY = WaldotRulesEnginePlugin.BASE_CMD_DIRECTORY;
+	private static final String CREATE_COMPUTE_COMMAND_DESCRIPTION = "create compute vertex";
+	private static final String CREATE_COMPUTE_COMMAND_NAME = "create compute";
 	public static final UInteger DEFAULT_WRITE_MASK = UInteger
 			.valueOf(WriteMask.Executable.getValue());
 	private static final String LABEL_RESULT = "result";
 	protected final static Logger logger = LoggerFactory
-			.getLogger(CreateSimulatorCommand.class);
+			.getLogger(CreateComputeVertexCommand.class);
 	private static final String LONG_LABEL_RESULT = "result of the update operation";
-	public CreateSimulatorCommand(final WaldotNamespace waldotNamespace) {
+	public CreateComputeVertexCommand(final WaldotNamespace waldotNamespace) {
 		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
-				CREATE_SIMULATION_COMMAND_NAME,
-				CREATE_SIMULATION_COMMAND_DESCRIPTION, DEFAULT_WRITE_MASK,
-				DEFAULT_WRITE_MASK, true, true);
+				CREATE_COMPUTE_COMMAND_NAME, CREATE_COMPUTE_COMMAND_DESCRIPTION,
+				DEFAULT_WRITE_MASK, DEFAULT_WRITE_MASK, true, true);
 		addInputArgument(MiloStrategy.LABEL_FIELD,
 				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english("Label for the data simulator vertex"));
+				LocalizedText.english("Label for the compute vertex"));
 		addInputArgument(MiloStrategy.DIRECTORY_PARAMETER,
 				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText
-						.english("Directory for the data simulator vertex"));
-		addInputArgument(WaldotGeneratorPlugin.ALGORITHM_FIELD,
-				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english("Directory for the compute vertex"));
+		addInputArgument(WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD,
+				VariableNodeTypes.Int16.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(
-						WaldotGeneratorPlugin.ALGORITHM_FIELD_DESCRIPTION));
-		addInputArgument(WaldotGeneratorPlugin.DELAY_FIELD,
-				VariableNodeTypes.UInt64.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english(WaldotGeneratorPlugin.DELAY_DESCRIPTION));
-		addInputArgument(WaldotGeneratorPlugin.MIN_VALUE_FIELD,
-				VariableNodeTypes.UInt64.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText
-						.english(WaldotGeneratorPlugin.MIN_VALUE_DESCRIPTION));
-		addInputArgument(WaldotGeneratorPlugin.MAX_VALUE_FIELD,
-				VariableNodeTypes.UInt64.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText
-						.english(WaldotGeneratorPlugin.MAX_VALUE_DESCRIPTION));
+						WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD_DESCRIPTION));
 		addOutputArgument(LABEL_RESULT, VariableNodeTypes.String.getNodeId(),
 				ValueRanks.Scalar, null,
 				LocalizedText.english(LONG_LABEL_RESULT));
@@ -67,7 +54,7 @@ public class CreateSimulatorCommand extends AbstractOpcCommand {
 
 	@Override
 	public Object clone() {
-		return new CreateSimulatorCommand(this.waldotNamespace);
+		return new CreateComputeVertexCommand(this.waldotNamespace);
 	}
 
 	private void enrichParameters(final String[] inputValues,
@@ -88,21 +75,16 @@ public class CreateSimulatorCommand extends AbstractOpcCommand {
 			final String[] inputValues) {
 		final List<String> parameters = new ArrayList<>();
 		parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
-		parameters.add(WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL);
+		parameters
+				.add(WaldotRulesEnginePlugin.RULE_NODE_PARAMETER.toLowerCase());
 		enrichParameters(inputValues, parameters, 0,
 				MiloStrategy.LABEL_FIELD.toLowerCase());
 		enrichParameters(inputValues, parameters, 1,
 				MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
 		enrichParameters(inputValues, parameters, 2,
-				WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase());
-		enrichParameters(inputValues, parameters, 3,
-				WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase());
-		enrichParameters(inputValues, parameters, 4,
-				WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase());
-		enrichParameters(inputValues, parameters, 5,
-				WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase());
+				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD.toLowerCase());
 		final Object[] arrayParameters = parameters.toArray(new String[0]);
-		logger.info("create vertex with parameters: "
+		logger.info("create compute vertex with parameters: "
 				+ Arrays.toString(arrayParameters));
 		return new String[]{getGraph().addVertex(arrayParameters).toString()};
 	}

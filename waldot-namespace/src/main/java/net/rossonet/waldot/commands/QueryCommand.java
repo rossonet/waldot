@@ -15,19 +15,26 @@ public class QueryCommand extends AbstractOpcCommand {
 	public QueryCommand(WaldotNamespace waldotNamespace) {
 		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
 				waldotNamespace.getConfiguration().getWaldotCommandLabel(),
-				waldotNamespace.getConfiguration().getWaldotCommandDescription(),
+				waldotNamespace.getConfiguration()
+						.getWaldotCommandDescription(),
 				waldotNamespace.getConfiguration().getWaldotCommandWriteMask(),
-				waldotNamespace.getConfiguration().getWaldotCommandUserWriteMask(),
+				waldotNamespace.getConfiguration()
+						.getWaldotCommandUserWriteMask(),
 				waldotNamespace.getConfiguration().getWaldotCommandExecutable(),
-				waldotNamespace.getConfiguration().getWaldotCommandUserExecutable());
-		super.addOutputArgument("output", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				waldotNamespace.getConfiguration()
+						.getWaldotCommandUserExecutable());
+		super.addOutputArgument("output", VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null,
 				LocalizedText.english("command output"));
-		super.addOutputArgument("error", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		super.addOutputArgument("error", VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null,
 				LocalizedText.english("command error"));
-		super.addInputArgument("command", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		super.addInputArgument("command", VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null,
 				LocalizedText.english("command to execute"));
-		this.addReference(new Reference(this.getNodeId(), NodeIds.HasModellingRule,
-				NodeIds.ModellingRule_Mandatory.expanded(), true));
+		this.addReference(
+				new Reference(this.getNodeId(), NodeIds.HasModellingRule,
+						NodeIds.ModellingRule_Mandatory.expanded(), true));
 	}
 
 	@Override
@@ -37,14 +44,16 @@ public class QueryCommand extends AbstractOpcCommand {
 
 	@Override
 	public String getDirectory() {
-		return MiloStrategy.GENERAL_CMD_DIRECTORY;
+		return MiloStrategy.MANAGE_CMD_DIRECTORY;
 	}
 
 	@Override
-	public String[] runCommand(InvocationContext invocationContext, String[] inputValues) {
+	public String[] runCommand(InvocationContext invocationContext,
+			String[] inputValues) {
 		final String[] output = new String[2];
 		try {
-			final Object runExpression = getNamespace().runExpression(inputValues[0]);
+			final Object runExpression = getNamespace()
+					.runExpression(inputValues[0]);
 			if (runExpression != null) {
 				output[0] = runExpression.toString();
 				output[1] = "";

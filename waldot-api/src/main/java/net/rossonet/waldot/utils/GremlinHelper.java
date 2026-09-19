@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.json.JSONObject;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
@@ -103,6 +104,68 @@ public class GremlinHelper {
 			result.add(vertexData.toArray(new String[0]));
 		}
 		return result;
+	}
+
+	public static JSONObject propertyArrayToDtmlJson(String sourceVertex,
+			String targetVertex, String[] edgeParameters) {
+		String label = null;
+		String type = null;
+		final List<String> otherParameters = new ArrayList<>();
+		for (int i = 0; i < edgeParameters.length; i += 2) {
+			final String key = edgeParameters[i];
+			final String value = edgeParameters[i + 1];
+			if (key.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {
+				label = value;
+			} else if (key.equals(MiloStrategy.TYPE_FIELD.toLowerCase())) {
+				type = value;
+			} else {
+				otherParameters.add(key);
+				otherParameters.add(value);
+			}
+		}
+		final JSONObject json = new JSONObject();
+		json.put("@" + MiloStrategy.LABEL_FIELD.toLowerCase(), label);
+		json.put("@" + MiloStrategy.SOURCE_NODE.toLowerCase(), sourceVertex);
+		json.put("@" + MiloStrategy.TARGET_NODE.toLowerCase(), targetVertex);
+		json.put("@" + MiloStrategy.TYPE_FIELD.toLowerCase(), type);
+		for (int i = 0; i < otherParameters.size(); i += 2) {
+			final String key = otherParameters.get(i);
+			final String value = otherParameters.get(i + 1);
+			json.put(key, value);
+		}
+		return json;
+	}
+
+	public static JSONObject propertyArrayToDtmlJson(
+			String[] vertexParameters) {
+		String nodeId = null;
+		String label = null;
+		String type = null;
+		final List<String> otherParameters = new ArrayList<>();
+		for (int i = 0; i < vertexParameters.length; i += 2) {
+			final String key = vertexParameters[i];
+			final String value = vertexParameters[i + 1];
+			if (key.equals(MiloStrategy.ID_PARAMETER.toLowerCase())) {
+				nodeId = value;
+			} else if (key.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {
+				label = value;
+			} else if (key.equals(MiloStrategy.TYPE_FIELD.toLowerCase())) {
+				type = value;
+			} else {
+				otherParameters.add(key);
+				otherParameters.add(value);
+			}
+		}
+		final JSONObject json = new JSONObject();
+		json.put("@" + MiloStrategy.ID_PARAMETER.toLowerCase(), nodeId);
+		json.put("@" + MiloStrategy.LABEL_FIELD.toLowerCase(), label);
+		json.put("@" + MiloStrategy.TYPE_FIELD.toLowerCase(), type);
+		for (int i = 0; i < otherParameters.size(); i += 2) {
+			final String key = otherParameters.get(i);
+			final String value = otherParameters.get(i + 1);
+			json.put(key, value);
+		}
+		return json;
 	}
 
 	private GremlinHelper() {

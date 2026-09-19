@@ -95,7 +95,7 @@ public class AboutCommand extends AbstractOpcCommand {
 
 	@Override
 	public String getDirectory() {
-		return MiloStrategy.GENERAL_CMD_DIRECTORY;
+		return MiloStrategy.INFOMATION_CMD_DIRECTORY;
 	}
 
 	@Override

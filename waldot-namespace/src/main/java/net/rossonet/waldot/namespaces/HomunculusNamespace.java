@@ -61,6 +61,8 @@ import net.rossonet.waldot.client.auth.ClientRegisterAnonymousValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterUsernameIdentityValidator;
 import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.commands.AboutCommand;
+import net.rossonet.waldot.commands.AddFireMonitoredEdgeCommand;
+import net.rossonet.waldot.commands.AddLinkMonitoredEdgeCommand;
 import net.rossonet.waldot.commands.DeleteDirectory;
 import net.rossonet.waldot.commands.HelpCommand;
 import net.rossonet.waldot.commands.QueryCommand;
@@ -73,7 +75,9 @@ import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 import net.rossonet.waldot.utils.ThreadHelper;
 
-public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implements WaldotNamespace {
+public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
+		implements
+			WaldotNamespace {
 
 	private ClientRegisterAnonymousValidator agentAnonymousValidator;
 	private ClientRegisterUsernameIdentityValidator agentIdentityValidator;
@@ -101,14 +105,19 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	private final SubscriptionModel subscriptionModel;
 
-	private final ScheduledExecutorService timer = ThreadHelper.newVirtualSchedulerExecutor("timer");
+	private final ScheduledExecutorService timer = ThreadHelper
+			.newVirtualSchedulerExecutor("timer");
 
 	private WaldotOpcUaServer waldotOpcUaServer;
 
-	public HomunculusNamespace(final WaldotOpcUaServer server, final MiloStrategy opcMappingStrategy,
-			HistoryStrategy historyStrategy, final ConsoleStrategy consoleStrategy,
-			final WaldotConfiguration configuration, final BootstrapStrategy bootstrapProcedureStrategy,
-			final ClientManagementStrategy agentManagementStrategy, final String bootstrapUrl) {
+	public HomunculusNamespace(final WaldotOpcUaServer server,
+			final MiloStrategy opcMappingStrategy,
+			HistoryStrategy historyStrategy,
+			final ConsoleStrategy consoleStrategy,
+			final WaldotConfiguration configuration,
+			final BootstrapStrategy bootstrapProcedureStrategy,
+			final ClientManagementStrategy agentManagementStrategy,
+			final String bootstrapUrl) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
@@ -140,7 +149,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	@Override
 	public void addAssetAgentNode(UaNode assetManagerComponent) {
 		getStorageManager().addNode(assetManagerComponent);
-		clientManagementStrategy.getAssetClientsFolderNode().addOrganizes(assetManagerComponent);
+		clientManagementStrategy.getAssetClientsFolderNode()
+				.addOrganizes(assetManagerComponent);
 	}
 
 	private void addBaseCommands() {
@@ -156,12 +166,16 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 		if (configuration.getDeleteDirectoryLabel() != null) {
 			registerCommand(new DeleteDirectory(this));
 		}
+		registerCommand(new AddFireMonitoredEdgeCommand(this));
+		registerCommand(new AddLinkMonitoredEdgeCommand(this));
 	}
 
 	@Override
-	public WaldotEdge addEdge(final WaldotVertex sourceVertex, final WaldotVertex targetVertex, final String label,
+	public WaldotEdge addEdge(final WaldotVertex sourceVertex,
+			final WaldotVertex targetVertex, final String label,
 			final Object[] keyValues) {
-		return (WaldotEdge) opcMappingStrategy.addEdge(sourceVertex, targetVertex, label, keyValues);
+		return (WaldotEdge) opcMappingStrategy.addEdge(sourceVertex,
+				targetVertex, label, keyValues);
 	}
 
 	@Override
@@ -170,7 +184,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public WaldotVertex addVertex(final NodeId nodeId, final Object[] keyValues) {
+	public WaldotVertex addVertex(final NodeId nodeId,
+			final Object[] keyValues) {
 		return opcMappingStrategy.addVertex(nodeId, keyValues);
 	}
 
@@ -196,21 +211,27 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public WaldotGraphComputerView createGraphComputerView(final WaldotGraph graph, final GraphFilter graphFilter,
+	public WaldotGraphComputerView createGraphComputerView(
+			final WaldotGraph graph, final GraphFilter graphFilter,
 			final Set<VertexComputeKey> object) {
-		return opcMappingStrategy.createGraphComputerView(graph, graphFilter, object);
+		return opcMappingStrategy.createGraphComputerView(graph, graphFilter,
+				object);
 	}
 
 	@Override
-	public <DATA_TYPE> WaldotProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(final WaldotEdge waldotEdge,
-			final String key, final DATA_TYPE value) {
-		return opcMappingStrategy.createOrUpdateWaldotEdgeProperty(waldotEdge, key, value);
+	public <DATA_TYPE> WaldotProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(
+			final WaldotEdge waldotEdge, final String key,
+			final DATA_TYPE value) {
+		return opcMappingStrategy.createOrUpdateWaldotEdgeProperty(waldotEdge,
+				key, value);
 	}
 
 	@Override
-	public <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(final WaldotVertex opcVertex,
-			final String key, final DATA_TYPE value) {
-		return opcMappingStrategy.createOrUpdateWaldotVertexProperty(opcVertex, key, value);
+	public <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(
+			final WaldotVertex opcVertex, final String key,
+			final DATA_TYPE value) {
+		return opcMappingStrategy.createOrUpdateWaldotVertexProperty(opcVertex,
+				key, value);
 	}
 
 	@Override
@@ -299,7 +320,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getEdgeProperties(final WaldotEdge waldotEdge) {
+	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getEdgeProperties(
+			final WaldotEdge waldotEdge) {
 		return opcMappingStrategy.getProperties(waldotEdge);
 	}
 
@@ -309,8 +331,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public Map<NodeId, WaldotEdge> getEdges(final WaldotVertex vertex, final Direction direction,
-			final String[] edgeLabels) {
+	public Map<NodeId, WaldotEdge> getEdges(final WaldotVertex vertex,
+			final Direction direction, final String[] edgeLabels) {
 		return opcMappingStrategy.getEdges(vertex, direction, edgeLabels);
 	}
 
@@ -381,7 +403,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public <DATA_TYPE> WaldotEdge getPropertyReference(final WaldotProperty<DATA_TYPE> opcProperty) {
+	public <DATA_TYPE> WaldotEdge getPropertyReference(
+			final WaldotProperty<DATA_TYPE> opcProperty) {
 		return opcMappingStrategy.getPropertyReference(opcProperty);
 	}
 
@@ -412,7 +435,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public <DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(final WaldotVertex opcVertex) {
+	public <DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(
+			final WaldotVertex opcVertex) {
 		return opcMappingStrategy.getVertexProperties(opcVertex);
 	}
 
@@ -428,8 +452,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public Map<NodeId, WaldotVertex> getVertices(final WaldotVertex opcVertex, final Direction direction,
-			final String[] edgeLabels) {
+	public Map<NodeId, WaldotVertex> getVertices(final WaldotVertex opcVertex,
+			final Direction direction, final String[] edgeLabels) {
 		return opcMappingStrategy.getVertices(opcVertex, direction, edgeLabels);
 	}
 
@@ -444,9 +468,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public List<HistoryReadResult> historyRead(HistoryReadContext context, HistoryReadDetails readDetails,
-			TimestampsToReturn timestamps, List<HistoryReadValueId> readValueIds) {
-		return historyStrategy.historyRead(context, readDetails, timestamps, readValueIds);
+	public List<HistoryReadResult> historyRead(HistoryReadContext context,
+			HistoryReadDetails readDetails, TimestampsToReturn timestamps,
+			List<HistoryReadValueId> readValueIds) {
+		return historyStrategy.historyRead(context, readDetails, timestamps,
+				readValueIds);
 	}
 
 	@Override
@@ -522,7 +548,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 
 	@Override
 	public void onEventItemsDeleted(List<EventItem> eventItems) {
-		eventItems.forEach(item -> getServer().getEventNotifier().unregister(item));
+		eventItems.forEach(
+				item -> getServer().getEventNotifier().unregister(item));
 	}
 
 	@Override
@@ -537,9 +564,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public void onMonitoringModeChanged(final List<MonitoredItem> monitoredItems) {
+	public void onMonitoringModeChanged(
+			final List<MonitoredItem> monitoredItems) {
 		subscriptionModel.onMonitoringModeChanged(monitoredItems);
-		listeners.forEach(listener -> listener.onMonitoringModeChanged(monitoredItems));
+		listeners.forEach(
+				listener -> listener.onMonitoringModeChanged(monitoredItems));
 	}
 
 	@Override
@@ -551,13 +580,15 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	}
 
 	@Override
-	public void registerAgentValidators(final ClientRegisterAnonymousValidator agentAnonymousValidator,
+	public void registerAgentValidators(
+			final ClientRegisterAnonymousValidator agentAnonymousValidator,
 			final ClientRegisterUsernameIdentityValidator agentIdentityValidator,
 			final ClientRegisterX509IdentityValidator agentX509IdentityValidator) {
 		this.agentAnonymousValidator = agentAnonymousValidator;
 		this.agentIdentityValidator = agentIdentityValidator;
 		this.agentX509IdentityValidator = agentX509IdentityValidator;
-		clientManagementStrategy.activate(agentAnonymousValidator, agentIdentityValidator, agentX509IdentityValidator);
+		clientManagementStrategy.activate(agentAnonymousValidator,
+				agentIdentityValidator, agentX509IdentityValidator);
 	}
 
 	@Override
@@ -572,7 +603,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle implement
 	public void registerPlugin(final PluginListener plugin) {
 		plugins.add(plugin);
 		plugin.initialize(this);
-		logger.info("Registering commands from plugin {}", plugin.getClass().getSimpleName());
+		logger.info("Registering commands from plugin {}",
+				plugin.getClass().getSimpleName());
 		plugin.getCommands().forEach(command -> registerCommand(command));
 	}
 

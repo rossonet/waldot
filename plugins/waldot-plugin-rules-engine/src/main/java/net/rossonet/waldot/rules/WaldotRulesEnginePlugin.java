@@ -1,5 +1,7 @@
 package net.rossonet.waldot.rules;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +33,9 @@ import net.rossonet.waldot.api.strategies.ConsoleStrategy;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.jexl.ClonableMapContext;
 import net.rossonet.waldot.jexl.JexlExecutor;
+import net.rossonet.waldot.rules.commands.AddComputeMonitoredEdgeCommand;
+import net.rossonet.waldot.rules.commands.CreateComputeVertexCommand;
+import net.rossonet.waldot.rules.commands.CreateRuleCommand;
 import net.rossonet.waldot.rules.edges.ComputeMonitoredEdge;
 import net.rossonet.waldot.rules.vertices.ComputableFireableAbstractOpcVertex;
 import net.rossonet.waldot.rules.vertices.ComputeVertex;
@@ -138,11 +143,16 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 
 	private static final String _RULES_TYPE_PRE_LABEL = "rules:";
 	public static final String ACTION_EXECUTED_SIZE_LABEL = "Executed";
+	public static final String ACTION_EXECUTED_SIZE_LABEL_DESCRIPTION = "Number of actions that have been successfully executed by the ComputeVertex since it was created. This is a read-only property.";
 	public static final String ACTION_FIELD = "Action";
+	public static final String ACTION_FIELD_DESCRIPTION = "JEXL expression that is executed when the condition evaluates to true. Can contain any valid JEXL code, including logging, graph traversal, and commands.";
+	public static final String BASE_CMD_DIRECTORY = "rules";
 	private static final String COMPUTE_NODE_PARAMETER = _RULES_TYPE_PRE_LABEL
 			+ "compute";
 	public static final String CONDITION_FIELD = "Condition";
+	public static final String CONDITION_FIELD_DESCRIPTION = "JEXL expression that evaluates to true or false. If true, the action is executed.";
 	public static final String DEBUG_LEVEL_LABEL = "Debug";
+	public static final String DEBUG_LEVEL_LABEL_DESCRIPTION = "Debug level for the RuleVertex. 0 = no debug, 1 = log condition evaluations, 2 = log action executions, 3 = log all events and property changes. This is a read/write property.";
 	public static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
 	public static final boolean DEFAULT_CLEAR_FACTS_AFTER_EXECUTION = false;
 	public static final String DEFAULT_CONDITION_VALUE = "true";
@@ -154,6 +164,7 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	public static final int DEFAULT_PRIORITY_VALUE = 100;
 	public static final int DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE = 1;
 	public static final String ERRORS_SIZE_LABEL = "Errors";
+	public static final String ERRORS_SIZE_LABEL_DESCRIPTION = "Number of actions that have failed to execute due to errors in the action code or exceptions thrown during execution. This is a read-only property.";
 	private static final String EXECUTE_EDGE_LABEL = _RULES_TYPE_PRE_LABEL
 			+ "execute";
 	public static final String EXECUTION_TIMEOUT_MS_FIELD = "execution-timeout-ms";
@@ -164,10 +175,13 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	public static final String PRIORITY_FACTOR_FIELD = "Factor";
 	public static final String PRIORITY_FIELD = "Priority";
 	public static final String QUEUE_SIZE_LABEL = "Queue";
+	public static final String QUEUE_SIZE_LABEL_DESCRIPTION = "Number of events currently in the queue waiting to be processed by the ComputeVertex. This is a read-only property.";
 	public static final String RULE_NODE_PARAMETER = _RULES_TYPE_PRE_LABEL
 			+ "rule";
 	public static final String THREAD_POOL_SIZE_FIELD = "Threads";
+	public static final String THREAD_POOL_SIZE_FIELD_DESCRIPTION = "Number of threads in the ComputeVertex thread pool.";
 	public static final String TOTAL_SIZE_LABEL = "Total";
+	public static final String TOTAL_SIZE_LABEL_DESCRIPTION = "Total number of events that have been processed by the ComputeVertex since it was created. This is a read-only property.";
 	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
 	private static final String WALD_OT_COMPUTE_NAME = "Thread Manager";
 	private static final String WALD_OT_COMPUTE_OBJECT_TYPE = "WaldOTComputeObjectType";
@@ -175,8 +189,11 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	private static final String WALD_OT_RULE_OBJECT_TYPE = "WaldOTRuleObjectType";
 	private final Map<NodeId, MonitoredEdge> activeEdges = Collections
 			.synchronizedMap(new HashMap<>());
+	private AddComputeMonitoredEdgeCommand addComputeMonitoredEdgeCommand;
 	protected final ClonableMapContext baseJexlContext = new ClonableMapContext();
 	private UaObjectTypeNode computeTypeNode;
+	private CreateComputeVertexCommand createComputeVertexCommand;
+	private CreateRuleCommand createRuleCommand;
 	private JexlEngine jexlEngine;
 	private UaObjectTypeNode ruleTypeNode;
 	protected WaldotNamespace waldotNamespace;
@@ -312,6 +329,12 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 		}
 	}
 
+	@Override
+	public Collection<WaldotCommand> getCommands() {
+		return Arrays.asList(addComputeMonitoredEdgeCommand, createRuleCommand,
+				createComputeVertexCommand);
+	}
+
 	public JexlEngine getJexlEngine() {
 		return jexlEngine;
 	}
@@ -334,6 +357,11 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 		createRuleTypeNode();
 		createComputeTypeNode();
 		registerJexlEngine(waldotNamespace);
+		addComputeMonitoredEdgeCommand = new AddComputeMonitoredEdgeCommand(
+				waldotNamespace);
+		createRuleCommand = new CreateRuleCommand(waldotNamespace);
+		createComputeVertexCommand = new CreateComputeVertexCommand(
+				waldotNamespace);
 	}
 
 	/**
