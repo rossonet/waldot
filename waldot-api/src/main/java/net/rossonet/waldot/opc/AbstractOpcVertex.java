@@ -21,6 +21,7 @@ import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
 import org.eclipse.milo.opcua.sdk.core.ValueRanks;
+import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler.InvocationContext;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
@@ -61,6 +62,15 @@ public abstract class AbstractOpcVertex extends GremlinElement
 			WaldotVertex,
 			AttributeObserver {
 
+	public interface ChangedPropertyCallback<DATA_TYPE> {
+		public void onChange(DATA_TYPE oldValue, DATA_TYPE newValue);
+	}
+
+	public interface CommandHandler {
+		public String[] handleCommand(InvocationContext invocationContext,
+				String[] inputValues);
+	}
+
 	private transient boolean activeHistory = false;
 
 	protected boolean allowNullPropertyValues = false;
@@ -74,13 +84,13 @@ public abstract class AbstractOpcVertex extends GremlinElement
 	private String historyContext = null;
 
 	private final QualifiedProperty<String> historyContextProperty;
-
 	private final QualifiedProperty<Boolean> historyProperty;
 
 	private final QualifiedProperty<String> labelProperty;
 	private final Set<WaldotVertexProperty<?>> linkedProperties = new HashSet<>();
 
 	private transient final Logger logger = LoggerFactory.getLogger(getClass());
+
 	protected transient final List<PropertyObserver> propertyObservers = new ArrayList<>();
 
 	private final QualifiedProperty<String> typeProperty;
@@ -153,11 +163,120 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	}
 
+	protected AbstractOpcCommand addVertexCommand(String commandName,
+			String commandDescription, CommandHandler commandHandler) {
+		final AbstractOpcCommand command = new AbstractOpcCommand(
+				graph.getWaldotNamespace().getGremlinGraph(),
+				graph.getWaldotNamespace(),
+				id().getIdentifier().toString() + "." + commandName,
+				commandName, commandDescription, null,
+				graph.getWaldotNamespace().getConfiguration()
+						.getWaldotCommandWriteMask(),
+				graph.getWaldotNamespace().getConfiguration()
+						.getWaldotCommandUserWriteMask(),
+				graph.getWaldotNamespace().getConfiguration()
+						.getWaldotCommandExecutable(),
+				graph.getWaldotNamespace().getConfiguration()
+						.getWaldotCommandUserExecutable()) {
+
+			@Override
+			public Object[] runCommand(InvocationContext invocationContext,
+					String[] inputValues) {
+				return commandHandler.handleCommand(invocationContext,
+						inputValues);
+			}
+		};
+		graph.getWaldotNamespace().getStorageManager().addNode(command);
+		addComponent((UaNode) command);
+		return command;
+	}
+
 	@Override
 	public void attributeChanged(UaNode node, AttributeId attributeId,
 			Object value) {
 		logger.debug("Attribute changed: node {}, attribute {}, new value {}",
 				node, attributeId, value);
+	}
+
+	/**
+	 * Checks if a property value has changed and updates it if necessary. If the
+	 * changed property label matches the key in the property key values, it retrieves
+	 * the original value of the property and compares it with the new value. If they
+	 * are different, it updates the property with the new value and invokes the
+	 * callback if provided.
+	 * @param <DATA_TYPE>
+	 * @param changedPropertyLabel
+	 * @param changedPropertyValue
+	 * @param keyInPropertyKeyValues
+	 * @param qualifiedPropertySlot
+	 * @param callback
+	 * @return true if the property value was changed, false otherwise
+	 */
+	protected <DATA_TYPE> boolean checkPropertyValueChange(
+			String changedPropertyLabel, DataValue changedPropertyValue,
+			String keyInPropertyKeyValues,
+			QualifiedProperty<DATA_TYPE> qualifiedPropertySlot,
+			ChangedPropertyCallback<DATA_TYPE> callback) {
+		if (changedPropertyLabel == null || changedPropertyLabel.isEmpty()) {
+			logger.warn("Changed property label is null or empty");
+			return false;
+		}
+		if (keyInPropertyKeyValues == null
+				|| keyInPropertyKeyValues.isEmpty()) {
+			logger.warn("Key in property key values is null or empty");
+			return false;
+		}
+		if (keyInPropertyKeyValues.equals(changedPropertyLabel)) {
+			final VertexProperty<DATA_TYPE> propertyVertex = property(
+					keyInPropertyKeyValues);
+			final DATA_TYPE originalValue = propertyVertex.isPresent()
+					? propertyVertex.value()
+					: null;
+			if (changedPropertyValue.getValue() != null
+					&& changedPropertyValue.getValue().getValue() != null) {
+				final Object valueObject = changedPropertyValue.getValue()
+						.getValue();
+				if (qualifiedPropertySlot.getJavaType()
+						.isInstance(valueObject)) {
+					try {
+						@SuppressWarnings("unchecked")
+						final DATA_TYPE value = (DATA_TYPE) valueObject;
+						if (originalValue == null
+								|| !originalValue.equals(value)) {
+							setProperty(qualifiedPropertySlot, value);
+							if (callback != null) {
+								callback.onChange(originalValue, value);
+							}
+							return true;
+						} else {
+							logger.debug(
+									"Property {} value unchanged, remains {}",
+									changedPropertyLabel, originalValue);
+							return false;
+						}
+					} catch (final Throwable e) {
+						logger.error(
+								"Error while setting property {} with value {}",
+								changedPropertyLabel, valueObject, e);
+						return false;
+					}
+				} else {
+					logger.warn(
+							"Value object {} is not an instance of {} for property {}",
+							valueObject, qualifiedPropertySlot.getJavaType(),
+							changedPropertyLabel);
+					return false;
+				}
+			} else {
+				logger.warn("Changed property value is null for property {}",
+						changedPropertyLabel);
+				return false;
+			}
+		} else {
+			// la proprietà cambiata non corrisponde a quella che ci interessa,
+			// quindi non facciamo nulla
+			return false;
+		}
 	}
 
 	@Override
@@ -176,19 +295,6 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				: edgeIterator;
 	}
 
-	protected Boolean getBooleanProperty(Object[] propertyKeyValues,
-			String label, QualifiedProperty<Boolean> property, String key) {
-		property = initBooleanProperty(label);
-		final String value = MiloStrategy
-				.getKeyValuesProperty(propertyKeyValues, key);
-		if (value != null && !value.isEmpty()) {
-			final Boolean boolValue = Boolean.parseBoolean(value);
-			setProperty(property, boolValue);
-			return boolValue;
-		}
-		return null;
-	}
-
 	@Override
 	public List<EventObserver> getEventObservers() {
 		return eventObservers;
@@ -203,40 +309,6 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		return historyContext != null
 				? historyContext
 				: HistoryStrategy.DEFAULT_DATA_CONTEXT;
-	}
-
-	protected Integer getIntProperty(Object[] propertyKeyValues, String label,
-			QualifiedProperty<Integer> property, String key) {
-		property = initIntProperty(label);
-		final String value = MiloStrategy
-				.getKeyValuesProperty(propertyKeyValues, key);
-		if (value != null && !value.isEmpty()) {
-			try {
-				final Integer intValue = Integer.valueOf(value);
-				setProperty(property, intValue);
-				return intValue;
-			} catch (final Throwable e) {
-				return null;
-			}
-		}
-		return null;
-	}
-
-	protected Long getLongProperty(Object[] propertyKeyValues, String label,
-			QualifiedProperty<Long> property, String key) {
-		property = initLongProperty(label);
-		final String value = MiloStrategy
-				.getKeyValuesProperty(propertyKeyValues, key);
-		if (value != null && !value.isEmpty()) {
-			try {
-				final Long longValue = Long.valueOf(value);
-				setProperty(property, longValue);
-				return longValue;
-			} catch (final NumberFormatException e) {
-				return null;
-			}
-		}
-		return null;
 	}
 
 	@Override
@@ -263,22 +335,6 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		return propertyObservers;
 	}
 
-	protected String getStringProperty(Object[] propertyKeyValues, String label,
-			QualifiedProperty<String> property, String key, boolean required) {
-		property = new QualifiedProperty<String>(
-				getNamespace().getNamespaceUri(), label,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
-				ValueRanks.Scalar, String.class);
-		final String value = MiloStrategy
-				.getKeyValuesProperty(propertyKeyValues, key);
-		if (value != null && !value.isEmpty()) {
-			setProperty(property, value);
-			return value;
-		}
-		return null;
-	}
-
 	@Override
 	public ImmutableMap<String, WaldotVertexProperty<Object>> getVertexProperties() {
 		return ImmutableMap.copyOf(getNamespace().getVertexProperties(this));
@@ -294,7 +350,7 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		return getNamespace().inComputerMode();
 	}
 
-	protected QualifiedProperty<Boolean> initBooleanProperty(String label) {
+	private QualifiedProperty<Boolean> initBooleanProperty(String label) {
 		return new QualifiedProperty<Boolean>(getNamespace().getNamespaceUri(),
 				label,
 				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
@@ -302,7 +358,72 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				ValueRanks.Scalar, Boolean.class);
 	}
 
-	private QualifiedProperty<Integer> initIntProperty(String label) {
+	protected Boolean initializeBooleanProperty(Object[] propertyKeyValues,
+			String browserName,
+			QualifiedProperty<Boolean> qualifiedPropertySlot,
+			String keyInPropertyKeyValues) {
+		qualifiedPropertySlot = initBooleanProperty(browserName);
+		final String value = MiloStrategy.getKeyValuesProperty(
+				propertyKeyValues, keyInPropertyKeyValues);
+		if (value != null && !value.isEmpty()) {
+			final Boolean boolValue = Boolean.parseBoolean(value);
+			setProperty(qualifiedPropertySlot, boolValue);
+			return boolValue;
+		}
+		return null;
+	}
+
+	protected Integer initializeIntProperty(Object[] propertyKeyValues,
+			String browserName,
+			QualifiedProperty<Integer> qualifiedPropertySlot,
+			String keyInPropertyKeyValues) {
+		qualifiedPropertySlot = initIntProperty(browserName);
+		final String value = MiloStrategy.getKeyValuesProperty(
+				propertyKeyValues, keyInPropertyKeyValues);
+		if (value != null && !value.isEmpty()) {
+			try {
+				final Integer intValue = Integer.valueOf(value);
+				setProperty(qualifiedPropertySlot, intValue);
+				return intValue;
+			} catch (final Throwable e) {
+				return null;
+			}
+		}
+		return null;
+	}
+
+	protected Long initializeLongProperty(Object[] propertyKeyValues,
+			String browserName, QualifiedProperty<Long> qualifiedPropertySlot,
+			String keyInPropertyKeyValues) {
+		qualifiedPropertySlot = initLongProperty(browserName);
+		final String value = MiloStrategy.getKeyValuesProperty(
+				propertyKeyValues, keyInPropertyKeyValues);
+		if (value != null && !value.isEmpty()) {
+			try {
+				final Long longValue = Long.valueOf(value);
+				setProperty(qualifiedPropertySlot, longValue);
+				return longValue;
+			} catch (final NumberFormatException e) {
+				return null;
+			}
+		}
+		return null;
+	}
+
+	protected String initializeStringProperty(Object[] propertyKeyValues,
+			String browserName, QualifiedProperty<String> qualifiedPropertySlot,
+			String keyInPropertyKeyValues, boolean required) {
+		qualifiedPropertySlot = initStringProperty(browserName);
+		final String value = MiloStrategy.getKeyValuesProperty(
+				propertyKeyValues, keyInPropertyKeyValues);
+		if (value != null && !value.isEmpty()) {
+			setProperty(qualifiedPropertySlot, value);
+			return value;
+		}
+		return null;
+	}
+
+	protected QualifiedProperty<Integer> initIntProperty(String label) {
 		return new QualifiedProperty<Integer>(getNamespace().getNamespaceUri(),
 				label,
 				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
@@ -310,12 +431,20 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				ValueRanks.Scalar, Integer.class);
 	}
 
-	private QualifiedProperty<Long> initLongProperty(String label) {
+	protected QualifiedProperty<Long> initLongProperty(String label) {
 		return new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
 				label,
 				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
 						.getNodeId().expanded(),
 				ValueRanks.Scalar, Long.class);
+	}
+
+	protected QualifiedProperty<String> initStringProperty(String label) {
+		return new QualifiedProperty<String>(getNamespace().getNamespaceUri(),
+				label,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, String.class);
 	}
 
 	@Override
