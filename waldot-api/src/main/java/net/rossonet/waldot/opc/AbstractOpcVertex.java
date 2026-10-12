@@ -56,7 +56,10 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
  * 
  * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
-public abstract class AbstractOpcVertex extends GremlinElement implements WaldotVertex, AttributeObserver {
+public abstract class AbstractOpcVertex extends GremlinElement
+		implements
+			WaldotVertex,
+			AttributeObserver {
 
 	private transient boolean activeHistory = false;
 
@@ -82,39 +85,55 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 
 	private final QualifiedProperty<String> typeProperty;
 
-	public AbstractOpcVertex(final WaldotGraph graph, final UaNodeContext context, final NodeId nodeId,
-			final QualifiedName browseName, final LocalizedText displayName, final LocalizedText description,
-			final UInteger writeMask, final UInteger userWriteMask, final UByte eventNotifier, final long version) {
-		super(context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier, version);
+	public AbstractOpcVertex(final WaldotGraph graph,
+			final UaNodeContext context, final NodeId nodeId,
+			final QualifiedName browseName, final LocalizedText displayName,
+			final LocalizedText description, final UInteger writeMask,
+			final UInteger userWriteMask, final UByte eventNotifier,
+			final long version) {
+		super(context, nodeId, browseName, displayName, description, writeMask,
+				userWriteMask, eventNotifier, version);
 		this.graph = graph;
-		this.allowNullPropertyValues = graph.features().vertex().supportsNullPropertyValues();
+		this.allowNullPropertyValues = graph.features().vertex()
+				.supportsNullPropertyValues();
 		addAttributeObserver(this);
-		labelProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
+		labelProperty = new QualifiedProperty<String>(
+				graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.LABEL_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				String.class);
-		typeProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
-				MiloStrategy.TYPE_FIELD, MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode.getNodeId().expanded(),
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
-		historyProperty = new QualifiedProperty<Boolean>(graph.getWaldotNamespace().getNamespaceUri(),
+		typeProperty = new QualifiedProperty<String>(
+				graph.getWaldotNamespace().getNamespaceUri(),
+				MiloStrategy.TYPE_FIELD,
+				MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, String.class);
+		historyProperty = new QualifiedProperty<Boolean>(
+				graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.HISTORY_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Boolean.class);
-		historyContextProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
+				MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, Boolean.class);
+		historyContextProperty = new QualifiedProperty<String>(
+				graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.HISTORY_CONTEXT_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				String.class);
+				MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, String.class);
 	}
 
 	@Override
-	public Edge addEdge(final String label, final Vertex vertex, final Object... keyValues) {
+	public Edge addEdge(final String label, final Vertex vertex,
+			final Object... keyValues) {
 		if (null == vertex) {
 			throw Graph.Exceptions.argumentCanNotBeNull("vertex");
 		}
 		if (this.isRemoved() || ((WaldotVertex) vertex).isRemoved()) {
 			throw elementAlreadyRemoved(Vertex.class, getNodeId());
 		}
-		return getNamespace().addEdge(this, (WaldotVertex) vertex, label, keyValues);
+		return getNamespace().addEdge(this, (WaldotVertex) vertex, label,
+				keyValues);
 	}
 
 	@Override
@@ -135,27 +154,33 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	}
 
 	@Override
-	public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
-		logger.debug("Attribute changed: node {}, attribute {}, new value {}", node, attributeId, value);
+	public void attributeChanged(UaNode node, AttributeId attributeId,
+			Object value) {
+		logger.debug("Attribute changed: node {}, attribute {}, new value {}",
+				node, attributeId, value);
 	}
 
 	@Override
-	public Iterator<Edge> edges(final Direction direction, final String... edgeLabels) {
-		final Collection<WaldotEdge> values = getNamespace().getEdges(this, direction, edgeLabels).values();
+	public Iterator<Edge> edges(final Direction direction,
+			final String... edgeLabels) {
+		final Collection<WaldotEdge> values = getNamespace()
+				.getEdges(this, direction, edgeLabels).values();
 		final Collection<Edge> edges = new ArrayList<>();
 		for (final WaldotEdge edge : values) {
 			edges.add(edge);
 		}
 		final Iterator<Edge> edgeIterator = edges.iterator();
 		return inComputerMode()
-				? IteratorUtils.filter(edgeIterator, edge -> getGraphComputerView().legalEdge(this, edge))
+				? IteratorUtils.filter(edgeIterator,
+						edge -> getGraphComputerView().legalEdge(this, edge))
 				: edgeIterator;
 	}
 
-	protected Boolean getBooleanProperty(Object[] propertyKeyValues, String label, QualifiedProperty<Boolean> property,
-			String key) {
+	protected Boolean getBooleanProperty(Object[] propertyKeyValues,
+			String label, QualifiedProperty<Boolean> property, String key) {
 		property = initBooleanProperty(label);
-		final String value = MiloStrategy.getKeyValuesProperty(propertyKeyValues, key);
+		final String value = MiloStrategy
+				.getKeyValuesProperty(propertyKeyValues, key);
 		if (value != null && !value.isEmpty()) {
 			final Boolean boolValue = Boolean.parseBoolean(value);
 			setProperty(property, boolValue);
@@ -175,13 +200,16 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	}
 
 	public String getHistoryContext() {
-		return historyContext != null ? historyContext : HistoryStrategy.DEFAULT_DATA_CONTEXT;
+		return historyContext != null
+				? historyContext
+				: HistoryStrategy.DEFAULT_DATA_CONTEXT;
 	}
 
-	protected Integer getIntProperty(Object[] propertyKeyValues, String label, QualifiedProperty<Integer> property,
-			String key) {
+	protected Integer getIntProperty(Object[] propertyKeyValues, String label,
+			QualifiedProperty<Integer> property, String key) {
 		property = initIntProperty(label);
-		final String value = MiloStrategy.getKeyValuesProperty(propertyKeyValues, key);
+		final String value = MiloStrategy
+				.getKeyValuesProperty(propertyKeyValues, key);
 		if (value != null && !value.isEmpty()) {
 			try {
 				final Integer intValue = Integer.valueOf(value);
@@ -194,10 +222,11 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 		return null;
 	}
 
-	protected Long getLongProperty(Object[] propertyKeyValues, String label, QualifiedProperty<Long> property,
-			String key) {
+	protected Long getLongProperty(Object[] propertyKeyValues, String label,
+			QualifiedProperty<Long> property, String key) {
 		property = initLongProperty(label);
-		final String value = MiloStrategy.getKeyValuesProperty(propertyKeyValues, key);
+		final String value = MiloStrategy
+				.getKeyValuesProperty(propertyKeyValues, key);
 		if (value != null && !value.isEmpty()) {
 			try {
 				final Long longValue = Long.valueOf(value);
@@ -219,7 +248,8 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	public String[] getPropertiesAsStringArray() {
 		final List<String> props = new ArrayList<>();
 		final ImmutableMap<String, WaldotVertexProperty<Object>> vertexProperties = getVertexProperties();
-		for (final Entry<String, WaldotVertexProperty<Object>> entry : vertexProperties.entrySet()) {
+		for (final Entry<String, WaldotVertexProperty<Object>> entry : vertexProperties
+				.entrySet()) {
 			final String key = entry.getKey();
 			props.add(key);
 			final String value = entry.getValue().value().toString();
@@ -233,12 +263,15 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 		return propertyObservers;
 	}
 
-	protected String getStringProperty(Object[] propertyKeyValues, String label, QualifiedProperty<String> property,
-			String key, boolean required) {
-		property = new QualifiedProperty<String>(getNamespace().getNamespaceUri(), label,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				String.class);
-		final String value = MiloStrategy.getKeyValuesProperty(propertyKeyValues, key);
+	protected String getStringProperty(Object[] propertyKeyValues, String label,
+			QualifiedProperty<String> property, String key, boolean required) {
+		property = new QualifiedProperty<String>(
+				getNamespace().getNamespaceUri(), label,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, String.class);
+		final String value = MiloStrategy
+				.getKeyValuesProperty(propertyKeyValues, key);
 		if (value != null && !value.isEmpty()) {
 			setProperty(property, value);
 			return value;
@@ -262,21 +295,27 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	}
 
 	protected QualifiedProperty<Boolean> initBooleanProperty(String label) {
-		return new QualifiedProperty<Boolean>(getNamespace().getNamespaceUri(), label,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Boolean.class);
+		return new QualifiedProperty<Boolean>(getNamespace().getNamespaceUri(),
+				label,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, Boolean.class);
 	}
 
 	private QualifiedProperty<Integer> initIntProperty(String label) {
-		return new QualifiedProperty<Integer>(getNamespace().getNamespaceUri(), label,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Integer.class);
+		return new QualifiedProperty<Integer>(getNamespace().getNamespaceUri(),
+				label,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, Integer.class);
 	}
 
 	private QualifiedProperty<Long> initLongProperty(String label) {
-		return new QualifiedProperty<Long>(getNamespace().getNamespaceUri(), label,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Long.class);
+		return new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
+				label,
+				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+						.getNodeId().expanded(),
+				ValueRanks.Scalar, Long.class);
 	}
 
 	@Override
@@ -296,22 +335,27 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	public void notifyPropertyValueChanging(String label, DataValue value) {
 		if (label.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {
 			final String originalLabel = getProperty(labelProperty).get();
-			if (!originalLabel.equals(String.valueOf(value.getValue().getValue().toString()))) {
-				logger.warn("Changing label from {} to {} is not allowed, reverting to original value", originalLabel,
-						value.getValue().getValue().toString());
+			if (!originalLabel.equals(
+					String.valueOf(value.getValue().getValue().toString()))) {
+				logger.warn(
+						"Changing label from {} to {} is not allowed, reverting to original value",
+						originalLabel, value.getValue().getValue().toString());
 				property(MiloStrategy.LABEL_FIELD.toLowerCase(), originalLabel);
 			}
 		}
 		if (label.equals(MiloStrategy.TYPE_FIELD.toLowerCase())) {
 			final String originalType = getProperty(typeProperty).get();
-			if (!originalType.equals(String.valueOf(value.getValue().getValue().toString()))) {
-				logger.warn("Changing type from {} to {} is not allowed, reverting to original value", originalType,
-						value.getValue().getValue().toString());
+			if (!originalType.equals(
+					String.valueOf(value.getValue().getValue().toString()))) {
+				logger.warn(
+						"Changing type from {} to {} is not allowed, reverting to original value",
+						originalType, value.getValue().getValue().toString());
 				property(MiloStrategy.TYPE_FIELD.toLowerCase(), originalType);
 			}
 		}
 		if (label.equals(MiloStrategy.HISTORY_FIELD.toLowerCase())) {
-			final boolean newHistory = Boolean.parseBoolean(String.valueOf(value.getValue().getValue()));
+			final boolean newHistory = Boolean
+					.parseBoolean(String.valueOf(value.getValue().getValue()));
 			if (newHistory) {
 				activeHistory = true;
 				logger.info("History activated for vertex {}", this);
@@ -325,25 +369,31 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 			}
 		}
 		if (label.equals(MiloStrategy.HISTORY_CONTEXT_FIELD.toLowerCase())) {
-			final String newContext = String.valueOf(value.getValue().getValue());
+			final String newContext = String
+					.valueOf(value.getValue().getValue());
 			if (newContext != null && !newContext.isEmpty()) {
 				historyContext = newContext;
 			}
 		}
 		if (label.equals(MiloStrategy.NAME_FIELD.toLowerCase())) {
 			final QualifiedName browseName = graph.getWaldotNamespace()
-					.generateQualifiedName((String) value.getValue().getValue());
-			final LocalizedText displayName = new LocalizedText((String) value.getValue().getValue());
+					.generateQualifiedName(
+							(String) value.getValue().getValue());
+			final LocalizedText displayName = new LocalizedText(
+					(String) value.getValue().getValue());
 			setBrowseName(browseName);
 			setDisplayName(displayName);
 		}
 		if (label.equals(MiloStrategy.DESCRIPTION_PARAMETER.toLowerCase())) {
-			final LocalizedText description = new LocalizedText((String) value.getValue().getValue());
+			final LocalizedText description = new LocalizedText(
+					(String) value.getValue().getValue());
 			setDescription(description);
 		}
-		propertyObservers.forEach(observer -> observer.propertyChanged(this, label, value));
+		propertyObservers.forEach(
+				observer -> observer.propertyChanged(this, label, value));
 		if (activeHistory) {
-			getNamespace().getHistoryStrategy().registerHistoryRecord(historyContext, this, label, value);
+			getNamespace().getHistoryStrategy()
+					.registerHistoryRecord(historyContext, this, label, value);
 		}
 	}
 
@@ -357,15 +407,18 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 		eventObservers.forEach(observer -> observer.fireEvent(this, event));
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
-	public <V> Iterator<VertexProperty<V>> properties(final String... propertyKeys) {
+	public <V> Iterator<VertexProperty<V>> properties(
+			final String... propertyKeys) {
 		if (this.isRemoved()) {
 			return Collections.emptyIterator();
 		}
 		if (inComputerMode()) {
-			return (Iterator) getGraphComputerView().getProperties(this).stream()
-					.filter(p -> ElementHelper.keyExists(p.key(), propertyKeys)).iterator();
+			return (Iterator) getGraphComputerView().getProperties(this)
+					.stream()
+					.filter(p -> ElementHelper.keyExists(p.key(), propertyKeys))
+					.iterator();
 		} else {
 			final ImmutableMap<String, WaldotVertexProperty<Object>> vertexProperties = getVertexProperties();
 			if (null == vertexProperties) {
@@ -375,7 +428,8 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 				return (Iterator) vertexProperties.values().iterator();
 			}
 			final Set<VertexProperty<V>> result = new HashSet<>();
-			for (final Entry<String, WaldotVertexProperty<Object>> p : vertexProperties.entrySet()) {
+			for (final Entry<String, WaldotVertexProperty<Object>> p : vertexProperties
+					.entrySet()) {
 				for (final String key : propertyKeys) {
 					if (p.getKey().equals(key)) {
 						result.add((VertexProperty<V>) p.getValue());
@@ -393,16 +447,19 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 			return VertexProperty.empty();
 		}
 		if (inComputerMode()) {
-			final List<VertexProperty> list = (List) getGraphComputerView().getProperty(this, key);
+			final List<VertexProperty> list = (List) getGraphComputerView()
+					.getProperty(this, key);
 			if (list.size() == 0) {
 				return VertexProperty.<V>empty();
 			} else if (list.size() == 1) {
 				return list.get(0);
 			} else {
-				throw Vertex.Exceptions.multiplePropertiesExistForProvidedKey(key);
+				throw Vertex.Exceptions
+						.multiplePropertiesExistForProvidedKey(key);
 			}
 		} else {
-			for (final Entry<String, WaldotVertexProperty<Object>> p : getVertexProperties().entrySet()) {
+			for (final Entry<String, WaldotVertexProperty<Object>> p : getVertexProperties()
+					.entrySet()) {
 				if (p.getKey().equals(key)) {
 					return (VertexProperty<V>) p.getValue();
 				}
@@ -412,15 +469,17 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 	}
 
 	@Override
-	public <V> VertexProperty<V> property(final VertexProperty.Cardinality cardinality, final String key, final V value,
-			final Object... keyValues) {
+	public <V> VertexProperty<V> property(
+			final VertexProperty.Cardinality cardinality, final String key,
+			final V value, final Object... keyValues) {
 		if (this.isRemoved()) {
 			throw elementAlreadyRemoved(Vertex.class, this.getNodeId());
 		}
 		ElementHelper.legalPropertyKeyValueArray(keyValues);
 		ElementHelper.validateProperty(key, value);
 		if (!allowNullPropertyValues && null == value) {
-			final VertexProperty.Cardinality card = null == cardinality ? graph.features().vertex().getCardinality(key)
+			final VertexProperty.Cardinality card = null == cardinality
+					? graph.features().vertex().getCardinality(key)
 					: cardinality;
 			if (VertexProperty.Cardinality.single == card) {
 				properties(key).forEachRemaining(Property::remove);
@@ -428,11 +487,13 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 			return VertexProperty.empty();
 		}
 		if (inComputerMode()) {
-			final VertexProperty<V> vertexProperty = getGraphComputerView().addProperty(this, key, value);
+			final VertexProperty<V> vertexProperty = getGraphComputerView()
+					.addProperty(this, key, value);
 			ElementHelper.attachProperties(vertexProperty, keyValues);
 			return vertexProperty;
 		} else {
-			return getNamespace().createOrUpdateWaldotVertexProperty(this, key, value);
+			return getNamespace().createOrUpdateWaldotVertexProperty(this, key,
+					value);
 		}
 	}
 
@@ -454,26 +515,34 @@ public abstract class AbstractOpcVertex extends GremlinElement implements Waldot
 
 	@Override
 	public void removeRelatedOpcUaNodes() {
-		// TODO Auto-generated method stub
+		// TODO rimuovere le variabili e gli oggetti collegati al vertice
 
 	}
 
 	@Override
 	public String toString() {
-		return WaldotGraph.V + WaldotGraph.L_BRACKET + getNodeId().toParseableString() + WaldotGraph.R_BRACKET;
+		return WaldotGraph.V + WaldotGraph.L_BRACKET
+				+ getNodeId().toParseableString() + WaldotGraph.R_BRACKET;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
-	public Iterator<Vertex> vertices(final Direction direction, final String... edgeLabels) {
+	public Iterator<Vertex> vertices(final Direction direction,
+			final String... edgeLabels) {
 		if (inComputerMode()) {
 			return direction.equals(Direction.BOTH)
-					? IteratorUtils.concat(IteratorUtils.map(this.edges(Direction.OUT, edgeLabels), Edge::inVertex),
-							IteratorUtils.map(this.edges(Direction.IN, edgeLabels), Edge::outVertex))
+					? IteratorUtils.concat(
+							IteratorUtils.map(
+									this.edges(Direction.OUT, edgeLabels),
+									Edge::inVertex),
+							IteratorUtils.map(
+									this.edges(Direction.IN, edgeLabels),
+									Edge::outVertex))
 					: IteratorUtils.map(this.edges(direction, edgeLabels),
 							edge -> edge.vertices(direction.opposite()).next());
 		}
-		return (Iterator) getNamespace().getVertices(this, direction, edgeLabels).values().iterator();
+		return (Iterator) getNamespace()
+				.getVertices(this, direction, edgeLabels).values().iterator();
 	}
 
 }
