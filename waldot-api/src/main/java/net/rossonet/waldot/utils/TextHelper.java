@@ -143,6 +143,23 @@ public final class TextHelper {
 		return stringBuffer.toString();
 	}
 
+	public static String convertCamelCaseToCharacterSeparatedLowerCase(
+			String input, String separator) {
+		final StringBuilder result = new StringBuilder();
+		boolean firstChar = true;
+		for (final char c : input.toCharArray()) {
+			if (firstChar) {
+				firstChar = false;
+				result.append(Character.toLowerCase(c));
+			} else if (Character.isUpperCase(c)) {
+				result.append(separator).append(Character.toLowerCase(c));
+			} else {
+				result.append(c);
+			}
+		}
+		return result.toString();
+	}
+
 	public static byte[] decryptData(final byte[] encryptedData,
 			final byte[] key) throws InvalidKeyException,
 			NoSuchAlgorithmException, NoSuchPaddingException,

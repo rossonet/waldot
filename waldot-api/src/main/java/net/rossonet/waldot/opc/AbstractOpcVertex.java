@@ -34,6 +34,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap;
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -213,7 +214,7 @@ public abstract class AbstractOpcVertex extends GremlinElement
 	 * @return true if the property value was changed, false otherwise
 	 */
 	protected <DATA_TYPE> boolean checkPropertyValueChange(
-			String changedPropertyLabel, DataValue changedPropertyValue,
+			String changedPropertyLabel, DATA_TYPE changedPropertyValue,
 			String keyInPropertyKeyValues,
 			QualifiedProperty<DATA_TYPE> qualifiedPropertySlot,
 			ChangedPropertyCallback<DATA_TYPE> callback) {
@@ -232,41 +233,123 @@ public abstract class AbstractOpcVertex extends GremlinElement
 			final DATA_TYPE originalValue = propertyVertex.isPresent()
 					? propertyVertex.value()
 					: null;
-			if (changedPropertyValue.getValue() != null
-					&& changedPropertyValue.getValue().getValue() != null) {
-				final Object valueObject = changedPropertyValue.getValue()
-						.getValue();
-				if (qualifiedPropertySlot.getJavaType()
-						.isInstance(valueObject)) {
-					try {
-						@SuppressWarnings("unchecked")
-						final DATA_TYPE value = (DATA_TYPE) valueObject;
-						if (originalValue == null
-								|| !originalValue.equals(value)) {
-							setProperty(qualifiedPropertySlot, value);
-							if (callback != null) {
-								callback.onChange(originalValue, value);
-							}
-							return true;
-						} else {
-							logger.debug(
-									"Property {} value unchanged, remains {}",
-									changedPropertyLabel, originalValue);
-							return false;
+			if (changedPropertyValue != null) {
+				try {
+					final DATA_TYPE value = changedPropertyValue;
+					if (originalValue == null || !originalValue.equals(value)) {
+						setProperty(qualifiedPropertySlot, value);
+						if (callback != null) {
+							callback.onChange(originalValue, value);
 						}
-					} catch (final Throwable e) {
-						logger.error(
-								"Error while setting property {} with value {}",
-								changedPropertyLabel, valueObject, e);
+						return true;
+					} else {
+						logger.debug("Property {} value unchanged, remains {}",
+								changedPropertyLabel, originalValue);
 						return false;
 					}
-				} else {
-					logger.warn(
-							"Value object {} is not an instance of {} for property {}",
-							valueObject, qualifiedPropertySlot.getJavaType(),
-							changedPropertyLabel);
+				} catch (final Throwable e) {
+					logger.error(
+							"Error while setting property {} with value {}",
+							changedPropertyLabel, changedPropertyValue, e);
 					return false;
 				}
+
+			} else {
+				logger.warn("Changed property value is null for property {}",
+						changedPropertyLabel);
+				return false;
+			}
+		} else {
+			// la proprietà cambiata non corrisponde a quella che ci interessa,
+			// quindi non facciamo nulla
+			return false;
+		}
+	}
+
+	/**
+	 * Checks if a property value has changed and updates it if necessary. If the
+	 * changed property label matches the key in the property key values, it retrieves
+	 * the original value of the property and compares it with the new value. If they
+	 * are different, it updates the property with the new value and invokes the
+	 * callback if provided.
+	 * @param <DATA_TYPE>
+	 * @param changedPropertyLabel
+	 * @param changedPropertyValue
+	 * @param keyInPropertyKeyValues
+	 * @param qualifiedPropertySlot
+	 * @param callback
+	 * @return true if the property value was changed, false otherwise
+	 */
+
+	protected <DATA_TYPE> boolean checkPropertyValueChange(
+			String changedPropertyLabel, DataValue changedPropertyValue,
+			String keyInPropertyKeyValues,
+			QualifiedProperty<DATA_TYPE> qualifiedPropertySlot,
+			ChangedPropertyCallback<DATA_TYPE> callback) {
+		if (changedPropertyValue.getValue() != null
+				&& changedPropertyValue.getValue().getValue() != null) {
+			final Object valueObject = changedPropertyValue.getValue()
+					.getValue();
+			if (qualifiedPropertySlot != null && qualifiedPropertySlot
+					.getJavaType().isInstance(valueObject)) {
+				return checkPropertyValueChange(changedPropertyLabel,
+						(DATA_TYPE) valueObject, keyInPropertyKeyValues,
+						qualifiedPropertySlot, callback);
+			} else {
+				logger.warn(
+						"Changed property value type {} does not match expected type {} for property {}",
+						valueObject.getClass().getName(),
+						qualifiedPropertySlot != null
+								? qualifiedPropertySlot.getJavaType().getName()
+								: "null",
+						changedPropertyLabel);
+				return false;
+			}
+		} else {
+			logger.warn("Changed property value is null for property {}",
+					changedPropertyLabel);
+			return false;
+		}
+	}
+
+	protected <DATA_TYPE> boolean checkValueChange(String changedPropertyLabel,
+			DATA_TYPE changedPropertyValue, String keyInPropertyKeyValues,
+			ChangedPropertyCallback<DATA_TYPE> callback) {
+		if (changedPropertyLabel == null || changedPropertyLabel.isEmpty()) {
+			logger.warn("Changed property label is null or empty");
+			return false;
+		}
+		if (keyInPropertyKeyValues == null
+				|| keyInPropertyKeyValues.isEmpty()) {
+			logger.warn("Key in property key values is null or empty");
+			return false;
+		}
+		if (keyInPropertyKeyValues.equals(changedPropertyLabel)) {
+			final VertexProperty<DATA_TYPE> propertyVertex = property(
+					keyInPropertyKeyValues);
+			final DATA_TYPE originalValue = propertyVertex.isPresent()
+					? propertyVertex.value()
+					: null;
+			if (changedPropertyValue != null) {
+				try {
+					final DATA_TYPE value = changedPropertyValue;
+					if (originalValue == null || !originalValue.equals(value)) {
+						if (callback != null) {
+							callback.onChange(originalValue, value);
+						}
+						return true;
+					} else {
+						logger.debug("Property {} value unchanged, remains {}",
+								changedPropertyLabel, originalValue);
+						return false;
+					}
+				} catch (final Throwable e) {
+					logger.error(
+							"Error while setting property {} with value {}",
+							changedPropertyLabel, changedPropertyValue, e);
+					return false;
+				}
+
 			} else {
 				logger.warn("Changed property value is null for property {}",
 						changedPropertyLabel);
@@ -358,69 +441,71 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				ValueRanks.Scalar, Boolean.class);
 	}
 
-	protected Boolean initializeBooleanProperty(Object[] propertyKeyValues,
-			String browserName,
-			QualifiedProperty<Boolean> qualifiedPropertySlot,
+	protected Pair<Boolean, QualifiedProperty<Boolean>> initializeBooleanProperty(
+			Object[] propertyKeyValues, String browserName,
 			String keyInPropertyKeyValues) {
-		qualifiedPropertySlot = initBooleanProperty(browserName);
+		final QualifiedProperty<Boolean> qualifiedPropertySlot = initBooleanProperty(
+				browserName);
 		final String value = MiloStrategy.getKeyValuesProperty(
 				propertyKeyValues, keyInPropertyKeyValues);
 		if (value != null && !value.isEmpty()) {
 			final Boolean boolValue = Boolean.parseBoolean(value);
 			setProperty(qualifiedPropertySlot, boolValue);
-			return boolValue;
+			return new Pair<>(boolValue, qualifiedPropertySlot);
 		}
-		return null;
+		return new Pair<>(null, qualifiedPropertySlot);
 	}
 
-	protected Integer initializeIntProperty(Object[] propertyKeyValues,
-			String browserName,
-			QualifiedProperty<Integer> qualifiedPropertySlot,
+	protected Pair<Integer, QualifiedProperty<Integer>> initializeIntProperty(
+			Object[] propertyKeyValues, String browserName,
 			String keyInPropertyKeyValues) {
-		qualifiedPropertySlot = initIntProperty(browserName);
+		final QualifiedProperty<Integer> qualifiedPropertySlot = initIntProperty(
+				browserName);
 		final String value = MiloStrategy.getKeyValuesProperty(
 				propertyKeyValues, keyInPropertyKeyValues);
 		if (value != null && !value.isEmpty()) {
 			try {
 				final Integer intValue = Integer.valueOf(value);
 				setProperty(qualifiedPropertySlot, intValue);
-				return intValue;
+				return new Pair<>(intValue, qualifiedPropertySlot);
 			} catch (final Throwable e) {
 				return null;
 			}
 		}
-		return null;
+		return new Pair<>(null, qualifiedPropertySlot);
 	}
 
-	protected Long initializeLongProperty(Object[] propertyKeyValues,
-			String browserName, QualifiedProperty<Long> qualifiedPropertySlot,
+	protected Pair<Long, QualifiedProperty<Long>> initializeLongProperty(
+			Object[] propertyKeyValues, String browserName,
 			String keyInPropertyKeyValues) {
-		qualifiedPropertySlot = initLongProperty(browserName);
+		final QualifiedProperty<Long> qualifiedPropertySlot = initLongProperty(
+				browserName);
 		final String value = MiloStrategy.getKeyValuesProperty(
 				propertyKeyValues, keyInPropertyKeyValues);
 		if (value != null && !value.isEmpty()) {
 			try {
 				final Long longValue = Long.valueOf(value);
 				setProperty(qualifiedPropertySlot, longValue);
-				return longValue;
+				return new Pair<>(longValue, qualifiedPropertySlot);
 			} catch (final NumberFormatException e) {
 				return null;
 			}
 		}
-		return null;
+		return new Pair<>(null, qualifiedPropertySlot);
 	}
 
-	protected String initializeStringProperty(Object[] propertyKeyValues,
-			String browserName, QualifiedProperty<String> qualifiedPropertySlot,
+	protected Pair<String, QualifiedProperty<String>> initializeStringProperty(
+			Object[] propertyKeyValues, String browserName,
 			String keyInPropertyKeyValues, boolean required) {
-		qualifiedPropertySlot = initStringProperty(browserName);
+		final QualifiedProperty<String> qualifiedPropertySlot = initStringProperty(
+				browserName);
 		final String value = MiloStrategy.getKeyValuesProperty(
 				propertyKeyValues, keyInPropertyKeyValues);
 		if (value != null && !value.isEmpty()) {
 			setProperty(qualifiedPropertySlot, value);
-			return value;
+			return new Pair<>(value, qualifiedPropertySlot);
 		}
-		return null;
+		return new Pair<>(required ? "" : null, qualifiedPropertySlot);
 	}
 
 	protected QualifiedProperty<Integer> initIntProperty(String label) {
