@@ -64,12 +64,26 @@ public abstract class AbstractOpcVertex extends GremlinElement
 			AttributeObserver {
 
 	public interface ChangedPropertyCallback<DATA_TYPE> {
-		public void onChange(DATA_TYPE oldValue, DATA_TYPE newValue);
+		public void onChange(String label, DATA_TYPE oldValue,
+				DATA_TYPE newValue) throws PropertyChangeException;
 	}
 
 	public interface CommandHandler {
 		public String[] handleCommand(InvocationContext invocationContext,
 				String[] inputValues);
+	}
+
+	public static class PropertyChangeException extends Exception {
+
+		private static final long serialVersionUID = 6543733607549354598L;
+
+		public PropertyChangeException(String message) {
+			super(message);
+		}
+
+		public PropertyChangeException(String message, Throwable cause) {
+			super(message, cause);
+		}
 	}
 
 	private transient boolean activeHistory = false;
@@ -86,8 +100,8 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	private final QualifiedProperty<String> historyContextProperty;
 	private final QualifiedProperty<Boolean> historyProperty;
-
 	private final QualifiedProperty<String> labelProperty;
+
 	private final Set<WaldotVertexProperty<?>> linkedProperties = new HashSet<>();
 
 	private transient final Logger logger = LoggerFactory.getLogger(getClass());
@@ -96,6 +110,7 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	private final QualifiedProperty<String> typeProperty;
 
+	@Deprecated
 	public AbstractOpcVertex(final WaldotGraph graph,
 			final UaNodeContext context, final NodeId nodeId,
 			final QualifiedName browseName, final LocalizedText displayName,
@@ -132,6 +147,17 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode
 						.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
+	}
+
+	public AbstractOpcVertex(final WaldotGraph graph,
+			final UaNodeContext context, final NodeId nodeId,
+			final QualifiedName browseName, final LocalizedText displayName,
+			final LocalizedText description, final UInteger writeMask,
+			final UInteger userWriteMask, final UByte eventNotifier,
+			final long version, Object[] propertyKeyValues) {
+		this(graph, context, nodeId, browseName, displayName, description,
+				writeMask, userWriteMask, eventNotifier, version);
+		initializeManagedProperties(propertyKeyValues);
 	}
 
 	@Override
@@ -239,7 +265,8 @@ public abstract class AbstractOpcVertex extends GremlinElement
 					if (originalValue == null || !originalValue.equals(value)) {
 						setProperty(qualifiedPropertySlot, value);
 						if (callback != null) {
-							callback.onChange(originalValue, value);
+							callback.onChange(changedPropertyLabel,
+									originalValue, value);
 						}
 						return true;
 					} else {
@@ -335,7 +362,8 @@ public abstract class AbstractOpcVertex extends GremlinElement
 					final DATA_TYPE value = changedPropertyValue;
 					if (originalValue == null || !originalValue.equals(value)) {
 						if (callback != null) {
-							callback.onChange(originalValue, value);
+							callback.onChange(changedPropertyLabel,
+									originalValue, value);
 						}
 						return true;
 					} else {
@@ -494,6 +522,11 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		return new Pair<>(null, qualifiedPropertySlot);
 	}
 
+	private void initializeManagedProperties(Object[] propertyKeyValues) {
+		// TODO Auto-generated method stub
+
+	}
+
 	protected Pair<String, QualifiedProperty<String>> initializeStringProperty(
 			Object[] propertyKeyValues, String browserName,
 			String keyInPropertyKeyValues, boolean required) {
@@ -603,6 +636,7 @@ public abstract class AbstractOpcVertex extends GremlinElement
 					(String) value.getValue().getValue());
 			setDescription(description);
 		}
+		updateManagedProperties(label, value);
 		propertyObservers.forEach(
 				observer -> observer.propertyChanged(this, label, value));
 		if (activeHistory) {
@@ -737,6 +771,11 @@ public abstract class AbstractOpcVertex extends GremlinElement
 	public String toString() {
 		return WaldotGraph.V + WaldotGraph.L_BRACKET
 				+ getNodeId().toParseableString() + WaldotGraph.R_BRACKET;
+	}
+
+	private void updateManagedProperties(String label, DataValue value) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})

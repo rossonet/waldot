@@ -23,18 +23,31 @@ import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotCommand;
+import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
+import net.rossonet.waldot.exception.PluginBlockingException;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 
 public abstract class AbstractPluginListener implements PluginListener {
+
 	protected final List<WaldotCommand> commands = new ArrayList<>();
+
+	protected final List<String> edgeTypeNodes = new ArrayList<>();
+
 	protected final Map<String, UaObjectTypeNode> labelTypeNodes = new HashMap<>();
+
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
+
 	protected final Map<UaObjectTypeNode, Class<? extends AbstractOpcVertex>> typeClassNodes = new HashMap<>();
 	private WaldotNamespace waldotNamespace;
+
+	@Override
+	public boolean containsEdgeType(String typeDefinitionLabel) {
+		return edgeTypeNodes.contains(typeDefinitionLabel);
+	}
 
 	@Override
 	public boolean containsVertexType(String typeDefinitionLabel) {
@@ -80,7 +93,6 @@ public abstract class AbstractPluginListener implements PluginListener {
 							graph, context, nodeId, browseName, displayName,
 							description, writeMask, userWriteMask,
 							eventNotifier, version, propertyKeyValues);
-					// managedObjects.add(newInstance);
 					return newInstance;
 				} catch (final Throwable e) {
 					logger.error(
@@ -93,6 +105,7 @@ public abstract class AbstractPluginListener implements PluginListener {
 				typeDefinitionNodeId);
 		return null;
 	}
+
 	private UaObjectTypeNode generateTypeNode(Class<?> vertexClass,
 			String typeNodeId, String typeNodeDisplayName) {
 		final UaObjectTypeNode type = UaObjectTypeNode
@@ -137,6 +150,10 @@ public abstract class AbstractPluginListener implements PluginListener {
 		}
 	}
 
+	protected WaldotNamespace getWaldotNamespace() {
+		return waldotNamespace;
+	}
+
 	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
 		this.typeClassNodes.clear();
@@ -144,8 +161,47 @@ public abstract class AbstractPluginListener implements PluginListener {
 		this.waldotNamespace = waldotNamespace;
 	}
 
+	@Override
+	public void notifyAddEdge(final WaldotEdge edge,
+			final WaldotVertex sourceVertex, final WaldotVertex targetVertex,
+			final String label, final String type,
+			final Object[] propertyKeyValues) throws PluginBlockingException {
+		if (sourceVertex instanceof EdgeMonitoredVertex) {
+			logger.debug("Source vertex {} is EdgeMonitoredVertex, notifying",
+					sourceVertex.getNodeId());
+			((EdgeMonitoredVertex) sourceVertex).notifyAddTargetMonitoredEdge(
+					edge, targetVertex, label, type, propertyKeyValues);
+		}
+		if (targetVertex instanceof EdgeMonitoredVertex) {
+			logger.debug("Source vertex {} is EdgeMonitoredVertex, notifying",
+					sourceVertex.getNodeId());
+			((EdgeMonitoredVertex) targetVertex).notifyAddSourceMonitoredEdge(
+					edge, sourceVertex, label, type, propertyKeyValues);
+		}
+	}
+
+	@Override
+	public void notifyRemoveEdge(final WaldotEdge edge) {
+		if (edge.outVertex() instanceof EdgeMonitoredVertex) {
+			logger.debug("Source vertex {} is EdgeMonitoredVertex, notifying",
+					edge.outVertex());
+			((EdgeMonitoredVertex) edge.outVertex())
+					.notifyRemoveTargetMonitoredEdge(edge);
+		}
+		if (edge.inVertex() instanceof EdgeMonitoredVertex) {
+			logger.debug("Source vertex {} is EdgeMonitoredVertex, notifying",
+					edge.inVertex());
+			((EdgeMonitoredVertex) edge.inVertex())
+					.notifyRemoveSourceMonitoredEdge(edge);
+		}
+	}
+
 	protected void registerCommand(WaldotCommand command) {
 		commands.add(command);
+	}
+
+	protected void registerTypeEdge(String edgeTypeLabel) {
+		edgeTypeNodes.add(edgeTypeLabel);
 	}
 
 	protected void registerTypeNode(
@@ -156,4 +212,17 @@ public abstract class AbstractPluginListener implements PluginListener {
 		labelTypeNodes.put(label, typeNode);
 		typeClassNodes.put(typeNode, vertexClass);
 	}
+
+	/**
+	 * Resets the plugin to its initial state.
+	 * 
+	 * <p>This method is called to reset all plugin state without fully
+	 * closing and reinitializing. Useful for testing or recovery scenarios.</p>
+	 */
+	@Override
+	public void reset() {
+		// TODO: Implement reset logic for the plugin to clear its state and
+		// prepare for reinitialization.
+	}
+
 }
