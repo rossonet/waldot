@@ -27,7 +27,6 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.exception.PluginBlockingException;
-import net.rossonet.waldot.opc.AbstractOpcVertex.ChangedPropertyCallback;
 
 /**
  * PluginListener interface for handling events related to Waldot plugins.
@@ -65,52 +64,12 @@ import net.rossonet.waldot.opc.AbstractOpcVertex.ChangedPropertyCallback;
  */
 public interface PluginListener {
 
-	public final class MetaDataVariableNode {
+	public final class MetaDataTypeNode {
 
-		private ChangedPropertyCallback<?> callbackOnChange;
-		private boolean isNecessaryRestartVertex;
-		private boolean isRequired;
-		private Class<?> javaType;
 		private UaVariableNode uaVariableNode;
-
-		public ChangedPropertyCallback<?> getCallbackOnChange() {
-			return callbackOnChange;
-		}
-
-		public Class<?> getJavaType() {
-			return javaType;
-		}
 
 		public UaVariableNode getUaVariableNode() {
 			return uaVariableNode;
-		}
-
-		public boolean isNecessaryRestartVertex() {
-			return isNecessaryRestartVertex;
-		}
-
-		public boolean isRequired() {
-			return isRequired;
-		}
-
-		void setCallbackOnChange(ChangedPropertyCallback<?> callbackOnChange) {
-			this.callbackOnChange = callbackOnChange;
-
-		}
-
-		void setJavaType(Class<?> javaType) {
-			this.javaType = javaType;
-
-		}
-
-		void setNecessaryRestartVertex(boolean isNecessaryRestartVertex) {
-			this.isNecessaryRestartVertex = isNecessaryRestartVertex;
-
-		}
-
-		void setRequired(boolean isRequired) {
-			this.isRequired = isRequired;
-
 		}
 
 		void setUaVariableNode(UaVariableNode uaVariableNode) {
@@ -136,20 +95,10 @@ public interface PluginListener {
 
 	};
 
-	@Deprecated
-	public static MetaDataVariableNode addParameterToTypeNode(
+	private static <DATA_TYPE> MetaDataTypeNode addParameter(
 			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
 			String variableId, NodeId dataType) {
-		return addParameterToTypeNode(waldotNamespace, typeNode, variableId,
-				dataType, null, false, false, null);
-	}
-
-	public static <DATA_TYPE> MetaDataVariableNode addParameterToTypeNode(
-			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
-			String variableId, NodeId dataType, Class<DATA_TYPE> javaType,
-			boolean isRequired, boolean isNecessaryRestartVertex,
-			ChangedPropertyCallback<DATA_TYPE> callbackOnChange) {
-		final MetaDataVariableNode metaDataVariableNode = new MetaDataVariableNode();
+		final MetaDataTypeNode metaDataVariableNode = new MetaDataTypeNode();
 		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(
 				waldotNamespace.getOpcUaNodeContext())
 				.setNodeId(waldotNamespace
@@ -168,29 +117,13 @@ public interface PluginListener {
 		typeNode.addComponent(variable);
 		waldotNamespace.getStorageManager().addNode(variable);
 		metaDataVariableNode.setUaVariableNode(variable);
-		metaDataVariableNode.setRequired(isRequired);
-		metaDataVariableNode
-				.setNecessaryRestartVertex(isNecessaryRestartVertex);
-		metaDataVariableNode.setCallbackOnChange(callbackOnChange);
-		metaDataVariableNode.setJavaType(javaType);
 		return metaDataVariableNode;
 	}
 
-	@Deprecated
-	public static <DATA_TYPE> MetaDataVariableNode addParameterToTypeNode(
+	private static <DATA_TYPE> MetaDataTypeNode addParameter(
 			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
 			String variableId, NodeId dataType, String description) {
-		return addParameterToTypeNode(waldotNamespace, typeNode, variableId,
-				dataType, description, null, false, false, null);
-	}
-
-	public static <DATA_TYPE> MetaDataVariableNode addParameterToTypeNode(
-			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
-			String variableId, NodeId dataType, String description,
-			Class<DATA_TYPE> javaType, boolean isRequired,
-			boolean isNecessaryRestartVertex,
-			ChangedPropertyCallback<DATA_TYPE> callbackOnChange) {
-		final MetaDataVariableNode metaDataVariableNode = new MetaDataVariableNode();
+		final MetaDataTypeNode metaDataVariableNode = new MetaDataTypeNode();
 		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(
 				waldotNamespace.getOpcUaNodeContext())
 				.setNodeId(waldotNamespace
@@ -210,29 +143,13 @@ public interface PluginListener {
 		typeNode.addComponent(variable);
 		waldotNamespace.getStorageManager().addNode(variable);
 		metaDataVariableNode.setUaVariableNode(variable);
-		metaDataVariableNode.setRequired(isRequired);
-		metaDataVariableNode
-				.setNecessaryRestartVertex(isNecessaryRestartVertex);
-		metaDataVariableNode.setCallbackOnChange(callbackOnChange);
-		metaDataVariableNode.setJavaType(javaType);
 		return metaDataVariableNode;
 	}
 
-	@Deprecated
-	public static <DATA_TYPE> MetaDataVariableNode addParameterToTypeNode(
+	private static <DATA_TYPE> MetaDataTypeNode addParameter(
 			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
 			String variableId, NodeId dataType, UInteger[] arrayDimensions) {
-		return addParameterToTypeNode(waldotNamespace, typeNode, variableId,
-				dataType, arrayDimensions, null, false, false, null);
-	}
-
-	public static <DATA_TYPE> MetaDataVariableNode addParameterToTypeNode(
-			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
-			String variableId, NodeId dataType, UInteger[] arrayDimensions,
-			Class<DATA_TYPE> javaType, boolean isRequired,
-			boolean isNecessaryRestartVertex,
-			ChangedPropertyCallback<DATA_TYPE> callbackOnChange) {
-		final MetaDataVariableNode metaDataVariableNode = new MetaDataVariableNode();
+		final MetaDataTypeNode metaDataVariableNode = new MetaDataTypeNode();
 		final UaVariableNode variable = new UaVariableNode.UaVariableNodeBuilder(
 				waldotNamespace.getOpcUaNodeContext())
 				.setNodeId(waldotNamespace
@@ -252,12 +169,27 @@ public interface PluginListener {
 		typeNode.addComponent(variable);
 		waldotNamespace.getStorageManager().addNode(variable);
 		metaDataVariableNode.setUaVariableNode(variable);
-		metaDataVariableNode.setRequired(isRequired);
-		metaDataVariableNode
-				.setNecessaryRestartVertex(isNecessaryRestartVertex);
-		metaDataVariableNode.setCallbackOnChange(callbackOnChange);
-		metaDataVariableNode.setJavaType(javaType);
 		return metaDataVariableNode;
+	}
+
+	public static MetaDataTypeNode addParameterToTypeNode(
+			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
+			String variableId, NodeId dataType) {
+		return addParameter(waldotNamespace, typeNode, variableId, dataType);
+	}
+
+	public static <DATA_TYPE> MetaDataTypeNode addParameterToTypeNode(
+			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
+			String variableId, NodeId dataType, String description) {
+		return addParameter(waldotNamespace, typeNode, variableId, dataType,
+				description);
+	}
+
+	public static <DATA_TYPE> MetaDataTypeNode addParameterToTypeNode(
+			WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode,
+			String variableId, NodeId dataType, UInteger[] arrayDimensions) {
+		return addParameter(waldotNamespace, typeNode, variableId, dataType,
+				arrayDimensions);
 	}
 
 	/**

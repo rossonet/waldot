@@ -35,11 +35,11 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 
 	public static UaObjectTypeNode edgeTypeNode;
 
-	public static final UByte edgeVariableAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead,
-			AccessLevel.CurrentWrite);
+	public static final UByte edgeVariableAccessLevel = AccessLevel
+			.toValue(AccessLevel.CurrentRead, AccessLevel.CurrentWrite);
 
-	public static final UByte edgeVariableUserAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead,
-			AccessLevel.CurrentWrite);
+	public static final UByte edgeVariableUserAccessLevel = AccessLevel
+			.toValue(AccessLevel.CurrentRead, AccessLevel.CurrentWrite);
 
 	public static final UInteger edgeVariableUserWriteMask = UInteger.MIN;
 
@@ -72,12 +72,15 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	private final static ObjectNodeConstructor objectNodeConstructor = new ObjectNodeConstructor() {
 
 		@Override
-		public UaObjectNode apply(UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-				LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-				RolePermissionType[] rolePermissions, RolePermissionType[] userRolePermissions,
+		public UaObjectNode apply(UaNodeContext context, NodeId nodeId,
+				QualifiedName browseName, LocalizedText displayName,
+				LocalizedText description, UInteger writeMask,
+				UInteger userWriteMask, RolePermissionType[] rolePermissions,
+				RolePermissionType[] userRolePermissions,
 				AccessRestrictionType accessRestrictions) {
-			return new UaObjectNode(context, nodeId, browseName, displayName, description, writeMask, userWriteMask,
-					rolePermissions, userRolePermissions, accessRestrictions);
+			return new UaObjectNode(context, nodeId, browseName, displayName,
+					description, writeMask, userWriteMask, rolePermissions,
+					userRolePermissions, accessRestrictions);
 		}
 
 	};
@@ -87,10 +90,10 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	public static UaVariableNode targetNodeTypeNode;
 	public static UaVariableNode typeEdgeTypeNode;
 	public static UaVariableNode typeVertexTypeNode;
-	public static final UByte variableAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead,
-			AccessLevel.CurrentWrite);
-	public static final UByte variableUserAccessLevel = AccessLevel.toValue(AccessLevel.CurrentRead,
-			AccessLevel.CurrentWrite);
+	public static final UByte variableAccessLevel = AccessLevel
+			.toValue(AccessLevel.CurrentRead, AccessLevel.CurrentWrite);
+	public static final UByte variableUserAccessLevel = AccessLevel
+			.toValue(AccessLevel.CurrentRead, AccessLevel.CurrentWrite);
 	public static final UInteger variableUserWriteMask = UInteger.MIN;
 
 	public static final UInteger variableWriteMask = UInteger.MIN;
@@ -102,42 +105,74 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	public static final UInteger vertexWriteMask = UInteger.MIN;
 
 	private static void generateEdgeTypeNode(final MiloStrategy miloStrategy) {
-		edgeTypeNode = UaObjectTypeNode.builder(miloStrategy.getWaldotNamespace().getOpcUaNodeContext())
-				.setNodeId(miloStrategy.getWaldotNamespace().generateNodeId("ObjectTypes/EdgeObjectType"))
-				.setBrowseName(miloStrategy.getWaldotNamespace().generateQualifiedName("EdgeObjectType"))
-				.setDisplayName(LocalizedText.english("Gremlin Edge Node")).setIsAbstract(false).build();
-		labelEdgeTypeNode = PluginListener.addParameterToTypeNode(miloStrategy.getWaldotNamespace(), edgeTypeNode,
-				MiloStrategy.LABEL_FIELD, NodeIds.String);
-		typeEdgeTypeNode = PluginListener.addParameterToTypeNode(miloStrategy.getWaldotNamespace(), edgeTypeNode,
-				MiloStrategy.TYPE_FIELD, NodeIds.String);
-		sourceNodeTypeNode = PluginListener.addParameterToTypeNode(miloStrategy.getWaldotNamespace(), edgeTypeNode,
-				MiloStrategy.SOURCE_NODE, NodeIds.NodeId);
-		targetNodeTypeNode = PluginListener.addParameterToTypeNode(miloStrategy.getWaldotNamespace(), edgeTypeNode,
-				MiloStrategy.TARGET_NODE, NodeIds.NodeId);
-		referenceTypeTypeNode = PluginListener.addParameterToTypeNode(miloStrategy.getWaldotNamespace(), edgeTypeNode,
-				MiloStrategy.REFERENCE_TYPE, NodeIds.NodeId);
-		isForwardTypeNode = PluginListener.addParameterToTypeNode(miloStrategy.getWaldotNamespace(), edgeTypeNode,
-				MiloStrategy.IS_FORWARD, NodeIds.Boolean);
-		historyContext = PluginListener.addParameterToTypeNode(miloStrategy.getWaldotNamespace(), edgeTypeNode,
-				MiloStrategy.HISTORY_CONTEXT_FIELD, NodeIds.String);
-		miloStrategy.getWaldotNamespace().getStorageManager().addNode(edgeTypeNode);
-		edgeTypeNode.addReference(
-				new Reference(edgeTypeNode.getNodeId(), NodeIds.HasSubtype, NodeIds.BaseObjectType.expanded(), false));
-		miloStrategy.getWaldotNamespace().getObjectTypeManager().registerObjectType(edgeTypeNode.getNodeId(),
-				UaObjectNode.class, objectNodeConstructor);
+		edgeTypeNode = UaObjectTypeNode
+				.builder(
+						miloStrategy.getWaldotNamespace().getOpcUaNodeContext())
+				.setNodeId(miloStrategy.getWaldotNamespace()
+						.generateNodeId("ObjectTypes/EdgeObjectType"))
+				.setBrowseName(miloStrategy.getWaldotNamespace()
+						.generateQualifiedName("EdgeObjectType"))
+				.setDisplayName(LocalizedText.english("Gremlin Edge Node"))
+				.setIsAbstract(false).build();
+		labelEdgeTypeNode = PluginListener
+				.addParameterToTypeNode(miloStrategy.getWaldotNamespace(),
+						edgeTypeNode, MiloStrategy.LABEL_FIELD, NodeIds.String)
+				.getUaVariableNode();
+		typeEdgeTypeNode = PluginListener
+				.addParameterToTypeNode(miloStrategy.getWaldotNamespace(),
+						edgeTypeNode, MiloStrategy.TYPE_FIELD, NodeIds.String)
+				.getUaVariableNode();
+		sourceNodeTypeNode = PluginListener
+				.addParameterToTypeNode(miloStrategy.getWaldotNamespace(),
+						edgeTypeNode, MiloStrategy.SOURCE_NODE, NodeIds.NodeId)
+				.getUaVariableNode();
+		targetNodeTypeNode = PluginListener
+				.addParameterToTypeNode(miloStrategy.getWaldotNamespace(),
+						edgeTypeNode, MiloStrategy.TARGET_NODE, NodeIds.NodeId)
+				.getUaVariableNode();
+		referenceTypeTypeNode = PluginListener
+				.addParameterToTypeNode(miloStrategy.getWaldotNamespace(),
+						edgeTypeNode, MiloStrategy.REFERENCE_TYPE,
+						NodeIds.NodeId)
+				.getUaVariableNode();
+		isForwardTypeNode = PluginListener
+				.addParameterToTypeNode(miloStrategy.getWaldotNamespace(),
+						edgeTypeNode, MiloStrategy.IS_FORWARD, NodeIds.Boolean)
+				.getUaVariableNode();
+		historyContext = PluginListener
+				.addParameterToTypeNode(miloStrategy.getWaldotNamespace(),
+						edgeTypeNode, MiloStrategy.HISTORY_CONTEXT_FIELD,
+						NodeIds.String)
+				.getUaVariableNode();
+		miloStrategy.getWaldotNamespace().getStorageManager()
+				.addNode(edgeTypeNode);
+		edgeTypeNode.addReference(new Reference(edgeTypeNode.getNodeId(),
+				NodeIds.HasSubtype, NodeIds.BaseObjectType.expanded(), false));
+		miloStrategy.getWaldotNamespace().getObjectTypeManager()
+				.registerObjectType(edgeTypeNode.getNodeId(),
+						UaObjectNode.class, objectNodeConstructor);
 	}
 
-	private static void generateInterfaceRootNode(final MiloStrategy miloSingleServerBaseV0Strategy) {
+	private static void generateInterfaceRootNode(
+			final MiloStrategy miloSingleServerBaseV0Strategy) {
 		interfaceTypeNode = UaObjectTypeNode
-				.builder(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext())
-				.setNodeId(miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId("API"))
-				.setBrowseName(miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("API"))
-				.setDisplayName(LocalizedText.english("WaldOT API & Commands")).setIsAbstract(false).build();
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(interfaceTypeNode);
-		interfaceTypeNode.addReference(new Reference(interfaceTypeNode.getNodeId(), NodeIds.HasSubtype,
-				NodeIds.BaseObjectType.expanded(), false));
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getObjectTypeManager()
-				.registerObjectType(interfaceTypeNode.getNodeId(), UaObjectNode.class, objectNodeConstructor);
+				.builder(miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getOpcUaNodeContext())
+				.setNodeId(miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateNodeId("API"))
+				.setBrowseName(miloSingleServerBaseV0Strategy
+						.getWaldotNamespace().generateQualifiedName("API"))
+				.setDisplayName(LocalizedText.english("WaldOT API & Commands"))
+				.setIsAbstract(false).build();
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager()
+				.addNode(interfaceTypeNode);
+		interfaceTypeNode.addReference(
+				new Reference(interfaceTypeNode.getNodeId(), NodeIds.HasSubtype,
+						NodeIds.BaseObjectType.expanded(), false));
+		miloSingleServerBaseV0Strategy.getWaldotNamespace()
+				.getObjectTypeManager()
+				.registerObjectType(interfaceTypeNode.getNodeId(),
+						UaObjectNode.class, objectNodeConstructor);
 
 	}
 
@@ -148,21 +183,30 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	 *
 	 * @param miloSingleServerBaseV0Strategy the Milo strategy instance used to generate nodes
 	 */
-	public static void generateRefereceNodes(final MiloStrategy miloSingleServerBaseV0Strategy) {
+	public static void generateRefereceNodes(
+			final MiloStrategy miloSingleServerBaseV0Strategy) {
 		generateVertexTypeNode(miloSingleServerBaseV0Strategy);
 		generateEdgeTypeNode(miloSingleServerBaseV0Strategy);
 		generateInterfaceRootNode(miloSingleServerBaseV0Strategy);
-		hasReferenceDescriptionReferenceType = generateReferenceTypeNode(HAS_REFERENCE_DESCRIPTION_REFERENCE,
-				REFERENCED_BY_REFERENCE, "Edge description with properties", NodeIds.NonHierarchicalReferences, false,
-				false, miloSingleServerBaseV0Strategy.getWaldotNamespace());
-		hasSourceNodeReferenceType = generateReferenceTypeNode(HAS_SOURCE_NODE_REFERENCE, IS_SOURCE_NODE_FOR_REFERENCE,
-				"Source node for edge", NodeIds.NonHierarchicalReferences, false, false,
+		hasReferenceDescriptionReferenceType = generateReferenceTypeNode(
+				HAS_REFERENCE_DESCRIPTION_REFERENCE, REFERENCED_BY_REFERENCE,
+				"Edge description with properties",
+				NodeIds.NonHierarchicalReferences, false, false,
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
-		hasTargetNodeReferenceType = generateReferenceTypeNode(HAS_TARGET_NODE_REFERENCE, IS_TARGET_NODE_FOR_REFERENCE,
-				"Target node for edge", NodeIds.NonHierarchicalReferences, false, false,
+		hasSourceNodeReferenceType = generateReferenceTypeNode(
+				HAS_SOURCE_NODE_REFERENCE, IS_SOURCE_NODE_FOR_REFERENCE,
+				"Source node for edge", NodeIds.NonHierarchicalReferences,
+				false, false,
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
-		hasGremlinPropertyReferenceType = generateReferenceTypeNode(HAS_GREMLIN_PROPERTY_REFERENCE,
-				IS_PROPERTY_OF_REFERENCE, "A property linked to an edge or vertex", NodeIds.HasComponent, false, false,
+		hasTargetNodeReferenceType = generateReferenceTypeNode(
+				HAS_TARGET_NODE_REFERENCE, IS_TARGET_NODE_FOR_REFERENCE,
+				"Target node for edge", NodeIds.NonHierarchicalReferences,
+				false, false,
+				miloSingleServerBaseV0Strategy.getWaldotNamespace());
+		hasGremlinPropertyReferenceType = generateReferenceTypeNode(
+				HAS_GREMLIN_PROPERTY_REFERENCE, IS_PROPERTY_OF_REFERENCE,
+				"A property linked to an edge or vertex", NodeIds.HasComponent,
+				false, false,
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
 	}
 
@@ -179,15 +223,21 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	 * @param waldotNamespace the namespace manager to register the type with
 	 * @return the node ID of the newly created reference type
 	 */
-	public static NodeId generateReferenceTypeNode(final String reference, final String inverse,
-			final String description, final NodeId subTypeId, final boolean isAbstract, final boolean isSymmetric,
-			final WaldotNamespace waldotNamespace) {
-		final UaReferenceTypeNode refType = new UaReferenceTypeNode(waldotNamespace.getOpcUaNodeContext(),
-				waldotNamespace.generateNodeId(reference), waldotNamespace.generateQualifiedName(reference),
-				LocalizedText.english(reference), LocalizedText.english(description), UInteger.valueOf(0),
-				UInteger.valueOf(0), false, false, LocalizedText.english(inverse));
+	public static NodeId generateReferenceTypeNode(final String reference,
+			final String inverse, final String description,
+			final NodeId subTypeId, final boolean isAbstract,
+			final boolean isSymmetric, final WaldotNamespace waldotNamespace) {
+		final UaReferenceTypeNode refType = new UaReferenceTypeNode(
+				waldotNamespace.getOpcUaNodeContext(),
+				waldotNamespace.generateNodeId(reference),
+				waldotNamespace.generateQualifiedName(reference),
+				LocalizedText.english(reference),
+				LocalizedText.english(description), UInteger.valueOf(0),
+				UInteger.valueOf(0), false, false,
+				LocalizedText.english(inverse));
 		waldotNamespace.getStorageManager().addNode(refType);
-		refType.addReference(new Reference(refType.getNodeId(), NodeIds.HasSubtype, subTypeId.expanded(), false));
+		refType.addReference(new Reference(refType.getNodeId(),
+				NodeIds.HasSubtype, subTypeId.expanded(), false));
 		final ReferenceType referenceType = new ReferenceType() {
 
 			@Override
@@ -226,26 +276,39 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 		return refType.getNodeId();
 	}
 
-	private static void generateVertexTypeNode(final MiloStrategy miloSingleServerBaseV0Strategy) {
+	private static void generateVertexTypeNode(
+			final MiloStrategy miloSingleServerBaseV0Strategy) {
 		vertexTypeNode = UaObjectTypeNode
-				.builder(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext())
+				.builder(miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getOpcUaNodeContext())
 				.setNodeId(miloSingleServerBaseV0Strategy.getWaldotNamespace()
 						.generateNodeId("ObjectTypes/VertexObjectType"))
 				.setBrowseName(
-						miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("VertexObjectType"))
-				.setDisplayName(LocalizedText.english("Gremlin Vertex Node")).setIsAbstract(false).build();
-		labelVertexTypeNode = PluginListener.addParameterToTypeNode(miloSingleServerBaseV0Strategy.getWaldotNamespace(),
-				vertexTypeNode, MiloStrategy.LABEL_FIELD, NodeIds.String);
-		typeVertexTypeNode = PluginListener.addParameterToTypeNode(miloSingleServerBaseV0Strategy.getWaldotNamespace(),
-				vertexTypeNode, MiloStrategy.TYPE_FIELD, NodeIds.String);
+						miloSingleServerBaseV0Strategy.getWaldotNamespace()
+								.generateQualifiedName("VertexObjectType"))
+				.setDisplayName(LocalizedText.english("Gremlin Vertex Node"))
+				.setIsAbstract(false).build();
+		labelVertexTypeNode = PluginListener.addParameterToTypeNode(
+				miloSingleServerBaseV0Strategy.getWaldotNamespace(),
+				vertexTypeNode, MiloStrategy.LABEL_FIELD, NodeIds.String)
+				.getUaVariableNode();
+		typeVertexTypeNode = PluginListener
+				.addParameterToTypeNode(
+						miloSingleServerBaseV0Strategy.getWaldotNamespace(),
+						vertexTypeNode, MiloStrategy.TYPE_FIELD, NodeIds.String)
+				.getUaVariableNode();
 		historyVertexTypeNode = PluginListener.addParameterToTypeNode(
-				miloSingleServerBaseV0Strategy.getWaldotNamespace(), vertexTypeNode, MiloStrategy.HISTORY_FIELD,
-				NodeIds.Boolean);
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(vertexTypeNode);
-		vertexTypeNode.addReference(new Reference(vertexTypeNode.getNodeId(), NodeIds.HasSubtype,
-				NodeIds.BaseObjectType.expanded(), false));
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getObjectTypeManager()
-				.registerObjectType(vertexTypeNode.getNodeId(), UaObjectNode.class, objectNodeConstructor);
+				miloSingleServerBaseV0Strategy.getWaldotNamespace(),
+				vertexTypeNode, MiloStrategy.HISTORY_FIELD, NodeIds.Boolean)
+				.getUaVariableNode();
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager()
+				.addNode(vertexTypeNode);
+		vertexTypeNode.addReference(new Reference(vertexTypeNode.getNodeId(),
+				NodeIds.HasSubtype, NodeIds.BaseObjectType.expanded(), false));
+		miloSingleServerBaseV0Strategy.getWaldotNamespace()
+				.getObjectTypeManager()
+				.registerObjectType(vertexTypeNode.getNodeId(),
+						UaObjectNode.class, objectNodeConstructor);
 	}
 
 	/**
@@ -257,10 +320,12 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	 * @return the event notifier value (1 for active/enabled, 0 for disabled)
 	 */
 	public static UByte getEventNotifier(Object[] propertyKeyValues) {
-		final String event = getKeyValuesProperty(propertyKeyValues, MiloStrategy.EVENT_NOTIFIER_PARAMETER);
+		final String event = getKeyValuesProperty(propertyKeyValues,
+				MiloStrategy.EVENT_NOTIFIER_PARAMETER);
 		if (event != null && !event.isEmpty()) {
-			if (event.equalsIgnoreCase("active") || event.equalsIgnoreCase("enabled") || event.equalsIgnoreCase("true")
-					|| event.equals("1")) {
+			if (event.equalsIgnoreCase("active")
+					|| event.equalsIgnoreCase("enabled")
+					|| event.equalsIgnoreCase("true") || event.equals("1")) {
 				return eventNotifierActive;
 			} else {
 				return eventNotifierDisable;
@@ -269,9 +334,11 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 		return eventNotifierDisable;
 	}
 
-	private static String getKeyValuesProperty(final Object[] propertyKeyValues, final String label) {
+	private static String getKeyValuesProperty(final Object[] propertyKeyValues,
+			final String label) {
 		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
-			if (propertyKeyValues[i] instanceof String && label.equals(propertyKeyValues[i])) {
+			if (propertyKeyValues[i] instanceof String
+					&& label.equals(propertyKeyValues[i])) {
 				return propertyKeyValues[i + 1].toString();
 			}
 		}
@@ -287,7 +354,8 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	 * @return the user write mask value
 	 */
 	public static UInteger getUserWriteMask(Object[] propertyKeyValues) {
-		final String userWriteMask = getKeyValuesProperty(propertyKeyValues, MiloStrategy.USER_WRITE_MASK_PARAMETER);
+		final String userWriteMask = getKeyValuesProperty(propertyKeyValues,
+				MiloStrategy.USER_WRITE_MASK_PARAMETER);
 		// TODO parametrizzare correttamente user write mask
 		return vertexUserWriteMask;
 	}
@@ -300,7 +368,8 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	 * @return the version number, or the default version if not specified
 	 */
 	public static long getVersion(Object[] propertyKeyValues) {
-		final String found = getKeyValuesProperty(propertyKeyValues, MiloStrategy.VERSION_PARAMETER);
+		final String found = getKeyValuesProperty(propertyKeyValues,
+				MiloStrategy.VERSION_PARAMETER);
 		if (found == null || found.isEmpty()) {
 			return version;
 		}
@@ -315,7 +384,8 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	 * @return the write mask value
 	 */
 	public static UInteger getWriteMask(Object[] propertyKeyValues) {
-		final String writeMask = getKeyValuesProperty(propertyKeyValues, MiloStrategy.WRITE_MASK_PARAMETER);
+		final String writeMask = getKeyValuesProperty(propertyKeyValues,
+				MiloStrategy.WRITE_MASK_PARAMETER);
 		// TODO parametrizzare correttamente write mask
 		return vertexWriteMask;
 	}

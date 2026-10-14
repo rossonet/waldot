@@ -119,6 +119,8 @@ public abstract class AbstractPluginListener implements PluginListener {
 		PluginListener.addParameterToTypeNode(waldotNamespace, type,
 				MiloStrategy.LABEL_FIELD, NodeIds.String);
 		try {
+			// TODO: generazione parametri di tipo con reflection, da
+			// implementare in ogni classe di vertice
 			final Method method = vertexClass.getMethod("generateParameters",
 					WaldotNamespace.class, UaObjectTypeNode.class);
 			method.invoke(null, waldotNamespace, type);

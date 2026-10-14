@@ -2,12 +2,15 @@ package net.rossonet.waldot.opc;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -34,7 +37,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.shaded.com.google.common.collect.ImmutableMap;
-import org.javatuples.Pair;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +76,67 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				String[] inputValues);
 	}
 
+	public final class MetaDataProperty<DATA_TYPE> {
+
+		private final ChangedPropertyCallback<DATA_TYPE> callbackOnChange;
+		private final DATA_TYPE defaultValue;
+		private final boolean isNecessaryRestartVertex;
+		private final boolean isRequired;
+		private final Class<DATA_TYPE> javaType;
+		private final String label;
+		private final QualifiedProperty<DATA_TYPE> qualifiedProperty;
+		private final NodeId uaDataType;
+
+		public MetaDataProperty(String label, NodeId dataType,
+				Class<DATA_TYPE> javaType, boolean isRequired,
+				DATA_TYPE defaultValue,
+				ChangedPropertyCallback<DATA_TYPE> callbackOnChange,
+				boolean isNecessaryRestartVertex,
+				QualifiedProperty<DATA_TYPE> qualifiedProperty) {
+			this.javaType = javaType;
+			this.isRequired = isRequired;
+			this.callbackOnChange = callbackOnChange;
+			this.isNecessaryRestartVertex = isNecessaryRestartVertex;
+			this.label = label;
+			this.uaDataType = dataType;
+			this.defaultValue = defaultValue;
+			this.qualifiedProperty = qualifiedProperty;
+		}
+
+		public ChangedPropertyCallback<DATA_TYPE> getCallbackOnChange() {
+			return callbackOnChange;
+		}
+
+		public DATA_TYPE getDefaultValue() {
+			return defaultValue;
+		}
+
+		public Class<DATA_TYPE> getJavaType() {
+			return javaType;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public QualifiedProperty<DATA_TYPE> getQualifiedProperty() {
+			return qualifiedProperty;
+		}
+
+		public NodeId getUaDataType() {
+			return uaDataType;
+		}
+
+		public boolean isNecessaryRestartVertex() {
+			return isNecessaryRestartVertex;
+		}
+
+		public boolean isRequired() {
+			return isRequired;
+		}
+
+	}
+
 	public static class PropertyChangeException extends Exception {
 
 		private static final long serialVersionUID = 6543733607549354598L;
@@ -86,31 +150,35 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		}
 	}
 
-	private transient boolean activeHistory = false;
+	private boolean activeHistory = false;
 
 	protected boolean allowNullPropertyValues = false;
 
-	private transient boolean ensurePostActive = false;
+	private boolean dirtyStateToUpdate = false;
 
-	protected transient final List<EventObserver> eventObservers = new ArrayList<>();
+	private boolean ensurePostActive = false;
 
-	protected transient final WaldotGraph graph;
+	protected final List<EventObserver> eventObservers = new ArrayList<>();
+
+	protected final WaldotGraph graph;
 
 	private String historyContext = null;
-
 	private final QualifiedProperty<String> historyContextProperty;
 	private final QualifiedProperty<Boolean> historyProperty;
+
 	private final QualifiedProperty<String> labelProperty;
 
 	private final Set<WaldotVertexProperty<?>> linkedProperties = new HashSet<>();
 
-	private transient final Logger logger = LoggerFactory.getLogger(getClass());
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	protected transient final List<PropertyObserver> propertyObservers = new ArrayList<>();
+	@SuppressWarnings("rawtypes")
+	private final Map<String, MetaDataProperty> managedProperties = new HashMap<>();
+
+	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
 
 	private final QualifiedProperty<String> typeProperty;
 
-	@Deprecated
 	public AbstractOpcVertex(final WaldotGraph graph,
 			final UaNodeContext context, final NodeId nodeId,
 			final QualifiedName browseName, final LocalizedText displayName,
@@ -148,18 +216,6 @@ public abstract class AbstractOpcVertex extends GremlinElement
 						.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
 	}
-
-	public AbstractOpcVertex(final WaldotGraph graph,
-			final UaNodeContext context, final NodeId nodeId,
-			final QualifiedName browseName, final LocalizedText displayName,
-			final LocalizedText description, final UInteger writeMask,
-			final UInteger userWriteMask, final UByte eventNotifier,
-			final long version, Object[] propertyKeyValues) {
-		this(graph, context, nodeId, browseName, displayName, description,
-				writeMask, userWriteMask, eventNotifier, version);
-		initializeManagedProperties(propertyKeyValues);
-	}
-
 	@Override
 	public Edge addEdge(final String label, final Vertex vertex,
 			final Object... keyValues) {
@@ -176,6 +232,82 @@ public abstract class AbstractOpcVertex extends GremlinElement
 	@Override
 	public void addEventObserver(final EventObserver eventObserver) {
 		eventObservers.add(eventObserver);
+	}
+
+	protected <DATA_TYPE> void addManagedProperty(String label, NodeId dataType,
+			Class<DATA_TYPE> javaType, boolean isRequired,
+			DATA_TYPE defaultValue,
+			ChangedPropertyCallback<DATA_TYPE> callbackOnChange,
+			boolean isNecessaryRestartVertex, Object[] propertyKeyValues) {
+		final MetaDataProperty<DATA_TYPE> metadataProperty = new MetaDataProperty<DATA_TYPE>(
+				label, dataType, javaType, isRequired, defaultValue,
+				callbackOnChange, isNecessaryRestartVertex,
+				new QualifiedProperty<DATA_TYPE>(
+						getNamespace().getNamespaceUri(), label,
+						MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
+								.getNodeId().expanded(),
+						ValueRanks.Scalar, javaType));
+		managedProperties.put(label, metadataProperty);
+		final String value = MiloStrategy
+				.getKeyValuesProperty(propertyKeyValues, label);
+		if (value != null && !value.isEmpty()) {
+			final DATA_TYPE convertedValue = valueConversion(label, javaType,
+					value);
+			if (convertedValue != null) {
+				property(label, convertedValue);
+				setProperty(metadataProperty.getQualifiedProperty(),
+						convertedValue);
+				if (callbackOnChange != null) {
+					try {
+						callbackOnChange.onChange(label, null, convertedValue);
+					} catch (final PropertyChangeException e) {
+						logger.warn(
+								"Error executing callback for property {} with value {}",
+								label, convertedValue, e);
+						if (defaultValue != null) {
+							logger.info(
+									"because of the error, using default value {} for property {} of type {}",
+									label, value, javaType.getSimpleName(),
+									defaultValue);
+							property(label, defaultValue);
+							setProperty(metadataProperty.getQualifiedProperty(),
+									defaultValue);
+						} else {
+							logger.info(
+									"because of the error, no default value is provided for property {} of type {}, setting property to null",
+									label, value, javaType.getSimpleName());
+							setProperty(metadataProperty.getQualifiedProperty(),
+									null);
+						}
+					}
+				}
+			} else {
+				if (defaultValue != null) {
+					logger.warn(
+							"Property {} value {} is not valid for type {}, using default value {}",
+							label, value, javaType.getSimpleName(),
+							defaultValue);
+					property(label, defaultValue);
+					setProperty(metadataProperty.getQualifiedProperty(),
+							defaultValue);
+				} else {
+					logger.warn(
+							"Property {} value {} is not valid for type {}, and no default value is provided, setting property to null",
+							label, value, javaType.getSimpleName());
+					setProperty(metadataProperty.getQualifiedProperty(), null);
+				}
+			}
+		} else if (defaultValue != null) {
+			logger.trace("Property {} not provided, using default value {}",
+					label, defaultValue);
+			property(label, defaultValue);
+			setProperty(metadataProperty.getQualifiedProperty(), defaultValue);
+		} else {
+			logger.debug(
+					"Property {} not provided and no default value is set, setting property to null",
+					label);
+			setProperty(metadataProperty.getQualifiedProperty(), null);
+		}
 	}
 
 	@Override
@@ -239,153 +371,52 @@ public abstract class AbstractOpcVertex extends GremlinElement
 	 * @param callback
 	 * @return true if the property value was changed, false otherwise
 	 */
-	protected <DATA_TYPE> boolean checkPropertyValueChange(
+	private <DATA_TYPE> boolean checkPropertyValueChange(
 			String changedPropertyLabel, DATA_TYPE changedPropertyValue,
-			String keyInPropertyKeyValues,
 			QualifiedProperty<DATA_TYPE> qualifiedPropertySlot,
 			ChangedPropertyCallback<DATA_TYPE> callback) {
 		if (changedPropertyLabel == null || changedPropertyLabel.isEmpty()) {
 			logger.warn("Changed property label is null or empty");
 			return false;
 		}
-		if (keyInPropertyKeyValues == null
-				|| keyInPropertyKeyValues.isEmpty()) {
-			logger.warn("Key in property key values is null or empty");
-			return false;
-		}
-		if (keyInPropertyKeyValues.equals(changedPropertyLabel)) {
-			final VertexProperty<DATA_TYPE> propertyVertex = property(
-					keyInPropertyKeyValues);
-			final DATA_TYPE originalValue = propertyVertex.isPresent()
-					? propertyVertex.value()
-					: null;
-			if (changedPropertyValue != null) {
-				try {
-					final DATA_TYPE value = changedPropertyValue;
-					if (originalValue == null || !originalValue.equals(value)) {
+		final VertexProperty<DATA_TYPE> propertyVertex = property(
+				changedPropertyLabel);
+		final DATA_TYPE originalValue = propertyVertex.isPresent()
+				? propertyVertex.value()
+				: null;
+		if (changedPropertyValue != null) {
+			try {
+				final DATA_TYPE value = changedPropertyValue;
+				if (originalValue == null || !originalValue.equals(value)) {
+					if (callback != null) {
+						try {
+							callback.onChange(changedPropertyLabel,
+									originalValue, value);
+							setProperty(qualifiedPropertySlot, value);
+							return true;
+						} catch (final PropertyChangeException e) {
+							logger.warn(
+									"Error executing callback for property {} with value {}",
+									changedPropertyLabel, value, e);
+							return false;
+						}
+					} else {
 						setProperty(qualifiedPropertySlot, value);
-						if (callback != null) {
-							callback.onChange(changedPropertyLabel,
-									originalValue, value);
-						}
 						return true;
-					} else {
-						logger.debug("Property {} value unchanged, remains {}",
-								changedPropertyLabel, originalValue);
-						return false;
 					}
-				} catch (final Throwable e) {
-					logger.error(
-							"Error while setting property {} with value {}",
-							changedPropertyLabel, changedPropertyValue, e);
+				} else {
+					logger.debug("Property {} value unchanged, remains {}",
+							changedPropertyLabel, originalValue);
 					return false;
 				}
-
-			} else {
-				logger.warn("Changed property value is null for property {}",
-						changedPropertyLabel);
+			} catch (final Throwable e) {
+				logger.error("Error while setting property {} with value {}",
+						changedPropertyLabel, changedPropertyValue, e);
 				return false;
 			}
 		} else {
-			// la proprietà cambiata non corrisponde a quella che ci interessa,
-			// quindi non facciamo nulla
-			return false;
-		}
-	}
-
-	/**
-	 * Checks if a property value has changed and updates it if necessary. If the
-	 * changed property label matches the key in the property key values, it retrieves
-	 * the original value of the property and compares it with the new value. If they
-	 * are different, it updates the property with the new value and invokes the
-	 * callback if provided.
-	 * @param <DATA_TYPE>
-	 * @param changedPropertyLabel
-	 * @param changedPropertyValue
-	 * @param keyInPropertyKeyValues
-	 * @param qualifiedPropertySlot
-	 * @param callback
-	 * @return true if the property value was changed, false otherwise
-	 */
-
-	protected <DATA_TYPE> boolean checkPropertyValueChange(
-			String changedPropertyLabel, DataValue changedPropertyValue,
-			String keyInPropertyKeyValues,
-			QualifiedProperty<DATA_TYPE> qualifiedPropertySlot,
-			ChangedPropertyCallback<DATA_TYPE> callback) {
-		if (changedPropertyValue.getValue() != null
-				&& changedPropertyValue.getValue().getValue() != null) {
-			final Object valueObject = changedPropertyValue.getValue()
-					.getValue();
-			if (qualifiedPropertySlot != null && qualifiedPropertySlot
-					.getJavaType().isInstance(valueObject)) {
-				return checkPropertyValueChange(changedPropertyLabel,
-						(DATA_TYPE) valueObject, keyInPropertyKeyValues,
-						qualifiedPropertySlot, callback);
-			} else {
-				logger.warn(
-						"Changed property value type {} does not match expected type {} for property {}",
-						valueObject.getClass().getName(),
-						qualifiedPropertySlot != null
-								? qualifiedPropertySlot.getJavaType().getName()
-								: "null",
-						changedPropertyLabel);
-				return false;
-			}
-		} else {
-			logger.warn("Changed property value is null for property {}",
+			logger.debug("Changed property value is null for property {}",
 					changedPropertyLabel);
-			return false;
-		}
-	}
-
-	protected <DATA_TYPE> boolean checkValueChange(String changedPropertyLabel,
-			DATA_TYPE changedPropertyValue, String keyInPropertyKeyValues,
-			ChangedPropertyCallback<DATA_TYPE> callback) {
-		if (changedPropertyLabel == null || changedPropertyLabel.isEmpty()) {
-			logger.warn("Changed property label is null or empty");
-			return false;
-		}
-		if (keyInPropertyKeyValues == null
-				|| keyInPropertyKeyValues.isEmpty()) {
-			logger.warn("Key in property key values is null or empty");
-			return false;
-		}
-		if (keyInPropertyKeyValues.equals(changedPropertyLabel)) {
-			final VertexProperty<DATA_TYPE> propertyVertex = property(
-					keyInPropertyKeyValues);
-			final DATA_TYPE originalValue = propertyVertex.isPresent()
-					? propertyVertex.value()
-					: null;
-			if (changedPropertyValue != null) {
-				try {
-					final DATA_TYPE value = changedPropertyValue;
-					if (originalValue == null || !originalValue.equals(value)) {
-						if (callback != null) {
-							callback.onChange(changedPropertyLabel,
-									originalValue, value);
-						}
-						return true;
-					} else {
-						logger.debug("Property {} value unchanged, remains {}",
-								changedPropertyLabel, originalValue);
-						return false;
-					}
-				} catch (final Throwable e) {
-					logger.error(
-							"Error while setting property {} with value {}",
-							changedPropertyLabel, changedPropertyValue, e);
-					return false;
-				}
-
-			} else {
-				logger.warn("Changed property value is null for property {}",
-						changedPropertyLabel);
-				return false;
-			}
-		} else {
-			// la proprietà cambiata non corrisponde a quella che ci interessa,
-			// quindi non facciamo nulla
 			return false;
 		}
 	}
@@ -446,6 +477,16 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		return propertyObservers;
 	}
 
+	protected <DATA_TYPE> DATA_TYPE getRuntimeParameter(String label) {
+		@SuppressWarnings("unchecked")
+		final MetaDataProperty<DATA_TYPE> entry = managedProperties.get(label);
+		if (entry != null) {
+			return getProperty(entry.getQualifiedProperty()).orElse(null);
+		} else {
+			return null;
+		}
+	}
+
 	@Override
 	public ImmutableMap<String, WaldotVertexProperty<Object>> getVertexProperties() {
 		return ImmutableMap.copyOf(getNamespace().getVertexProperties(this));
@@ -461,108 +502,8 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		return getNamespace().inComputerMode();
 	}
 
-	private QualifiedProperty<Boolean> initBooleanProperty(String label) {
-		return new QualifiedProperty<Boolean>(getNamespace().getNamespaceUri(),
-				label,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
-				ValueRanks.Scalar, Boolean.class);
-	}
-
-	protected Pair<Boolean, QualifiedProperty<Boolean>> initializeBooleanProperty(
-			Object[] propertyKeyValues, String browserName,
-			String keyInPropertyKeyValues) {
-		final QualifiedProperty<Boolean> qualifiedPropertySlot = initBooleanProperty(
-				browserName);
-		final String value = MiloStrategy.getKeyValuesProperty(
-				propertyKeyValues, keyInPropertyKeyValues);
-		if (value != null && !value.isEmpty()) {
-			final Boolean boolValue = Boolean.parseBoolean(value);
-			setProperty(qualifiedPropertySlot, boolValue);
-			return new Pair<>(boolValue, qualifiedPropertySlot);
-		}
-		return new Pair<>(null, qualifiedPropertySlot);
-	}
-
-	protected Pair<Integer, QualifiedProperty<Integer>> initializeIntProperty(
-			Object[] propertyKeyValues, String browserName,
-			String keyInPropertyKeyValues) {
-		final QualifiedProperty<Integer> qualifiedPropertySlot = initIntProperty(
-				browserName);
-		final String value = MiloStrategy.getKeyValuesProperty(
-				propertyKeyValues, keyInPropertyKeyValues);
-		if (value != null && !value.isEmpty()) {
-			try {
-				final Integer intValue = Integer.valueOf(value);
-				setProperty(qualifiedPropertySlot, intValue);
-				return new Pair<>(intValue, qualifiedPropertySlot);
-			} catch (final Throwable e) {
-				return null;
-			}
-		}
-		return new Pair<>(null, qualifiedPropertySlot);
-	}
-
-	protected Pair<Long, QualifiedProperty<Long>> initializeLongProperty(
-			Object[] propertyKeyValues, String browserName,
-			String keyInPropertyKeyValues) {
-		final QualifiedProperty<Long> qualifiedPropertySlot = initLongProperty(
-				browserName);
-		final String value = MiloStrategy.getKeyValuesProperty(
-				propertyKeyValues, keyInPropertyKeyValues);
-		if (value != null && !value.isEmpty()) {
-			try {
-				final Long longValue = Long.valueOf(value);
-				setProperty(qualifiedPropertySlot, longValue);
-				return new Pair<>(longValue, qualifiedPropertySlot);
-			} catch (final NumberFormatException e) {
-				return null;
-			}
-		}
-		return new Pair<>(null, qualifiedPropertySlot);
-	}
-
-	private void initializeManagedProperties(Object[] propertyKeyValues) {
-		// TODO Auto-generated method stub
-
-	}
-
-	protected Pair<String, QualifiedProperty<String>> initializeStringProperty(
-			Object[] propertyKeyValues, String browserName,
-			String keyInPropertyKeyValues, boolean required) {
-		final QualifiedProperty<String> qualifiedPropertySlot = initStringProperty(
-				browserName);
-		final String value = MiloStrategy.getKeyValuesProperty(
-				propertyKeyValues, keyInPropertyKeyValues);
-		if (value != null && !value.isEmpty()) {
-			setProperty(qualifiedPropertySlot, value);
-			return new Pair<>(value, qualifiedPropertySlot);
-		}
-		return new Pair<>(required ? "" : null, qualifiedPropertySlot);
-	}
-
-	protected QualifiedProperty<Integer> initIntProperty(String label) {
-		return new QualifiedProperty<Integer>(getNamespace().getNamespaceUri(),
-				label,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
-				ValueRanks.Scalar, Integer.class);
-	}
-
-	protected QualifiedProperty<Long> initLongProperty(String label) {
-		return new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
-				label,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
-				ValueRanks.Scalar, Long.class);
-	}
-
-	protected QualifiedProperty<String> initStringProperty(String label) {
-		return new QualifiedProperty<String>(getNamespace().getNamespaceUri(),
-				label,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
-				ValueRanks.Scalar, String.class);
+	public boolean isDirtyStateToUpdate() {
+		return dirtyStateToUpdate;
 	}
 
 	@Override
@@ -575,24 +516,38 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	@Override
 	public String label() {
-		return getProperty(labelProperty).get();
+		return getProperty(labelProperty).orElseGet(() -> null);
 	}
 
 	@Override
 	public void notifyPropertyValueChanging(String label, DataValue value) {
 		if (label.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {
-			final String originalLabel = getProperty(labelProperty).get();
-			if (!originalLabel.equals(
-					String.valueOf(value.getValue().getValue().toString()))) {
-				logger.warn(
-						"Changing label from {} to {} is not allowed, reverting to original value",
-						originalLabel, value.getValue().getValue().toString());
-				property(MiloStrategy.LABEL_FIELD.toLowerCase(), originalLabel);
+			final String originalLabel;
+			try {
+				originalLabel = getProperty(labelProperty)
+						.orElseGet(() -> null);
+				if (originalLabel != null && !originalLabel.equals(String
+						.valueOf(value.getValue().getValue().toString()))) {
+					logger.warn(
+							"Changing label from {} to {} is not allowed, reverting to original value",
+							originalLabel,
+							value.getValue().getValue().toString());
+					property(MiloStrategy.LABEL_FIELD.toLowerCase(),
+							originalLabel);
+				}
+			} catch (final Throwable e) {
+				logger.warn("Error retrieving original label property", e);
 			}
 		}
 		if (label.equals(MiloStrategy.TYPE_FIELD.toLowerCase())) {
-			final String originalType = getProperty(typeProperty).get();
-			if (!originalType.equals(
+			final String originalType;
+			try {
+				originalType = getProperty(typeProperty).orElseGet(() -> null);
+			} catch (final Throwable e) {
+				logger.warn("Error retrieving original type property", e);
+				return;
+			}
+			if (originalType != null && !originalType.equals(
 					String.valueOf(value.getValue().getValue().toString()))) {
 				logger.warn(
 						"Changing type from {} to {} is not allowed, reverting to original value",
@@ -689,12 +644,14 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <V> VertexProperty<V> property(final String key) {
 		if (this.isRemoved()) {
 			return VertexProperty.empty();
 		}
 		if (inComputerMode()) {
+			@SuppressWarnings({"rawtypes"})
 			final List<VertexProperty> list = (List) getGraphComputerView()
 					.getProperty(this, key);
 			if (list.size() == 0) {
@@ -767,15 +724,92 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	}
 
+	protected void resetDirtyStateToUpdate() {
+		dirtyStateToUpdate = false;
+	}
+
+	protected <DATA_TYPE> void setRuntimeParameter(String label, Object value) {
+		@SuppressWarnings("unchecked")
+		final MetaDataProperty<DATA_TYPE> entry = managedProperties.get(label);
+		if (entry != null && value != null
+				&& entry.getJavaType().isInstance(value)) {
+			setProperty(entry.getQualifiedProperty(),
+					entry.getJavaType().cast(value));
+		}
+	}
+
 	@Override
 	public String toString() {
 		return WaldotGraph.V + WaldotGraph.L_BRACKET
 				+ getNodeId().toParseableString() + WaldotGraph.R_BRACKET;
 	}
 
-	private void updateManagedProperties(String label, DataValue value) {
-		// TODO Auto-generated method stub
+	private <DATA_TYPE> void updateManagedProperties(String label,
+			DataValue opcDataValue) {
+		try {
+			@SuppressWarnings("unchecked")
+			final MetaDataProperty<DATA_TYPE> entry = managedProperties
+					.get(label);
+			if (entry != null && opcDataValue != null
+					&& opcDataValue.getValue() != null
+					&& opcDataValue.getValue().getValue() != null) {
+				final Object convertedValue = valueConversion(label,
+						entry.getJavaType(),
+						opcDataValue.getValue().getValue().toString());
+				final boolean isDirty = checkPropertyValueChange(label,
+						entry.getJavaType().cast(convertedValue),
+						entry.getQualifiedProperty(),
+						entry.getCallbackOnChange());
+				dirtyStateToUpdate = dirtyStateToUpdate || isDirty;
+			}
+		} catch (final Throwable e) {
+			logger.error("Error updating managed property {} with value {}",
+					label, opcDataValue, e);
+		}
+	}
 
+	@SuppressWarnings({"unchecked"})
+	private <DATA_TYPE> DATA_TYPE valueConversion(String label,
+			Class<DATA_TYPE> javaType, final String value) {
+		DATA_TYPE convertedValue = null;
+		try {
+			switch (javaType.getSimpleName()) {
+				case "String" :
+					convertedValue = (DATA_TYPE) value;
+					break;
+				case "Integer" :
+					convertedValue = (DATA_TYPE) Integer.valueOf(value);
+					break;
+				case "Long" :
+					convertedValue = (DATA_TYPE) Long.valueOf(value);
+					break;
+				case "Boolean" :
+					convertedValue = (DATA_TYPE) Boolean.valueOf(value);
+					break;
+				case "Double" :
+					convertedValue = (DATA_TYPE) Double.valueOf(value);
+					break;
+				case "Float" :
+					convertedValue = (DATA_TYPE) Float.valueOf(value);
+					break;
+				case "Byte" :
+					convertedValue = (DATA_TYPE) Byte.valueOf(value);
+					break;
+				case "Instant" :
+					convertedValue = (DATA_TYPE) Instant.parse(value);
+					break;
+				case "JSONObject" :
+					convertedValue = (DATA_TYPE) new JSONObject(value);
+					break;
+				default :
+					logger.warn("Unsupported data type {} for property {}",
+							javaType.getSimpleName(), label);
+			}
+		} catch (final Throwable e) {
+			logger.error("Error converting value {} to type {} for property {}",
+					value, javaType.getSimpleName(), label, e);
+		}
+		return convertedValue;
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
