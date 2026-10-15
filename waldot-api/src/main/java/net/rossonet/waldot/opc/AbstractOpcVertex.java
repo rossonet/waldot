@@ -1,6 +1,7 @@
 package net.rossonet.waldot.opc;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
+import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -30,7 +32,10 @@ import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
+import org.eclipse.milo.opcua.stack.core.NodeIds;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -726,6 +731,40 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	protected void resetDirtyStateToUpdate() {
 		dirtyStateToUpdate = false;
+	}
+
+	public void sendLogEvent(String category, String message, int severity) {
+		if (category == null || category.isEmpty()) {
+			logger.warn(
+					"sendLogEvent called with null or empty category, event not sent");
+			return;
+		}
+		if (message == null || message.isEmpty()) {
+			logger.warn(
+					"sendLogEvent called with null or empty message, event not sent");
+			return;
+		}
+		try {
+			final UUID randomUUID = UUID.randomUUID();
+			final BaseEventTypeNode eventNode = getNamespace().getEventFactory()
+					.createEvent(getNamespace().generateNodeId(randomUUID),
+							NodeIds.BaseEventType);
+			eventNode.setBrowseName(
+					getNamespace().generateQualifiedName(category));
+			eventNode.setDisplayName(LocalizedText.english(category));
+			eventNode.setEventId(
+					ByteString.of(randomUUID.toString().getBytes()));
+			eventNode.setEventType(NodeIds.SystemEventType);
+			eventNode.setSourceNode(getNodeId());
+			eventNode.setSourceName(getBrowseName().getName());
+			eventNode.setTime(DateTime.now());
+			eventNode.setReceiveTime(DateTime.NULL_VALUE);
+			eventNode.setMessage(LocalizedText.english(message));
+			eventNode.setSeverity(ushort(severity));
+			postEvent(eventNode);
+		} catch (final Throwable e) {
+			logger.error("Error sending log event", e);
+		}
 	}
 
 	protected <DATA_TYPE> void setRuntimeParameter(String label, Object value) {
