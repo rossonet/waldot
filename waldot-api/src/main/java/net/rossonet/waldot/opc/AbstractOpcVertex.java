@@ -807,6 +807,23 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		}
 	}
 
+	protected boolean updatePropertyIfChanged(String key, Object value) {
+		if (key == null) {
+			return false;
+		}
+		if (value == null) {
+			return false;
+		}
+		final VertexProperty<Object> currentValue = property(key);
+		if (currentValue == null || !currentValue.isPresent()
+				|| !currentValue.value().equals(value)) {
+			property(key, value);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	@SuppressWarnings({"unchecked"})
 	private <DATA_TYPE> DATA_TYPE valueConversion(String label,
 			Class<DATA_TYPE> javaType, final String value) {

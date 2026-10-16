@@ -31,7 +31,10 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.exception.PluginBlockingException;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 
-public abstract class AbstractPluginListener implements PluginListener {
+public abstract class AbstractPluginListener
+		implements
+			PluginListener,
+			AutoCloseable {
 
 	protected final List<WaldotCommand> commands = new ArrayList<>();
 
@@ -43,6 +46,11 @@ public abstract class AbstractPluginListener implements PluginListener {
 
 	protected final Map<UaObjectTypeNode, Class<? extends AbstractOpcVertex>> typeClassNodes = new HashMap<>();
 	private WaldotNamespace waldotNamespace;
+
+	@Override
+	public void close() throws Exception {
+		logger.info("Closing plugin listener: {}", getClass().getName());
+	}
 
 	@Override
 	public boolean containsEdgeType(String typeDefinitionLabel) {

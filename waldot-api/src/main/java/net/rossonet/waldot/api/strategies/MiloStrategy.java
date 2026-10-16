@@ -176,6 +176,10 @@ public interface MiloStrategy extends AutoCloseable {
 	 */
 	public static final String TARGET_NODE = "TargetNode";
 	/**
+	 * Parameter name for thread epoch.
+	 */
+	public static final String THREAD_EPOCH_LABEL = "thread-epoch";
+	/**
 	 * Field name for type.
 	 */
 	public static final String TYPE_FIELD = "Type";
@@ -187,6 +191,7 @@ public interface MiloStrategy extends AutoCloseable {
 	 * Parameter name for version.
 	 */
 	public static final String VERSION_PARAMETER = "version";
+
 	/**
 	 * Parameter name for write mask.
 	 */
