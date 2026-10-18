@@ -61,9 +61,9 @@ public class GraphQueryTests {
 		try {
 			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
 				System.out.println("Waiting for server shutdown");
-				Thread.sleep(5_000);
+				Thread.sleep(1);
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
@@ -79,7 +79,7 @@ public class GraphQueryTests {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.createKitchenSink();
 		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
 		assert g.getWaldotNamespace().getVerticesCount() == 3;
 		assert g.getWaldotNamespace().getEdgesCount() == 3;
@@ -117,7 +117,7 @@ public class GraphQueryTests {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.createModern();
 		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
 
 		// Verify vertex and edge counts
@@ -217,7 +217,7 @@ public class GraphQueryTests {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.createTheCrew();
 		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
 
 		// Verify vertex and edge counts (6 vertices, 14 edges)

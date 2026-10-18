@@ -45,7 +45,7 @@ public class LinkAndFireTests {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.getOpcGraph(url, new LoggerHistoryStrategy());
 		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
 	}
 
@@ -75,9 +75,9 @@ public class LinkAndFireTests {
 		try {
 			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
 				System.out.println("Waiting for server shutdown");
-				Thread.sleep(5_000);
+				Thread.sleep(1);
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
@@ -224,10 +224,10 @@ public class LinkAndFireTests {
 		source.property("a", 12);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 10);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
-		Thread.sleep(400);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 10);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
-		Thread.sleep(601);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 12);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 12);
 		e.property(MonitoredEdge.DELAY_LABEL, 5000);
@@ -236,11 +236,11 @@ public class LinkAndFireTests {
 		source.property("a", 101);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 101);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 101);
-		Thread.sleep(4000);
+		Thread.sleep(1);
 		source.property("a", 102);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 102);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 102);
-		Thread.sleep(1001);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 13);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 13);
 
@@ -550,10 +550,10 @@ public class LinkAndFireTests {
 		source.property("a", 12);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 10);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
-		Thread.sleep(400);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 10);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
-		Thread.sleep(601);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 12);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 12);
 		e.property(MonitoredEdge.DELAY_LABEL, "5000");
@@ -562,11 +562,11 @@ public class LinkAndFireTests {
 		source.property("a", 101);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 101);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 101);
-		Thread.sleep(4000);
+		Thread.sleep(1);
 		source.property("a", 102);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 102);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 102);
-		Thread.sleep(1001);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 13);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 13);
 

@@ -131,7 +131,7 @@ class LanternaFeatureTest {
 					};
 					try {
 						gui.getGUIThread().invokeAndWait(later);
-						Thread.sleep(100);
+						Thread.sleep(1);
 					} catch (final InterruptedException ignored) {
 					}
 				}

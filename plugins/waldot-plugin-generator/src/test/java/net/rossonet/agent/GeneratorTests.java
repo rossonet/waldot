@@ -57,7 +57,7 @@ public class GeneratorTests {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.getOpcGraph(url, new LoggerHistoryStrategy());
 		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
 	}
 
@@ -92,9 +92,9 @@ public class GeneratorTests {
 		try {
 			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
 				System.out.println("Waiting for server shutdown");
-				Thread.sleep(5_000);
+				Thread.sleep(1);
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
@@ -122,7 +122,7 @@ public class GeneratorTests {
 					WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase(), "100",
 					WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase(), "90");
 		}
-		Thread.sleep(500L);
+		Thread.sleep(1);
 		for (int i = 0; i < 1000; i++) {
 			assert waldotTestClientHandler.checkOpcUaVertexExists("test" + i);
 			assert waldotTestClientHandler.checkVertexExists("test" + i);
@@ -168,7 +168,7 @@ public class GeneratorTests {
 					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
 					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "8000");
 		}
-		Thread.sleep(500L);
+		Thread.sleep(1);
 		for (int i = 0; i < 100; i++) {
 			assert waldotTestClientHandler.checkOpcUaVertexExists("random" + i);
 			assert waldotTestClientHandler.checkVertexExists("incremental" + i);
@@ -196,7 +196,7 @@ public class GeneratorTests {
 		for (final String k : v.keys()) {
 			System.out.println(k + ": " + v.property(k));
 		}
-		Thread.sleep(700);
+		Thread.sleep(1);
 		long value = 0;
 		for (int i = 1; i < 20; i++) {
 			if (value == 0) {
@@ -212,7 +212,7 @@ public class GeneratorTests {
 			if (value < 1) {
 				value = 100;
 			}
-			Thread.sleep(1000);
+			Thread.sleep(1);
 		}
 	}
 
@@ -234,7 +234,7 @@ public class GeneratorTests {
 		for (final String k : v.keys()) {
 			System.out.println(k + ": " + v.property(k));
 		}
-		Thread.sleep(700);
+		Thread.sleep(1);
 		long value = 0;
 		for (int i = 1; i < 20; i++) {
 			if (value == 0) {
@@ -247,7 +247,7 @@ public class GeneratorTests {
 			System.out.println("ok: " + value);
 			System.out.flush();
 			value++;
-			Thread.sleep(1000);
+			Thread.sleep(1);
 		}
 	}
 

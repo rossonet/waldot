@@ -45,7 +45,7 @@ public class DeleteVertexAndEdgeTests {
 		assert waldotTestClientHandler.checkOpcUaVertexExists(9);
 		// assert waldotTestClientHandler.checkOpcUaVertexEdge(1, 3, "created");
 		waldotTestClientHandler.deleteVertexWithOpcUa(9);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert !waldotTestClientHandler.checkOpcUaVertexExists(9);
 		// assert !waldotTestClientHandler.checkOpcUaVertexEdge(1, 3, "created");
 	}
@@ -58,7 +58,7 @@ public class DeleteVertexAndEdgeTests {
 		assert waldotTestClientHandler.checkOpcUaVertexExists(1);
 		assert waldotTestClientHandler.checkVertexExists(1);
 		g.traversal().V().has("name", "marko").drop().iterate();
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert !waldotTestClientHandler.checkOpcUaVertexExists(1);
 		assert !waldotTestClientHandler.checkVertexExists(1);
 	}
@@ -75,7 +75,7 @@ public class DeleteVertexAndEdgeTests {
 		assert waldotTestClientHandler.checkVertexExists(1);
 		final String[] result = waldotTestClientHandler.deleteVertexWithOpcUa(1);
 		System.out.println("Delete result: " + String.join("\n", result));
-		Thread.sleep(5000);
+		Thread.sleep(1);
 		assert !waldotTestClientHandler.checkOpcUaVertexExists(1);
 		assert !waldotTestClientHandler.checkVertexExists(1);
 	}
@@ -91,7 +91,7 @@ public class DeleteVertexAndEdgeTests {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.getOpcGraph(url, new LoggerHistoryStrategy());
 		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
 	}
 
@@ -126,9 +126,9 @@ public class DeleteVertexAndEdgeTests {
 		try {
 			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
 				System.out.println("Waiting for server shutdown");
-				Thread.sleep(5_000);
+				Thread.sleep(1);
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}

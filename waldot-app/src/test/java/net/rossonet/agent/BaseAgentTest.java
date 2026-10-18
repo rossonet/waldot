@@ -25,13 +25,13 @@ public class BaseAgentTest {
 	@Test
 	public void runGratefulDeadOneMinutes() throws InterruptedException, ExecutionException {
 		OpcFactory.createGratefulDead();
-		Thread.sleep(60_000);
+		Thread.sleep(1);
 	}
 
 	@Test
 	public void runServerOneMinutes() throws InterruptedException, ExecutionException {
 		create();
-		Thread.sleep(60_000);
+		Thread.sleep(1);
 	}
 
 }

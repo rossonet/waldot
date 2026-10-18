@@ -48,7 +48,7 @@ public class LabelInterationTests {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.getOpcGraph(url, new LoggerHistoryStrategy());
 		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
 	}
 
@@ -83,9 +83,9 @@ public class LabelInterationTests {
 		try {
 			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
 				System.out.println("Waiting for server shutdown");
-				Thread.sleep(5_000);
+				Thread.sleep(1);
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
@@ -101,13 +101,13 @@ public class LabelInterationTests {
 		simpleServerInit();
 		String expectedValue = UUID.randomUUID().toString();
 		final Vertex v = g.addVertex("description", expectedValue, "id", "description1");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("description1");
 		assert waldotTestClientHandler.checkOpcUaVertexDescriptionValueEquals("description1", expectedValue);
 		for (int i = 0; i < 10; i++) {
 			expectedValue = UUID.randomUUID().toString();
 			v.property("description", expectedValue);
-			Thread.sleep(500);
+			Thread.sleep(1);
 			assert waldotTestClientHandler.checkOpcUaVertexDescriptionValueEquals("description1", expectedValue);
 
 		}
@@ -121,13 +121,13 @@ public class LabelInterationTests {
 		final Vertex a = g.addVertex("id", 1);
 		final Vertex b = g.addVertex("id", 2);
 		final WaldotEdge e = (WaldotEdge) a.addEdge("test label", b, "description", expectedValue);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexEdge(1, 2, "test label");
 		assert waldotTestClientHandler.checkOpcUaEdgeDescriptionValueEquals(e, expectedValue);
 		for (int i = 0; i < 10; i++) {
 			expectedValue = UUID.randomUUID().toString();
 			e.property("description", expectedValue);
-			Thread.sleep(500);
+			Thread.sleep(1);
 			assert waldotTestClientHandler.checkOpcUaEdgeDescriptionValueEquals(e, expectedValue);
 
 		}
@@ -141,7 +141,7 @@ public class LabelInterationTests {
 		final Vertex a = g.addVertex("id", 1);
 		final Vertex b = g.addVertex("id", 2);
 		final WaldotEdge edge = (WaldotEdge) a.addEdge(expectedValue, b);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexEdge(1, 2, expectedValue);
 		assert waldotTestClientHandler.checkOpcUaEdgeLabelValueEquals(edge, expectedValue);
 		assert waldotTestClientHandler.checkOpcUaEdgeLabelReadOnly(edge);
@@ -153,7 +153,7 @@ public class LabelInterationTests {
 	public void labelReadOnlyInVertexTest() throws Exception {
 		simpleServerInit();
 		g.addVertex("label", "prova123", "id", "label1");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
 		assert waldotTestClientHandler.checkOpcUaVertexLabelValueEquals("label1", "prova123");
 		assert waldotTestClientHandler.checkOpcUaVertexLabelReadOnly("label1");
@@ -166,7 +166,7 @@ public class LabelInterationTests {
 		simpleServerInit();
 		final String expectedValue = UUID.randomUUID().toString();
 		g.addVertex("label", expectedValue, "id", "label2");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label2");
 		assert waldotTestClientHandler.checkOpcUaVertexLabelValueEquals("label2", expectedValue);
 		for (int i = 0; i < 10; i++) {
@@ -176,7 +176,7 @@ public class LabelInterationTests {
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 			assert waldotTestClientHandler.checkOpcUaVertexLabelValueEquals("label2", expectedValue);
 		}
 
@@ -187,7 +187,7 @@ public class LabelInterationTests {
 		simpleServerInit();
 		final String expectedValue = UUID.randomUUID().toString();
 		final Vertex v = g.addVertex("label", expectedValue, "id", "label2");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label2");
 		assert waldotTestClientHandler.checkOpcUaVertexLabelValueEquals("label2", expectedValue);
 		for (int i = 0; i < 10; i++) {
@@ -197,7 +197,7 @@ public class LabelInterationTests {
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 			assert waldotTestClientHandler.checkOpcUaVertexLabelValueEquals("label2", expectedValue);
 		}
 
@@ -210,14 +210,14 @@ public class LabelInterationTests {
 		final Vertex a = g.addVertex("id", 11);
 		final Vertex b = g.addVertex("id", 22);
 		final WaldotEdge edge = (WaldotEdge) a.addEdge("test_name", b, "name", expectedValue);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexEdge(11, 22, "test_name");
 		assert waldotTestClientHandler.checkOpcUaEdgeDisplayNameValueEquals(edge, expectedValue);
 		assert waldotTestClientHandler.checkOpcUaEdgeBrowserNameNameValueEquals(edge, expectedValue);
 		for (int i = 0; i < 10; i++) {
 			expectedValue = UUID.randomUUID().toString();
 			edge.property("name", expectedValue);
-			Thread.sleep(500);
+			Thread.sleep(1);
 			assert waldotTestClientHandler.checkOpcUaEdgeDisplayNameValueEquals(edge, expectedValue);
 			assert waldotTestClientHandler.checkOpcUaEdgeBrowserNameNameValueEquals(edge, expectedValue);
 
@@ -230,14 +230,14 @@ public class LabelInterationTests {
 		simpleServerInit();
 		String expectedValue = UUID.randomUUID().toString();
 		final Vertex v = g.addVertex("name", expectedValue, "id", "name1");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("name1");
 		assert waldotTestClientHandler.checkOpcUaVertexDisplayNameValueEquals("name1", expectedValue);
 		assert waldotTestClientHandler.checkOpcUaVertexBrowserNameNameValueEquals("name1", expectedValue);
 		for (int i = 0; i < 10; i++) {
 			expectedValue = UUID.randomUUID().toString();
 			v.property("name", expectedValue);
-			Thread.sleep(500);
+			Thread.sleep(1);
 			assert waldotTestClientHandler.checkOpcUaVertexDisplayNameValueEquals("name1", expectedValue);
 			assert waldotTestClientHandler.checkOpcUaVertexBrowserNameNameValueEquals("name1", expectedValue);
 
@@ -254,7 +254,7 @@ public class LabelInterationTests {
 		simpleServerInit();
 		final String expectedValue = "vertex";
 		final Vertex v = g.addVertex("label", "prova", "id", "label2");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label2");
 		assert waldotTestClientHandler.checkOpcUaVertexTypeValueEquals("label2", expectedValue);
 		for (int i = 0; i < 10; i++) {
@@ -269,7 +269,7 @@ public class LabelInterationTests {
 			} catch (final Exception e) {
 				e.printStackTrace();
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 			assert waldotTestClientHandler.checkOpcUaVertexTypeValueEquals("label2", expectedValue);
 		}
 

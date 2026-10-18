@@ -61,7 +61,7 @@ public class WritePropertiesAndEventsTests {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.getOpcGraph(url, new LoggerHistoryStrategy());
 		g.getWaldotNamespace().addListener(listener);
-		Thread.sleep(500);
+		Thread.sleep(1);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
 	}
 
@@ -96,9 +96,9 @@ public class WritePropertiesAndEventsTests {
 		try {
 			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
 				System.out.println("Waiting for server shutdown");
-				Thread.sleep(5_000);
+				Thread.sleep(1);
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
@@ -284,7 +284,7 @@ public class WritePropertiesAndEventsTests {
 			eventNode.setMessage(LocalizedText.english(String.valueOf(i)));
 			eventNode.setSeverity(ushort(3));
 			v.postEvent(eventNode);
-			Thread.sleep(1000);
+			Thread.sleep(1);
 			eventNode.delete();
 		}
 		assert eventObserver.v == 20;

@@ -66,27 +66,27 @@ public class WaldotRulesEngineBaseTest {
 	public void baseRuleTest() throws InterruptedException, ExecutionException, ConfigurationException {
 		LogHelper.changeJulLogLevel("fine");
 		baseRulesGraph();
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputB.property("value", "5");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputB.property("value", "9");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputB.property("value", "4");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputA.property("value", "11");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputB.property("value", "7");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputB.property("value", "3");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputB.property("value", "91");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputA.property("value", "10");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputB.property("value", "55");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		inputB.property("value", "99");
-		Thread.sleep(500);
+		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists(4);
 		assert waldotTestClientHandler.checkVertexExists(4);
 		assert waldotTestClientHandler.checkOpcUaVertexExists(5);
@@ -147,7 +147,7 @@ public class WaldotRulesEngineBaseTest {
 			throws ConfigurationException, InterruptedException, ExecutionException {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.getOpcGraph(url, new LoggerHistoryStrategy());
-		Thread.sleep(500);
+		Thread.sleep(1);
 		waldotTestClientHandler = new WaldotTestClientHandler(g);
 	}
 
@@ -182,9 +182,9 @@ public class WaldotRulesEngineBaseTest {
 		try {
 			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
 				System.out.println("Waiting for server shutdown");
-				Thread.sleep(5_000);
+				Thread.sleep(1);
 			}
-			Thread.sleep(500);
+			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}

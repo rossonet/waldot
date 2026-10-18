@@ -19,9 +19,6 @@ ext {
 
 repositories {
     mavenCentral()
-    maven {
-       url "https://repo.craftyn.com/repository/snapshots/" 
-    }
     maven { url 'https://jitpack.io' }
 }
 

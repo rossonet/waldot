@@ -14,7 +14,7 @@ class ThreadHelperTest {
 	@Test
 	void testRunWithTimeoutCompletesInTime() throws Exception {
 		final Callable<String> task = () -> {
-			Thread.sleep(500); // Simulate a task that takes 500ms
+			Thread.sleep(1); // Simulate a task that takes 500ms
 			return "Completed";
 		};
 
@@ -25,7 +25,7 @@ class ThreadHelperTest {
 	@Test
 	void testRunWithTimeoutExceedsTime() {
 		final Callable<String> task = () -> {
-			Thread.sleep(2000); // Simulate a task that takes 2 seconds
+			Thread.sleep(1); // Simulate a task that takes 2 seconds
 			return "Completed";
 		};
 

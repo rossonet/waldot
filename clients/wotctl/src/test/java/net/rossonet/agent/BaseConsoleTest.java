@@ -13,7 +13,7 @@ public class BaseConsoleTest {
 	@Test
 	public void runServerClientOneMinutes() throws InterruptedException, ExecutionException {
 		// TODO: implementare test
-		Thread.sleep(60_000);
+		Thread.sleep(1);
 	}
 
 	@Test

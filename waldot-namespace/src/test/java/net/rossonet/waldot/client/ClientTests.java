@@ -109,7 +109,7 @@ public class ClientTests {
 		final int limit = 60 / 5;
 		for (int i = 0; i < limit; i++) {
 			final WaldOTAgentClient.Status status = client.getStatus();
-			Thread.sleep(5000);
+			Thread.sleep(1);
 		}
 		final Vertex source = d.addVertex("id", "source", "name",
 				"source vertex", "a", "1", "b", "2");
