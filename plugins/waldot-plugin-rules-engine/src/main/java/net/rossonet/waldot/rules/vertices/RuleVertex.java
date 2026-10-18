@@ -80,7 +80,6 @@ import net.rossonet.waldot.utils.LogHelper;
  *   <li><code>Math</code>: Java Math class</li>
  *   <li><code>random</code>: ThreadLocalRandom</li>
  * </ul>
- * </p>
  * 
  * <h2>Example Usage</h2>
  * <pre>{@code
@@ -123,7 +122,6 @@ import net.rossonet.waldot.utils.LogHelper;
  * 
  * @see ComputableFireableAbstractOpcVertex
  * @see ComputeVertex
- * @see net.rossonet.waldot.gremlin.opcgraph.structure.edge.FireMonitoredEdge
  * 
  * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0

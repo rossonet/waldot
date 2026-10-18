@@ -37,7 +37,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
  * }
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public interface ConsoleStrategy extends AutoCloseable {
 	/**
@@ -104,7 +104,6 @@ public interface ConsoleStrategy extends AutoCloseable {
 	 * the console for command execution.</p>
 	 * 
 	 * @param waldotNamespace the WaldotNamespace to use
-	 * @throws Exception if initialization fails
 	 */
 	void initialize(WaldotNamespace waldotNamespace);
 

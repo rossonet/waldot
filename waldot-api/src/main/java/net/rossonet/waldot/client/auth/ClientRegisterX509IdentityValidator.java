@@ -16,7 +16,6 @@ import net.rossonet.waldot.opc.WaldotOpcUaServer;
  * This validator handles X.509 certificate authentication for OPC UA clients
  * connecting to the Waldot server.
  *
- * @param waldotOpcUaServer the Waldot OPC UA server instance
  */
 public class ClientRegisterX509IdentityValidator extends WaldotX509IdentityValidator implements ClientAuthenticator {
 	private ClientManagementStrategy clientManagementStrategy;

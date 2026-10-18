@@ -8,7 +8,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 /**
  * WaldotConfiguration is an interface that defines the configuration settings
- * for the Waldot Agent. It extends Serializable and Map<String, String> to
+ * for the Waldot Agent. It extends Serializable and Map&lt;String, String&gt; to
  * allow for easy serialization and access to configuration properties.
  * 
  * <p>WaldotConfiguration provides access to all configuration settings for
@@ -36,7 +36,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
  * }
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  *
  */
 public interface WaldotConfiguration extends Serializable, Map<String, String> {

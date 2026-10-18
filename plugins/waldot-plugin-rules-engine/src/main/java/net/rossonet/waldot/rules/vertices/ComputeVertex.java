@@ -75,7 +75,6 @@ import net.rossonet.waldot.utils.ThreadHelper;
  *   <li><b>Queue size</b>: Number of pending events in RuleVertex</li>
  *   <li><b>Priority factor</b>: Multiplier for edge priority (default: 100.0)</li>
  * </ul>
- * </p>
  * <p>
  * Formula: <code>weight = edge_priority * priority_factor + queue_size</code>
  * </p>
@@ -93,7 +92,6 @@ import net.rossonet.waldot.utils.ThreadHelper;
  *   <li>Automatic timeout cancellation</li>
  *   <li>Concurrent execution tracking</li>
  * </ul>
- * </p>
  * 
  * <h2>Example Usage</h2>
  * <pre>{@code
@@ -121,7 +119,6 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * </ul>
  * 
  * @see RuleVertex
- * @see ComputeMonitoredEdge
  * @see ComputableFireableAbstractOpcVertex
  * 
  * @author Andrea Ambrosini - Rossonet s.c.a r.l.

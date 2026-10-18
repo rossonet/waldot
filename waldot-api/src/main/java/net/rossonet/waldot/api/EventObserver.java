@@ -33,9 +33,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
  * vertex.addEventObserver(new TemperatureEventObserver());
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
- * @see WaldotVertex
- * @see BaseEventType
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public interface EventObserver {
 

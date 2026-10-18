@@ -61,7 +61,6 @@ import net.rossonet.waldot.rules.events.RunnableEvent;
  *   <li>{@link #getRunnableEvent(UaNode, BaseEventType)}: Create action for OPC-UA event</li>
  *   <li>{@link #getRunnablePropertyEvent(UaNode, String)}: Create action for property change</li>
  * </ul>
- * </p>
  * 
  * @see RuleVertex
  * @see ComputeVertex

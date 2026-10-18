@@ -19,8 +19,6 @@ import net.rossonet.waldot.opc.WaldotOpcUaServer;
  * This validator handles username/password authentication for OPC UA clients
  * connecting to the Waldot server.
  *
- * @param waldotOpcUaServer the Waldot OPC UA server instance
- * @param authChallenge     the factory password validator for authentication challenges
  */
 public class ClientRegisterUsernameIdentityValidator extends WaldotIdentityValidator implements ClientAuthenticator {
 	private ClientManagementStrategy clientManagementStrategy;

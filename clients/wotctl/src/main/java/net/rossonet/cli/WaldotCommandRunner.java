@@ -32,7 +32,7 @@ import picocli.shell.jline3.PicocliJLineCompleter;
 
 /**
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 @Command(name = "walctl", mixinStandardHelpOptions = true, showDefaultValues = true, version = { "${COMMAND-NAME} 1.0",
 		"JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",

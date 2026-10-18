@@ -20,7 +20,6 @@ import net.rossonet.waldot.opc.WaldotOpcUaServer;
  * This validator handles anonymous authentication for OPC UA clients
  * connecting to the Waldot server without providing credentials.
  *
- * @param waldotOpcUaServer the Waldot OPC UA server instance
  */
 public class ClientRegisterAnonymousValidator extends WaldotAnonymousValidator implements ClientAuthenticator {
 	private ClientManagementStrategy clientManagementStrategy;

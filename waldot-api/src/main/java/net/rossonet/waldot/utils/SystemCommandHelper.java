@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * tokenizer for parsing quoted strings and a stream gobbler for consuming
  * process output.
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public class SystemCommandHelper {
 

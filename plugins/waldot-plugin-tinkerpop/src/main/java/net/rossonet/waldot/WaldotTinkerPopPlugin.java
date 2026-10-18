@@ -41,7 +41,6 @@ import net.rossonet.waldot.tinkerpop.TinkerPopVertex;
  *   <li><b>Remote traversals</b>: Execute Gremlin scripts from external applications</li>
  *   <li><b>Multi-protocol access</b>: OPC-UA + Gremlin on the same graph</li>
  * </ul>
- * </p>
  * 
  * <h2>Vertex Type</h2>
  * <p>
@@ -104,8 +103,6 @@ import net.rossonet.waldot.tinkerpop.TinkerPopVertex;
  * </ul>
  * 
  * @see TinkerPopVertex
- * @see WaldotGremlinServer
- * @see WaldotGraphManager
  * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0
  */

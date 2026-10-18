@@ -7,7 +7,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 
 /**
  * OpcConfiguration is an interface that defines the configuration settings for
- * an OPC server. It extends Serializable and Map<String, String> to allow for
+ * an OPC server. It extends Serializable and Map&lt;String, String&gt; to allow for
  * easy serialization and access to configuration properties.
  * 
  * <p>OpcConfiguration provides configuration settings specific to the OPC UA
@@ -33,7 +33,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
  * String securityDir = opcConfig.getSecurityTempDir();
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public interface OpcConfiguration extends Serializable, Map<String, String> {
 

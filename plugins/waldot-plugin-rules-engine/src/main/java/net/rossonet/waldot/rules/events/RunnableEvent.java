@@ -35,7 +35,6 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
  * </p>
  * 
  * @see FireableAction
- * @see ComputableFireableAbstractOpcVertex
  * @see net.rossonet.waldot.jexl.HysteresisPriorityQueue
  * 
  * @author Andrea Ambrosini - Rossonet s.c.a r.l.

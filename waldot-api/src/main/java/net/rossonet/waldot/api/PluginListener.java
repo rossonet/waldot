@@ -60,7 +60,7 @@ import net.rossonet.waldot.exception.PluginBlockingException;
  * }
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public interface PluginListener {
 
@@ -408,7 +408,6 @@ public interface PluginListener {
 	 * should stop any background tasks but maintain state for potential restart.</p>
 	 * 
 	 * @see #start()
-	 * @see #close()
 	 */
 	default void stop() {
 

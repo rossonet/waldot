@@ -26,8 +26,6 @@ package net.rossonet.waldot.rules.events;
  * </p>
  * 
  * @see RunnableEvent
- * @see RuleVertex.RuleVertexFireableAction
- * @see ComputeVertex
  * 
  * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0

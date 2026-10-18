@@ -56,7 +56,6 @@ import net.rossonet.waldot.rules.vertices.RuleVertex;
  *   <li><b>RuleVertex</b>: Represents an IF-THEN rule with JEXL condition and action</li>
  *   <li><b>ComputeVertex</b>: Thread manager that executes rule actions with priority queuing</li>
  * </ul>
- * </p>
  * 
  * <h2>Event Flow</h2>
  * <pre>
@@ -128,12 +127,10 @@ import net.rossonet.waldot.rules.vertices.RuleVertex;
  *   <li><code>Math</code>: Java Math class for calculations</li>
  *   <li><code>random</code>: ThreadLocalRandom for random numbers</li>
  * </ul>
- * </p>
  * 
  * @see RuleVertex
  * @see ComputeVertex
  * @see ComputableFireableAbstractOpcVertex
- * @see net.rossonet.waldot.gremlin.opcgraph.structure.edge.FireMonitoredEdge
  * 
  * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @since 0.4.0

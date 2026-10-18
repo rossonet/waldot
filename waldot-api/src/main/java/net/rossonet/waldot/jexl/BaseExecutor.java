@@ -36,7 +36,7 @@ import org.apache.commons.jexl3.JexlContext;
  * executor.close();
  * }</pre>
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  * @see JexlContext
  */
 public interface BaseExecutor extends AutoCloseable {
@@ -48,7 +48,6 @@ public interface BaseExecutor extends AutoCloseable {
 	 * 
 	 * @param expression the JEXL expression to execute
 	 * @return the result of the expression evaluation
-	 * @throws Exception if execution fails
 	 */
 	Object execute(String expression);
 
@@ -61,7 +60,6 @@ public interface BaseExecutor extends AutoCloseable {
 	 * @param expression the JEXL expression to execute
 	 * @param jexlContext the context variables to use
 	 * @return the result of the expression evaluation
-	 * @throws Exception if execution fails
 	 * @see JexlContext
 	 */
 	Object execute(String expression, JexlContext jexlContext);

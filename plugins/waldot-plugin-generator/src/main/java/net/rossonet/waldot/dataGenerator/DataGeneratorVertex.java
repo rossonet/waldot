@@ -60,7 +60,6 @@ import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
  *   <li>TinkerPop graph: {@code vertex.property("data").value()}</li>
  *   <li>OPC-UA client: Browse to vertex and read "data" property</li>
  * </ul>
- * </p>
  * 
  * <h2>Lifecycle</h2>
  * <ol>
@@ -544,7 +543,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 	 * Decrementa il valore di 1. Quando raggiunge min, ritorna a max (wrap-around).
 	 * </p>
 	 * <p>
-	 * Formula: value--, if value < min then value = max
+	 * Formula: value--, if value &lt; min then value = max
 	 * </p>
 	 */
 	protected void generateNextDecremental() {

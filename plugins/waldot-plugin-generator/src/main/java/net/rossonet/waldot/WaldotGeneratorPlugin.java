@@ -46,7 +46,6 @@ import net.rossonet.waldot.utils.ThreadHelper;
  *   <li><b>Load testing</b>: Generate thousands of data points for performance testing</li>
  *   <li><b>Development</b>: Develop applications without access to real devices</li>
  * </ul>
- * </p>
  * 
  * <h2>Available Algorithms</h2>
  * <ul>

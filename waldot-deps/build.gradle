@@ -1,6 +1,6 @@
 plugins {
     id "org.jreleaser"
-    id "com.gorylenko.gradle-git-properties" version "2.5.1"
+    id "com.gorylenko.gradle-git-properties" version "2.5.7"
 }
 
 description = "WaldOT dependencies"

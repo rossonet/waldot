@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
  * keystores.
  * 
  * 
- * @Author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Rossonet s.c.a r.l.
  */
 public class SslHelper {
 

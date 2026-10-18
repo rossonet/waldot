@@ -55,7 +55,6 @@ import net.rossonet.waldot.rules.vertices.ComputeVertex;
  * // When both have events, alarmRule is processed first
  * }</pre>
  * 
- * @see RuleVertex
  * @see ComputeVertex
  * @see MonitoredEdge
  * 
