@@ -1,20 +1,16 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-    dependencies {
-        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
-    }
+plugins {
+        id 'java'
+        id 'eclipse'
+        id 'org.jreleaser' version '1.21.0' apply false
 }
 
 description = "WaldOT - TinkerPop implementation with Milo OpcUA"
 group = 'net.rossonet.waldot'
-version = '0.6.1'
+version = '0.6.2'
 
 ext {
-    sourceCompatibility = 21
-    targetCompatibility = 21
+    sourceCompatibility = JavaVersion.VERSION_26
+    targetCompatibility = JavaVersion.VERSION_26
     debianName = "${project.name}"
     packageName = "${project.name}"
 }
@@ -27,16 +23,6 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
-apply plugin: 'eclipse'
-apply plugin: "com.gorylenko.gradle-git-properties"
-
-gitProperties {
-    dotGitDirectory = project.rootProject.layout.projectDirectory.dir(".git")
-    failOnNoGitDirectory = false
-    dateFormat = "yyyy-MM-dd HH:mm:ssZ"
-    dateFormatTimeZone = 'GMT'
-}
-
 task eclipseClosedDependencies {}
 
 task eclipseClosedDependencies_ {}
@@ -46,6 +32,19 @@ eclipse {
         downloadJavadoc = true
         downloadSources = true
     }
+}
+
+// Configure gitProperties plugin centrally so subprojects that don't contain
+// a .git directory (because their source is in a subfolder) won't fail the build.
+subprojects {
+        afterEvaluate { proj ->
+                if (proj.plugins.hasPlugin('com.gorylenko.gradle-git-properties')) {
+                        proj.gitProperties {
+                                dotGitDirectory = rootProject.layout.projectDirectory.dir('.git')
+                                failOnNoGitDirectory = false
+                        }
+                }
+        }
 }
 
 task view { doLast { println "Working on project ${project.name} [ ${project.description} ]" } }

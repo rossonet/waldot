@@ -19,8 +19,8 @@ group = 'net.rossonet.waldot'
 version = "${rootProject.version}"
 
 ext {
-    sourceCompatibility = 21
-    targetCompatibility = 21
+    sourceCompatibility = JavaVersion.VERSION_26
+    targetCompatibility = JavaVersion.VERSION_26
     mainClassName = "net.rossonet.agent.MainAgent"
     mainPicocliCommandClass = "net.rossonet.agent.WaldotRunner"
     debianName = "${project.name}"
@@ -60,6 +60,7 @@ dependencies {
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.7.3'
     testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-server', version: '3.7.3'
+    implementation 'net.minidev:json-smart:2.3.1'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testImplementation(platform('org.junit:junit-bom:5.13.1'))
 	testImplementation('org.junit.jupiter:junit-jupiter')
@@ -93,7 +94,7 @@ jar {
 }
 
 jar.doLast { task ->
-	ant.checksum file: task.archivePath
+	ant.checksum file: task.archiveFile.get().asFile
 }
 
 shadowJar {

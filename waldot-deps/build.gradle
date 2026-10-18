@@ -1,12 +1,6 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-    dependencies {
-        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
-        classpath("org.jreleaser:org.jreleaser.gradle.plugin:1.21.0")
-    }
+plugins {
+    id "org.jreleaser"
+    id "com.gorylenko.gradle-git-properties" version "2.5.1"
 }
 
 description = "WaldOT dependencies"
@@ -14,8 +8,8 @@ group = 'net.rossonet.waldot'
 version = "${rootProject.version}"
 
 ext {
-    sourceCompatibility = 21
-    targetCompatibility = 21
+    sourceCompatibility = JavaVersion.VERSION_26
+    targetCompatibility = JavaVersion.VERSION_26
 }
 
 repositories {
@@ -36,7 +30,7 @@ apply plugin: 'jacoco'
 apply plugin: 'distribution'
 apply plugin: 'signing'
 apply plugin: 'maven-publish'
-apply plugin: 'org.jreleaser'
+// org.jreleaser applied via plugins DSL above
 
 configurations.all {
   resolutionStrategy {
@@ -97,7 +91,8 @@ jar {
 }
 
 jar.doLast { task ->
-	ant.checksum file: task.archivePath
+    // archivePath removed in newer Gradle; use archiveFile
+    ant.checksum file: task.archiveFile.get().asFile
 }
 
 java {
@@ -160,36 +155,40 @@ publishing {
   }
 }
 
-jreleaser {
-  signing {
-    active = 'ALWAYS'
-    armored = true
-    secretKey = System.getenv('GPG_PRIVATE')
-    publicKey = System.getenv('GPG_PUBLIC')
-  }
-  deploy {
-    maven {
-      mavenCentral {
-        sonatype {
-          active = 'ALWAYS'
-          url = 'https://central.sonatype.com/api/v1/publisher'
-          stagingRepository(
-              layout.buildDirectory
-                     .dir('staging-deploy')
-                     .get()
-                     .asFile
-                     .absolutePath
-          )
-          username = System.getenv('OSSRH_USERNAME')
-          password = System.getenv('OSSRH_PASSWORD') 
+if (plugins.hasPlugin('org.jreleaser')) {
+  jreleaser {
+    signing {
+      active = 'ALWAYS'
+      armored = true
+      secretKey = System.getenv('GPG_PRIVATE')
+      publicKey = System.getenv('GPG_PUBLIC')
+    }
+    deploy {
+      maven {
+        mavenCentral {
+          sonatype {
+            active = 'ALWAYS'
+            url = 'https://central.sonatype.com/api/v1/publisher'
+            stagingRepository(
+                layout.buildDirectory
+                       .dir('staging-deploy')
+                       .get()
+                       .asFile
+                       .absolutePath
+            )
+            username = System.getenv('OSSRH_USERNAME')
+            password = System.getenv('OSSRH_PASSWORD') 
+          }
         }
       }
     }
   }
 }
 
-tasks.named('publish').configure { dependsOn 'jreleaserDeploy' }
-tasks.named('jreleaserDeploy').configure { dependsOn 'publishAllPublicationsToStagingRepository' }
+if (plugins.hasPlugin('org.jreleaser')) {
+  tasks.named('publish').configure { dependsOn 'jreleaserDeploy' }
+  tasks.named('jreleaserDeploy').configure { dependsOn 'publishAllPublicationsToStagingRepository' }
+}
 
 configurations {
 	compileOnly {

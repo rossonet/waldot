@@ -5,7 +5,6 @@ buildscript {
     }
     dependencies {
         classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.0"
-        classpath("org.jreleaser:org.jreleaser.gradle.plugin:1.21.0")
     }
 }
 
@@ -14,8 +13,8 @@ group = 'net.rossonet.waldot'
 version = "${rootProject.version}"
 
 ext {
-    sourceCompatibility = 21
-    targetCompatibility = 21
+    sourceCompatibility = JavaVersion.VERSION_26
+    targetCompatibility = JavaVersion.VERSION_26
 }
 
 repositories {
@@ -91,7 +90,7 @@ jar {
 }
 
 jar.doLast { task ->
-	ant.checksum file: task.archivePath
+	ant.checksum file: task.archiveFile.get().asFile
 }
 
 java {

@@ -19,8 +19,8 @@ group = 'net.rossonet.waldot'
 version = "${rootProject.version}"
 
 ext {
-    sourceCompatibility = 21
-    targetCompatibility = 21
+    sourceCompatibility = JavaVersion.VERSION_26
+    targetCompatibility = JavaVersion.VERSION_26
     mainClassName = "net.rossonet.cli.MainCli"
     mainPicocliCommandClass = "net.rossonet.cli.WaldotCommandRunner"
     debianName = "${project.name}"
@@ -110,7 +110,7 @@ jar {
 }
 
 jar.doLast { task ->
-	ant.checksum file: task.archivePath
+	ant.checksum file: task.archiveFile.get().asFile
 }
 
 shadowJar {
