@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * Annotation to mark a class as a Waldot Plugin. This annotation must be used
  * to indicate that the class is a plugin with lifecycle methods
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 @Retention(RUNTIME)
 @Target(TYPE)

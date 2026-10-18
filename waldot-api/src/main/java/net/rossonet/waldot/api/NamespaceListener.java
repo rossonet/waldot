@@ -46,7 +46,7 @@ import net.rossonet.waldot.api.models.WaldotCommand;
  * namespace.addListener(new MyNamespaceListener());
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface NamespaceListener {
 

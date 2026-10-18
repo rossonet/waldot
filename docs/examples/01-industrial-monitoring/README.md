@@ -295,4 +295,4 @@ docker-compose restart
 
 ---
 
-**WaldOT Industrial Monitoring Example** - Rossonet s.c.a r.l.
+**WaldOT Industrial Monitoring Example** - Zona Autonoma srl

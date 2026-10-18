@@ -48,13 +48,13 @@ import picocli.CommandLine.Spec;
  *   <li><b>WaldOT Configuration</b>: Application-specific settings, commands, nodes</li>
  * </ul>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @see OpcConfiguration
  * @see WaldotConfiguration
  */
 @Command(name = "WaldOT", mixinStandardHelpOptions = true, version = { "${COMMAND-NAME} 1.0",
 		"JVM: ${java.version} (${java.vendor} ${java.vm.name} ${java.vm.version})",
-		"OS: ${os.name} ${os.version} ${os.arch}" }, description = "WaldOT OPC UA server with TinkerPop graph integration", footer = "Powered by Rossonet s.c.a r.l. - https://www.rossonet.net", showEndOfOptionsDelimiterInUsageHelp = true, showAtFileInUsageHelp = true)
+		"OS: ${os.name} ${os.version} ${os.arch}" }, description = "WaldOT OPC UA server with TinkerPop graph integration", footer = "Powered by Zona Autonoma srl - https://www.rossonet.net", showEndOfOptionsDelimiterInUsageHelp = true, showAtFileInUsageHelp = true)
 public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	private static final Logger logger = LoggerFactory.getLogger("WaldOT runner");
 
@@ -232,9 +232,9 @@ public class WaldotRunner implements Callable<Integer>, AutoCloseable {
 	 * <p>The company or organization name that appears in the server's BuildInfo.
 	 * This is displayed in OPC UA client applications and helps identify the server vendor.</p>
 	 * 
-	 * <p><b>Default</b>: "Rossonet s.c.a r.l."</p>
+	 * <p><b>Default</b>: "Zona Autonoma srl"</p>
 	 */
-	@Option(names = { "--manufacturer-name", "-mn" }, description = "Manufacturer name in OPC UA BuildInfo", defaultValue = "Rossonet s.c.a r.l.")
+	@Option(names = { "--manufacturer-name", "-mn" }, description = "Manufacturer name in OPC UA BuildInfo", defaultValue = "Zona Autonoma srl")
 	protected String manufacturerName;
 
 	/**

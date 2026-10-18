@@ -502,4 +502,4 @@ log.info("=== Script End ===")
 ---
 
 **WaldOT Bootstrap Configuration** - Flexible configuration system with automatic format detection  
-*Rossonet s.c.a r.l.* - https://www.rossonet.net
+*Zona Autonoma srl* - https://www.rossonet.net

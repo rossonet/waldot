@@ -87,7 +87,7 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * }</pre>
  * 
  * @see DataGeneratorVertex
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
 @WaldotPlugin

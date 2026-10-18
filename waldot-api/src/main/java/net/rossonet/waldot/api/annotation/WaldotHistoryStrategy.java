@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  *
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 @Retention(RUNTIME)
 @Target(TYPE)

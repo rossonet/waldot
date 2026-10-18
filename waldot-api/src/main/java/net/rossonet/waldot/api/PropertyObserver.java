@@ -33,7 +33,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
  * vertex.addPropertyObserver(new MyPropertyObserver());
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface PropertyObserver {
 

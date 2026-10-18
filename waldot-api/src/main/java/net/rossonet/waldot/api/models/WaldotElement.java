@@ -32,7 +32,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
  * WaldotNamespace ns = element.getNamespace();
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @see Element
  * @see org.eclipse.milo.opcua.sdk.server.nodes.UaServerNode
  */

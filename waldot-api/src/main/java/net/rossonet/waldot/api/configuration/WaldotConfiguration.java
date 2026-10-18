@@ -36,7 +36,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
  * }
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  *
  */
 public interface WaldotConfiguration extends Serializable, Map<String, String> {

@@ -132,7 +132,7 @@ import net.rossonet.waldot.rules.vertices.RuleVertex;
  * @see ComputeVertex
  * @see ComputableFireableAbstractOpcVertex
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
 @WaldotPlugin

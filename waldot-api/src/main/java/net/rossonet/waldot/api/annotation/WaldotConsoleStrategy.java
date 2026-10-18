@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * be used to indicate that the class implements the logic to handle the string
  * and query commands
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 @Retention(RUNTIME)
 @Target(TYPE)

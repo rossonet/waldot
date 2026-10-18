@@ -29,7 +29,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Password) codes. It supports HMAC-SHA1, HMAC-SHA256, and HMAC-SHA512
  * algorithms. reference: https://datatracker.ietf.org/doc/html/rfc6238
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public final class OtpHelper {
 	public enum Algorithm {

@@ -13,7 +13,7 @@ import picocli.CommandLine;
  * in WaldotRunner, verificando che i parametri da linea di comando vengano
  * correttamente mappati sui campi della classe.</p>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public class WaldotRunnerPicocliTest {
 
@@ -271,7 +271,7 @@ public class WaldotRunnerPicocliTest {
 		assertEquals("127.0.0.1", runner.getBindHostname());
 		assertEquals("/waldot", runner.getPath());
 		assertEquals("WaldOT", runner.getProductName());
-		assertEquals("Rossonet s.c.a r.l.", runner.getManufacturerName());
+		assertEquals("Zona Autonoma srl", runner.getManufacturerName());
 		assertEquals(".security", runner.getSecurityTempDir());
 		
 		// Verify WaldOT defaults

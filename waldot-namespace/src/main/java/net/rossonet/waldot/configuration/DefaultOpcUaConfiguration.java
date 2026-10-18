@@ -15,7 +15,7 @@ public class DefaultOpcUaConfiguration extends HashMap<String, String> implement
 	public static DateTime DEFAULT_BUILD_DATE = DateTime.now();
 	public static String DEFAULT_BUILD_NUMBER = "w001";
 	public static int DEFAULT_HTTPS_BIND_PORT = 8443;
-	public static String DEFAULT_MANUFACTURER_NAME = "Rossonet s.c.a r.l.";
+	public static String DEFAULT_MANUFACTURER_NAME = "Zona Autonoma srl";
 	public static String DEFAULT_PATH = "/waldot";
 	public static String DEFAULT_PRODUCT_NAME = "WaldOT";
 	public static String DEFAULT_PRODUCT_URI = "urn:rossonet:waldot:uaserver";

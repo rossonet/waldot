@@ -24,7 +24,7 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	public static String DEFAULT_NEW_CERTIFICATE_LOCALITY = "Imola";
 	public static String DEFAULT_NEW_CERTIFICATE_STATE = "Bologna";
 	public static String DEFAULT_NEW_CERTIFICATE_UNIT = "WaldOT Agent Client";
-	public static String DEFAULT_NEW_ORGANIZATION = "Rossonet s.c.a r.l.";
+	public static String DEFAULT_NEW_ORGANIZATION = "Zona Autonoma srl";
 	public static String DISCOVERY_PATH = "/discovery";
 	public static final long serialVersionUID = 977371251684189681L;
 

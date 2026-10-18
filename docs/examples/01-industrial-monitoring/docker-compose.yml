@@ -11,7 +11,7 @@ services:
       # Server Identity
       - WALDOT_APPLICATION_NAME=Industrial Monitoring System
       - WALDOT_PRODUCT_NAME=WaldOT Industrial Monitor
-      - WALDOT_MANUFACTURER_NAME=Rossonet s.c.a r.l.
+      - WALDOT_MANUFACTURER_NAME=Zona Autonoma srl
 
       # Network Configuration
       - WALDOT_TCP_PORT=12686

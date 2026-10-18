@@ -16,7 +16,7 @@ import net.rossonet.waldot.api.configuration.WaldotConfiguration;
  * AbstractIdentityValidator to provide a specific implementation for validating
  * anonymous tokens in the Waldot context.
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public abstract class WaldotAnonymousValidator extends AbstractIdentityValidator {
 

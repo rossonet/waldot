@@ -51,7 +51,7 @@ import net.rossonet.waldot.api.PropertyObserver;
  * }
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @see Vertex
  * @see WaldotElement
  * @see BaseObjectType

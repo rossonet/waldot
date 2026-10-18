@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * used to indicate that the class implements the logic to handle the Gremlin
  * objects as OPC UA nodes
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 @Retention(RUNTIME)
 @Target(TYPE)

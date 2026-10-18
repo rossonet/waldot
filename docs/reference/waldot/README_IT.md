@@ -967,11 +967,11 @@ g.V().has('lot_number', 'FAULTY-LOT')
 
 ## Sponsor del Progetto
 
-[![Rossonet s.c.a r.l.](https://raw.githubusercontent.com/rossonet/images/main/artwork/rossonet-logo/png/rossonet-logo_280_115.png)](https://www.rossonet.net)
+[![Zona Autonoma srl](https://raw.githubusercontent.com/rossonet/images/main/artwork/rossonet-logo/png/rossonet-logo_280_115.png)](https://www.rossonet.net)
 
-**WaldOT** è sviluppato e mantenuto da **Rossonet s.c.a r.l.**
+**WaldOT** è sviluppato e mantenuto da **Zona Autonoma srl**
 
 ---
 
 *Documentazione WaldOT - Versione 0.6.1*  
-*Copyright © 2024 Rossonet s.c.a r.l. - Licensed under Apache License 2.0*
+*Copyright © 2024 Zona Autonoma srl - Licensed under Apache License 2.0*

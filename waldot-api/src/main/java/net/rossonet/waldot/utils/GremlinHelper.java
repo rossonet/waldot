@@ -13,7 +13,7 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
 
 /**
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public class GremlinHelper {
 

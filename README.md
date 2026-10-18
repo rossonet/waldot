@@ -532,7 +532,7 @@ See [LICENSE](LICENSE) file for details.
 
 ## Project Sponsor
 
-[![Rossonet s.c.a r.l.](https://raw.githubusercontent.com/rossonet/images/main/artwork/rossonet-logo/png/rossonet-logo_280_115.png)](https://www.rossonet.net)
+[![Zona Autonoma srl](https://raw.githubusercontent.com/rossonet/images/main/artwork/rossonet-logo/png/rossonet-logo_280_115.png)](https://www.rossonet.net)
 
 ---
 

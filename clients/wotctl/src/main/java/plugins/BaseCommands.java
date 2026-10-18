@@ -26,7 +26,7 @@ public class BaseCommands implements CliPluginListener {
 
 		@Override
 		public Void call() throws Exception {
-			System.out.println("powered by Rossonet s.c.a r.l.");
+			System.out.println("powered by Zona Autonoma srl");
 			return null;
 		}
 

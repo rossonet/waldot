@@ -89,7 +89,7 @@ Configured in `DefaultOpcUaConfiguration` and `DefaultHomunculusConfiguration` c
 - **Example**: `--product-name "Industrial WaldOT"`
 
 #### Manufacturer Name (`--manufacturer-name`, `-mn`)
-- **Default**: "Rossonet s.c.a r.l."
+- **Default**: "Zona Autonoma srl"
 - **Purpose**: Manufacturer name in BuildInfo
 - **Example**: `--manufacturer-name "Your Company"`
 
@@ -403,4 +403,4 @@ lsof -i :12686
 
 ---
 
-**Rossonet s.c.a r.l.** - https://www.rossonet.net
+**Zona Autonoma srl** - https://www.rossonet.net

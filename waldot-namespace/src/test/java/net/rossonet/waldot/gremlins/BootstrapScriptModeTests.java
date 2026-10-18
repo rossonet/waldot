@@ -26,7 +26,7 @@ import net.rossonet.waldot.utils.NetworkHelper;
  * <p>This test class verifies that the bootstrap strategy correctly handles
  * both the legacy line-by-line format and the new multi-line Groovy script format.</p>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public class BootstrapScriptModeTests {
 	

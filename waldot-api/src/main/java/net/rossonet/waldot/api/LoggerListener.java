@@ -29,7 +29,7 @@ package net.rossonet.waldot.api;
  * logger.addListener(new CustomLoggerListener());
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface LoggerListener {
 

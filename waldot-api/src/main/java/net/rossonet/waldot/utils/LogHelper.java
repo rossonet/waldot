@@ -15,7 +15,7 @@ import javax.naming.ConfigurationException;
  * LogHelper is a utility class for managing logging levels and formatting stack
  * traces in Waldot
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public final class LogHelper {
 

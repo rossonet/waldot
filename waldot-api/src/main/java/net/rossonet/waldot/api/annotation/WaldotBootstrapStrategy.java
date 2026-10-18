@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * used to indicate that the class contains a strategy for booting Waldot,
  * typically for initializing rules or configurations.
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 @Retention(RUNTIME)
 @Target(TYPE)

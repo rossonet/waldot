@@ -126,7 +126,7 @@ All Picocli parameters can be set via environment variables using the format `WA
 | `WALDOT_BIND_HOSTNAME` | `--bind-hostname` | `127.0.0.1` | Hostname |
 | `WALDOT_ENDPOINT_PATH` | `--endpoint-path` | `/waldot` | URL path |
 | `WALDOT_PRODUCT_NAME` | `--product-name` | `WaldOT` | Product name |
-| `WALDOT_MANUFACTURER_NAME` | `--manufacturer-name` | `Rossonet s.c.a r.l.` | Manufacturer |
+| `WALDOT_MANUFACTURER_NAME` | `--manufacturer-name` | `Zona Autonoma srl` | Manufacturer |
 | `WALDOT_SECURITY_DIR` | `--security-dir` | `.security` | Security directory |
 
 ### WaldOT Application Configuration

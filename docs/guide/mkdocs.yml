@@ -1,6 +1,6 @@
 site_name: WaldOT Documentation
 site_description: Complete documentation for WaldOT - Digital Twin Engine bridging OPC UA and Apache TinkerPop
-site_author: Rossonet s.c.a r.l.
+site_author: Zona Autonoma srl
 site_url: https://github.com/rossonet/waldot
 
 markdown_extensions:
@@ -43,7 +43,7 @@ plugins:
   - with-pdf:
       author: andrea.ambrosini@rossonet.com
       toc_title: Table of Contents / Indice dei contenuti
-      copyright: Rossonet s.c.a r.l.
+      copyright: Zona Autonoma srl
       cover: true
       back_cover: false
       cover_title: WaldOT - Digital Twin Engine Documentation

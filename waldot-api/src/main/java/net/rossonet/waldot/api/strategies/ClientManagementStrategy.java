@@ -48,7 +48,7 @@ import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
  * UaFolderNode clientsFolder = clientStrategy.getAssetClientsFolderNode();
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface ClientManagementStrategy extends AutoCloseable {
 

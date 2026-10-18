@@ -72,7 +72,7 @@ import net.rossonet.waldot.api.models.WaldotVertexProperty;
  * Map<NodeId, WaldotEdge> edges = strategy.getEdges();
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface MiloStrategy extends AutoCloseable {
 	/**

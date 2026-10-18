@@ -123,7 +123,7 @@ import net.rossonet.waldot.utils.LogHelper;
  * @see ComputableFireableAbstractOpcVertex
  * @see ComputeVertex
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
 public class RuleVertex extends ComputableFireableAbstractOpcVertex {

@@ -66,7 +66,7 @@ import net.rossonet.waldot.rules.events.RunnableEvent;
  * @see ComputeVertex
  * @see HysteresisPriorityQueue
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
 public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVertex implements AutoCloseable {

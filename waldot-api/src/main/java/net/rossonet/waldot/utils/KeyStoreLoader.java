@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * containing a self-signed server certificate and private key. It provides
  * methods to retrieve the server's certificate chain and key pair.
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 @Deprecated
 public class KeyStoreLoader {
@@ -112,7 +112,7 @@ public class KeyStoreLoader {
 			final String applicationUri = "urn:rossonet:waldot:camillo:" + UUID.randomUUID();
 
 			final SelfSignedCertificateBuilder builder = new SelfSignedCertificateBuilder(keyPair)
-					.setCommonName("WaldOT OPC Server").setOrganization("Rossonet scarl").setOrganizationalUnit("dev")
+					.setCommonName("WaldOT OPC Server").setOrganization("Zona Autonoma srl").setOrganizationalUnit("dev")
 					.setLocalityName("Imola").setStateName("BO").setCountryCode("IT").setApplicationUri(applicationUri);
 
 			// Get as many hostnames and IP addresses as we can listed in the certificate.

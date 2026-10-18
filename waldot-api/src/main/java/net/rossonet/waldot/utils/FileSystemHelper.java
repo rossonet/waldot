@@ -8,7 +8,7 @@ import java.nio.file.Paths;
  * FileSystemHelper provides utility methods for file system operations, such as
  * deleting directories recursively.
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public class FileSystemHelper {
 

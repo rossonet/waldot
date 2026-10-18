@@ -33,7 +33,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
  * vertex.addEventObserver(new TemperatureEventObserver());
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface EventObserver {
 

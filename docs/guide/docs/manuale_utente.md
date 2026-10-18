@@ -96,7 +96,7 @@ docker run \
 |-----------|---------|-------------|
 | `WALDOT_APPLICATION_NAME` | `WaldOT OPCUA server` | Nome server visibile ai client |
 | `WALDOT_PRODUCT_NAME` | `WaldOT` | Nome prodotto |
-| `WALDOT_MANUFACTURER_NAME` | `Rossonet s.c.a r.l.` | Nome produttore |
+| `WALDOT_MANUFACTURER_NAME` | `Zona Autonoma srl` | Nome produttore |
 
 **Esempio - Branding Personalizzato**:
 ```bash
@@ -1730,6 +1730,6 @@ docker logs <container-id> > waldot.log 2>&1
 
 **Buon lavoro con WaldOT!**
 
-*Manuale a cura di Rossonet s.c.a r.l.*  
+*Manuale a cura di Zona Autonoma srl*  
 *Versione documento: 1.0*  
 *Data: 2024*

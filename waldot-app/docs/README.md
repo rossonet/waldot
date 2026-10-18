@@ -135,7 +135,7 @@ java -jar waldot-app.jar [OPTIONS]
 | `--endpoint-path` | `-ep` | String | `/waldot` | URL path for endpoints |
 | `--product-name` | `-pn` | String | `WaldOT` | Product name in BuildInfo |
 | `--product-uri` | `-pu` | String | `urn:rossonet:waldot:uaserver` | Product URI identifier |
-| `--manufacturer-name` | `-mn` | String | `Rossonet s.c.a r.l.` | Manufacturer name |
+| `--manufacturer-name` | `-mn` | String | `Zona Autonoma srl` | Manufacturer name |
 | `--security-dir` | `-sd` | String | `.security` | Security certificates directory |
 | `--build-number` | `-bn` | String | `w001` | Build number identifier |
 
@@ -551,4 +551,4 @@ Contributions are welcome! Please see [AGENT.md](../../AGENT.md) for guidelines.
 
 ---
 
-**Developed by Rossonet s.c.a r.l.** - https://www.rossonet.net
+**Developed by Zona Autonoma srl** - https://www.rossonet.net

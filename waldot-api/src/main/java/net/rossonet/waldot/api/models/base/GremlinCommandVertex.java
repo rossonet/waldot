@@ -16,7 +16,7 @@ import net.rossonet.waldot.api.models.WaldotCommand;
  * implements WaldotCommand. It represents a command vertex in the Waldot graph
  * model, providing methods to manage command execution and versioning.
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public abstract class GremlinCommandVertex extends UaMethodNode implements WaldotCommand {
 

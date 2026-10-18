@@ -60,7 +60,7 @@ import net.rossonet.waldot.exception.PluginBlockingException;
  * }
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface PluginListener {
 

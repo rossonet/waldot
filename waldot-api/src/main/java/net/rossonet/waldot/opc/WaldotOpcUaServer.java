@@ -81,7 +81,7 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * WaldotOpcUaServer is the main class for the Waldot OPC UA server. It handles
  * the server configuration, endpoint creation, and plugin registration.
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public class WaldotOpcUaServer implements AutoCloseable {
 

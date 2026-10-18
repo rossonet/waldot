@@ -41,7 +41,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
  * Object[] contextResult = command.runCommand(invocationContext, inputValues);
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @see WaldotVertex
  * @see MethodNode
  */

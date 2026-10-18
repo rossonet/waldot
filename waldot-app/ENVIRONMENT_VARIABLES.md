@@ -71,7 +71,7 @@ docker run --env-file .env -p 4840:4840 rossonet/waldot:latest
 | `WALDOT_APPLICATION_NAME` | `WaldOT OPCUA server` | Server name visible to OPC UA clients | `Production OPC UA Server` |
 | `WALDOT_PRODUCT_NAME` | `WaldOT` | Product name in OPC UA BuildInfo | `Industrial WaldOT` |
 | `WALDOT_PRODUCT_URI` | `urn:rossonet:waldot:uaserver` | Unique product URI identifier | `urn:company:product:waldot` |
-| `WALDOT_MANUFACTURER_NAME` | `Rossonet s.c.a r.l.` | Manufacturer name in BuildInfo | `ACME Corporation` |
+| `WALDOT_MANUFACTURER_NAME` | `Zona Autonoma srl` | Manufacturer name in BuildInfo | `ACME Corporation` |
 | `WALDOT_BUILD_NUMBER` | `w001` | Build number for version tracking | `v1.2.3-prod` |
 
 **Identity Configuration Tips**:
@@ -655,4 +655,4 @@ lsof -i :4840
 
 ---
 
-**Rossonet s.c.a r.l.** - https://www.rossonet.net
+**Zona Autonoma srl** - https://www.rossonet.net

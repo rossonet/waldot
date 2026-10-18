@@ -43,7 +43,7 @@ import net.rossonet.waldot.utils.LogHelper;
  * values, observers, and interactions with the WaldotGraph.
  * 
  * @param <DATA_TYPE> the type of data stored in the vertex property
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public abstract class AbstractOpcVertexProperty<DATA_TYPE>
 		extends

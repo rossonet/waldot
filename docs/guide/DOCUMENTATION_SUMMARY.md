@@ -555,4 +555,4 @@ The documentation is now ready for:
 **Documentation Version**: 1.0  
 **WaldOT Version**: 0.6.1  
 **Last Updated**: 2024-04-04  
-**Author**: AI Assistant (Claude Sonnet 4.5) for Rossonet s.c.a r.l.
+**Author**: AI Assistant (Claude Sonnet 4.5) for Zona Autonoma srl

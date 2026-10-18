@@ -121,7 +121,7 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * @see RuleVertex
  * @see ComputableFireableAbstractOpcVertex
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
 public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {

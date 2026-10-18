@@ -50,7 +50,7 @@ import net.rossonet.waldot.utils.TextHelper;
  * in the Waldot graph model, including methods for managing input and output
  * arguments, event observers, and property observers.
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public abstract class AbstractOpcCommand extends GremlinCommandVertex implements WaldotCommand {
 

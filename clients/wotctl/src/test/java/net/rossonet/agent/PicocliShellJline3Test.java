@@ -20,7 +20,7 @@ import picocli.shell.jline3.PicocliCommands;
 import picocli.shell.jline3.PicocliJLineCompleter;
 
 @Command(name = "", description = "@|bold,underline Demo Client Interactive Console :|@%n", footer = {
-		"by Rossonet s.c.a r.l. - https://rossonet.net%n" }, subcommands = {
+		"by Zona Autonoma srl - https://rossonet.net%n" }, subcommands = {
 				net.rossonet.agent.PicocliShellJline3Test.VersionCommand.class }, customSynopsis = {
 						"" }, synopsisHeading = "")
 public class PicocliShellJline3Test implements Runnable {

@@ -29,7 +29,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
  * }
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface BootstrapStrategy extends AutoCloseable {
 

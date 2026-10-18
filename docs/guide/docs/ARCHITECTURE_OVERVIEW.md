@@ -748,4 +748,4 @@ WaldOT represents a paradigm shift in industrial data management by unifying OPC
 
 ---
 
-**Questions? Contact**: [Rossonet s.c.a r.l.](https://www.rossonet.net)
+**Questions? Contact**: [Zona Autonoma srl](https://www.rossonet.net)

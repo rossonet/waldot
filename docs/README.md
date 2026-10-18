@@ -278,9 +278,9 @@ All documentation is released under the **Apache License 2.0**.
 
 ## 🏢 Project Sponsor
 
-[![Rossonet s.c.a r.l.](https://raw.githubusercontent.com/rossonet/images/main/artwork/rossonet-logo/png/rossonet-logo_280_115.png)](https://www.rossonet.net)
+[![Zona Autonoma srl](https://raw.githubusercontent.com/rossonet/images/main/artwork/rossonet-logo/png/rossonet-logo_280_115.png)](https://www.rossonet.net)
 
-**Rossonet s.c.a r.l.**  
+**Zona Autonoma srl**  
 Industrial IoT and Edge Computing Solutions  
 https://www.rossonet.net
 
@@ -298,4 +298,4 @@ https://www.rossonet.net
 
 **Version**: 1.0  
 **Last Updated**: 2024-04-04  
-**Maintained by**: Rossonet s.c.a r.l.
+**Maintained by**: Zona Autonoma srl

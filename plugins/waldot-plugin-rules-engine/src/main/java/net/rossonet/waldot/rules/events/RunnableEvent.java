@@ -37,7 +37,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
  * @see FireableAction
  * @see net.rossonet.waldot.jexl.HysteresisPriorityQueue
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
 public final class RunnableEvent {

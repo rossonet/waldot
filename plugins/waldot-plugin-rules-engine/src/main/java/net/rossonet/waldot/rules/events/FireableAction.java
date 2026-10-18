@@ -27,7 +27,7 @@ package net.rossonet.waldot.rules.events;
  * 
  * @see RunnableEvent
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
 public abstract class FireableAction implements Runnable {

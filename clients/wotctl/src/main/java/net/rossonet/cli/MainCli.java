@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import picocli.CommandLine;
 
 /**
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public class MainCli {
 

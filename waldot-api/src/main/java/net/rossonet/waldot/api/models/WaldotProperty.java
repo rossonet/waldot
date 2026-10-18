@@ -31,7 +31,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaServerNode;
  * WaldotEdge owner = prop.getPropertyReference();
  * }</pre>
  * 
- * @author Andrea Ambrosini - Rossonet s.c.a r.l.
+ * @author Andrea Ambrosini - Zona Autonoma srl
  * @see Property
  * @see BaseVariableType
  */
