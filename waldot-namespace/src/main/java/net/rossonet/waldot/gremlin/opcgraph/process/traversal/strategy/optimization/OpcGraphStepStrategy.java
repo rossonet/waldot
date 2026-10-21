@@ -52,7 +52,7 @@ public final class OpcGraphStepStrategy extends AbstractTraversalStrategy<Traver
             Step<?, ?> currentStep = tinkerGraphStep.getNextStep();
             while (currentStep instanceof HasStep || currentStep instanceof NoOpBarrierStep) {
                 if (currentStep instanceof HasStep) {
-                    for (final HasContainer hasContainer : ((HasContainerHolder) currentStep).getHasContainers()) {
+                    for (final HasContainer hasContainer : ((HasContainerHolder<?, ?>) currentStep).getHasContainers()) {
                         if (!GraphStep.processHasContainerIds(tinkerGraphStep, hasContainer))
                             tinkerGraphStep.addHasContainer(hasContainer);
                     }

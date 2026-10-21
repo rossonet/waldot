@@ -52,9 +52,9 @@ configurations.all {
 dependencies {
     implementation project(':waldot-deps')
     api project(':waldot-api')
-    api group: 'org.apache.tinkerpop', name: 'gremlin-server', version: '3.7.3'
-    testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: '3.7.3'
-    testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
+    api group: 'org.apache.tinkerpop', name: 'gremlin-server', version: '3.8.2'
+    testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-driver', version: '3.8.2'
+    testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.8.2'
     testImplementation project(':waldot-namespace')
     testImplementation project(':waldot-client')
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'

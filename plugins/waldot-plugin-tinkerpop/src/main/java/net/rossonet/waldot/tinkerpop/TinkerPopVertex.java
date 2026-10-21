@@ -12,12 +12,9 @@ import org.apache.tinkerpop.gremlin.server.Settings.SerializerSettings;
 import org.apache.tinkerpop.gremlin.server.channel.WsAndHttpChannelizer;
 import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
 import org.apache.tinkerpop.gremlin.util.ser.GraphSONMessageSerializerV3;
-import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
-import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
 import org.eclipse.milo.opcua.stack.core.NodeIds;
-import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -30,9 +27,7 @@ import net.rossonet.waldot.WaldotTinkerPopPlugin;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
-import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 
 /**
  * Vertex that embeds Apache TinkerPop Gremlin Server for native client connections.
@@ -42,117 +37,59 @@ import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
  * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
-public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable {
+public class TinkerPopVertex extends AbstractOpcVertex
+		implements
+			AutoCloseable {
+	private static final String DEFAULT_BIND_HOST = "0.0.0.0";
+
+	private static final String DEFAULT_CATEGORY_EVENT = "TinkerPopVertex";
+
+	private static final int DEFAULT_PORT = 1025;
+
 	/**
 	 * Registers OPC-UA properties for Gremlin Server type node.
 	 * Aggiunge le proprietà Port, Bind, Status al tipo OPC-UA.
 	 */
-	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode dockerTypeNode) {
-		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode, WaldotTinkerPopPlugin.PORT_FIELD,
-				NodeIds.Int16);
-		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode, WaldotTinkerPopPlugin.BIND_HOST_FIELD,
-				NodeIds.String);
-		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode, WaldotTinkerPopPlugin.STATUS_FIELD,
-				NodeIds.String);
+	public static void generateParameters(WaldotNamespace waldotNamespace,
+			UaObjectTypeNode dockerTypeNode) {
+		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode,
+				WaldotTinkerPopPlugin.PORT_FIELD, NodeIds.Int16);
+		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode,
+				WaldotTinkerPopPlugin.BIND_HOST_FIELD, NodeIds.String);
 	}
 
-	// Directory OPC-UA per organizzare i server
-	private String baseDirectory;
-
-	// Indirizzo bind del server
-	private String host;
-	private final QualifiedProperty<String> hostProperty;
-
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	
-	// Porta del server Gremlin
-	private int port = 1025;
-
-	private final QualifiedProperty<Integer> portProperty;
 
 	// Istanza Gremlin Server embedded
 	private GremlinServer server;
-	
-	// Proprietà Status (Running/Stopped/Failed)
-	private final QualifiedProperty<String> statusProperty;
 
-	private final WaldotNamespace waldotNamespace;
-
-	public TinkerPopVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-			UByte eventNotifier, long version, Object[] propertyKeyValues) {
-		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
-				version);
-		waldotNamespace = graph.getWaldotNamespace();
-		baseDirectory = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
-		if (baseDirectory == null || baseDirectory.isEmpty()) {
-			baseDirectory = "gremlin";
-		}
-		final String keyValuesPropertyPort = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				WaldotTinkerPopPlugin.PORT_FIELD.toLowerCase());
-		if (keyValuesPropertyPort != null && !keyValuesPropertyPort.isEmpty()) {
-			try {
-				port = Integer.valueOf(keyValuesPropertyPort);
-			} catch (final NumberFormatException e) {
-				logger.warn("Invalid port number provided: " + keyValuesPropertyPort + ". Using default port " + port);
-			}
-		}
-		portProperty = new QualifiedProperty<Integer>(getNamespace().getNamespaceUri(),
-				WaldotTinkerPopPlugin.PORT_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Integer.class);
-		if (port == 0) {
-			port = 1025;
-		}
-		setProperty(portProperty, port);
-		host = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				WaldotTinkerPopPlugin.BIND_HOST_FIELD.toLowerCase());
-		hostProperty = new QualifiedProperty<String>(getNamespace().getNamespaceUri(),
-				WaldotTinkerPopPlugin.BIND_HOST_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				String.class);
-		if (host == null || host.isEmpty()) {
-			host = "0.0.0.0";
-		}
-		setProperty(hostProperty, host);
-		statusProperty = new QualifiedProperty<String>(getNamespace().getNamespaceUri(),
-				WaldotTinkerPopPlugin.STATUS_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				String.class);
+	public TinkerPopVertex(WaldotGraph graph, UaNodeContext context,
+			NodeId nodeId, QualifiedName browseName, LocalizedText displayName,
+			LocalizedText description, UInteger writeMask,
+			UInteger userWriteMask, UByte eventNotifier, long version,
+			Object[] propertyKeyValues) {
+		super(graph, context, nodeId, browseName, displayName, description,
+				writeMask, userWriteMask, eventNotifier, version);
+		addManagedProperty(WaldotTinkerPopPlugin.PORT_FIELD, NodeIds.Int16,
+				Integer.class, true, DEFAULT_PORT, null, true,
+				propertyKeyValues);
+		addManagedProperty(WaldotTinkerPopPlugin.BIND_HOST_FIELD,
+				NodeIds.String, String.class, true, DEFAULT_BIND_HOST, null,
+				true, propertyKeyValues);
 		start();
 	}
 
 	@Override
 	public Object clone() {
-		return new TinkerPopVertex(graph, getNodeContext(), getNodeId(), getBrowseName(), getDisplayName(),
-				getDescription(), getWriteMask(), getUserWriteMask(), getEventNotifier(), version(),
-				getPropertiesAsStringArray());
+		return new TinkerPopVertex(graph, getNodeContext(), getNodeId(),
+				getBrowseName(), getDisplayName(), getDescription(),
+				getWriteMask(), getUserWriteMask(), getEventNotifier(),
+				version(), getPropertiesAsStringArray());
 	}
 
 	@Override
 	public void close() throws Exception {
 		stop();
-	}
-
-	@Override
-	public void notifyPropertyValueChanging(String label, DataValue value) {
-		super.notifyPropertyValueChanging(label, value);
-		boolean restart = false;
-		if (label.equals(WaldotTinkerPopPlugin.PORT_FIELD.toLowerCase())) {
-			port = Integer.valueOf(value.getValue().getValue().toString());
-			setProperty(portProperty, port);
-			restart = true;
-		}
-		if (label.equals(WaldotTinkerPopPlugin.BIND_HOST_FIELD.toLowerCase())) {
-			host = value.getValue().getValue().toString();
-			setProperty(hostProperty, host);
-			restart = true;
-		}
-		if (restart) {
-			stop(true);
-			start();
-		}
 	}
 
 	/**
@@ -162,25 +99,30 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 	 */
 	public void start() {
 		final Settings overriddenSettings = new Settings();
-		overriddenSettings.host = host;
-		overriddenSettings.port = port;
+		overriddenSettings.host = getRuntimeParameter(
+				WaldotTinkerPopPlugin.BIND_HOST_FIELD);
+		overriddenSettings.port = getRuntimeParameter(
+				WaldotTinkerPopPlugin.PORT_FIELD);
 		overriddenSettings.channelizer = WsAndHttpChannelizer.class.getName();
 		overriddenSettings.graphManager = WaldotGraphManager.class.getName();
 		/* bindings */
 		final Map<String, Object> arg = new HashMap<>();
-		arg.put("graph", waldotNamespace.getGremlinGraph());
-		arg.put("g", waldotNamespace.getGremlinGraph().traversal());
+		arg.put("graph", getNamespace().getGremlinGraph());
+		arg.put("g", getNamespace().getGremlinGraph().traversal());
 		final Map<String, Object> method2arg = new HashMap<>();
 		method2arg.put("bindings", arg);
-		overriddenSettings.scriptEngines.get("gremlin-groovy").plugins
-				.put("org.apache.tinkerpop.gremlin.jsr223.BindingsGremlinPlugin", method2arg);
-		overriddenSettings.scriptEngines.get("gremlin-groovy").plugins
-				.put("net.rossonet.waldot.gremlin.opcgraph.jsr223.OpcGraphGremlinPlugin", method2arg);
+		overriddenSettings.scriptEngines.get("gremlin-groovy").plugins.put(
+				"org.apache.tinkerpop.gremlin.jsr223.BindingsGremlinPlugin",
+				method2arg);
+		overriddenSettings.scriptEngines.get("gremlin-groovy").plugins.put(
+				"net.rossonet.waldot.gremlin.opcgraph.jsr223.OpcGraphGremlinPlugin",
+				method2arg);
 		/* === SERIALIZERS === */
 		// 1) GraphSON v3 – richiesto da Graph-Explorer
 		final SerializerSettings graphsonV3 = new SerializerSettings();
 		graphsonV3.className = GraphSONMessageSerializerV3.class.getName();
-		graphsonV3.config = Map.of("serializeResultToString", false, "ioRegistries",
+		graphsonV3.config = Map.of("serializeResultToString", false,
+				"ioRegistries",
 				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3",
 						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV2",
 						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1"));
@@ -188,10 +130,10 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 		// 2) (facoltativo) GraphBinary v1 per client WS high-performance
 		final SerializerSettings graphBinary = new SerializerSettings();
 		graphBinary.className = GraphBinaryMessageSerializerV1.class.getName();
-		graphBinary.config = Map.of("ioRegistries",
-				List.of("net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3",
-						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV2",
-						"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1"));
+		graphBinary.config = Map.of("ioRegistries", List.of(
+				"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV3",
+				"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV2",
+				"net.rossonet.waldot.gremlin.opcgraph.structure.OpcIoRegistryV1"));
 		overriddenSettings.serializers = new ArrayList<>();
 		overriddenSettings.serializers.add(graphsonV3); // deve essere PRIMO
 		overriddenSettings.serializers.add(graphBinary);
@@ -201,10 +143,18 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 		try {
 			server.start();// .get();
 			logger.info("Gremlin Server started: " + server.toString());
-			setProperty(statusProperty, WaldotTinkerPopPlugin.STATUS_RUNNING);
+			updatePropertyIfChanged(
+					WaldotTinkerPopPlugin.STATUS_FIELD.toLowerCase(),
+					WaldotTinkerPopPlugin.STATUS_RUNNING);
+			sendLogEvent(DEFAULT_CATEGORY_EVENT,
+					"Gremlin Server started: " + server.toString(), 0);
 		} catch (final Exception e) {
 			logger.error("Failed to start Gremlin Server", e);
-			setProperty(statusProperty, WaldotTinkerPopPlugin.STATUS_FAILED);
+			updatePropertyIfChanged(
+					WaldotTinkerPopPlugin.STATUS_FIELD.toLowerCase(),
+					WaldotTinkerPopPlugin.STATUS_FAILED);
+			sendLogEvent(DEFAULT_CATEGORY_EVENT,
+					"Failed to start Gremlin Server: " + e.getMessage(), 100);
 		}
 	}
 
@@ -220,11 +170,15 @@ public class TinkerPopVertex extends AbstractOpcVertex implements AutoCloseable 
 					f.get();
 				}
 				server = null;
-				setProperty(statusProperty, WaldotTinkerPopPlugin.STATUS_STOPPED);
+				updatePropertyIfChanged(
+						WaldotTinkerPopPlugin.STATUS_FIELD.toLowerCase(),
+						WaldotTinkerPopPlugin.STATUS_STOPPED);
 				logger.info("Gremlin Server stopped");
 			} catch (final Exception e) {
 				logger.error("Failed to stop Gremlin Server", e);
-				setProperty(statusProperty, WaldotTinkerPopPlugin.STATUS_FAILED);
+				updatePropertyIfChanged(
+						WaldotTinkerPopPlugin.STATUS_FIELD.toLowerCase(),
+						WaldotTinkerPopPlugin.STATUS_FAILED);
 			}
 		}
 

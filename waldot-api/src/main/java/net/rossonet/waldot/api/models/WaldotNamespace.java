@@ -108,7 +108,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotEdge
 	 * @see WaldotVertex
 	 */
-	WaldotEdge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex, String label, Object[] keyValues);
+	WaldotEdge addEdge(WaldotVertex sourceVertex, WaldotVertex targetVertex,
+			String label, Object[] keyValues);
 
 	/**
 	 * Adds a namespace listener to receive namespace events.
@@ -147,8 +148,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotGraphComputerView
 	 * @see GraphFilter
 	 */
-	WaldotGraphComputerView createGraphComputerView(WaldotGraph graph, GraphFilter graphFilter,
-			Set<VertexComputeKey> object);
+	WaldotGraphComputerView createGraphComputerView(WaldotGraph graph,
+			GraphFilter graphFilter, Set<VertexComputeKey> object);
 
 	/**
 	 * Creates or updates a property on an edge.
@@ -164,8 +165,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotProperty
 	 * @see WaldotEdge
 	 */
-	<DATA_TYPE> WaldotProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(WaldotEdge edge, String key,
-			DATA_TYPE value);
+	<DATA_TYPE> WaldotProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(
+			WaldotEdge edge, String key, DATA_TYPE value);
 
 	/**
 	 * Creates or updates a property on a vertex.
@@ -181,8 +182,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotVertexProperty
 	 * @see WaldotVertex
 	 */
-	<DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(WaldotVertex vertex, String key,
-			DATA_TYPE value);
+	<DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(
+			WaldotVertex vertex, String key, DATA_TYPE value);
 
 	/**
 	 * Deletes a directory (folder) node from the OPC UA address space.
@@ -365,7 +366,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotProperty
 	 * @see WaldotEdge
 	 */
-	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getEdgeProperties(WaldotEdge edge);
+	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getEdgeProperties(
+			WaldotEdge edge);
 
 	/**
 	 * Returns a map of all edges in the graph, keyed by NodeId.
@@ -385,7 +387,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotEdge
 	 * @see Direction
 	 */
-	Map<NodeId, WaldotEdge> getEdges(WaldotVertex vertex, Direction direction, String[] edgeLabels);
+	Map<NodeId, WaldotEdge> getEdges(WaldotVertex vertex, Direction direction,
+			String[] edgeLabels);
 
 	/**
 	 * Returns the total count of edges in the graph.
@@ -516,7 +519,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotProperty
 	 * @see WaldotEdge
 	 */
-	public <DATA_TYPE> WaldotEdge getPropertyReference(WaldotProperty<DATA_TYPE> property);
+	public <DATA_TYPE> WaldotEdge getPropertyReference(
+			WaldotProperty<DATA_TYPE> property);
 
 	/**
 	 * Returns the reference type tree for the namespace.
@@ -572,7 +576,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotVertexProperty
 	 * @see WaldotVertex
 	 */
-	<DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(WaldotVertex vertex);
+	<DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(
+			WaldotVertex vertex);
 
 	/**
 	 * Returns the vertex that owns a vertex property.
@@ -583,7 +588,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotVertexProperty
 	 * @see WaldotVertex
 	 */
-	public <DATA_TYPE> WaldotVertex getVertexPropertyReference(WaldotVertexProperty<DATA_TYPE> vertexProperty);
+	public <DATA_TYPE> WaldotVertex getVertexPropertyReference(
+			WaldotVertexProperty<DATA_TYPE> vertexProperty);
 
 	/**
 	 * Returns a map of all vertices in the graph, keyed by NodeId.
@@ -603,7 +609,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see WaldotVertex
 	 * @see Direction
 	 */
-	Map<NodeId, WaldotVertex> getVertices(WaldotVertex vertex, Direction direction, String[] edgeLabels);
+	Map<NodeId, WaldotVertex> getVertices(WaldotVertex vertex,
+			Direction direction, String[] edgeLabels);
 
 	/**
 	 * Returns the total count of vertices in the graph.
@@ -700,7 +707,8 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @see ClientRegisterUsernameIdentityValidator
 	 * @see ClientRegisterX509IdentityValidator
 	 */
-	void registerAgentValidators(ClientRegisterAnonymousValidator agentAnonymousValidator,
+	void registerAgentValidators(
+			ClientRegisterAnonymousValidator agentAnonymousValidator,
 			ClientRegisterUsernameIdentityValidator agentIdentityValidator,
 			ClientRegisterX509IdentityValidator agentX509IdentityValidator);
 

@@ -60,7 +60,7 @@ dependencies {
     api("org.bouncycastle:bcpkix-jdk18on:1.83")
     api("org.bouncycastle:bcutil-jdk18on:1.83")
     // gremlin
-    api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.7.3'
+    api group: 'org.apache.tinkerpop', name: 'gremlin-core', version: '3.8.2'
     // OPCUA
     api group: 'org.eclipse.milo', name: 'milo-sdk-server', version: '1.1.6'
 }

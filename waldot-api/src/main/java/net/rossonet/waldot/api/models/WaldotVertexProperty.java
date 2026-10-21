@@ -37,7 +37,11 @@ import org.eclipse.milo.opcua.sdk.server.model.variables.BaseVariableType;
  * @see BaseVariableType
  * @see WaldotElement
  */
-public interface WaldotVertexProperty<DATA_TYPE> extends VertexProperty<DATA_TYPE>, BaseVariableType, WaldotElement {
+public interface WaldotVertexProperty<DATA_TYPE>
+		extends
+			VertexProperty<DATA_TYPE>,
+			BaseVariableType,
+			WaldotElement {
 
 	/**
 	 * Returns the vertex that owns this property.

@@ -824,7 +824,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 			if (r.getReferenceTypeId().equals(NodeIds.HasComponent)
 					&& r.isInverse()) {
 				final NodeId nodeId = r.getSourceNodeId();
-				return (AbstractOpcVertex) waldotNamespace.getStorageManager()
+				return (WaldotVertex) waldotNamespace.getStorageManager()
 						.get(nodeId);
 			}
 		}

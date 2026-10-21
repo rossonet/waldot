@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 class WaldotVertexPropertyTest {
 
-	private WaldotVertexProperty<Object> mockVertexProperty;
 	private WaldotVertex mockVertex;
+	private WaldotVertexProperty<Object> mockVertexProperty;
 
 	@BeforeEach
 	void setUp() {
@@ -22,9 +22,11 @@ class WaldotVertexPropertyTest {
 
 	@Test
 	void testGetVertexPropertyReference() {
-		when(mockVertexProperty.getVertexPropertyReference()).thenReturn(mockVertex);
+		when(mockVertexProperty.getVertexPropertyReference())
+				.thenReturn(mockVertex);
 
-		final WaldotVertex result = mockVertexProperty.getVertexPropertyReference();
+		final WaldotVertex result = mockVertexProperty
+				.getVertexPropertyReference();
 
 		assertEquals(mockVertex, result);
 		verify(mockVertexProperty, times(1)).getVertexPropertyReference();

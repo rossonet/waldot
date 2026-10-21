@@ -171,7 +171,7 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE>
 
 	@Override
 	public void remove() {
-		getVertexPropertyReference().removeComponent(this);
+		// getVertexPropertyReference().removeComponent(this);
 	}
 
 	@Override
