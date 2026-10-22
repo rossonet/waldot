@@ -524,6 +524,10 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		return getProperty(labelProperty).orElseGet(() -> null);
 	}
 
+	protected void markDirtyStateToUpdate() {
+		dirtyStateToUpdate = false;
+	}
+
 	@Override
 	public void notifyPropertyValueChanging(String label, DataValue value) {
 		if (label.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {

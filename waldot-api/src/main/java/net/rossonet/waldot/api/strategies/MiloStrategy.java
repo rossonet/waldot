@@ -168,6 +168,10 @@ public interface MiloStrategy extends AutoCloseable {
 	 */
 	public static final String REFERENCE_TYPE = "ReferenceType";
 	/**
+	 * Prefix for runtime data keys.
+	 */
+	public static final String RUNTIME_DATA_PREFIX = "run!";
+	/**
 	 * Field name for source node.
 	 */
 	public static final String SOURCE_NODE = "SourceNode";
@@ -187,6 +191,7 @@ public interface MiloStrategy extends AutoCloseable {
 	 * Parameter name for user write mask.
 	 */
 	public static final String USER_WRITE_MASK_PARAMETER = "user-write-mask";
+
 	/**
 	 * Parameter name for version.
 	 */
