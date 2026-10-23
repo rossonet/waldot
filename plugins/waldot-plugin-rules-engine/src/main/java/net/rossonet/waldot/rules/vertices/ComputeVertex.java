@@ -5,10 +5,11 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
-import org.eclipse.milo.opcua.sdk.core.QualifiedProperty;
-import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
@@ -23,12 +24,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.PluginListener;
+import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.strategies.MiloStrategy;
+import net.rossonet.waldot.api.models.WaldotVertex;
+import net.rossonet.waldot.exception.PluginBlockingException;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
-import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
+import net.rossonet.waldot.plugin.EdgeMonitoredVertex;
 import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
+import net.rossonet.waldot.rules.edges.ComputeMonitoredEdge;
 import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.rules.events.RunnableEvent;
 import net.rossonet.waldot.utils.ThreadHelper;
@@ -44,79 +48,69 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * 
  * <h2>Architecture</h2>
  * <pre>
- * [RuleVertex 1] --execute--> [ComputeMonitoredEdge 1]
- *                                       |
- * [RuleVertex 2] --execute--> [ComputeMonitoredEdge 2] --> [ComputeVertex]
- *                                       |                        |
- * [RuleVertex N] --execute--> [ComputeMonitoredEdge N]          |
- *                                                                v
- *                                                      [Priority Queue]
- *                                                                |
- *                                                                v
- *                                                   [Virtual Thread Pool]
+ * [ComputeVertex] --rules:execute--&gt; [RuleVertex 1]
+ *        |         --rules:execute--&gt; [RuleVertex 2]
+ *        |         --rules:execute--&gt; [RuleVertex N]
+ *        v
+ *  [dirty rules queue, ordered by weight]
+ *        |
+ *        v
+ *  [virtual threads, at most "threads" at the same time]
  * </pre>
+ * The edge goes from the compute vertex (source) to the rule (target). When the edge is created the
+ * vertex installs a {@link ComputeMonitoredEdge}; an edge in the opposite direction, or towards a vertex that
+ * is not a rule, is rejected.
  * 
  * <h2>Execution Flow</h2>
  * <ol>
- *   <li><b>Queue notification</b>: ComputeMonitoredEdge notifies queue size change</li>
- *   <li><b>Priority calculation</b>: Weight = edge_priority * factor + queue_size</li>
- *   <li><b>Dirty node queue</b>: RuleVertex added to priority queue by weight</li>
- *   <li><b>Thread manager</b>: Polls dirty nodes and checks thread availability</li>
- *   <li><b>Event polling</b>: Polls RunnableEvent from RuleVertex queue</li>
- *   <li><b>Action execution</b>: Submits action to virtual thread pool</li>
- *   <li><b>Timeout monitoring</b>: Cancels actions exceeding execution timeout</li>
+ *   <li><b>Queue notification</b>: the rule publishes its <code>queue</code> size and the edge notifies this vertex</li>
+ *   <li><b>Priority calculation</b>: weight = edge_priority * factor + queue_size</li>
+ *   <li><b>Dirty rules queue</b>: the rule is queued by weight (the highest weight is served first)</li>
+ *   <li><b>Thread manager</b>: when a slot is free it takes the heaviest rule and polls <b>one</b> event from it</li>
+ *   <li><b>Action execution</b>: the event is submitted to the virtual thread pool; if the rule still has
+ *       events it is queued again with its new weight, so the rules are served in turn</li>
+ *   <li><b>Timeout monitoring</b>: actions exceeding the execution timeout are cancelled</li>
  * </ol>
  * 
  * <h2>Priority Mechanism</h2>
- * <p>
- * ComputeVertex prioritizes RuleVertices based on:
  * <ul>
- *   <li><b>Edge priority</b>: Priority of ComputeMonitoredEdge (from edge property)</li>
- *   <li><b>Queue size</b>: Number of pending events in RuleVertex</li>
- *   <li><b>Priority factor</b>: Multiplier for edge priority (default: 100.0)</li>
+ *   <li><b>Edge priority</b>: property <code>priority</code> of the <code>rules:execute</code> edge</li>
+ *   <li><b>Queue size</b>: number of pending events in the rule</li>
+ *   <li><b>Priority factor</b>: multiplier of the edge priority (default: 100.0)</li>
  * </ul>
  * <p>
- * Formula: <code>weight = edge_priority * priority_factor + queue_size</code>
- * </p>
- * <p>
- * Higher weight = higher priority. This ensures urgent rules (high edge priority)
- * and backed-up rules (large queue) get processed first.
+ * Formula: <code>weight = edge_priority * priority_factor + queue_size</code>.
+ * Higher weight = served first.
  * </p>
  * 
  * <h2>Thread Management</h2>
  * <p>
- * Uses Java 21+ virtual threads for lightweight concurrency:
- * <ul>
- *   <li>Configurable thread pool size (default: 1)</li>
- *   <li>Execution timeout per action (default: 2 minutes)</li>
- *   <li>Automatic timeout cancellation</li>
- *   <li>Concurrent execution tracking</li>
- * </ul>
+ * The manager thread is started when the first rule needs it, so a vertex that is never used does not
+ * consume threads. All the limits are read at every cycle, so they can be changed at runtime.
+ * </p>
  * 
  * <h2>Example Usage</h2>
  * <pre>{@code
- * // Create compute vertex with 4 threads
  * Vertex compute = graph.addVertex(
- *     "type", "compute",
+ *     "type", "rules:compute",
  *     "label", "main-compute",
- *     "Threads", "4",  // 4 concurrent actions
- *     "execution-timeout-ms", "60000",  // 1 minute timeout
- *     "Factor", "100.0"  // Priority factor
+ *     "threads", "4",
+ *     "execution-timeout-ms", "60000",
+ *     "factor", "100.0"
  * );
  * 
- * // Connect multiple rules to compute
- * rule1.addEdge("execute", compute, "Priority", "100");  // High priority
- * rule2.addEdge("execute", compute, "Priority", "50");   // Medium priority
- * rule3.addEdge("execute", compute, "Priority", "10");   // Low priority
+ * compute.addEdge("runner", rule1, "type", "rules:execute", "priority", "100");
+ * compute.addEdge("runner", rule2, "type", "rules:execute", "priority", "10");
  * }</pre>
  * 
  * <h2>Properties</h2>
  * <ul>
- *   <li><b>Threads</b>: Thread pool size (default: 1)</li>
- *   <li><b>execution-timeout-ms</b>: Action timeout in ms (default: 120000)</li>
- *   <li><b>Factor</b>: Priority factor multiplier (default: 100.0)</li>
- *   <li><b>Queue</b>: Number of dirty nodes awaiting execution (read-only)</li>
+ *   <li><b>threads</b>: max actions executed at the same time (default: 1, minimum 1)</li>
+ *   <li><b>execution-timeout-ms</b>: action timeout in ms (default: 120000)</li>
+ *   <li><b>factor</b>: priority factor multiplier (default: 100.0)</li>
+ *   <li><b>queue</b>: number of rules with events awaiting execution</li>
  * </ul>
+ * Invalid values (not a number, below the minimum) are replaced by the default.
  * 
  * @see RuleVertex
  * @see ComputableFireableAbstractOpcVertex
@@ -124,14 +118,10 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
-public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
+public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, EdgeMonitoredVertex {
 
 	/**
 	 * Thread manager runnable that polls dirty nodes and executes actions.
-	 * <p>
-	 * Runnable che gestisce il polling dei nodi sporchi e l'esecuzione delle azioni
-	 * nel thread pool.
-	 * </p>
 	 */
 	private final class ComputeThreadManager implements Runnable {
 
@@ -139,34 +129,31 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 		public void run() {
 			while (isActive()) {
 				try {
-					for (final Entry<Future<?>, FireableAction> active : runners.entrySet()) {
-						if (active.getKey().isDone()) {
-							runners.remove(active.getKey());
-						}
-						if (active.getValue().getStartingTime() + executionTimeoutMs < System.currentTimeMillis()) {
-							logger.warn("Action for node " + active.getValue()
-									+ " is taking too long to execute. Cancelling...");
-							active.getKey().cancel(true);
-							runners.remove(active.getKey());
-						}
-					}
-					if (runners.size() >= threads) {
-						Thread.sleep(100); // attende un po' prima di controllare di nuovo
+					reapRunners();
+					if (runners.size() >= getThreads()) {
+						// pool pieno: attende che si liberi uno slot senza bloccare i controlli di timeout
+						Thread.sleep(FULL_POOL_WAIT_MS);
 						continue;
 					}
-					final DirtyNode dirty = dirtyNodes.take();
-					final ComputableFireableAbstractOpcVertex activeVertex = servedFireableNodes.get(dirty.getNodeId());
-					RunnableEvent newEvent = activeVertex.poll();
-					while (newEvent != null) {
-						final FireableAction action = newEvent.getAction(System.currentTimeMillis());
-						runners.put(executor.submit(() -> {
-							try {
-								action.run();
-							} catch (final Throwable t) {
-								logger.error("Error executing action for node " + dirty.getNodeId(), t);
-							}
-						}), action);
-						newEvent = activeVertex.poll();
+					final DirtyNode dirty = dirtyNodes.poll(MANAGER_POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
+					if (dirty == null) {
+						continue;
+					}
+					final ComputableFireableAbstractOpcVertex vertex = servedFireableNodes.get(dirty.getNodeId());
+					if (vertex == null) {
+						// la regola è stata scollegata nel frattempo
+						continue;
+					}
+					// un solo evento per volta: la regola, se ha ancora eventi, rientra in coda
+					// con il suo nuovo peso e le altre regole non restano indietro
+					final RunnableEvent newEvent = vertex.poll();
+					if (newEvent != null) {
+						submit(dirty.getNodeId(), newEvent);
+					}
+				} catch (final InterruptedException e) {
+					if (!isActive()) {
+						Thread.currentThread().interrupt();
+						return;
 					}
 				} catch (final Throwable t) {
 					logger.error("Error in ComputeThreadManager", t);
@@ -176,19 +163,26 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 
 	}
 
-	private final class DirtyNode implements Comparable<DirtyNode> {
+	private static final class DirtyNode implements Comparable<DirtyNode> {
+
+		private static final AtomicLong SEQ = new AtomicLong();
 
 		private final NodeId nodeId;
+		private final long sequence = SEQ.getAndIncrement();
 		private final int weight;
 
-		public DirtyNode(NodeId nodeId, int executorEdgePriority, int queueSize) {
+		public DirtyNode(NodeId nodeId, int weight) {
 			this.nodeId = nodeId;
-			this.weight = calcolateWeight(executorEdgePriority, queueSize);
+			this.weight = weight;
 		}
 
+		/**
+		 * Higher weight first; the same weight is served in arrival order.
+		 */
 		@Override
 		public int compareTo(DirtyNode other) {
-			return Integer.compare(this.getWeight(), other.getWeight());
+			final int byWeight = Integer.compare(other.weight, this.weight);
+			return byWeight != 0 ? byWeight : Long.compare(this.sequence, other.sequence);
 		}
 
 		public NodeId getNodeId() {
@@ -201,31 +195,41 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 
 	}
 
-	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode dockerTypeNode) {
-		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode,
-				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD, NodeIds.Int16);
+	private static final long FULL_POOL_WAIT_MS = 5;
+
+	private static final long MANAGER_POLL_INTERVAL_MS = 50;
+
+	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode) {
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD, NodeIds.Int32,
+				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD, NodeIds.Int64,
+				WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD, NodeIds.Double,
+				WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL,
+				NodeIds.Int64, WaldotRulesEnginePlugin.COMPUTE_QUEUE_LABEL_DESCRIPTION);
 	}
 
-	private boolean active = true;
-
-	private String baseDirectory;
+	private volatile boolean active = true;
 
 	private final PriorityBlockingQueue<DirtyNode> dirtyNodes = new PriorityBlockingQueue<>();
-	private long executionTimeoutMs = WaldotRulesEnginePlugin.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE;
-	private final QualifiedProperty<Long> executionTimeoutMsProperty;
-	private final ExecutorService executor;
+
+	private ExecutorService executor;
+
+	private final Object lifecycleLock = new Object();
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private double priorityFactor = WaldotRulesEnginePlugin.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE;
-	private final QualifiedProperty<Double> priorityFactorProperty;
-	public Map<Future<?>, FireableAction> runners = new ConcurrentHashMap<>();
+	private final Object publishLock = new Object();
+
+	private final Map<Future<?>, FireableAction> runners = new ConcurrentHashMap<>();
+
 	private final ConcurrentHashMap<NodeId, ComputableFireableAbstractOpcVertex> servedFireableNodes = new ConcurrentHashMap<>();
 
-	private final Future<?> threadManager;
-
-	private int threads = WaldotRulesEnginePlugin.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE;
-
-	private final QualifiedProperty<Integer> threadsProperty;
+	private Future<?> threadManager;
 
 	protected final WaldotNamespace waldotNamespace;
 
@@ -235,73 +239,19 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
 				version);
 		waldotNamespace = graph.getWaldotNamespace();
-		baseDirectory = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
-		if (baseDirectory == null || baseDirectory.isEmpty()) {
-			baseDirectory = "compute";
-		}
-		final String keyValuesThreadPool = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD.toLowerCase());
-		if (keyValuesThreadPool != null && !keyValuesThreadPool.isEmpty()) {
-			try {
-				threads = Integer.valueOf(keyValuesThreadPool);
-			} catch (final NumberFormatException e) {
-				threads = WaldotRulesEnginePlugin.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE;
-				logger.warn("Invalid threads number provided: " + keyValuesThreadPool + ". Using default threads "
-						+ threads);
-			}
-		}
-		threadsProperty = new QualifiedProperty<Integer>(getNamespace().getNamespaceUri(),
-				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Integer.class);
-
-		final String keyValuesExecutionTimeoutMs = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD.toLowerCase());
-		if (keyValuesExecutionTimeoutMs != null && !keyValuesExecutionTimeoutMs.isEmpty()) {
-			try {
-				executionTimeoutMs = Long.valueOf(keyValuesExecutionTimeoutMs);
-			} catch (final NumberFormatException e) {
-				executionTimeoutMs = WaldotRulesEnginePlugin.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE;
-				logger.warn("Invalid execution timeout ms provided: " + keyValuesExecutionTimeoutMs
-						+ ". Using default execution timeout ms " + executionTimeoutMs);
-			}
-		}
-		executionTimeoutMsProperty = new QualifiedProperty<Long>(getNamespace().getNamespaceUri(),
-				WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Long.class);
-		setProperty(executionTimeoutMsProperty, executionTimeoutMs);
-
-		final String keyValuesPriorityFactorMs = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD.toLowerCase());
-		if (keyValuesPriorityFactorMs != null && !keyValuesPriorityFactorMs.isEmpty()) {
-			try {
-				priorityFactor = Double.valueOf(keyValuesPriorityFactorMs);
-			} catch (final NumberFormatException e) {
-				priorityFactor = WaldotRulesEnginePlugin.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE;
-				logger.warn("Invalid priority factor provided: " + keyValuesPriorityFactorMs
-						+ ". Using default priority factor " + priorityFactor);
-			}
-		}
-		priorityFactorProperty = new QualifiedProperty<Double>(getNamespace().getNamespaceUri(),
-				WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
-				Double.class);
-		setProperty(priorityFactorProperty, priorityFactor);
-		// avvia i servizi di gestione dei thread per l'esecuzione dei nodi
-		executor = ThreadHelper.newVirtualThreadExecutor();
-		threadManager = executor.submit(new ComputeThreadManager());
+		addManagedProperty(WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD, NodeIds.Int32, Integer.class, false,
+				WaldotRulesEnginePlugin.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE, null, false, propertyKeyValues);
+		addManagedProperty(WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD, NodeIds.Int64, Long.class, false,
+				WaldotRulesEnginePlugin.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE, null, false, propertyKeyValues);
+		addManagedProperty(WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD, NodeIds.Double, Double.class, false,
+				WaldotRulesEnginePlugin.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE, null, false, propertyKeyValues);
+		addManagedProperty(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
+				false, propertyKeyValues);
 	}
 
 	public int calcolateWeight(int executorEdgePriority, int queueSize) {
-		// calcola il peso del nodo sporco in base alla priorità dell'arco
-		// dell'esecutore e alla dimensione della coda
-		// ad esempio, puoi dare più peso alla priorità dell'arco rispetto alla
-		// dimensione della coda
-		// in questo primo esempio, moltiplichiamo la priorità dell'arco per un fattore
-		// e aggiungiamo la dimensione della coda
-		return (int) (executorEdgePriority * priorityFactor + queueSize);
+		final double weight = executorEdgePriority * getPriorityFactor() + queueSize;
+		return (int) Math.max(Integer.MIN_VALUE, Math.min(Integer.MAX_VALUE, Math.round(weight)));
 	}
 
 	@Override
@@ -313,64 +263,204 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		active = false;
-		for (final Future<?> active : runners.keySet()) {
-			if (!active.isDone()) {
-				active.cancel(true);
+		synchronized (lifecycleLock) {
+			active = false;
+			for (final Future<?> running : runners.keySet()) {
+				if (!running.isDone()) {
+					running.cancel(true);
+				}
+			}
+			if (threadManager != null) {
+				threadManager.cancel(true);
+			}
+			if (executor != null) {
+				executor.shutdownNow();
 			}
 		}
-		threadManager.cancel(true);
 		dirtyNodes.clear();
 		runners.clear();
-		executor.shutdownNow();
+		servedFireableNodes.clear();
+	}
+
+	private void ensureStarted() {
+		synchronized (lifecycleLock) {
+			if (active && executor == null) {
+				executor = ThreadHelper.newVirtualThreadExecutor();
+				threadManager = executor.submit(new ComputeThreadManager());
+			}
+		}
+	}
+
+	/**
+	 * Stops serving a rule: removes it from the queue of the rules to execute.
+	 * Called when the <code>rules:execute</code> edge is removed.
+	 * 
+	 * @param ruleNodeId node id of the rule
+	 */
+	public void forget(NodeId ruleNodeId) {
+		servedFireableNodes.remove(ruleNodeId);
+		synchronized (dirtyNodes) {
+			dirtyNodes.removeIf(dirtyNode -> dirtyNode.getNodeId().equals(ruleNodeId));
+		}
+		publishQueueSize();
+	}
+
+	/**
+	 * Returns the timeout of an action in ms; invalid values give the default.
+	 * 
+	 * @return execution timeout in ms
+	 */
+	public long getExecutionTimeoutMs() {
+		final Long value = getRuntimeParameter(WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD);
+		return value == null || value <= 0
+				? WaldotRulesEnginePlugin.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE
+				: value;
+	}
+
+	/**
+	 * Returns the number of rules waiting to be executed.
+	 * 
+	 * @return pending rules
+	 */
+	public int getPendingRulesCount() {
+		return dirtyNodes.size();
+	}
+
+	/**
+	 * Returns the multiplier of the edge priority; invalid values give the default.
+	 * 
+	 * @return priority factor
+	 */
+	public double getPriorityFactor() {
+		final Double value = getRuntimeParameter(WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD);
+		return value == null || value.isNaN() || value.isInfinite() || value < 0
+				? WaldotRulesEnginePlugin.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE
+				: value;
+	}
+
+	/**
+	 * Returns the number of actions running now.
+	 * 
+	 * @return running actions
+	 */
+	public int getRunningCount() {
+		reapRunners();
+		return runners.size();
+	}
+
+	/**
+	 * Returns the max number of actions executed at the same time; invalid values give the default.
+	 * 
+	 * @return thread pool size
+	 */
+	public int getThreads() {
+		final Integer value = getRuntimeParameter(WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD);
+		return value == null || value < 1 ? WaldotRulesEnginePlugin.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE : value;
 	}
 
 	public boolean isActive() {
 		return active;
 	}
 
+	/**
+	 * Installs the {@link ComputeMonitoredEdge} for a <code>rules:execute</code> edge going out of this vertex.
+	 */
 	@Override
-	public void notifyPropertyValueChanging(String label, DataValue value) {
-		super.notifyPropertyValueChanging(label, value);
-		if (label.equals(WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD.toLowerCase())) {
-			final int newThreadsValue = Integer.valueOf(value.getValue().getValue().toString());
-			threads = newThreadsValue;
-			setProperty(threadsProperty, newThreadsValue);
+	public void notifyAddTargetMonitoredEdge(WaldotEdge edge, WaldotVertex targetVertex, String label, String type,
+			Object[] propertyKeyValues) throws PluginBlockingException {
+		if (!WaldotRulesEnginePlugin.EXECUTE_EDGE_LABEL.equals(type)) {
+			return;
 		}
-		if (label.equals(WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD.toLowerCase())) {
-			final long newExecutionTimeoutMsValue = Long.valueOf(value.getValue().getValue().toString());
-			executionTimeoutMs = newExecutionTimeoutMsValue;
-			setProperty(executionTimeoutMsProperty, newExecutionTimeoutMsValue);
+		if (!(targetVertex instanceof ComputableFireableAbstractOpcVertex)) {
+			throw new PluginBlockingException(
+					"The target of a " + type + " edge must be a rule vertex, but it is " + targetVertex);
 		}
-		if (label.equals(WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD.toLowerCase())) {
-			final double newPriorityFactorValue = Double.valueOf(value.getValue().getValue().toString());
-			priorityFactor = newPriorityFactorValue;
-			setProperty(priorityFactorProperty, newPriorityFactorValue);
-		}
-
+		servedFireableNodes.put(targetVertex.getNodeId(), (ComputableFireableAbstractOpcVertex) targetVertex);
+		edge.setMonitor(new ComputeMonitoredEdge(getNamespace(), edge, this, targetVertex));
 	}
 
+	/**
+	 * A compute vertex cannot be the target of a <code>rules:execute</code> edge.
+	 */
+	@Override
+	public void notifyAddSourceMonitoredEdge(WaldotEdge edge, WaldotVertex sourceVertex, String label, String type,
+			Object[] propertyKeyValues) throws PluginBlockingException {
+		if (WaldotRulesEnginePlugin.EXECUTE_EDGE_LABEL.equals(type)) {
+			throw new PluginBlockingException("A " + type
+					+ " edge must go from the compute vertex to the rule: a compute vertex cannot be its target");
+		}
+	}
+
+	/**
+	 * Called by the {@link ComputeMonitoredEdge} when the queue of a rule changes.
+	 * The rule is queued again with a weight that follows the new size, or removed if it is empty.
+	 * 
+	 * @param sourceNode rule that changed
+	 * @param queueSizeLabel label of the property
+	 * @param queueSize new size of the queue of the rule
+	 * @param executorEdgePriority priority of the edge
+	 */
 	public void notifyQueueSizeChange(UaNode sourceNode, String queueSizeLabel, DataValue queueSize,
 			int executorEdgePriority) {
-		final Object size = queueSize.getValue().getValue();
-		if (isActive() && size instanceof Number) {
-			final int intSize = ((Number) size).intValue();
+		final Object size = queueSize == null || queueSize.getValue() == null ? null
+				: queueSize.getValue().getValue();
+		if (!isActive() || !(size instanceof Number) || !(sourceNode instanceof ComputableFireableAbstractOpcVertex)) {
+			return;
+		}
+		final int intSize = ((Number) size).intValue();
+		final NodeId ruleId = sourceNode.getNodeId();
+		synchronized (dirtyNodes) {
+			dirtyNodes.removeIf(dirtyNode -> dirtyNode.getNodeId().equals(ruleId));
 			if (intSize > 0) {
-				if (!dirtyNodes.stream().anyMatch(dirtyNode -> dirtyNode.getNodeId().equals(sourceNode.getNodeId()))) {
-					if (!servedFireableNodes.containsKey(sourceNode.getNodeId())) {
-						servedFireableNodes.put(sourceNode.getNodeId(),
-								(ComputableFireableAbstractOpcVertex) sourceNode);
-					}
-					dirtyNodes.offer(new DirtyNode(sourceNode.getNodeId(), executorEdgePriority, intSize));
-					property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), dirtyNodes.size());
-				}
-			} else {
-				// rimuovi il nodo sporco se la coda è vuota
-				dirtyNodes.removeIf(dirtyNode -> dirtyNode.getNodeId().equals(sourceNode.getNodeId()));
-				servedFireableNodes.remove(sourceNode.getNodeId());
-				property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), dirtyNodes.size());
+				servedFireableNodes.put(ruleId, (ComputableFireableAbstractOpcVertex) sourceNode);
+				dirtyNodes.offer(new DirtyNode(ruleId, calcolateWeight(executorEdgePriority, intSize)));
 			}
 		}
+		if (intSize > 0) {
+			ensureStarted();
+		}
+		publishQueueSize();
+	}
+
+	private void publishQueueSize() {
+		synchronized (publishLock) {
+			if (!isRemoved()) {
+				property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, Long.valueOf(dirtyNodes.size()));
+			}
+		}
+	}
+
+	/**
+	 * Forgets the finished actions and cancels the ones over the timeout.
+	 */
+	private void reapRunners() {
+		final long now = System.currentTimeMillis();
+		final long timeout = getExecutionTimeoutMs();
+		for (final Entry<Future<?>, FireableAction> running : runners.entrySet()) {
+			final Future<?> future = running.getKey();
+			if (future.isDone()) {
+				runners.remove(future);
+			} else if (running.getValue().getStartingTime() + timeout < now) {
+				logger.warn("Action started at {} is taking more than {} ms to execute. Cancelling...",
+						running.getValue().getStartingTime(), timeout);
+				future.cancel(true);
+				runners.remove(future);
+			}
+		}
+	}
+
+	private void submit(NodeId ruleId, RunnableEvent event) {
+		final FireableAction action = event.getAction(System.currentTimeMillis());
+		final FutureTask<Void> task = new FutureTask<>(() -> {
+			try {
+				action.run();
+			} catch (final Throwable t) {
+				logger.error("Error executing action for node " + ruleId, t);
+			}
+		}, null);
+		// l'azione è registrata prima di partire: il conteggio delle azioni in corso non ha buchi
+		runners.put(task, action);
+		executor.execute(task);
 	}
 
 }

@@ -1,5 +1,7 @@
 package net.rossonet.waldot.rules.events;
 
+import java.util.Objects;
+
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 
@@ -119,6 +121,25 @@ public final class RunnableEvent {
 		return action;
 	}
 
+	/**
+	 * Two events are equal when they have the same type, come from the same
+	 * node and (for property changes) concern the same property. The value and
+	 * the action are not part of the identity: this is what lets the hysteresis
+	 * window of the queue discard repeated notifications of the same source.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof RunnableEvent)) {
+			return false;
+		}
+		final RunnableEvent other = (RunnableEvent) obj;
+		return type == other.type && Objects.equals(sourceNodeId(), other.sourceNodeId())
+				&& Objects.equals(label, other.label);
+	}
+
 	public BaseEventType getEvent() {
 		return event;
 	}
@@ -137,6 +158,15 @@ public final class RunnableEvent {
 
 	public Object getValue() {
 		return value;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(type, sourceNodeId(), label);
+	}
+
+	private Object sourceNodeId() {
+		return node == null ? null : node.getNodeId();
 	}
 
 }

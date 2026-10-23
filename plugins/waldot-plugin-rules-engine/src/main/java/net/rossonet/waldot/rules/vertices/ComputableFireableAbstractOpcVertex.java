@@ -28,17 +28,26 @@ import net.rossonet.waldot.rules.events.RunnableEvent;
  * <h2>Key Features</h2>
  * <ul>
  *   <li><b>Event reception</b>: Receives OPC-UA events and property changes</li>
- *   <li><b>Priority queuing</b>: Events queued by priority for ordered execution</li>
+ *   <li><b>Priority queuing</b>: Events queued by priority for ordered execution (lower value = served first)</li>
  *   <li><b>Hysteresis support</b>: Time-based deduplication to prevent event flooding</li>
  *   <li><b>Action generation</b>: Abstract methods to create executable actions from events</li>
  * </ul>
  * 
  * <h2>Hysteresis Mechanism</h2>
  * <p>
- * When hysteresis is enabled (hysteresisTimeMs > 0), duplicate events within the
- * time window are automatically deduplicated to prevent flooding. For example,
- * if hysteresis is 1000ms, only one event per second is queued even if 100 events
- * arrive in that second.
+ * When hysteresis is enabled (hysteresisTimeMs &gt; 0), notifications from the same source
+ * (same node and, for property changes, same property) that arrive inside the time window
+ * are discarded. For example, with a hysteresis of 1000ms, only one notification per second
+ * is queued for each source even if 100 arrive in that second.
+ * The queue is always available: the hysteresis can be changed at any time without losing
+ * the queued events.
+ * </p>
+ * 
+ * <h2>Queue size</h2>
+ * <p>
+ * The size of the queue is published in the <code>queue</code> property. The publication is
+ * serialized, so the last published value is always the real size of the queue: the
+ * {@link ComputeVertex} relies on this to know when a rule has work to do.
  * </p>
  * 
  * <h2>Lifecycle</h2>
@@ -61,6 +70,7 @@ import net.rossonet.waldot.rules.events.RunnableEvent;
  *   <li>{@link #getRunnableEvent(UaNode, BaseEventType)}: Create action for OPC-UA event</li>
  *   <li>{@link #getRunnablePropertyEvent(UaNode, String)}: Create action for property change</li>
  * </ul>
+ * and must declare the <code>queue</code> property (type Long).
  * 
  * @see RuleVertex
  * @see ComputeVertex
@@ -74,11 +84,11 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	// Intervallo di pulizia della coda (10 secondi)
 	private static final long CLEAN_UP_INTERVAL_MS = 10000L;
 
-	private HysteresisPriorityQueue<RunnableEvent> eventQueue;
+	private final HysteresisPriorityQueue<RunnableEvent> eventQueue = new HysteresisPriorityQueue<>(0);
 
-	private long hysteresisTimeMs = 0;
+	private volatile long lastCleanUpTimeMs = System.currentTimeMillis();
 
-	private final long lastCleanUpTimeMs = System.currentTimeMillis();
+	private final Object publishLock = new Object();
 
 	public ComputableFireableAbstractOpcVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
 			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
@@ -91,16 +101,19 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 		if (isHisteresisEnabled()) {
 			final long now = System.currentTimeMillis();
 			if (now - lastCleanUpTimeMs >= CLEAN_UP_INTERVAL_MS) {
+				lastCleanUpTimeMs = now;
 				eventQueue.cleanUp();
 			}
 		}
-
 	}
 
+	/**
+	 * Empties the queue and publishes the new size.
+	 */
 	@Override
 	public void close() throws Exception {
-		eventQueue.cleanUp();
-
+		eventQueue.clear();
+		publishQueueSize();
 	}
 
 	/**
@@ -144,7 +157,7 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	 * @return hysteresis time in ms (0 = disabled)
 	 */
 	public long getHysteresisTimeMs() {
-		return hysteresisTimeMs;
+		return eventQueue.getHysteresisMs();
 	}
 
 	/**
@@ -177,44 +190,74 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 		return getHysteresisTimeMs() != 0;
 	}
 
+	/**
+	 * Adds an event to the queue, unless the hysteresis window discards it.
+	 * 
+	 * @param message event to queue
+	 * @param priority priority of the event (lower value = served first)
+	 * @return true if the event has been queued
+	 */
 	public boolean offer(RunnableEvent message, int priority) {
 		final boolean ok = eventQueue.offer(message, priority);
 		if (ok) {
-			property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), eventQueue.size());
+			publishQueueSize();
 		}
 		return ok;
 	}
 
+	/**
+	 * Removes and returns the first event of the queue.
+	 * 
+	 * @return the first event, or null if the queue is empty
+	 */
 	public RunnableEvent poll() {
 		final RunnableEvent poll = eventQueue.poll();
 		if (poll != null) {
-			property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), eventQueue.size());
+			publishQueueSize();
 		}
 		cleanUpIfNeeded();
 		return poll;
 	}
 
-	protected void setHysteresisTimeMs(long hysteresisTimeMs) {
-		if (hysteresisTimeMs < 0) {
-			throw new IllegalArgumentException("Hysteresis time must be non-negative");
-		}
-		if (this.hysteresisTimeMs != hysteresisTimeMs) {
-			this.hysteresisTimeMs = hysteresisTimeMs;
-			if (eventQueue != null) {
-				eventQueue.cleanUp();
-				eventQueue = null;
-			}
-			eventQueue = new HysteresisPriorityQueue<>(hysteresisTimeMs);
-		} else {
-			if (eventQueue == null) {
-				eventQueue = new HysteresisPriorityQueue<>(hysteresisTimeMs);
+	private void publishQueueSize() {
+		synchronized (publishLock) {
+			if (!isRemoved()) {
+				property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, Long.valueOf(eventQueue.size()));
 			}
 		}
 	}
 
+	/**
+	 * Changes the hysteresis window. The events already queued are kept.
+	 * 
+	 * @param hysteresisTimeMs window in ms (0 = disabled)
+	 * @throws IllegalArgumentException if the value is negative
+	 */
+	protected void setHysteresisTimeMs(long hysteresisTimeMs) {
+		if (hysteresisTimeMs < 0) {
+			throw new IllegalArgumentException("Hysteresis time must be non-negative");
+		}
+		eventQueue.setHysteresisMs(hysteresisTimeMs);
+	}
+
+	/**
+	 * Returns the number of queued events.
+	 * 
+	 * @return queue size
+	 */
+	public int size() {
+		return eventQueue.size();
+	}
+
+	/**
+	 * Removes and returns the first event of the queue, waiting if it is empty.
+	 * 
+	 * @return the first event
+	 * @throws InterruptedException if interrupted while waiting
+	 */
 	public RunnableEvent take() throws InterruptedException {
 		final RunnableEvent take = eventQueue.take();
-		property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase(), eventQueue.size());
+		publishQueueSize();
 		cleanUpIfNeeded();
 		return take;
 	}

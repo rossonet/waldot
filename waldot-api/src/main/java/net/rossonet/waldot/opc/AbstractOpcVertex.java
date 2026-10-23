@@ -384,11 +384,15 @@ public abstract class AbstractOpcVertex extends GremlinElement
 			logger.warn("Changed property label is null or empty");
 			return false;
 		}
-		final VertexProperty<DATA_TYPE> propertyVertex = property(
-				changedPropertyLabel);
-		final DATA_TYPE originalValue = propertyVertex.isPresent()
-				? propertyVertex.value()
-				: null;
+		// la notifica arriva dopo la scrittura della proprietà gremlin: il valore
+		// precedente è quello ancora presente nello slot gestito
+		DATA_TYPE originalValue = null;
+		try {
+			originalValue = getProperty(qualifiedPropertySlot).orElse(null);
+		} catch (final Throwable e) {
+			logger.debug("Previous value of property {} not available",
+					changedPropertyLabel, e);
+		}
 		if (changedPropertyValue != null) {
 			try {
 				final DATA_TYPE value = changedPropertyValue;

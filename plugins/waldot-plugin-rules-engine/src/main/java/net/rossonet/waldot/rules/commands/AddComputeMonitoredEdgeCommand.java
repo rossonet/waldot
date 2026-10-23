@@ -16,17 +16,19 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 
+/**
+ * Creates a <code>rules:execute</code> edge: the compute vertex (source) will execute the rule (target).
+ */
 public class AddComputeMonitoredEdgeCommand extends AbstractOpcCommand {
 	private static final String CONTEXT_DIRECTORY = WaldotRulesEnginePlugin.BASE_CMD_DIRECTORY
 			+ "/edges";
-	private static final String CREATE_COMPUTE_MONITORED_EDGE_DESCRIPTION = "create a monitored edge observing the source vertex and firing events or properties to the target vertex";
-	private static final String CREATE_COMPUTE_MONITORED_EDGE_NAME = "create fire monitored edge";
+	private static final String CREATE_COMPUTE_MONITORED_EDGE_DESCRIPTION = "create an execute edge: the source compute vertex runs the actions of the target rule";
+	private static final String CREATE_COMPUTE_MONITORED_EDGE_NAME = "create compute monitored edge";
 	public static final UInteger DEFAULT_WRITE_MASK = UInteger
 			.valueOf(WriteMask.Executable.getValue());
 	private static final String LABEL_RESULT = "result";
@@ -44,30 +46,17 @@ public class AddComputeMonitoredEdgeCommand extends AbstractOpcCommand {
 				LocalizedText.english("Label for the edge"));
 		addInputArgument(MiloStrategy.SOURCE_NODE,
 				VariableNodeTypes.NodeId.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english("Source vertex for the edge"));
+				LocalizedText.english("Compute vertex that executes the rule"));
 		addInputArgument(MiloStrategy.TARGET_NODE,
 				VariableNodeTypes.NodeId.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english("Target vertex for the edge"));
+				LocalizedText.english("Rule vertex to execute"));
 		addInputArgument(MiloStrategy.DIRECTORY_PARAMETER,
 				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("Directory for the edge"));
-		addInputArgument(MonitoredEdge.MONITORED_PROPERTIES_LABEL,
-				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addInputArgument(WaldotRulesEnginePlugin.PRIORITY_FIELD,
+				VariableNodeTypes.Int32.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(
-						MonitoredEdge.MONITORED_PROPERTIES_DESCRIPTION));
-		addInputArgument(MonitoredEdge.PROPERTY_ACTIVE_LABEL,
-				VariableNodeTypes.Boolean.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText
-						.english(MonitoredEdge.PROPERTY_ACTIVE_DESCRIPTION));
-		addInputArgument(MonitoredEdge.DEADBAND_TYPE_LABEL,
-				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english(MonitoredEdge.DEADBAND_TYPE_DESCRIPTION));
-		addInputArgument(MonitoredEdge.DEADBAND_LABEL,
-				VariableNodeTypes.UInt32.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english(MonitoredEdge.DEADBAND_DESCRIPTION));
-		addInputArgument(MonitoredEdge.EVENT_ACTIVE_LABEL,
-				VariableNodeTypes.Boolean.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english(MonitoredEdge.EVENT_ACTIVE_DESCRIPTION));
+						"Priority of the rule in the compute vertex: the higher, the sooner it is executed"));
 		addOutputArgument(LABEL_RESULT, VariableNodeTypes.String.getNodeId(),
 				ValueRanks.Scalar, null,
 				LocalizedText.english(LONG_LABEL_RESULT));
@@ -100,29 +89,25 @@ public class AddComputeMonitoredEdgeCommand extends AbstractOpcCommand {
 			final String[] inputValues) {
 		final List<String> parameters = new ArrayList<>();
 		parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
-		parameters.add(MiloStrategy.FIRE_EDGE_TYPE);
-		enrichParameters(inputValues, parameters, 0,
-				MiloStrategy.LABEL_FIELD.toLowerCase());
+		parameters.add(WaldotRulesEnginePlugin.EXECUTE_EDGE_LABEL);
 		enrichParameters(inputValues, parameters, 3,
 				MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
 		enrichParameters(inputValues, parameters, 4,
-				MonitoredEdge.MONITORED_PROPERTIES_LABEL.toLowerCase());
-		enrichParameters(inputValues, parameters, 5,
-				MonitoredEdge.PROPERTY_ACTIVE_LABEL.toLowerCase());
-		enrichParameters(inputValues, parameters, 6,
-				MonitoredEdge.DEADBAND_TYPE_LABEL.toLowerCase());
-		enrichParameters(inputValues, parameters, 7,
-				MonitoredEdge.DEADBAND_LABEL.toLowerCase());
-		enrichParameters(inputValues, parameters, 8,
-				MonitoredEdge.EVENT_ACTIVE_LABEL.toLowerCase());
+				WaldotRulesEnginePlugin.PRIORITY_FIELD);
 		final Object[] arrayParameters = parameters.toArray(new String[0]);
-		logger.info("create vertex with parameters: "
+		logger.info("create execute edge with parameters: "
 				+ Arrays.toString(arrayParameters));
 		final Vertex source = waldotNamespace
 				.getVertexNode(waldotNamespace.generateNodeId(inputValues[1]));
 		final Vertex target = waldotNamespace
 				.getVertexNode(waldotNamespace.generateNodeId(inputValues[2]));
-		final Edge edge = target.addEdge(inputValues[0], source,
+		if (source == null || target == null) {
+			throw new IllegalArgumentException(
+					"Source or target vertex not found: " + inputValues[1]
+							+ " -> " + inputValues[2]);
+		}
+		// l'edge va dal compute (source) alla regola (target)
+		final Edge edge = source.addEdge(inputValues[0], target,
 				arrayParameters);
 		return new String[]{edge.id().toString()};
 	}

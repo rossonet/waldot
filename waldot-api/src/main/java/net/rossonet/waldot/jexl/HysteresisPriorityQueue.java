@@ -42,7 +42,7 @@ public class HysteresisPriorityQueue<J> {
 		}
 	}
 
-	private final long hysteresisMs;
+	private volatile long hysteresisMs;
 	private final ConcurrentHashMap<J, Long> lastInsertion = new ConcurrentHashMap<>();
 	private final PriorityBlockingQueue<PrioritizedMessage<J>> pq = new PriorityBlockingQueue<>();
 
@@ -65,11 +65,20 @@ public class HysteresisPriorityQueue<J> {
 	 */
 	public void cleanUp() {
 		final long now = System.currentTimeMillis();
+		final long window = hysteresisMs;
 		lastInsertion.forEach((message, ts) -> {
-			if (now - ts >= hysteresisMs) {
+			if (now - ts >= window) {
 				lastInsertion.remove(message, ts);
 			}
 		});
+	}
+
+	/**
+	 * Removes all the queued jobs and the hysteresis history.
+	 */
+	public void clear() {
+		pq.clear();
+		lastInsertion.clear();
 	}
 
 	/**
@@ -84,14 +93,18 @@ public class HysteresisPriorityQueue<J> {
 	}
 
 	/**
-	 * Offre un job con priorità; se respinto per hysteresis restituisce false.
+	 * Returns the hysteresis time in milliseconds.
 	 * 
-	 * @param message  oggetto job
-	 * @param priority valore di priorità (più basso = più urgente)
+	 * @return the hysteresis time in milliseconds
 	 */
+	public long getHysteresisMs() {
+		return hysteresisMs;
+	}
+
 	/**
 	 * Offers a job with priority to the queue.
 	 * If a duplicate job exists that was inserted less than hysteresisMs ago, returns false.
+	 * The check and the registration of the insertion time are atomic.
 	 * 
 	 * @param message  the job object to add
 	 * @param priority the priority value (lower value = higher urgency)
@@ -99,17 +112,32 @@ public class HysteresisPriorityQueue<J> {
 	 */
 	public boolean offer(J message, int priority) {
 		final long now = System.currentTimeMillis();
-		if (!lastInsertion.containsKey(message)) {
-			lastInsertion.put(message, 0L);
-		}
-		final long last = lastInsertion.get(message);
-		if (now - last >= hysteresisMs) {
+		final long window = hysteresisMs;
+		final boolean[] accepted = new boolean[1];
+		lastInsertion.compute(message, (key, last) -> {
+			if (last == null || now - last >= window) {
+				accepted[0] = true;
+				return now;
+			}
+			return last;
+		});
+		if (accepted[0]) {
 			pq.offer(new PrioritizedMessage<>(message, priority));
-			lastInsertion.put(message, now);
-			return true;
-		} else {
-			return false;
 		}
+		return accepted[0];
+	}
+
+	/**
+	 * Changes the hysteresis time; the new value is used by the next offers.
+	 * 
+	 * @param hysteresisMs the hysteresis time in milliseconds
+	 * @throws IllegalArgumentException if hysteresisMs is negative
+	 */
+	public void setHysteresisMs(long hysteresisMs) {
+		if (hysteresisMs < 0) {
+			throw new IllegalArgumentException("hysteresisMs < 0");
+		}
+		this.hysteresisMs = hysteresisMs;
 	}
 
 	/** Estrae (non bloccante) o restituisce null se vuota. */

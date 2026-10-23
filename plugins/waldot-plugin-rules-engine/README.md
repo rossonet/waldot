@@ -1,328 +1,113 @@
 # WaldOT Rules Engine Plugin
 
-Event-driven IF-THEN-THAT rule execution system for WaldOT framework.
+Motore di regole event-driven IF-THEN per WaldOT. Le regole reagiscono a eventi e variazioni di proprietà del grafo OPC-UA; condizione e azione sono script [JEXL](https://commons.apache.org/proper/commons-jexl/), eseguiti da un pool gestito di virtual thread.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Java](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.org/)
-[![WaldOT](https://img.shields.io/badge/WaldOT-0.4.0%2B-green.svg)](../../README.md)
+## Elementi forniti
 
-## Overview
+| Elemento | Etichetta (`type`) | Descrizione |
+|----------|--------------------|-------------|
+| Vertice regola | `rules:rule` | Regola IF-THEN con condizione e azione JEXL |
+| Vertice compute | `rules:compute` | Gestore dei thread: esegue le azioni delle regole collegate |
+| Edge execute | `rules:execute` | Dal compute (sorgente) alla regola (destinazione) |
+| Edge fire | `fire` | Fornito dal namespace: dal vertice sorgente alla regola |
 
-The WaldOT Rules Engine plugin enables sophisticated automation and monitoring by implementing IF-THEN-THAT style rules that react to OPC-UA events and property changes in a graph-based architecture. Rules are expressed using JEXL (Java Expression Language) for maximum flexibility and power.
+Il plugin estende `AbstractPluginListener` (`registerTypeNode`, `registerTypeEdge`, `registerCommand`). L'istanza è raggiungibile con `WaldotRulesEnginePlugin.getInstance()`.
 
-### Key Features
-
-- **Event-Driven Architecture**: Rules react to OPC-UA events and property changes in real-time
-- **JEXL Expressions**: Powerful scripting for both conditions (IF) and actions (THEN)
-- **Priority Queuing**: Events processed by priority with hysteresis deduplication
-- **Thread Management**: Virtual thread pool for lightweight concurrent execution
-- **Monitoring Edges**: FireMonitoredEdge filters events, ComputeMonitoredEdge routes to execution
-- **Debug Support**: Comprehensive debug events and metrics for troubleshooting
-- **Graph Integration**: Full access to TinkerPop graph and Gremlin traversal in rules
-- **OPC-UA Native**: Rules exposed as OPC-UA objects with standard properties and events
-
-### Architecture
+## Flusso
 
 ```
-[Source Node] → [FireMonitoredEdge] → [RuleVertex] → [ComputeMonitoredEdge] → [ComputeVertex]
-   (event)         (filters)          (enqueues)          (routes)            (executes)
+[vertice sorgente] --fire--> [rules:rule] (coda) <--rules:execute-- [rules:compute] --> virtual thread
 ```
 
-**Components:**
-- **RuleVertex**: IF-THEN rule with JEXL condition and action
-- **ComputeVertex**: Thread manager with priority execution
-- **ComputeMonitoredEdge**: Connects rules to compute for execution
-- **FireMonitoredEdge**: Monitors sources and fires rules (from waldot-namespace)
+1. una variazione di proprietà o un evento sul vertice sorgente raggiunge la regola tramite l'edge `fire`;
+2. la regola accoda l'evento (con isteresi) e aggiorna `queue`;
+3. l'edge `rules:execute` avvisa il compute, che ordina le regole per peso;
+4. il compute esegue un evento alla volta, entro il limite `threads`;
+5. l'esecuzione valuta la `condition` e, se vera, esegue l'`action`.
 
-## Quick Start
+## Esempio
 
-### 1. Create Compute Vertex
+```java
+Vertex compute = graph.addVertex("type", "rules:compute", "label", "main-compute", "threads", "4");
+Vertex rule = graph.addVertex("type", "rules:rule", "label", "temp-alarm",
+    "condition", "g.V().has('id','sensor').next().property('temperature').value() > 80.0",
+    "action", "log.warn('Temperature alarm')");
 
-```groovy
-compute = graph.addVertex(
-    "type", "compute",
-    "label", "main-compute",
-    "Threads", "4",  // 4 concurrent threads
-    "execution-timeout-ms", "120000",  // 2 minute timeout
-    "Factor", "100.0"  // Priority factor
-)
+// il compute esegue la regola (direzione: compute -> regola)
+compute.addEdge("runner", rule, "type", "rules:execute", "priority", "100");
+
+// quando il sensore cambia, la regola viene attivata
+sensor.addEdge("watch", rule, "type", "fire", "properties-to-monitor", "temperature");
 ```
 
-### 2. Create Rule
+## Proprietà
 
-```groovy
-rule = graph.addVertex(
-    "type", "rule",
-    "label", "temp-alarm",
-    "Condition", "temperature > 80.0",
-    "Action", "log.warn('Temperature alarm: ' + temperature + '°C')",
-    "Priority", "100",
-    "Hysteresis", "5000",  // 5 seconds deduplication
-    "Debug", "0"  // Debug level (0=off, 1=events, 2=all)
-)
-```
+Tutte le etichette sono minuscole e coincidono con le chiavi passate ad `addVertex`.
 
-### 3. Connect Rule to Compute
+### `rules:rule`
 
-```groovy
-rule.addEdge("execute", compute, "Priority", "100")
-```
+| Proprietà | Tipo | Default | Modificabile | Descrizione |
+|-----------|------|---------|--------------|-------------|
+| `condition` | String | `true` | sì | Script JEXL che deve restituire un booleano |
+| `action` | String | `log.info('action fired')` | sì | Script JEXL eseguito se la condizione è vera |
+| `debug` | Int32 | 0 | sì | Livello debug (0 = disattivo) |
+| `hysteresis` | Int64 | 0 | sì | Finestra in ms in cui le notifiche ripetute della stessa sorgente sono scartate |
+| `queue` | Int64 | 0 | no | Eventi in attesa |
+| `total` | Int64 | 0 | no | Eventi valutati |
+| `executed` | Int64 | 0 | no | Azioni eseguite con successo |
+| `errors` | Int64 | 0 | no | Errori (compilazione, eccezioni, condizione non booleana) |
 
-### 4. Monitor Source
+### `rules:compute`
 
-```groovy
-tempSensor = g.V().hasLabel("temperature-sensor").has("label", "sensor1").next()
+| Proprietà | Tipo | Default | Descrizione |
+|-----------|------|---------|-------------|
+| `threads` | Int32 | 1 | Numero massimo di azioni simultanee |
+| `execution-timeout-ms` | Int64 | 120000 | Durata massima di un'azione |
+| `factor` | Double | 100.0 | Moltiplicatore della priorità dell'edge |
+| `queue` | Int64 | 0 | Regole con eventi in attesa (sola lettura) |
 
-tempSensor.addEdge("fire", rule, 
-    "monitor-property", "temperature",
-    "active", "true",
-    "priority", "100"
-)
-```
+Valori non validi (non numerici, `threads` ≤ 0) vengono rifiutati o sostituiti dal default, con un avviso nel log.
 
-### 5. Test
+### Edge `rules:execute`
 
-```groovy
-tempSensor.property("temperature", 85.0)
-// Output: WARN Temperature alarm: 85.0°C
-```
+| Proprietà | Default | Descrizione |
+|-----------|---------|-------------|
+| `priority` | 100 | Priorità della regola nel compute |
 
-## Rule Components
+Peso di una regola: `weight = priority * factor + queue`. La regola con **peso più alto** viene eseguita per prima.
 
-### RuleVertex Properties
+## Comandi console
 
-| Property    | Type    | Default     | Description                          |
-|-------------|---------|-------------|--------------------------------------|
-| `Condition` | String  | "true"      | JEXL expression (must return boolean)|
-| `Action`    | String  | log.info()  | JEXL expression to execute           |
-| `Priority`  | Integer | 100         | Rule priority                        |
-| `Hysteresis`| Long    | 0           | Event deduplication window (ms)      |
-| `Debug`     | Integer | 0           | Debug level (0=off, 1=events, 2=all)|
-| `Queue`     | Long    | 0           | Current queue size (read-only)       |
-| `Total`     | Long    | 0           | Total events received (read-only)    |
-| `Executed`  | Long    | 0           | Actions executed (read-only)         |
-| `Errors`    | Long    | 0           | Errors during execution (read-only)  |
+| Comando | Descrizione |
+|---------|-------------|
+| `create rule` | Crea un vertice `rules:rule` (label, condition, action, debug, hysteresis) |
+| `create compute` | Crea un vertice `rules:compute` (label, directory, threads) |
+| `create compute monitored edge` | Crea un edge `rules:execute` dal compute alla regola |
+| `create show case arena` | Crea l'esempio "Dungeon Arena" (16 vertici, argomento `delay-ms`) |
+| `create show case evolution` | Crea l'esempio "Evolution Lab" (algoritmo evolutivo, oltre 100 vertici; argomenti `population-size`, `delay-ms`, `target-fitness`, `seed`) |
 
-### ComputeVertex Properties
+I due comandi `show case` creano grafi "vivi" (generatori `sim:generator` + edge `link-to` + `fire` + `rules:execute`), organizzati nelle directory `rules/showcase/<scenario>/...`, e rifiutano la creazione se lo scenario esiste già. Vedi [Esempi](docs/EXAMPLES.md#show-case).
 
-| Property              | Type    | Default | Description                      |
-|-----------------------|---------|---------|----------------------------------|
-| `Threads`             | Integer | 1       | Thread pool size                 |
-| `execution-timeout-ms`| Long    | 120000  | Action timeout (ms)              |
-| `Factor`              | Double  | 100.0   | Priority factor multiplier       |
-| `Queue`               | Integer | 0       | Dirty nodes in queue (read-only) |
+## Variabili JEXL
 
-### JEXL Context Variables
+Ogni esecuzione ha un contesto proprio: le variabili assegnate non passano alla successiva.
 
-Available in all rule conditions and actions:
+`log`, `g` (traversal), `graph`, `cmd`, `self` (la regola), `math`, `rand` (`java.util.Random`) e tutti i comandi console, per nome (inclusi quelli dei plugin caricati dopo).
 
-| Variable   | Type                 | Description                      |
-|------------|----------------------|----------------------------------|
-| `log`      | Logger               | SLF4J logger for logging         |
-| `g`        | GraphTraversal       | Gremlin traversal for queries    |
-| `graph`    | Graph                | TinkerPop graph instance         |
-| `commands` | CommandsFunction     | WaldOT console commands          |
-| `self`     | RuleVertex           | Reference to this rule           |
-| `Math`     | Math class           | Java Math functions              |
-| `random`   | ThreadLocalRandom    | Random number generator          |
+## Debug
 
-## Examples
+Con `debug > 0` la regola pubblica un evento OPC-UA per ogni fase: `BEFORE/AFTER_CONDITION_COMPILE`, `BEFORE/AFTER_CONDITION_EXECUTION`, `BEFORE/AFTER_ACTION_COMPILE`, `BEFORE/AFTER_ACTION_EXECUTION` e le varianti `*_EXCEPTION`. Con `debug > 1` le fasi sono anche scritte nel log.
 
-### Example 1: Temperature Threshold
+## Documentazione
 
-```groovy
-rule = graph.addVertex(
-    "type", "rule",
-    "label", "temp-warning",
-    "Condition", "temperature > 80.0",
-    "Action", "log.warn('High temperature: ' + temperature)"
-)
-```
+- [Quickstart](docs/QUICKSTART.md)
+- [Architettura](docs/ARCHITECTURE.md)
+- [Riferimento API](docs/API_REFERENCE.md)
+- [Espressioni JEXL](docs/JEXL_EXPRESSIONS.md)
+- [Esempi](docs/EXAMPLES.md)
 
-### Example 2: Multiple Conditions
-
-```groovy
-rule = graph.addVertex(
-    "type", "rule",
-    "label", "critical-state",
-    "Condition", "temperature > 80.0 && pressure > 100.0",
-    "Action", "log.error('CRITICAL'); commands.execute('shutdown')"
-)
-```
-
-### Example 3: Graph Query
-
-```groovy
-rule = graph.addVertex(
-    "type", "rule",
-    "label", "multi-sensor-failure",
-    "Condition", "g.V().hasLabel('sensor').has('status', 'ERROR').count().next() > 5",
-    "Action", "log.error('Multiple sensor failures detected')"
-)
-```
-
-### Example 4: State Machine
-
-```groovy
-// Trigger alarm
-alarmRule = graph.addVertex(
-    "type", "rule",
-    "label", "alarm-trigger",
-    "Condition", "temperature > 80.0 && state != 'ALARMED'",
-    "Action", "self.property('state', 'ALARMED'); log.warn('Alarm triggered')"
-)
-
-// Clear alarm
-clearRule = graph.addVertex(
-    "type", "rule",
-    "label", "alarm-clear",
-    "Condition", "temperature <= 70.0 && state == 'ALARMED'",
-    "Action", "self.property('state', 'NORMAL'); log.info('Alarm cleared')"
-)
-```
-
-## Priority Mechanism
-
-ComputeVertex prioritizes rules based on:
+## Test
 
 ```
-weight = edge_priority × priority_factor + queue_size
+./gradlew :waldot-plugin-rules-engine:test
 ```
-
-**Example:**
-- Rule A: edge_priority=100, queue_size=5, factor=100.0 → weight=10,005
-- Rule B: edge_priority=50, queue_size=10, factor=100.0 → weight=5,010
-
-Rule A is processed first (higher weight).
-
-## Hysteresis Mechanism
-
-Hysteresis prevents event flooding by deduplicating events within a time window:
-
-```groovy
-rule.property("hysteresis", 5000)  // 5 seconds
-```
-
-If 100 events arrive within 5 seconds, only 1 is queued and processed.
-
-## Debug Features
-
-Enable debug to publish OPC-UA events for each execution phase:
-
-```groovy
-rule.property("debug", 1)  // Enable debug events
-rule.property("debug", 2)  // Enable debug events + log messages
-```
-
-Debug events published:
-- `BEFORE_CONDITION_COMPILE` / `AFTER_CONDITION_COMPILE`
-- `BEFORE_CONDITION_EXECUTION` / `AFTER_CONDITION_EXECUTION`
-- `BEFORE_ACTION_COMPILE` / `AFTER_ACTION_COMPILE`
-- `BEFORE_ACTION_EXECUTION` / `AFTER_ACTION_EXECUTION`
-- `*_EXCEPTION` variants for errors
-
-## Documentation
-
-Complete documentation available in the `docs/` directory:
-
-- **[Quick Start Guide](docs/QUICKSTART.md)**: Get started in 5 minutes
-- **[JEXL Expressions Guide](docs/JEXL_EXPRESSIONS.md)**: Complete JEXL reference and best practices
-- **[Examples](docs/EXAMPLES.md)**: Real-world use cases and patterns
-- **[Architecture](docs/ARCHITECTURE.md)**: Deep dive into system design and internals
-- **[API Reference](docs/API_REFERENCE.md)**: Complete API documentation
-
-## Performance
-
-### Characteristics
-
-- **Memory**: ~1KB per virtual thread, ~100 bytes per queued event
-- **Latency**: <1ms for simple conditions, depends on action complexity
-- **Throughput**: Thousands of events per second
-- **Scalability**: Handles thousands of concurrent rules and threads
-
-### Optimization Tips
-
-1. **Keep conditions simple**: Fast boolean checks
-2. **Use hysteresis**: Prevent flooding from noisy sensors
-3. **Avoid blocking in actions**: No sleeps, waits, or blocking I/O
-4. **Set appropriate priorities**: Critical rules get high priority
-5. **Adjust thread pool**: Match workload (CPU-bound vs I/O-bound)
-
-## Requirements
-
-- **Java**: 21 or higher (for virtual threads)
-- **WaldOT**: 0.4.0 or higher
-- **Dependencies**:
-  - Apache Commons JEXL 3.x
-  - Apache TinkerPop 3.x
-  - Eclipse Milo (OPC-UA)
-
-## Building
-
-```bash
-./gradlew build
-```
-
-## Installation
-
-The plugin is automatically discovered by WaldOT via the `@WaldotPlugin` annotation. Simply include it in your WaldOT installation classpath.
-
-```gradle
-dependencies {
-    implementation project(':plugins:waldot-plugin-rules-engine')
-}
-```
-
-## Configuration
-
-No external configuration required. All configuration is done via vertex and edge properties at runtime.
-
-## Thread Safety
-
-The plugin is fully thread-safe:
-- Concurrent data structures for queues and collections
-- Virtual threads for isolated action execution
-- OPC-UA framework handles property synchronization
-
-## Troubleshooting
-
-### Rule Not Executing
-
-1. Check FireMonitoredEdge is active: `edge.property("active").value()`
-2. Verify property name matches: `edge.property("monitor-property").value()`
-3. Enable debug: `rule.property("debug", 2)`
-
-### Slow Execution
-
-1. Check queue sizes: `rule.property("queue").value()`, `compute.property("queue").value()`
-2. Increase threads: `compute.property("threads", 8)`
-3. Simplify conditions/actions
-
-### Timeout Errors
-
-1. Increase timeout: `compute.property("execution-timeout-ms", 300000)`
-2. Check for blocking operations in actions
-3. Simplify action logic
-
-## Contributing
-
-Contributions welcome! Please see the main [WaldOT README](../../README.md) for contribution guidelines.
-
-## License
-
-Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) file for details.
-
-## Authors
-
-- Andrea Ambrosini - Zona Autonoma srl - Initial development
-
-## See Also
-
-- [WaldOT Framework](../../README.md)
-- [Apache Commons JEXL](https://commons.apache.org/proper/commons-jexl/)
-- [Apache TinkerPop](https://tinkerpop.apache.org/)
-- [Eclipse Milo](https://github.com/eclipse/milo)
-
----
-
-**WaldOT Rules Engine Plugin** - Event-driven automation for industrial IoT and beyond.

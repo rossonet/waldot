@@ -3,6 +3,7 @@ package net.rossonet.waldot.rules.edges;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 
 import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotEdge;
@@ -22,10 +23,10 @@ import net.rossonet.waldot.rules.vertices.ComputeVertex;
  * 
  * <h2>Architecture</h2>
  * <pre>
- * [RuleVertex] --execute--> [ComputeMonitoredEdge] --notifies--> [ComputeVertex]
- *      |                            |                                  |
- *      v (property change)          v (observes)                      v (polls)
- * [Queue size]  -----------------> [propertyChanged]  ------------> [take event]
+ * [ComputeVertex] --rules:execute--> [RuleVertex]
+ *      ^                                  |
+ *      |  notifyQueueSizeChange           v (property change "queue")
+ *      +---------- [ComputeMonitoredEdge.propertyChanged]
  * </pre>
  * 
  * <h2>Monitoring Mechanism</h2>
@@ -47,10 +48,10 @@ import net.rossonet.waldot.rules.vertices.ComputeVertex;
  * <h2>Example</h2>
  * <pre>{@code
  * // High priority rule
- * alarmRule.addEdge("execute", compute, "Priority", "100");
+ * compute.addEdge("runner", alarmRule, "type", "rules:execute", "priority", "100");
  * 
  * // Low priority rule
- * logRule.addEdge("execute", compute, "Priority", "10");
+ * compute.addEdge("runner", logRule, "type", "rules:execute", "priority", "10");
  * 
  * // When both have events, alarmRule is processed first
  * }</pre>
@@ -90,6 +91,27 @@ public class ComputeMonitoredEdge extends MonitoredEdge {
 				&& getSourceVertex() instanceof ComputeVertex) {
 			// Osserva le property del RuleVertex (target)
 			getTargetVertex().addPropertyObserver(this);
+			// gli eventi già in coda prima del collegamento non produrrebbero più
+			// notifiche: il compute vertex deve conoscerli subito
+			final ComputableFireableAbstractOpcVertex rule = (ComputableFireableAbstractOpcVertex) getTargetVertex();
+			final int pending = rule.size();
+			if (pending > 0) {
+				((ComputeVertex) getSourceVertex()).notifyQueueSizeChange(rule,
+						WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL,
+						new DataValue(new Variant(Long.valueOf(pending))), getPriority());
+			}
+		}
+	}
+
+	/**
+	 * Stops observing the rule and tells the compute vertex to forget it.
+	 */
+	@Override
+	public void remove() {
+		if (getTargetVertex() instanceof ComputableFireableAbstractOpcVertex
+				&& getSourceVertex() instanceof ComputeVertex) {
+			getTargetVertex().removePropertyObserver(this);
+			((ComputeVertex) getSourceVertex()).forget(getTargetVertex().getNodeId());
 		}
 	}
 
@@ -133,7 +155,7 @@ public class ComputeMonitoredEdge extends MonitoredEdge {
 	@Override
 	public void propertyChanged(final UaNode node, final String label, final DataValue value) {
 		// Solo la property "queue" è monitorata
-		if (label.equals(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL.toLowerCase())) {
+		if (label.equals(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL)) {
 			// Calcola priorità dall'edge property
 			final int calcolatedPriority = getPriority();
 			// Notifica ComputeVertex (source) del cambio di dimensione coda

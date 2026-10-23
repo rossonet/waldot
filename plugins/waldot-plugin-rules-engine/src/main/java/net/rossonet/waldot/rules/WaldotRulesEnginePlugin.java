@@ -1,131 +1,85 @@
 package net.rossonet.waldot.rules;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.jexl3.JexlEngine;
-import org.eclipse.milo.opcua.sdk.core.Reference;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
-import org.eclipse.milo.opcua.stack.core.NodeIds;
-import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
-import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
-import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
-import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
-import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotCommand;
-import net.rossonet.waldot.api.models.WaldotEdge;
-import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
-import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.jexl.ClonableMapContext;
 import net.rossonet.waldot.jexl.JexlExecutor;
+import net.rossonet.waldot.plugin.AbstractPluginListener;
 import net.rossonet.waldot.rules.commands.AddComputeMonitoredEdgeCommand;
 import net.rossonet.waldot.rules.commands.CreateComputeVertexCommand;
 import net.rossonet.waldot.rules.commands.CreateRuleCommand;
-import net.rossonet.waldot.rules.edges.ComputeMonitoredEdge;
+import net.rossonet.waldot.rules.commands.CreateShowCaseArenaCommand;
+import net.rossonet.waldot.rules.commands.CreateShowCaseEvolutionCommand;
 import net.rossonet.waldot.rules.vertices.ComputableFireableAbstractOpcVertex;
 import net.rossonet.waldot.rules.vertices.ComputeVertex;
 import net.rossonet.waldot.rules.vertices.RuleVertex;
 
 /**
- * WaldOT Rules Engine Plugin - Event-driven IF-THEN-THAT rule execution system.
+ * WaldOT Rules Engine Plugin - Event-driven IF-THEN rule execution system.
  * <p>
- * This plugin implements a rule engine for WaldOT that allows defining and executing
- * IF-THEN-THAT style rules triggered by events and property changes in the OPC-UA graph.
- * Rules are expressed using JEXL (Java Expression Language) for both conditions and actions.
+ * The plugin lets you define rules that are triggered by events and property
+ * changes in the OPC-UA graph. Conditions and actions are written in JEXL
+ * (Java Expression Language) and executed by a managed pool of virtual threads.
  * </p>
  * 
  * <h2>Architecture Overview</h2>
  * <p>
- * The plugin provides two main vertex types:
+ * The plugin provides two vertex types and one edge type:
  * <ul>
- *   <li><b>RuleVertex</b>: Represents an IF-THEN rule with JEXL condition and action</li>
- *   <li><b>ComputeVertex</b>: Thread manager that executes rule actions with priority queuing</li>
+ *   <li><b>rules:rule</b> ({@link RuleVertex}): IF-THEN rule with a JEXL condition and action</li>
+ *   <li><b>rules:compute</b> ({@link ComputeVertex}): thread manager that executes the actions of the connected rules</li>
+ *   <li><b>rules:execute</b> edge: connects a compute vertex (source) to a rule (target)</li>
  * </ul>
+ * The <code>fire</code> edge, provided by the namespace, connects any vertex to a rule and
+ * triggers it when the source changes.
  * 
  * <h2>Event Flow</h2>
  * <pre>
- * [OPC-UA Node] --property-change/event--> [FireMonitoredEdge] 
- *                                               |
- *                                               v (filters)
- *                                          [RuleVertex]
- *                                               |
- *                                               v (enqueues)
- *                                          [ComputeMonitoredEdge]
- *                                               |
- *                                               v (priority queue)
- *                                          [ComputeVertex]
- *                                               |
- *                                               v (executes action)
- *                                          [Thread Pool]
+ * [Source vertex] --fire--&gt; [RuleVertex] (queue) &lt;--rules:execute-- [ComputeVertex] --&gt; [virtual threads]
  * </pre>
- * 
- * <h2>Key Features</h2>
- * <ul>
- *   <li><b>Event-driven</b>: Rules react to OPC-UA events and property changes</li>
- *   <li><b>JEXL expressions</b>: Powerful scripting for conditions and actions</li>
- *   <li><b>Priority queuing</b>: Events processed by priority with hysteresis support</li>
- *   <li><b>Thread management</b>: ComputeVertex manages execution with configurable thread pool</li>
- *   <li><b>Monitoring edges</b>: FireMonitoredEdge filters events, ComputeMonitoredEdge routes to compute</li>
- *   <li><b>Debug support</b>: Configurable debug levels with OPC-UA event publishing</li>
- * </ul>
+ * <ol>
+ *   <li>a property change or an event on the source vertex reaches the rule through the <code>fire</code> edge;</li>
+ *   <li>the rule queues an action (with hysteresis deduplication) and publishes its <code>queue</code> size;</li>
+ *   <li>the <code>rules:execute</code> edge notifies the compute vertex, which schedules the rule by weight;</li>
+ *   <li>the compute vertex takes one event at a time, within the limit of its <code>threads</code>, and runs it;</li>
+ *   <li>the action evaluates the <code>condition</code> and, when it is true, runs the <code>action</code>.</li>
+ * </ol>
  * 
  * <h2>Example Usage</h2>
  * <pre>{@code
- * // Create ComputeVertex (thread manager)
- * Vertex compute = graph.addVertex(
- *     "type", "compute",
- *     "label", "main-compute",
- *     "Threads", "4"  // 4 worker threads
- * );
+ * Vertex compute = graph.addVertex("type", "rules:compute", "label", "main-compute", "threads", "4");
+ * Vertex rule = graph.addVertex("type", "rules:rule", "label", "temp-alarm",
+ *     "condition", "g.V().has('id','sensor').next().property('temperature').value() > 80.0",
+ *     "action", "log.warn('Temperature alarm')");
  * 
- * // Create RuleVertex (IF temperature > 80 THEN log warning)
- * Vertex rule = graph.addVertex(
- *     "type", "rule",
- *     "label", "temp-alarm",
- *     "Condition", "temperature > 80.0",
- *     "Action", "log.warn('Temperature alarm: ' + temperature)"
- * );
+ * // the compute vertex executes the rule (edge direction: compute -> rule)
+ * compute.addEdge("runner", rule, "type", "rules:execute", "priority", "100");
  * 
- * // Connect rule to compute for execution
- * rule.addEdge("execute", compute, "Priority", "100");
- * 
- * // Connect temperature sensor to rule with fire edge
- * tempSensor.addEdge("fire", rule, "monitor-property", "temperature");
- * 
- * // When temperature property changes:
- * // 1. FireMonitoredEdge checks filters and fires RuleVertex
- * // 2. RuleVertex evaluates condition "temperature > 80.0"
- * // 3. If true, enqueues action in priority queue
- * // 4. ComputeVertex picks up action and executes in thread pool
- * // 5. Action logs warning message
+ * // when the sensor changes, the rule is fired
+ * sensor.addEdge("watch", rule, "type", "fire", "properties-to-monitor", "temperature");
  * }</pre>
  * 
  * <h2>JEXL Context Variables</h2>
  * <p>
- * Available in rule condition and action scripts:
+ * Every execution gets its own context, so variables assigned by a script do not leak to the next one:
  * <ul>
- *   <li><code>log</code>: SLF4J logger for logging</li>
- *   <li><code>g</code>: Gremlin traversal source for graph queries</li>
- *   <li><code>graph</code>: TinkerPop graph instance</li>
- *   <li><code>commands</code>: WaldOT console commands</li>
- *   <li><code>self</code>: Reference to the RuleVertex itself</li>
- *   <li><code>Math</code>: Java Math class for calculations</li>
- *   <li><code>random</code>: ThreadLocalRandom for random numbers</li>
+ *   <li><code>log</code>: SLF4J logger</li>
+ *   <li><code>g</code>: Gremlin traversal source</li>
+ *   <li><code>graph</code>: the WaldOT graph</li>
+ *   <li><code>cmd</code>: WaldOT commands</li>
+ *   <li><code>self</code>: the {@link RuleVertex} being executed</li>
+ *   <li><code>math</code>: {@link Math} class</li>
+ *   <li><code>rand</code>: thread safe {@link java.util.Random}</li>
+ *   <li>every console command, by its console name (including the commands of the plugins loaded later)</li>
  * </ul>
  * 
  * @see RuleVertex
@@ -136,20 +90,21 @@ import net.rossonet.waldot.rules.vertices.RuleVertex;
  * @since 0.4.0
  */
 @WaldotPlugin
-public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
+public class WaldotRulesEnginePlugin extends AbstractPluginListener {
 
 	private static final String _RULES_TYPE_PRE_LABEL = "rules:";
-	public static final String ACTION_EXECUTED_SIZE_LABEL = "Executed";
-	public static final String ACTION_EXECUTED_SIZE_LABEL_DESCRIPTION = "Number of actions that have been successfully executed by the ComputeVertex since it was created. This is a read-only property.";
-	public static final String ACTION_FIELD = "Action";
-	public static final String ACTION_FIELD_DESCRIPTION = "JEXL expression that is executed when the condition evaluates to true. Can contain any valid JEXL code, including logging, graph traversal, and commands.";
+	public static final String ACTION_EXECUTED_SIZE_LABEL = "executed";
+	public static final String ACTION_EXECUTED_SIZE_LABEL_DESCRIPTION = "Number of actions of the rule that have been executed successfully. Actions that fail are counted in 'errors'.";
+	public static final String ACTION_FIELD = "action";
+	public static final String ACTION_FIELD_DESCRIPTION = "JEXL script that is executed when the condition evaluates to true. Can contain any valid JEXL code, including logging, graph traversal, and commands.";
 	public static final String BASE_CMD_DIRECTORY = "rules";
-	private static final String COMPUTE_NODE_PARAMETER = _RULES_TYPE_PRE_LABEL
+	public static final String COMPUTE_NODE_PARAMETER = _RULES_TYPE_PRE_LABEL
 			+ "compute";
-	public static final String CONDITION_FIELD = "Condition";
-	public static final String CONDITION_FIELD_DESCRIPTION = "JEXL expression that evaluates to true or false. If true, the action is executed.";
-	public static final String DEBUG_LEVEL_LABEL = "Debug";
-	public static final String DEBUG_LEVEL_LABEL_DESCRIPTION = "Debug level for the RuleVertex. 0 = no debug, 1 = log condition evaluations, 2 = log action executions, 3 = log all events and property changes. This is a read/write property.";
+	public static final String COMPUTE_QUEUE_LABEL_DESCRIPTION = "Number of rules with events waiting to be executed by the compute vertex.";
+	public static final String CONDITION_FIELD = "condition";
+	public static final String CONDITION_FIELD_DESCRIPTION = "JEXL script that must evaluate to a boolean. If true, the action is executed.";
+	public static final String DEBUG_LEVEL_LABEL = "debug";
+	public static final String DEBUG_LEVEL_LABEL_DESCRIPTION = "Debug level of the rule. 0 = no debug; greater than 0 = a debug event is published for each phase of the execution; greater than 1 = the phases are also logged. The level also sets the depth of the stack traces in the events.";
 	public static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
 	public static final boolean DEFAULT_CLEAR_FACTS_AFTER_EXECUTION = false;
 	public static final String DEFAULT_CONDITION_VALUE = "true";
@@ -160,47 +115,73 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	public static final double DEFAULT_PRIORITY_FACTOR_IN_COMPUTE = 100.0;
 	public static final int DEFAULT_PRIORITY_VALUE = 100;
 	public static final int DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE = 1;
-	public static final String ERRORS_SIZE_LABEL = "Errors";
-	public static final String ERRORS_SIZE_LABEL_DESCRIPTION = "Number of actions that have failed to execute due to errors in the action code or exceptions thrown during execution. This is a read-only property.";
-	private static final String EXECUTE_EDGE_LABEL = _RULES_TYPE_PRE_LABEL
+	public static final String ERRORS_SIZE_LABEL = "errors";
+	public static final String ERRORS_SIZE_LABEL_DESCRIPTION = "Number of failures of the rule: compile errors, exceptions, conditions that do not return a boolean. This is a counter maintained by the engine.";
+	public static final String EXECUTE_EDGE_LABEL = _RULES_TYPE_PRE_LABEL
 			+ "execute";
 	public static final String EXECUTION_TIMEOUT_MS_FIELD = "execution-timeout-ms";
+	public static final String EXECUTION_TIMEOUT_MS_FIELD_DESCRIPTION = "Maximum duration in milliseconds of an action; after that the action is cancelled.";
 	public static final String FIRE_EDGE_PARAMETER = "fire";
-	public static final String HYSTERESIS_LABEL = "Hysteresis";
-	private final static Logger logger = LoggerFactory
-			.getLogger(WaldotRulesEnginePlugin.class);
-	public static final String PRIORITY_FACTOR_FIELD = "Factor";
-	public static final String PRIORITY_FIELD = "Priority";
-	public static final String QUEUE_SIZE_LABEL = "Queue";
-	public static final String QUEUE_SIZE_LABEL_DESCRIPTION = "Number of events currently in the queue waiting to be processed by the ComputeVertex. This is a read-only property.";
+	public static final String HYSTERESIS_LABEL = "hysteresis";
+	public static final String HYSTERESIS_LABEL_DESCRIPTION = "Time window in milliseconds in which repeated notifications from the same source (same vertex and property) are discarded. 0 = disabled.";
+	private static volatile WaldotRulesEnginePlugin instance;
+	public static final String PRIORITY_FACTOR_FIELD = "factor";
+	public static final String PRIORITY_FACTOR_FIELD_DESCRIPTION = "Multiplier of the edge priority in the weight of a rule: weight = priority * factor + queue size. Rules with higher weight are executed first.";
+	public static final String PRIORITY_FIELD = "priority";
+	public static final String QUEUE_SIZE_LABEL = "queue";
+	public static final String QUEUE_SIZE_LABEL_DESCRIPTION = "Number of events of the rule waiting to be executed.";
 	public static final String RULE_NODE_PARAMETER = _RULES_TYPE_PRE_LABEL
 			+ "rule";
-	public static final String THREAD_POOL_SIZE_FIELD = "Threads";
-	public static final String THREAD_POOL_SIZE_FIELD_DESCRIPTION = "Number of threads in the ComputeVertex thread pool.";
-	public static final String TOTAL_SIZE_LABEL = "Total";
-	public static final String TOTAL_SIZE_LABEL_DESCRIPTION = "Total number of events that have been processed by the ComputeVertex since it was created. This is a read-only property.";
+	public static final String THREAD_POOL_SIZE_FIELD = "threads";
+	public static final String THREAD_POOL_SIZE_FIELD_DESCRIPTION = "Maximum number of actions executed at the same time by the compute vertex.";
+	public static final String TOTAL_SIZE_LABEL = "total";
+	public static final String TOTAL_SIZE_LABEL_DESCRIPTION = "Total number of events of the rule that have been evaluated.";
 	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
 	private static final String WALD_OT_COMPUTE_NAME = "Thread Manager";
 	private static final String WALD_OT_COMPUTE_OBJECT_TYPE = "WaldOTComputeObjectType";
 	private static final String WALD_OT_RULE_NAME = "Rule";
 	private static final String WALD_OT_RULE_OBJECT_TYPE = "WaldOTRuleObjectType";
-	private final Map<NodeId, MonitoredEdge> activeEdges = Collections
-			.synchronizedMap(new HashMap<>());
-	private AddComputeMonitoredEdgeCommand addComputeMonitoredEdgeCommand;
-	protected final ClonableMapContext baseJexlContext = new ClonableMapContext();
-	private UaObjectTypeNode computeTypeNode;
-	private CreateComputeVertexCommand createComputeVertexCommand;
-	private CreateRuleCommand createRuleCommand;
-	private JexlEngine jexlEngine;
-	private UaObjectTypeNode ruleTypeNode;
-	protected WaldotNamespace waldotNamespace;
 
 	/**
-	 * Returns the base JEXL context shared by all rules.
-	 * <p>
-	 * Questo contesto contiene variabili globali disponibili a tutte le regole:
-	 * log, graph traversal, commands, Math, random, etc.
-	 * </p>
+	 * Returns the last initialized plugin.
+	 * 
+	 * @return the plugin instance, or null if it is not initialized
+	 */
+	public static WaldotRulesEnginePlugin getInstance() {
+		return instance;
+	}
+
+	/**
+	 * Returns the plugin registered in a namespace. Falls back to the last
+	 * initialized instance when the namespace does not list the plugin.
+	 * 
+	 * @param namespace the namespace of the vertex
+	 * @return the plugin, or null if it is not initialized
+	 */
+	public static WaldotRulesEnginePlugin getInstance(
+			WaldotNamespace namespace) {
+		if (namespace != null) {
+			for (final PluginListener plugin : namespace.getPlugins()) {
+				if (plugin instanceof WaldotRulesEnginePlugin) {
+					return (WaldotRulesEnginePlugin) plugin;
+				}
+			}
+		}
+		return instance;
+	}
+
+	private final ClonableMapContext baseJexlContext = new ClonableMapContext();
+
+	private final Object contextLock = new Object();
+
+	private JexlEngine jexlEngine;
+
+	private int registeredConsoleCommands = -1;
+
+	/**
+	 * Returns the base JEXL context shared by all rules. It holds the global
+	 * variables (log, g, graph, cmd, math, rand). Rules do not use it directly:
+	 * they get a copy through {@link #newJexlContext(Object)}.
 	 * 
 	 * @return base JEXL context
 	 */
@@ -208,128 +189,12 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 		return baseJexlContext;
 	}
 
-	/**
-	 * Closes the plugin and removes all monitored edges.
-	 * <p>
-	 * Rimuove tutti gli edge monitorati attivi per cleanup graceful.
-	 * </p>
-	 */
 	@Override
 	public void close() throws Exception {
-		// Rimuove tutti gli edge monitorati attivi
-		for (final MonitoredEdge edge : activeEdges.values()) {
-			edge.remove();
+		if (instance == this) {
+			instance = null;
 		}
-		logger.info("WaldotRulesEnginePlugin closed");
-	}
-
-	@Override
-	public boolean containsEdgeType(String typeDefinitionLabel) {
-		return EXECUTE_EDGE_LABEL.equals(typeDefinitionLabel);
-	}
-
-	@Override
-	public boolean containsVertexType(String typeDefinitionLabel) {
-		return RULE_NODE_PARAMETER.equals(typeDefinitionLabel)
-				|| COMPUTE_NODE_PARAMETER.equals(typeDefinitionLabel);
-	}
-
-	@Override
-	public boolean containsVertexTypeNode(NodeId typeDefinitionNodeId) {
-		return ruleTypeNode.getNodeId().equals(typeDefinitionNodeId)
-				|| computeTypeNode.getNodeId().equals(typeDefinitionNodeId);
-	}
-
-	private void createComputeTypeNode() {
-		computeTypeNode = UaObjectTypeNode
-				.builder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId(
-						OBJECT_TYPES + WALD_OT_COMPUTE_OBJECT_TYPE))
-				.setBrowseName(waldotNamespace
-						.generateQualifiedName(WALD_OT_COMPUTE_OBJECT_TYPE))
-				.setDisplayName(LocalizedText.english(WALD_OT_COMPUTE_NAME))
-				.setIsAbstract(false).build();
-		PluginListener.addParameterToTypeNode(waldotNamespace, computeTypeNode,
-				MiloStrategy.LABEL_FIELD, NodeIds.String);
-		ComputeVertex.generateParameters(waldotNamespace, computeTypeNode);
-		// add definition to the address space
-		waldotNamespace.getStorageManager().addNode(computeTypeNode);
-		computeTypeNode.addReference(new Reference(computeTypeNode.getNodeId(),
-				NodeIds.HasSubtype, NodeIds.BaseObjectType.expanded(), false));
-		waldotNamespace.getObjectTypeManager().registerObjectType(
-				computeTypeNode.getNodeId(), UaObjectNode.class,
-				objectNodeConstructor);
-
-	}
-
-	private WaldotVertex createComputeVertex(WaldotGraph graph,
-			UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description,
-			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier,
-			long version, Object[] propertyKeyValues) {
-		return new ComputeVertex(graph, context, nodeId, browseName,
-				displayName, description, writeMask, userWriteMask,
-				eventNotifier, version, propertyKeyValues);
-	}
-
-	private void createRuleTypeNode() {
-		ruleTypeNode = UaObjectTypeNode
-				.builder(waldotNamespace.getOpcUaNodeContext())
-				.setNodeId(waldotNamespace.generateNodeId(
-						OBJECT_TYPES + WALD_OT_RULE_OBJECT_TYPE))
-				.setBrowseName(waldotNamespace
-						.generateQualifiedName(WALD_OT_RULE_OBJECT_TYPE))
-				.setDisplayName(LocalizedText.english(WALD_OT_RULE_NAME))
-				.setIsAbstract(false).build();
-		PluginListener.addParameterToTypeNode(waldotNamespace, ruleTypeNode,
-				MiloStrategy.LABEL_FIELD, NodeIds.String);
-		RuleVertex.generateParameters(waldotNamespace, ruleTypeNode);
-		// add definition to the address space
-		waldotNamespace.getStorageManager().addNode(ruleTypeNode);
-		ruleTypeNode.addReference(new Reference(ruleTypeNode.getNodeId(),
-				NodeIds.HasSubtype, NodeIds.BaseObjectType.expanded(), false));
-		waldotNamespace.getObjectTypeManager().registerObjectType(
-				ruleTypeNode.getNodeId(), UaObjectNode.class,
-				objectNodeConstructor);
-	}
-
-	private WaldotVertex createRuleVertex(WaldotGraph graph,
-			UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description,
-			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier,
-			long version, Object[] propertyKeyValues) {
-		return new RuleVertex(this, graph, context, nodeId, browseName,
-				displayName, description, writeMask, userWriteMask,
-				eventNotifier, version, propertyKeyValues);
-	}
-
-	@Override
-	public WaldotVertex createVertex(NodeId typeDefinitionNodeId,
-			WaldotGraph graph, UaNodeContext context, NodeId nodeId,
-			QualifiedName browseName, LocalizedText displayName,
-			LocalizedText description, UInteger writeMask,
-			UInteger userWriteMask, UByte eventNotifier, long version,
-			Object[] propertyKeyValues) {
-		if (!containsVertexTypeNode(typeDefinitionNodeId)) {
-			return null;
-		}
-		if (ruleTypeNode.getNodeId().equals(typeDefinitionNodeId)) {
-			return createRuleVertex(graph, context, nodeId, browseName,
-					displayName, description, writeMask, userWriteMask,
-					eventNotifier, version, propertyKeyValues);
-		} else if (computeTypeNode.getNodeId().equals(typeDefinitionNodeId)) {
-			return createComputeVertex(graph, context, nodeId, browseName,
-					displayName, description, writeMask, userWriteMask,
-					eventNotifier, version, propertyKeyValues);
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	public Collection<WaldotCommand> getCommands() {
-		return Arrays.asList(addComputeMonitoredEdgeCommand, createRuleCommand,
-				createComputeVertexCommand);
+		super.close();
 	}
 
 	public JexlEngine getJexlEngine() {
@@ -337,115 +202,84 @@ public class WaldotRulesEnginePlugin implements PluginListener, AutoCloseable {
 	}
 
 	@Override
-	public NodeId getVertexTypeNode(String typeDefinitionLabel) {
-		if (RULE_NODE_PARAMETER.equals(typeDefinitionLabel)) {
-			return ruleTypeNode.getNodeId();
-		} else if (COMPUTE_NODE_PARAMETER.equals(typeDefinitionLabel)) {
-			return computeTypeNode.getNodeId();
-		} else {
-			return null;
-
-		}
-	}
-
-	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
-		this.waldotNamespace = waldotNamespace;
-		createRuleTypeNode();
-		createComputeTypeNode();
+		super.initialize(waldotNamespace);
+		commands.clear();
+		edgeTypeNodes.clear();
 		registerJexlEngine(waldotNamespace);
-		addComputeMonitoredEdgeCommand = new AddComputeMonitoredEdgeCommand(
-				waldotNamespace);
-		createRuleCommand = new CreateRuleCommand(waldotNamespace);
-		createComputeVertexCommand = new CreateComputeVertexCommand(
-				waldotNamespace);
+		registerTypeNode(RuleVertex.class, WALD_OT_RULE_OBJECT_TYPE,
+				WALD_OT_RULE_NAME, RULE_NODE_PARAMETER);
+		registerTypeNode(ComputeVertex.class, WALD_OT_COMPUTE_OBJECT_TYPE,
+				WALD_OT_COMPUTE_NAME, COMPUTE_NODE_PARAMETER);
+		registerTypeEdge(EXECUTE_EDGE_LABEL);
+		registerCommand(new AddComputeMonitoredEdgeCommand(waldotNamespace));
+		registerCommand(new CreateRuleCommand(waldotNamespace));
+		registerCommand(new CreateComputeVertexCommand(waldotNamespace));
+		registerCommand(new CreateShowCaseArenaCommand(waldotNamespace));
+		registerCommand(new CreateShowCaseEvolutionCommand(waldotNamespace));
+		instance = this;
 	}
 
 	/**
-	 * Handles edge addition and creates appropriate monitored edges.
-	 * <p>
-	 * Quando viene aggiunto un edge "execute" tra RuleVertex e ComputeVertex,
-	 * crea un ComputeMonitoredEdge che monitora la coda del RuleVertex e
-	 * notifica il ComputeVertex quando ci sono eventi da elaborare.
-	 * </p>
+	 * Creates the JEXL context for one execution of a rule: a copy of the base
+	 * context, with <code>self</code> and with all the console commands
+	 * registered at this moment (so the commands of the plugins loaded after
+	 * this one are available too).
 	 * 
-	 * @param edge edge being added
-	 * @param sourceVertex source vertex of the edge
-	 * @param targetVertex target vertex of the edge (ComputeVertex)
-	 * @param label edge label
-	 * @param type edge type ("execute" for compute edges)
-	 * @param propertyKeyValues edge properties
+	 * @param self the vertex executing the script
+	 * @return a new context, owned by the caller
 	 */
-	@Override
-	public void notifyAddEdge(WaldotEdge edge, WaldotVertex sourceVertex,
-			WaldotVertex targetVertex, String label, String type,
-			Object[] propertyKeyValues) {
-		if (activeEdges.containsKey(edge.getNodeId())) {
-			logger.warn("Edge {} already monitored, skipping",
-					edge.getNodeId());
-		} else {
-			if (type == null) {
-				logger.warn("Edge {} has no type, skipping", edge.getNodeId());
-				return;
-			}
-			switch (type) {
-
-				case EXECUTE_EDGE_LABEL :
-					// Crea ComputeMonitoredEdge per collegare RuleVertex →
-					// ComputeVertex
-					edge.setMonitor(new ComputeMonitoredEdge(waldotNamespace,
-							edge, sourceVertex, targetVertex));
-
-					break;
-				default :
-					logger.warn("Edge {} has unknown type {}, skipping",
-							edge.getNodeId(), type);
-			}
+	public ClonableMapContext newJexlContext(Object self) {
+		synchronized (contextLock) {
+			refreshConsoleCommands();
+			final ClonableMapContext context = new ClonableMapContext(
+					baseJexlContext);
+			context.set(ConsoleStrategy.SELF_LABEL, self);
+			return context;
 		}
 	}
 
-	@Override
-	public void notifyRemoveEdge(WaldotEdge edge) {
-		if (!activeEdges.containsKey(edge.getNodeId())) {
-			logger.warn("Edge {} not monitored, skipping", edge.getNodeId());
-		} else {
-			activeEdges.get(edge.getNodeId()).remove();
-			activeEdges.remove(edge.getNodeId());
+	private void refreshConsoleCommands() {
+		final WaldotNamespace namespace = getWaldotNamespace();
+		if (namespace == null || namespace.getConsoleStrategy() == null) {
+			return;
+		}
+		try {
+			final List<WaldotCommand> consoleCommands = new ArrayList<>(
+					namespace.getConsoleStrategy().getCommands());
+			if (consoleCommands.size() != registeredConsoleCommands) {
+				for (final WaldotCommand command : consoleCommands) {
+					baseJexlContext.set(command.getConsoleCommand(), command);
+				}
+				registeredConsoleCommands = consoleCommands.size();
+			}
+		} catch (final RuntimeException e) {
+			logger.warn(
+					"Cannot refresh the console commands in the JEXL context",
+					e);
 		}
 	}
 
 	/**
 	 * Registers JEXL engine and populates base context with global variables.
-	 * <p>
-	 * Registra il motore JEXL e popola il contesto base con variabili globali
-	 * disponibili a tutte le regole: log, graph traversal, commands, Math, random, etc.
-	 * Ogni RuleVertex clona questo contesto e aggiunge 'self' reference.
-	 * </p>
 	 * 
 	 * @param waldotNamespace WaldOT namespace instance
 	 */
 	private void registerJexlEngine(final WaldotNamespace waldotNamespace) {
-		// Crea motore JEXL per eseguire script nelle regole
-		jexlEngine = JexlExecutor.generateEngine();
-
-		// Popola contesto base con variabili globali
-		baseJexlContext.set(ConsoleStrategy.LOG_LABEL, logger);
-		baseJexlContext.set(ConsoleStrategy.TRAVERSE_LABEL,
-				waldotNamespace.getGremlinGraph().traversal());
-		baseJexlContext.set(ConsoleStrategy.GRAPH_LABEL,
-				waldotNamespace.getGremlinGraph());
-		baseJexlContext.set(ConsoleStrategy.COMMANDS_LABEL,
-				waldotNamespace.getCommandsAsFunction());
-		baseJexlContext.set(ConsoleStrategy.MATH, Math.class);
-		baseJexlContext.set(ConsoleStrategy.RANDOM,
-				ThreadLocalRandom.current());
-
-		// Registra tutti i comandi console come funzioni JEXL
-		for (final WaldotCommand command : waldotNamespace.getConsoleStrategy()
-				.getCommands()) {
-			logger.info("Registering console command: {}",
-					command.getConsoleCommand());
-			baseJexlContext.set(command.getConsoleCommand(), command);
+		synchronized (contextLock) {
+			jexlEngine = JexlExecutor.generateEngine();
+			baseJexlContext.clear();
+			registeredConsoleCommands = -1;
+			baseJexlContext.set(ConsoleStrategy.LOG_LABEL, logger);
+			baseJexlContext.set(ConsoleStrategy.TRAVERSE_LABEL,
+					waldotNamespace.getGremlinGraph().traversal());
+			baseJexlContext.set(ConsoleStrategy.GRAPH_LABEL,
+					waldotNamespace.getGremlinGraph());
+			baseJexlContext.set(ConsoleStrategy.COMMANDS_LABEL,
+					waldotNamespace.getCommandsAsFunction());
+			baseJexlContext.set(ConsoleStrategy.MATH, Math.class);
+			// ThreadLocalRandom must not be shared between threads
+			baseJexlContext.set(ConsoleStrategy.RANDOM, new Random());
 		}
 	}
 }

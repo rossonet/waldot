@@ -224,10 +224,10 @@ public class LinkAndFireTests {
 		source.property("a", 12);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 10);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
-		Thread.sleep(1);
+		Thread.sleep(200);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 10);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
-		Thread.sleep(1);
+		Thread.sleep(1200);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 12);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 12);
 		e.property(MonitoredEdge.DELAY_LABEL, 5000);
@@ -240,7 +240,7 @@ public class LinkAndFireTests {
 		source.property("a", 102);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 102);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 102);
-		Thread.sleep(1);
+		Thread.sleep(5500);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 13);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 13);
 
@@ -526,6 +526,41 @@ public class LinkAndFireTests {
 	}
 
 	@Test
+	public void runLinkDeadBandWithoutTypeDefaultsToAbsoluteTest() throws Exception {
+		simpleServerInit();
+		final Vertex source = g.addVertex("id", "source", "name", "source vertex", "a", "1");
+		final Vertex destination = g.addVertex("id", "destination", "name", "destination vertex", "a", "3");
+		final Edge e = destination.addEdge("link from test", source, "type", "link-from");
+		source.property("a", 10);
+		org.junit.jupiter.api.Assertions.assertEquals(10, ((Number) destination.property("a").value()).intValue());
+		// only deadband-value, no deadband-type
+		e.property(MonitoredEdge.DEADBAND_LABEL, 5);
+		source.property("a", 12);
+		org.junit.jupiter.api.Assertions.assertEquals(10, ((Number) destination.property("a").value()).intValue());
+		source.property("a", 16);
+		org.junit.jupiter.api.Assertions.assertEquals(16, ((Number) destination.property("a").value()).intValue());
+	}
+
+	@Test
+	public void runLinkToDelayWithDestinationLabelTest() throws Exception {
+		simpleServerInit();
+		final Vertex source = g.addVertex("id", "source", "name", "source vertex", "a", "1");
+		final Vertex destination = g.addVertex("id", "destination", "name", "destination vertex", "a", "3");
+		final Edge e = source.addEdge("link to test", destination, "type", "link-to");
+		e.property("a", "renamed");
+		e.property(MonitoredEdge.DELAY_LABEL, 300);
+		source.property("a", 42);
+		org.junit.jupiter.api.Assertions.assertFalse(destination.property("renamed").isPresent());
+		final long limit = System.currentTimeMillis() + 5000;
+		while (!destination.property("renamed").isPresent() && System.currentTimeMillis() < limit) {
+			Thread.sleep(20);
+		}
+		org.junit.jupiter.api.Assertions.assertTrue(destination.property("renamed").isPresent());
+		org.junit.jupiter.api.Assertions.assertEquals("42", String.valueOf(destination.property("renamed").value()));
+		org.junit.jupiter.api.Assertions.assertEquals("3", String.valueOf(destination.property("a").value()));
+	}
+
+	@Test
 	public void runLinkToDelayTest() throws Exception {
 		simpleServerInit();
 		final Vertex source = g.addVertex("id", "source", "name", "source vertex", "a", "1", "b", "2");
@@ -550,10 +585,10 @@ public class LinkAndFireTests {
 		source.property("a", 12);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 10);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
-		Thread.sleep(1);
+		Thread.sleep(200);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 10);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
-		Thread.sleep(1);
+		Thread.sleep(1200);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 12);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 12);
 		e.property(MonitoredEdge.DELAY_LABEL, "5000");
@@ -566,7 +601,7 @@ public class LinkAndFireTests {
 		source.property("a", 102);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 102);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 102);
-		Thread.sleep(1);
+		Thread.sleep(5500);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "a", 13);
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 13);
 

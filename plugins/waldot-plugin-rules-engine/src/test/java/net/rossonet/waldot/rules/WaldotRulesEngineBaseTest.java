@@ -19,6 +19,7 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.client.utils.WaldotTestClientHandler;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
+import net.rossonet.waldot.rules.vertices.ComputeVertex;
 import net.rossonet.waldot.utils.LogHelper;
 import net.rossonet.waldot.utils.NetworkHelper;
 
@@ -42,20 +43,21 @@ public class WaldotRulesEngineBaseTest {
 
 	private void baseRulesGraph() throws ConfigurationException, InterruptedException, ExecutionException {
 		simpleServerInit();
+		changes = 0;
 		inputA = g.addVertex("id", "a", "name", "input A", "value", "10");
 		inputB = g.addVertex("id", "b", "name", "input B", "value", "20");
 		inputPassive = g.addVertex("id", "p", "name", "input P", "value", "40");
-		rule = g.addVertex("id", "rule", "type", "rule", "name", "Regola", "counter", "0", "condition",
+		rule = g.addVertex("id", "rule", "type", "rules:rule", "name", "Regola", "counter", "0", "condition",
 				"g.V().has('id', 'a').next().property('value').value() == 10", "action",
 				"log.info('working with ' + cmd.getVerticesCount().toString() + ' vertices') ; counter = cmd.toNumber(g.V().has('id', 'b').next().property('value').value()).intValue() ; graph.addVertex('name','vertice N. ' + counter,'id',counter) ; self.property('counter',counter)",
 				"debug", "6");
-		rule2 = g.addVertex("id", "rule2", "type", "rule", "name", "Regola Secondo", "counter", "10", "condition",
+		rule2 = g.addVertex("id", "rule2", "type", "rules:rule", "name", "Regola Secondo", "counter", "10", "condition",
 				"g.V().has('id', 'a').next().property('value').value() == 11", "action",
 				"log.info('working with ' + cmd.getVerticesCount().toString() + ' vertices') ; counter = cmd.toNumber(g.V().has('id', 'b').next().property('value').value()).intValue(); graph.addVertex('name','vertice N. ' + counter,'id', counter + 1000) ; self.property('counter',counter)",
 				"debug", "6");
-		compute = g.addVertex("id", "compute", "type", "compute", "name", "Compute");
-		compute.addEdge("runner", rule, "type", "execute");
-		compute.addEdge("runner", rule2, "type", "execute");
+		compute = g.addVertex("id", "compute", "type", "rules:compute", "name", "Compute");
+		compute.addEdge("runner", rule, "type", "rules:execute");
+		compute.addEdge("runner", rule2, "type", "rules:execute");
 		inputA.addEdge("fireA", rule, "type", "fire");
 		inputB.addEdge("fireB", rule, "type", "fire");
 		inputA.addEdge("fireA", rule2, "type", "fire");
@@ -67,26 +69,20 @@ public class WaldotRulesEngineBaseTest {
 		LogHelper.changeJulLogLevel("fine");
 		baseRulesGraph();
 		Thread.sleep(1);
-		inputB.property("value", "5");
-		Thread.sleep(1);
-		inputB.property("value", "9");
-		Thread.sleep(1);
-		inputB.property("value", "4");
-		Thread.sleep(1);
-		inputA.property("value", "11");
-		Thread.sleep(1);
-		inputB.property("value", "7");
-		Thread.sleep(1);
-		inputB.property("value", "3");
-		Thread.sleep(1);
-		inputB.property("value", "91");
-		Thread.sleep(1);
-		inputA.property("value", "10");
-		Thread.sleep(1);
-		inputB.property("value", "55");
-		Thread.sleep(1);
-		inputB.property("value", "99");
-		Thread.sleep(1);
+		change(inputB, "5");
+		change(inputB, "9");
+		change(inputB, "4");
+		change(inputA, "11");
+		change(inputB, "7");
+		change(inputB, "3");
+		change(inputB, "91");
+		change(inputA, "10");
+		change(inputB, "55");
+		change(inputB, "99");
+		// tutte le modifiche sono state elaborate (ogni modifica attende il proprio completamento)
+		assert waitFor(() -> longProperty(rule, "total") == 10 && longProperty(rule2, "total") == 10
+				&& longProperty(rule, "queue") == 0 && longProperty(rule2, "queue") == 0, 15000);
+		assert waitFor(() -> longProperty(rule, "executed") == 6 && longProperty(rule2, "executed") == 4, 15000);
 		assert waldotTestClientHandler.checkOpcUaVertexExists(4);
 		assert waldotTestClientHandler.checkVertexExists(4);
 		assert waldotTestClientHandler.checkOpcUaVertexExists(5);
@@ -197,5 +193,42 @@ public class WaldotRulesEngineBaseTest {
 
 	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {
 		bootstrapUrlServerInit("file:///tmp/boot.conf");
+	}
+
+	private int changes = 0;
+
+	/**
+	 * Changes the value of an input and waits that both rules have processed the
+	 * event: the actions read the live state of the graph, so the next change
+	 * must not overlap with the execution of the previous one.
+	 */
+	private void change(final Vertex input, final String value) {
+		input.property("value", value);
+		changes++;
+		final int expected = changes;
+		assert waitFor(() -> longProperty(rule, "total") == expected && longProperty(rule2, "total") == expected
+				&& longProperty(rule, "queue") == 0 && longProperty(rule2, "queue") == 0
+				&& ((ComputeVertex) compute).getRunningCount() == 0
+				&& ((ComputeVertex) compute).getPendingRulesCount() == 0, 15000) : "events not processed for " + value;
+	}
+
+	private static long longProperty(final Vertex vertex, final String key) {
+		return vertex.property(key).isPresent() ? ((Number) vertex.property(key).value()).longValue() : -1;
+	}
+
+	private static boolean waitFor(final java.util.function.BooleanSupplier condition, final long timeoutMs) {
+		final long end = System.currentTimeMillis() + timeoutMs;
+		while (System.currentTimeMillis() < end) {
+			try {
+				if (condition.getAsBoolean()) {
+					return true;
+				}
+				Thread.sleep(20);
+			} catch (final InterruptedException e) {
+				Thread.currentThread().interrupt();
+				return false;
+			}
+		}
+		return condition.getAsBoolean();
 	}
 }

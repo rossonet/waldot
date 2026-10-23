@@ -54,33 +54,35 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 
 	@Override
 	protected Object getLastValue(final String propertyLabel) {
+		final Property<Object> last;
 		if (direction.equals(LinkDirection.TO)) {
-			return getTargetVertex().property(getDestinationLabel(propertyLabel)).value();
-		}
-		if (direction.equals(LinkDirection.FROM)) {
-			return getSourceVertex().property(getDestinationLabel(propertyLabel)).value();
+			last = getTargetVertex().property(getDestinationLabel(propertyLabel));
+		} else if (direction.equals(LinkDirection.FROM)) {
+			last = getSourceVertex().property(getDestinationLabel(propertyLabel));
 		} else {
 			logger.error("Invalid direction for LinkMonitoredEdge: {}", direction);
 			return null;
 		}
+		return last.isPresent() ? last.value() : null;
 	}
 
 	@Override
 	public void propertyChanged(final UaNode sourceNode, final String propertyLabel, final DataValue value) {
 		if (isActive() && isPropertyNotificationActive() && isMonitoredProperty(propertyLabel)) {
+		final String destinationLabel = getDestinationLabel(propertyLabel);
 			if (isDeadBandExceeded(propertyLabel, value)) {
 				if (direction.equals(LinkDirection.TO)) {
 					if (isDelayProperty()) {
-						sendWithDelay(getTargetVertex(), propertyLabel, value.getValue().getValue());
+						sendWithDelay(getTargetVertex(), destinationLabel, value.getValue().getValue());
 					} else {
-						getTargetVertex().property(getDestinationLabel(propertyLabel), value.getValue().getValue());
+						getTargetVertex().property(destinationLabel, value.getValue().getValue());
 					}
 				}
 				if (direction.equals(LinkDirection.FROM)) {
 					if (isDelayProperty()) {
-						sendWithDelay(getSourceVertex(), propertyLabel, value.getValue().getValue());
+						sendWithDelay(getSourceVertex(), destinationLabel, value.getValue().getValue());
 					} else {
-						getSourceVertex().property(getDestinationLabel(propertyLabel), value.getValue().getValue());
+						getSourceVertex().property(destinationLabel, value.getValue().getValue());
 					}
 				}
 			}

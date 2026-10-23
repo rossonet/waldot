@@ -76,13 +76,13 @@ public class CreateComputeVertexCommand extends AbstractOpcCommand {
 		final List<String> parameters = new ArrayList<>();
 		parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
 		parameters
-				.add(WaldotRulesEnginePlugin.RULE_NODE_PARAMETER.toLowerCase());
+				.add(WaldotRulesEnginePlugin.COMPUTE_NODE_PARAMETER);
 		enrichParameters(inputValues, parameters, 0,
 				MiloStrategy.LABEL_FIELD.toLowerCase());
 		enrichParameters(inputValues, parameters, 1,
 				MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
 		enrichParameters(inputValues, parameters, 2,
-				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD.toLowerCase());
+				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD);
 		final Object[] arrayParameters = parameters.toArray(new String[0]);
 		logger.info("create compute vertex with parameters: "
 				+ Arrays.toString(arrayParameters));

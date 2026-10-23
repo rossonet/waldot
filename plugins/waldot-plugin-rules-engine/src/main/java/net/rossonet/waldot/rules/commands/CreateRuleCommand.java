@@ -48,6 +48,10 @@ public class CreateRuleCommand extends AbstractOpcCommand {
 				VariableNodeTypes.Int16.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(
 						WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL_DESCRIPTION));
+		addInputArgument(WaldotRulesEnginePlugin.HYSTERESIS_LABEL,
+				VariableNodeTypes.Int64.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(
+						WaldotRulesEnginePlugin.HYSTERESIS_LABEL_DESCRIPTION));
 		addOutputArgument(LABEL_RESULT, VariableNodeTypes.String.getNodeId(),
 				ValueRanks.Scalar, null,
 				LocalizedText.english(LONG_LABEL_RESULT));
@@ -81,15 +85,17 @@ public class CreateRuleCommand extends AbstractOpcCommand {
 		final List<String> parameters = new ArrayList<>();
 		parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
 		parameters
-				.add(WaldotRulesEnginePlugin.RULE_NODE_PARAMETER.toLowerCase());
+				.add(WaldotRulesEnginePlugin.RULE_NODE_PARAMETER);
 		enrichParameters(inputValues, parameters, 0,
 				MiloStrategy.LABEL_FIELD.toLowerCase());
 		enrichParameters(inputValues, parameters, 1,
-				WaldotRulesEnginePlugin.CONDITION_FIELD.toLowerCase());
+				WaldotRulesEnginePlugin.CONDITION_FIELD);
 		enrichParameters(inputValues, parameters, 2,
-				WaldotRulesEnginePlugin.ACTION_FIELD.toLowerCase());
+				WaldotRulesEnginePlugin.ACTION_FIELD);
 		enrichParameters(inputValues, parameters, 3,
-				WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL.toLowerCase());
+				WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL);
+		enrichParameters(inputValues, parameters, 4,
+				WaldotRulesEnginePlugin.HYSTERESIS_LABEL);
 		final Object[] arrayParameters = parameters.toArray(new String[0]);
 		logger.info("create rule with parameters: "
 				+ Arrays.toString(arrayParameters));

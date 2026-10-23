@@ -32,8 +32,9 @@ package net.rossonet.waldot.rules.events;
  */
 public abstract class FireableAction implements Runnable {
 
-	// Timestamp di inizio esecuzione (per timeout tracking)
-	private long startingTime;
+	// Timestamp di inizio esecuzione (per timeout tracking), letto dal thread
+	// manager e scritto da chi estrae l'evento dalla coda
+	private volatile long startingTime;
 
 	/**
 	 * Returns the execution starting time in milliseconds.

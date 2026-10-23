@@ -10,9 +10,12 @@ import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 
 import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
 
-public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClientConfiguration {
+public class DefaultWaldOTAgentClientConfigurationV1
+		implements
+			WaldOTAgentClientConfiguration {
 	public static int _DEFAULT_TCP_BIND_PORT = 12686;
-	public static String DEFAULT_ENDPOINT = "opc.tcp://localhost:" + _DEFAULT_TCP_BIND_PORT + "/waldot";
+	public static String DEFAULT_ENDPOINT = "opc.tcp://localhost:"
+			+ _DEFAULT_TCP_BIND_PORT + "/waldot";
 	public static String DEFAULT_KEYSTORE_PASSWORD = "_pa_ss_wo_rd_";
 	public static String DEFAULT_KEYSTORE_PATH = "/tmp/waldot-client.ks";
 	public static String DEFAULT_NEW_CERTIFICATE_APPLICATION_URI = "urn:rossonet:waldot:agent";
@@ -21,8 +24,8 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	public static String DEFAULT_NEW_CERTIFICATE_DNS = "localhost";
 	public static String DEFAULT_NEW_CERTIFICATE_DNS_ALIAS = "localhost.localdomain";
 	public static String DEFAULT_NEW_CERTIFICATE_IP = "127.0.0.1";
-	public static String DEFAULT_NEW_CERTIFICATE_LOCALITY = "Imola";
-	public static String DEFAULT_NEW_CERTIFICATE_STATE = "Bologna";
+	public static String DEFAULT_NEW_CERTIFICATE_LOCALITY = "Ferrara";
+	public static String DEFAULT_NEW_CERTIFICATE_STATE = "Ferrara";
 	public static String DEFAULT_NEW_CERTIFICATE_UNIT = "WaldOT Agent Client";
 	public static String DEFAULT_NEW_ORGANIZATION = "Zona Autonoma srl";
 	public static String DISCOVERY_PATH = "/discovery";
@@ -292,7 +295,8 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	}
 
 	@Override
-	public void setCryptoCertificateChain(final List<X509Certificate> cryptoCertificateChain) {
+	public void setCryptoCertificateChain(
+			final List<X509Certificate> cryptoCertificateChain) {
 		this.cryptoCertificateChain = cryptoCertificateChain;
 	}
 
@@ -302,12 +306,14 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	}
 
 	@Override
-	public void setForceCertificateValidator(final boolean forceCertificateValidator) {
+	public void setForceCertificateValidator(
+			final boolean forceCertificateValidator) {
 		this.forceCertificateValidator = forceCertificateValidator;
 	}
 
 	@Override
-	public void setForceDiscoveredEndpointUrl(final String forceDiscoveredEndpointUrl) {
+	public void setForceDiscoveredEndpointUrl(
+			final String forceDiscoveredEndpointUrl) {
 		this.forceDiscoveredEndpointUrl = forceDiscoveredEndpointUrl;
 	}
 
@@ -337,7 +343,8 @@ public class DefaultWaldOTAgentClientConfigurationV1 implements WaldOTAgentClien
 	}
 
 	@Override
-	public void setGenerateCertOrganization(final String generateCertOrganization) {
+	public void setGenerateCertOrganization(
+			final String generateCertOrganization) {
 		this.generateCertOrganization = generateCertOrganization;
 	}
 

@@ -233,8 +233,11 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 			if (dbValue instanceof Number) {
 				final Property<Object> deadBandType = edge
 						.property(DEADBAND_TYPE_LABEL);
-				if (deadBandValue.isPresent()) {
-					final Object dbType = deadBandType.value();
+				// se il tipo non è specificato si usa il deadband assoluto
+				final Object dbType = deadBandType.isPresent()
+						? deadBandType.value()
+						: ABSOLUTE;
+				{
 					if (dbType instanceof String) {
 						final Object lastVal = getLastValue(propertyLabel);
 						if (lastVal instanceof Number) {
@@ -272,10 +275,6 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 						// superato
 						return true;
 					}
-				} else {
-					// se il deadband type non è specificato, considero sempre
-					// superato
-					return true;
 				}
 			} else {
 				// se il valore del deadband non è numerico, non applico il
