@@ -218,29 +218,37 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 
 			// Loop principale di generazione
 			while (active == true) {
-				// Seleziona l'algoritmo di generazione
-				switch (algorithm) {
-					case decremental :
-						generateNextDecremental();
-						break;
-					case incremental :
-						generateNextIncremental();
-						break;
-					case random :
-						generateNextRandom();
-						break;
-					case sinusoidal :
-						generateNextSinusoidal();
-						break;
-					case triangular :
-						generateNextTriangular();
-						break;
-					case stopped :
-						// Non genera nulla, mantiene il valore corrente
-						break;
-					default :
-						logger.warn("algorithm not implemented: " + algorithm);
-						break;
+				// Un errore nella propagazione del valore non deve fermare il
+				// generatore (l'eccezione sarebbe inghiottita dal Future)
+				try {
+					// Seleziona l'algoritmo di generazione
+					switch (algorithm) {
+						case decremental :
+							generateNextDecremental();
+							break;
+						case incremental :
+							generateNextIncremental();
+							break;
+						case random :
+							generateNextRandom();
+							break;
+						case sinusoidal :
+							generateNextSinusoidal();
+							break;
+						case triangular :
+							generateNextTriangular();
+							break;
+						case stopped :
+							// Non genera nulla, mantiene il valore corrente
+							break;
+						default :
+							logger.warn(
+									"algorithm not implemented: " + algorithm);
+							break;
+					}
+				} catch (final RuntimeException e) {
+					logger.warn("Error generating the value of node "
+							+ getNodeId().toParseableString(), e);
 				}
 				try {
 					// Attende prima della prossima generazione

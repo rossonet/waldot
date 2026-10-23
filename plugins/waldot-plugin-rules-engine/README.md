@@ -85,8 +85,9 @@ Peso di una regola: `weight = priority * factor + queue`. La regola con **peso p
 | `create compute monitored edge` | Crea un edge `rules:execute` dal compute alla regola |
 | `create show case arena` | Crea l'esempio "Dungeon Arena" (16 vertici, argomento `delay-ms`) |
 | `create show case evolution` | Crea l'esempio "Evolution Lab" (algoritmo evolutivo, oltre 100 vertici; argomenti `population-size`, `delay-ms`, `target-fitness`, `seed`) |
+| `create show case gas grid` | Crea l'esempio "Gas Grid" (rete di distribuzione del gas con loop controller PI sulle valvole, `link-to`/`link-from` con deadband e delay; argomenti `stations`, `delay-ms`, `setpoint`, `pipe-delay-ms`, `gas-type`, `compare`). Guida per la demo: [SHOWCASE_GAS_GRID.md](docs/SHOWCASE_GAS_GRID.md) |
 
-I due comandi `show case` creano grafi "vivi" (generatori `sim:generator` + edge `link-to` + `fire` + `rules:execute`), organizzati nelle directory `rules/showcase/<scenario>/...`, e rifiutano la creazione se lo scenario esiste già. Vedi [Esempi](docs/EXAMPLES.md#show-case).
+I comandi `show case` creano grafi "vivi" (generatori `sim:generator` + edge `link-to` + `fire` + `rules:execute`), organizzati nelle directory `rules/showcase/<scenario>/...`, e rifiutano la creazione se lo scenario esiste già. Vedi [Esempi](docs/EXAMPLES.md#show-case).
 
 ## Variabili JEXL
 

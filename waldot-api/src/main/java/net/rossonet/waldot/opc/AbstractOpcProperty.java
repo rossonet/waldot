@@ -44,13 +44,13 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 		implements WaldotProperty<DATA_TYPE> {
 	protected boolean allowNullPropertyValues = false;
 
-	protected final List<EventObserver> eventObservers = new ArrayList<>();
+	protected final List<EventObserver> eventObservers = new java.util.concurrent.CopyOnWriteArrayList<>();
 	protected final WaldotGraph graph;
 
 	private ByteString icon;
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
-	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
+	protected final List<PropertyObserver> propertyObservers = new java.util.concurrent.CopyOnWriteArrayList<>();
 	private final WaldotEdge referenceEdge;
 
 	public AbstractOpcProperty(final WaldotGraph graph, final WaldotEdge edge, final String key, final DATA_TYPE value,

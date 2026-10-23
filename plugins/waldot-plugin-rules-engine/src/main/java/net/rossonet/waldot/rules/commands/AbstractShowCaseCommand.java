@@ -179,6 +179,109 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	}
 
 	/**
+	 * Creates a link edge (link-to or link-from) with the optional properties
+	 * of the link logic.
+	 * <p>
+	 * For <code>link-to</code> the value of the source is copied to the target;
+	 * for <code>link-from</code> the value of the target is copied to the
+	 * source.
+	 * </p>
+	 * 
+	 * @param type         link-to or link-from
+	 * @param source       source vertex of the edge
+	 * @param target       target vertex of the edge
+	 * @param name         edge label
+	 * @param property     property of the vertex that is observed
+	 * @param renamedTo    label of the property that receives the value, or
+	 *                     null to keep the same label
+	 * @param deadbandType <code>absolute</code> or <code>percentage</code>, or
+	 *                     null for no deadband
+	 * @param deadband     deadband value, or null for no deadband
+	 * @param delayMs      delay in milliseconds, or null for no delay
+	 * @param directory    directory of the edge
+	 */
+	protected Edge link(String type, Vertex source, Vertex target, String name,
+			String property, String renamedTo, String deadbandType,
+			Double deadband, Long delayMs, String directory) {
+		final java.util.List<Object> extra = new java.util.ArrayList<>();
+		extra.add(MonitoredEdge.MONITORED_PROPERTIES_LABEL);
+		extra.add(property);
+		if (renamedTo != null) {
+			extra.add(property);
+			extra.add(renamedTo);
+		}
+		if (deadband != null) {
+			extra.add(MonitoredEdge.DEADBAND_LABEL);
+			extra.add(deadband);
+			extra.add(MonitoredEdge.DEADBAND_TYPE_LABEL);
+			extra.add(deadbandType);
+		}
+		if (delayMs != null && delayMs > 0) {
+			extra.add(MonitoredEdge.DELAY_LABEL);
+			extra.add(delayMs);
+		}
+		return edge(source, target, name, type, directory, extra.toArray());
+	}
+
+	/**
+	 * Creates the link-from edge (the value of the target is copied to the
+	 * source).
+	 */
+	protected Edge linkFrom(Vertex source, Vertex target, String name,
+			String property, String renamedTo, String deadbandType,
+			Double deadband, Long delayMs, String directory) {
+		return link(MiloStrategy.LINK_FROM_EDGE_TYPE, source, target, name,
+				property, renamedTo, deadbandType, deadband, delayMs,
+				directory);
+	}
+
+	/**
+	 * Creates the link-to edge with rename, deadband and delay.
+	 */
+	protected Edge linkTo(Vertex source, Vertex destination, String name,
+			String property, String renamedTo, String deadbandType,
+			Double deadband, Long delayMs, String directory) {
+		return link(MiloStrategy.LINK_TO_EDGE_TYPE, source, destination, name,
+				property, renamedTo, deadbandType, deadband, delayMs,
+				directory);
+	}
+
+	/**
+	 * Parses an optional decimal argument.
+	 * 
+	 * @return the value, or the default when the argument is empty
+	 * @throws IllegalArgumentException when the argument is not a number
+	 */
+	protected static double doubleArgument(String[] inputValues, int index,
+			double defaultValue, String name) {
+		final String text = stringArgument(inputValues, index, null);
+		if (text == null) {
+			return defaultValue;
+		}
+		try {
+			return Double.parseDouble(text);
+		} catch (final NumberFormatException e) {
+			throw new IllegalArgumentException(
+					"argument '" + name + "' is not a number: " + text);
+		}
+	}
+
+	/**
+	 * Returns an optional text argument, trimmed.
+	 * 
+	 * @return the value, or the default when the argument is empty
+	 */
+	protected static String stringArgument(String[] inputValues, int index,
+			String defaultValue) {
+		if (inputValues == null || inputValues.length <= index
+				|| inputValues[index] == null
+				|| inputValues[index].trim().isEmpty()) {
+			return defaultValue;
+		}
+		return inputValues[index].trim();
+	}
+
+	/**
 	 * Creates the link-to edge (the value of the source is copied to the
 	 * destination).
 	 */

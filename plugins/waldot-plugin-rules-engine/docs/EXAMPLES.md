@@ -58,7 +58,7 @@ compute.property("threads", "8");      // nuovo limite di concorrenza
 
 ## Show case
 
-I comandi `create show case arena` e `create show case evolution` costruiscono due scenari completi che si muovono da soli. Servono per studiare il plugin sul grafo. Usano `waldot-plugin-generator` (`sim:generator`) per i dati in movimento, edge `link-to` (generatore → stato, proprietà `data`), edge `fire` (stato → regola) ed edge `rules:execute` (compute → regola). Se l'id marcatore dello scenario esiste già, il comando risponde `already exists` e non crea nulla.
+I comandi `create show case arena`, `create show case evolution` e `create show case gas grid` costruiscono scenari completi che si muovono da soli. Servono per studiare il plugin sul grafo. Usano `waldot-plugin-generator` (`sim:generator`) per i dati in movimento, edge `link-to` (generatore → stato, proprietà `data`), edge `fire` (stato → regola) ed edge `rules:execute` (compute → regola). Se l'id marcatore dello scenario esiste già, il comando risponde `already exists` e non crea nulla.
 
 ### Dungeon Arena (`arena-*`, 16 vertici)
 
@@ -91,3 +91,7 @@ Algoritmo evolutivo che massimizza `100 - Rastrigin(x, y, z)` (massimo 100 in 0,
 
 
 `WaldotRulesEngineBehaviorTest` verifica: tipi dei vertici, default e valori non validi, peso in funzione della priorità, condizione vera/falsa, errori di condizione e azione, modifiche a runtime, più thread, rimozione di una regola e chiusura del compute. `WaldotRulesEngineBaseTest` è lo scenario completo con due regole.
+
+### Gas Grid (`gas-*`, `14 + 11 × stazioni` vertici)
+
+Rete di distribuzione del gas con stazioni di riduzione regolate da loop controller PI, archi `link-to`/`link-from` con `deadband-type`, `deadband-value` e `delay`, e due profili gas (`metano`, `metano-blu`). La documentazione completa, pensata per le demo, è in [SHOWCASE_GAS_GRID.md](SHOWCASE_GAS_GRID.md). I test sono in `WaldotRulesEngineGasGridTest`.

@@ -59,7 +59,7 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE>
 	private ByteString icon;
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
-	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
+	protected final List<PropertyObserver> propertyObservers = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	private final WaldotVertex referenceVertex;
 

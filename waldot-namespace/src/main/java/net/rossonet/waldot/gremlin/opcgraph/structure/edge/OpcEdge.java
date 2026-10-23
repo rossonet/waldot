@@ -55,7 +55,7 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	private final Set<WaldotProperty<?>> propertiesToDelete = new HashSet<>();
 
-	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
+	protected final List<PropertyObserver> propertyObservers = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	private final Set<Reference> referencesToDelete = new HashSet<>();
 

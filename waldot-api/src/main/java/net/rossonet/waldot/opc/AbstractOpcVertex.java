@@ -163,7 +163,7 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	private boolean ensurePostActive = false;
 
-	protected final List<EventObserver> eventObservers = new ArrayList<>();
+	protected final List<EventObserver> eventObservers = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	protected final WaldotGraph graph;
 
@@ -180,7 +180,7 @@ public abstract class AbstractOpcVertex extends GremlinElement
 	@SuppressWarnings("rawtypes")
 	private final Map<String, MetaDataProperty> managedProperties = new HashMap<>();
 
-	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
+	protected final List<PropertyObserver> propertyObservers = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	private final QualifiedProperty<String> typeProperty;
 

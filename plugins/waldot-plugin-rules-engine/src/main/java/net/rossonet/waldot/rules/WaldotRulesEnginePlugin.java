@@ -19,6 +19,7 @@ import net.rossonet.waldot.rules.commands.CreateComputeVertexCommand;
 import net.rossonet.waldot.rules.commands.CreateRuleCommand;
 import net.rossonet.waldot.rules.commands.CreateShowCaseArenaCommand;
 import net.rossonet.waldot.rules.commands.CreateShowCaseEvolutionCommand;
+import net.rossonet.waldot.rules.commands.CreateShowCaseGasGridCommand;
 import net.rossonet.waldot.rules.vertices.ComputableFireableAbstractOpcVertex;
 import net.rossonet.waldot.rules.vertices.ComputeVertex;
 import net.rossonet.waldot.rules.vertices.RuleVertex;
@@ -217,6 +218,7 @@ public class WaldotRulesEnginePlugin extends AbstractPluginListener {
 		registerCommand(new CreateComputeVertexCommand(waldotNamespace));
 		registerCommand(new CreateShowCaseArenaCommand(waldotNamespace));
 		registerCommand(new CreateShowCaseEvolutionCommand(waldotNamespace));
+		registerCommand(new CreateShowCaseGasGridCommand(waldotNamespace));
 		instance = this;
 	}
 

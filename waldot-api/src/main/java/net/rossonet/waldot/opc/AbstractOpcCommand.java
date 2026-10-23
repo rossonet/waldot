@@ -82,7 +82,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	private final String directory;
 
-	protected final List<EventObserver> eventObservers = new ArrayList<>();
+	protected final List<EventObserver> eventObservers = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	protected final WaldotGraph graph;
 
@@ -92,7 +92,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	protected final List<Argument> outputArguments = new ArrayList<>();
 
-	protected final List<PropertyObserver> propertyObservers = new ArrayList<>();
+	protected final List<PropertyObserver> propertyObservers = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	protected final WaldotNamespace waldotNamespace;
 
