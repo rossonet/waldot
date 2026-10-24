@@ -1,7 +1,5 @@
 package net.rossonet.waldot;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 import org.eclipse.milo.opcua.sdk.core.Reference;
@@ -14,19 +12,17 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
-import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.dataGenerator.DataGeneratorVertex;
-import net.rossonet.waldot.dataGenerator.DataGeneratorVertex.Algorithm;
+import net.rossonet.waldot.dataGenerator.GeneratorConstants;
 import net.rossonet.waldot.dataGenerator.commands.CreateSimulatorCommand;
+import net.rossonet.waldot.plugin.AbstractPluginListener;
 import net.rossonet.waldot.utils.ThreadHelper;
 
 /**
@@ -87,63 +83,17 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * }</pre>
  * 
  * @see DataGeneratorVertex
+ * @see GeneratorConstants
  * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
 @WaldotPlugin
-public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
-	/** Property name for generation algorithm */
-	public static final String ALGORITHM_FIELD = "Algorithm";
-
-	public static final String ALGORITHM_FIELD_DESCRIPTION = "Algorithm used for data generation (incremental, decremental, random, sinusoidal, triangular, stopped)";
-
-	/** Vertex type label for data generator vertices */
-	public static final String DATA_GENERATOR_OBJECT_TYPE_LABEL = "sim:generator";
-
-	/** Default algorithm: incremental */
-	public static final String DEFAULT_ALGORITHM = Algorithm.incremental
-			.toString();
-
-	/** Default update delay: 1 second */
-	public static final Long DEFAULT_DELAY = 1000L;
-
-	/** Default maximum value: 20000 */
-	public static final Long DEFAULT_MAX_VALUE = 20000L;
-
-	/** Default minimum value: 0 */
-	public static final Long DEFAULT_MIN_VALUE = 0L;
-
-	public static final String DEFAULT_POST_NODE_ID_DATA = null;
-
-	public static final String DELAY_DESCRIPTION = "Delay in milliseconds between data updates (minimum 10ms)";
-
-	/** Property name for update delay */
-	public static final String DELAY_FIELD = "Delay";
-
-	private final static Logger logger = LoggerFactory
-			.getLogger(WaldotGeneratorPlugin.class);
-
-	public static final String MAX_VALUE_DESCRIPTION = "Maximum value for the generated data";
-
-	/** Property name for maximum value */
-	public static final String MAX_VALUE_FIELD = "Max";
-
-	public static final String MIN_VALUE_DESCRIPTION = "Minimum value for the generated data";
-
-	/** Property name for minimum value */
-	public static final String MIN_VALUE_FIELD = "Min";
-
-	public static final String POST_NODE_ID_DATA_DESCRIPTION = "NodeId of the vertex to which the generated data will be posted";
-
-	public static final String POST_NODE_ID_DATA_FIELD = "postNodeIdData";
-
+public class WaldotGeneratorPlugin extends AbstractPluginListener {
 	/** OPC-UA display name for data generator type */
 	private static final String WALDOT_DATA_GENERATOR_DISPLAY_NAME = "WaldOT Data Generator";
 
 	/** OPC-UA object type name */
 	private static final String WALDOT_DATA_GENERATOR_OBJECT_TYPE = "WaldOTDataGeneratorObjectType";
-
-	private CreateSimulatorCommand createSimulatorCommand;
 
 	// Nodo tipo OPC-UA per i generatori
 	private UaObjectTypeNode dataGeneratorTypeNode;
@@ -166,29 +116,7 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 	public void close() throws Exception {
 		// Ferma tutti i thread virtuali dei generatori
 		executor.shutdownNow();
-		logger.info("WaldotGeneratorPlugin closed");
-	}
-
-	/**
-	 * Checks if this plugin handles the specified vertex type label.
-	 * 
-	 * @param typeDefinitionLabel vertex type label
-	 * @return true if label is "generator"
-	 */
-	@Override
-	public boolean containsVertexType(String typeDefinitionLabel) {
-		return DATA_GENERATOR_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel);
-	}
-
-	/**
-	 * Checks if this plugin handles the specified OPC-UA type node ID.
-	 * 
-	 * @param typeDefinitionNodeId OPC-UA type node ID
-	 * @return true if matches data generator type node
-	 */
-	@Override
-	public boolean containsVertexTypeNode(NodeId typeDefinitionNodeId) {
-		return dataGeneratorTypeNode.getNodeId().equals(typeDefinitionNodeId);
+		super.close();
 	}
 
 	/**
@@ -228,58 +156,19 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 		waldotNamespace.getObjectTypeManager().registerObjectType(
 				dataGeneratorTypeNode.getNodeId(), UaObjectNode.class,
 				objectNodeConstructor);
-	}
-
-	/**
-	 * Creates a new DataGeneratorVertex instance.
-	 * <p>
-	 * Crea un nuovo vertice generatore con le proprietà specificate.
-	 * Il generatore inizia automaticamente a generare valori in un thread virtuale.
-	 * </p>
-	 * 
-	 * @param graph WaldOT graph instance
-	 * @param context OPC-UA node context
-	 * @param nodeId OPC-UA node ID
-	 * @param browseName OPC-UA browse name
-	 * @param displayName OPC-UA display name
-	 * @param description OPC-UA description
-	 * @param writeMask OPC-UA write mask
-	 * @param userWriteMask OPC-UA user write mask
-	 * @param eventNotifier OPC-UA event notifier
-	 * @param version vertex version
-	 * @param propertyKeyValues initial property values
-	 * @return new DataGeneratorVertex
-	 */
-	private WaldotVertex createDataGeneratorVertex(WaldotGraph graph,
-			UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description,
-			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier,
-			long version, Object[] propertyKeyValues) {
-		return new DataGeneratorVertex(executor, graph, context, nodeId,
-				browseName, displayName, description, writeMask, userWriteMask,
-				eventNotifier, version, propertyKeyValues);
+		// rende il tipo visibile ai metodi di AbstractPluginListener
+		labelTypeNodes.put(GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL,
+				dataGeneratorTypeNode);
+		typeClassNodes.put(dataGeneratorTypeNode, DataGeneratorVertex.class);
 	}
 
 	/**
 	 * Creates a new vertex of the specified type.
 	 * <p>
-	 * Chiamato dal framework WaldOT quando viene aggiunto un vertice di tipo "generator".
-	 * Crea un DataGeneratorVertex che inizia immediatamente a generare valori.
+	 * Il costruttore di {@link DataGeneratorVertex} richiede l'executor del
+	 * plugin, per questo la creazione non usa la reflection di
+	 * {@link AbstractPluginListener}.
 	 * </p>
-	 * 
-	 * @param typeDefinitionNodeId OPC-UA type node ID
-	 * @param graph WaldOT graph instance
-	 * @param context OPC-UA node context
-	 * @param nodeId OPC-UA node ID
-	 * @param browseName OPC-UA browse name
-	 * @param displayName OPC-UA display name
-	 * @param description OPC-UA description
-	 * @param writeMask OPC-UA write mask
-	 * @param userWriteMask OPC-UA user write mask
-	 * @param eventNotifier OPC-UA event notifier
-	 * @param version vertex version
-	 * @param propertyKeyValues initial property values
-	 * @return new vertex or null if type not handled
 	 */
 	@Override
 	public WaldotVertex createVertex(NodeId typeDefinitionNodeId,
@@ -288,61 +177,30 @@ public class WaldotGeneratorPlugin implements AutoCloseable, PluginListener {
 			LocalizedText description, UInteger writeMask,
 			UInteger userWriteMask, UByte eventNotifier, long version,
 			Object[] propertyKeyValues) {
-		// Verifica che il tipo sia gestito da questo plugin
-		if (!containsVertexTypeNode(typeDefinitionNodeId)) {
+		if (dataGeneratorTypeNode == null || !dataGeneratorTypeNode.getNodeId()
+				.equals(typeDefinitionNodeId)) {
 			return null;
 		}
-		if (dataGeneratorTypeNode.getNodeId().equals(typeDefinitionNodeId)) {
-			return createDataGeneratorVertex(graph, context, nodeId, browseName,
-					displayName, description, writeMask, userWriteMask,
-					eventNotifier, version, propertyKeyValues);
-		} else {
-			return null;
-		}
+		return new DataGeneratorVertex(executor, graph, context, nodeId,
+				browseName, displayName, description, writeMask, userWriteMask,
+				eventNotifier, version, propertyKeyValues);
 	}
 
 	/**
-	 * Returns plugin-specific console commands.
-	 * <p>
-	 * 
-	 * @return collection of WaldotCommand instances (e.g., "create generator")
-	 */
-	@Override
-	public Collection<WaldotCommand> getCommands() {
-		return Arrays.asList(createSimulatorCommand);
-	}
-
-	/**
-	 * Returns the OPC-UA type node ID for the specified type label.
-	 * 
-	 * @param typeDefinitionLabel type label ("generator")
-	 * @return type node ID or null if not found
-	 */
-	@Override
-	public NodeId getVertexTypeNode(String typeDefinitionLabel) {
-		if (DATA_GENERATOR_OBJECT_TYPE_LABEL.equals(typeDefinitionLabel)) {
-			return dataGeneratorTypeNode.getNodeId();
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Initializes the plugin and registers vertex types.
-	 * <p>
-	 * Chiamato dal framework WaldOT all'avvio. Crea il tipo OPC-UA per i generatori
-	 * e lo registra nel namespace.
-	 * </p>
+	 * Initializes the plugin, registers the vertex type and the command that
+	 * creates it.
 	 * 
 	 * @param waldotNamespace WaldOT namespace instance
 	 */
 	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
+		super.initialize(waldotNamespace);
 		this.waldotNamespace = waldotNamespace;
+		commands.clear();
 		// Crea e registra il tipo DataGenerator nell'OPC-UA address space
 		createDataGeneratorTypeNode();
 		waldotNamespace.getOpcuaServer().updateReferenceTypeTree();
-		createSimulatorCommand = new CreateSimulatorCommand(waldotNamespace);
+		registerCommand(new CreateSimulatorCommand(waldotNamespace));
 	}
 
 }

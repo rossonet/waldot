@@ -10,10 +10,10 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
+import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.jexl.HysteresisPriorityQueue;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
-import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.rules.events.RunnableEvent;
 
@@ -222,7 +222,7 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	private void publishQueueSize() {
 		synchronized (publishLock) {
 			if (!isRemoved()) {
-				property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, Long.valueOf(eventQueue.size()));
+				property(RulesEngineConstants.QUEUE_SIZE_LABEL, Long.valueOf(eventQueue.size()));
 			}
 		}
 	}

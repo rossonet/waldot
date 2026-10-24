@@ -9,12 +9,12 @@ import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
-import net.rossonet.waldot.WaldotGeneratorPlugin;
+import net.rossonet.waldot.rules.RulesEngineConstants;
+import net.rossonet.waldot.dataGenerator.GeneratorConstants;
 import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
-import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 
 /**
  * Base class of the commands that build a complete, running example graph
@@ -27,7 +27,7 @@ import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
  */
 public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 
-	public static final String BASE_DIRECTORY = WaldotRulesEnginePlugin.BASE_CMD_DIRECTORY
+	public static final String BASE_DIRECTORY = RulesEngineConstants.BASE_CMD_DIRECTORY
 			+ "/showcase";
 	public static final UInteger DEFAULT_WRITE_MASK = UInteger
 			.valueOf(WriteMask.Executable.getValue());
@@ -91,8 +91,8 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	 */
 	protected Vertex compute(String id, String label, String directory,
 			int threads) {
-		return vertex(id, WaldotRulesEnginePlugin.COMPUTE_NODE_PARAMETER, label,
-				directory, WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD,
+		return vertex(id, RulesEngineConstants.COMPUTE_NODE_PARAMETER, label,
+				directory, RulesEngineConstants.THREAD_POOL_SIZE_FIELD,
 				String.valueOf(threads));
 	}
 
@@ -117,8 +117,8 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	protected Edge execute(Vertex compute, Vertex rule, String name,
 			int priority, String directory) {
 		return edge(compute, rule, name,
-				WaldotRulesEnginePlugin.EXECUTE_EDGE_LABEL, directory,
-				WaldotRulesEnginePlugin.PRIORITY_FIELD,
+				RulesEngineConstants.EXECUTE_EDGE_LABEL, directory,
+				RulesEngineConstants.PRIORITY_FIELD,
 				String.valueOf(priority));
 	}
 
@@ -136,7 +136,7 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	protected Edge fire(Vertex source, Vertex rule, String name,
 			String property, String directory) {
 		return edge(source, rule, name,
-				WaldotRulesEnginePlugin.FIRE_EDGE_PARAMETER, directory,
+				RulesEngineConstants.FIRE_EDGE_PARAMETER, directory,
 				MonitoredEdge.MONITORED_PROPERTIES_LABEL, property);
 	}
 
@@ -145,14 +145,14 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	 */
 	protected Vertex generator(String id, String label, String directory,
 			String algorithm, long min, long max, long delayMs) {
-		return vertex(id, WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
+		return vertex(id, GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL,
 				label, directory,
-				WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), algorithm,
-				WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase(),
+				GeneratorConstants.ALGORITHM_FIELD.toLowerCase(), algorithm,
+				GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(),
 				String.valueOf(min),
-				WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase(),
+				GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(),
 				String.valueOf(max),
-				WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(),
+				GeneratorConstants.DELAY_FIELD.toLowerCase(),
 				String.valueOf(delayMs));
 	}
 
@@ -297,12 +297,12 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	 */
 	protected Vertex rule(String id, String label, String directory,
 			String condition, String action, long hysteresisMs, int debug) {
-		return vertex(id, WaldotRulesEnginePlugin.RULE_NODE_PARAMETER, label,
-				directory, WaldotRulesEnginePlugin.CONDITION_FIELD, condition,
-				WaldotRulesEnginePlugin.ACTION_FIELD, action,
-				WaldotRulesEnginePlugin.HYSTERESIS_LABEL,
+		return vertex(id, RulesEngineConstants.RULE_NODE_PARAMETER, label,
+				directory, RulesEngineConstants.CONDITION_FIELD, condition,
+				RulesEngineConstants.ACTION_FIELD, action,
+				RulesEngineConstants.HYSTERESIS_LABEL,
 				String.valueOf(hysteresisMs),
-				WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL,
+				RulesEngineConstants.DEBUG_LEVEL_LABEL,
 				String.valueOf(debug));
 	}
 

@@ -23,6 +23,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
@@ -233,23 +234,23 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	private static final Logger logger = LoggerFactory.getLogger(RuleVertex.class);
 
 	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode) {
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, WaldotRulesEnginePlugin.CONDITION_FIELD,
-				NodeIds.String, WaldotRulesEnginePlugin.CONDITION_FIELD_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, WaldotRulesEnginePlugin.ACTION_FIELD,
-				NodeIds.String, WaldotRulesEnginePlugin.ACTION_FIELD_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL,
-				NodeIds.Int32, WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, WaldotRulesEnginePlugin.HYSTERESIS_LABEL,
-				NodeIds.Int64, WaldotRulesEnginePlugin.HYSTERESIS_LABEL_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL,
-				NodeIds.Int64, WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, WaldotRulesEnginePlugin.TOTAL_SIZE_LABEL,
-				NodeIds.Int64, WaldotRulesEnginePlugin.TOTAL_SIZE_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.CONDITION_FIELD,
+				NodeIds.String, RulesEngineConstants.CONDITION_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.ACTION_FIELD,
+				NodeIds.String, RulesEngineConstants.ACTION_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.DEBUG_LEVEL_LABEL,
+				NodeIds.Int32, RulesEngineConstants.DEBUG_LEVEL_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.HYSTERESIS_LABEL,
+				NodeIds.Int64, RulesEngineConstants.HYSTERESIS_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.QUEUE_SIZE_LABEL,
+				NodeIds.Int64, RulesEngineConstants.QUEUE_SIZE_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.TOTAL_SIZE_LABEL,
+				NodeIds.Int64, RulesEngineConstants.TOTAL_SIZE_LABEL_DESCRIPTION);
 		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
-				WaldotRulesEnginePlugin.ACTION_EXECUTED_SIZE_LABEL, NodeIds.Int64,
-				WaldotRulesEnginePlugin.ACTION_EXECUTED_SIZE_LABEL_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, WaldotRulesEnginePlugin.ERRORS_SIZE_LABEL,
-				NodeIds.Int64, WaldotRulesEnginePlugin.ERRORS_SIZE_LABEL_DESCRIPTION);
+				RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL, NodeIds.Int64,
+				RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.ERRORS_SIZE_LABEL,
+				NodeIds.Int64, RulesEngineConstants.ERRORS_SIZE_LABEL_DESCRIPTION);
 	}
 
 	private volatile boolean closed = false;
@@ -280,26 +281,26 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 				version);
 		waldotNamespace = graph.getWaldotNamespace();
 		this.waldotRulesEnginePlugin = waldotRulesEnginePlugin;
-		addManagedProperty(WaldotRulesEnginePlugin.CONDITION_FIELD, NodeIds.String, String.class, false,
-				WaldotRulesEnginePlugin.DEFAULT_CONDITION_VALUE, null, false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.ACTION_FIELD, NodeIds.String, String.class, false,
-				WaldotRulesEnginePlugin.DEFAULT_ACTION_VALUE, null, false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL, NodeIds.Int32, Integer.class, false, 0, null,
+		addManagedProperty(RulesEngineConstants.CONDITION_FIELD, NodeIds.String, String.class, false,
+				RulesEngineConstants.DEFAULT_CONDITION_VALUE, null, false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.ACTION_FIELD, NodeIds.String, String.class, false,
+				RulesEngineConstants.DEFAULT_ACTION_VALUE, null, false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.DEBUG_LEVEL_LABEL, NodeIds.Int32, Integer.class, false, 0, null,
 				false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.HYSTERESIS_LABEL, NodeIds.Int64, Long.class, false, 0L,
+		addManagedProperty(RulesEngineConstants.HYSTERESIS_LABEL, NodeIds.Int64, Long.class, false, 0L,
 				hysteresisCallback(), false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
+		addManagedProperty(RulesEngineConstants.QUEUE_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
 				false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.TOTAL_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
+		addManagedProperty(RulesEngineConstants.TOTAL_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
 				false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.ACTION_EXECUTED_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L,
+		addManagedProperty(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L,
 				null, false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.ERRORS_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
+		addManagedProperty(RulesEngineConstants.ERRORS_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
 				false, propertyKeyValues);
 		// i contatori ripartono dai valori presenti nelle proprietà (es. vertice ricreato)
-		total.set(readCounter(WaldotRulesEnginePlugin.TOTAL_SIZE_LABEL));
-		executed.set(readCounter(WaldotRulesEnginePlugin.ACTION_EXECUTED_SIZE_LABEL));
-		errors.set(readCounter(WaldotRulesEnginePlugin.ERRORS_SIZE_LABEL));
+		total.set(readCounter(RulesEngineConstants.TOTAL_SIZE_LABEL));
+		executed.set(readCounter(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL));
+		errors.set(readCounter(RulesEngineConstants.ERRORS_SIZE_LABEL));
 	}
 
 	private void applyHysteresis(Object newValue) throws PropertyChangeException {
@@ -346,8 +347,8 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * @return action script
 	 */
 	public String getAction() {
-		final String value = getRuntimeParameter(WaldotRulesEnginePlugin.ACTION_FIELD);
-		return value == null || value.isBlank() ? WaldotRulesEnginePlugin.DEFAULT_ACTION_VALUE : value;
+		final String value = getRuntimeParameter(RulesEngineConstants.ACTION_FIELD);
+		return value == null || value.isBlank() ? RulesEngineConstants.DEFAULT_ACTION_VALUE : value;
 	}
 
 	/**
@@ -356,8 +357,8 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * @return condition script
 	 */
 	public String getCondition() {
-		final String value = getRuntimeParameter(WaldotRulesEnginePlugin.CONDITION_FIELD);
-		return value == null || value.isBlank() ? WaldotRulesEnginePlugin.DEFAULT_CONDITION_VALUE : value;
+		final String value = getRuntimeParameter(RulesEngineConstants.CONDITION_FIELD);
+		return value == null || value.isBlank() ? RulesEngineConstants.DEFAULT_CONDITION_VALUE : value;
 	}
 
 	/**
@@ -366,7 +367,7 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * @return debug level
 	 */
 	public int getDebug() {
-		final Integer value = getRuntimeParameter(WaldotRulesEnginePlugin.DEBUG_LEVEL_LABEL);
+		final Integer value = getRuntimeParameter(RulesEngineConstants.DEBUG_LEVEL_LABEL);
 		return value == null || value < 0 ? 0 : value;
 	}
 
@@ -449,21 +450,21 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * Counts one action executed successfully.
 	 */
 	public void updateExecuted() {
-		updateCounter(WaldotRulesEnginePlugin.ACTION_EXECUTED_SIZE_LABEL, executed);
+		updateCounter(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL, executed);
 	}
 
 	/**
 	 * Counts one failure of the rule.
 	 */
 	public void updateThrowable() {
-		updateCounter(WaldotRulesEnginePlugin.ERRORS_SIZE_LABEL, errors);
+		updateCounter(RulesEngineConstants.ERRORS_SIZE_LABEL, errors);
 	}
 
 	/**
 	 * Counts one event evaluated.
 	 */
 	public void updateTotal() {
-		updateCounter(WaldotRulesEnginePlugin.TOTAL_SIZE_LABEL, total);
+		updateCounter(RulesEngineConstants.TOTAL_SIZE_LABEL, total);
 	}
 
 	// l'incremento e la pubblicazione sono nello stesso blocco: gli aggiornamenti

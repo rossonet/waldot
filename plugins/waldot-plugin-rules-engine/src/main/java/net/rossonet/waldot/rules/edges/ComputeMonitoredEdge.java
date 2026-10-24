@@ -5,11 +5,11 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 
+import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
-import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 import net.rossonet.waldot.rules.vertices.ComputableFireableAbstractOpcVertex;
 import net.rossonet.waldot.rules.vertices.ComputeVertex;
 
@@ -97,7 +97,7 @@ public class ComputeMonitoredEdge extends MonitoredEdge {
 			final int pending = rule.size();
 			if (pending > 0) {
 				((ComputeVertex) getSourceVertex()).notifyQueueSizeChange(rule,
-						WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL,
+						RulesEngineConstants.QUEUE_SIZE_LABEL,
 						new DataValue(new Variant(Long.valueOf(pending))), getPriority());
 			}
 		}
@@ -155,7 +155,7 @@ public class ComputeMonitoredEdge extends MonitoredEdge {
 	@Override
 	public void propertyChanged(final UaNode node, final String label, final DataValue value) {
 		// Solo la property "queue" è monitorata
-		if (label.equals(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL)) {
+		if (label.equals(RulesEngineConstants.QUEUE_SIZE_LABEL)) {
 			// Calcola priorità dall'edge property
 			final int calcolatedPriority = getPriority();
 			// Notifica ComputeVertex (source) del cambio di dimensione coda

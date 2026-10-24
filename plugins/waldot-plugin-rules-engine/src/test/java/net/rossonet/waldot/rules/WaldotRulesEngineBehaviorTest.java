@@ -110,10 +110,10 @@ public class WaldotRulesEngineBehaviorTest {
 	@Test
 	public void computeDefaultsAndInvalidValues() {
 		final ComputeVertex defaults = (ComputeVertex) newCompute("c1");
-		assertEquals(WaldotRulesEnginePlugin.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE, defaults.getThreads());
-		assertEquals(WaldotRulesEnginePlugin.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE,
+		assertEquals(RulesEngineConstants.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE, defaults.getThreads());
+		assertEquals(RulesEngineConstants.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE,
 				defaults.getExecutionTimeoutMs());
-		assertEquals(WaldotRulesEnginePlugin.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE, defaults.getPriorityFactor());
+		assertEquals(RulesEngineConstants.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE, defaults.getPriorityFactor());
 		final ComputeVertex custom = (ComputeVertex) newCompute("c2", "threads", "4", "execution-timeout-ms", "5000",
 				"factor", "2.5");
 		assertEquals(4, custom.getThreads());
@@ -121,8 +121,8 @@ public class WaldotRulesEngineBehaviorTest {
 		assertEquals(2.5, custom.getPriorityFactor());
 		final ComputeVertex invalid = (ComputeVertex) assertDoesNotThrow(
 				() -> newCompute("c3", "threads", "-3", "execution-timeout-ms", "0"));
-		assertEquals(WaldotRulesEnginePlugin.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE, invalid.getThreads());
-		assertEquals(WaldotRulesEnginePlugin.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE,
+		assertEquals(RulesEngineConstants.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE, invalid.getThreads());
+		assertEquals(RulesEngineConstants.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE,
 				invalid.getExecutionTimeoutMs());
 	}
 
@@ -138,8 +138,8 @@ public class WaldotRulesEngineBehaviorTest {
 	public void ruleDefaultsAndInvalidValues() {
 		final RuleVertex rule = (RuleVertex) assertDoesNotThrow(
 				() -> g.addVertex("id", "r1", "type", "rules:rule", "debug", "abc"));
-		assertEquals(WaldotRulesEnginePlugin.DEFAULT_CONDITION_VALUE, rule.getCondition());
-		assertEquals(WaldotRulesEnginePlugin.DEFAULT_ACTION_VALUE, rule.getAction());
+		assertEquals(RulesEngineConstants.DEFAULT_CONDITION_VALUE, rule.getCondition());
+		assertEquals(RulesEngineConstants.DEFAULT_ACTION_VALUE, rule.getAction());
 		assertEquals(0, rule.getDebug());
 		assertEquals(0, rule.getTotal());
 		assertEquals(0, rule.getExecuted());

@@ -16,16 +16,16 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
-import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 
 /**
  * Creates a <code>rules:execute</code> edge: the compute vertex (source) will execute the rule (target).
  */
 public class AddComputeMonitoredEdgeCommand extends AbstractOpcCommand {
-	private static final String CONTEXT_DIRECTORY = WaldotRulesEnginePlugin.BASE_CMD_DIRECTORY
+	private static final String CONTEXT_DIRECTORY = RulesEngineConstants.BASE_CMD_DIRECTORY
 			+ "/edges";
 	private static final String CREATE_COMPUTE_MONITORED_EDGE_DESCRIPTION = "create an execute edge: the source compute vertex runs the actions of the target rule";
 	private static final String CREATE_COMPUTE_MONITORED_EDGE_NAME = "create compute monitored edge";
@@ -53,7 +53,7 @@ public class AddComputeMonitoredEdgeCommand extends AbstractOpcCommand {
 		addInputArgument(MiloStrategy.DIRECTORY_PARAMETER,
 				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("Directory for the edge"));
-		addInputArgument(WaldotRulesEnginePlugin.PRIORITY_FIELD,
+		addInputArgument(RulesEngineConstants.PRIORITY_FIELD,
 				VariableNodeTypes.Int32.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(
 						"Priority of the rule in the compute vertex: the higher, the sooner it is executed"));
@@ -89,11 +89,11 @@ public class AddComputeMonitoredEdgeCommand extends AbstractOpcCommand {
 			final String[] inputValues) {
 		final List<String> parameters = new ArrayList<>();
 		parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
-		parameters.add(WaldotRulesEnginePlugin.EXECUTE_EDGE_LABEL);
+		parameters.add(RulesEngineConstants.EXECUTE_EDGE_LABEL);
 		enrichParameters(inputValues, parameters, 3,
 				MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
 		enrichParameters(inputValues, parameters, 4,
-				WaldotRulesEnginePlugin.PRIORITY_FIELD);
+				RulesEngineConstants.PRIORITY_FIELD);
 		final Object[] arrayParameters = parameters.toArray(new String[0]);
 		logger.info("create execute edge with parameters: "
 				+ Arrays.toString(arrayParameters));

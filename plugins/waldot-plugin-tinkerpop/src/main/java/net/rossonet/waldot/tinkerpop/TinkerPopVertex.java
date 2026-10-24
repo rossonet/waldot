@@ -1,5 +1,7 @@
 package net.rossonet.waldot.tinkerpop;
 
+import static net.rossonet.waldot.tinkerpop.TinkerPopConstants.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +25,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.WaldotTinkerPopPlugin;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
@@ -40,11 +41,7 @@ import net.rossonet.waldot.opc.AbstractOpcVertex;
 public class TinkerPopVertex extends AbstractOpcVertex
 		implements
 			AutoCloseable {
-	private static final String DEFAULT_BIND_HOST = "0.0.0.0";
-
 	private static final String DEFAULT_CATEGORY_EVENT = "TinkerPopVertex";
-
-	private static final int DEFAULT_PORT = 1025;
 
 	/**
 	 * Registers OPC-UA properties for Gremlin Server type node.
@@ -53,9 +50,14 @@ public class TinkerPopVertex extends AbstractOpcVertex
 	public static void generateParameters(WaldotNamespace waldotNamespace,
 			UaObjectTypeNode dockerTypeNode) {
 		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode,
-				WaldotTinkerPopPlugin.PORT_FIELD, NodeIds.Int16);
+				PORT_FIELD, NodeIds.Int16,
+				PORT_FIELD_DESCRIPTION);
 		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode,
-				WaldotTinkerPopPlugin.BIND_HOST_FIELD, NodeIds.String);
+				BIND_HOST_FIELD, NodeIds.String,
+				BIND_HOST_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, dockerTypeNode,
+				STATUS_FIELD.toLowerCase(), NodeIds.String,
+				STATUS_FIELD_DESCRIPTION);
 	}
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -70,10 +72,10 @@ public class TinkerPopVertex extends AbstractOpcVertex
 			Object[] propertyKeyValues) {
 		super(graph, context, nodeId, browseName, displayName, description,
 				writeMask, userWriteMask, eventNotifier, version);
-		addManagedProperty(WaldotTinkerPopPlugin.PORT_FIELD, NodeIds.Int16,
+		addManagedProperty(PORT_FIELD, NodeIds.Int16,
 				Integer.class, true, DEFAULT_PORT, null, true,
 				propertyKeyValues);
-		addManagedProperty(WaldotTinkerPopPlugin.BIND_HOST_FIELD,
+		addManagedProperty(BIND_HOST_FIELD,
 				NodeIds.String, String.class, true, DEFAULT_BIND_HOST, null,
 				true, propertyKeyValues);
 		start();
@@ -100,9 +102,9 @@ public class TinkerPopVertex extends AbstractOpcVertex
 	public void start() {
 		final Settings overriddenSettings = new Settings();
 		overriddenSettings.host = getRuntimeParameter(
-				WaldotTinkerPopPlugin.BIND_HOST_FIELD);
+				BIND_HOST_FIELD);
 		overriddenSettings.port = getRuntimeParameter(
-				WaldotTinkerPopPlugin.PORT_FIELD);
+				PORT_FIELD);
 		overriddenSettings.channelizer = WsAndHttpChannelizer.class.getName();
 		overriddenSettings.graphManager = WaldotGraphManager.class.getName();
 		/* bindings */
@@ -144,15 +146,15 @@ public class TinkerPopVertex extends AbstractOpcVertex
 			server.start();// .get();
 			logger.info("Gremlin Server started: " + server.toString());
 			updatePropertyIfChanged(
-					WaldotTinkerPopPlugin.STATUS_FIELD.toLowerCase(),
-					WaldotTinkerPopPlugin.STATUS_RUNNING);
+					STATUS_FIELD.toLowerCase(),
+					STATUS_RUNNING);
 			sendLogEvent(DEFAULT_CATEGORY_EVENT,
 					"Gremlin Server started: " + server.toString(), 0);
 		} catch (final Exception e) {
 			logger.error("Failed to start Gremlin Server", e);
 			updatePropertyIfChanged(
-					WaldotTinkerPopPlugin.STATUS_FIELD.toLowerCase(),
-					WaldotTinkerPopPlugin.STATUS_FAILED);
+					STATUS_FIELD.toLowerCase(),
+					STATUS_FAILED);
 			sendLogEvent(DEFAULT_CATEGORY_EVENT,
 					"Failed to start Gremlin Server: " + e.getMessage(), 100);
 		}
@@ -171,14 +173,14 @@ public class TinkerPopVertex extends AbstractOpcVertex
 				}
 				server = null;
 				updatePropertyIfChanged(
-						WaldotTinkerPopPlugin.STATUS_FIELD.toLowerCase(),
-						WaldotTinkerPopPlugin.STATUS_STOPPED);
+						STATUS_FIELD.toLowerCase(),
+						STATUS_STOPPED);
 				logger.info("Gremlin Server stopped");
 			} catch (final Exception e) {
 				logger.error("Failed to stop Gremlin Server", e);
 				updatePropertyIfChanged(
-						WaldotTinkerPopPlugin.STATUS_FIELD.toLowerCase(),
-						WaldotTinkerPopPlugin.STATUS_FAILED);
+						STATUS_FIELD.toLowerCase(),
+						STATUS_FAILED);
 			}
 		}
 

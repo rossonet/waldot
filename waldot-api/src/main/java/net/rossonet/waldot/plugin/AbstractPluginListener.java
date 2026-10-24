@@ -4,9 +4,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
@@ -147,6 +149,13 @@ public abstract class AbstractPluginListener
 	@Override
 	public Collection<WaldotCommand> getCommands() {
 		return commands;
+	}
+
+	/**
+	 * @return the type labels of the vertices managed by the plugin
+	 */
+	public Set<String> getManagedVertexTypes() {
+		return Collections.unmodifiableSet(labelTypeNodes.keySet());
 	}
 
 	@Override

@@ -23,6 +23,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
@@ -31,7 +32,6 @@ import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.exception.PluginBlockingException;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.plugin.EdgeMonitoredVertex;
-import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 import net.rossonet.waldot.rules.edges.ComputeMonitoredEdge;
 import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.rules.events.RunnableEvent;
@@ -201,16 +201,16 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 
 	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode) {
 		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
-				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD, NodeIds.Int32,
-				WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD_DESCRIPTION);
+				RulesEngineConstants.THREAD_POOL_SIZE_FIELD, NodeIds.Int32,
+				RulesEngineConstants.THREAD_POOL_SIZE_FIELD_DESCRIPTION);
 		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
-				WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD, NodeIds.Int64,
-				WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD_DESCRIPTION);
+				RulesEngineConstants.EXECUTION_TIMEOUT_MS_FIELD, NodeIds.Int64,
+				RulesEngineConstants.EXECUTION_TIMEOUT_MS_FIELD_DESCRIPTION);
 		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
-				WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD, NodeIds.Double,
-				WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL,
-				NodeIds.Int64, WaldotRulesEnginePlugin.COMPUTE_QUEUE_LABEL_DESCRIPTION);
+				RulesEngineConstants.PRIORITY_FACTOR_FIELD, NodeIds.Double,
+				RulesEngineConstants.PRIORITY_FACTOR_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.QUEUE_SIZE_LABEL,
+				NodeIds.Int64, RulesEngineConstants.COMPUTE_QUEUE_LABEL_DESCRIPTION);
 	}
 
 	private volatile boolean active = true;
@@ -239,13 +239,13 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
 				version);
 		waldotNamespace = graph.getWaldotNamespace();
-		addManagedProperty(WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD, NodeIds.Int32, Integer.class, false,
-				WaldotRulesEnginePlugin.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE, null, false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD, NodeIds.Int64, Long.class, false,
-				WaldotRulesEnginePlugin.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE, null, false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD, NodeIds.Double, Double.class, false,
-				WaldotRulesEnginePlugin.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE, null, false, propertyKeyValues);
-		addManagedProperty(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
+		addManagedProperty(RulesEngineConstants.THREAD_POOL_SIZE_FIELD, NodeIds.Int32, Integer.class, false,
+				RulesEngineConstants.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE, null, false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.EXECUTION_TIMEOUT_MS_FIELD, NodeIds.Int64, Long.class, false,
+				RulesEngineConstants.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE, null, false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.PRIORITY_FACTOR_FIELD, NodeIds.Double, Double.class, false,
+				RulesEngineConstants.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE, null, false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.QUEUE_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
 				false, propertyKeyValues);
 	}
 
@@ -311,9 +311,9 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	 * @return execution timeout in ms
 	 */
 	public long getExecutionTimeoutMs() {
-		final Long value = getRuntimeParameter(WaldotRulesEnginePlugin.EXECUTION_TIMEOUT_MS_FIELD);
+		final Long value = getRuntimeParameter(RulesEngineConstants.EXECUTION_TIMEOUT_MS_FIELD);
 		return value == null || value <= 0
-				? WaldotRulesEnginePlugin.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE
+				? RulesEngineConstants.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE
 				: value;
 	}
 
@@ -332,9 +332,9 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	 * @return priority factor
 	 */
 	public double getPriorityFactor() {
-		final Double value = getRuntimeParameter(WaldotRulesEnginePlugin.PRIORITY_FACTOR_FIELD);
+		final Double value = getRuntimeParameter(RulesEngineConstants.PRIORITY_FACTOR_FIELD);
 		return value == null || value.isNaN() || value.isInfinite() || value < 0
-				? WaldotRulesEnginePlugin.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE
+				? RulesEngineConstants.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE
 				: value;
 	}
 
@@ -354,8 +354,8 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	 * @return thread pool size
 	 */
 	public int getThreads() {
-		final Integer value = getRuntimeParameter(WaldotRulesEnginePlugin.THREAD_POOL_SIZE_FIELD);
-		return value == null || value < 1 ? WaldotRulesEnginePlugin.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE : value;
+		final Integer value = getRuntimeParameter(RulesEngineConstants.THREAD_POOL_SIZE_FIELD);
+		return value == null || value < 1 ? RulesEngineConstants.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE : value;
 	}
 
 	public boolean isActive() {
@@ -368,7 +368,7 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	@Override
 	public void notifyAddTargetMonitoredEdge(WaldotEdge edge, WaldotVertex targetVertex, String label, String type,
 			Object[] propertyKeyValues) throws PluginBlockingException {
-		if (!WaldotRulesEnginePlugin.EXECUTE_EDGE_LABEL.equals(type)) {
+		if (!RulesEngineConstants.EXECUTE_EDGE_LABEL.equals(type)) {
 			return;
 		}
 		if (!(targetVertex instanceof ComputableFireableAbstractOpcVertex)) {
@@ -385,7 +385,7 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	@Override
 	public void notifyAddSourceMonitoredEdge(WaldotEdge edge, WaldotVertex sourceVertex, String label, String type,
 			Object[] propertyKeyValues) throws PluginBlockingException {
-		if (WaldotRulesEnginePlugin.EXECUTE_EDGE_LABEL.equals(type)) {
+		if (RulesEngineConstants.EXECUTE_EDGE_LABEL.equals(type)) {
 			throw new PluginBlockingException("A " + type
 					+ " edge must go from the compute vertex to the rule: a compute vertex cannot be its target");
 		}
@@ -425,7 +425,7 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	private void publishQueueSize() {
 		synchronized (publishLock) {
 			if (!isRemoved()) {
-				property(WaldotRulesEnginePlugin.QUEUE_SIZE_LABEL, Long.valueOf(dirtyNodes.size()));
+				property(RulesEngineConstants.QUEUE_SIZE_LABEL, Long.valueOf(dirtyNodes.size()));
 			}
 		}
 	}

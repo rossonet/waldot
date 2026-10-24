@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import net.rossonet.waldot.WaldotGeneratorPlugin;
+import net.rossonet.waldot.dataGenerator.GeneratorConstants;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
@@ -115,12 +115,12 @@ public class GeneratorTests {
 		simpleServerInit();
 		// Crea 1000 generatori random
 		for (int i = 0; i < 1000; i++) {
-			g.addVertex(MiloStrategy.ID_PARAMETER, "test" + i, WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(),
+			g.addVertex(MiloStrategy.ID_PARAMETER, "test" + i, GeneratorConstants.ALGORITHM_FIELD.toLowerCase(),
 					"random", MiloStrategy.LABEL_FIELD.toLowerCase(), "test" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
-					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
-					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "1000",
-					WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase(), "100",
-					WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase(), "90");
+					GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL,
+					GeneratorConstants.DELAY_FIELD.toLowerCase(), "1000",
+					GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(), "100",
+					GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(), "90");
 		}
 		Thread.sleep(1);
 		for (int i = 0; i < 1000; i++) {
@@ -143,30 +143,30 @@ public class GeneratorTests {
 		// Crea 100 generatori per ogni algoritmo
 		for (int i = 0; i < 100; i++) {
 			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "random", MiloStrategy.ID_PARAMETER, "random" + i,
-					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "random",
+					GeneratorConstants.ALGORITHM_FIELD.toLowerCase(), "random",
 					MiloStrategy.LABEL_FIELD.toLowerCase(), "random" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
-					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
-					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "1000");
+					GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL,
+					GeneratorConstants.DELAY_FIELD.toLowerCase(), "1000");
 			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "incremental", MiloStrategy.ID_PARAMETER, "incremental" + i,
-					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "incremental",
+					GeneratorConstants.ALGORITHM_FIELD.toLowerCase(), "incremental",
 					MiloStrategy.LABEL_FIELD.toLowerCase(), "incremental" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
-					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
-					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "1000");
+					GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL,
+					GeneratorConstants.DELAY_FIELD.toLowerCase(), "1000");
 			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "decremental", MiloStrategy.ID_PARAMETER, "decremental" + i,
-					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "decremental",
+					GeneratorConstants.ALGORITHM_FIELD.toLowerCase(), "decremental",
 					MiloStrategy.LABEL_FIELD.toLowerCase(), "decremental" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
-					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
-					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "1000");
+					GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL,
+					GeneratorConstants.DELAY_FIELD.toLowerCase(), "1000");
 			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "sinusoidal", MiloStrategy.ID_PARAMETER, "sinusoidal" + i,
-					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "sinusoidal",
+					GeneratorConstants.ALGORITHM_FIELD.toLowerCase(), "sinusoidal",
 					MiloStrategy.LABEL_FIELD.toLowerCase(), "sinusoidal" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
-					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
-					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "5000");
+					GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL,
+					GeneratorConstants.DELAY_FIELD.toLowerCase(), "5000");
 			g.addVertex(MiloStrategy.DIRECTORY_PARAMETER, "triangular", MiloStrategy.ID_PARAMETER, "triangular" + i,
-					WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "triangular",
+					GeneratorConstants.ALGORITHM_FIELD.toLowerCase(), "triangular",
 					MiloStrategy.LABEL_FIELD.toLowerCase(), "triangular" + i, MiloStrategy.TYPE_FIELD.toLowerCase(),
-					WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL,
-					WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(), "8000");
+					GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL,
+					GeneratorConstants.DELAY_FIELD.toLowerCase(), "8000");
 		}
 		Thread.sleep(1);
 		for (int i = 0; i < 100; i++) {
@@ -188,10 +188,10 @@ public class GeneratorTests {
 		// Crea generatore decrementale
 		final Vertex v = g.addVertex(MiloStrategy.ID_PARAMETER, "dectest", MiloStrategy.LABEL_FIELD.toLowerCase(),
 				"dectest", MiloStrategy.TYPE_FIELD.toLowerCase(),
-				WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL, WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(),
-				"1000", WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "decremental",
-				WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase(), "100",
-				WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase(), "1");
+				GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL, GeneratorConstants.DELAY_FIELD.toLowerCase(),
+				"1000", GeneratorConstants.ALGORITHM_FIELD.toLowerCase(), "decremental",
+				GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(), "100",
+				GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(), "1");
 		System.out.println("created " + v);
 		for (final String k : v.keys()) {
 			System.out.println(k + ": " + v.property(k));
@@ -237,10 +237,10 @@ public class GeneratorTests {
 		// Crea generatore incrementale
 		final Vertex v = g.addVertex(MiloStrategy.ID_PARAMETER, "inctest", MiloStrategy.LABEL_FIELD.toLowerCase(),
 				"inctest", MiloStrategy.TYPE_FIELD.toLowerCase(),
-				WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL, WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase(),
-				"1000", WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase(), "incremental",
-				WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase(), "100",
-				WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase(), "1");
+				GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL, GeneratorConstants.DELAY_FIELD.toLowerCase(),
+				"1000", GeneratorConstants.ALGORITHM_FIELD.toLowerCase(), "incremental",
+				GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(), "100",
+				GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(), "1");
 		System.out.println("created " + v);
 		for (final String k : v.keys()) {
 			System.out.println(k + ": " + v.property(k));

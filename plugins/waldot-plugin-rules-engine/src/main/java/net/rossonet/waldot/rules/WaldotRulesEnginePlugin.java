@@ -1,5 +1,7 @@
 package net.rossonet.waldot.rules;
 
+import static net.rossonet.waldot.rules.RulesEngineConstants.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -93,51 +95,7 @@ import net.rossonet.waldot.rules.vertices.RuleVertex;
 @WaldotPlugin
 public class WaldotRulesEnginePlugin extends AbstractPluginListener {
 
-	private static final String _RULES_TYPE_PRE_LABEL = "rules:";
-	public static final String ACTION_EXECUTED_SIZE_LABEL = "executed";
-	public static final String ACTION_EXECUTED_SIZE_LABEL_DESCRIPTION = "Number of actions of the rule that have been executed successfully. Actions that fail are counted in 'errors'.";
-	public static final String ACTION_FIELD = "action";
-	public static final String ACTION_FIELD_DESCRIPTION = "JEXL script that is executed when the condition evaluates to true. Can contain any valid JEXL code, including logging, graph traversal, and commands.";
-	public static final String BASE_CMD_DIRECTORY = "rules";
-	public static final String COMPUTE_NODE_PARAMETER = _RULES_TYPE_PRE_LABEL
-			+ "compute";
-	public static final String COMPUTE_QUEUE_LABEL_DESCRIPTION = "Number of rules with events waiting to be executed by the compute vertex.";
-	public static final String CONDITION_FIELD = "condition";
-	public static final String CONDITION_FIELD_DESCRIPTION = "JEXL script that must evaluate to a boolean. If true, the action is executed.";
-	public static final String DEBUG_LEVEL_LABEL = "debug";
-	public static final String DEBUG_LEVEL_LABEL_DESCRIPTION = "Debug level of the rule. 0 = no debug; greater than 0 = a debug event is published for each phase of the execution; greater than 1 = the phases are also logged. The level also sets the depth of the stack traces in the events.";
-	public static final String DEFAULT_ACTION_VALUE = "log.info('action fired')";
-	public static final boolean DEFAULT_CLEAR_FACTS_AFTER_EXECUTION = false;
-	public static final String DEFAULT_CONDITION_VALUE = "true";
-	public static final int DEFAULT_DELAY_BEFORE_EVALUATION = 0;
-	public static final int DEFAULT_DELAY_BEFORE_EXECUTE = 0;
-	public static final long DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE = 120000; // 2
-	// minuti;
-	public static final double DEFAULT_PRIORITY_FACTOR_IN_COMPUTE = 100.0;
-	public static final int DEFAULT_PRIORITY_VALUE = 100;
-	public static final int DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE = 1;
-	public static final String ERRORS_SIZE_LABEL = "errors";
-	public static final String ERRORS_SIZE_LABEL_DESCRIPTION = "Number of failures of the rule: compile errors, exceptions, conditions that do not return a boolean. This is a counter maintained by the engine.";
-	public static final String EXECUTE_EDGE_LABEL = _RULES_TYPE_PRE_LABEL
-			+ "execute";
-	public static final String EXECUTION_TIMEOUT_MS_FIELD = "execution-timeout-ms";
-	public static final String EXECUTION_TIMEOUT_MS_FIELD_DESCRIPTION = "Maximum duration in milliseconds of an action; after that the action is cancelled.";
-	public static final String FIRE_EDGE_PARAMETER = "fire";
-	public static final String HYSTERESIS_LABEL = "hysteresis";
-	public static final String HYSTERESIS_LABEL_DESCRIPTION = "Time window in milliseconds in which repeated notifications from the same source (same vertex and property) are discarded. 0 = disabled.";
 	private static volatile WaldotRulesEnginePlugin instance;
-	public static final String PRIORITY_FACTOR_FIELD = "factor";
-	public static final String PRIORITY_FACTOR_FIELD_DESCRIPTION = "Multiplier of the edge priority in the weight of a rule: weight = priority * factor + queue size. Rules with higher weight are executed first.";
-	public static final String PRIORITY_FIELD = "priority";
-	public static final String QUEUE_SIZE_LABEL = "queue";
-	public static final String QUEUE_SIZE_LABEL_DESCRIPTION = "Number of events of the rule waiting to be executed.";
-	public static final String RULE_NODE_PARAMETER = _RULES_TYPE_PRE_LABEL
-			+ "rule";
-	public static final String THREAD_POOL_SIZE_FIELD = "threads";
-	public static final String THREAD_POOL_SIZE_FIELD_DESCRIPTION = "Maximum number of actions executed at the same time by the compute vertex.";
-	public static final String TOTAL_SIZE_LABEL = "total";
-	public static final String TOTAL_SIZE_LABEL_DESCRIPTION = "Total number of events of the rule that have been evaluated.";
-	public static final String TYPE_DEFINITION_PARAMETER = "type-node-id";
 	private static final String WALD_OT_COMPUTE_NAME = "Thread Manager";
 	private static final String WALD_OT_COMPUTE_OBJECT_TYPE = "WaldOTComputeObjectType";
 	private static final String WALD_OT_RULE_NAME = "Rule";

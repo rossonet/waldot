@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.api.annotation.WaldotPlugin;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.plugin.AbstractPluginListener;
+import net.rossonet.waldot.tinkerpop.TinkerPopConstants;
 import net.rossonet.waldot.tinkerpop.TinkerPopVertex;
+import net.rossonet.waldot.tinkerpop.commands.CreateGremlinServerCommand;
 
 /**
  * WaldOT TinkerPop Plugin - Enables native TinkerPop/Gremlin client connections to WaldOT graph.
@@ -90,37 +92,18 @@ import net.rossonet.waldot.tinkerpop.TinkerPopVertex;
  * </ul>
  * 
  * @see TinkerPopVertex
+ * @see TinkerPopConstants
  * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
 @WaldotPlugin
 public class WaldotTinkerPopPlugin extends AbstractPluginListener {
-	/** Property name for bind address/host */
-	public static final String BIND_HOST_FIELD = "Bind";
 
 	/** OPC-UA display name for Gremlin Server type */
 	private static final String GREMLIN_TYPE_DISPLAY_NAME = "Tinkerpop endpoint";
 
-	/** Vertex type label for Gremlin Server vertices */
-	public static final String GREMLIN_TYPE_LABEL = "gremlin";
-
 	/** OPC-UA object type node ID */
 	private static final String GREMLIN_TYPE_NODE_ID = "GremlinServerObjectType";
-
-	/** Property name for server port */
-	public static final String PORT_FIELD = "Port";
-
-	/** Status value: server failed to start */
-	public static final String STATUS_FAILED = "Failed";
-
-	/** Property name for server status */
-	public static final String STATUS_FIELD = "Status";
-
-	/** Status value: server running */
-	public static final String STATUS_RUNNING = "Running";
-
-	/** Status value: server stopped */
-	public static final String STATUS_STOPPED = "Stopped";
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -136,8 +119,10 @@ public class WaldotTinkerPopPlugin extends AbstractPluginListener {
 	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
 		super.initialize(waldotNamespace);
+		commands.clear();
 		registerTypeNode(TinkerPopVertex.class, GREMLIN_TYPE_NODE_ID,
-				GREMLIN_TYPE_DISPLAY_NAME, GREMLIN_TYPE_LABEL);
+				GREMLIN_TYPE_DISPLAY_NAME, TinkerPopConstants.GREMLIN_TYPE_LABEL);
+		registerCommand(new CreateGremlinServerCommand(waldotNamespace));
 		logger.info("Initializing Waldot TinkerPop Plugin");
 	}
 

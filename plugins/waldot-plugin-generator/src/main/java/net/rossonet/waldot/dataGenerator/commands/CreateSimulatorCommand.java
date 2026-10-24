@@ -1,110 +1,59 @@
 package net.rossonet.waldot.dataGenerator.commands;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.milo.opcua.sdk.core.Reference;
-import org.eclipse.milo.opcua.sdk.core.ValueRanks;
-import org.eclipse.milo.opcua.sdk.core.WriteMask;
-import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler.InvocationContext;
-import org.eclipse.milo.opcua.stack.core.NodeIds;
-import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
-import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.EnumUtils;
 
-import net.rossonet.waldot.WaldotGeneratorPlugin;
+import net.rossonet.waldot.dataGenerator.GeneratorConstants;
+import net.rossonet.waldot.dataGenerator.DataGeneratorVertex.Algorithm;
 import net.rossonet.waldot.api.models.WaldotNamespace;
-import net.rossonet.waldot.api.strategies.MiloStrategy;
-import net.rossonet.waldot.opc.AbstractOpcCommand;
+import net.rossonet.waldot.opc.AbstractCreateVertexCommand;
 
-public class CreateSimulatorCommand extends AbstractOpcCommand {
-	private static final String CONTEXT_DIRECTORY = "simulator";
-	private static final String CREATE_SIMULATION_COMMAND_DESCRIPTION = "create data simulator vertex";
+/**
+ * OPC UA command that creates a data generator vertex (
+ * {@value GeneratorConstants#DATA_GENERATOR_OBJECT_TYPE_LABEL}).
+ */
+public class CreateSimulatorCommand extends AbstractCreateVertexCommand {
+
+	private static final String CREATE_SIMULATION_COMMAND_DESCRIPTION = "Create a data generator vertex that "
+			+ "periodically writes a simulated value in its 'data' property";
 	private static final String CREATE_SIMULATION_COMMAND_NAME = "create generator";
-	public static final UInteger DEFAULT_WRITE_MASK = UInteger
-			.valueOf(WriteMask.Executable.getValue());
-	private static final String LABEL_RESULT = "result";
-	protected final static Logger logger = LoggerFactory
-			.getLogger(CreateSimulatorCommand.class);
-	private static final String LONG_LABEL_RESULT = "result of the update operation";
+
 	public CreateSimulatorCommand(final WaldotNamespace waldotNamespace) {
-		super(waldotNamespace.getGremlinGraph(), waldotNamespace,
-				CREATE_SIMULATION_COMMAND_NAME,
-				CREATE_SIMULATION_COMMAND_DESCRIPTION, DEFAULT_WRITE_MASK,
-				DEFAULT_WRITE_MASK, true, true);
-		addInputArgument(MiloStrategy.LABEL_FIELD,
-				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english("Label for the data simulator vertex"));
-		addInputArgument(MiloStrategy.DIRECTORY_PARAMETER,
-				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText
-						.english("Directory for the data simulator vertex"));
-		addInputArgument(WaldotGeneratorPlugin.ALGORITHM_FIELD,
-				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english(
-						WaldotGeneratorPlugin.ALGORITHM_FIELD_DESCRIPTION));
-		addInputArgument(WaldotGeneratorPlugin.DELAY_FIELD,
-				VariableNodeTypes.UInt64.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english(WaldotGeneratorPlugin.DELAY_DESCRIPTION));
-		addInputArgument(WaldotGeneratorPlugin.MIN_VALUE_FIELD,
-				VariableNodeTypes.UInt64.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText
-						.english(WaldotGeneratorPlugin.MIN_VALUE_DESCRIPTION));
-		addInputArgument(WaldotGeneratorPlugin.MAX_VALUE_FIELD,
-				VariableNodeTypes.UInt64.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText
-						.english(WaldotGeneratorPlugin.MAX_VALUE_DESCRIPTION));
-		addOutputArgument(LABEL_RESULT, VariableNodeTypes.String.getNodeId(),
-				ValueRanks.Scalar, null,
-				LocalizedText.english(LONG_LABEL_RESULT));
-		this.addReference(
-				new Reference(this.getNodeId(), NodeIds.HasModellingRule,
-						NodeIds.ModellingRule_Mandatory.expanded(), true));
-
+		super(waldotNamespace, CREATE_SIMULATION_COMMAND_NAME, CREATE_SIMULATION_COMMAND_DESCRIPTION,
+				GeneratorConstants.BASE_CMD_DIRECTORY, GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL, Language.ENGLISH,
+				List.of(VertexParameter.optional(GeneratorConstants.ALGORITHM_FIELD.toLowerCase(),
+						VariableNodeTypes.String, GeneratorConstants.ALGORITHM_FIELD_DESCRIPTION),
+						VertexParameter.optional(GeneratorConstants.DELAY_FIELD.toLowerCase(),
+								VariableNodeTypes.UInt64, GeneratorConstants.DELAY_DESCRIPTION),
+						VertexParameter.optional(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(),
+								VariableNodeTypes.Int64, GeneratorConstants.MIN_VALUE_DESCRIPTION),
+						VertexParameter.optional(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(),
+								VariableNodeTypes.Int64, GeneratorConstants.MAX_VALUE_DESCRIPTION),
+						VertexParameter.optional(GeneratorConstants.POST_NODE_ID_DATA_FIELD.toLowerCase(),
+								VariableNodeTypes.String, GeneratorConstants.POST_NODE_ID_DATA_DESCRIPTION)));
 	}
 
 	@Override
-	public Object clone() {
-		return new CreateSimulatorCommand(this.waldotNamespace);
-	}
-
-	private void enrichParameters(final String[] inputValues,
-			final List<String> parameters, int i, String field) {
-		if (inputValues[i] != null && !inputValues[i].isEmpty()) {
-			parameters.add(field);
-			parameters.add(inputValues[i]);
+	protected String validate(final List<Object> keyValues) {
+		final String algorithm = findValue(keyValues, GeneratorConstants.ALGORITHM_FIELD.toLowerCase());
+		if (algorithm != null && !EnumUtils.isValidEnum(Algorithm.class, algorithm)) {
+			return "unknown algorithm '" + algorithm + "', valid values are "
+					+ Arrays.toString(Algorithm.values());
 		}
-	}
-
-	@Override
-	public String getDirectory() {
-		return CONTEXT_DIRECTORY;
-	}
-
-	@Override
-	public String[] runCommand(final InvocationContext invocationContext,
-			final String[] inputValues) {
-		final List<String> parameters = new ArrayList<>();
-		parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
-		parameters.add(WaldotGeneratorPlugin.DATA_GENERATOR_OBJECT_TYPE_LABEL);
-		enrichParameters(inputValues, parameters, 0,
-				MiloStrategy.LABEL_FIELD.toLowerCase());
-		enrichParameters(inputValues, parameters, 1,
-				MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
-		enrichParameters(inputValues, parameters, 2,
-				WaldotGeneratorPlugin.ALGORITHM_FIELD.toLowerCase());
-		enrichParameters(inputValues, parameters, 3,
-				WaldotGeneratorPlugin.DELAY_FIELD.toLowerCase());
-		enrichParameters(inputValues, parameters, 4,
-				WaldotGeneratorPlugin.MIN_VALUE_FIELD.toLowerCase());
-		enrichParameters(inputValues, parameters, 5,
-				WaldotGeneratorPlugin.MAX_VALUE_FIELD.toLowerCase());
-		final Object[] arrayParameters = parameters.toArray(new String[0]);
-		logger.info("create vertex with parameters: "
-				+ Arrays.toString(arrayParameters));
-		return new String[]{getGraph().addVertex(arrayParameters).toString()};
+		final String delay = findValue(keyValues, GeneratorConstants.DELAY_FIELD.toLowerCase());
+		if (delay != null && Long.parseLong(delay.trim()) < 10) {
+			return "the delay must be at least 10 ms";
+		}
+		final String min = findValue(keyValues, GeneratorConstants.MIN_VALUE_FIELD.toLowerCase());
+		final String max = findValue(keyValues, GeneratorConstants.MAX_VALUE_FIELD.toLowerCase());
+		final long minValue = min != null ? Long.parseLong(min.trim()) : GeneratorConstants.DEFAULT_MIN_VALUE;
+		final long maxValue = max != null ? Long.parseLong(max.trim()) : GeneratorConstants.DEFAULT_MAX_VALUE;
+		if (minValue > maxValue) {
+			return "Min (" + minValue + ") must not be greater than Max (" + maxValue + ")";
+		}
+		return null;
 	}
 
 }
