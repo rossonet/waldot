@@ -182,7 +182,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			return items.get(key);
 		}
 
-		synchronized P getOrCreate(final String key, final Supplier<P> factory) {
+		synchronized P getOrCreate(final String key,
+				final Supplier<P> factory) {
 			P value = items.get(key);
 			if (value == null) {
 				value = factory.get();
@@ -222,14 +223,14 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	private volatile MiloSingleServerBaseReferenceNodeBuilder.ReferenceNodes cachedReferenceNodes;
 	private transient final ConcurrentHashMap<NodeId, WaldotVertex> cachedVertices = new ConcurrentHashMap<>();
 	private final AtomicBoolean closed = new AtomicBoolean(false);
+	private final Map<NodeId, DirectoryLink> directoryLinks = new ConcurrentHashMap<>();
 	private final Object directoryLock = new Object();
 	private final Map<NodeId, DirectoryNode> directoryNodes = new ConcurrentHashMap<>();
-	private final Map<NodeId, DirectoryLink> directoryLinks = new ConcurrentHashMap<>();
 	private transient final ConcurrentHashMap<String, UaFolderNode> edgeDirectories = new ConcurrentHashMap<>();
-	private final AtomicLong edgeSequence = new AtomicLong(0);
-	private final AtomicLong edgeSuffix = new AtomicLong(0);
 	private final ConcurrentHashMap<NodeId, EdgeEntry> edgeIndex = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<NodeId, PropertyBag<OpcProperty<?>>> edgeProperties = new ConcurrentHashMap<>();
+	private final AtomicLong edgeSequence = new AtomicLong(0);
+	private final AtomicLong edgeSuffix = new AtomicLong(0);
 	private final MiloSingleServerBaseFolderManager folderManager = new MiloSingleServerBaseFolderManager(
 			this);
 	private final ConcurrentHashMap<NodeId, ConcurrentSkipListMap<Long, EdgeEntry>> inEdges = new ConcurrentHashMap<>();
@@ -243,8 +244,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	private transient final ConcurrentHashMap<String, NodeId> referenceCache = new ConcurrentHashMap<>();
 	private UaFolderNode rootNode;
 	private volatile SharedProperties sharedProperties;
-	private WaldotNamespace waldotNamespace;
 	private final ConcurrentHashMap<NodeId, PropertyBag<OpcVertexProperty<?>>> vertexProperties = new ConcurrentHashMap<>();
+	private WaldotNamespace waldotNamespace;
 
 	private void addDeletedCommand(GremlinElement vertex) {
 		final AbstractOpcCommand deleteCommand = new AbstractOpcCommand(
@@ -417,10 +418,11 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 					} catch (final PluginBlockingException e) {
 						logger.error("Plugin {} blocked the edge addition: {}",
 								p.getClass().getName(), e.getMessage());
-						throw new RuntimeException("Plugin "
-								+ p.getClass().getName()
-								+ " blocked the edge addition: "
-								+ e.getMessage(), e);
+						throw new RuntimeException(
+								"Plugin " + p.getClass().getName()
+										+ " blocked the edge addition: "
+										+ e.getMessage(),
+								e);
 					}
 				}
 			}
@@ -429,8 +431,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			publishEdge(entry);
 			return edge;
 		} catch (final RuntimeException | Error e) {
-			// complete rollback: nodes, references, properties, monitor,
-			// folder link and indexes created so far
+			// complete rollback: nodes, references, properties, monitor, folder
+			// link and indexes created so far
 			try {
 				removeEdgeInternal(nodeId, false);
 			} catch (final Throwable rollbackError) {
@@ -552,8 +554,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 						typeDefinition);
 			}
 			final AbstractOpcVertex vertex = createVertex(nodeId,
-					typeDefinition, label, description, browseName,
-					displayName, propertyKeyValues,
+					typeDefinition, label, description, browseName, displayName,
+					propertyKeyValues,
 					MiloSingleServerBaseReferenceNodeBuilder
 							.getWriteMask(propertyKeyValues),
 					MiloSingleServerBaseReferenceNodeBuilder
@@ -656,6 +658,43 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			folderManager.getVertexDirectories().clear();
 			folderManager.getCommandDirectories().clear();
 		}
+	}
+
+	private void collectEdges(
+			final ConcurrentSkipListMap<Long, EdgeEntry> entries,
+			final String[] edgeLabels, final List<WaldotEdge> result) {
+		if (entries == null) {
+			return;
+		}
+		for (final EdgeEntry entry : entries.values()) {
+			if (labelMatches(entry, edgeLabels)) {
+				result.add(entry.edge());
+			}
+		}
+	}
+
+	private void collectVertices(
+			final ConcurrentSkipListMap<Long, EdgeEntry> entries,
+			final String[] edgeLabels, final List<WaldotVertex> result,
+			final boolean outgoing) {
+		if (entries == null) {
+			return;
+		}
+		for (final EdgeEntry entry : entries.values()) {
+			if (labelMatches(entry, edgeLabels)) {
+				// tolerant lookup: a vertex that disappeared is skipped
+				final WaldotVertex vertex = vertexById(
+						outgoing ? entry.target() : entry.source());
+				if (vertex != null) {
+					result.add(vertex);
+				}
+			}
+		}
+	}
+
+	private NodeId commandNodeId(final NodeId elementId, final String suffix) {
+		return waldotNamespace
+				.generateNodeId(elementId.getIdentifier().toString() + suffix);
 	}
 
 	@Override
@@ -831,19 +870,6 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 				description, writeMask, userWriteMask, eventNotifier, version);
 	}
 
-	/** Removes a node from the storage and deletes it, ignoring any error. */
-	private void deleteQuietly(final UaNode node) {
-		if (node == null) {
-			return;
-		}
-		try {
-			waldotNamespace.getStorageManager().removeNode(node.getNodeId());
-			node.delete();
-		} catch (final Throwable e) {
-			logger.debug("Error deleting node {}", node.getNodeId(), e);
-		}
-	}
-
 	@Override
 	public String deleteOpcNodeId(String nodeId) {
 		final NodeId nodeTargetId = MiloStrategy.getNodeIdManager()
@@ -856,11 +882,11 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		if (node.isEmpty()) {
 			cachedVertices.remove(nodeTargetId);
 			cachedEdges.remove(nodeTargetId);
-			throw new IllegalArgumentException(
-					"node " + nodeId + " not found");
+			throw new IllegalArgumentException("node " + nodeId + " not found");
 		}
 		final UaNode target = node.get();
-		if (target instanceof WaldotEdge || edgeIndex.containsKey(nodeTargetId)) {
+		if (target instanceof WaldotEdge
+				|| edgeIndex.containsKey(nodeTargetId)) {
 			removeEdge(nodeTargetId);
 		} else if (target instanceof WaldotVertex) {
 			removeVertex(nodeTargetId);
@@ -871,6 +897,19 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			deleteQuietly(target);
 		}
 		return nodeTargetId.toParseableString();
+	}
+
+	/** Removes a node from the storage and deletes it, ignoring any error. */
+	private void deleteQuietly(final UaNode node) {
+		if (node == null) {
+			return;
+		}
+		try {
+			waldotNamespace.getStorageManager().removeNode(node.getNodeId());
+			node.delete();
+		} catch (final Throwable e) {
+			logger.debug("Error deleting node {}", node.getNodeId(), e);
+		}
 	}
 
 	/**
@@ -894,6 +933,16 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		logger.info("dropGraphComputerView");
 	}
 
+	private WaldotVertex endpoint(final WaldotEdge edge, final NodeId nodeId,
+			final String role) {
+		final WaldotVertex vertex = nodeId == null ? null : vertexById(nodeId);
+		if (vertex == null) {
+			throw new IllegalStateException("The " + role + " vertex " + nodeId
+					+ " of edge " + edge.getNodeId() + " does not exist");
+		}
+		return vertex;
+	}
+
 	/** Forgets the folder of a directory (and its sub folders) when deleted. */
 	private void forgetDirectory(final NodeId folderId) {
 		synchronized (directoryLock) {
@@ -904,14 +953,10 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			directory.registry.remove(directory.key);
 			final String prefix = directory.key + DIRECTORY_SPLIT_SIMBOL;
 			directory.registry.keySet().removeIf(k -> k.startsWith(prefix));
-			directoryNodes.values().removeIf(d -> d.registry == directory.registry
-					&& !d.registry.containsKey(d.key));
+			directoryNodes.values()
+					.removeIf(d -> d.registry == directory.registry
+							&& !d.registry.containsKey(d.key));
 		}
-	}
-
-	private NodeId commandNodeId(final NodeId elementId, final String suffix) {
-		return waldotNamespace.generateNodeId(
-				elementId.getIdentifier().toString() + suffix);
 	}
 
 	@Override
@@ -937,17 +982,6 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		return endpoint(edge, nodeId, "source");
 	}
 
-	private WaldotVertex endpoint(final WaldotEdge edge, final NodeId nodeId,
-			final String role) {
-		final WaldotVertex vertex = nodeId == null ? null : vertexById(nodeId);
-		if (vertex == null) {
-			throw new IllegalStateException("The " + role + " vertex "
-					+ nodeId + " of edge " + edge.getNodeId()
-					+ " does not exist");
-		}
-		return vertex;
-	}
-
 	@Override
 	public Map<NodeId, WaldotEdge> getEdges() {
 		return Collections.unmodifiableMap(cachedEdges);
@@ -965,19 +999,6 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			collectEdges(inEdges.get(id), edgeLabels, result);
 		}
 		return result;
-	}
-
-	private void collectEdges(
-			final ConcurrentSkipListMap<Long, EdgeEntry> entries,
-			final String[] edgeLabels, final List<WaldotEdge> result) {
-		if (entries == null) {
-			return;
-		}
-		for (final EdgeEntry entry : entries.values()) {
-			if (labelMatches(entry, edgeLabels)) {
-				result.add(entry.edge());
-			}
-		}
 	}
 
 	public int getLastEventId() {
@@ -1062,7 +1083,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			return result;
 		}
 		// vertex not created by this strategy: tolerant scan of the references
-		for (final UaNode node : linkedPropertyNodes(opcVertex.getReferences())) {
+		for (final UaNode node : linkedPropertyNodes(
+				opcVertex.getReferences())) {
 			if (node instanceof WaldotVertexProperty) {
 				result.put(node.getBrowseName().getName(),
 						(WaldotVertexProperty<DATA_TYPE>) node);
@@ -1136,28 +1158,29 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		return result;
 	}
 
-	private void collectVertices(
-			final ConcurrentSkipListMap<Long, EdgeEntry> entries,
-			final String[] edgeLabels, final List<WaldotVertex> result,
-			final boolean outgoing) {
-		if (entries == null) {
-			return;
-		}
-		for (final EdgeEntry entry : entries.values()) {
-			if (labelMatches(entry, edgeLabels)) {
-				// tolerant lookup: a vertex that disappeared is skipped
-				final WaldotVertex vertex = vertexById(
-						outgoing ? entry.target() : entry.source());
-				if (vertex != null) {
-					result.add(vertex);
-				}
-			}
-		}
-	}
-
 	@Override
 	public WaldotNamespace getWaldotNamespace() {
 		return waldotNamespace;
+	}
+
+	/**
+	 * Edges with the same source, target and type share the main reference
+	 * {@code source -type-> target}: it must stay while one of them is left.
+	 */
+	private boolean hasOtherEdgeSharingReference(final EdgeEntry entry) {
+		final ConcurrentSkipListMap<Long, EdgeEntry> siblings = outEdges
+				.get(entry.source());
+		if (siblings == null) {
+			return false;
+		}
+		for (final EdgeEntry other : siblings.values()) {
+			if (other.sequence() != entry.sequence()
+					&& other.target().equals(entry.target())
+					&& other.type().equals(entry.type())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -1228,6 +1251,12 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		return false;
 	}
 
+	private void linkCommandDirectoryStructure(AbstractOpcCommand command) {
+		linkToDirectory(command.getDirectory(), command, interfaceRootNode,
+				folderManager.getCommandDirectories(),
+				COMMAND_DIRECTORY_NODEID_PREFIX, true);
+	}
+
 	/**
 	 * Gremlin property nodes referenced by an element, found scanning its
 	 * references. Missing targets are skipped. Used only for elements that are
@@ -1238,19 +1267,14 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		for (final Reference p : new ArrayList<>(references)) {
 			if (p.isForward() && p.getReferenceTypeId()
 					.equals(referenceNodes().hasGremlinPropertyReferenceType)) {
-				p.getTargetNodeId().toNodeId(waldotNamespace.getNamespaceTable())
+				p.getTargetNodeId()
+						.toNodeId(waldotNamespace.getNamespaceTable())
 						.flatMap(id -> waldotNamespace.getStorageManager()
 								.getNode(id))
 						.ifPresent(result::add);
 			}
 		}
 		return result;
-	}
-
-	private void linkCommandDirectoryStructure(AbstractOpcCommand command) {
-		linkToDirectory(command.getDirectory(), command, interfaceRootNode,
-				folderManager.getCommandDirectories(),
-				COMMAND_DIRECTORY_NODEID_PREFIX, true);
 	}
 
 	/**
@@ -1350,8 +1374,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 						getParameterNodeId(key),
 						waldotNamespace.generateQualifiedName(key),
 						LocalizedText.english(key),
-						LocalizedText.english("variable " + key),
-						UInteger.MIN, UInteger.MIN);
+						LocalizedText.english("variable " + key), UInteger.MIN,
+						UInteger.MIN);
 				waldotNamespace.getStorageManager().addNode(property);
 				folderManager.getVariablesFolderNode().addOrganizes(property);
 				property.setValue(new DataValue(new Variant(value)));
@@ -1416,20 +1440,17 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	 * public cache.
 	 */
 	private void publishEdge(final EdgeEntry entry) {
-		outEdges.compute(entry.source(),
-				(k, m) -> withEntry(m, entry));
+		outEdges.compute(entry.source(), (k, m) -> withEntry(m, entry));
 		inEdges.compute(entry.target(), (k, m) -> withEntry(m, entry));
 		cachedEdges.put(entry.nodeId(), entry.edge());
 	}
 
-	private ConcurrentSkipListMap<Long, EdgeEntry> withEntry(
-			final ConcurrentSkipListMap<Long, EdgeEntry> map,
-			final EdgeEntry entry) {
-		final ConcurrentSkipListMap<Long, EdgeEntry> result = map == null
-				? new ConcurrentSkipListMap<>()
-				: map;
-		result.put(entry.sequence(), entry);
-		return result;
+	private String readType(final WaldotEdge edge) {
+		try {
+			return edge.getProperty(shared().typeEdge()).orElse(null);
+		} catch (final Throwable e) {
+			return null;
+		}
 	}
 
 	private MiloSingleServerBaseReferenceNodeBuilder.ReferenceNodes referenceNodes() {
@@ -1486,8 +1507,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		final WaldotEdge edge = entry != null
 				? entry.edge()
 				: (WaldotEdge) node;
-		// 1. unpublish: traversals no longer see the edge. The edgeIndex
-		// stays until the end, the monitors still need inVertex() / outVertex()
+		// 1. unpublish: traversals no longer see the edge. The edgeIndex stays
+		// until the end, the monitors still need inVertex() / outVertex()
 		cachedEdges.remove(nodeId);
 		if (entry != null) {
 			outEdges.computeIfPresent(entry.source(),
@@ -1542,50 +1563,6 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		}
 	}
 
-	/**
-	 * Edges with the same source, target and type share the main reference
-	 * {@code source -type-> target}: it must stay while one of them is left.
-	 */
-	private boolean hasOtherEdgeSharingReference(final EdgeEntry entry) {
-		final ConcurrentSkipListMap<Long, EdgeEntry> siblings = outEdges
-				.get(entry.source());
-		if (siblings == null) {
-			return false;
-		}
-		for (final EdgeEntry other : siblings.values()) {
-			if (other.sequence() != entry.sequence()
-					&& other.target().equals(entry.target())
-					&& other.type().equals(entry.type())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void removeReferenceQuietly(final WaldotVertex vertex,
-			final Reference reference) {
-		try {
-			vertex.removeReference(reference);
-		} catch (final Throwable e) {
-			logger.debug("Error removing reference {}", reference, e);
-		}
-	}
-
-	private ConcurrentSkipListMap<Long, EdgeEntry> withoutEntry(
-			final ConcurrentSkipListMap<Long, EdgeEntry> map,
-			final EdgeEntry entry) {
-		map.remove(entry.sequence());
-		return map.isEmpty() ? null : map;
-	}
-
-	private String readType(final WaldotEdge edge) {
-		try {
-			return edge.getProperty(shared().typeEdge()).orElse(null);
-		} catch (final Throwable e) {
-			return null;
-		}
-	}
-
 	/** Removes (storage and delete) a node by id, ignoring any error. */
 	private void removeNodeQuietly(final NodeId nodeId) {
 		try {
@@ -1617,7 +1594,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		}
 		if (owner != null) {
 			try {
-				for (final UaNode residual : linkedPropertyNodes(owner.getReferences())) {
+				for (final UaNode residual : linkedPropertyNodes(
+						owner.getReferences())) {
 					if (done.add(residual.getNodeId())) {
 						deleteQuietly(residual);
 					}
@@ -1632,6 +1610,15 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public void removeReference(Reference reference) {
 		waldotNamespace.getStorageManager().removeReference(reference);
+	}
+
+	private void removeReferenceQuietly(final WaldotVertex vertex,
+			final Reference reference) {
+		try {
+			vertex.removeReference(reference);
+		} catch (final Throwable e) {
+			logger.debug("Error removing reference {}", reference, e);
+		}
 	}
 
 	@Override
@@ -1783,8 +1770,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 				try {
 					directory.parentFolder.removeOrganizes(directory.folder);
 				} catch (final Throwable e) {
-					logger.debug("Error unlinking folder {}", directory.key,
-							e);
+					logger.debug("Error unlinking folder {}", directory.key, e);
 				}
 				deleteQuietly(directory.folder);
 				directory = directory.parentDirectory;
@@ -1827,6 +1813,23 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		}
 		final UaNode node = waldotNamespace.getStorageManager().get(nodeId);
 		return node instanceof WaldotVertex ? (WaldotVertex) node : null;
+	}
+
+	private ConcurrentSkipListMap<Long, EdgeEntry> withEntry(
+			final ConcurrentSkipListMap<Long, EdgeEntry> map,
+			final EdgeEntry entry) {
+		final ConcurrentSkipListMap<Long, EdgeEntry> result = map == null
+				? new ConcurrentSkipListMap<>()
+				: map;
+		result.put(entry.sequence(), entry);
+		return result;
+	}
+
+	private ConcurrentSkipListMap<Long, EdgeEntry> withoutEntry(
+			final ConcurrentSkipListMap<Long, EdgeEntry> map,
+			final EdgeEntry entry) {
+		map.remove(entry.sequence());
+		return map.isEmpty() ? null : map;
 	}
 
 }

@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -173,7 +172,8 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	private final QualifiedProperty<String> labelProperty;
 
-	private final Set<WaldotVertexProperty<?>> linkedProperties = java.util.concurrent.ConcurrentHashMap.newKeySet();
+	private final Set<WaldotVertexProperty<?>> linkedProperties = java.util.concurrent.ConcurrentHashMap
+			.newKeySet();
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -199,25 +199,29 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		labelProperty = new QualifiedProperty<String>(
 				graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.LABEL_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.forNamespace(graph.getWaldotNamespace()).labelVertexTypeNode
+				MiloSingleServerBaseReferenceNodeBuilder.forNamespace(
+						graph.getWaldotNamespace()).labelVertexTypeNode
 						.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
 		typeProperty = new QualifiedProperty<String>(
 				graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.TYPE_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.forNamespace(graph.getWaldotNamespace()).vertexTypeNode
+				MiloSingleServerBaseReferenceNodeBuilder
+						.forNamespace(graph.getWaldotNamespace()).vertexTypeNode
 						.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
 		historyProperty = new QualifiedProperty<Boolean>(
 				graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.HISTORY_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.forNamespace(graph.getWaldotNamespace()).vertexTypeNode
+				MiloSingleServerBaseReferenceNodeBuilder
+						.forNamespace(graph.getWaldotNamespace()).vertexTypeNode
 						.getNodeId().expanded(),
 				ValueRanks.Scalar, Boolean.class);
 		historyContextProperty = new QualifiedProperty<String>(
 				graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.HISTORY_CONTEXT_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.forNamespace(graph.getWaldotNamespace()).vertexTypeNode
+				MiloSingleServerBaseReferenceNodeBuilder
+						.forNamespace(graph.getWaldotNamespace()).vertexTypeNode
 						.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
 	}
@@ -249,7 +253,8 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				callbackOnChange, isNecessaryRestartVertex,
 				new QualifiedProperty<DATA_TYPE>(
 						getNamespace().getNamespaceUri(), label,
-						MiloSingleServerBaseReferenceNodeBuilder.forNamespace(graph.getWaldotNamespace()).labelVertexTypeNode
+						MiloSingleServerBaseReferenceNodeBuilder.forNamespace(
+								graph.getWaldotNamespace()).labelVertexTypeNode
 								.getNodeId().expanded(),
 						ValueRanks.Scalar, javaType));
 		managedProperties.put(label, metadataProperty);
@@ -384,8 +389,8 @@ public abstract class AbstractOpcVertex extends GremlinElement
 			logger.warn("Changed property label is null or empty");
 			return false;
 		}
-		// la notifica arriva dopo la scrittura della proprietà gremlin: il valore
-		// precedente è quello ancora presente nello slot gestito
+		// la notifica arriva dopo la scrittura della proprietà gremlin: il
+		// valore precedente è quello ancora presente nello slot gestito
 		DATA_TYPE originalValue = null;
 		try {
 			originalValue = getProperty(qualifiedPropertySlot).orElse(null);
@@ -433,8 +438,8 @@ public abstract class AbstractOpcVertex extends GremlinElement
 	@Override
 	public Iterator<Edge> edges(final Direction direction,
 			final String... edgeLabels) {
-		final Collection<WaldotEdge> values = getNamespace()
-				.getEdges(this, direction, edgeLabels);
+		final Collection<WaldotEdge> values = getNamespace().getEdges(this,
+				direction, edgeLabels);
 		final Collection<Edge> edges = new ArrayList<>();
 		for (final WaldotEdge edge : values) {
 			edges.add(edge);
@@ -712,12 +717,12 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		} else {
 			// the OPC UA model keeps one property node per key: list and set
 			// collapse to a single value. Only an explicit 'set' cardinality
-			// with an equal value is a no-op; the default path always writes
-			// (a write of an equal value still notifies observers and rules).
+			// with an equal value is a no-op; the default path always writes (a
+			// write of an equal value still notifies observers and rules).
 			if (VertexProperty.Cardinality.set == cardinality) {
 				final VertexProperty<V> existing = property(key);
-				if (existing.isPresent() && java.util.Objects
-						.equals(existing.value(), value)) {
+				if (existing.isPresent()
+						&& java.util.Objects.equals(existing.value(), value)) {
 					ElementHelper.attachProperties(existing, keyValues);
 					return existing;
 				}
@@ -746,6 +751,12 @@ public abstract class AbstractOpcVertex extends GremlinElement
 	}
 
 	@Override
+	public void removeRelatedOpcUaNodes() {
+		// TODO rimuovere le variabili e gli oggetti collegati al vertice
+
+	}
+
+	@Override
 	public void removeRelatedProperty(final WaldotVertexProperty<?> property) {
 		if (property == null) {
 			return;
@@ -760,12 +771,6 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				removeReference(reference);
 			}
 		}
-	}
-
-	@Override
-	public void removeRelatedOpcUaNodes() {
-		// TODO rimuovere le variabili e gli oggetti collegati al vertice
-
 	}
 
 	protected void resetDirtyStateToUpdate() {

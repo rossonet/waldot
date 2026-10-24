@@ -163,8 +163,3 @@ if (plugins.hasPlugin('org.jreleaser')) {
   tasks.named('jreleaserDeploy').configure { dependsOn 'publishAllPublicationsToStagingRepository' }
 }
 
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
