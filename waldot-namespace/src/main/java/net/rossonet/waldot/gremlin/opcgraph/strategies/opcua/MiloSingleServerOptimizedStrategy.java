@@ -3,14 +3,21 @@ package net.rossonet.waldot.gremlin.opcgraph.strategies.opcua;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
@@ -71,75 +78,179 @@ import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 
-/*
- * TODO: da realizzare
- * Plan: Strategia Milo ottimizzata e test su entrambe le implementazioni
-
-MiloSingleServerOptimizedStrategy oggi è una copia identica di MiloSingleServerBaseStrategy (stesse 1178 righe). Il piano la rende più veloce e robusta con indici interni e creazione/rimozione atomica. Poi permette di scegliere la strategia nei test tramite OpcFactory, con una seconda esecuzione Gradle sulla stessa suite. Non ho modificato nulla.
-
-Steps
-
-	1. Selezione della strategia. In OpcFactory aggiungere l'overload getOpcGraph(url, history, MiloStrategy).
-	2. getOpcGraph(url, history) sceglie la strategia dalla proprietà di sistema waldot.milo.strategy (base di default, optimized).
-	3. Il default resta quello attuale.
-	4. La stessa selezione si può riusare nei tre WaldotRunner (waldot-app, clarabella, logica), che istanziano ancora la strategia base.
-	5. Test su entrambe le classi.
-	6. Nei build.gradle di waldot-namespace, waldot-plugin-generator e waldot-plugin-rules-engine, registrare un task Test aggiuntivo testOptimized con la proprietà impostata.
-	7. Il task usa lo stesso classpath, mustRunAfter test e check dipende da entrambi. Serve l'ordine sequenziale perché i test usano la porta fissa 12686 e i file in /tmp.
-	8. I test esistenti, come BaseWaldotTests, LinkAndFireTests, GeneratorTests e i test del rules-engine, non cambiano perché passano già da OpcFactory.
-	9. waldot-api: i suoi test usano solo mock (MiloStrategyTest, WaldotGraphTest e simili) e non possono dipendere da waldot-namespace. Non c'è nulla da parametrizzare lì. Propongo un test di contratto in waldot-namespace (MiloStrategyContractTest) eseguito su entrambe le implementazioni. Dovrebbe coprire:
-		•  id duplicati e multi-edge;
-		•  proprietà create in parallelo;
-		•  rimozione di un vertice con archi;
-		•  archi e vertici adiacenti per direzione e label;
-		•  close() ripetuto.
-
-	10. Correzioni di robustezza in `MiloSingleServerOptimizedStrategy`.
-	11. Edge senza id esplicito: il NodeId è source:label:target. Due archi con la stessa label tra gli stessi vertici si sovrascrivono in silenzio nello storage. Servono un suffisso univoco e un controllo sugli id espliciti già presenti.
-	12. Rollback incompleto in `addEdge`: avviene solo per PluginBlockingException. Restano il monitor registrato, le property node, il link nella cartella e il nodo stesso. Va esteso a ogni eccezione, anche in addVertex, dove una property non valida lascia un nodo fantasma non presente in cachedVertices.
-	13. Atomicità: createOrUpdateWaldotVertexProperty e createOrUpdateWaldotEdgeProperty fanno hasNodeId e poi addNode, con una race. Il secondo thread sostituisce il nodo e duplica le reference. Serve computeIfAbsent su un indice per elemento.
-	14. Reference type: getOrCreateReferenceType ha la stessa race; usare computeIfAbsent.
-	15. `removeVertex`: non rimuove gli archi incidenti, le property, i comandi .delete/.property né i link nelle cartelle (removeRelatedOpcUaNodes in AbstractOpcVertex è un TODO vuoto). Gli archi restano orfani e getEdgeInVertex fa Optional.get() su un vertice inesistente, che rompe le query. Rimuovere a cascata e usare lookup tolleranti.
-	16. `deleteOpcNodeId`: non distingue vertici, archi e cartelle e usa .get() senza controllo. Le mappe delle directory restano con cartelle morte.
-	17. Directory: componenti vuoti (a//b, /x) generano chiavi errate. Le mappe vertexDirectories e commandDirectories del folder manager sono HashMap non thread-safe. linkCommandDirectoryStructure usa NodeId senza prefisso, con rischio di collisioni.
-	18. `removeEdge`: typeProperty è costruita con labelEdgeTypeNode, ma dovrebbe usare typeEdgeTypeNode.
-	19. Descrizione edge: usa label anziché elaboratedLabel, quindi può scrivere "null".
-	20. Input null: propertyKeyValues null genera NPE; normalizzare ad array vuoto.
-	21. `getEdges()` e `getVertices()`: espongono le ConcurrentHashMap interne modificabili; restituire viste non modificabili.
-	22. `close()`: resetNameSpace è un no-op. Rendere close() idempotente: svuotare cache, indici e mappe delle directory e fermare i monitor.
-	23. `getVertexProperties` e `getProperties`: fanno getNode(...).get() o cast senza controllo; con una reference residua lanciano NoSuchElementException.
-	24. Ottimizzazioni di prestazioni.
-	25. Adiacenza: getEdges(vertex, dir, labels) e getVertices(vertex, dir, labels) scorrono tutti gli archi e per ognuno leggono due property OPC (getEdgeInVertex/getEdgeOutVertex) più label(). Sostituire con indici ConcurrentHashMap per vertice (out/in) e un record per arco con NodeId di source e target e label immutabile (le modifiche di label vengono ripristinate). L'indice va registrato prima di setMonitor e prima dei plugin, perché i monitor chiamano inVertex().
-	26. Property per vertice: getVertexProperties ricostruisce ogni volta una mappa dalle reference del nodo, e AbstractOpcVertex.property(key) poi la copia in una ImmutableMap. Tenere nella strategia un indice per vertice chiave → property.
-	27. Oggetti ricorrenti: pre-creare i QualifiedProperty ricorrenti in initialize, invece di ricrearli a ogni chiamata.
-	28. Proprietà del vertice nell'API: in waldot-api, getVertexPropertyReference e getPropertyReference potrebbero restituire referenceVertex direttamente, senza scansionare le reference.
+/**
+ * Optimized and hardened variant of {@link MiloSingleServerBaseStrategy}.
+ * <p>
+ * It keeps the same OPC UA address space layout of the base strategy (same
+ * folders, same property nodes, same references, same commands) but it adds
+ * a set of in-memory indexes so that the hot paths of the Gremlin API do not
+ * need to walk the OPC UA address space, and it makes the creation / removal
+ * of vertices, edges and properties atomic and complete.
+ *
+ * <h2>Maintenance notes</h2>
+ *
+ * <h3>In-memory indexes</h3>
+ * <ul>
+ * <li>{@link #cachedVertices} / {@link #cachedEdges}: published elements, the
+ * only ones visible to {@code getVertices()} / {@code getEdges()}. An element
+ * is published as the very last step of its creation and unpublished as the
+ * first step of its removal.</li>
+ * <li>{@link #edgeIndex}: nodeId of an edge &rarr; {@link EdgeEntry}
+ * (immutable snapshot with source, target, label and type). It is filled
+ * <b>before</b> the monitors and the plugins are notified because they call
+ * {@code inVertex()} / {@code outVertex()} on the half built edge. Labels
+ * cannot change (an attempt is reverted by {@code OpcEdge}) so the snapshot
+ * never goes stale.</li>
+ * <li>{@link #outEdges} / {@link #inEdges}: adjacency per vertex, ordered by
+ * the creation sequence of the edge. They contain only published edges.</li>
+ * <li>{@link #vertexProperties} / {@link #edgeProperties}: one
+ * {@link PropertyBag} per element, key &rarr; property node. The bag is the
+ * serialization point that makes "create or update" atomic.</li>
+ * </ul>
+ *
+ * <h3>Directories</h3> Elements (vertices, edges) and commands can be placed
+ * in a tree of folders. Folder creation, element linking and the pruning of
+ * empty folders are serialized by {@link #directoryLock}; every folder keeps
+ * a counter of its children in {@link DirectoryNode}. Empty path components
+ * ({@code a//b}, {@code /x}) are ignored.
+ *
+ * <h3>Atomicity</h3> {@code addVertex} and {@code addEdge} roll back every
+ * node, reference and index entry they created if anything fails (not only
+ * {@link PluginBlockingException}). Removal of a vertex cascades to the
+ * incident edges, the property nodes, the {@code .delete} / {@code .property}
+ * commands and the folder links.
+ *
+ * <h3>Locking order</h3> {@link #directoryLock} and the monitor of a
+ * {@link PropertyBag} are never held while calling plugins or observers, so
+ * they cannot be part of a lock cycle with user code.
  */
-
-//TODO commentare la classe accuratamente per manutenzioni future
 @WaldotMiloStrategy
 public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 
+	/**
+	 * Folder in which an element is linked. {@code directory} is {@code null} when
+	 * the element is linked directly under a root folder.
+	 */
+	private record DirectoryLink(UaFolderNode folder, DirectoryNode directory,
+			boolean component) {
+	}
+
+	/** A dynamic folder created for the {@code directory} parameter. */
+	private static final class DirectoryNode {
+		private int children;
+		private final UaFolderNode folder;
+		private final String key;
+		private final DirectoryNode parentDirectory;
+		private final UaFolderNode parentFolder;
+		private final Map<String, UaFolderNode> registry;
+
+		private DirectoryNode(final String key, final UaFolderNode folder,
+				final UaFolderNode parentFolder,
+				final DirectoryNode parentDirectory,
+				final Map<String, UaFolderNode> registry) {
+			this.key = key;
+			this.folder = folder;
+			this.parentFolder = parentFolder;
+			this.parentDirectory = parentDirectory;
+			this.registry = registry;
+		}
+	}
+
+	/**
+	 * Immutable snapshot of an edge: everything needed to navigate the graph
+	 * without reading OPC UA properties.
+	 */
+	private record EdgeEntry(long sequence, WaldotEdge edge, NodeId nodeId,
+			NodeId source, NodeId target, String label, String type) {
+	}
+
+	/**
+	 * Insertion ordered, thread safe map key &rarr; property node. The factory
+	 * of {@link #getOrCreate} runs inside the monitor, so two threads can never
+	 * create the same property node.
+	 */
+	private static final class PropertyBag<P> {
+		private final Map<String, P> items = new LinkedHashMap<>();
+
+		synchronized List<P> drain() {
+			final List<P> result = new ArrayList<>(items.values());
+			items.clear();
+			return result;
+		}
+
+		synchronized P get(final String key) {
+			return items.get(key);
+		}
+
+		synchronized P getOrCreate(final String key, final Supplier<P> factory) {
+			P value = items.get(key);
+			if (value == null) {
+				value = factory.get();
+				items.put(key, value);
+			}
+			return value;
+		}
+
+		synchronized void removeIf(
+				final java.util.function.Predicate<P> predicate) {
+			items.values().removeIf(predicate);
+		}
+
+		synchronized Map<String, P> snapshot() {
+			return new LinkedHashMap<>(items);
+		}
+	}
+
+	/** Qualified properties used on every call, built once. */
+	private record SharedProperties(QualifiedProperty<String> labelEdge,
+			QualifiedProperty<String> typeEdge,
+			QualifiedProperty<NodeId> source, QualifiedProperty<NodeId> target,
+			QualifiedProperty<NodeId> referenceType,
+			QualifiedProperty<Boolean> forward,
+			QualifiedProperty<String> labelVertex,
+			QualifiedProperty<String> typeVertex) {
+	}
+
+	private static final String COMMAND_DIRECTORY_NODEID_PREFIX = "c";
+	private static final String DELETE_COMMAND_SUFFIX = ".delete";
 	private static final String EDGE_DIRECTORY_NODEID_PREFIX = "e";
+	private static final String PROPERTY_COMMAND_SUFFIX = ".property";
 	private static final String VERTEX_DIRECTORY_NODEID_PREFIX = "v";
+
 	private UaFolderNode assetRootNode;
 	private transient final ConcurrentHashMap<NodeId, WaldotEdge> cachedEdges = new ConcurrentHashMap<>();
+	private volatile MiloSingleServerBaseReferenceNodeBuilder.ReferenceNodes cachedReferenceNodes;
 	private transient final ConcurrentHashMap<NodeId, WaldotVertex> cachedVertices = new ConcurrentHashMap<>();
+	private final AtomicBoolean closed = new AtomicBoolean(false);
+	private final Object directoryLock = new Object();
+	private final Map<NodeId, DirectoryNode> directoryNodes = new ConcurrentHashMap<>();
+	private final Map<NodeId, DirectoryLink> directoryLinks = new ConcurrentHashMap<>();
 	private transient final ConcurrentHashMap<String, UaFolderNode> edgeDirectories = new ConcurrentHashMap<>();
+	private final AtomicLong edgeSequence = new AtomicLong(0);
+	private final AtomicLong edgeSuffix = new AtomicLong(0);
+	private final ConcurrentHashMap<NodeId, EdgeEntry> edgeIndex = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<NodeId, PropertyBag<OpcProperty<?>>> edgeProperties = new ConcurrentHashMap<>();
 	private final MiloSingleServerBaseFolderManager folderManager = new MiloSingleServerBaseFolderManager(
 			this);
+	private final ConcurrentHashMap<NodeId, ConcurrentSkipListMap<Long, EdgeEntry>> inEdges = new ConcurrentHashMap<>();
 	private UaFolderNode interfaceRootNode;
 	private final AtomicLong lastEventId = new AtomicLong(0);
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private Graph.Variables opcGraphVariables;
-	private transient ConcurrentHashMap<String, NodeId> referenceCache = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<NodeId, ConcurrentSkipListMap<Long, EdgeEntry>> outEdges = new ConcurrentHashMap<>();
+	private final Object parametersLock = new Object();
+	private final Set<NodeId> pendingEdgeIds = ConcurrentHashMap.newKeySet();
+	private transient final ConcurrentHashMap<String, NodeId> referenceCache = new ConcurrentHashMap<>();
 	private UaFolderNode rootNode;
+	private volatile SharedProperties sharedProperties;
 	private WaldotNamespace waldotNamespace;
+	private final ConcurrentHashMap<NodeId, PropertyBag<OpcVertexProperty<?>>> vertexProperties = new ConcurrentHashMap<>();
 
 	private void addDeletedCommand(GremlinElement vertex) {
 		final AbstractOpcCommand deleteCommand = new AbstractOpcCommand(
 				waldotNamespace.getGremlinGraph(), waldotNamespace,
-				vertex.id().getIdentifier().toString() + ".delete", "delete",
-				"Delete " + vertex.getBrowseName().getName(), null,
+				vertex.id().getIdentifier().toString() + DELETE_COMMAND_SUFFIX,
+				"delete", "Delete " + vertex.getBrowseName().getName(), null,
 				waldotNamespace.getConfiguration().getWaldotCommandWriteMask(),
 				waldotNamespace.getConfiguration()
 						.getWaldotCommandUserWriteMask(),
@@ -177,7 +288,12 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public Edge addEdge(final WaldotVertex sourceVertex,
 			final WaldotVertex targetVertex, final String label,
-			final Object[] propertyKeyValues) {
+			final Object[] keyValues) {
+		Objects.requireNonNull(sourceVertex, "sourceVertex");
+		Objects.requireNonNull(targetVertex, "targetVertex");
+		final Object[] propertyKeyValues = keyValues == null
+				? new Object[0]
+				: keyValues;
 		ElementHelper.legalPropertyKeyValueArray(propertyKeyValues);
 		String type = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
 				TYPE_FIELD.toLowerCase());
@@ -195,18 +311,6 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 					"Edge label not found in propertyKeyValues, using default label '{}'",
 					elaboratedLabel);
 		}
-		NodeId nodeId = null;
-		final Object readId = MiloStrategy.getIdValue(propertyKeyValues)
-				.orElse(null);
-		if (readId != null) {
-			nodeId = MiloStrategy.getNodeIdManager()
-					.convert(waldotNamespace.getGremlinGraph(), readId);
-		} else {
-			nodeId = waldotNamespace
-					.generateNodeId(sourceVertex.getNodeId().getIdentifier()
-							+ ":" + elaboratedLabel + ":"
-							+ targetVertex.getNodeId().getIdentifier());
-		}
 		String name = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
 				NAME_FIELD.toLowerCase());
 		if (name == null) {
@@ -219,121 +323,124 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 				propertyKeyValues, DESCRIPTION_PARAMETER.toLowerCase());
 		if (description == null || description.isEmpty()) {
 			description = sourceVertex.getDisplayName().getText() + " -- "
-					+ label + " -> " + targetVertex.getDisplayName().getText();
+					+ elaboratedLabel + " -> "
+					+ targetVertex.getDisplayName().getText();
 			logger.debug(DESCRIPTION_PARAMETER
 					+ " not found in propertyKeyValues, using default '{}'",
 					description);
 		}
-		final OpcEdge edge = new OpcEdge(waldotNamespace.getGremlinGraph(),
-				nodeId, sourceVertex, targetVertex, elaboratedLabel, name,
-				description,
-				MiloSingleServerBaseReferenceNodeBuilder
-						.getWriteMask(propertyKeyValues),
-				MiloSingleServerBaseReferenceNodeBuilder
-						.getUserWriteMask(propertyKeyValues),
-				MiloSingleServerBaseReferenceNodeBuilder
-						.getEventNotifier(propertyKeyValues),
-				MiloSingleServerBaseReferenceNodeBuilder
-						.getVersion(propertyKeyValues));
-		waldotNamespace.getStorageManager().addNode(edge);
-		checkDirectoryParameterAndLinkNode(propertyKeyValues, edge,
-				folderManager.getEdgesFolderNode(), edgeDirectories,
-				EDGE_DIRECTORY_NODEID_PREFIX);
-		edge.addReference(new Reference(edge.getNodeId(),
-				NodeIds.HasTypeDefinition,
-				referenceNodes().edgeTypeNode.getNodeId().expanded(), true));
-		final QualifiedProperty<String> labelProperty = new QualifiedProperty<String>(
-				waldotNamespace.getNamespaceUri(), LABEL_FIELD,
-				referenceNodes().labelEdgeTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, String.class);
-		edge.setProperty(labelProperty, elaboratedLabel);
-		final QualifiedProperty<String> typeProperty = new QualifiedProperty<String>(
-				waldotNamespace.getNamespaceUri(), TYPE_FIELD,
-				referenceNodes().typeEdgeTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, String.class);
-		edge.setProperty(typeProperty, type);
-		final QualifiedProperty<NodeId> sourceProperty = new QualifiedProperty<NodeId>(
-				waldotNamespace.getNamespaceUri(), SOURCE_NODE,
-				referenceNodes().sourceNodeTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, NodeId.class);
-		edge.setProperty(sourceProperty, sourceVertex.getNodeId());
-		final QualifiedProperty<NodeId> targetProperty = new QualifiedProperty<NodeId>(
-				waldotNamespace.getNamespaceUri(), TARGET_NODE,
-				referenceNodes().targetNodeTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, NodeId.class);
-		edge.setProperty(targetProperty, targetVertex.getNodeId());
-		edge.addReference(new Reference(edge.getNodeId(),
-				referenceNodes().hasSourceNodeReferenceType,
-				sourceVertex.getNodeId().expanded(), true));
-		edge.addReference(new Reference(edge.getNodeId(),
-				referenceNodes().hasTargetNodeReferenceType,
-				targetVertex.getNodeId().expanded(), true));
-		final Reference sourceReference = new Reference(
-				sourceVertex.getNodeId(),
-				referenceNodes().hasReferenceDescriptionReferenceType,
-				edge.getNodeId().expanded(), true);
-		edge.addRelatedReference(sourceReference);
-		sourceVertex.addReference(sourceReference);
-		final Reference targetReference = new Reference(
-				targetVertex.getNodeId(),
-				referenceNodes().hasReferenceDescriptionReferenceType,
-				edge.getNodeId().expanded(), true);
-		edge.addRelatedReference(targetReference);
-		targetVertex.addReference(targetReference);
-		// create the main reference type if it does not exist
-		final NodeId mainReferenceTypeNodeId = getOrCreateReferenceType(type);
-		final QualifiedProperty<NodeId> edgeReferenceType = new QualifiedProperty<NodeId>(
-				waldotNamespace.getNamespaceUri(), REFERENCE_TYPE,
-				referenceNodes().referenceTypeTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, NodeId.class);
-		edge.setProperty(edgeReferenceType, mainReferenceTypeNodeId);
-		final QualifiedProperty<Boolean> forward = new QualifiedProperty<Boolean>(
-				waldotNamespace.getNamespaceUri(), IS_FORWARD,
-				referenceNodes().isForwardTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, Boolean.class);
-		edge.setProperty(forward, true);
-		final Reference reference = new Reference(sourceVertex.getNodeId(),
-				mainReferenceTypeNodeId, targetVertex.getNodeId().expanded(),
-				true);
-		edge.addRelatedReference(reference);
-		sourceVertex.addReference(reference);
-		popolateEdgePropertiesFromPropertyKeyValues(propertyKeyValues, edge);
-		if (type.equals(LINK_TO_EDGE_TYPE)) {
-			edge.setMonitor(new LinkMonitoredEdge(waldotNamespace,
-					LinkDirection.TO, edge, sourceVertex, targetVertex));
-		}
-		if (type.equals(LINK_FROM_EDGE_TYPE)) {
-			edge.setMonitor(new LinkMonitoredEdge(waldotNamespace,
-					LinkDirection.FROM, edge, sourceVertex, targetVertex));
-		}
-		if (type.equals(FIRE_EDGE_TYPE)) {
-			edge.setMonitor(new FireMonitoredEdge(waldotNamespace, edge,
-					sourceVertex, targetVertex));
-		}
-		for (final PluginListener p : waldotNamespace.getPlugins()) {
-			if (p.containsEdgeType(type)) {
-				try {
-					p.notifyAddEdge(edge, sourceVertex, targetVertex,
-							elaboratedLabel, type, propertyKeyValues);
-				} catch (final PluginBlockingException e) {
-					logger.error("Plugin {} blocked the edge addition: {}",
-							p.getClass().getName(), e.getMessage());
-					// pulire le references create finora
-					sourceVertex.removeReference(reference);
-					sourceVertex.removeReference(sourceReference);
-					targetVertex.removeReference(targetReference);
-					waldotNamespace.getStorageManager().removeNode(edge);
-					throw new RuntimeException("Plugin "
-							+ p.getClass().getName()
-							+ " blocked the edge addition: " + e.getMessage(),
-							e);
+		final NodeId nodeId = claimEdgeNodeId(
+				MiloStrategy.getIdValue(propertyKeyValues).orElse(null),
+				sourceVertex, targetVertex, elaboratedLabel);
+		try {
+			final OpcEdge edge = new OpcEdge(waldotNamespace.getGremlinGraph(),
+					nodeId, sourceVertex, targetVertex, elaboratedLabel, name,
+					description,
+					MiloSingleServerBaseReferenceNodeBuilder
+							.getWriteMask(propertyKeyValues),
+					MiloSingleServerBaseReferenceNodeBuilder
+							.getUserWriteMask(propertyKeyValues),
+					MiloSingleServerBaseReferenceNodeBuilder
+							.getEventNotifier(propertyKeyValues),
+					MiloSingleServerBaseReferenceNodeBuilder
+							.getVersion(propertyKeyValues));
+			// the index must exist before the monitors and the plugins run:
+			// they call inVertex() / outVertex() on the half built edge
+			final EdgeEntry entry = new EdgeEntry(
+					edgeSequence.incrementAndGet(), edge, nodeId,
+					sourceVertex.getNodeId(), targetVertex.getNodeId(),
+					elaboratedLabel, type);
+			edgeIndex.put(nodeId, entry);
+			edgeProperties.put(nodeId, new PropertyBag<>());
+			waldotNamespace.getStorageManager().addNode(edge);
+			linkToDirectory(
+					MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+							DIRECTORY_PARAMETER.toLowerCase()),
+					edge, folderManager.getEdgesFolderNode(), edgeDirectories,
+					EDGE_DIRECTORY_NODEID_PREFIX, false);
+			edge.addReference(new Reference(edge.getNodeId(),
+					NodeIds.HasTypeDefinition,
+					referenceNodes().edgeTypeNode.getNodeId().expanded(),
+					true));
+			final SharedProperties qp = shared();
+			edge.setProperty(qp.labelEdge(), elaboratedLabel);
+			edge.setProperty(qp.typeEdge(), type);
+			edge.setProperty(qp.source(), sourceVertex.getNodeId());
+			edge.setProperty(qp.target(), targetVertex.getNodeId());
+			edge.addReference(new Reference(edge.getNodeId(),
+					referenceNodes().hasSourceNodeReferenceType,
+					sourceVertex.getNodeId().expanded(), true));
+			edge.addReference(new Reference(edge.getNodeId(),
+					referenceNodes().hasTargetNodeReferenceType,
+					targetVertex.getNodeId().expanded(), true));
+			final Reference sourceReference = new Reference(
+					sourceVertex.getNodeId(),
+					referenceNodes().hasReferenceDescriptionReferenceType,
+					edge.getNodeId().expanded(), true);
+			edge.addRelatedReference(sourceReference);
+			sourceVertex.addReference(sourceReference);
+			final Reference targetReference = new Reference(
+					targetVertex.getNodeId(),
+					referenceNodes().hasReferenceDescriptionReferenceType,
+					edge.getNodeId().expanded(), true);
+			edge.addRelatedReference(targetReference);
+			targetVertex.addReference(targetReference);
+			// create the main reference type if it does not exist
+			final NodeId mainReferenceTypeNodeId = getOrCreateReferenceType(
+					type);
+			edge.setProperty(qp.referenceType(), mainReferenceTypeNodeId);
+			edge.setProperty(qp.forward(), true);
+			final Reference reference = new Reference(sourceVertex.getNodeId(),
+					mainReferenceTypeNodeId,
+					targetVertex.getNodeId().expanded(), true);
+			edge.addRelatedReference(reference);
+			sourceVertex.addReference(reference);
+			popolateEdgePropertiesFromPropertyKeyValues(propertyKeyValues,
+					edge);
+			if (type.equals(LINK_TO_EDGE_TYPE)) {
+				edge.setMonitor(new LinkMonitoredEdge(waldotNamespace,
+						LinkDirection.TO, edge, sourceVertex, targetVertex));
+			}
+			if (type.equals(LINK_FROM_EDGE_TYPE)) {
+				edge.setMonitor(new LinkMonitoredEdge(waldotNamespace,
+						LinkDirection.FROM, edge, sourceVertex, targetVertex));
+			}
+			if (type.equals(FIRE_EDGE_TYPE)) {
+				edge.setMonitor(new FireMonitoredEdge(waldotNamespace, edge,
+						sourceVertex, targetVertex));
+			}
+			for (final PluginListener p : waldotNamespace.getPlugins()) {
+				if (p.containsEdgeType(type)) {
+					try {
+						p.notifyAddEdge(edge, sourceVertex, targetVertex,
+								elaboratedLabel, type, propertyKeyValues);
+					} catch (final PluginBlockingException e) {
+						logger.error("Plugin {} blocked the edge addition: {}",
+								p.getClass().getName(), e.getMessage());
+						throw new RuntimeException("Plugin "
+								+ p.getClass().getName()
+								+ " blocked the edge addition: "
+								+ e.getMessage(), e);
+					}
 				}
 			}
+			addDeletedCommand(edge);
+			addPropertyCommand(edge);
+			publishEdge(entry);
+			return edge;
+		} catch (final RuntimeException | Error e) {
+			// complete rollback: nodes, references, properties, monitor,
+			// folder link and indexes created so far
+			try {
+				removeEdgeInternal(nodeId, false);
+			} catch (final Throwable rollbackError) {
+				logger.error("Rollback of edge {} failed", nodeId,
+						rollbackError);
+			}
+			throw e;
+		} finally {
+			pendingEdgeIds.remove(nodeId);
 		}
-		addDeletedCommand(edge);
-		addPropertyCommand(edge);
-		cachedEdges.put(edge.getNodeId(), edge);
-		return edge;
 	}
 
 	private void addPropertyCommand(GremlinElement vertex) {
@@ -341,7 +448,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 				waldotNamespace.getGremlinGraph(), waldotNamespace,
 				// TODO: usare delle costanti per tutte le variabili stringa che
 				// non sono messaggi di log
-				vertex.id().getIdentifier().toString() + ".property",
+				vertex.id().getIdentifier().toString()
+						+ PROPERTY_COMMAND_SUFFIX,
 				"property",
 				"Add or update vertex property"
 						+ vertex.getBrowseName().getName(),
@@ -392,9 +500,22 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	}
 
 	@Override
-	public AbstractOpcVertex addVertex(final NodeId nodeId,
-			final Object[] propertyKeyValues) {
+	public AbstractOpcVertex addVertex(final NodeId requestedNodeId,
+			final Object[] keyValues) {
+		final Object[] propertyKeyValues = keyValues == null
+				? new Object[0]
+				: keyValues;
 		ElementHelper.legalPropertyKeyValueArray(propertyKeyValues);
+		final NodeId nodeId = requestedNodeId != null
+				? requestedNodeId
+				: waldotNamespace.getNodeIdManager()
+						.getNextId(waldotNamespace.getGremlinGraph());
+		if (cachedVertices.containsKey(nodeId)
+				|| waldotNamespace.hasNodeId(nodeId)) {
+			// checked before touching anything: the rollback below must never
+			// delete the nodes of an element that already exists
+			throw Graph.Exceptions.vertexWithIdAlreadyExists(nodeId);
+		}
 		String label = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
 				LABEL_FIELD.toLowerCase());
 		if (label == null) {
@@ -422,77 +543,119 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 					+ " not found in propertyKeyValues, using default '{}'",
 					description);
 		}
-		NodeId typeDefinition = getVertexTypeNode(propertyKeyValues);
-		if (typeDefinition == null) {
-			typeDefinition = referenceNodes().vertexTypeNode.getNodeId();
-			logger.debug(TYPE_FIELD.toLowerCase()
-					+ " not found in propertyKeyValues, using default type '{}'",
-					typeDefinition);
+		try {
+			NodeId typeDefinition = getVertexTypeNode(propertyKeyValues);
+			if (typeDefinition == null) {
+				typeDefinition = referenceNodes().vertexTypeNode.getNodeId();
+				logger.debug(TYPE_FIELD.toLowerCase()
+						+ " not found in propertyKeyValues, using default type '{}'",
+						typeDefinition);
+			}
+			final AbstractOpcVertex vertex = createVertex(nodeId,
+					typeDefinition, label, description, browseName,
+					displayName, propertyKeyValues,
+					MiloSingleServerBaseReferenceNodeBuilder
+							.getWriteMask(propertyKeyValues),
+					MiloSingleServerBaseReferenceNodeBuilder
+							.getUserWriteMask(propertyKeyValues),
+					MiloSingleServerBaseReferenceNodeBuilder
+							.getEventNotifier(propertyKeyValues),
+					MiloSingleServerBaseReferenceNodeBuilder
+							.getVersion(propertyKeyValues));
+			addDeletedCommand(vertex);
+			addPropertyCommand(vertex);
+			cachedVertices.put(vertex.getNodeId(), vertex);
+			return vertex;
+		} catch (final RuntimeException | Error e) {
+			// an invalid property must not leave a ghost node in the address
+			// space
+			try {
+				discardVertexNodes(nodeId);
+			} catch (final Throwable rollbackError) {
+				logger.error("Rollback of vertex {} failed", nodeId,
+						rollbackError);
+			}
+			throw e;
 		}
-		final AbstractOpcVertex vertex = createVertex(nodeId, typeDefinition,
-				label, description, browseName, displayName, propertyKeyValues,
-				MiloSingleServerBaseReferenceNodeBuilder
-						.getWriteMask(propertyKeyValues),
-				MiloSingleServerBaseReferenceNodeBuilder
-						.getUserWriteMask(propertyKeyValues),
-				MiloSingleServerBaseReferenceNodeBuilder
-						.getEventNotifier(propertyKeyValues),
-				MiloSingleServerBaseReferenceNodeBuilder
-						.getVersion(propertyKeyValues));
-		addDeletedCommand(vertex);
-		addPropertyCommand(vertex);
-		cachedVertices.put(vertex.getNodeId(), vertex);
-		return vertex;
 	}
 
-	private void checkDirectoryParameterAndLinkNode(
-			final Object[] propertyKeyValues, final GremlinElement vertex,
-			final UaFolderNode folderNode,
-			final Map<String, UaFolderNode> directories, String suffix) {
-		final String directory = MiloStrategy.getKeyValuesProperty(
-				propertyKeyValues, DIRECTORY_PARAMETER.toLowerCase());
-		if (directory == null || directory.isEmpty()) {
-			folderNode.addOrganizes(vertex);
-			return;
+	/**
+	 * Releases an edge id claimed with {@link #claimEdgeNodeId} when it is
+	 * not available.
+	 */
+	private boolean claimEdgeId(final NodeId id) {
+		if (!pendingEdgeIds.add(id)) {
+			return false;
 		}
-		final String[] components = directory.split(DIRECTORY_SPLIT_SIMBOL);
-		String actual = null;
-		String last = actual;
-		for (int counter = 0; counter < components.length; counter++) {
-			actual = (actual == null ? "" : (actual + DIRECTORY_SPLIT_SIMBOL))
-					+ components[counter].trim();
-			if (!directories.containsKey(actual)) {
-				directories.put(actual, new UaFolderNode(
-						waldotNamespace.getOpcUaNodeContext(),
-						waldotNamespace.generateNodeId(suffix + ":" + actual),
-						waldotNamespace.generateQualifiedName(
-								components[counter].trim()),
-						LocalizedText.english(components[counter].trim())));
-				waldotNamespace.getStorageManager()
-						.addNode(directories.get(actual));
-				final UaFolderNode uaFolderNode = directories.get(actual);
-				if (counter == 0) {
-					folderNode.addOrganizes(uaFolderNode);
-				} else {
-					directories.get(last).addOrganizes(uaFolderNode);
-				}
-			}
+		if (edgeIndex.containsKey(id) || waldotNamespace.hasNodeId(id)) {
+			pendingEdgeIds.remove(id);
+			return false;
+		}
+		return true;
+	}
 
-			if (counter == components.length - 1) {
-				directories.get(actual).addOrganizes(vertex);
+	/**
+	 * Picks (and reserves) the nodeId of a new edge. An explicit id that is
+	 * already in use is an error. Without an explicit id the nodeId is
+	 * {@code source:label:target}; a second edge with the same label between
+	 * the same vertices gets a unique numeric suffix instead of silently
+	 * overwriting the first one.
+	 */
+	private NodeId claimEdgeNodeId(final Object readId,
+			final WaldotVertex sourceVertex, final WaldotVertex targetVertex,
+			final String elaboratedLabel) {
+		if (readId != null) {
+			final NodeId explicit = MiloStrategy.getNodeIdManager()
+					.convert(waldotNamespace.getGremlinGraph(), readId);
+			if (explicit != null) {
+				if (!claimEdgeId(explicit)) {
+					throw Graph.Exceptions.edgeWithIdAlreadyExists(explicit);
+				}
+				return explicit;
 			}
-			last = actual;
 		}
+		final String base = sourceVertex.getNodeId().getIdentifier() + ":"
+				+ elaboratedLabel + ":"
+				+ targetVertex.getNodeId().getIdentifier();
+		NodeId candidate = waldotNamespace.generateNodeId(base);
+		while (!claimEdgeId(candidate)) {
+			candidate = waldotNamespace
+					.generateNodeId(base + "#" + edgeSuffix.incrementAndGet());
+		}
+		return candidate;
 	}
 
 	@Override
 	public void close() throws Exception {
+		if (!closed.compareAndSet(false, true)) {
+			return;
+		}
 		resetNameSpace();
+		// stop the monitors of the edges
+		for (final WaldotEdge edge : new ArrayList<>(cachedEdges.values())) {
+			try {
+				edge.removeRelatedOpcUaNodes();
+			} catch (final Throwable e) {
+				logger.debug("Error stopping the monitor of edge {}",
+						edge.getNodeId(), e);
+			}
+		}
 		referenceCache.clear();
 		cachedVertices.clear();
 		cachedEdges.clear();
-		// quando rivedi il codice, ricorda di chiudere le risorse aperte!
-
+		edgeIndex.clear();
+		outEdges.clear();
+		inEdges.clear();
+		vertexProperties.clear();
+		edgeProperties.clear();
+		pendingEdgeIds.clear();
+		synchronized (directoryLock) {
+			directoryLinks.clear();
+			directoryNodes.clear();
+			edgeDirectories.clear();
+			folderManager.getVertexDirectories().clear();
+			folderManager.getCommandDirectories().clear();
+		}
 	}
 
 	@Override
@@ -506,52 +669,57 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
 	public <DATA_TYPE> OpcProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(
 			final WaldotEdge opcEdge, final String key, final DATA_TYPE value) {
 		final NodeId nodeId = waldotNamespace
 				.generateNodeId(opcEdge.getNodeId().getIdentifier().toString()
 						+ PROPERTY_SPLIT_SIMBOL_IN_NODEID + key);
-		if (waldotNamespace.hasNodeId(nodeId)) {
-			@SuppressWarnings("unchecked")
-			final OpcProperty<DATA_TYPE> opcProperty = (OpcProperty<DATA_TYPE>) waldotNamespace
-					.getStorageManager().getNode(nodeId).get();
-			final Variant variant = new Variant(value);
-			final DataValue dataValue = DataValue.newValue()
-					.setStatus(StatusCode.GOOD).setSourceTime(DateTime.now())
-					.setValue(variant).build();
-			opcProperty.setValue(dataValue);
-			return opcProperty;
-		} else {
-			final UaNodeContext context = opcEdge.getNodeContext();
-			final LocalizedText description = LocalizedText.english(key
-					+ " of edge property " + opcEdge.getBrowseName().getName());
-			final UInteger writeMask = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableWriteMask;
-			final UInteger userWriteMask = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableUserWriteMask;
-			final NodeId dataType = NodeIds.BaseDataType;
-			final int valueRank = ValueRanks.Scalar;
-			final UInteger[] arrayDimensions = null;
-			final UByte accessLevel = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableAccessLevel;
-			final UByte userAccessLevel = MiloSingleServerBaseReferenceNodeBuilder.edgeVariableUserAccessLevel;
-			final Double minimumSamplingInterval = -1.0;
-			final boolean historizing = false;
-			@SuppressWarnings({"rawtypes", "unchecked"})
-			final OpcProperty<DATA_TYPE> property = new OpcProperty(
-					waldotNamespace.getGremlinGraph(), opcEdge, key, value,
-					context, nodeId, description, writeMask, userWriteMask,
-					dataType, valueRank, arrayDimensions, accessLevel,
-					userAccessLevel, minimumSamplingInterval, historizing);
-			waldotNamespace.getStorageManager().addNode(property);
-			opcEdge.addRelatedProperty(property);
-			opcEdge.addReference(new Reference(opcEdge.getNodeId(),
-					referenceNodes().hasGremlinPropertyReferenceType,
-					property.getNodeId().expanded(), true));
+		final PropertyBag<OpcProperty<?>> bag = edgeProperties
+				.computeIfAbsent(opcEdge.getNodeId(), k -> new PropertyBag<>());
+		final AtomicBoolean created = new AtomicBoolean(false);
+		final OpcProperty<DATA_TYPE> property = (OpcProperty<DATA_TYPE>) bag
+				.getOrCreate(key, () -> {
+					final Optional<UaNode> existing = waldotNamespace
+							.getStorageManager().getNode(nodeId);
+					if (existing.isPresent()
+							&& existing.get() instanceof OpcProperty) {
+						return (OpcProperty<?>) existing.get();
+					}
+					final OpcProperty<DATA_TYPE> newProperty = new OpcProperty(
+							waldotNamespace.getGremlinGraph(), opcEdge, key,
+							value, opcEdge.getNodeContext(), nodeId,
+							LocalizedText.english(key + " of edge property "
+									+ opcEdge.getBrowseName().getName()),
+							MiloSingleServerBaseReferenceNodeBuilder.edgeVariableWriteMask,
+							MiloSingleServerBaseReferenceNodeBuilder.edgeVariableUserWriteMask,
+							NodeIds.BaseDataType, ValueRanks.Scalar, null,
+							MiloSingleServerBaseReferenceNodeBuilder.edgeVariableAccessLevel,
+							MiloSingleServerBaseReferenceNodeBuilder.edgeVariableUserAccessLevel,
+							-1.0, false);
+					waldotNamespace.getStorageManager().addNode(newProperty);
+					try {
+						opcEdge.addRelatedProperty(newProperty);
+						opcEdge.addReference(new Reference(opcEdge.getNodeId(),
+								referenceNodes().hasGremlinPropertyReferenceType,
+								newProperty.getNodeId().expanded(), true));
+					} catch (final RuntimeException | Error e) {
+						waldotNamespace.getStorageManager().removeNode(nodeId);
+						throw e;
+					}
+					created.set(true);
+					return newProperty;
+				});
+		if (created.get()) {
 			opcEdge.notifyPropertyValueChanging(key, property.getValue());
-			return property;
+		} else {
+			property.setValue(newDataValue(value));
 		}
-
+		return property;
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
 	public <DATA_TYPE> OpcVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(
 			final WaldotVertex opcVertex, final String key,
@@ -559,45 +727,49 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		final NodeId nodeId = waldotNamespace
 				.generateNodeId(opcVertex.getNodeId().getIdentifier().toString()
 						+ PROPERTY_SPLIT_SIMBOL_IN_NODEID + key);
-		if (waldotNamespace.hasNodeId(nodeId)) {
-			@SuppressWarnings("unchecked")
-			final OpcVertexProperty<DATA_TYPE> vp = (OpcVertexProperty<DATA_TYPE>) waldotNamespace
-					.getStorageManager().get(nodeId);
-			final Variant variant = new Variant(value);
-			final DataValue dataValue = DataValue.newValue()
-					.setStatus(StatusCode.GOOD).setSourceTime(DateTime.now())
-					.setValue(variant).build();
-			vp.setValue(dataValue);
-			return vp;
-		} else {
-			final UaNodeContext context = opcVertex.getNodeContext();
-			final LocalizedText description = LocalizedText
-					.english(key + " of vertex property "
-							+ opcVertex.getBrowseName().getName());
-			final UInteger writeMask = MiloSingleServerBaseReferenceNodeBuilder.variableWriteMask;
-			final UInteger userWriteMask = MiloSingleServerBaseReferenceNodeBuilder.variableUserWriteMask;
-			final NodeId dataType = NodeIds.BaseDataType;
-			final int valueRank = ValueRanks.Scalar;
-			final UInteger[] arrayDimensions = null;
-			final UByte accessLevel = MiloSingleServerBaseReferenceNodeBuilder.variableAccessLevel;
-			final UByte userAccessLevel = MiloSingleServerBaseReferenceNodeBuilder.variableUserAccessLevel;
-			final Double minimumSamplingInterval = -1.0;
-			final boolean historizing = false;
-			@SuppressWarnings({"rawtypes", "unchecked"})
-			final OpcVertexProperty<DATA_TYPE> property = new OpcVertexProperty(
-					waldotNamespace.getGremlinGraph(), opcVertex, key, value,
-					context, nodeId, description, writeMask, userWriteMask,
-					dataType, valueRank, arrayDimensions, accessLevel,
-					userAccessLevel, minimumSamplingInterval, historizing,
-					false);
-			waldotNamespace.getStorageManager().addNode(property);
-			opcVertex.addReference(new Reference(opcVertex.getNodeId(),
-					referenceNodes().hasGremlinPropertyReferenceType,
-					property.getNodeId().expanded(), true));
-			opcVertex.addRelatedProperty(property);
+		final PropertyBag<OpcVertexProperty<?>> bag = vertexProperties
+				.computeIfAbsent(opcVertex.getNodeId(),
+						k -> new PropertyBag<>());
+		final AtomicBoolean created = new AtomicBoolean(false);
+		final OpcVertexProperty<DATA_TYPE> property = (OpcVertexProperty<DATA_TYPE>) bag
+				.getOrCreate(key, () -> {
+					final Optional<UaNode> existing = waldotNamespace
+							.getStorageManager().getNode(nodeId);
+					if (existing.isPresent()
+							&& existing.get() instanceof OpcVertexProperty) {
+						return (OpcVertexProperty<?>) existing.get();
+					}
+					final OpcVertexProperty<DATA_TYPE> newProperty = new OpcVertexProperty(
+							waldotNamespace.getGremlinGraph(), opcVertex, key,
+							value, opcVertex.getNodeContext(), nodeId,
+							LocalizedText.english(key + " of vertex property "
+									+ opcVertex.getBrowseName().getName()),
+							MiloSingleServerBaseReferenceNodeBuilder.variableWriteMask,
+							MiloSingleServerBaseReferenceNodeBuilder.variableUserWriteMask,
+							NodeIds.BaseDataType, ValueRanks.Scalar, null,
+							MiloSingleServerBaseReferenceNodeBuilder.variableAccessLevel,
+							MiloSingleServerBaseReferenceNodeBuilder.variableUserAccessLevel,
+							-1.0, false, false);
+					waldotNamespace.getStorageManager().addNode(newProperty);
+					try {
+						opcVertex.addReference(new Reference(
+								opcVertex.getNodeId(),
+								referenceNodes().hasGremlinPropertyReferenceType,
+								newProperty.getNodeId().expanded(), true));
+						opcVertex.addRelatedProperty(newProperty);
+					} catch (final RuntimeException | Error e) {
+						waldotNamespace.getStorageManager().removeNode(nodeId);
+						throw e;
+					}
+					created.set(true);
+					return newProperty;
+				});
+		if (created.get()) {
 			opcVertex.notifyPropertyValueChanging(key, property.getValue());
-			return property;
+		} else {
+			property.setValue(newDataValue(value));
 		}
+		return property;
 	}
 
 	private AbstractOpcVertex createVertex(final NodeId nodeId,
@@ -606,6 +778,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			final LocalizedText displayName, final Object[] propertyKeyValues,
 			final UInteger writeMask, final UInteger userWriteMask,
 			final UByte eventNotifierActive, final long version) {
+		vertexProperties.putIfAbsent(nodeId, new PropertyBag<>());
 		final AbstractOpcVertex vertex = createVertexObject(propertyKeyValues,
 				typeDefinition, waldotNamespace.getGremlinGraph(),
 				waldotNamespace.getOpcUaNodeContext(), nodeId, browseName,
@@ -614,28 +787,23 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		waldotNamespace.getStorageManager().addNode(vertex);
 		vertex.addReference(new Reference(vertex.getNodeId(),
 				NodeIds.HasTypeDefinition, typeDefinition.expanded(), true));
-		checkDirectoryParameterAndLinkNode(propertyKeyValues, vertex,
-				folderManager.getVerticesFolderNode(),
+		linkToDirectory(
+				MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+						DIRECTORY_PARAMETER.toLowerCase()),
+				vertex, folderManager.getVerticesFolderNode(),
 				folderManager.getVertexDirectories(),
-				VERTEX_DIRECTORY_NODEID_PREFIX);
-		final QualifiedProperty<String> labelProperty = new QualifiedProperty<String>(
-				waldotNamespace.getNamespaceUri(), LABEL_FIELD,
-				referenceNodes().labelVertexTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, String.class);
-		vertex.setProperty(labelProperty, label);
+				VERTEX_DIRECTORY_NODEID_PREFIX, false);
+		final SharedProperties qp = shared();
+		vertex.setProperty(qp.labelVertex(), label);
 		String type = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
 				TYPE_FIELD.toLowerCase());
-		final QualifiedProperty<String> typeProperty = new QualifiedProperty<String>(
-				waldotNamespace.getNamespaceUri(), TYPE_FIELD,
-				referenceNodes().vertexTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, String.class);
 		if (type == null || type.isEmpty()) {
 			type = "vertex";
 			logger.debug(TYPE_FIELD.toLowerCase()
 					+ " not found in propertyKeyValues, using default type '{}'",
 					type);
 		}
-		vertex.setProperty(typeProperty, type);
+		vertex.setProperty(qp.typeVertex(), type);
 		popolateVertexPropertiesFromPropertyKeyValues(propertyKeyValues,
 				vertex);
 		return vertex;
@@ -663,14 +831,62 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 				description, writeMask, userWriteMask, eventNotifier, version);
 	}
 
+	/** Removes a node from the storage and deletes it, ignoring any error. */
+	private void deleteQuietly(final UaNode node) {
+		if (node == null) {
+			return;
+		}
+		try {
+			waldotNamespace.getStorageManager().removeNode(node.getNodeId());
+			node.delete();
+		} catch (final Throwable e) {
+			logger.debug("Error deleting node {}", node.getNodeId(), e);
+		}
+	}
+
 	@Override
 	public String deleteOpcNodeId(String nodeId) {
 		final NodeId nodeTargetId = MiloStrategy.getNodeIdManager()
 				.convert(waldotNamespace.getGremlinGraph(), nodeId);
-		cachedVertices.remove(nodeTargetId);
-		cachedEdges.remove(nodeTargetId);
-		return waldotNamespace.getStorageManager().removeNode(nodeTargetId)
-				.get().getNodeId().toParseableString();
+		if (nodeTargetId == null) {
+			throw new IllegalArgumentException("invalid nodeId " + nodeId);
+		}
+		final Optional<UaNode> node = waldotNamespace.getStorageManager()
+				.getNode(nodeTargetId);
+		if (node.isEmpty()) {
+			cachedVertices.remove(nodeTargetId);
+			cachedEdges.remove(nodeTargetId);
+			throw new IllegalArgumentException(
+					"node " + nodeId + " not found");
+		}
+		final UaNode target = node.get();
+		if (target instanceof WaldotEdge || edgeIndex.containsKey(nodeTargetId)) {
+			removeEdge(nodeTargetId);
+		} else if (target instanceof WaldotVertex) {
+			removeVertex(nodeTargetId);
+		} else if (target instanceof WaldotVertexProperty) {
+			removeVertexProperty(nodeTargetId);
+		} else {
+			forgetDirectory(nodeTargetId);
+			deleteQuietly(target);
+		}
+		return nodeTargetId.toParseableString();
+	}
+
+	/**
+	 * Removes every node, reference and index entry of a (possibly half built)
+	 * vertex. Tolerant of missing pieces: it is used by the rollback of
+	 * {@link #addVertex} and by {@link #removeVertex}.
+	 */
+	private void discardVertexNodes(final NodeId nodeId) {
+		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId)
+				.orElse(null);
+		removePropertyNodes(vertexProperties.remove(nodeId), node);
+		removeNodeQuietly(commandNodeId(nodeId, DELETE_COMMAND_SUFFIX));
+		removeNodeQuietly(commandNodeId(nodeId, PROPERTY_COMMAND_SUFFIX));
+		unlinkFromDirectory(nodeId, node);
+		cachedVertices.remove(nodeId);
+		deleteQuietly(node);
 	}
 
 	@Override
@@ -678,23 +894,24 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		logger.info("dropGraphComputerView");
 	}
 
-	private boolean edgeLabelsIsValid(String[] edgeLabels, WaldotEdge edge) {
-		if (edgeLabels == null || edgeLabels.length == 0) {
-			return true;
-		}
-		try {
-			if (edge.label() != null && !edge.label().isEmpty()) {
-				for (final String label : edgeLabels) {
-					if (edge.label().equals(label)) {
-						return true;
-					}
-				}
+	/** Forgets the folder of a directory (and its sub folders) when deleted. */
+	private void forgetDirectory(final NodeId folderId) {
+		synchronized (directoryLock) {
+			final DirectoryNode directory = directoryNodes.remove(folderId);
+			if (directory == null) {
+				return;
 			}
-			return false;
-		} catch (final Exception e) {
-			logger.error("Error checking edge labels", e);
-			return false;
+			directory.registry.remove(directory.key);
+			final String prefix = directory.key + DIRECTORY_SPLIT_SIMBOL;
+			directory.registry.keySet().removeIf(k -> k.startsWith(prefix));
+			directoryNodes.values().removeIf(d -> d.registry == directory.registry
+					&& !d.registry.containsKey(d.key));
 		}
+	}
+
+	private NodeId commandNodeId(final NodeId elementId, final String suffix) {
+		return waldotNamespace.generateNodeId(
+				elementId.getIdentifier().toString() + suffix);
 	}
 
 	@Override
@@ -704,53 +921,63 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 
 	@Override
 	public WaldotVertex getEdgeInVertex(final WaldotEdge edge) {
-		final QualifiedProperty<NodeId> target = new QualifiedProperty<NodeId>(
-				waldotNamespace.getNamespaceUri(), TARGET_NODE,
-				referenceNodes().targetNodeTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, NodeId.class);
-		final NodeId nodeId = edge.getProperty(target).get();
-		return (AbstractOpcVertex) waldotNamespace.getStorageManager()
-				.getNode(nodeId).get();
+		final EdgeEntry entry = edgeIndex.get(edge.getNodeId());
+		final NodeId nodeId = entry != null
+				? entry.target()
+				: edge.getProperty(shared().target()).orElse(null);
+		return endpoint(edge, nodeId, "target");
 	}
 
 	@Override
 	public WaldotVertex getEdgeOutVertex(final WaldotEdge edge) {
-		final QualifiedProperty<NodeId> source = new QualifiedProperty<NodeId>(
-				waldotNamespace.getNamespaceUri(), SOURCE_NODE,
-				referenceNodes().sourceNodeTypeNode.getNodeId().expanded(),
-				ValueRanks.Scalar, NodeId.class);
-		final NodeId nodeId = edge.getProperty(source).get();
-		return (AbstractOpcVertex) waldotNamespace.getStorageManager()
-				.getNode(nodeId).get();
+		final EdgeEntry entry = edgeIndex.get(edge.getNodeId());
+		final NodeId nodeId = entry != null
+				? entry.source()
+				: edge.getProperty(shared().source()).orElse(null);
+		return endpoint(edge, nodeId, "source");
+	}
+
+	private WaldotVertex endpoint(final WaldotEdge edge, final NodeId nodeId,
+			final String role) {
+		final WaldotVertex vertex = nodeId == null ? null : vertexById(nodeId);
+		if (vertex == null) {
+			throw new IllegalStateException("The " + role + " vertex "
+					+ nodeId + " of edge " + edge.getNodeId()
+					+ " does not exist");
+		}
+		return vertex;
 	}
 
 	@Override
 	public Map<NodeId, WaldotEdge> getEdges() {
-
-		return cachedEdges;
+		return Collections.unmodifiableMap(cachedEdges);
 	}
 
 	@Override
-	public java.util.Collection<WaldotEdge> getEdges(
-			final WaldotVertex opcVertex, final Direction direction,
-			final String[] edgeLabels) {
-		final java.util.List<WaldotEdge> result = new java.util.ArrayList<>();
-		for (final WaldotEdge e : getEdges().values()) {
-			if (edgeLabelsIsValid(edgeLabels, e)) {
-				final WaldotVertex inVertex = getEdgeInVertex(e);
-				final WaldotVertex outVertex = getEdgeOutVertex(e);
-				if ((direction == Direction.OUT || direction == Direction.BOTH)
-						&& outVertex.getNodeId()
-								.equals(opcVertex.getNodeId())) {
-					result.add(e);
-				}
-				if ((direction == Direction.IN || direction == Direction.BOTH)
-						&& inVertex.getNodeId().equals(opcVertex.getNodeId())) {
-					result.add(e);
-				}
-			}
+	public Collection<WaldotEdge> getEdges(final WaldotVertex opcVertex,
+			final Direction direction, final String[] edgeLabels) {
+		final List<WaldotEdge> result = new ArrayList<>();
+		final NodeId id = opcVertex.getNodeId();
+		if (direction == Direction.OUT || direction == Direction.BOTH) {
+			collectEdges(outEdges.get(id), edgeLabels, result);
+		}
+		if (direction == Direction.IN || direction == Direction.BOTH) {
+			collectEdges(inEdges.get(id), edgeLabels, result);
 		}
 		return result;
+	}
+
+	private void collectEdges(
+			final ConcurrentSkipListMap<Long, EdgeEntry> entries,
+			final String[] edgeLabels, final List<WaldotEdge> result) {
+		if (entries == null) {
+			return;
+		}
+		for (final EdgeEntry entry : entries.values()) {
+			if (labelMatches(entry, edgeLabels)) {
+				result.add(entry.edge());
+			}
+		}
 	}
 
 	public int getLastEventId() {
@@ -758,24 +985,13 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	}
 
 	private NodeId getOrCreateReferenceType(final String type) {
-		/*
-		 * for (final Tree<org.eclipse.milo.opcua.sdk.core.typetree.ReferenceType> r :
-		 * waldotNamespace.getReferenceTypes() .getRoot().getChildren()) { if
-		 * (r.getValue().getBrowseName() != null &&
-		 * r.getValue().getBrowseName().getName().equals(type)) { return
-		 * r.getValue().getNodeId(); } }
-		 */
-		if (referenceCache.containsKey(type)) {
-			return referenceCache.get(type);
-		} else {
-			final NodeId referenceTypeNode = MiloSingleServerBaseReferenceNodeBuilder
-					.generateReferenceTypeNode(type, "is a " + type + " of ",
-							type + " reference type",
-							NodeIds.NonHierarchicalReferences, false, false,
-							waldotNamespace);
-			referenceCache.put(type, referenceTypeNode);
-			return referenceTypeNode;
-		}
+		// atomic: two threads asking for the same new type create one node
+		return referenceCache.computeIfAbsent(type,
+				t -> MiloSingleServerBaseReferenceNodeBuilder
+						.generateReferenceTypeNode(t, "is a " + t + " of ",
+								t + " reference type",
+								NodeIds.NonHierarchicalReferences, false, false,
+								waldotNamespace));
 	}
 
 	private NodeId getParameterNodeId(final String key) {
@@ -789,15 +1005,18 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getProperties(
 			final WaldotEdge opcEdge) {
 		final List<WaldotProperty<DATA_TYPE>> result = new ArrayList<>();
-		for (final Reference p : opcEdge.getReferences()) {
-			if (p.isForward() && p.getReferenceTypeId()
-					.equals(referenceNodes().hasGremlinPropertyReferenceType)) {
-				result.add((WaldotProperty<DATA_TYPE>) waldotNamespace
-						.getStorageManager()
-						.getNode(p.getTargetNodeId()
-								.toNodeId(waldotNamespace.getNamespaceTable())
-								.get())
-						.get());
+		final PropertyBag<OpcProperty<?>> bag = edgeProperties
+				.get(opcEdge.getNodeId());
+		if (bag != null) {
+			for (final OpcProperty<?> p : bag.snapshot().values()) {
+				result.add((WaldotProperty<DATA_TYPE>) p);
+			}
+			return result;
+		}
+		// edge not created by this strategy: tolerant scan of the references
+		for (final UaNode node : linkedPropertyNodes(opcEdge.getReferences())) {
+			if (node instanceof WaldotProperty) {
+				result.add((WaldotProperty<DATA_TYPE>) node);
 			}
 		}
 		return result;
@@ -806,12 +1025,17 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public <DATA_TYPE> WaldotEdge getPropertyReference(
 			final WaldotProperty<DATA_TYPE> property) {
+		// the property node knows its edge: no need to scan the references
+		final Object owner = property.element();
+		if (owner instanceof WaldotEdge) {
+			return (WaldotEdge) owner;
+		}
 		for (final Reference r : property.getReferences()) {
 			if (r.getReferenceTypeId().equals(NodeIds.HasComponent)
 					&& r.isInverse()) {
-				final NodeId nodeId = r.getSourceNodeId();
-				return (OpcEdge) waldotNamespace.getStorageManager()
-						.get(nodeId);
+				final UaNode node = waldotNamespace.getStorageManager()
+						.get(r.getSourceNodeId());
+				return node instanceof WaldotEdge ? (WaldotEdge) node : null;
 			}
 		}
 		return null;
@@ -826,19 +1050,22 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public <DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(
 			final WaldotVertex opcVertex) {
-		final Map<String, WaldotVertexProperty<DATA_TYPE>> result = new HashMap<>();
-		for (final Reference p : opcVertex.getReferences()) {
-			if (p.isForward() && p.getReferenceTypeId()
-					.equals(referenceNodes().hasGremlinPropertyReferenceType)) {
-				final UaNode node = waldotNamespace.getStorageManager()
-						.getNode(p.getTargetNodeId()
-								.toNodeId(waldotNamespace.getNamespaceTable())
-								.get())
-						.get();
-				if (node instanceof WaldotVertexProperty) {
-					result.put(node.getBrowseName().getName(),
-							(WaldotVertexProperty<DATA_TYPE>) node);
-				}
+		final Map<String, WaldotVertexProperty<DATA_TYPE>> result = new LinkedHashMap<>();
+		final PropertyBag<OpcVertexProperty<?>> bag = vertexProperties
+				.get(opcVertex.getNodeId());
+		if (bag != null) {
+			for (final Map.Entry<String, OpcVertexProperty<?>> e : bag
+					.snapshot().entrySet()) {
+				result.put(e.getKey(),
+						(WaldotVertexProperty<DATA_TYPE>) e.getValue());
+			}
+			return result;
+		}
+		// vertex not created by this strategy: tolerant scan of the references
+		for (final UaNode node : linkedPropertyNodes(opcVertex.getReferences())) {
+			if (node instanceof WaldotVertexProperty) {
+				result.put(node.getBrowseName().getName(),
+						(WaldotVertexProperty<DATA_TYPE>) node);
 			}
 		}
 		return result;
@@ -847,12 +1074,19 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public <DATA_TYPE> WaldotVertex getVertexPropertyReference(
 			final WaldotVertexProperty<DATA_TYPE> opcVertexProperty) {
+		// the property node knows its vertex: no need to scan the references
+		final Object owner = opcVertexProperty.element();
+		if (owner instanceof WaldotVertex) {
+			return (WaldotVertex) owner;
+		}
 		for (final Reference r : opcVertexProperty.getReferences()) {
 			if (r.getReferenceTypeId().equals(NodeIds.HasComponent)
 					&& r.isInverse()) {
-				final NodeId nodeId = r.getSourceNodeId();
-				return (WaldotVertex) waldotNamespace.getStorageManager()
-						.get(nodeId);
+				final UaNode node = waldotNamespace.getStorageManager()
+						.get(r.getSourceNodeId());
+				return node instanceof WaldotVertex
+						? (WaldotVertex) node
+						: null;
 			}
 		}
 		return null;
@@ -885,31 +1119,40 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 
 	@Override
 	public Map<NodeId, WaldotVertex> getVertices() {
-
-		return cachedVertices;
+		return Collections.unmodifiableMap(cachedVertices);
 	}
 
 	@Override
-	public java.util.Collection<WaldotVertex> getVertices(
-			final WaldotVertex opcVertex, final Direction direction,
-			final String[] edgeLabels) {
-		final java.util.List<WaldotVertex> result = new java.util.ArrayList<>();
-		for (final WaldotEdge e : getEdges().values()) {
-			if (edgeLabelsIsValid(edgeLabels, e)) {
-				final WaldotVertex inVertex = getEdgeInVertex(e);
-				final WaldotVertex outVertex = getEdgeOutVertex(e);
-				if ((direction == Direction.OUT || direction == Direction.BOTH)
-						&& outVertex.getNodeId()
-								.equals(opcVertex.getNodeId())) {
-					result.add(inVertex);
-				}
-				if ((direction == Direction.IN || direction == Direction.BOTH)
-						&& inVertex.getNodeId().equals(opcVertex.getNodeId())) {
-					result.add(outVertex);
+	public Collection<WaldotVertex> getVertices(final WaldotVertex opcVertex,
+			final Direction direction, final String[] edgeLabels) {
+		final List<WaldotVertex> result = new ArrayList<>();
+		final NodeId id = opcVertex.getNodeId();
+		if (direction == Direction.OUT || direction == Direction.BOTH) {
+			collectVertices(outEdges.get(id), edgeLabels, result, true);
+		}
+		if (direction == Direction.IN || direction == Direction.BOTH) {
+			collectVertices(inEdges.get(id), edgeLabels, result, false);
+		}
+		return result;
+	}
+
+	private void collectVertices(
+			final ConcurrentSkipListMap<Long, EdgeEntry> entries,
+			final String[] edgeLabels, final List<WaldotVertex> result,
+			final boolean outgoing) {
+		if (entries == null) {
+			return;
+		}
+		for (final EdgeEntry entry : entries.values()) {
+			if (labelMatches(entry, edgeLabels)) {
+				// tolerant lookup: a vertex that disappeared is skipped
+				final WaldotVertex vertex = vertexById(
+						outgoing ? entry.target() : entry.source());
+				if (vertex != null) {
+					result.add(vertex);
 				}
 			}
 		}
-		return result;
 	}
 
 	@Override
@@ -920,6 +1163,9 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public WaldotNamespace initialize(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
+		this.sharedProperties = null;
+		this.cachedReferenceNodes = null;
+		closed.set(false);
 		MiloSingleServerBaseReferenceNodeBuilder.generateRefereceNodes(this);
 		waldotNamespace.getOpcuaServer().updateReferenceTypeTree();
 		rootNode = new UaFolderNode(waldotNamespace.getOpcUaNodeContext(),
@@ -965,46 +1211,108 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		return waldotNamespace;
 	}
 
+	private boolean labelMatches(final EdgeEntry entry,
+			final String[] edgeLabels) {
+		if (edgeLabels == null || edgeLabels.length == 0) {
+			return true;
+		}
+		final String label = entry.label();
+		if (label == null || label.isEmpty()) {
+			return false;
+		}
+		for (final String wanted : edgeLabels) {
+			if (label.equals(wanted)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Gremlin property nodes referenced by an element, found scanning its
+	 * references. Missing targets are skipped. Used only for elements that are
+	 * not in the property indexes.
+	 */
+	private List<UaNode> linkedPropertyNodes(final List<Reference> references) {
+		final List<UaNode> result = new ArrayList<>();
+		for (final Reference p : new ArrayList<>(references)) {
+			if (p.isForward() && p.getReferenceTypeId()
+					.equals(referenceNodes().hasGremlinPropertyReferenceType)) {
+				p.getTargetNodeId().toNodeId(waldotNamespace.getNamespaceTable())
+						.flatMap(id -> waldotNamespace.getStorageManager()
+								.getNode(id))
+						.ifPresent(result::add);
+			}
+		}
+		return result;
+	}
+
 	private void linkCommandDirectoryStructure(AbstractOpcCommand command) {
-		final Map<String, UaFolderNode> commandDirectories = folderManager
-				.getCommandDirectories();
-		if (!commandDirectories.containsKey(command.getDirectory())) {
-			final String[] components = command.getDirectory()
-					.split(DIRECTORY_SPLIT_SIMBOL);
-			String actual = null;
-			String last = actual;
-			for (int counter = 0; counter < components.length; counter++) {
-				actual = (actual == null
-						? ""
-						: (actual + DIRECTORY_SPLIT_SIMBOL))
-						+ components[counter].trim();
-				if (!commandDirectories.containsKey(actual)) {
-					commandDirectories.put(actual, new UaFolderNode(
+		linkToDirectory(command.getDirectory(), command, interfaceRootNode,
+				folderManager.getCommandDirectories(),
+				COMMAND_DIRECTORY_NODEID_PREFIX, true);
+	}
+
+	/**
+	 * Links an element under the folder tree described by {@code directory}
+	 * (components separated by {@code /}), creating the missing folders. Empty
+	 * components are ignored; without directory the element is linked directly
+	 * under {@code rootFolder}. The folder tree and the children counters are
+	 * guarded by {@link #directoryLock}.
+	 */
+	private void linkToDirectory(final String directory, final UaNode element,
+			final UaFolderNode rootFolder,
+			final Map<String, UaFolderNode> registry, final String prefix,
+			final boolean component) {
+		final List<String> components = new ArrayList<>();
+		if (directory != null) {
+			for (final String c : directory.split(DIRECTORY_SPLIT_SIMBOL)) {
+				final String trimmed = c.trim();
+				if (!trimmed.isEmpty()) {
+					components.add(trimmed);
+				}
+			}
+		}
+		synchronized (directoryLock) {
+			UaFolderNode parentFolder = rootFolder;
+			DirectoryNode parentDirectory = null;
+			String key = null;
+			for (final String name : components) {
+				key = key == null ? name : key + DIRECTORY_SPLIT_SIMBOL + name;
+				UaFolderNode folder = registry.get(key);
+				DirectoryNode current = folder == null
+						? null
+						: directoryNodes.get(folder.getNodeId());
+				if (folder == null) {
+					folder = new UaFolderNode(
 							waldotNamespace.getOpcUaNodeContext(),
-							waldotNamespace.generateNodeId(actual),
-							waldotNamespace.generateQualifiedName(
-									components[counter].trim()),
-							LocalizedText.english(components[counter].trim())));
-					waldotNamespace.getStorageManager()
-							.addNode(commandDirectories.get(actual));
-					final UaFolderNode uaFolderNode = commandDirectories
-							.get(actual);
-					if (counter == 0) {
-						interfaceRootNode.addOrganizes(uaFolderNode);
-					} else {
-						commandDirectories.get(last).addOrganizes(uaFolderNode);
+							waldotNamespace.generateNodeId(prefix + ":" + key),
+							waldotNamespace.generateQualifiedName(name),
+							LocalizedText.english(name));
+					waldotNamespace.getStorageManager().addNode(folder);
+					parentFolder.addOrganizes(folder);
+					current = new DirectoryNode(key, folder, parentFolder,
+							parentDirectory, registry);
+					registry.put(key, folder);
+					directoryNodes.put(folder.getNodeId(), current);
+					if (parentDirectory != null) {
+						parentDirectory.children++;
 					}
 				}
-				if (counter == components.length - 1) {
-					commandDirectories.get(actual).addComponent(command);
-				}
-				last = actual;
+				parentFolder = folder;
+				parentDirectory = current;
 			}
-		} else {
-			commandDirectories.get(command.getDirectory())
-					.addComponent(command);
+			if (component) {
+				parentFolder.addComponent(element);
+			} else {
+				parentFolder.addOrganizes(element);
+			}
+			if (parentDirectory != null) {
+				parentDirectory.children++;
+			}
+			directoryLinks.put(element.getNodeId(), new DirectoryLink(
+					parentFolder, parentDirectory, component));
 		}
-
 	}
 
 	@Override
@@ -1030,36 +1338,41 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 
 	@Override
 	public void namespaceParametersPut(final String key, final Object value) {
-		if (waldotNamespace.hasNodeId(getParameterNodeId(key))) {
-			final UaVariableNode property = (UaVariableNode) waldotNamespace
-					.getStorageManager().getNode(getParameterNodeId(key)).get();
-			property.setValue(new DataValue(new Variant(value)));
-		} else {
-			final UaVariableNode property = new UaVariableNode(
-					waldotNamespace.getOpcUaNodeContext(),
-					getParameterNodeId(key),
-					waldotNamespace.generateQualifiedName(key),
-					LocalizedText.english(key),
-					LocalizedText.english("variable " + key), UInteger.MIN,
-					UInteger.MIN);
-			waldotNamespace.getStorageManager().addNode(property);
-			folderManager.getVariablesFolderNode().addOrganizes(property);
-			property.setValue(new DataValue(new Variant(value)));
+		synchronized (parametersLock) {
+			if (waldotNamespace.hasNodeId(getParameterNodeId(key))) {
+				final UaVariableNode property = (UaVariableNode) waldotNamespace
+						.getStorageManager().getNode(getParameterNodeId(key))
+						.get();
+				property.setValue(new DataValue(new Variant(value)));
+			} else {
+				final UaVariableNode property = new UaVariableNode(
+						waldotNamespace.getOpcUaNodeContext(),
+						getParameterNodeId(key),
+						waldotNamespace.generateQualifiedName(key),
+						LocalizedText.english(key),
+						LocalizedText.english("variable " + key),
+						UInteger.MIN, UInteger.MIN);
+				waldotNamespace.getStorageManager().addNode(property);
+				folderManager.getVariablesFolderNode().addOrganizes(property);
+				property.setValue(new DataValue(new Variant(value)));
+			}
 		}
-
 	}
 
 	@Override
 	public void namespaceParametersRemove(final String key) {
-		if (waldotNamespace.hasNodeId(getParameterNodeId(key))) {
-			final UaVariableNode property = (UaVariableNode) waldotNamespace
-					.getStorageManager().getNode(getParameterNodeId(key)).get();
-			folderManager.getVariablesFolderNode().removeOrganizes(property);
-			waldotNamespace.getStorageManager()
-					.removeNode(property.getNodeId());
-			property.delete();
+		synchronized (parametersLock) {
+			if (waldotNamespace.hasNodeId(getParameterNodeId(key))) {
+				final UaVariableNode property = (UaVariableNode) waldotNamespace
+						.getStorageManager().getNode(getParameterNodeId(key))
+						.get();
+				folderManager.getVariablesFolderNode()
+						.removeOrganizes(property);
+				waldotNamespace.getStorageManager()
+						.removeNode(property.getNodeId());
+				property.delete();
+			}
 		}
-
 	}
 
 	@Override
@@ -1070,11 +1383,16 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		return opcGraphVariables;
 	}
 
+	private DataValue newDataValue(final Object value) {
+		return DataValue.newValue().setStatus(StatusCode.GOOD)
+				.setSourceTime(DateTime.now()).setValue(new Variant(value))
+				.build();
+	}
+
 	private void popolateEdgePropertiesFromPropertyKeyValues(
 			final Object[] propertyKeyValues, final OpcEdge edge) {
 		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
-			if (propertyKeyValues[i] instanceof String
-					&& propertyKeyValues[i] != null) {
+			if (propertyKeyValues[i] instanceof String) {
 				createOrUpdateWaldotEdgeProperty(edge,
 						(String) propertyKeyValues[i],
 						propertyKeyValues[i + 1]);
@@ -1085,8 +1403,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	public void popolateVertexPropertiesFromPropertyKeyValues(
 			final Object[] propertyKeyValues, final AbstractOpcVertex vertex) {
 		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
-			if (propertyKeyValues[i] instanceof String
-					&& propertyKeyValues[i] != null) {
+			if (propertyKeyValues[i] instanceof String) {
 				createOrUpdateWaldotVertexProperty(vertex,
 						(String) propertyKeyValues[i],
 						propertyKeyValues[i + 1]);
@@ -1094,7 +1411,26 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		}
 	}
 
-	private volatile MiloSingleServerBaseReferenceNodeBuilder.ReferenceNodes cachedReferenceNodes;
+	/**
+	 * Makes a fully built edge visible: adjacency indexes first, then the
+	 * public cache.
+	 */
+	private void publishEdge(final EdgeEntry entry) {
+		outEdges.compute(entry.source(),
+				(k, m) -> withEntry(m, entry));
+		inEdges.compute(entry.target(), (k, m) -> withEntry(m, entry));
+		cachedEdges.put(entry.nodeId(), entry.edge());
+	}
+
+	private ConcurrentSkipListMap<Long, EdgeEntry> withEntry(
+			final ConcurrentSkipListMap<Long, EdgeEntry> map,
+			final EdgeEntry entry) {
+		final ConcurrentSkipListMap<Long, EdgeEntry> result = map == null
+				? new ConcurrentSkipListMap<>()
+				: map;
+		result.put(entry.sequence(), entry);
+		return result;
+	}
 
 	private MiloSingleServerBaseReferenceNodeBuilder.ReferenceNodes referenceNodes() {
 		// hot path: the registry is synchronized, so the snapshot of this
@@ -1119,38 +1455,179 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 
 	@Override
 	public void removeCommand(final WaldotCommand command) {
-		interfaceRootNode.removeComponent((AbstractOpcCommand) command);
+		if (!unlinkFromDirectory(command.getNodeId(),
+				(AbstractOpcCommand) command)) {
+			interfaceRootNode.removeComponent((AbstractOpcCommand) command);
+		}
 	}
 
 	@Override
 	public void removeEdge(final NodeId nodeId) {
+		removeEdgeInternal(nodeId, true);
+	}
+
+	/**
+	 * Removes an edge completely. Idempotent and tolerant of half built edges
+	 * (it is also the rollback of {@link #addEdge}).
+	 */
+	private void removeEdgeInternal(final NodeId nodeId,
+			final boolean notifyPlugins) {
+		final EdgeEntry entry = edgeIndex.get(nodeId);
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId)
-				.get();
-		if (!(node instanceof WaldotEdge)) {
+				.orElse(null);
+		if (entry == null && node == null) {
+			logger.debug("Edge {} already removed", nodeId);
+			return;
+		}
+		if (entry == null && !(node instanceof WaldotEdge)) {
 			logger.warn("NodeId {} is not an edge", nodeId);
 			return;
-		} else {
-			final QualifiedProperty<String> typeProperty = new QualifiedProperty<String>(
-					waldotNamespace.getNamespaceUri(), TYPE_FIELD,
-					referenceNodes().labelEdgeTypeNode.getNodeId().expanded(),
-					ValueRanks.Scalar, String.class);
-			final WaldotEdge edge = (WaldotEdge) node;
-			final String type = edge.getProperty(typeProperty).get();
+		}
+		final WaldotEdge edge = entry != null
+				? entry.edge()
+				: (WaldotEdge) node;
+		// 1. unpublish: traversals no longer see the edge. The edgeIndex
+		// stays until the end, the monitors still need inVertex() / outVertex()
+		cachedEdges.remove(nodeId);
+		if (entry != null) {
+			outEdges.computeIfPresent(entry.source(),
+					(k, m) -> withoutEntry(m, entry));
+			inEdges.computeIfPresent(entry.target(),
+					(k, m) -> withoutEntry(m, entry));
+		}
+		// 2. monitor, properties and references registered on the edge
+		try {
 			edge.removeRelatedOpcUaNodes();
+		} catch (final Throwable e) {
+			logger.warn("Error removing the related nodes of edge {}", nodeId,
+					e);
+		}
+		if (entry != null) {
+			removeEdgeReferences(entry);
+		}
+		if (notifyPlugins) {
+			final String type = entry != null ? entry.type() : readType(edge);
 			for (final PluginListener p : waldotNamespace.getPlugins()) {
-				if (p.containsEdgeType(type)) {
+				if (type != null && p.containsEdgeType(type)) {
 					p.notifyRemoveEdge(edge);
 				}
 			}
 		}
-		waldotNamespace.getStorageManager().removeNode(nodeId);
-		cachedEdges.remove(nodeId);
-		node.delete();
+		// 3. nodes owned by the edge
+		removePropertyNodes(edgeProperties.remove(nodeId), node);
+		removeNodeQuietly(commandNodeId(nodeId, DELETE_COMMAND_SUFFIX));
+		removeNodeQuietly(commandNodeId(nodeId, PROPERTY_COMMAND_SUFFIX));
+		unlinkFromDirectory(nodeId, node);
+		edgeIndex.remove(nodeId);
+		deleteQuietly(node);
 	}
 
-	// TODO tutti metodi che rimuovono nodi, riferimenti, proprietà, ecc.
-	// dovrebbero essere implementati in modo da rimuovere anche i riferimenti e
-	// le proprietà collegate
+	/** Removes from the end vertices the references created for the edge. */
+	private void removeEdgeReferences(final EdgeEntry entry) {
+		final WaldotVertex source = vertexById(entry.source());
+		final WaldotVertex target = vertexById(entry.target());
+		final NodeId descriptionType = referenceNodes().hasReferenceDescriptionReferenceType;
+		if (source != null) {
+			removeReferenceQuietly(source, new Reference(entry.source(),
+					descriptionType, entry.nodeId().expanded(), true));
+			final NodeId mainType = referenceCache.get(entry.type());
+			if (mainType != null && !hasOtherEdgeSharingReference(entry)) {
+				removeReferenceQuietly(source, new Reference(entry.source(),
+						mainType, entry.target().expanded(), true));
+			}
+		}
+		if (target != null) {
+			removeReferenceQuietly(target, new Reference(entry.target(),
+					descriptionType, entry.nodeId().expanded(), true));
+		}
+	}
+
+	/**
+	 * Edges with the same source, target and type share the main reference
+	 * {@code source -type-> target}: it must stay while one of them is left.
+	 */
+	private boolean hasOtherEdgeSharingReference(final EdgeEntry entry) {
+		final ConcurrentSkipListMap<Long, EdgeEntry> siblings = outEdges
+				.get(entry.source());
+		if (siblings == null) {
+			return false;
+		}
+		for (final EdgeEntry other : siblings.values()) {
+			if (other.sequence() != entry.sequence()
+					&& other.target().equals(entry.target())
+					&& other.type().equals(entry.type())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void removeReferenceQuietly(final WaldotVertex vertex,
+			final Reference reference) {
+		try {
+			vertex.removeReference(reference);
+		} catch (final Throwable e) {
+			logger.debug("Error removing reference {}", reference, e);
+		}
+	}
+
+	private ConcurrentSkipListMap<Long, EdgeEntry> withoutEntry(
+			final ConcurrentSkipListMap<Long, EdgeEntry> map,
+			final EdgeEntry entry) {
+		map.remove(entry.sequence());
+		return map.isEmpty() ? null : map;
+	}
+
+	private String readType(final WaldotEdge edge) {
+		try {
+			return edge.getProperty(shared().typeEdge()).orElse(null);
+		} catch (final Throwable e) {
+			return null;
+		}
+	}
+
+	/** Removes (storage and delete) a node by id, ignoring any error. */
+	private void removeNodeQuietly(final NodeId nodeId) {
+		try {
+			waldotNamespace.getStorageManager().removeNode(nodeId)
+					.ifPresent(n -> {
+						try {
+							n.delete();
+						} catch (final Throwable e) {
+							logger.debug("Error deleting node {}", nodeId, e);
+						}
+					});
+		} catch (final Throwable e) {
+			logger.debug("Error removing node {}", nodeId, e);
+		}
+	}
+
+	/**
+	 * Deletes the property nodes of an element: the ones of the index and any
+	 * other referenced by the owner node.
+	 */
+	private void removePropertyNodes(final PropertyBag<? extends UaNode> bag,
+			final UaNode owner) {
+		final Set<NodeId> done = new HashSet<>();
+		if (bag != null) {
+			for (final UaNode property : bag.drain()) {
+				done.add(property.getNodeId());
+				deleteQuietly(property);
+			}
+		}
+		if (owner != null) {
+			try {
+				for (final UaNode residual : linkedPropertyNodes(owner.getReferences())) {
+					if (done.add(residual.getNodeId())) {
+						deleteQuietly(residual);
+					}
+				}
+			} catch (final Throwable e) {
+				logger.debug("Error removing the residual properties of {}",
+						owner.getNodeId(), e);
+			}
+		}
+	}
 
 	@Override
 	public void removeReference(Reference reference) {
@@ -1160,24 +1637,67 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public void removeVertex(final NodeId nodeId) {
 		final UaNode node = waldotNamespace.getStorageManager().getNode(nodeId)
-				.get();
+				.orElse(null);
+		if (node == null) {
+			if (cachedVertices.remove(nodeId) != null) {
+				logger.debug("Vertex {} removed from cache only", nodeId);
+			}
+			return;
+		}
 		if (!(node instanceof WaldotVertex)) {
 			logger.warn("NodeId {} is not a vertex", nodeId);
 			return;
-		} else {
-			((WaldotVertex) node).notifyRemoveVertex();
-			((WaldotVertex) node).removeRelatedOpcUaNodes();
 		}
-		waldotNamespace.getStorageManager().removeNode(nodeId);
-		cachedVertices.remove(nodeId);
-		node.delete();
+		// cascade: the incident edges go first, while the vertex still exists
+		final Set<NodeId> incident = new HashSet<>();
+		for (final Map<NodeId, ConcurrentSkipListMap<Long, EdgeEntry>> adjacency : List
+				.of(outEdges, inEdges)) {
+			final ConcurrentSkipListMap<Long, EdgeEntry> entries = adjacency
+					.get(nodeId);
+			if (entries != null) {
+				for (final EdgeEntry entry : entries.values()) {
+					incident.add(entry.nodeId());
+				}
+			}
+		}
+		for (final NodeId edgeId : incident) {
+			try {
+				removeEdgeInternal(edgeId, true);
+			} catch (final RuntimeException e) {
+				logger.error("Error removing edge {} of vertex {}", edgeId,
+						nodeId, e);
+			}
+		}
+		((WaldotVertex) node).notifyRemoveVertex();
+		((WaldotVertex) node).removeRelatedOpcUaNodes();
+		discardVertexNodes(nodeId);
+		outEdges.remove(nodeId);
+		inEdges.remove(nodeId);
 		logger.info("Vertex with NodeId {} removed", nodeId);
 	}
 
 	@Override
 	public void removeVertexProperty(final NodeId nodeId) {
-		final java.util.Optional<UaNode> node = waldotNamespace
-				.getStorageManager().getNode(nodeId);
+		final Optional<UaNode> node = waldotNamespace.getStorageManager()
+				.getNode(nodeId);
+		// drop it from the index of its vertex
+		final java.util.function.Predicate<OpcVertexProperty<?>> sameNode = p -> p
+				.getNodeId().equals(nodeId);
+		if (node.isPresent() && node.get() instanceof WaldotVertexProperty) {
+			final Object owner = ((WaldotVertexProperty<?>) node.get())
+					.element();
+			if (owner instanceof WaldotVertex) {
+				final PropertyBag<OpcVertexProperty<?>> bag = vertexProperties
+						.get(((WaldotVertex) owner).getNodeId());
+				if (bag != null) {
+					bag.removeIf(sameNode);
+				}
+			} else {
+				vertexProperties.values().forEach(b -> b.removeIf(sameNode));
+			}
+		} else {
+			vertexProperties.values().forEach(b -> b.removeIf(sameNode));
+		}
 		if (node.isEmpty()) {
 			logger.debug("Vertex property with NodeId {} already removed",
 					nodeId);
@@ -1192,6 +1712,85 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		logger.info("resetNameSpace");
 		// TODO cancellare tutto il contenuto del namespace, compresi i folder
 
+	}
+
+	private SharedProperties shared() {
+		SharedProperties props = sharedProperties;
+		if (props == null) {
+			final String uri = waldotNamespace.getNamespaceUri();
+			final MiloSingleServerBaseReferenceNodeBuilder.ReferenceNodes nodes = referenceNodes();
+			props = new SharedProperties(
+					new QualifiedProperty<String>(uri, LABEL_FIELD,
+							nodes.labelEdgeTypeNode.getNodeId().expanded(),
+							ValueRanks.Scalar, String.class),
+					new QualifiedProperty<String>(uri, TYPE_FIELD,
+							nodes.typeEdgeTypeNode.getNodeId().expanded(),
+							ValueRanks.Scalar, String.class),
+					new QualifiedProperty<NodeId>(uri, SOURCE_NODE,
+							nodes.sourceNodeTypeNode.getNodeId().expanded(),
+							ValueRanks.Scalar, NodeId.class),
+					new QualifiedProperty<NodeId>(uri, TARGET_NODE,
+							nodes.targetNodeTypeNode.getNodeId().expanded(),
+							ValueRanks.Scalar, NodeId.class),
+					new QualifiedProperty<NodeId>(uri, REFERENCE_TYPE,
+							nodes.referenceTypeTypeNode.getNodeId().expanded(),
+							ValueRanks.Scalar, NodeId.class),
+					new QualifiedProperty<Boolean>(uri, IS_FORWARD,
+							nodes.isForwardTypeNode.getNodeId().expanded(),
+							ValueRanks.Scalar, Boolean.class),
+					new QualifiedProperty<String>(uri, LABEL_FIELD,
+							nodes.labelVertexTypeNode.getNodeId().expanded(),
+							ValueRanks.Scalar, String.class),
+					new QualifiedProperty<String>(uri, TYPE_FIELD,
+							nodes.vertexTypeNode.getNodeId().expanded(),
+							ValueRanks.Scalar, String.class));
+			sharedProperties = props;
+		}
+		return props;
+	}
+
+	/**
+	 * Unlinks an element from its folder and prunes the folders left empty.
+	 * 
+	 * @return true if the element was linked
+	 */
+	private boolean unlinkFromDirectory(final NodeId elementId,
+			final UaNode element) {
+		synchronized (directoryLock) {
+			final DirectoryLink link = directoryLinks.remove(elementId);
+			if (link == null) {
+				return false;
+			}
+			try {
+				if (element != null) {
+					if (link.component()) {
+						link.folder().removeComponent(element);
+					} else {
+						link.folder().removeOrganizes(element);
+					}
+				}
+			} catch (final Throwable e) {
+				logger.debug("Error unlinking {}", elementId, e);
+			}
+			DirectoryNode directory = link.directory();
+			while (directory != null) {
+				directory.children--;
+				if (directory.children > 0) {
+					break;
+				}
+				directory.registry.remove(directory.key);
+				directoryNodes.remove(directory.folder.getNodeId());
+				try {
+					directory.parentFolder.removeOrganizes(directory.folder);
+				} catch (final Throwable e) {
+					logger.debug("Error unlinking folder {}", directory.key,
+							e);
+				}
+				deleteQuietly(directory.folder);
+				directory = directory.parentDirectory;
+			}
+			return true;
+		}
 	}
 
 	@Override
@@ -1218,6 +1817,16 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		} catch (final Throwable e) {
 			logger.error("Error creating EventNode: {}", e.getMessage(), e);
 		}
+	}
+
+	/** Vertex by id: index first, then the storage (plugin vertices). */
+	private WaldotVertex vertexById(final NodeId nodeId) {
+		final WaldotVertex cached = cachedVertices.get(nodeId);
+		if (cached != null) {
+			return cached;
+		}
+		final UaNode node = waldotNamespace.getStorageManager().get(nodeId);
+		return node instanceof WaldotVertex ? (WaldotVertex) node : null;
 	}
 
 }

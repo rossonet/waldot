@@ -686,10 +686,12 @@ public abstract class AbstractWaldotRunner
 
 	/**
 	 * Creates the OPC UA / TinkerPop mapping strategy (default:
-	 * {@link MiloSingleServerBaseStrategy}).
+	 * {@link MiloSingleServerBaseStrategy}; the system property
+	 * {@code waldot.milo.strategy=optimized} selects the optimized one).
 	 */
 	protected MiloStrategy createMiloStrategy() {
-		return new MiloSingleServerBaseStrategy();
+		return net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory
+				.createMiloStrategy();
 	}
 
 	public String getAboutCommandDescription() {

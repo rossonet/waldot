@@ -24,12 +24,12 @@ import net.rossonet.waldot.opc.AbstractOpcCommand.VariableNodeTypes;
 public class MiloSingleServerBaseFolderManager {
 	private AbstractOpcCommand addEdgeCommand;
 	private AbstractOpcCommand addVertexCommand;
-	private final Map<String, UaFolderNode> commandDirectoriesAndObjects = new HashMap<>();
+	private final Map<String, UaFolderNode> commandDirectoriesAndObjects = new java.util.concurrent.ConcurrentHashMap<>();
 	private UaFolderNode edgesFolderNode;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private final MiloStrategy miloSingleServerBaseV0Strategy;
 	private UaFolderNode variablesFolderNode;
-	private final Map<String, UaFolderNode> vertexDirectories = new HashMap<>();
+	private final Map<String, UaFolderNode> vertexDirectories = new java.util.concurrent.ConcurrentHashMap<>();
 	private UaFolderNode verticesFolderNode;
 
 	public MiloSingleServerBaseFolderManager(

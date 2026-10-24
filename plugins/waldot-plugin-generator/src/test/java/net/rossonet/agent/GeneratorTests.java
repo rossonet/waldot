@@ -197,23 +197,34 @@ public class GeneratorTests {
 			System.out.println(k + ": " + v.property(k));
 		}
 		Thread.sleep(1);
-		long value = 0;
-		for (int i = 1; i < 20; i++) {
-			if (value == 0) {
-				value = waldotTestClientHandler.readIntOpcUaVertexValue("dectest", DataGeneratorVertex.VALUE_KEY);
-				System.out.println("start from " + value);
-				System.out.flush();
-			}
+		long value = waitForValueChange("dectest", -1);
+		for (int i = 1; i < 6; i++) {
 			assert waldotTestClientHandler.checkOpcUaVertexValueEquals("dectest", DataGeneratorVertex.VALUE_KEY, value);
 			assert waldotTestClientHandler.checkVertexValueEquals("dectest", DataGeneratorVertex.VALUE_KEY, value);
 			System.out.println("ok: " + value);
-			System.out.flush();
-			value--;
-			if (value < 1) {
-				value = 100;
+			long expected = value - 1;
+			if (expected < 1) {
+				expected = 100;
 			}
-			Thread.sleep(1);
+			value = waitForValueChange("dectest", value);
+			assert value == expected : "atteso " + expected + " ma letto " + value;
 		}
+	}
+
+	/**
+	 * Legge il valore del generatore finche' non diventa diverso da quello
+	 * indicato (il generatore aggiorna ogni DELAY ms). Fallisce dopo 5 secondi.
+	 */
+	private long waitForValueChange(String vertexId, long previous) throws Exception {
+		final long deadline = System.currentTimeMillis() + 5000;
+		while (System.currentTimeMillis() < deadline) {
+			final long current = waldotTestClientHandler.readIntOpcUaVertexValue(vertexId, DataGeneratorVertex.VALUE_KEY);
+			if (current != previous && current != 0) {
+				return current;
+			}
+			Thread.sleep(50);
+		}
+		throw new AssertionError("il valore di " + vertexId + " non e' cambiato entro 5 secondi");
 	}
 
 	/**
@@ -235,19 +246,17 @@ public class GeneratorTests {
 			System.out.println(k + ": " + v.property(k));
 		}
 		Thread.sleep(1);
-		long value = 0;
-		for (int i = 1; i < 20; i++) {
-			if (value == 0) {
-				value = waldotTestClientHandler.readIntOpcUaVertexValue("inctest", DataGeneratorVertex.VALUE_KEY);
-				System.out.println("start from " + value);
-				System.out.flush();
-			}
+		long value = waitForValueChange("inctest", -1);
+		for (int i = 1; i < 6; i++) {
 			assert waldotTestClientHandler.checkOpcUaVertexValueEquals("inctest", DataGeneratorVertex.VALUE_KEY, value);
 			assert waldotTestClientHandler.checkVertexValueEquals("inctest", DataGeneratorVertex.VALUE_KEY, value);
 			System.out.println("ok: " + value);
-			System.out.flush();
-			value++;
-			Thread.sleep(1);
+			long expected = value + 1;
+			if (expected > 100) {
+				expected = 1;
+			}
+			value = waitForValueChange("inctest", value);
+			assert value == expected : "atteso " + expected + " ma letto " + value;
 		}
 	}
 

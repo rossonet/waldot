@@ -36,6 +36,7 @@ import net.rossonet.waldot.api.configuration.OpcConfiguration;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.strategies.HistoryStrategy;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.auth.DefaultAnonymousValidator;
 import net.rossonet.waldot.auth.DefaultIdentityValidator;
 import net.rossonet.waldot.auth.DefaultX509IdentityValidator;
@@ -45,6 +46,7 @@ import net.rossonet.waldot.gremlin.opcgraph.strategies.boot.SingleFileBootstrapS
 import net.rossonet.waldot.gremlin.opcgraph.strategies.client.BaseClientManagementStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.console.BaseConsoleStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBaseStrategy;
+import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerOptimizedStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.namespaces.HomunculusNamespace;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
@@ -259,8 +261,31 @@ public final class OpcFactory {
 		return getOpcGraph();
 	}
 
+	/** System property that selects the Milo strategy: base (default) or optimized. */
+	public static final String MILO_STRATEGY_PROPERTY = "waldot.milo.strategy";
+
+	/**
+	 * Creates the Milo strategy selected by the system property
+	 * {@value #MILO_STRATEGY_PROPERTY} ("base" by default, or "optimized").
+	 */
+	public static MiloStrategy createMiloStrategy() {
+		final String selected = System.getProperty(MILO_STRATEGY_PROPERTY, "base").trim();
+		if ("optimized".equalsIgnoreCase(selected)) {
+			return new MiloSingleServerOptimizedStrategy();
+		}
+		if (!"base".equalsIgnoreCase(selected) && !selected.isEmpty()) {
+			logger.warn("Unknown Milo strategy '{}', using base", selected);
+		}
+		return new MiloSingleServerBaseStrategy();
+	}
+
 	public static WaldotGraph getOpcGraph(String bootStrapUrl, HistoryStrategy historyStrategy)
 			throws InterruptedException, ExecutionException {
+		return getOpcGraph(bootStrapUrl, historyStrategy, createMiloStrategy());
+	}
+
+	public static WaldotGraph getOpcGraph(String bootStrapUrl, HistoryStrategy historyStrategy,
+			MiloStrategy miloStrategy) throws InterruptedException, ExecutionException {
 		final WaldotConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
 		final OpcConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		final WaldotOpcUaServer waldot = new WaldotOpcUaServer(configuration, serverConfiguration,
@@ -278,7 +303,7 @@ public final class OpcFactory {
 				}
 			}
 		});
-		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, new MiloSingleServerBaseStrategy(),
+		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, miloStrategy,
 				historyStrategy, new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
 				new BaseClientManagementStrategy(), bootStrapUrl);
 		waldot.startup(namespace).get();
