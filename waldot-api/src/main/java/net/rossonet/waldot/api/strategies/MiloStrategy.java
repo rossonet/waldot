@@ -1,5 +1,6 @@
 package net.rossonet.waldot.api.strategies;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -211,7 +212,10 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @return Optional containing the ID value if found
 	 */
 	public static Optional<Object> getIdValue(final Object... keyValues) {
-		for (int i = 0; i < keyValues.length; i = i + 2) {
+		if (keyValues == null) {
+			return Optional.empty();
+		}
+		for (int i = 0; i + 1 < keyValues.length; i = i + 2) {
 			if (keyValues[i] == null) {
 				continue;
 			}
@@ -229,17 +233,21 @@ public interface MiloStrategy extends AutoCloseable {
 	 * 
 	 * @param propertyKeyValues array of key-value pairs
 	 * @param label the property label to find
-	 * @return the property value as String, or null if not found
+	 * @return the property value as String, or null if not found or the value is null
 	 */
 	public static String getKeyValuesProperty(final Object[] propertyKeyValues,
 			final String label) {
-		for (int i = 0; i < propertyKeyValues.length; i = i + 2) {
+		if (propertyKeyValues == null || label == null) {
+			return null;
+		}
+		for (int i = 0; i + 1 < propertyKeyValues.length; i = i + 2) {
 			if (propertyKeyValues[i] == null) {
 				continue;
 			}
 			final String name = propertyKeyValues[i].toString();
 			if (name != null && !name.isEmpty() && label.equals(name)) {
-				return propertyKeyValues[i + 1].toString();
+				final Object value = propertyKeyValues[i + 1];
+				return value == null ? null : value.toString();
 			}
 		}
 		return null;
@@ -441,9 +449,10 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @param opcVertex the vertex to query
 	 * @param direction the direction to traverse
 	 * @param edgeLabels optional edge label filter
-	 * @return map of NodeId to WaldotEdge
+	 * @return one entry per edge, in no particular order; for {@code BOTH}
+	 *         a self-loop is returned twice, as TinkerPop does
 	 */
-	Map<NodeId, WaldotEdge> getEdges(WaldotVertex opcVertex,
+	Collection<WaldotEdge> getEdges(WaldotVertex opcVertex,
 			Direction direction, String[] edgeLabels);
 
 	/**
@@ -506,9 +515,11 @@ public interface MiloStrategy extends AutoCloseable {
 	 * @param opcVertex the vertex to query
 	 * @param direction the direction to traverse
 	 * @param edgeLabels optional edge label filter
-	 * @return map of NodeId to WaldotVertex
+	 * @return one entry per traversed edge (a neighbor reached through
+	 *         several edges is repeated); for {@code BOTH} a self-loop
+	 *         yields the vertex twice, as TinkerPop does
 	 */
-	Map<NodeId, WaldotVertex> getVertices(WaldotVertex opcVertex,
+	Collection<WaldotVertex> getVertices(WaldotVertex opcVertex,
 			Direction direction, String[] edgeLabels);
 
 	/**

@@ -1,0 +1,29 @@
+description = "WaldOT shared runner (picocli options and server bootstrap)"
+group = 'net.rossonet.waldot'
+version = "${rootProject.version}"
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'eclipse'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_26
+    targetCompatibility = JavaVersion.VERSION_26
+}
+
+dependencies {
+    api project(':waldot-api')
+    api project(':waldot-deps')
+    api project(':waldot-namespace')
+    api group: 'info.picocli', name: 'picocli', version: '4.7.6'
+    implementation 'org.slf4j:jul-to-slf4j:2.0.17'
+}
+
+compileJava {
+    options.encoding = "UTF-8"
+}

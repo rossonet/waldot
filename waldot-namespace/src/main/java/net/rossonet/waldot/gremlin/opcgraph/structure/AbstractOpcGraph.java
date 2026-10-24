@@ -76,6 +76,12 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 		}
 
 		@Override
+		public boolean supportsMultiProperties() {
+			// one OPC UA node per vertex property key
+			return false;
+		}
+
+		@Override
 		public boolean supportsCustomIds() {
 			return false;
 		}

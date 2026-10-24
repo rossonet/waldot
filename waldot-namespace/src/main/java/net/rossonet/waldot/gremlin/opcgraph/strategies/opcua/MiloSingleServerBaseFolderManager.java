@@ -27,158 +27,240 @@ public class MiloSingleServerBaseFolderManager {
 	private final Map<String, UaFolderNode> commandDirectoriesAndObjects = new HashMap<>();
 	private UaFolderNode edgesFolderNode;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private final MiloSingleServerBaseStrategy miloSingleServerBaseV0Strategy;
+	private final MiloStrategy miloSingleServerBaseV0Strategy;
 	private UaFolderNode variablesFolderNode;
 	private final Map<String, UaFolderNode> vertexDirectories = new HashMap<>();
 	private UaFolderNode verticesFolderNode;
 
-	public MiloSingleServerBaseFolderManager(MiloSingleServerBaseStrategy miloSingleServerBaseV0Strategy) {
+	public MiloSingleServerBaseFolderManager(
+			MiloStrategy miloSingleServerBaseV0Strategy) {
 		this.miloSingleServerBaseV0Strategy = miloSingleServerBaseV0Strategy;
 	}
 
 	private UaFolderNode createEdgesFolder() {
 		final UaFolderNode edgeFolder = new UaFolderNode(
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace()
-						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
+						.getOpcUaNodeContext(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateNodeId(miloSingleServerBaseV0Strategy
+								.getRootFolderNode().getNodeId().getIdentifier()
 								.toString() + "/Edges"),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Edges"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateQualifiedName("Edges"),
 				LocalizedText.english("Edges"));
-		addEdgeCommand = new AbstractOpcCommand(miloSingleServerBaseV0Strategy.getWaldotNamespace().getGremlinGraph(),
+		addEdgeCommand = new AbstractOpcCommand(
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getGremlinGraph(),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace(),
-				miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier().toString()
-						+ "/Edges/add",
+				miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId()
+						.getIdentifier().toString() + "/Edges/add",
 				"add edge", "add edge to Gremlin graph", null,
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getConfiguration().getWaldotCommandWriteMask(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getConfiguration().getWaldotCommandUserWriteMask(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getConfiguration().getWaldotCommandExecutable(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getConfiguration()
-						.getWaldotCommandUserExecutable()) {
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getConfiguration().getWaldotCommandWriteMask(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getConfiguration().getWaldotCommandUserWriteMask(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getConfiguration().getWaldotCommandExecutable(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getConfiguration().getWaldotCommandUserExecutable()) {
 
 			@Override
-			public Object[] runCommand(InvocationContext invocationContext, String[] inputValues) {
+			public Object[] runCommand(InvocationContext invocationContext,
+					String[] inputValues) {
 				String output = "";
 				String error = "";
 				try {
 					final String type = inputValues[0];
 					final String sourceNode = inputValues[1];
-					final WaldotVertex sourceVertex = miloSingleServerBaseV0Strategy.getWaldotNamespace()
+					final WaldotVertex sourceVertex = miloSingleServerBaseV0Strategy
+							.getWaldotNamespace()
 							.getVertexNode(NodeId.parse(sourceNode));
 					final String destinationNode = inputValues[2];
-					final WaldotVertex destinationVertex = miloSingleServerBaseV0Strategy.getWaldotNamespace()
+					final WaldotVertex destinationVertex = miloSingleServerBaseV0Strategy
+							.getWaldotNamespace()
 							.getVertexNode(NodeId.parse(destinationNode));
-					final Object[] keyValues = inputValues.length > 2 && inputValues[3] != null
-							&& inputValues[3].contains(",") ? inputValues[3].split(",") : new String[0];
+					final Object[] keyValues = parseKeyValues(
+							inputValues.length > 3 ? inputValues[3] : null)
+									.toArray();
 					if (keyValues.length > 0) {
 						ElementHelper.legalPropertyKeyValueArray(keyValues);
 					}
-					final WaldotEdge edge = waldotNamespace.addEdge(sourceVertex, destinationVertex, type, keyValues);
+					final WaldotEdge edge = waldotNamespace.addEdge(
+							sourceVertex, destinationVertex, type, keyValues);
 					output = edge.toString();
 				} catch (final Exception e) {
 					logger.error("Error adding edge", e);
 					error = e.getMessage();
 				}
-				return new String[] { output, error };
+				return new String[]{output, error};
 			}
 		};
-		addEdgeCommand.addOutputArgument("output", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addEdgeCommand.addOutputArgument("output",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("command output"));
-		addEdgeCommand.addOutputArgument("error", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addEdgeCommand.addOutputArgument("error",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("command error"));
-		addEdgeCommand.addInputArgument("label", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addEdgeCommand.addInputArgument("label",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("edge type to add"));
-		addEdgeCommand.addInputArgument("source", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addEdgeCommand.addInputArgument("source",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("node id of source vertex"));
-		addEdgeCommand.addInputArgument("destination", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addEdgeCommand.addInputArgument("destination",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("node id of destination vertex"));
-		addEdgeCommand.addInputArgument("keyValues", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english("key values of edge to add, separated by comma"));
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(addEdgeCommand);
+		addEdgeCommand.addInputArgument("keyValues",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(
+						"key values of edge to add, separated by comma"));
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager()
+				.addNode(addEdgeCommand);
 		edgeFolder.addComponent(addEdgeCommand);
 		return edgeFolder;
 	}
 
+	/**
+	 * Checks whether a key is present in a flat key/value list. Only the key
+	 * positions (even indexes) are inspected, so values never match.
+	 */
+	static boolean containsKey(final List<String> keyValues, final String key) {
+		for (int i = 0; i < keyValues.size(); i += 2) {
+			if (key.equalsIgnoreCase(keyValues.get(i))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Parses a comma separated list of alternating keys and values.
+	 *
+	 * @throws IllegalArgumentException if the number of items is odd
+	 */
+	static List<String> parseKeyValues(final String text) {
+		final List<String> result = new ArrayList<>();
+		if (text == null || text.trim().isEmpty()) {
+			return result;
+		}
+		for (final String item : text.split(",")) {
+			result.add(item.trim());
+		}
+		if (result.size() % 2 != 0) {
+			throw new IllegalArgumentException(
+					"keyValues must contain an even number of comma separated items (key,value,...): '"
+							+ text + "'");
+		}
+		return result;
+	}
+
 	private UaFolderNode createVariablesFolder() {
-		return new UaFolderNode(miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
+		return new UaFolderNode(
 				miloSingleServerBaseV0Strategy.getWaldotNamespace()
-						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
+						.getOpcUaNodeContext(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateNodeId(miloSingleServerBaseV0Strategy
+								.getRootFolderNode().getNodeId().getIdentifier()
 								.toString() + "/Variables"),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Variables"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateQualifiedName("Variables"),
 				LocalizedText.english("Variables"));
 	}
 
 	private UaFolderNode createVerticesFolder() {
 		final UaFolderNode vertexFolder = new UaFolderNode(
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getOpcUaNodeContext(),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace()
-						.generateNodeId(miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier()
+						.getOpcUaNodeContext(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateNodeId(miloSingleServerBaseV0Strategy
+								.getRootFolderNode().getNodeId().getIdentifier()
 								.toString() + "/Vertices"),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().generateQualifiedName("Vertices"),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.generateQualifiedName("Vertices"),
 				LocalizedText.english("Vertices"));
-		addVertexCommand = new AbstractOpcCommand(miloSingleServerBaseV0Strategy.getWaldotNamespace().getGremlinGraph(),
+		addVertexCommand = new AbstractOpcCommand(
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getGremlinGraph(),
 				miloSingleServerBaseV0Strategy.getWaldotNamespace(),
-				miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId().getIdentifier().toString()
-						+ "/Vertices/add",
+				miloSingleServerBaseV0Strategy.getRootFolderNode().getNodeId()
+						.getIdentifier().toString() + "/Vertices/add",
 				"add vertex", "add vertex to Gremlin graph", null,
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getConfiguration().getWaldotCommandWriteMask(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getConfiguration().getWaldotCommandUserWriteMask(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getConfiguration().getWaldotCommandExecutable(),
-				miloSingleServerBaseV0Strategy.getWaldotNamespace().getConfiguration()
-						.getWaldotCommandUserExecutable()) {
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getConfiguration().getWaldotCommandWriteMask(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getConfiguration().getWaldotCommandUserWriteMask(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getConfiguration().getWaldotCommandExecutable(),
+				miloSingleServerBaseV0Strategy.getWaldotNamespace()
+						.getConfiguration().getWaldotCommandUserExecutable()) {
 
 			@Override
-			public Object[] runCommand(InvocationContext invocationContext, String[] inputValues) {
+			public Object[] runCommand(InvocationContext invocationContext,
+					String[] inputValues) {
 				String output = "";
 				String error = "";
 				try {
 					final String nodeId = inputValues[0];
 					NodeId node = null;
 					if (nodeId == null || nodeId.isEmpty()) {
-						node = miloSingleServerBaseV0Strategy.getWaldotNamespace().getNodeIdManager().getNextId(graph);
+						node = miloSingleServerBaseV0Strategy
+								.getWaldotNamespace().getNodeIdManager()
+								.getNextId(graph);
 					} else {
-						node = miloSingleServerBaseV0Strategy.getWaldotNamespace().generateNodeId(nodeId);
+						node = miloSingleServerBaseV0Strategy
+								.getWaldotNamespace().generateNodeId(nodeId);
 					}
 
 					final String label = inputValues[1];
 					final String type = inputValues[2];
 					final List<String> keyValues = new ArrayList<>();
-					keyValues.addAll((inputValues.length > 2 && inputValues[3] != null && inputValues[3].contains(","))
-							? Arrays.asList(inputValues[3].split(","))
-							: new ArrayList<>());
-					if (type != null && !type.isEmpty() && !keyValues.contains(MiloStrategy.TYPE_FIELD.toLowerCase())) {
+					keyValues.addAll(parseKeyValues(
+							inputValues.length > 3 ? inputValues[3] : null));
+					if (type != null && !type.isEmpty() && !containsKey(
+							keyValues, MiloStrategy.TYPE_FIELD.toLowerCase())) {
 						keyValues.add(MiloStrategy.TYPE_FIELD.toLowerCase());
 						keyValues.add(type);
 					}
-					if (label != null && !label.isEmpty()
-							&& !keyValues.contains(MiloStrategy.LABEL_FIELD.toLowerCase())) {
+					if (label != null && !label.isEmpty() && !containsKey(
+							keyValues, MiloStrategy.LABEL_FIELD.toLowerCase())) {
 						keyValues.add(MiloStrategy.LABEL_FIELD.toLowerCase());
 						keyValues.add(label);
 					}
 					if (!keyValues.isEmpty()) {
-						ElementHelper.legalPropertyKeyValueArray(keyValues.toArray());
+						ElementHelper.legalPropertyKeyValueArray(
+								keyValues.toArray());
 					}
-					final WaldotVertex vertex = waldotNamespace.addVertex(node, keyValues.toArray());
+					final WaldotVertex vertex = waldotNamespace.addVertex(node,
+							keyValues.toArray());
 					output = vertex.toString();
 				} catch (final Exception e) {
 					logger.error("Error adding vertex", e);
 					error = e.getMessage();
 				}
-				return new String[] { output, error };
+				return new String[]{output, error};
 			}
 		};
-		addVertexCommand.addOutputArgument("output", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addVertexCommand.addOutputArgument("output",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("command output"));
-		addVertexCommand.addOutputArgument("error", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addVertexCommand.addOutputArgument("error",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("command error"));
-		addVertexCommand.addInputArgument("nodeId", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addVertexCommand.addInputArgument("nodeId",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("vertex nodeId to add"));
-		addVertexCommand.addInputArgument("label", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addVertexCommand.addInputArgument("label",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("vertex label to add"));
-		addVertexCommand.addInputArgument("type", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+		addVertexCommand.addInputArgument("type",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("vertex type to add"));
-		addVertexCommand.addInputArgument("keyValues", VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
-				LocalizedText.english("key values of vertex to add, separated by comma"));
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(addVertexCommand);
+		addVertexCommand.addInputArgument("keyValues",
+				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
+				LocalizedText.english(
+						"key values of vertex to add, separated by comma"));
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager()
+				.addNode(addVertexCommand);
 		vertexFolder.addComponent(addVertexCommand);
 		return vertexFolder;
 	}
@@ -205,14 +287,20 @@ public class MiloSingleServerBaseFolderManager {
 
 	public void initialize() {
 		setVerticesFolderNode(createVerticesFolder());
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(getVerticesFolderNode());
-		miloSingleServerBaseV0Strategy.getRootFolderNode().addOrganizes(getVerticesFolderNode());
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager()
+				.addNode(getVerticesFolderNode());
+		miloSingleServerBaseV0Strategy.getRootFolderNode()
+				.addOrganizes(getVerticesFolderNode());
 		setEdgesFolderNode(createEdgesFolder());
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(getEdgesFolderNode());
-		miloSingleServerBaseV0Strategy.getRootFolderNode().addOrganizes(getEdgesFolderNode());
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager()
+				.addNode(getEdgesFolderNode());
+		miloSingleServerBaseV0Strategy.getRootFolderNode()
+				.addOrganizes(getEdgesFolderNode());
 		setVariablesFolderNode(createVariablesFolder());
-		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager().addNode(getVariablesFolderNode());
-		miloSingleServerBaseV0Strategy.getRootFolderNode().addOrganizes(getVariablesFolderNode());
+		miloSingleServerBaseV0Strategy.getWaldotNamespace().getStorageManager()
+				.addNode(getVariablesFolderNode());
+		miloSingleServerBaseV0Strategy.getRootFolderNode()
+				.addOrganizes(getVariablesFolderNode());
 
 	}
 

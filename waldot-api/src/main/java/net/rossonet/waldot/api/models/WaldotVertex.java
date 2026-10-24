@@ -284,4 +284,14 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 	 */
 	void removeRelatedOpcUaNodes();
 
+	/**
+	 * Detaches a vertex property from this vertex (references and internal
+	 * bookkeeping). The OPC UA node of the property is removed separately.
+	 *
+	 * @param property the property to detach
+	 */
+	default void removeRelatedProperty(WaldotVertexProperty<?> property) {
+		// default: nothing to do
+	}
+
 }

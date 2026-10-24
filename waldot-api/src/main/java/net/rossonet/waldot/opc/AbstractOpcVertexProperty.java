@@ -148,30 +148,111 @@ public abstract class AbstractOpcVertexProperty<DATA_TYPE>
 		return getBrowseName().getName();
 	}
 
+	/**
+	 * Meta-property attached to a vertex property (in-memory).
+	 */
+	private static final class MetaProperty<V> implements Property<V> {
+		private final String key;
+		private final V value;
+		private final AbstractOpcVertexProperty<?> owner;
+
+		private MetaProperty(final AbstractOpcVertexProperty<?> owner,
+				final String key, final V value) {
+			this.owner = owner;
+			this.key = key;
+			this.value = value;
+		}
+
+		@Override
+		public org.apache.tinkerpop.gremlin.structure.Element element() {
+			return owner;
+		}
+
+		@Override
+		public boolean equals(final Object object) {
+			return org.apache.tinkerpop.gremlin.structure.util.ElementHelper
+					.areEqual(this, object);
+		}
+
+		@Override
+		public int hashCode() {
+			return org.apache.tinkerpop.gremlin.structure.util.ElementHelper
+					.hashCode(this);
+		}
+
+		@Override
+		public boolean isPresent() {
+			return true;
+		}
+
+		@Override
+		public String key() {
+			return key;
+		}
+
+		@Override
+		public void remove() {
+			owner.metaProperties.remove(key, this);
+		}
+
+		@Override
+		public String toString() {
+			return org.apache.tinkerpop.gremlin.structure.util.StringFactory
+					.propertyString(this);
+		}
+
+		@Override
+		public V value() {
+			return value;
+		}
+	}
+
+	private final java.util.Map<String, Property<?>> metaProperties = new java.util.concurrent.ConcurrentHashMap<>();
+
 	@Override
 	public Set<String> keys() {
-		logger.error("keys() is not implemented");
-		return new HashSet<>();
+		return Collections.unmodifiableSet(new HashSet<>(metaProperties.keySet()));
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
 	public <U> Iterator<Property<U>> properties(final String... propertyKeys) {
-		return Collections.emptyIterator();
+		final List<Property<U>> result = new ArrayList<>();
+		for (final Property<?> p : metaProperties.values()) {
+			if (propertyKeys == null || propertyKeys.length == 0
+					|| java.util.Arrays.asList(propertyKeys)
+							.contains(p.key())) {
+				result.add((Property) p);
+			}
+		}
+		return result.iterator();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public <V> VertexProperty<V> property(final String key) {
-		return VertexProperty.<V>empty();
+	public <V> Property<V> property(final String key) {
+		final Property<?> p = metaProperties.get(key);
+		return p == null ? Property.<V>empty() : (Property<V>) p;
 	}
 
 	@Override
 	public <V> Property<V> property(final String key, final V value) {
-		return Property.empty();
+		org.apache.tinkerpop.gremlin.structure.util.ElementHelper
+				.validateProperty(key, value);
+		if (value == null) {
+			metaProperties.remove(key);
+			return Property.empty();
+		}
+		final MetaProperty<V> p = new MetaProperty<>(this, key, value);
+		metaProperties.put(key, p);
+		return p;
 	}
 
 	@Override
 	public void remove() {
-		// getVertexPropertyReference().removeComponent(this);
+		metaProperties.clear();
+		referenceVertex.removeRelatedProperty(this);
+		getNamespace().removeVertexProperty(getNodeId());
 	}
 
 	@Override

@@ -44,6 +44,7 @@ apply plugin: 'application'
 
 dependencies {
     implementation project(':waldot-deps')
+    implementation project(':waldot-runner')
     implementation project(':waldot-namespace')
     implementation project(':waldot-plugin-generator')
     implementation project(':waldot-plugin-rules-engine')

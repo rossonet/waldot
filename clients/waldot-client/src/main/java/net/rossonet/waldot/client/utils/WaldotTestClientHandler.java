@@ -493,7 +493,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
 					TimestampsToReturn.Both, readValueIds);
 			final DataValue[] results = readResponse.getResults();
-			final long value = (Long) results[0].value().getValue();
+			final double value = ((Number) results[0].value().getValue()).doubleValue();
 			System.out.println("Read value: " + value + " expected between: " + minValue + " and " + maxValue);
 			return value >= minValue && value <= maxValue;
 		} catch (final Exception e) {
@@ -513,7 +513,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 					TimestampsToReturn.Both, readValueIds);
 			final DataValue[] results = readResponse.getResults();
 			final Object value = results[0].value().getValue();
-			return value.toString().equals(expectedValue.toString());
+			return valuesEqual(value, expectedValue);
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
@@ -533,7 +533,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			final DataValue[] results = readResponse.getResults();
 			final Object value = results[0].value().getValue();
 			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return value.toString().equals(expectedValue.toString());
+			return valuesEqual(value, expectedValue);
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
@@ -567,7 +567,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		try {
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
 			final Vertex v = graph.vertex(completedNodeId);
-			final long value = (Long) v.property(valueLabel).value();
+			final double value = ((Number) v.property(valueLabel).value()).doubleValue();
 			System.out.println("Vertex value: " + value + " expected between: " + minValue + " and " + maxValue);
 			return value >= minValue && value <= maxValue;
 		} catch (final Exception e) {
@@ -581,7 +581,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
 			final Vertex v = graph.vertex(completedNodeId);
 			final Object value = v.property(valueLabel).value();
-			return value.toString().equals(expectedValue.toString());
+			return valuesEqual(value, expectedValue);
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
@@ -594,11 +594,18 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			final Vertex v = graph.vertex(completedNodeId);
 			final Object value = v.property(valueLabel).value();
 			System.out.println("Vertex value: " + value + " expected: " + expectedValue);
-			return value.toString().equals(expectedValue.toString());
+			return valuesEqual(value, expectedValue);
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	private static boolean valuesEqual(final Object value, final Object expected) {
+		if (value instanceof Number && expected instanceof Number) {
+			return Double.compare(((Number) value).doubleValue(), ((Number) expected).doubleValue()) == 0;
+		}
+		return String.valueOf(value).equals(String.valueOf(expected));
 	}
 
 	@Override
@@ -672,7 +679,7 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		final DataValue[] results = readResponse.getResults();
 		final Object value = results[0].value().getValue();
 		System.out.println("Read value: " + value);
-		return (Long) value;
+		return ((Number) value).longValue();
 	}
 
 	private void resetCache() {

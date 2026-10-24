@@ -33,6 +33,73 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
  */
 public class MiloSingleServerBaseReferenceNodeBuilder {
 
+	/**
+	 * Immutable snapshot of the reference nodes generated for ONE namespace.
+	 * Use {@link MiloSingleServerBaseReferenceNodeBuilder#forNamespace}
+	 * instead of the legacy static fields, which only reflect the last
+	 * namespace initialized in the JVM.
+	 */
+	public static final class ReferenceNodes {
+		public final UaObjectTypeNode edgeTypeNode;
+		public final UaObjectTypeNode vertexTypeNode;
+		public final UaObjectTypeNode interfaceTypeNode;
+		public final UaVariableNode labelVertexTypeNode;
+		public final UaVariableNode typeVertexTypeNode;
+		public final UaVariableNode historyVertexTypeNode;
+		public final UaVariableNode labelEdgeTypeNode;
+		public final UaVariableNode typeEdgeTypeNode;
+		public final UaVariableNode sourceNodeTypeNode;
+		public final UaVariableNode targetNodeTypeNode;
+		public final UaVariableNode referenceTypeTypeNode;
+		public final UaVariableNode isForwardTypeNode;
+		public final NodeId hasGremlinPropertyReferenceType;
+		public final NodeId hasReferenceDescriptionReferenceType;
+		public final NodeId hasSourceNodeReferenceType;
+		public final NodeId hasTargetNodeReferenceType;
+
+		private ReferenceNodes() {
+			edgeTypeNode = MiloSingleServerBaseReferenceNodeBuilder.edgeTypeNode;
+			vertexTypeNode = MiloSingleServerBaseReferenceNodeBuilder.vertexTypeNode;
+			interfaceTypeNode = MiloSingleServerBaseReferenceNodeBuilder.interfaceTypeNode;
+			labelVertexTypeNode = MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode;
+			typeVertexTypeNode = MiloSingleServerBaseReferenceNodeBuilder.typeVertexTypeNode;
+			historyVertexTypeNode = MiloSingleServerBaseReferenceNodeBuilder.historyVertexTypeNode;
+			labelEdgeTypeNode = MiloSingleServerBaseReferenceNodeBuilder.labelEdgeTypeNode;
+			typeEdgeTypeNode = MiloSingleServerBaseReferenceNodeBuilder.typeEdgeTypeNode;
+			sourceNodeTypeNode = MiloSingleServerBaseReferenceNodeBuilder.sourceNodeTypeNode;
+			targetNodeTypeNode = MiloSingleServerBaseReferenceNodeBuilder.targetNodeTypeNode;
+			referenceTypeTypeNode = MiloSingleServerBaseReferenceNodeBuilder.referenceTypeTypeNode;
+			isForwardTypeNode = MiloSingleServerBaseReferenceNodeBuilder.isForwardTypeNode;
+			hasGremlinPropertyReferenceType = MiloSingleServerBaseReferenceNodeBuilder.hasGremlinPropertyReferenceType;
+			hasReferenceDescriptionReferenceType = MiloSingleServerBaseReferenceNodeBuilder.hasReferenceDescriptionReferenceType;
+			hasSourceNodeReferenceType = MiloSingleServerBaseReferenceNodeBuilder.hasSourceNodeReferenceType;
+			hasTargetNodeReferenceType = MiloSingleServerBaseReferenceNodeBuilder.hasTargetNodeReferenceType;
+		}
+	}
+
+	private static final java.util.Map<WaldotNamespace, ReferenceNodes> REFERENCE_NODES_BY_NAMESPACE = java.util.Collections
+			.synchronizedMap(new java.util.WeakHashMap<>());
+
+	private static volatile ReferenceNodes lastReferenceNodes;
+
+	/**
+	 * Returns the reference nodes generated for the given namespace. If the
+	 * namespace is unknown (or null), the most recently generated set is
+	 * returned.
+	 */
+	public static ReferenceNodes registeredFor(final WaldotNamespace namespace) {
+		return namespace == null
+				? null
+				: REFERENCE_NODES_BY_NAMESPACE.get(namespace);
+	}
+
+	public static ReferenceNodes forNamespace(final WaldotNamespace namespace) {
+		final ReferenceNodes nodes = namespace == null
+				? null
+				: REFERENCE_NODES_BY_NAMESPACE.get(namespace);
+		return nodes != null ? nodes : lastReferenceNodes;
+	}
+
 	public static UaObjectTypeNode edgeTypeNode;
 
 	public static final UByte edgeVariableAccessLevel = AccessLevel
@@ -183,7 +250,7 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 	 *
 	 * @param miloSingleServerBaseV0Strategy the Milo strategy instance used to generate nodes
 	 */
-	public static void generateRefereceNodes(
+	public static synchronized void generateRefereceNodes(
 			final MiloStrategy miloSingleServerBaseV0Strategy) {
 		generateVertexTypeNode(miloSingleServerBaseV0Strategy);
 		generateEdgeTypeNode(miloSingleServerBaseV0Strategy);
@@ -208,6 +275,12 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 				"A property linked to an edge or vertex", NodeIds.HasComponent,
 				false, false,
 				miloSingleServerBaseV0Strategy.getWaldotNamespace());
+		// the statics above are a legacy "last initialized" view: keep a
+		// per-namespace snapshot for code that can reach its namespace
+		final ReferenceNodes snapshot = new ReferenceNodes();
+		lastReferenceNodes = snapshot;
+		REFERENCE_NODES_BY_NAMESPACE.put(
+				miloSingleServerBaseV0Strategy.getWaldotNamespace(), snapshot);
 	}
 
 	/**

@@ -77,10 +77,10 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 		this.allowNullPropertyValues = graph.features().edge().supportsNullPropertyValues();
 		labelProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
 				MiloStrategy.LABEL_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelEdgeTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
+				MiloSingleServerBaseReferenceNodeBuilder.forNamespace(graph.getWaldotNamespace()).labelEdgeTypeNode.getNodeId().expanded(), ValueRanks.Scalar,
 				String.class);
 		typeProperty = new QualifiedProperty<String>(graph.getWaldotNamespace().getNamespaceUri(),
-				MiloStrategy.TYPE_FIELD, MiloSingleServerBaseReferenceNodeBuilder.edgeTypeNode.getNodeId().expanded(),
+				MiloStrategy.TYPE_FIELD, MiloSingleServerBaseReferenceNodeBuilder.forNamespace(graph.getWaldotNamespace()).edgeTypeNode.getNodeId().expanded(),
 				ValueRanks.Scalar, String.class);
 	}
 

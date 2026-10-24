@@ -167,7 +167,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 
 	@Override
 	public Iterator<Edge> edges(final Direction direction, final String... edgeLabels) {
-		final Collection<WaldotEdge> values = getNamespace().getEdges(this, direction, edgeLabels).values();
+		final Collection<WaldotEdge> values = getNamespace().getEdges(this, direction, edgeLabels);
 		final Collection<Edge> edges = new ArrayList<>();
 		for (final WaldotEdge edge : values) {
 			edges.add(edge);
@@ -403,6 +403,6 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 					: IteratorUtils.map(this.edges(direction, edgeLabels),
 							edge -> edge.vertices(direction.opposite()).next());
 		}
-		return (Iterator) getNamespace().getVertices(this, direction, edgeLabels);
+		return (Iterator) getNamespace().getVertices(this, direction, edgeLabels).iterator();
 	}
 }

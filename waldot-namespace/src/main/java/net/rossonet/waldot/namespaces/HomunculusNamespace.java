@@ -96,12 +96,14 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	private final WaldotGraph gremlin;
 	private final HistoryStrategy historyStrategy;
 	private final JexlCmdFunction jexlWaldotCommandHelper;
-	private final List<NamespaceListener> listeners = new ArrayList<>();
+	private final List<NamespaceListener> listeners = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 	private final Graph.Variables opcGraphVariables;
 	private final MiloStrategy opcMappingStrategy;
-	private final Set<PluginListener> plugins = new HashSet<>();
+	private final Set<NodeId> reservedIds = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+	private final Set<PluginListener> plugins = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
 	private final SubscriptionModel subscriptionModel;
 
@@ -174,8 +176,36 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	public WaldotEdge addEdge(final WaldotVertex sourceVertex,
 			final WaldotVertex targetVertex, final String label,
 			final Object[] keyValues) {
-		return (WaldotEdge) opcMappingStrategy.addEdge(sourceVertex,
-				targetVertex, label, keyValues);
+		final Object[] safeKeyValues = keyValues == null
+				? new Object[0]
+				: keyValues;
+		final Object readId = MiloStrategy.getIdValue(safeKeyValues)
+				.orElse(null);
+		if (readId == null) {
+			return (WaldotEdge) opcMappingStrategy.addEdge(sourceVertex,
+					targetVertex, label, safeKeyValues);
+		}
+		// explicit id: reserve it atomically before the creation
+		final NodeId edgeId = MiloStrategy.getNodeIdManager()
+				.convert(getGremlinGraph(), readId);
+		if (edgeId == null) {
+			return (WaldotEdge) opcMappingStrategy.addEdge(sourceVertex,
+					targetVertex, label, safeKeyValues);
+		}
+		if (!reservedIds.add(edgeId)) {
+			throw org.apache.tinkerpop.gremlin.structure.Graph.Exceptions
+					.edgeWithIdAlreadyExists(edgeId);
+		}
+		try {
+			if (hasNodeId(edgeId)) {
+				throw org.apache.tinkerpop.gremlin.structure.Graph.Exceptions
+						.edgeWithIdAlreadyExists(edgeId);
+			}
+			return (WaldotEdge) opcMappingStrategy.addEdge(sourceVertex,
+					targetVertex, label, safeKeyValues);
+		} finally {
+			reservedIds.remove(edgeId);
+		}
 	}
 
 	@Override
@@ -186,7 +216,23 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	@Override
 	public WaldotVertex addVertex(final NodeId nodeId,
 			final Object[] keyValues) {
-		return opcMappingStrategy.addVertex(nodeId, keyValues);
+		if (nodeId == null) {
+			return opcMappingStrategy.addVertex(nodeId, keyValues);
+		}
+		// atomic reservation: two threads cannot create the same id
+		if (!reservedIds.add(nodeId)) {
+			throw org.apache.tinkerpop.gremlin.structure.Graph.Exceptions
+					.vertexWithIdAlreadyExists(nodeId);
+		}
+		try {
+			if (hasNodeId(nodeId)) {
+				throw org.apache.tinkerpop.gremlin.structure.Graph.Exceptions
+						.vertexWithIdAlreadyExists(nodeId);
+			}
+			return opcMappingStrategy.addVertex(nodeId, keyValues);
+		} finally {
+			reservedIds.remove(nodeId);
+		}
 	}
 
 	@Override
@@ -331,7 +377,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	}
 
 	@Override
-	public Map<NodeId, WaldotEdge> getEdges(final WaldotVertex vertex,
+	public java.util.Collection<WaldotEdge> getEdges(final WaldotVertex vertex,
 			final Direction direction, final String[] edgeLabels) {
 		return opcMappingStrategy.getEdges(vertex, direction, edgeLabels);
 	}
@@ -452,7 +498,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	}
 
 	@Override
-	public Map<NodeId, WaldotVertex> getVertices(final WaldotVertex opcVertex,
+	public java.util.Collection<WaldotVertex> getVertices(final WaldotVertex opcVertex,
 			final Direction direction, final String[] edgeLabels) {
 		return opcMappingStrategy.getVertices(opcVertex, direction, edgeLabels);
 	}

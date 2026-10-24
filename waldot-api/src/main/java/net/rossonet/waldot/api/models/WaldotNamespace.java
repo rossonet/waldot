@@ -383,11 +383,12 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @param vertex the vertex to query
 	 * @param direction the direction (OUT, IN, or BOTH)
 	 * @param edgeLabels optional array of edge labels to filter
-	 * @return map of NodeId to WaldotEdge
+	 * @return one entry per edge; for {@code BOTH} a self-loop is returned
+	 *         twice, as TinkerPop does
 	 * @see WaldotEdge
 	 * @see Direction
 	 */
-	Map<NodeId, WaldotEdge> getEdges(WaldotVertex vertex, Direction direction,
+	Collection<WaldotEdge> getEdges(WaldotVertex vertex, Direction direction,
 			String[] edgeLabels);
 
 	/**
@@ -605,11 +606,12 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * @param vertex the vertex to query
 	 * @param direction the direction (OUT, IN, or BOTH)
 	 * @param edgeLabels optional array of edge labels to filter
-	 * @return map of NodeId to WaldotVertex
+	 * @return one entry per traversed edge; for {@code BOTH} a self-loop
+	 *         yields the vertex twice, as TinkerPop does
 	 * @see WaldotVertex
 	 * @see Direction
 	 */
-	Map<NodeId, WaldotVertex> getVertices(WaldotVertex vertex,
+	Collection<WaldotVertex> getVertices(WaldotVertex vertex,
 			Direction direction, String[] edgeLabels);
 
 	/**
