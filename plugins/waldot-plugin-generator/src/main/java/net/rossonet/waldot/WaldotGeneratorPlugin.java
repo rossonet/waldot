@@ -20,7 +20,9 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.dataGenerator.DataGeneratorVertex;
+import net.rossonet.waldot.dataGenerator.EventGeneratorVertex;
 import net.rossonet.waldot.dataGenerator.GeneratorConstants;
+import net.rossonet.waldot.dataGenerator.commands.CreateEventSimulatorCommand;
 import net.rossonet.waldot.dataGenerator.commands.CreateSimulatorCommand;
 import net.rossonet.waldot.plugin.AbstractPluginListener;
 import net.rossonet.waldot.utils.ThreadHelper;
@@ -55,7 +57,9 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * 
  * <h2>Vertex Type</h2>
  * <p>
- * Registers vertex type: <code>generator</code> (DataGeneratorVertex)
+ * Registers vertex types: <code>sim:generator</code> (DataGeneratorVertex)
+ * and <code>sim:event-generator</code> (EventGeneratorVertex, simulated OPC
+ * UA events)
  * </p>
  * 
  * <h2>Configuration Properties</h2>
@@ -91,6 +95,12 @@ import net.rossonet.waldot.utils.ThreadHelper;
 public class WaldotGeneratorPlugin extends AbstractPluginListener {
 	/** OPC-UA display name for data generator type */
 	private static final String WALDOT_DATA_GENERATOR_DISPLAY_NAME = "WaldOT Data Generator";
+
+	/** OPC-UA display name for the event generator type */
+	private static final String WALDOT_EVENT_GENERATOR_DISPLAY_NAME = "WaldOT Event Generator";
+
+	/** OPC-UA object type name of the event generator */
+	private static final String WALDOT_EVENT_GENERATOR_OBJECT_TYPE = "WaldOTEventGeneratorObjectType";
 
 	/** OPC-UA object type name */
 	private static final String WALDOT_DATA_GENERATOR_OBJECT_TYPE = "WaldOTDataGeneratorObjectType";
@@ -179,7 +189,10 @@ public class WaldotGeneratorPlugin extends AbstractPluginListener {
 			Object[] propertyKeyValues) {
 		if (dataGeneratorTypeNode == null || !dataGeneratorTypeNode.getNodeId()
 				.equals(typeDefinitionNodeId)) {
-			return null;
+			// the other types (event generator) use the standard constructor
+			return super.createVertex(typeDefinitionNodeId, graph, context,
+					nodeId, browseName, displayName, description, writeMask,
+					userWriteMask, eventNotifier, version, propertyKeyValues);
 		}
 		return new DataGeneratorVertex(executor, graph, context, nodeId,
 				browseName, displayName, description, writeMask, userWriteMask,
@@ -199,8 +212,13 @@ public class WaldotGeneratorPlugin extends AbstractPluginListener {
 		commands.clear();
 		// Crea e registra il tipo DataGenerator nell'OPC-UA address space
 		createDataGeneratorTypeNode();
+		registerTypeNode(EventGeneratorVertex.class,
+				WALDOT_EVENT_GENERATOR_OBJECT_TYPE,
+				WALDOT_EVENT_GENERATOR_DISPLAY_NAME,
+				GeneratorConstants.EVENT_GENERATOR_OBJECT_TYPE_LABEL);
 		waldotNamespace.getOpcuaServer().updateReferenceTypeTree();
 		registerCommand(new CreateSimulatorCommand(waldotNamespace));
+		registerCommand(new CreateEventSimulatorCommand(waldotNamespace));
 	}
 
 }

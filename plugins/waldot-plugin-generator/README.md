@@ -13,6 +13,7 @@ The Data Generator plugin creates vertices that continuously generate changing v
 ### Key Features
 
 - **6 Generation Algorithms**: incremental, decremental, random, sinusoidal, triangular, stopped
+- **Event Generator**: `sim:event-generator` publishes simulated OPC UA events (alarms, logs) from message lists and templates
 - **Real-time Updates**: Configurable update intervals from 10ms to hours
 - **Virtual Threads**: Lightweight concurrency for thousands of generators
 - **OPC-UA Integration**: Full bidirectional sync with OPC-UA address space
@@ -101,6 +102,42 @@ vibrationSensor = graph.addVertex(
     )
 }
 ```
+
+## Event Generator (`sim:event-generator`)
+
+The `sim:event-generator` vertex simulates a source of **OPC UA events** (alarms, log lines, device messages). At every cycle it builds one or more texts from a list of messages and a template and publishes each of them as an OPC UA event; the events reach the vertices connected with a `fire` edge (for example `syslog:sender` or `snmp:trap-sender`). The text of the last event is also written in the `data` property, so it can be copied to other vertices with a `link-to` edge. Every parameter is read again at every cycle and can be changed at runtime. The first event is generated after one `delay`, so the edges created right after the vertex receive it.
+
+| Property | Default | Description |
+| --- | --- | --- |
+| `algorithm` | `sequential` | `sequential` (one event per cycle, messages in order), `random` (one random message per cycle), `burst` (`burst-size` events per cycle), `stopped` |
+| `delay` | `1000` | ms between two cycles (minimum 10) |
+| `jitter` | `0` | random extra wait in ms (0 - jitter) added to every cycle |
+| `messages` | `event ${counter}` | messages divided by `separator` |
+| `separator` | `\|` | separator of `messages` and `severities` |
+| `template` | `${message}` | text of the event |
+| `category` | `simulated` | name of the events (browse name), placeholders allowed |
+| `event-type` | `system` | `base`, `system`, `device-failure`, `audit`, `progress`, `system-status` |
+| `min-severity` / `max-severity` | `100` / `500` | random severity (1-1000) when `severities` is empty |
+| `severities` | | one severity per message (the last one is repeated) |
+| `burst-size` | `5` | events per cycle with `burst` |
+| `max-events` | `0` | after this number of events the algorithm becomes `stopped` (0 = no limit) |
+| `random-min` / `random-max` | `0` / `100` | range of `${random}` |
+| `seed` | | seed of the random choices, to repeat the same sequence |
+
+Placeholders of `messages`, `template` and `category`: `${message}`, `${counter}`, `${index}`, `${time}` (ISO 8601), `${epoch}`, `${severity}`, `${random}`, `${source}`, `${category}` and `${p:name}` (value of the property `name` of the vertex, for example fed by a `link-to` edge). Runtime properties: `data` (text of the last event), `count`, `severity`.
+
+```groovy
+boiler = graph.addVertex("type", "sim:event-generator", "label", "boiler",
+    "algorithm", "sequential", "delay", "2000",
+    "messages", "water temperature ${p:temperature} C|flame lost|pressure high",
+    "severities", "200|700|900", "category", "boiler", "event-type", "device-failure")
+temperature = graph.addVertex("type", "sim:generator", "label", "temp", "algorithm", "sinusoidal",
+    "min", "60", "max", "100", "delay", "1000")
+temperature.addEdge("feeds", boiler, "type", "link-to", "properties-to-monitor", "data", "data", "temperature")
+boiler.addEdge("to-syslog", syslogSender, "type", "fire")
+```
+
+The vertex is created also by the OPC UA command `create event generator` (folder `simulator`).
 
 ## Documentation
 
