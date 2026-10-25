@@ -125,6 +125,8 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	private OpcUaServer server;
 
+	private FileBasedTrustListManager trustListManager;
+
 	private final WaldotConfiguration waldotConfiguration;
 
 	private final X509IdentityValidator x509IdentityValidator;
@@ -210,6 +212,16 @@ public class WaldotOpcUaServer implements AutoCloseable {
 				logger.error("Error shutting down executor", e);
 			}
 		}
+		// the trust list manager watches the PKI directories (one inotify instance
+		// per server): it must be closed, otherwise every restart leaks a watcher
+		if (trustListManager != null) {
+			try {
+				trustListManager.close();
+			} catch (final IOException e) {
+				logger.error("Error closing trust list manager", e);
+			}
+			trustListManager = null;
+		}
 	}
 
 	private OpcUaServer create(final OpcConfiguration configuration, final WaldotAnonymousValidator anonymousValidator,
@@ -249,6 +261,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 		final FileBasedTrustListManager trustListManager = FileBasedTrustListManager
 				.createAndInitialize(issuerDir.toPath());
+		this.trustListManager = trustListManager;
 
 		final FileBasedCertificateQuarantine certificateQuarantine = FileBasedCertificateQuarantine
 				.create(issuerDir.toPath().resolve("rejected").resolve("certs"));

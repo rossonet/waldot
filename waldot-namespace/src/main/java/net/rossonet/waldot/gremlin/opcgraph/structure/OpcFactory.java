@@ -252,8 +252,14 @@ public final class OpcFactory {
 				"this graph was created to provide examples and test coverage for tinkerpop3 api advances");
 	}
 
+	/** System property overriding the bootstrap file used by {@link #getOpcGraph()}. */
+	public static final String BOOT_FILE_PROPERTY = "waldot.boot.file";
+
 	public static WaldotGraph getOpcGraph() throws InterruptedException, ExecutionException {
-		return getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
+		final String bootFile = System.getProperty(BOOT_FILE_PROPERTY);
+		final String bootUrl = bootFile == null || bootFile.isBlank() ? "file:///tmp/boot.conf"
+				: java.nio.file.Path.of(bootFile).toUri().toString();
+		return getOpcGraph(bootUrl, new LoggerHistoryStrategy());
 	};
 
 	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {

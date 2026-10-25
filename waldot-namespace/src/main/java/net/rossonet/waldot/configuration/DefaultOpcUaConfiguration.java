@@ -8,19 +8,26 @@ import net.rossonet.waldot.api.configuration.OpcConfiguration;
 
 public class DefaultOpcUaConfiguration extends HashMap<String, String> implements OpcConfiguration {
 
+	/** System property overriding the default HTTPS bind port (used by tests). */
+	public static final String HTTPS_PORT_PROPERTY = "waldot.opc.https.port";
+	/** System property overriding the default security directory (used by tests). */
+	public static final String SECURITY_DIR_PROPERTY = "waldot.security.dir";
+	/** System property overriding the default OPC UA TCP bind port (used by tests). */
+	public static final String TCP_PORT_PROPERTY = "waldot.opc.tcp.port";
+
 	public static String DEFAULT_ADDRESS_CERTIFICATE_GENERATOR = "127.0.0.1";
 	public static String DEFAULT_APPLICATION_NAME = "WaldOT OPCUA server";
 	public static String DEFAULT_BIND_ADDRESSES = "0.0.0.0";
 	public static String DEFAULT_BIND_HOSTNAME = "127.0.0.1";
 	public static DateTime DEFAULT_BUILD_DATE = DateTime.now();
 	public static String DEFAULT_BUILD_NUMBER = "w001";
-	public static int DEFAULT_HTTPS_BIND_PORT = 8443;
+	public static int DEFAULT_HTTPS_BIND_PORT = Integer.getInteger(HTTPS_PORT_PROPERTY, 8443);
 	public static String DEFAULT_MANUFACTURER_NAME = "Zona Autonoma srl";
 	public static String DEFAULT_PATH = "/waldot";
 	public static String DEFAULT_PRODUCT_NAME = "WaldOT";
 	public static String DEFAULT_PRODUCT_URI = "urn:rossonet:waldot:uaserver";
-	public static String DEFAULT_SECURITY_DIR = ".security";
-	public static int DEFAULT_TCP_BIND_PORT = 12686;
+	public static String DEFAULT_SECURITY_DIR = System.getProperty(SECURITY_DIR_PROPERTY, ".security");
+	public static int DEFAULT_TCP_BIND_PORT = Integer.getInteger(TCP_PORT_PROPERTY, 12686);
 	public static final long serialVersionUID = 1487462093576743910L;
 
 	public static OpcConfiguration getDefault() {

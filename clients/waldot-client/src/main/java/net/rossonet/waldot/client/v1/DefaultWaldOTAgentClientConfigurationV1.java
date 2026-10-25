@@ -13,11 +13,16 @@ import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
 public class DefaultWaldOTAgentClientConfigurationV1
 		implements
 			WaldOTAgentClientConfiguration {
-	public static int _DEFAULT_TCP_BIND_PORT = 12686;
+	/** System property overriding the default keystore path (used by tests). */
+	public static final String KEYSTORE_PATH_PROPERTY = "waldot.client.keystore";
+	/** System property overriding the default server TCP port (used by tests). */
+	public static final String TCP_PORT_PROPERTY = "waldot.opc.tcp.port";
+
+	public static int _DEFAULT_TCP_BIND_PORT = Integer.getInteger(TCP_PORT_PROPERTY, 12686);
 	public static String DEFAULT_ENDPOINT = "opc.tcp://localhost:"
 			+ _DEFAULT_TCP_BIND_PORT + "/waldot";
 	public static String DEFAULT_KEYSTORE_PASSWORD = "_pa_ss_wo_rd_";
-	public static String DEFAULT_KEYSTORE_PATH = "/tmp/waldot-client.ks";
+	public static String DEFAULT_KEYSTORE_PATH = System.getProperty(KEYSTORE_PATH_PROPERTY, "/tmp/waldot-client.ks");
 	public static String DEFAULT_NEW_CERTIFICATE_APPLICATION_URI = "urn:rossonet:waldot:agent";
 	// public static String DEFAULT_NEW_CERTIFICATE_COMMON_NAME = "";
 	public static String DEFAULT_NEW_CERTIFICATE_COUNTRY = "IT";

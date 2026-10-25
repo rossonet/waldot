@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 import net.rossonet.waldot.tinkerpop.TinkerPopConstants;
 import net.rossonet.waldot.WaldotTinkerPopPlugin;
 import net.rossonet.waldot.api.PluginListener;
@@ -51,7 +52,7 @@ public class TinkerPopVertexCommandsTest {
 	@BeforeEach
 	public void beforeEach() throws Exception {
 		clean();
-		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
+		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy());
 		for (final PluginListener p : g.getWaldotNamespace().getPlugins()) {
 			if (p instanceof WaldotTinkerPopPlugin) {
 				plugin = (WaldotTinkerPopPlugin) p;
@@ -66,11 +67,9 @@ public class TinkerPopVertexCommandsTest {
 			g = null;
 		}
 		plugin = null;
-		Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 		Files.deleteIfExists(Path.of("/tmp/index.txt"));
-		while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-			Thread.sleep(10);
-		}
+		WaldotTestEnvironment.awaitOpcPortReleased();
 	}
 
 	private AbstractCreateVertexCommand command(final String type) {

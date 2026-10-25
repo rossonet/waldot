@@ -19,6 +19,7 @@ repositories {
 
 apply plugin: 'java'
 apply plugin: 'java-library'
+apply plugin: 'java-test-fixtures'
 apply plugin: 'eclipse'
 apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: 'jacoco'
@@ -36,7 +37,18 @@ dependencies {
     testImplementation(platform('org.junit:junit-bom:5.13.1'))
 	testImplementation('org.junit.jupiter:junit-jupiter')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    // shared test support (WaldotTestEnvironment, Testcontainers extensions)
+    testFixturesImplementation project(':waldot-deps')
+    testFixturesApi(platform('org.junit:junit-bom:5.13.1'))
+    testFixturesApi('org.junit.jupiter:junit-jupiter-api')
+    testFixturesApi('org.junit.platform:junit-platform-launcher')
+    testFixturesApi('org.testcontainers:testcontainers:2.0.3')
 }
+
+// the test fixtures are used only by the tests of the other modules: they are
+// not published with the client artifact
+components.java.withVariantsFromConfiguration(configurations.testFixturesApiElements) { skip() }
+components.java.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements) { skip() }
 
 task eclipseClosedDependencies {}
 

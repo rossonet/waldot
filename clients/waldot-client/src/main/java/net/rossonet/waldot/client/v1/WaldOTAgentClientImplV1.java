@@ -217,7 +217,14 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 					logger.info("Connected to server");
 				} else {
 					client = createOpcClient(getGeneralConfigBuilder().build());
-					logger.info("Waiting for connection to server...");
+					// connect() is synchronous: if the session is already available the client
+					// can be considered running without waiting for the next control cycle
+					if (checkClientConnected(client)) {
+						changeStatus(Status.RUNNING);
+						logger.info("Connected to server");
+					} else {
+						logger.info("Waiting for connection to server...");
+					}
 				}
 			}
 		} catch (final Exception e) {
@@ -487,8 +494,10 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	@Override
 	public CompletableFuture<WaldOTAgentClient> startConnectionProcedure() {
-		controlThread.start();
+		// the flag must be set before starting the control thread, otherwise the first
+		// control cycle could be skipped
 		activeConnectionRequest = true;
+		controlThread.start();
 		return CompletableFuture.completedFuture(this);
 
 	}

@@ -29,7 +29,7 @@ import net.rossonet.waldot.dataGenerator.commands.CreateSimulatorCommand;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.opc.AbstractCreateVertexCommand;
-import net.rossonet.waldot.utils.NetworkHelper;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 
 /**
  * Verifies the commands that create the vertices of the generator plugin.
@@ -48,7 +48,7 @@ public class GeneratorVertexCommandsTest {
 	@BeforeEach
 	public void beforeEach() throws Exception {
 		clean();
-		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
+		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy());
 		for (final PluginListener p : g.getWaldotNamespace().getPlugins()) {
 			if (p instanceof WaldotGeneratorPlugin) {
 				plugin = (WaldotGeneratorPlugin) p;
@@ -63,11 +63,9 @@ public class GeneratorVertexCommandsTest {
 			g = null;
 		}
 		plugin = null;
-		Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 		Files.deleteIfExists(Path.of("/tmp/index.txt"));
-		while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-			Thread.sleep(10);
-		}
+		WaldotTestEnvironment.awaitOpcPortReleased();
 	}
 
 	private AbstractCreateVertexCommand command(final String type) {

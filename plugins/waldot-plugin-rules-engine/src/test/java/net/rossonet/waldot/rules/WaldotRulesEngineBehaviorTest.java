@@ -19,7 +19,7 @@ import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHisto
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.rules.vertices.ComputeVertex;
 import net.rossonet.waldot.rules.vertices.RuleVertex;
-import net.rossonet.waldot.utils.NetworkHelper;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 
 /**
  * Tests of the rules engine logic: counters, errors, runtime changes of the
@@ -39,7 +39,7 @@ public class WaldotRulesEngineBehaviorTest {
 	@BeforeEach
 	public void beforeEach() throws Exception {
 		clean();
-		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
+		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy());
 	}
 
 	private Vertex newCompute(String id, Object... extra) {
@@ -85,12 +85,10 @@ public class WaldotRulesEngineBehaviorTest {
 			g.getWaldotNamespace().close();
 			g = null;
 		}
-		Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 		Files.deleteIfExists(Path.of("/tmp/index.txt"));
-		while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-			Thread.sleep(10);
-		}
-		Files.deleteIfExists(Path.of("/tmp/waldot-client.ks"));
+		WaldotTestEnvironment.awaitOpcPortReleased();
+		Files.deleteIfExists(WaldotTestEnvironment.clientKeystore());
 	}
 
 	@Test

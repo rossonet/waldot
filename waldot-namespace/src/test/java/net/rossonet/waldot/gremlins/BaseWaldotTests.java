@@ -22,8 +22,8 @@ import net.rossonet.waldot.client.utils.WaldotTestClientHandler;
 import net.rossonet.waldot.configuration.DefaultHomunculusConfiguration;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 import net.rossonet.waldot.utils.LogHelper;
-import net.rossonet.waldot.utils.NetworkHelper;
 
 @TestMethodOrder(OrderAnnotation.class)
 public class BaseWaldotTests {
@@ -55,7 +55,7 @@ public class BaseWaldotTests {
 
 	private void clean() {
 		try {
-			Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+			Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -82,16 +82,13 @@ public class BaseWaldotTests {
 			}
 		}
 		try {
-			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-				System.out.println("Waiting for server shutdown");
-				Thread.sleep(1);
-			}
+			WaldotTestEnvironment.awaitOpcPortReleased();
 			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 		try {
-			Files.deleteIfExists(Path.of("/tmp/waldot-client.ks"));
+			Files.deleteIfExists(WaldotTestEnvironment.clientKeystore());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -208,7 +205,7 @@ public class BaseWaldotTests {
 	public void runSimpleConfigurationExpression() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("graph.addVertex(\"id\", \"test-id\", \"label\", \"test-query\", \"value\", 12);\n");
-		Files.writeString(Path.of("/tmp/boot.conf"), sb.toString());
+		Files.writeString(WaldotTestEnvironment.bootFile(), sb.toString());
 		simpleServerInit();
 		assert g.getWaldotNamespace().getVerticesCount() == 1;
 		assert waldotTestClientHandler.checkOpcUaVertexExists("test-id");
@@ -230,7 +227,7 @@ public class BaseWaldotTests {
 	}
 
 	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {
-		bootstrapUrlServerInit("file:///tmp/boot.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.bootUrl());
 	}
 
 }

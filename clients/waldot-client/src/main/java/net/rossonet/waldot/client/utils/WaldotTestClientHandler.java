@@ -49,27 +49,39 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
+	private static final long CONNECTION_POLL_MSEC = 50L;
+
+	private static final long CONNECTION_TIMEOUT_MSEC = Long.getLong("waldot.test.client.timeout.msec", 15_000L);
+
 	private final WaldOTAgentClientImplV1 client;
 
 	private final WaldotGraph graph;
 
 	public WaldotTestClientHandler(final WaldotGraph g) {
-		final WaldOTAgentClientConfiguration configuration = new DefaultWaldOTAgentClientConfigurationV1();
+		this(g, new DefaultWaldOTAgentClientConfigurationV1());
+	}
+
+	public WaldotTestClientHandler(final WaldotGraph g, final WaldOTAgentClientConfiguration configuration) {
 		client = new WaldOTAgentClientImplV1(configuration);
-		client.startConnectionProcedure();
 		this.graph = g;
-		final int retry = 0;
-		while (retry < 10) {
-			if (client.getStatus().equals(Status.RUNNING)) {
-				System.out.println("opc client connected");
-				break;
+		client.startConnectionProcedure();
+		final long deadline = System.currentTimeMillis() + CONNECTION_TIMEOUT_MSEC;
+		while (!client.getStatus().equals(Status.RUNNING)) {
+			if (System.currentTimeMillis() > deadline) {
+				disconnect();
+				throw new IllegalStateException("OPC UA test client not connected after " + CONNECTION_TIMEOUT_MSEC
+						+ " ms (status " + client.getStatus() + ", endpoint " + configuration.getDiscoveryEndpoint()
+						+ ")");
 			}
 			try {
-				Thread.sleep(500L);
+				Thread.sleep(CONNECTION_POLL_MSEC);
 			} catch (final InterruptedException e) {
-				e.printStackTrace();
+				Thread.currentThread().interrupt();
+				disconnect();
+				throw new IllegalStateException("interrupted while waiting for OPC UA test client connection", e);
 			}
 		}
+		System.out.println("opc client connected");
 	}
 
 	public boolean checkOpcUaEdgeBrowserNameNameValueEquals(final WaldotEdge edge, final String expectedValue) {

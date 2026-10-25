@@ -36,7 +36,7 @@ import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerBas
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerOptimizedStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
-import net.rossonet.waldot.utils.NetworkHelper;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 
 /**
  * Contract of {@link MiloStrategy}: every behavior verified here must be the
@@ -53,7 +53,7 @@ public class MiloStrategyContractTest {
 	@BeforeEach
 	public void before() throws Exception {
 		cleanup();
-		Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 	}
 
 	@AfterEach
@@ -66,9 +66,7 @@ public class MiloStrategyContractTest {
 			g.getWaldotNamespace().close();
 			g = null;
 		}
-		while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-			Thread.sleep(10);
-		}
+		WaldotTestEnvironment.awaitOpcPortReleased();
 		Files.deleteIfExists(Path.of("/tmp/index.txt"));
 	}
 
@@ -76,7 +74,7 @@ public class MiloStrategyContractTest {
 		strategy = OPTIMIZED.equals(implementation)
 				? new MiloSingleServerOptimizedStrategy()
 				: new MiloSingleServerBaseStrategy();
-		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy(), strategy);
+		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy(), strategy);
 	}
 
 	private static <T> List<T> list(final Iterator<T> iterator) {

@@ -27,7 +27,7 @@ import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.opc.AbstractCreateVertexCommand;
 import net.rossonet.waldot.rules.vertices.ComputeVertex;
 import net.rossonet.waldot.rules.vertices.RuleVertex;
-import net.rossonet.waldot.utils.NetworkHelper;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 
 /**
  * Verifies the commands that create the vertices of the rules engine plugin.
@@ -46,7 +46,7 @@ public class WaldotRulesEngineVertexCommandsTest {
 	@BeforeEach
 	public void beforeEach() throws Exception {
 		clean();
-		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
+		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy());
 		for (final PluginListener p : g.getWaldotNamespace().getPlugins()) {
 			if (p instanceof WaldotRulesEnginePlugin) {
 				plugin = (WaldotRulesEnginePlugin) p;
@@ -61,11 +61,9 @@ public class WaldotRulesEngineVertexCommandsTest {
 			g = null;
 		}
 		plugin = null;
-		Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 		Files.deleteIfExists(Path.of("/tmp/index.txt"));
-		while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-			Thread.sleep(10);
-		}
+		WaldotTestEnvironment.awaitOpcPortReleased();
 	}
 
 	private List<AbstractCreateVertexCommand> createCommands() {

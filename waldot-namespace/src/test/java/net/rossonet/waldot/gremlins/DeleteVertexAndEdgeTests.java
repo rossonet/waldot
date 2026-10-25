@@ -19,8 +19,8 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.client.utils.WaldotTestClientHandler;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 import net.rossonet.waldot.utils.LogHelper;
-import net.rossonet.waldot.utils.NetworkHelper;
 
 @TestMethodOrder(OrderAnnotation.class)
 public class DeleteVertexAndEdgeTests {
@@ -97,7 +97,7 @@ public class DeleteVertexAndEdgeTests {
 
 	private void clean() {
 		try {
-			Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+			Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -124,22 +124,19 @@ public class DeleteVertexAndEdgeTests {
 			}
 		}
 		try {
-			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-				System.out.println("Waiting for server shutdown");
-				Thread.sleep(1);
-			}
+			WaldotTestEnvironment.awaitOpcPortReleased();
 			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 		try {
-			Files.deleteIfExists(Path.of("/tmp/waldot-client.ks"));
+			Files.deleteIfExists(WaldotTestEnvironment.clientKeystore());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {
-		bootstrapUrlServerInit("file:///tmp/boot.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.bootUrl());
 	}
 }

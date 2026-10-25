@@ -17,8 +17,8 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.client.utils.WaldotTestClientHandler;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 import net.rossonet.waldot.utils.LogHelper;
-import net.rossonet.waldot.utils.NetworkHelper;
 
 /**
  * Tests for the new script mode in SingleFileBootstrapStrategy.
@@ -58,11 +58,11 @@ public class BootstrapScriptModeTests {
 	private void clean() {
 		// Clean test files
 		try {
-			Files.deleteIfExists(Path.of("/tmp/boot-script.conf"));
-			Files.deleteIfExists(Path.of("/tmp/boot-function.conf"));
-			Files.deleteIfExists(Path.of("/tmp/boot-multiline.conf"));
-			Files.deleteIfExists(Path.of("/tmp/boot-advanced.conf"));
-			Files.deleteIfExists(Path.of("/tmp/boot-legacy-compat.conf"));
+			Files.deleteIfExists(WaldotTestEnvironment.tmpPath("boot-script.conf"));
+			Files.deleteIfExists(WaldotTestEnvironment.tmpPath("boot-function.conf"));
+			Files.deleteIfExists(WaldotTestEnvironment.tmpPath("boot-multiline.conf"));
+			Files.deleteIfExists(WaldotTestEnvironment.tmpPath("boot-advanced.conf"));
+			Files.deleteIfExists(WaldotTestEnvironment.tmpPath("boot-legacy-compat.conf"));
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -84,16 +84,13 @@ public class BootstrapScriptModeTests {
 			}
 		}
 		try {
-			while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-				System.out.println("Waiting for server shutdown");
-				Thread.sleep(1);
-			}
+			WaldotTestEnvironment.awaitOpcPortReleased();
 			Thread.sleep(1);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 		try {
-			Files.deleteIfExists(Path.of("/tmp/waldot-client.ks"));
+			Files.deleteIfExists(WaldotTestEnvironment.clientKeystore());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
@@ -111,9 +108,9 @@ public class BootstrapScriptModeTests {
 		sb.append("// Script mode test with variable\n");
 		sb.append("sensor = graph.addVertex('id', 'test-var', 'label', 'test-script', 'value', 100)\n");
 		sb.append("sensor.property('extra', 'data')\n");
-		Files.writeString(Path.of("/tmp/boot-script.conf"), sb.toString());
+		Files.writeString(WaldotTestEnvironment.tmpPath("boot-script.conf"), sb.toString());
 		
-		bootstrapUrlServerInit("file:///tmp/boot-script.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-script.conf"));
 		
 		assert g.getWaldotNamespace().getVerticesCount() == 1;
 		assert waldotTestClientHandler.checkOpcUaVertexExists("test-var");
@@ -139,9 +136,9 @@ public class BootstrapScriptModeTests {
 		sb.append("// Create two sensors\n");
 		sb.append("createSensor('sensor1', 42)\n");
 		sb.append("createSensor('sensor2', 84)\n");
-		Files.writeString(Path.of("/tmp/boot-function.conf"), sb.toString());
+		Files.writeString(WaldotTestEnvironment.tmpPath("boot-function.conf"), sb.toString());
 		
-		bootstrapUrlServerInit("file:///tmp/boot-function.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-function.conf"));
 		
 		assert g.getWaldotNamespace().getVerticesCount() == 2;
 		assert waldotTestClientHandler.checkOpcUaVertexExists("sensor1");
@@ -167,9 +164,9 @@ public class BootstrapScriptModeTests {
 		sb.append("  .property('Min', '18')\n");
 		sb.append("  .property('Max', '26')\n");
 		sb.append("  .next()\n");
-		Files.writeString(Path.of("/tmp/boot-multiline.conf"), sb.toString());
+		Files.writeString(WaldotTestEnvironment.tmpPath("boot-multiline.conf"), sb.toString());
 		
-		bootstrapUrlServerInit("file:///tmp/boot-multiline.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-multiline.conf"));
 		
 		assert g.getWaldotNamespace().getVerticesCount() == 1;
 		// Il generator crea un vertice con proprietà specifiche
@@ -199,9 +196,9 @@ public class BootstrapScriptModeTests {
 		sb.append("3.times { i ->\n");
 		sb.append("  createZone(\"zone${i}\", 18 + i * 2)\n");
 		sb.append("}\n");
-		Files.writeString(Path.of("/tmp/boot-advanced.conf"), sb.toString());
+		Files.writeString(WaldotTestEnvironment.tmpPath("boot-advanced.conf"), sb.toString());
 		
-		bootstrapUrlServerInit("file:///tmp/boot-advanced.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-advanced.conf"));
 		
 		assert g.getWaldotNamespace().getVerticesCount() == 3;
 		assert waldotTestClientHandler.checkVertexExists("temp-zone0");
@@ -229,9 +226,9 @@ public class BootstrapScriptModeTests {
 		sb.append("graph.addVertex('id', 'legacy2', 'label', 'test-legacy', 'value', 20)\n");
 		sb.append("\n");
 		sb.append("graph.addVertex('id', 'legacy3', 'label', 'test-legacy', 'value', 30)\n");
-		Files.writeString(Path.of("/tmp/boot-legacy-compat.conf"), sb.toString());
+		Files.writeString(WaldotTestEnvironment.tmpPath("boot-legacy-compat.conf"), sb.toString());
 		
-		bootstrapUrlServerInit("file:///tmp/boot-legacy-compat.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-legacy-compat.conf"));
 		
 		assert g.getWaldotNamespace().getVerticesCount() == 3;
 		assert waldotTestClientHandler.checkVertexExists("legacy1");
@@ -255,9 +252,9 @@ public class BootstrapScriptModeTests {
 		sb.append("// New style comment - triggers script mode\n");
 		sb.append("v1 = graph.addVertex('id', 'mixed1', 'label', 'mixed-test', 'value', 111)\n");
 		sb.append("v2 = graph.addVertex('id', 'mixed2', 'label', 'mixed-test', 'value', 222)\n");
-		Files.writeString(Path.of("/tmp/boot-script.conf"), sb.toString());
+		Files.writeString(WaldotTestEnvironment.tmpPath("boot-script.conf"), sb.toString());
 		
-		bootstrapUrlServerInit("file:///tmp/boot-script.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-script.conf"));
 		
 		assert g.getWaldotNamespace().getVerticesCount() == 2;
 		assert waldotTestClientHandler.checkVertexExists("mixed1");
@@ -293,9 +290,9 @@ public class BootstrapScriptModeTests {
 		sb.append("\n");
 		sb.append("// Log summary\n");
 		sb.append("log.info(\"HVAC system configured with 3 rooms\")\n");
-		Files.writeString(Path.of("/tmp/boot-advanced.conf"), sb.toString());
+		Files.writeString(WaldotTestEnvironment.tmpPath("boot-advanced.conf"), sb.toString());
 		
-		bootstrapUrlServerInit("file:///tmp/boot-advanced.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-advanced.conf"));
 		
 		assert g.getWaldotNamespace().getVerticesCount() == 3;
 		assert waldotTestClientHandler.checkVertexExists("sensor-office");
@@ -321,9 +318,9 @@ public class BootstrapScriptModeTests {
 		sb.append("# No actual commands\n");
 		sb.append("\n");
 		sb.append("# More comments\n");
-		Files.writeString(Path.of("/tmp/boot-script.conf"), sb.toString());
+		Files.writeString(WaldotTestEnvironment.tmpPath("boot-script.conf"), sb.toString());
 		
-		bootstrapUrlServerInit("file:///tmp/boot-script.conf");
+		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-script.conf"));
 		
 		// Should initialize successfully with no vertices
 		assert g.getWaldotNamespace().getVerticesCount() == 0;

@@ -1,5 +1,7 @@
 package net.rossonet.waldot.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
@@ -21,6 +24,7 @@ import net.rossonet.waldot.client.api.WaldOTAgentClient.Status;
 import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
 import net.rossonet.waldot.client.api.WaldotAgentClientObserver;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 
 public class ClientTests {
 	private WaldOTAgentClient client;
@@ -92,6 +96,20 @@ public class ClientTests {
 
 	}
 
+	@AfterEach
+	public void afterEach() throws Exception {
+		if (client != null) {
+			try {
+				client.close();
+			} catch (final Exception e) {
+				e.printStackTrace();
+			}
+			client = null;
+		}
+		WaldotTestEnvironment.cleanup(d, null);
+		d = null;
+	}
+
 	@Test
 	public void runClientOneMinutes() throws Exception {
 		d = OpcFactory.getOpcGraph();
@@ -106,11 +124,11 @@ public class ClientTests {
 			}
 		});
 		client.startConnectionProcedure();
-		final int limit = 60 / 5;
-		for (int i = 0; i < limit; i++) {
-			final WaldOTAgentClient.Status status = client.getStatus();
-			Thread.sleep(1);
+		final long deadline = System.currentTimeMillis() + 15_000;
+		while (!Status.RUNNING.equals(client.getStatus()) && System.currentTimeMillis() < deadline) {
+			Thread.sleep(50);
 		}
+		assertEquals(Status.RUNNING, client.getStatus(), "client not connected");
 		final Vertex source = d.addVertex("id", "source", "name",
 				"source vertex", "a", "1", "b", "2");
 		final Vertex destination = d.addVertex("id", "destination", "name",
@@ -127,9 +145,6 @@ public class ClientTests {
 		assert checkVertexValueEquals("destination", "a", 3);
 		assert checkOpcUaVertexValueEquals("destination", "b", 4);
 		assert checkVertexValueEquals("destination", "b", 4);
-
-		client.stopConnectionProcedure();
-		d.getWaldotNamespace().close();
 	}
 
 }

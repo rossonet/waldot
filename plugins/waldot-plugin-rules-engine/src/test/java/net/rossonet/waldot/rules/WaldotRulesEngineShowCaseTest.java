@@ -20,7 +20,7 @@ import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHisto
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.rules.commands.CreateShowCaseArenaCommand;
 import net.rossonet.waldot.rules.commands.CreateShowCaseEvolutionCommand;
-import net.rossonet.waldot.utils.NetworkHelper;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 
 /**
  * Tests of the two show case commands: the graph they create and, above all,
@@ -40,7 +40,7 @@ public class WaldotRulesEngineShowCaseTest {
 	@BeforeEach
 	public void beforeEach() throws Exception {
 		clean();
-		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
+		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy());
 	}
 
 	private void clean() throws Exception {
@@ -48,12 +48,10 @@ public class WaldotRulesEngineShowCaseTest {
 			g.getWaldotNamespace().close();
 			g = null;
 		}
-		Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 		Files.deleteIfExists(Path.of("/tmp/index.txt"));
-		while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-			Thread.sleep(10);
-		}
-		Files.deleteIfExists(Path.of("/tmp/waldot-client.ks"));
+		WaldotTestEnvironment.awaitOpcPortReleased();
+		Files.deleteIfExists(WaldotTestEnvironment.clientKeystore());
 	}
 
 	private String arena(String... args) {

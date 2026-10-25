@@ -46,6 +46,7 @@ dependencies {
     implementation project(':waldot-deps')
     implementation project(':waldot-runner')
     implementation project(':waldot-namespace')
+    testImplementation testFixtures(project(':waldot-client'))
     implementation project(':waldot-plugin-generator')
     implementation project(':waldot-plugin-rules-engine')
     implementation project(':waldot-plugin-tinkerpop')

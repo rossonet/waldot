@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
-import net.rossonet.waldot.utils.NetworkHelper;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 
 /** Verifies duplicate ids, self loops and property removal on a live graph. */
 public class GraphIntegrityTests {
@@ -27,8 +27,8 @@ public class GraphIntegrityTests {
 	@BeforeEach
 	public void before() throws Exception {
 		cleanup();
-		Files.deleteIfExists(Path.of("/tmp/boot.conf"));
-		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
+		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
+		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy());
 	}
 
 	@AfterEach
@@ -41,9 +41,7 @@ public class GraphIntegrityTests {
 			g.getWaldotNamespace().close();
 			g = null;
 		}
-		while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-			Thread.sleep(10);
-		}
+		WaldotTestEnvironment.awaitOpcPortReleased();
 		Files.deleteIfExists(Path.of("/tmp/index.txt"));
 	}
 

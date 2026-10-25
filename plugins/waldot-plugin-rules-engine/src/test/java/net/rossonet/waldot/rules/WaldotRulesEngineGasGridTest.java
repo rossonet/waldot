@@ -23,7 +23,7 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.rules.commands.CreateShowCaseGasGridCommand;
-import net.rossonet.waldot.utils.NetworkHelper;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
 
 /**
  * Tests of the Gas Grid show case: the graph created by the command, the
@@ -43,7 +43,7 @@ public class WaldotRulesEngineGasGridTest {
 	@BeforeEach
 	public void beforeEach() throws Exception {
 		clean();
-		g = OpcFactory.getOpcGraph("file:///tmp/boot.conf", new LoggerHistoryStrategy());
+		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy());
 	}
 
 	private void clean() throws Exception {
@@ -51,12 +51,10 @@ public class WaldotRulesEngineGasGridTest {
 			g.getWaldotNamespace().close();
 			g = null;
 		}
-		Files.deleteIfExists(Path.of("/tmp/boot.conf"));
+		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 		Files.deleteIfExists(Path.of("/tmp/index.txt"));
-		while (!NetworkHelper.checkLocalPortAvailable(12686)) {
-			Thread.sleep(10);
-		}
-		Files.deleteIfExists(Path.of("/tmp/waldot-client.ks"));
+		WaldotTestEnvironment.awaitOpcPortReleased();
+		Files.deleteIfExists(WaldotTestEnvironment.clientKeystore());
 	}
 
 	/** Arguments: stations, delay-ms, setpoint, pipe-delay-ms, gas-type, compare. */
