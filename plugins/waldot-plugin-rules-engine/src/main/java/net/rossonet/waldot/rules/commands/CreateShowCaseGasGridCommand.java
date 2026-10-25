@@ -433,10 +433,10 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 								+ " + 1.0")
 						+ "; }",
 				0, 0);
-		// broken on purpose: the transmitter does not exist, 'errors' grows
+		// broken on purpose: arithmetic exception, 'errors' grows
 		final Vertex broken = rule("gas-rule-bad-sensor",
 				"Broken rule (demo)", DIR + "/rules/supervisory",
-				val("gas-sensor-missing", "pressure") + " > 0.0",
+				"1 / 0 > 0.0",
 				"log.info('never executed')", 0, 0);
 
 		execute(supervisory, leakRule, "runs-leak-detect", 60,

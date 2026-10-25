@@ -17,7 +17,7 @@ The Data Generator plugin simulates dynamic data sources for testing, developmen
 ```groovy
 // Create incrementing counter from 0 to 100, updating every second
 generator = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "counter-1",
     "Algorithm", "incremental",
     "Min", "0",
@@ -54,7 +54,7 @@ generator.property("Algorithm", "random")
 
 ```groovy
 tempSensor = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "office-temp",
     "Algorithm", "sinusoidal",  // Smooth cycles
     "Min", "18",
@@ -67,7 +67,7 @@ tempSensor = graph.addVertex(
 
 ```groovy
 noiseSensor = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "vibration-sensor",
     "Algorithm", "random",
     "Min", "0",
@@ -80,7 +80,7 @@ noiseSensor = graph.addVertex(
 
 ```groovy
 productionCounter = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "items-produced",
     "Algorithm", "incremental",
     "Min", "0",
@@ -93,7 +93,7 @@ productionCounter = graph.addVertex(
 
 ```groovy
 constant = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "reference-voltage",
     "Algorithm", "stopped",
     "Min", "0",
@@ -172,7 +172,7 @@ node.getProperty("Delay").write(500)  // 0.5 seconds
 ### Find All Generators
 
 ```groovy
-generators = g.V().has("type", "generator").toList()
+generators = g.V().has("type", "sim:generator").toList()
 println "Total generators: ${generators.size()}"
 ```
 
@@ -180,7 +180,7 @@ println "Total generators: ${generators.size()}"
 
 ```groovy
 randomGens = g.V()
-    .has("type", "generator")
+    .has("type", "sim:generator")
     .has("Algorithm", "random")
     .toList()
 ```
@@ -189,7 +189,7 @@ randomGens = g.V()
 
 ```groovy
 values = g.V()
-    .has("type", "generator")
+    .has("type", "sim:generator")
     .valueMap("label", "data")
     .toList()
 
@@ -199,7 +199,7 @@ values.each { println "${it}" }
 ### Change All Delays
 
 ```groovy
-g.V().has("type", "generator").property("Delay", 2000).iterate()
+g.V().has("type", "sim:generator").property("Delay", 2000).iterate()
 ```
 
 ## Performance Tips
@@ -220,7 +220,7 @@ goodGen.property("Delay", 1000)  // 1 update/sec
 // Create 1000 generators efficiently
 1000.times { i ->
     graph.addVertex(
-        "type", "generator",
+        "type", "sim:generator",
         "label", "sensor-${i}",
         "Algorithm", "random",
         "Delay", "1000"
@@ -278,7 +278,7 @@ if (data < min || data > max) {
 ```groovy
 // Find generators with low delay
 fastGens = g.V()
-    .has("type", "generator")
+    .has("type", "sim:generator")
     .has("Delay", lt(100))
     .toList()
 
@@ -291,8 +291,6 @@ fastGens.each { it.property("Delay", 1000) }
 ## Next Steps
 
 - **[Algorithms Guide](ALGORITHMS.md)**: Deep dive into generation algorithms
-- **[Examples](EXAMPLES.md)**: Real-world use cases
-- **[API Reference](API_REFERENCE.md)**: Complete API documentation
 - **[Architecture](ARCHITECTURE.md)**: Internal design details
 
 ## Common Use Cases
@@ -302,7 +300,7 @@ fastGens.each { it.property("Delay", 1000) }
 ```groovy
 // Create sensor that triggers rules
 sensor = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "test-sensor",
     "Algorithm", "incremental",
     "Min", "0",
@@ -327,7 +325,7 @@ sensor.addEdge("fire", rule, "monitor-property", "data")
 // Create 10,000 generators
 10000.times { i ->
     graph.addVertex(
-        "type", "generator",
+        "type", "sim:generator",
         "label", "load-gen-${i}",
         "Algorithm", ["random", "incremental", "sinusoidal"][i % 3],
         "Delay", "1000"
@@ -343,7 +341,7 @@ sensor.addEdge("fire", rule, "monitor-property", "data")
 // Create variety of sensors for demo
 temps = (1..5).collect { i ->
     graph.addVertex(
-        "type", "generator",
+        "type", "sim:generator",
         "label", "temp-${i}",
         "Algorithm", "sinusoidal",
         "Min", "15",
@@ -354,7 +352,7 @@ temps = (1..5).collect { i ->
 
 pressures = (1..3).collect { i ->
     graph.addVertex(
-        "type", "generator",
+        "type", "sim:generator",
         "label", "pressure-${i}",
         "Algorithm", "triangular",
         "Min", "95",

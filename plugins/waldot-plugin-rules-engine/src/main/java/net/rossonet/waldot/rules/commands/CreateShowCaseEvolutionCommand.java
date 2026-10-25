@@ -154,8 +154,9 @@ public class CreateShowCaseEvolutionCommand extends AbstractShowCaseCommand {
 		}
 
 		// control vertices
+		final double initialHallFitness = bestFitness - 1.0;
 		final Vertex hallOfFame = vertex(HALL_OF_FAME_ID, null,
-				"Hall of fame", DIR + "/control", "fitness", bestFitness, "x",
+				"Hall of fame", DIR + "/control", "fitness", initialHallFitness, "x",
 				bestX, "y", bestY, "z", bestZ, "improvements", 0.0,
 				"improved-at", 0.0, "stagnations", 0.0, "status", "running");
 		final Vertex generation = vertex(GENERATION_ID, null, "Generation",
@@ -172,13 +173,13 @@ public class CreateShowCaseEvolutionCommand extends AbstractShowCaseCommand {
 				DIR + "/compute", 1);
 
 		// one rule per individual: mutation with the hill climbing acceptance
-		final String rate = val(MUTATION_RATE_ID, "data") + " + "
-				+ val(MUTATION_RATE_ID, "boost");
+		final String rate = valOr(MUTATION_RATE_ID, "data", "25.0") + " + "
+				+ valOr(MUTATION_RATE_ID, "boost", "0.0");
 		final Vertex[] evaluateRules = new Vertex[population];
 		for (int i = 0; i < population; i++) {
 			final String id = INDIVIDUAL_PREFIX + i;
-			final String v = ref(id);
-			final String action = "var v = " + v + "; "
+			final String v = refOrNull(id);
+			final String action = "var v = " + v + "; if (v != null) { "
 					+ "var step = (" + rate + ") / 50.0; "
 					+ "var nx = " + clamp("v.property('x').value() + (rand.nextDouble() - 0.5) * step * 2.0")
 					+ "; " + "var ny = "
@@ -187,24 +188,25 @@ public class CreateShowCaseEvolutionCommand extends AbstractShowCaseCommand {
 					+ clamp("v.property('z').value() + (rand.nextDouble() - 0.5) * step * 2.0")
 					+ "; " + "var nf = " + fitnessExpr("nx", "ny", "nz")
 					+ "; if (nf > v.property('fitness').value()) { "
-					+ "v.property('x', nx); v.property('y', ny); v.property('z', nz); v.property('fitness', nf); }";
+					+ "v.property('x', nx); v.property('y', ny); v.property('z', nz); v.property('fitness', nf); } }";
 			evaluateRules[i] = rule("evo-rule-evaluate-" + i,
 					"Evaluate " + i, DIR + "/rules/evaluate",
-					val(id, "data") + " < " + rate, action, 0, 0);
+					valOr(id, "data", "0.0") + " < " + rate, action, 0,
+					0);
 		}
 
 		// rules that must not overlap (breeding compute)
 		final String loopHead = "for (var i = 0; i < " + population
 				+ "; i = i + 1) { var v = g.V().has('id', '"
-				+ INDIVIDUAL_PREFIX + "' + i).next(); ";
-		final String generationValue = val(GENERATION_ID, "data");
+				+ INDIVIDUAL_PREFIX + "' + i).tryNext().orElse(null); if (v != null) { ";
+		final String generationValue = valOr(GENERATION_ID, "data", "0.0");
 		final Vertex selectBest = rule("evo-rule-select-best", "Select best",
 				DIR + "/rules/breeding", "true",
 				"var bf = -1000000.0; var bi = 0; " + loopHead
-						+ "var f = v.property('fitness').value(); if (f > bf) { bf = f; bi = i; } } "
-						+ "if (bf > " + val(HALL_OF_FAME_ID, "fitness")
+						+ "var f = v.property('fitness').value(); if (f > bf) { bf = f; bi = i; } } } "
+						+ "if (bf > " + valOr(HALL_OF_FAME_ID, "fitness", "-1000000.0")
 						+ ") { var b = g.V().has('id', '" + INDIVIDUAL_PREFIX
-						+ "' + bi).next(); "
+						+ "' + bi).tryNext().orElse(null); if (b != null) { "
 						+ set(HALL_OF_FAME_ID, "fitness", "bf") + "; "
 						+ set(HALL_OF_FAME_ID, "x", "b.property('x').value()")
 						+ "; "
@@ -213,37 +215,41 @@ public class CreateShowCaseEvolutionCommand extends AbstractShowCaseCommand {
 						+ set(HALL_OF_FAME_ID, "z", "b.property('z').value()")
 						+ "; "
 						+ set(HALL_OF_FAME_ID, "improvements",
-								val(HALL_OF_FAME_ID, "improvements")
+								valOr(HALL_OF_FAME_ID, "improvements", "0.0")
 										+ " + 1.0")
 						+ "; "
 						+ set(HALL_OF_FAME_ID, "improved-at", generationValue)
-						+ "; " + set(MUTATION_RATE_ID, "boost", "0.0") + "; }",
+						+ "; " + set(MUTATION_RATE_ID, "boost", "0.0")
+						+ "; } }",
 				150, 0);
 		final Vertex crossover = rule("evo-rule-crossover", "Crossover",
 				DIR + "/rules/breeding", generationValue + " % 3.0 == 0.0",
 				"var bf = -1000000.0; var wf = 1000000.0; var bi = 0; var wi = 0; "
 						+ loopHead
-						+ "var f = v.property('fitness').value(); if (f > bf) { bf = f; bi = i; } if (f < wf) { wf = f; wi = i; } } "
+						+ "var f = v.property('fitness').value(); if (f > bf) { bf = f; bi = i; } if (f < wf) { wf = f; wi = i; } } } "
 						+ "if (bi != wi) { var b = g.V().has('id', '"
-						+ INDIVIDUAL_PREFIX + "' + bi).next(); "
+						+ INDIVIDUAL_PREFIX
+						+ "' + bi).tryNext().orElse(null); "
 						+ "var w = g.V().has('id', '" + INDIVIDUAL_PREFIX
-						+ "' + wi).next(); "
+						+ "' + wi).tryNext().orElse(null); "
 						+ "var r = g.V().has('id', '" + INDIVIDUAL_PREFIX
-						+ "' + rand.nextInt(" + population + ")).next(); "
+						+ "' + rand.nextInt(" + population
+						+ ")).tryNext().orElse(null); "
+						+ "if (b != null && w != null && r != null) { "
 						+ "var nx = (b.property('x').value() + r.property('x').value()) / 2.0; "
 						+ "var ny = (b.property('y').value() + r.property('y').value()) / 2.0; "
 						+ "var nz = (b.property('z').value() + r.property('z').value()) / 2.0; "
 						+ "w.property('x', nx); w.property('y', ny); w.property('z', nz); "
 						+ "w.property('fitness', "
-						+ fitnessExpr("nx", "ny", "nz") + "); }",
+						+ fitnessExpr("nx", "ny", "nz") + "); } }",
 				0, 0);
 		final Vertex stagnation = rule("evo-rule-stagnation", "Stagnation",
 				DIR + "/rules/breeding",
-				generationValue + " - " + val(HALL_OF_FAME_ID, "improved-at")
+				generationValue + " - " + valOr(HALL_OF_FAME_ID, "improved-at", "0.0")
 						+ " > 8.0",
 				set(MUTATION_RATE_ID, "boost", "30.0") + "; "
 						+ set(HALL_OF_FAME_ID, "stagnations",
-								val(HALL_OF_FAME_ID, "stagnations") + " + 1.0")
+								valOr(HALL_OF_FAME_ID, "stagnations", "0.0") + " + 1.0")
 						+ "; "
 						+ set(HALL_OF_FAME_ID, "improved-at", generationValue),
 				0, 0);
@@ -259,8 +265,10 @@ public class CreateShowCaseEvolutionCommand extends AbstractShowCaseCommand {
 				.append("' + i).next().property('algorithm', 'stopped'); }");
 		final Vertex converged = rule("evo-rule-converged", "Converged",
 				DIR + "/rules/breeding",
-				val(HALL_OF_FAME_ID, "status") + " == 'running' && "
-						+ val(HALL_OF_FAME_ID, "fitness") + " >= " + target
+				valOr(HALL_OF_FAME_ID, "status", "'running'") + " == 'running' && "
+						+ valOr(HALL_OF_FAME_ID, "improvements", "0.0")
+						+ " > 0.0 && "
+						+ valOr(HALL_OF_FAME_ID, "fitness", "-1000000.0") + " >= " + target
 						+ ".0",
 				stop.toString(), 0, 0);
 		final Vertex stats = rule("evo-rule-stats", "Statistics (debug)",
@@ -268,14 +276,15 @@ public class CreateShowCaseEvolutionCommand extends AbstractShowCaseCommand {
 				"var sum = 0.0; var best = -1000000.0; var worst = 1000000.0; "
 						+ loopHead
 						+ "var f = v.property('fitness').value(); sum = sum + f; if (f > best) { best = f; } if (f < worst) { worst = f; } } "
+						+ "} "
 						+ set(STATS_ID, "mean", "sum / " + population + ".0")
 						+ "; " + set(STATS_ID, "best", "best") + "; "
 						+ set(STATS_ID, "worst", "worst"),
 				0, 1);
-		// broken on purpose: it reads a vertex that does not exist
+		// broken on purpose: arithmetic exception, so 'errors' grows
 		final Vertex broken = rule("evo-rule-bad-input", "Bad input (demo)",
 				DIR + "/rules/breeding",
-				val("evo-missing-vertex", "x") + " > 1.0",
+				"1 / 0 > 1.0",
 				"log.info('never executed')", 0, 0);
 
 		// execution. weight = priority * factor + queue size: select-best is the

@@ -89,7 +89,9 @@ Sorgente: `rules:compute`. Destinazione: `rules:rule`. Proprietà: `priority` (d
 | Comando | Argomenti |
 |---------|-----------|
 | `create rule` | label, condition, action, debug, hysteresis |
-| `create compute` | label, directory, threads |
+| `create compute` | label, directory, threads, execution-timeout-ms, factor |
 | `create compute monitored edge` | label, source (compute), target (regola), directory, priority |
 
 Directory dei comandi: `rules` (e `rules/edges` per l'edge). Il risultato è l'id del vertice o dell'edge creato.
+
+Quando un'azione supera `execution-timeout-ms` viene annullata e conteggiata in `errors` della regola.

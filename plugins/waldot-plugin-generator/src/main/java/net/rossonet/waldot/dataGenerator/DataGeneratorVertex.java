@@ -217,7 +217,8 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 			Thread.currentThread().setName(getNodeId().toParseableString());
 
 			// Loop principale di generazione
-			while (active == true) {
+			while (active == true
+					&& !Thread.currentThread().isInterrupted()) {
 				// Un errore nella propagazione del valore non deve fermare il
 				// generatore (l'eccezione sarebbe inghiottita dal Future)
 				try {
@@ -254,7 +255,10 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 					// Attende prima della prossima generazione
 					Thread.sleep(delay);
 				} catch (final InterruptedException e) {
-					logger.info("exception in generator", e);
+					logger.info("generator thread interrupted for node {}",
+							getNodeId().toParseableString());
+					Thread.currentThread().interrupt();
+					break;
 				}
 			}
 			logger.info("Thread for generator node "
@@ -362,6 +366,15 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 						.getNodeId().expanded(),
 				ValueRanks.Scalar, Long.class);
 		setProperty(maxProperty, max);
+		if (min > max) {
+			logger.warn("{} ({}) is greater than {} ({}), restoring defaults",
+					GeneratorConstants.MIN_VALUE_FIELD, min,
+					GeneratorConstants.MAX_VALUE_FIELD, max);
+			min = GeneratorConstants.DEFAULT_MIN_VALUE;
+			max = GeneratorConstants.DEFAULT_MAX_VALUE;
+			setProperty(minProperty, min);
+			setProperty(maxProperty, max);
+		}
 
 		final String keyValuesPropertypostNodeId = MiloStrategy
 				.getKeyValuesProperty(propertyKeyValues,
@@ -607,7 +620,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 	 * </p>
 	 */
 	protected void generateNextSinusoidal() {
-		actualValue = (max - min) / 2 * Math.sin(seed++) + (max + min) / 2;
+		actualValue = (max - min) / 2.0 * Math.sin(seed++) + (max + min) / 2.0;
 		assignValue();
 	}
 
@@ -685,14 +698,54 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 
 		// Gestisce modifica del Min
 		if (label.equals(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase())) {
-			min = Long.valueOf(value.getValue().getValue().toString());
-			setProperty(minProperty, min);
+			final long previous = min;
+			try {
+				final long target = Long
+						.valueOf(value.getValue().getValue().toString());
+				if (target <= max) {
+					min = target;
+					setProperty(minProperty, min);
+				} else {
+					logger.warn(
+							"Changing min from {} to {} is not allowed because {} is {}",
+							previous, target,
+							GeneratorConstants.MAX_VALUE_FIELD, max);
+					property(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(),
+							previous);
+				}
+			} catch (final NumberFormatException e) {
+				logger.warn(
+						"Changing min from {} to {} is not allowed (not a number)",
+						previous, value.getValue().getValue());
+				property(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(),
+						previous);
+			}
 		}
 
 		// Gestisce modifica del Max
 		if (label.equals(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase())) {
-			max = Long.valueOf(value.getValue().getValue().toString());
-			setProperty(maxProperty, max);
+			final long previous = max;
+			try {
+				final long target = Long
+						.valueOf(value.getValue().getValue().toString());
+				if (target >= min) {
+					max = target;
+					setProperty(maxProperty, max);
+				} else {
+					logger.warn(
+							"Changing max from {} to {} is not allowed because {} is {}",
+							previous, target,
+							GeneratorConstants.MIN_VALUE_FIELD, min);
+					property(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(),
+							previous);
+				}
+			} catch (final NumberFormatException e) {
+				logger.warn(
+						"Changing max from {} to {} is not allowed (not a number)",
+						previous, value.getValue().getValue());
+				property(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(),
+						previous);
+			}
 		}
 
 		// Gestisce modifica del postNodeIdData (non consentita a runtime)

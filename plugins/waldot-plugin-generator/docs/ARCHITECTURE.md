@@ -9,7 +9,7 @@ The WaldOT Data Generator plugin provides dynamic data simulation capabilities f
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    WaldotGeneratorPlugin                        │
-│  - Registers "generator" vertex type                            │
+│  - Registers "sim:generator" vertex type                        │
 │  - Manages virtual thread executor                              │
 │  - Creates DataGeneratorVertex instances                        │
 └──────────────────────────┬──────────────────────────────────────┘
@@ -44,7 +44,7 @@ The main plugin class that integrates with the WaldOT framework.
 
 **Responsibilities:**
 - Plugin lifecycle management (initialize, close)
-- Registration of "generator" vertex type in OPC-UA address space
+- Registration of "sim:generator" vertex type in OPC-UA address space
 - Creation of DataGeneratorVertex instances when requested by framework
 - Management of shared virtual thread executor service
 - No custom console commands (returns empty collection)
@@ -55,7 +55,7 @@ The main plugin class that integrates with the WaldOT framework.
 - `close()`: Shuts down executor and stops all generators
 
 **Constants:**
-- `DATA_GENERATOR_OBJECT_TYPE_LABEL = "generator"`: Vertex type label
+- `DATA_GENERATOR_OBJECT_TYPE_LABEL = "sim:generator"`: Vertex type label
 - `DEFAULT_ALGORITHM_FIELD = "incremental"`: Default algorithm
 - `DEFAULT_DELAY_FIELD = 1000L`: Default 1 second update interval
 - `DEFAULT_MIN_VALUE_FIELD = 0L`: Default minimum value
@@ -211,7 +211,7 @@ Generators are standard TinkerPop vertices:
 ```groovy
 // Create generator
 v = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "temp-sensor-1",
     "Algorithm", "sinusoidal",
     "Min", "18",
@@ -226,10 +226,10 @@ temperature = v.property("data").value()
 v.property("Algorithm", "random")
 
 // Find all generators
-generators = g.V().has("type", "generator").toList()
+generators = g.V().has("type", "sim:generator").toList()
 
 // Generators with specific algorithm
-randomGens = g.V().has("type", "generator")
+randomGens = g.V().has("type", "sim:generator")
               .has("Algorithm", "random")
               .toList()
 ```
@@ -265,7 +265,7 @@ Each DataGeneratorVertex runs in its own virtual thread:
 
 **Thread lifecycle:**
 ```
-graph.addVertex("type", "generator", ...)
+graph.addVertex("type", "sim:generator", ...)
     ↓
 WaldotGeneratorPlugin.createVertex()
     ↓
@@ -363,7 +363,7 @@ WaldotGeneratorPlugin acts as factory for DataGeneratorVertex:
 ```java
 @Override
 public WaldotVertex createVertex(NodeId typeNodeId, ...) {
-    if (matches("generator")) {
+    if (matches("sim:generator")) {
         return new DataGeneratorVertex(executor, ...);
     }
     return null;
@@ -489,7 +489,7 @@ Test OPC-UA synchronization:
 @Test
 void testOpcUaSynchronization() {
     // Create generator via graph
-    vertex = graph.addVertex("type", "generator", ...);
+    vertex = graph.addVertex("type", "sim:generator", ...);
     // Verify OPC-UA node created
     opcNode = opcClient.browse("generator-label");
     // Verify property sync
@@ -505,7 +505,7 @@ Test scalability:
 @Test
 void test1000Generators() {
     for (i in 1..1000) {
-        graph.addVertex("type", "generator", "label", "gen-" + i);
+        graph.addVertex("type", "sim:generator", "label", "gen-" + i);
     }
     // Verify all generators running
     // Measure CPU and memory

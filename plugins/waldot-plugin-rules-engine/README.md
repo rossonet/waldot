@@ -81,7 +81,7 @@ Peso di una regola: `weight = priority * factor + queue`. La regola con **peso p
 | Comando | Descrizione |
 |---------|-------------|
 | `create rule` | Crea un vertice `rules:rule` (label, condition, action, debug, hysteresis) |
-| `create compute` | Crea un vertice `rules:compute` (label, directory, threads) |
+| `create compute` | Crea un vertice `rules:compute` (label, directory, threads, execution-timeout-ms, factor) |
 | `create compute monitored edge` | Crea un edge `rules:execute` dal compute alla regola |
 | `create show case arena` | Crea l'esempio "Dungeon Arena" (16 vertici, argomento `delay-ms`) |
 | `create show case evolution` | Crea l'esempio "Evolution Lab" (algoritmo evolutivo, oltre 100 vertici; argomenti `population-size`, `delay-ms`, `target-fitness`, `seed`) |
@@ -97,7 +97,7 @@ Ogni esecuzione ha un contesto proprio: le variabili assegnate non passano alla 
 
 ## Debug
 
-Con `debug > 0` la regola pubblica un evento OPC-UA per ogni fase: `BEFORE/AFTER_CONDITION_COMPILE`, `BEFORE/AFTER_CONDITION_EXECUTION`, `BEFORE/AFTER_ACTION_COMPILE`, `BEFORE/AFTER_ACTION_EXECUTION` e le varianti `*_EXCEPTION`. Con `debug > 1` le fasi sono anche scritte nel log.
+Con `debug > 0` la regola pubblica un evento OPC-UA per ogni fase: `BEFORE/AFTER_CONDITION_COMPILE`, `BEFORE/AFTER_CONDITION_EXECUTION`, `BEFORE/AFTER_ACTION_COMPILE`, `BEFORE/AFTER_ACTION_EXECUTION` e le varianti `*_EXCEPTION`. Con `debug > 1` le fasi sono anche scritte nel log. Il timeout di esecuzione (`execution-timeout-ms`) annulla l'azione e incrementa `errors`.
 
 ## Documentazione
 

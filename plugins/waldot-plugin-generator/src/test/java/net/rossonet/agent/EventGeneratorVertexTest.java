@@ -194,4 +194,36 @@ public class EventGeneratorVertexTest {
 					"severity " + severity);
 		}
 	}
+
+	@Test
+	public void allConfiguredEventTypesAreMapped() throws Exception {
+		for (final var entry : EventGeneratorVertex.EVENT_TYPES.entrySet()) {
+			events.clear();
+			final EventGeneratorVertex generator = create(
+					"label", "type-" + entry.getKey(), "algorithm",
+					"sequential", "delay", "20", "messages", "x",
+					"event-type", entry.getKey());
+			waitFor("event type " + entry.getKey(), () -> events.stream()
+					.anyMatch(e -> entry.getValue().equals(e.getEventType())));
+			generator.property("algorithm", "stopped");
+			generator.close();
+		}
+	}
+
+	@Test
+	public void placeholdersExpandSourceCategoryTimeAndEpoch()
+			throws Exception {
+		create("label", "source-a", "algorithm", "sequential", "delay", "20",
+				"messages", "m", "category", "cat-${counter}", "template",
+				"${source}|${category}|${epoch}|${time}");
+		waitFor("placeholder event", () -> !events.isEmpty());
+		final BaseEventType event = events.get(0);
+		final String text = event.getMessage().text();
+		final String[] parts = text.split("\\|");
+		assertEquals(4, parts.length, text);
+		assertEquals("source-a", parts[0]);
+		assertTrue(parts[1].startsWith("cat-"), text);
+		assertTrue(parts[2].matches("\\d+"), text);
+		assertTrue(parts[3].contains("T"), text);
+	}
 }

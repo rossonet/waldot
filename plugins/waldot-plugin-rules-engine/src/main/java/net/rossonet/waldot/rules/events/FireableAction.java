@@ -1,5 +1,7 @@
 package net.rossonet.waldot.rules.events;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Abstract base class for executable rule actions.
  * <p>
@@ -36,6 +38,8 @@ public abstract class FireableAction implements Runnable {
 	// manager e scritto da chi estrae l'evento dalla coda
 	private volatile long startingTime;
 
+	private final AtomicBoolean timedOut = new AtomicBoolean(false);
+
 	/**
 	 * Returns the execution starting time in milliseconds.
 	 * 
@@ -56,6 +60,29 @@ public abstract class FireableAction implements Runnable {
 	 */
 	public void setStartingTime(long timeMillis) {
 		startingTime = timeMillis;
+	}
+
+	/**
+	 * Marks the action as timed out once.
+	 *
+	 * @return true only on the first timeout mark
+	 */
+	public boolean markTimedOut() {
+		return timedOut.compareAndSet(false, true);
+	}
+
+	/**
+	 * @return true when the action has been marked as timed out
+	 */
+	public boolean isTimedOut() {
+		return timedOut.get();
+	}
+
+	/**
+	 * Hook invoked by ComputeVertex when timeout cancellation happens.
+	 */
+	public void onTimeout() {
+		// default no-op
 	}
 
 }

@@ -25,7 +25,7 @@ The Data Generator plugin creates vertices that continuously generate changing v
 ```groovy
 // Create temperature sensor simulator
 tempSensor = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "office-temp",
     "Algorithm", "sinusoidal",
     "Min", "18",
@@ -67,7 +67,7 @@ tempSensor.property("Algorithm", "random")
 
 ```groovy
 counter = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "items-produced",
     "Algorithm", "incremental",
     "Min", "0",
@@ -80,7 +80,7 @@ counter = graph.addVertex(
 
 ```groovy
 vibrationSensor = graph.addVertex(
-    "type", "generator",
+    "type", "sim:generator",
     "label", "vibration",
     "Algorithm", "random",
     "Min", "0",
@@ -95,7 +95,7 @@ vibrationSensor = graph.addVertex(
 // Create 1000 generators
 1000.times { i ->
     graph.addVertex(
-        "type", "generator",
+        "type", "sim:generator",
         "label", "sensor-${i}",
         "Algorithm", "random",
         "Delay", "1000"
@@ -146,8 +146,6 @@ Complete documentation in `docs/` directory:
 - **[Quick Start](docs/QUICKSTART.md)**: Get started in 5 minutes
 - **[Algorithms](docs/ALGORITHMS.md)**: Mathematical details of each algorithm
 - **[Architecture](docs/ARCHITECTURE.md)**: Internal design and implementation
-- **[API Reference](docs/API_REFERENCE.md)**: Complete API documentation
-- **[Examples](docs/EXAMPLES.md)**: Real-world use cases
 
 ## Performance
 
@@ -207,7 +205,7 @@ gen.property("Algorithm", "incremental")
 
 ```groovy
 // Find fast generators
-g.V().has("type", "generator")
+g.V().has("type", "sim:generator")
     .has("Delay", lt(100))
     .toList()
 

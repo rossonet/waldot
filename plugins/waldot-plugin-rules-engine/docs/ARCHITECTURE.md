@@ -7,7 +7,7 @@
 - `registerTypeNode(RuleVertex.class, "WaldOTRuleObjectType", "Rule", "rules:rule")`
 - `registerTypeNode(ComputeVertex.class, "WaldOTComputeObjectType", "Thread Manager", "rules:compute")`
 - `registerTypeEdge("rules:execute")`
-- `registerCommand(...)` per i tre comandi console.
+- `registerCommand(...)` per i comandi di creazione (`create rule`, `create compute`, `create compute monitored edge`) e i tre comandi show case.
 
 La creazione dei vertici avviene per reflection dalla classe base, con il costruttore standard a 11 argomenti. Per questo i vertici non ricevono il plugin: lo ottengono con `WaldotRulesEnginePlugin.getInstance()` (come `LinuxOsPlugin`).
 
@@ -49,7 +49,7 @@ Un thread gestore:
 1. prende dalla coda `dirtyNodes` la regola con **peso più alto** (`weight = priority * factor + queue`);
 2. rispetta il limite `threads`: se è raggiunto attende senza prendere altri eventi;
 3. esegue un evento della regola in un virtual thread;
-4. controlla a intervalli i timeout (`execution-timeout-ms`) e rimuove i future conclusi, anche con coda vuota;
+4. controlla a intervalli i timeout (`execution-timeout-ms`), annulla le azioni in ritardo e incrementa `errors` della regola; rimuove anche i future conclusi con coda vuota;
 5. alla chiusura viene interrotto e termina l'executor.
 
 ## Edge

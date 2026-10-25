@@ -61,6 +61,12 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * and <code>sim:event-generator</code> (EventGeneratorVertex, simulated OPC
  * UA events)
  * </p>
+ *
+ * <h2>Registered Commands</h2>
+ * <ul>
+ *   <li><code>create generator</code>: creates <code>sim:generator</code> vertices</li>
+ *   <li><code>create event generator</code>: creates <code>sim:event-generator</code> vertices</li>
+ * </ul>
  * 
  * <h2>Configuration Properties</h2>
  * <ul>
@@ -74,7 +80,7 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * <pre>{@code
  * // Create generator with random values
  * Vertex generator = graph.addVertex(
- *     "type", "generator",
+ *     "type", "sim:generator",
  *     "label", "temp-sensor-sim",
  *     "Algorithm", "random",
  *     "Min", "20",
@@ -130,9 +136,9 @@ public class WaldotGeneratorPlugin extends AbstractPluginListener {
 	}
 
 	/**
-	 * Creates the OPC-UA type node for data generator vertices.
+				 * Creates the OPC-UA type node for data generator vertices.
 	 * <p>
-	 * Crea il tipo OPC-UA "WaldOTDataGeneratorObjectType" nell'address space
+				 * Crea il tipo OPC-UA "WaldOTDataGeneratorObjectType" nell'address space
 	 * con le proprietà Algorithm, Delay, Min, Max.
 	 * </p>
 	 */
@@ -200,8 +206,8 @@ public class WaldotGeneratorPlugin extends AbstractPluginListener {
 	}
 
 	/**
-	 * Initializes the plugin, registers the vertex type and the command that
-	 * creates it.
+	 * Initializes the plugin, registers the managed vertex types and both create
+	 * commands.
 	 * 
 	 * @param waldotNamespace WaldOT namespace instance
 	 */

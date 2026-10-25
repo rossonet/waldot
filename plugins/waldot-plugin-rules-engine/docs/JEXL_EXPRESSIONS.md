@@ -44,7 +44,7 @@ self.property('counter', counter)
 | Condizione non booleana o con eccezione | `errors` +1, evento `AFTER_CONDITION_EXECUTION_EXCEPTION` |
 | Azione non compilabile | `errors` +1, evento `AFTER_ACTION_COMPILE_EXCEPTION` |
 | Eccezione nell'azione | `errors` +1, evento `AFTER_ACTION_EXECUTION_EXCEPTION` |
-| Azione oltre `execution-timeout-ms` | Azione annullata |
+| Azione oltre `execution-timeout-ms` | Azione annullata, `errors` +1 |
 
 `executed` aumenta solo se l'azione termina con successo.
 

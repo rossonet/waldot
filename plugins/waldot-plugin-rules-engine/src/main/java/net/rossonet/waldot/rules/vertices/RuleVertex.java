@@ -145,6 +145,14 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	public final class RuleVertexFireableAction extends FireableAction {
 
 		@Override
+		public void onTimeout() {
+			sendDebugEvent(DebugEventType.AFTER_ACTION_EXECUTION_EXCEPTION,
+					"Action cancelled: execution timeout reached");
+			logger.warn("Rule action timed out for {}", getNodeId());
+			updateThrowable();
+		}
+
+		@Override
 		public void run() {
 			Thread.currentThread().setName(getNodeId().toParseableString());
 			if (closed) {
@@ -220,12 +228,16 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 				} catch (final Throwable e) {
 					sendDebugEvent(DebugEventType.AFTER_ACTION_EXECUTION_EXCEPTION,
 							LogHelper.stackTraceToString(e, 2 + getDebug()));
-					updateThrowable();
+					if (!isTimedOut()) {
+						updateThrowable();
+					}
 					logger.error("Error executing rule vertex action", e);
 				}
 			} catch (final Throwable t) {
 				logger.error("Error executing rule vertex", t);
-				updateThrowable();
+				if (!isTimedOut()) {
+					updateThrowable();
+				}
 			}
 		}
 
@@ -257,6 +269,11 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	private volatile CompiledScript compiledAction;
 	private volatile CompiledScript compiledCondition;
 	private final Object counterLock = new Object();
+
+	private final Object debugEventLock = new Object();
+
+	private volatile boolean debugEventPublishingEnabled = true;
+
 	private final AtomicLong errors = new AtomicLong();
 	private final AtomicLong executed = new AtomicLong();
 	private final AtomicLong total = new AtomicLong();
@@ -417,32 +434,41 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 
 	public void sendDebugEvent(DebugEventType eventType, String message) {
 		final int debug = getDebug();
-		if (debug > 0) {
-			try {
-				final UUID randomUUID = UUID.randomUUID();
-				final BaseEventTypeNode eventNode = waldotNamespace.getEventFactory()
-						.createEvent(waldotNamespace.generateNodeId(randomUUID), NodeIds.BaseEventType);
-				eventNode.setBrowseName(waldotNamespace.generateQualifiedName(eventType.name()));
-				eventNode.setDisplayName(LocalizedText.english(eventType.name()));
-				eventNode.setEventId(ByteString.of(randomUUID.toString().getBytes()));
-				eventNode.setEventType(NodeIds.BaseEventType);
-				eventNode.setSourceNode(getNodeId());
-				eventNode.setSourceName(getBrowseName().getName());
-				eventNode.setTime(DateTime.now());
-				eventNode.setReceiveTime(DateTime.NULL_VALUE);
-				if (message == null || message.isEmpty()) {
-					eventNode.setMessage(LocalizedText.english(eventType.name()));
-				} else {
-					eventNode.setMessage(LocalizedText.english(message));
+		if (debug > 0 && debugEventPublishingEnabled) {
+			synchronized (debugEventLock) {
+				if (!debugEventPublishingEnabled) {
+					return;
 				}
-				eventNode.setSeverity(ushort(2));
-				postEvent(eventNode);
-			} catch (final Throwable e) {
-				logger.error("Error sending debug event", e);
+				try {
+					final UUID randomUUID = UUID.randomUUID();
+					final BaseEventTypeNode eventNode = waldotNamespace.getEventFactory()
+							.createEvent(waldotNamespace.generateNodeId(randomUUID), NodeIds.SystemEventType);
+					eventNode.setBrowseName(waldotNamespace.generateQualifiedName(eventType.name()));
+					eventNode.setDisplayName(LocalizedText.english(eventType.name()));
+					eventNode.setEventId(ByteString.of(randomUUID.toString().getBytes()));
+					eventNode.setEventType(NodeIds.SystemEventType);
+					eventNode.setSourceNode(getNodeId());
+					eventNode.setSourceName(getBrowseName().getName());
+					eventNode.setTime(DateTime.now());
+					eventNode.setReceiveTime(DateTime.NULL_VALUE);
+					if (message == null || message.isEmpty()) {
+						eventNode.setMessage(LocalizedText.english(eventType.name()));
+					} else {
+						eventNode.setMessage(LocalizedText.english(message));
+					}
+					eventNode.setSeverity(ushort(2));
+					postEvent(eventNode);
+				} catch (final Throwable e) {
+					debugEventPublishingEnabled = false;
+					logger.error("Error sending debug event", e);
+					logger.warn(
+							"Disabling OPC-UA debug event publishing for {} after an event factory failure",
+							getNodeId());
+				}
 			}
-			if (debug > 1) {
+		}
+		if (debug > 1) {
 				logger.info("Debug event, type: {}, message: {}", eventType, message);
-			}
 		}
 	}
 

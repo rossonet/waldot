@@ -46,6 +46,13 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	}
 
 	/**
+	 * Returns a nullable vertex reference expression: null when the vertex is missing.
+	 */
+	public static String refOrNull(String id) {
+		return "g.V().has('id', '" + id + "').tryNext().orElse(null)";
+	}
+
+	/**
 	 * Returns the JEXL expression that reads a property of a vertex.
 	 * 
 	 * @param id       id of the vertex
@@ -53,7 +60,17 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	 * @return JEXL expression returning the value
 	 */
 	public static String val(String id, String property) {
-		return ref(id) + ".property('" + property + "').value()";
+		return "g.V().has('id', '" + id + "').values('" + property
+				+ "').tryNext().orElse(0.0)";
+	}
+
+	/**
+	 * Returns a property value with fallback expression when the property is missing.
+	 */
+	public static String valOr(String id, String property,
+			String fallbackExpression) {
+		return "g.V().has('id', '" + id + "').values('" + property
+				+ "').tryNext().orElse(" + fallbackExpression + ")";
 	}
 
 	/**

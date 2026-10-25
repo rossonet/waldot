@@ -438,11 +438,15 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 		final long timeout = getExecutionTimeoutMs();
 		for (final Entry<Future<?>, FireableAction> running : runners.entrySet()) {
 			final Future<?> future = running.getKey();
+			final FireableAction action = running.getValue();
 			if (future.isDone()) {
 				runners.remove(future);
-			} else if (running.getValue().getStartingTime() + timeout < now) {
+			} else if (action.getStartingTime() + timeout < now) {
 				logger.warn("Action started at {} is taking more than {} ms to execute. Cancelling...",
-						running.getValue().getStartingTime(), timeout);
+						action.getStartingTime(), timeout);
+				if (action.markTimedOut()) {
+					action.onTimeout();
+				}
 				future.cancel(true);
 				runners.remove(future);
 			}
