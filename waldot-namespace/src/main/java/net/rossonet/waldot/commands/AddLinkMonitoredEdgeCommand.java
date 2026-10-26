@@ -102,8 +102,12 @@ public class AddLinkMonitoredEdgeCommand extends AbstractOpcCommand {
 			final String[] inputValues) {
 		final List<String> parameters = new ArrayList<>();
 		parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
-		if (inputValues[4] != null && !inputValues[6].isEmpty()
-				&& Boolean.parseBoolean(inputValues[4]) == true) {
+		// input index 6 maps to PROPERTY_EDGE_INVERTED_LABEL.
+		final boolean edgeInverted = inputValues.length > 6
+				&& inputValues[6] != null
+				&& !inputValues[6].isEmpty()
+				&& Boolean.parseBoolean(inputValues[6]);
+		if (edgeInverted) {
 			parameters.add(MiloStrategy.LINK_FROM_EDGE_TYPE);
 		} else {
 			parameters.add(MiloStrategy.LINK_TO_EDGE_TYPE);

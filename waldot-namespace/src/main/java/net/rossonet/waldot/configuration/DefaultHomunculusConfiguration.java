@@ -25,7 +25,7 @@ public class DefaultHomunculusConfiguration extends HashMap<String, String>
 		return new DefaultHomunculusConfiguration();
 	}
 
-	// Campi privati per configurazione mutabile
+	// Private fields for mutable runtime configuration.
 	private String aboutCommandDescription = DEFAULT_ABOUT_COMMAND_DESCRIPTION;
 	private Boolean aboutCommandExecutable = DEFAULT_ABOUT_COMMAND_EXECUTABLE;
 	private String aboutCommandLabel = DEFAULT_ABOUT_COMMAND_LABEL;

@@ -50,45 +50,45 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 	 * @return true if script mode should be used, false for line-by-line mode
 	 */
 	private boolean detectScriptMode(final String content) {
-		// Rimuovi commenti '#' per l'analisi (sono legacy line-mode)
+		// Remove '#' comments for detection (legacy line-mode syntax).
 		final String cleanContent = content.replaceAll("#[^\n]*\n", "\n");
 
-		// Indicatori di script mode:
+		// Script mode indicators:
 
-		// 1. Presenza di commenti Groovy (//, /* */)
+		// 1. Groovy comments (//, /* */)
 		if (cleanContent.contains("//") || cleanContent.contains("/*")) {
 			return true;
 		}
 
-		// 2. Definizioni di funzioni
+		// 2. Function definitions
 		if (cleanContent.matches("(?s).*\\bdef\\s+\\w+\\s*\\(.*")) {
 			return true;
 		}
 
-		// 3. Assegnazioni di variabili (ma non proprietà di oggetti)
-		// Cerca pattern come "varName = " all'inizio di riga
+		// 3. Variable assignments (excluding object property syntax).
+		// Look for patterns such as "varName = " at line start.
 		if (java.util.regex.Pattern.compile("^\\s*\\w+\\s*=(?!=)", java.util.regex.Pattern.MULTILINE)
 				.matcher(cleanContent).find()) {
 			return true;
 		}
 
-		// 4. Catene di metodi multi-linea con indentazione
-		// Cerca pattern come ".property(...)\n .property(...)"
+		// 4. Multi-line method chains with indentation.
+		// Look for patterns such as ".property(...)\n  .property(...)".
 		if (cleanContent.matches("(?s).*\\.\\w+\\([^)]*\\)\\s*\n\\s+\\.\\w+\\(.*")) {
 			return true;
 		}
 
-		// 5. Strutture di controllo
+		// 5. Control structures
 		if (cleanContent.matches("(?s).*(\\bif\\s*\\(|\\bfor\\s*\\(|\\bwhile\\s*\\(|\\btimes\\s*\\{).*")) {
 			return true;
 		}
 
-		// 6. Closure/blocchi { }
-		if (cleanContent.matches("(?s).*\\{[^}]{20,}\\}.*")) { // Blocchi con contenuto significativo
+		// 6. Closures/blocks with meaningful content.
+		if (cleanContent.matches("(?s).*\\{[^}]{20,}\\}.*")) {
 			return true;
 		}
 
-		// Default: usa line-by-line mode per retrocompatibilità
+		// Default: line-by-line mode for backward compatibility.
 		return false;
 	}
 
@@ -170,12 +170,12 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 			final List<String> individualLines = new ArrayList<>();
 			String line;
 
-			// Prima passata: leggi tutto il contenuto
+			// First pass: read the full content.
 			while ((line = reader.readLine()) != null) {
 				fullContent.append(line).append("\n");
 
-				// Mantieni le righe per il modo legacy (retrocompatibilità)
-				// Solo se non sono commenti '#' o vuote
+				// Keep per-line commands for legacy mode (backward compatibility),
+				// ignoring '#' comments and empty lines.
 				if (!line.trim().startsWith("#") && !line.trim().isEmpty()) {
 					individualLines.add(line.trim());
 				}
@@ -184,16 +184,16 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 
 			final String content = fullContent.toString();
 
-			// Determina se usare il modo script o il modo line-by-line
+			// Decide whether to use script mode or line-by-line mode.
 			final boolean useScriptMode = detectScriptMode(content);
 
 			if (useScriptMode) {
-				// Modo script: ritorna tutto il contenuto come un singolo elemento
+				// Script mode: return the whole content as a single expression.
 				logger.info("Bootstrap configuration loaded in SCRIPT MODE from URL: {}", bootstrapUrl);
 				logger.debug("Script content length: {} characters", content.length());
 				return new String[] { content };
 			} else {
-				// Modo line-by-line: retrocompatibilità
+				// Line-by-line mode: backward compatibility path.
 				if (individualLines.isEmpty()) {
 					logger.warn("No valid bootstrap configuration found at URL: {}", bootstrapUrl);
 					return new String[0];

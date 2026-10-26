@@ -81,6 +81,35 @@ test {
     //applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
 }
 
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+}
+
+// Pragmatic threshold: keeps quality pressure high while allowing complex integration tests.
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.28
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.12
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
+
 javadoc{
     destinationDir = file("${project.buildDir}/docs/javadoc/${project.name}/")
     failOnError=false

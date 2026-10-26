@@ -263,26 +263,26 @@ public final class OpcFactory {
 	};
 
 	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {
-		// TODO verificare come usare la configurazione originale
+		// TODO: evaluate how to wire this method to the provided configuration.
 		return getOpcGraph();
 	}
 
-	/** System property that selects the Milo strategy: base (default) or optimized. */
+	/** System property that selects the Milo strategy: optimized (default) or base. */
 	public static final String MILO_STRATEGY_PROPERTY = "waldot.milo.strategy";
 
 	/**
 	 * Creates the Milo strategy selected by the system property
-	 * {@value #MILO_STRATEGY_PROPERTY} ("base" by default, or "optimized").
+	 * {@value #MILO_STRATEGY_PROPERTY} ("optimized" by default, or "base").
 	 */
 	public static MiloStrategy createMiloStrategy() {
-		final String selected = System.getProperty(MILO_STRATEGY_PROPERTY, "base").trim();
-		if ("optimized".equalsIgnoreCase(selected)) {
-			return new MiloSingleServerOptimizedStrategy();
+		final String selected = System.getProperty(MILO_STRATEGY_PROPERTY, "optimized").trim();
+		if ("base".equalsIgnoreCase(selected)) {
+			return new MiloSingleServerBaseStrategy();
 		}
-		if (!"base".equalsIgnoreCase(selected) && !selected.isEmpty()) {
-			logger.warn("Unknown Milo strategy '{}', using base", selected);
+		if (!"optimized".equalsIgnoreCase(selected) && !selected.isEmpty()) {
+			logger.warn("Unknown Milo strategy '{}', using optimized", selected);
 		}
-		return new MiloSingleServerBaseStrategy();
+		return new MiloSingleServerOptimizedStrategy();
 	}
 
 	public static WaldotGraph getOpcGraph(String bootStrapUrl, HistoryStrategy historyStrategy)
