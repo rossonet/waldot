@@ -252,13 +252,21 @@ public final class TextHelper {
 
 	public static Map<String, String> getParametersInUrlQuery(
 			final String query) {
-		final String[] params = query.split("&");
 		final Map<String, String> map = new HashMap<String, String>();
-
+		if (query == null || query.isBlank()) {
+			return map;
+		}
+		final String[] params = query.split("&");
 		for (final String param : params) {
-			final String name = param.split("=")[0];
-			final String value = param.split("=")[1];
-			map.put(name, value);
+			if (param == null || param.isBlank()) {
+				continue;
+			}
+			final String[] keyValue = param.split("=", 2);
+			final String name = keyValue[0];
+			final String value = keyValue.length > 1 ? keyValue[1] : "";
+			if (!name.isBlank()) {
+				map.put(name, value);
+			}
 		}
 		return map;
 

@@ -35,7 +35,6 @@ dependencies {
     testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testImplementation(platform('org.junit:junit-bom:5.13.1'))
-    testImplementation(platform('org.junit:junit-bom:5.13.1'))
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.18.0'
 	testImplementation('org.junit.jupiter:junit-jupiter')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
@@ -75,7 +74,35 @@ java {
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.12
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.12
+            }
+        }
+    }
+}
+
+check.dependsOn jacocoTestCoverageVerification
 
 javadoc{
     destinationDir = file("${project.buildDir}/docs/javadoc/${project.name}/")

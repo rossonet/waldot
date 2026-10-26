@@ -60,36 +60,36 @@ import tss.tpm.TPM_SU;
 
 public class TpmHelper {
 	/**
-	 * Definisce, scrive, legge e opzionalmente elimina un NV Index.
+	 * Defines, writes, reads, and optionally deletes an NV index.
 	 */
 	public static class NvUtils {
-		/** Utility per definire un NV-Index con autorizzazione OWNER */
+		/** Utility method to define an NV index with OWNER authorization. */
 		public static void defineIndex(Tpm tpm, TPM_HANDLE index, int size) {
 
-			// Tentativo di pulizia preventiva: ignora l’errore se l’index non esiste
+			// Best-effort cleanup: ignore error if the index does not exist.
 			tpm._allowErrors().NV_UndefineSpace(TPM_HANDLE.from(TPM_RH.OWNER), index);
 
-			// Costruzione attributi NV: lettura/scrittura consentita all’OWNER, no DA
+			// NV attributes: OWNER read/write, with no dictionary-attack state impact.
 			final TPMA_NV attrs = new TPMA_NV(TPMA_NV.OWNERWRITE, TPMA_NV.OWNERREAD, TPMA_NV.NO_DA);
 
-			// Descrittore pubblico dell’area NV
+			// Public descriptor for the NV area.
 			final TPMS_NV_PUBLIC nvPub = new TPMS_NV_PUBLIC(index, // Handle NV
 					TPM_ALG_ID.SHA256, // nameAlg
-					attrs, // attributi
+					attrs, // attributes
 					new byte[0], // authPolicy
-					(short) size); // dimensione dati
+					(short) size); // data size
 
-			// authValue dell’NV spazio (vuoto = password “null”)
+			// NV auth value (empty means null password).
 			final byte[] nvAuth = new byte[0];
 
-			// Definizione dello spazio NV
+			// Define NV space.
 			tpm.NV_DefineSpace(TPM_HANDLE.from(TPM_RH.OWNER), nvAuth, nvPub);
 
 			print("NV index 0x%08X definito (%d byte)", index.handle, size);
 		}
 
 		/**
-		 * Legge tutti i dati da un NV index.
+		 * Reads all bytes from an NV index.
 		 */
 		public static byte[] nvRead(Tpm tpm, TPM_HANDLE index) {
 			final int size = tpm.NV_ReadPublic(index).nvPublic.dataSize;
@@ -107,7 +107,7 @@ public class TpmHelper {
 		}
 
 		/**
-		 * Scrive dati su un NV index; gestisce automaticamente chunking.
+		 * Writes data to an NV index and handles chunking automatically.
 		 */
 		public static void nvWrite(Tpm tpm, TPM_HANDLE index, byte[] data) {
 			final int maxNvWrite = TpmHelpers.getTpmProperty(tpm, TPM_PT.NV_BUFFER_MAX);
@@ -122,7 +122,7 @@ public class TpmHelper {
 		}
 
 		/**
-		 * Elimina (undefine) un NV index.
+		 * Undefines an NV index.
 		 */
 		public static void undefineIndex(Tpm tpm, TPM_HANDLE index) {
 			tpm._allowErrors().NV_UndefineSpace(TPM_HANDLE.from(TPM_RH.OWNER), index);
@@ -212,12 +212,12 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Crea e rende persistente una chiave di attestazione (AK/AIK) RSA.
+	 * Creates and persists an RSA attestation key (AK/AIK).
 	 *
-	 * @param tpm    istanza di {@link Tpm}
-	 * @param handle handle persistente desiderato (es. 0x81010002)
-	 * @param bits   dimensione chiave RSA (2048 o 3072)
-	 * @return handle persistente dell’AK
+	 * @param tpm    {@link Tpm} instance
+	 * @param handle desired persistent handle (for example 0x81010002)
+	 * @param bits   RSA key size (2048 or 3072)
+	 * @return persistent handle of the AK
 	 */
 	public static TPM_HANDLE createPersistentAkRsa(Tpm tpm, int handle, int bits) {
 		// Template AK RSA (restrictions: sign, fixedTPM, fixedParent,
@@ -303,24 +303,24 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Esegue un'estensione su un PCR con il digest specificato.
+	 * Extends a PCR with the provided digest.
 	 *
-	 * @param tpm      istanza di {@link Tpm}
-	 * @param pcrIndex indice del PCR da estendere (0-23)
-	 * @param digest   digest da estendere (lunghezza conforme ad hashAlg)
-	 * @param hashAlg  algoritmo hash del digest
+	 * @param tpm      {@link Tpm} instance
+	 * @param pcrIndex PCR index to extend (0-23)
+	 * @param digest   digest to extend (length must match hashAlg)
+	 * @param hashAlg  hash algorithm used by the digest
 	 */
 	public static void extendPcr(Tpm tpm, int pcrIndex, byte[] digest, TPM_ALG_ID hashAlg) {
-		// Costruisce la mappa PCR: un solo indice, un solo digest
+		// Build PCR selection with one index and one digest.
 		final TPML_HANDLE handles = new TPML_HANDLE(new TPM_HANDLE[] { TPM_HANDLE.pcr(pcrIndex) });
 		tpm.PCR_Event(handles.handle[0], digest);
 		print("PCR %d esteso con digest %s", pcrIndex, Helpers.toHex(digest));
 	}
 
 	/**
-	 * Elimina (Flush) tutti gli oggetti transienti e le sessioni caricate.
+	 * Flushes all transient objects and loaded sessions.
 	 *
-	 * @param tpm istanza di {@link Tpm}
+	 * @param tpm {@link Tpm} instance
 	 */
 	public static void flushAllTransientAndSessions(Tpm tpm) {
 		// Handles transient
@@ -340,7 +340,7 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Termina (Flush) la sessione indicata se ancora valida.
+	 * Flushes the provided session handle if it is valid.
 	 */
 	public static void flushSessionSafe(Tpm tpm, TPM_HANDLE session) {
 		if (session != null && session.handle != 0) {
@@ -350,59 +350,15 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Prepara e restituisce l’“activation blob” da inviare al dispositivo cliente.
-	 * L’algoritmo segue la procedura DRS (Device Registration Service) ed esegue le
-	 * seguenti fasi principali:
+	 * Prepares and returns the activation blob to send to the client device.
 	 *
-	 * 1. Decodifica delle chiavi pubbliche EK (Endorsement Key) e SRK (Storage Root
-	 * Key) trasmesse dal client: - Si ricostruiscono gli oggetti TPMT_PUBLIC a
-	 * partire dai blob ricevuti.
+	 * The method follows the DRS (Device Registration Service) provisioning flow:
+	 * it reconstructs EK/SRK public areas, creates a policy-bound ID key,
+	 * duplicates and protects key material for the target TPM, creates the
+	 * credential blob for ActivateCredential, encrypts URI provisioning data, and
+	 * serializes all generated artifacts into a single output buffer.
 	 *
-	 * 2. Apertura di una sessione di tipo POLICY: - StartAuthSession con tipo
-	 * TPM_SE_POLICY e hash SHA-256. - Applicazione della policy
-	 * TPM2_PolicyCommandCode(Duplicate) per autorizzare in seguito l’uso del
-	 * comando TPM2_Duplicate. - Si estrae il digest di policy (PolicyGetDigest) che
-	 * sarà inserito nel template della nuova chiave ID (IdKey) affinché possa
-	 * essere duplicata solo in presenza della stessa policy.
-	 *
-	 * 3. Creazione della nuova chiave “Device ID” (IdKey): - Si genera una chiave
-	 * simmetrica casuale (32 byte) da usare come secret della chiave HMAC
-	 * (TPM_ALG_SHA256, TPMA_OBJECT: sign|userWithAuth|noDA). - CreatePrimary in
-	 * gerarchia OWNER per ottenere handle e parte pubblica.
-	 *
-	 * 4. Preparazione dell’infrastruttura di duplicazione: - Caricamento esterno
-	 * della SRK pubblica (LoadExternal) per ottenere un handle temporaneo. -
-	 * Definizione dello schema simmetrico (AES-128-CFB) che proteggerà il blob
-	 * duplicato. - Esecuzione di TPM2_Duplicate (in sessione di policy) per
-	 * generare: • outSymSeed – seme cifrato per derivare la chiave di wrapping •
-	 * duplicate – blob privato della IdKey cifrato con la chiave di wrapping •
-	 * encryptionKeyOut – chiave simmetrica interna (innerWrapKey) usata come
-	 * “wrapping key” e successivamente come chiave AES per i dati URI - Flush
-	 * dell’handle SRK pubblico temporaneo.
-	 *
-	 * 5. Creazione di un credential blob destinato all’EK del client: - Caricamento
-	 * esterno della chiave pubblica EK del dispositivo. -
-	 * TPM2_MakeCredential(ekPubHandle, encryptionKeyOut, srkPub.name): produce
-	 * credentialBlob + secret che permetteranno al client di recuperare
-	 * encryptionKeyOut tramite TPM2_ActivateCredential. - Flush dell’handle EK e
-	 * della IdKey e chiusura della sessione di policy.
-	 *
-	 * 6. Uso temporaneo della encryptionKeyOut per cifrare i dati di provisioning
-	 * (URI): - Si crea al volo una chiave simmetrica TPM (AES-128-CFB) con
-	 * encryptionKeyOut come chiave sensibile (CreatePrimary su OWNER). - Si cifra
-	 * la stringa URI con TPM2_EncryptDecrypt. - Flush dell’handle della chiave
-	 * simmetrica appena creata.
-	 *
-	 * 7. Composizione dell’activation blob da inviare al client: - [uint16]
-	 * lunghezza e [blob] credentialBlob - [uint16] lunghezza e [blob] secret (per
-	 * ActivateCredential) - [TPM2B_PRIVATE] duplicate (blob della IdKey) - [uint16]
-	 * lunghezza e [blob] outSymSeed - [uint16] lunghezza e [blob] parte pubblica
-	 * della IdKey (TPM2B_PUBLIC) - [uint16] lunghezza e [blob] URI cifrato Il
-	 * buffer risultante viene copiato in actBlobBuffer e la funzione restituisce la
-	 * dimensione totale del blob.
-	 *
-	 * Ritorno: int – dimensione in byte dell’activation blob pronto per il
-	 * download.
+	 * @return total size in bytes of the activation blob written in actBlobBuffer
 	 */
 	public static int getActivationBlob(Tpm tpm, byte[] ekPubBlob, int ekPubSize, byte[] srkPubBlob, int srkPubSize,
 			byte[] actBlobBuffer, int blobBufCapacity) {
@@ -495,14 +451,14 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Genera una quote firmata dei PCR indicati tramite una Attestation Key.
+	 * Generates a signed quote for the selected PCRs using an attestation key.
 	 *
-	 * @param tpm      istanza di {@link Tpm}
-	 * @param akHandle handle dell'AK (AUTH = null o impostata)
-	 * @param nonce    valore casuale fornito dal verificatore
-	 * @param pcrIdx   indici PCR da quotare
-	 * @param hashAlg  algoritmo hash per la quote
-	 * @return {@link tss.tpm.QuoteResponse} contenente attestazione e firma
+	 * @param tpm      {@link Tpm} instance
+	 * @param akHandle AK handle (AUTH may be null or preconfigured)
+	 * @param nonce    verifier-provided nonce
+	 * @param pcrIdx   PCR indices to quote
+	 * @param hashAlg  hash algorithm used by the quote
+	 * @return {@link tss.tpm.QuoteResponse} containing attestation and signature
 	 */
 	public static tss.tpm.QuoteResponse quotePcrs(Tpm tpm, TPM_HANDLE akHandle, byte[] nonce, int[] pcrIdx,
 			TPM_ALG_ID hashAlg) {
@@ -516,23 +472,22 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Legge i valori di uno o più PCR e li restituisce concatenati.
+	 * Reads one or more PCR values and returns their concatenation.
 	 *
-	 * @param tpm     istanza di {@link Tpm} già inizializzata
-	 * @param pcrIdx  array con gli indici PCR da leggere (0-23)
-	 * @param hashAlg algoritmo hash da usare (es. TPM_ALG_ID.SHA256)
-	 * @return array di byte contenente la concatenazione dei valori letti
+	 * @param tpm     initialized {@link Tpm} instance
+	 * @param pcrIdx  array of PCR indexes to read (0-23)
+	 * @param hashAlg hash algorithm to use (for example TPM_ALG_ID.SHA256)
+	 * @return byte array containing the concatenation of all read values
 	 */
 	public static byte[] readPcrs(Tpm tpm, int[] pcrIdx, TPM_ALG_ID hashAlg) {
-		// Costruzione della selezione PCR
+		// Build the PCR selection.
 		final TPMS_PCR_SELECTION sel = new TPMS_PCR_SELECTION(hashAlg, pcrIdx);
 		final TPMS_PCR_SELECTION[] selArr = new TPMS_PCR_SELECTION[] { sel };
 
-		// Esecuzione del comando PCR_Read
+		// Execute the PCR_Read command.
 		final tss.tpm.PCR_ReadResponse rsp = tpm.PCR_Read(selArr);
 
-		// Il valore restituito è un array di digests, ognuno di hashAlg.getHashSize()
-		// byte
+		// The response contains digest array entries, each hashAlg.getHashSize() bytes.
 		final byte[][] results = new byte[rsp.pcrValues.length][];
 		for (int i = 0; i < rsp.pcrValues.length; i++) {
 			results[i] = rsp.pcrValues[i].buffer;
@@ -556,56 +511,16 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Esegue la sequenza di provisioning del dispositivo TPM-based mediante
-	 * interazione con il Device Registration Service (DRS).
+	 * Runs the TPM device provisioning flow against the Device Registration Service
+	 * (DRS).
 	 *
-	 * 1. Eventuale pulizia delle chiavi permanenti (opzione –clear / -c): • Rimuove
-	 * dalle NV gli handle persistenti di EK, SRK e ID Key.
+	 * The sequence optionally clears persistent keys, ensures EK/SRK are available,
+	 * requests and parses the activation blob, performs ActivateCredential,
+	 * imports/persists the new device ID key, decrypts URI payload data, and
+	 * finally signs and verifies a token as a validation step.
 	 *
-	 * 2. Verifica / creazione delle chiavi primarie locali: •
-	 * _createPersistentPrimary_ crea (o carica se già presenti) ‑ EK (Endorsement
-	 * Key) in gerarchia ENDORSEMENT ‑ SRK (Storage Root Key) in gerarchia OWNER •
-	 * Si ottengono i relativi blob TPM2B_PUBLIC da spedire al server.
-	 *
-	 * 3. Richiesta dell’activation blob al server: • Invoca _getActivationBlob_
-	 * passando i blob EK/SRK; riceve in risposta actBlobBuffer con i componenti
-	 * necessari alla fase di attivazione.
-	 *
-	 * 4. Parsing dell’activation blob: • Estrazione sequenziale di: a.
-	 * credentialBlob (TPM2B_ID_OBJECT) b. encSecret (TPM2B_ENCRYPTED_SECRET) c.
-	 * idKeyDupBlob (TPM2B_PRIVATE) d. encWrapKey (TPM2B_ENCRYPTED_SECRET) e.
-	 * idKeyPub (TPM2B_PUBLIC) f. encUriData (TPM2B_DATA)
-	 *
-	 * 5. Apertura di una sessione di policy per ActivateCredential: •
-	 * StartAuthSession (TPM_SE_POLICY, hash SHA-256). • PolicySecret con authValue
-	 * della gerarchia ENDORSEMENT (Win TPM richiede questa policy per autorizzare
-	 * EK).
-	 *
-	 * 6. Recupero della chiave simmetrica interna (innerWrapKey): •
-	 * TPM2_ActivateCredential eseguito in dual-session (PW per SRK, Policy per EK)
-	 * decritta credentialBlob usando encSecret → ottiene innerWrapKey.
-	 *
-	 * 7. Import della nuova Device ID Key: • Definizione dei parametri simmetrici
-	 * (AES-CFB, lunghezza derivata) usati per l’unwrapping del blob di
-	 * duplicazione. • TPM2_Import con SRK, innerWrapKey, idKeyPub, idKeyDupBlob,
-	 * encWrapKey → ottiene il PRIVATE della IdKey per il TPM locale. • TPM2_Load
-	 * carica la chiave sotto la SRK. • EvictControl rende la chiave persistente su
-	 * _ID_KEY_PersHandle_. • FlushContext dell’handle temporaneo.
-	 *
-	 * 8. Decrittazione dei dati URI consegnati dal server: • Ricrea in TPM una
-	 * chiave simmetrica avente innerWrapKey come parte sensibile (Create + Load). •
-	 * TPM2_EncryptDecrypt in modalità decrypt (dir=1) con AES-CFB e IV nullo. •
-	 * Stampa la URI in chiaro per verifica.
-	 *
-	 * 9. Firma di un token con la nuova Device ID Key (esempio dimostrativo): •
-	 * Genera un buffer random (deviceIdData). • Firma tramite _signData_ usando la
-	 * IdKey appena importata. • Verifica la firma con la libreria server DRS (solo
-	 * per test).
-	 *
-	 * 10. Gestione degli errori: • Cattura TpmException per diagnosticare eventuali
-	 * TPM_RC. • Catch generale per altre eccezioni.
-	 *
-	 * Alla fine stampa “RunProvisioningSequence finished!”.
+	 * Errors are reported through TpmException response codes and generic exception
+	 * messages.
 	 */
 	public static void runProvisioningSequence(Tpm tpm) {
 		try {
@@ -746,16 +661,15 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Seala (protegge) un blob di dati sotto SRK con policy di autorizzazione
-	 * semplice (Password).
+	 * Seals (protects) a data blob under SRK using password-based authorization.
 	 *
-	 * @param tpm       istanza di {@link Tpm}
-	 * @param data      dato da sigillare
-	 * @param authValue password (può essere array vuoto)
-	 * @return oggetto contenente le strutture PUBLIC e PRIVATE del sealed object
+	 * @param tpm       {@link Tpm} instance
+	 * @param data      data to seal
+	 * @param authValue authorization value (can be an empty array)
+	 * @return object containing PUBLIC and PRIVATE structures of the sealed object
 	 */
 	public static CreateResponse sealData(Tpm tpm, byte[] data, byte[] authValue) {
-		// Template di un keyed-hash object per sequestro dati
+		// Template of a keyed-hash object used for data sealing.
 		final TPMT_PUBLIC sealTemplate = new TPMT_PUBLIC(TPM_ALG_ID.SHA256,
 				new TPMA_OBJECT(TPMA_OBJECT.fixedTPM, TPMA_OBJECT.fixedParent, TPMA_OBJECT.userWithAuth,
 						TPMA_OBJECT.noDA),
@@ -764,7 +678,7 @@ public class TpmHelper {
 
 		final TPMS_SENSITIVE_CREATE sens = new TPMS_SENSITIVE_CREATE(authValue, data);
 
-		// Creazione del sealed object sotto SRK
+		// Create the sealed object under SRK.
 		final CreateResponse rsp = tpm.Create(SRK_PersHandle, sens, sealTemplate, new byte[0],
 				new TPMS_PCR_SELECTION[0]);
 
@@ -805,7 +719,7 @@ public class TpmHelper {
 				TPM_HANDLE.from(TPM_RH.NULL)).result;
 	}
 
-	/* === FIRMA ========================================================== */
+	/* === SIGNATURE ====================================================== */
 	public static byte[] signRsa(Tpm tpm, TPM_HANDLE keyHandle, byte[] digest, TPM_ALG_ID hashAlg) {
 		final TPMS_SIG_SCHEME_RSASSA scheme = new TPMS_SIG_SCHEME_RSASSA(hashAlg);
 		final TPMU_SIGNATURE sig = tpm.Sign(keyHandle, digest, scheme, null);
@@ -813,12 +727,11 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Avvia una policy session HMAC-binded che potrà essere usata per comandi
-	 * protetti (PolicySession convenzionale).
+	 * Starts an HMAC-bound policy session for protected commands.
 	 *
-	 * @param tpm      istanza di {@link Tpm}
-	 * @param authHash algoritmo hash (es. TPM_ALG_ID.SHA256)
-	 * @return handle della sessione aperta
+	 * @param tpm      {@link Tpm} instance
+	 * @param authHash hash algorithm (for example TPM_ALG_ID.SHA256)
+	 * @return opened session handle
 	 */
 	public static TPM_HANDLE startPolicySession(Tpm tpm, TPM_ALG_ID authHash) {
 		final TPM_HANDLE sess = tpm.StartAuthSession(TPM_HANDLE.NULL, TPM_HANDLE.NULL, Helpers.RandomBytes(20),
@@ -829,15 +742,15 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Esegue una cifratura/decifratura simmetrica usando una chiave generata
-	 * on-the-fly nel TPM (non persistente).
+	 * Performs symmetric encryption/decryption using a TPM key generated on the
+	 * fly (non-persistent).
 	 *
-	 * @param tpm     istanza di {@link Tpm}
-	 * @param encrypt true = cifra, false = decifra
-	 * @param keyBits dimensione chiave AES (128/256)
-	 * @param iv      vector di inizializzazione (CFB)
-	 * @param data    dati da cifrare/decifrare
-	 * @return dati elaborati
+	 * @param tpm     {@link Tpm} instance
+	 * @param encrypt true to encrypt, false to decrypt
+	 * @param keyBits AES key size (128/256)
+	 * @param iv      initialization vector (CFB)
+	 * @param data    data to encrypt/decrypt
+	 * @return processed data
 	 */
 	public static byte[] symmetricCrypt(Tpm tpm, boolean encrypt, int keyBits, byte[] iv, byte[] data) {
 		final TPMT_SYM_DEF_OBJECT sym = new TPMT_SYM_DEF_OBJECT(TPM_ALG_ID.AES, keyBits, TPM_ALG_ID.CFB);
@@ -858,22 +771,22 @@ public class TpmHelper {
 	}
 
 	/**
-	 * Carica e desigilla un oggetto creato con {@link #sealData}.
+	 * Loads and unseals an object created with {@link #sealData}.
 	 *
-	 * @param tpm          istanza di {@link Tpm}
-	 * @param parentHandle handle del parent (tipicamente SRK persistente)
-	 * @param privBlob     parte PRIVATE del sealed object
-	 * @param pubArea      parte PUBLIC del sealed object
-	 * @param authValue    password usata in fase di sealing
-	 * @return dato in chiaro
+	 * @param tpm          {@link Tpm} instance
+	 * @param parentHandle parent handle (typically persistent SRK)
+	 * @param privBlob     PRIVATE section of the sealed object
+	 * @param pubArea      PUBLIC section of the sealed object
+	 * @param authValue    password used during sealing
+	 * @return plaintext data
 	 */
 	public static byte[] unsealData(Tpm tpm, TPM_HANDLE parentHandle, TPM2B_PRIVATE privBlob, TPMT_PUBLIC pubArea,
 			byte[] authValue) {
-		// Carica l’oggetto in TPM
+		// Load object into TPM.
 		final TPM_HANDLE hObj = tpm.Load(parentHandle, privBlob, pubArea);
 		hObj.AuthValue = authValue;
 
-		// Recupero dato
+		// Retrieve unsealed data.
 		final byte[] unsealed = tpm.Unseal(hObj);
 		tpm.FlushContext(hObj);
 		return unsealed;
@@ -885,7 +798,7 @@ public class TpmHelper {
 	}
 
 	private TpmHelper() {
-		// solo uso statico
+		// static-only utility class
 	}
 
 }

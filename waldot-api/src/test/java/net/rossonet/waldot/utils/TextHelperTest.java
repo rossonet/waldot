@@ -3,6 +3,7 @@ package net.rossonet.waldot.utils;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -61,6 +62,20 @@ class TextHelperTest {
 		final List<String> data = Arrays.asList("one", "two", "three");
 		final String result = TextHelper.joinCollection(data, ", ");
 		assertEquals("one, two, three", result);
+	}
+
+	@Test
+	void testParametersInUrlQueryHandlesMissingValues() {
+		final Map<String, String> query = TextHelper.getParametersInUrlQuery("a=1&b=&flag");
+		assertEquals("1", query.get("a"));
+		assertEquals("", query.get("b"));
+		assertEquals("", query.get("flag"));
+	}
+
+	@Test
+	void testParametersInUrlQueryHandlesNull() {
+		assertTrue(TextHelper.getParametersInUrlQuery(null).isEmpty());
+		assertTrue(TextHelper.getParametersInUrlQuery("  ").isEmpty());
 	}
 
 	@Test

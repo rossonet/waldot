@@ -67,8 +67,14 @@ public class DtdlHandler {
 					templateObject.addTelemetry(singleContent);
 				} else if (typesList.contains("Property")) {
 					templateObject.addProperty(singleContent);
+				} else if (typesList.contains("Command")) {
+					templateObject.addCommand(singleContent);
+				} else if (typesList.contains("Relationship")) {
+					templateObject.addRelationship(singleContent);
+				} else if (typesList.contains("Component")) {
+					templateObject.addComponent(singleContent);
 				} else {
-					logger.error("types " + typesList.toArray(new String[0]) + " are not know");
+					logger.error("types " + typesList.toArray(new String[0]) + " are not known");
 				}
 			}
 		}
@@ -91,14 +97,18 @@ public class DtdlHandler {
 	public static DtdlHandler newFromDtdlV2(final String dtdlV2String) throws JsonParseException, IOException {
 		final DtdlHandler templateObject = new DtdlHandler();
 		final Map<String, Object> data = new JSONObject(dtdlV2String).toMap();
+		boolean hasContext = false;
+		boolean hasType = false;
 		for (final Entry<String, Object> v : data.entrySet()) {
 			switch (v.getKey()) {
 			case "@context":
+				hasContext = true;
 				if (!"dtmi:dtdl:context;2".equals(v.getValue())) {
 					throw new IllegalArgumentException("@context must be dtmi:dtdl:context;2 but is " + v.getValue());
 				}
 				break;
 			case "@type":
+				hasType = true;
 				if (!"Interface".equals(v.getValue())) {
 					throw new IllegalArgumentException("@type must be Interface but is " + v.getValue());
 				}
@@ -126,6 +136,12 @@ public class DtdlHandler {
 				templateObject.setContents(v.getValue());
 				break;
 			}
+		}
+		if (!hasContext) {
+			throw new IllegalArgumentException("@context is mandatory in DTDL v2");
+		}
+		if (!hasType) {
+			throw new IllegalArgumentException("@type is mandatory in DTDL v2");
 		}
 		if (templateObject.getId() == null) {
 			throw new NullPointerException("@id is mandatory in DTDL v2");

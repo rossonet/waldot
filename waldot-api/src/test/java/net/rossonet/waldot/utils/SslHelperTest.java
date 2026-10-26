@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,16 +21,28 @@ import net.rossonet.waldot.utils.SslHelper.KeyStoreHelper;
 class SslHelperTest {
 
 	private SslHelper.KeyStoreHelper keyStoreHelper;
+	private Path keyStorePath;
+
+	@AfterEach
+	void tearDown() throws Exception {
+		if (keyStorePath != null) {
+			Files.deleteIfExists(keyStorePath);
+			if (keyStorePath.getParent() != null) {
+				Files.deleteIfExists(keyStorePath.getParent());
+			}
+		}
+	}
 
 	@BeforeEach
-	void setUp() {
-		keyStoreHelper = new KeyStoreHelper("test-keystore.p12", "password");
+	void setUp() throws Exception {
+		keyStorePath = Files.createTempDirectory("waldot-api-ssl-test").resolve("test-keystore.p12");
+		keyStoreHelper = new KeyStoreHelper(keyStorePath.toString(), "password");
 	}
 
 	@Test
 	void testCheckSignatureWithPayload() throws Exception {
 		keyStoreHelper.createSelfSignedCertificate("test-cert", "Test Common Name", "Test Organization", "Test Unit",
-				"Test Locality", "Test State", "Test Country", "urn:test:uri", "test.dns", "127.0.0.1",
+				"Test Locality", "Test State", "IT", "urn:test:uri", "test.dns", "127.0.0.1",
 				"test-alias.dns");
 
 		final KeyPair keyPair = keyStoreHelper.getKeyPair("test-cert");
@@ -38,7 +53,7 @@ class SslHelperTest {
 	@Test
 	void testCreateSelfSignedCertificate() {
 		final boolean result = keyStoreHelper.createSelfSignedCertificate("test-cert", "Test Common Name",
-				"Test Organization", "Test Unit", "Test Locality", "Test State", "Test Country", "urn:test:uri",
+				"Test Organization", "Test Unit", "Test Locality", "Test State", "IT", "urn:test:uri",
 				"test.dns", "127.0.0.1", "test-alias.dns");
 		assertTrue(result);
 	}
@@ -46,34 +61,31 @@ class SslHelperTest {
 	@Test
 	void testGenerateCertificateSigningRequest() throws Exception {
 		keyStoreHelper.createSelfSignedCertificate("test-cert", "Test Common Name", "Test Organization", "Test Unit",
-				"Test Locality", "Test State", "Test Country", "urn:test:uri", "test.dns", "127.0.0.1",
+				"Test Locality", "Test State", "IT", "urn:test:uri", "test.dns", "127.0.0.1",
 				"test-alias.dns");
 
 		final PKCS10CertificationRequest csr = keyStoreHelper.generateCertificateSigningRequest("test-cert");
-		System.out.println("CSR: " + csr);
 		assertNotNull(csr);
 	}
 
 	@Test
 	void testGetCertificate() throws Exception {
 		keyStoreHelper.createSelfSignedCertificate("test-cert", "Test Common Name", "Test Organization", "Test Unit",
-				"Test Locality", "Test State", "Test Country", "urn:test:uri", "test.dns", "127.0.0.1",
+				"Test Locality", "Test State", "IT", "urn:test:uri", "test.dns", "127.0.0.1",
 				"test-alias.dns");
 
 		final X509Certificate certificate = keyStoreHelper.getCertificate("test-cert");
-		System.out.println("Certificate: " + certificate);
 		assertNotNull(certificate);
 	}
 
 	@Test
 	void testGetKeyPair() throws Exception {
 		keyStoreHelper.createSelfSignedCertificate("test-cert", "Test Common Name", "Test Organization", "Test Unit",
-				"Test Locality", "Test State", "Test Country", "urn:test:uri", "test.dns", "127.0.0.1",
+				"Test Locality", "Test State", "IT", "urn:test:uri", "test.dns", "127.0.0.1",
 				"test-alias.dns");
 
 		final KeyPair keyPair = keyStoreHelper.getKeyPair("test-cert");
 		assertNotNull(keyPair);
-		System.out.println("KeyPair: " + keyPair);
 		assertNotNull(keyPair.getPrivate());
 		assertNotNull(keyPair.getPublic());
 	}
@@ -81,7 +93,7 @@ class SslHelperTest {
 	@Test
 	void testGetSanDnsNames() throws Exception {
 		keyStoreHelper.createSelfSignedCertificate("test-cert", "Test Common Name", "Test Organization", "Test Unit",
-				"Test Locality", "Test State", "Test Country", "urn:test:uri", "test.dns", "127.0.0.1",
+				"Test Locality", "Test State", "IT", "urn:test:uri", "test.dns", "127.0.0.1",
 				"test-alias.dns");
 
 		final X509Certificate certificate = keyStoreHelper.getCertificate("test-cert");
@@ -93,7 +105,7 @@ class SslHelperTest {
 	@Test
 	void testGetSanIpAddresses() throws Exception {
 		keyStoreHelper.createSelfSignedCertificate("test-cert", "Test Common Name", "Test Organization", "Test Unit",
-				"Test Locality", "Test State", "Test Country", "urn:test:uri", "test.dns", "127.0.0.1",
+				"Test Locality", "Test State", "IT", "urn:test:uri", "test.dns", "127.0.0.1",
 				"test-alias.dns");
 
 		final X509Certificate certificate = keyStoreHelper.getCertificate("test-cert");
@@ -104,7 +116,7 @@ class SslHelperTest {
 	@Test
 	void testGetSanUri() throws Exception {
 		keyStoreHelper.createSelfSignedCertificate("test-cert", "Test Common Name", "Test Organization", "Test Unit",
-				"Test Locality", "Test State", "Test Country", "urn:test:uri", "test.dns", "127.0.0.1",
+				"Test Locality", "Test State", "IT", "urn:test:uri", "test.dns", "127.0.0.1",
 				"test-alias.dns");
 
 		final X509Certificate certificate = keyStoreHelper.getCertificate("test-cert");

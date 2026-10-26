@@ -9,25 +9,23 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Coda concorrente con: 1. Thread–safety (basata su strutture
- * java.util.concurrent). 2. Histeresis: evita l’inserimento di un job se ne
- * esiste già uno uguale inserito meno di hysteresisMs fa. 3. Priorità: i job
- * con valore di priorità minore vengono estratti per primi.
+ * Concurrent queue with: 1. thread safety (based on java.util.concurrent data
+ * structures), 2. hysteresis (rejects duplicates inserted within the
+ * configured window), 3. priority ordering (lower priority values are served
+ * first).
  *
- * @param <J> tipo dell’oggetto messaggio (deve implementare
- *            equals()/hashCode()).
+ * @param <J> message type (must implement equals()/hashCode()).
  */
 public class HysteresisPriorityQueue<J> {
 
-	/** Classe interna che incapsula job + priorità + timestamp. */
+	/** Internal wrapper that stores payload, priority, and insertion sequence. */
 	private static final class PrioritizedMessage<MESSAGE_TYPE>
 			implements Comparable<PrioritizedMessage<MESSAGE_TYPE>> {
 		private static final AtomicLong SEQ = new AtomicLong();
 
 		final MESSAGE_TYPE payload;
 		final int priority;
-		final long seq; // utilito per mantenere l’ordine di inserimento tra messaggi con stessa
-						// priorità
+		final long seq; // Keeps insertion order among items with equal priority.
 
 		private PrioritizedMessage(MESSAGE_TYPE payload, int priority) {
 			this.payload = Objects.requireNonNull(payload);
@@ -43,6 +41,7 @@ public class HysteresisPriorityQueue<J> {
 	}
 
 	private volatile long hysteresisMs;
+	private volatile ScheduledExecutorService houseKeepingService;
 	private final ConcurrentHashMap<J, Long> lastInsertion = new ConcurrentHashMap<>();
 	private final PriorityBlockingQueue<PrioritizedMessage<J>> pq = new PriorityBlockingQueue<>();
 
@@ -66,11 +65,7 @@ public class HysteresisPriorityQueue<J> {
 	public void cleanUp() {
 		final long now = System.currentTimeMillis();
 		final long window = hysteresisMs;
-		lastInsertion.forEach((message, ts) -> {
-			if (now - ts >= window) {
-				lastInsertion.remove(message, ts);
-			}
-		});
+		lastInsertion.entrySet().removeIf(entry -> now - entry.getValue() >= window);
 	}
 
 	/**
@@ -82,7 +77,7 @@ public class HysteresisPriorityQueue<J> {
 	}
 
 	/**
-	 * Rimuove il job estratto dalla mappa lastInsertion, restituendo il payload.
+	 * Returns the payload of the dequeued wrapper.
 	 */
 	private J finalizeDequeue(PrioritizedMessage<J> prioritizedMessage) {
 		if (prioritizedMessage == null) {
@@ -140,7 +135,6 @@ public class HysteresisPriorityQueue<J> {
 		this.hysteresisMs = hysteresisMs;
 	}
 
-	/** Estrae (non bloccante) o restituisce null se vuota. */
 	/**
 	 * Retrieves and removes the highest priority job from the queue, or returns null if empty.
 	 * 
@@ -151,7 +145,6 @@ public class HysteresisPriorityQueue<J> {
 		return pj == null ? null : finalizeDequeue(pj);
 	}
 
-	/** Restituisce il numero di job attualmente in coda. */
 	/**
 	 * Returns the number of jobs currently in the queue.
 	 * 
@@ -162,10 +155,6 @@ public class HysteresisPriorityQueue<J> {
 	}
 
 	/**
-	 * Rimuove periodicamente (ogni ‘period’) i riferimenti nella mappa
-	 * lastInsertion più vecchi di hysteresisMs, per evitare memory leak.
-	 */
-	/**
 	 * Starts a background housekeeping task that periodically removes stale entries
 	 * from the internal lastInsertion map to prevent memory leaks.
 	 * 
@@ -173,12 +162,24 @@ public class HysteresisPriorityQueue<J> {
 	 * @param unit   the time unit for the period
 	 */
 	public void startHouseKeeping(long period, TimeUnit unit) {
-		final ScheduledExecutorService ses = Executors
+		if (houseKeepingService != null && !houseKeepingService.isShutdown()) {
+			return;
+		}
+		houseKeepingService = Executors
 				.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("HysteresisQueue-HouseKeeper", 0).factory());
-		ses.scheduleAtFixedRate(this::cleanUp, period, period, unit);
+		houseKeepingService.scheduleAtFixedRate(this::cleanUp, period, period, unit);
 	}
 
-	/** Estrae (bloccante) il job con priorità più alta (valore minore). */
+	/**
+	 * Stops the running housekeeping task, if any.
+	 */
+	public void stopHouseKeeping() {
+		if (houseKeepingService != null) {
+			houseKeepingService.shutdownNow();
+			houseKeepingService = null;
+		}
+	}
+
 	/**
 	 * Retrieves and removes the highest priority job from the queue, blocking if necessary.
 	 * 

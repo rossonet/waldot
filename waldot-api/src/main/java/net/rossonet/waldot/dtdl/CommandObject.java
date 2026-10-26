@@ -78,8 +78,18 @@ public class CommandObject {
 				this.name = record.getValue().toString();
 				break;
 			case "@type":
-				if (!"Command".equals(record.getValue())) {
-					throw new IllegalArgumentException("@type must be Command but is " + record.getValue());
+				if (record.getValue() instanceof String) {
+					if (!"Command".equals(record.getValue())) {
+						throw new IllegalArgumentException("@type must be Command but is " + record.getValue());
+					}
+				} else if (record.getValue() instanceof java.util.List) {
+					final java.util.List<String> types = (java.util.List<String>) record.getValue();
+					if (!types.contains("Command")) {
+						throw new IllegalArgumentException(
+								"@type must include Command but values are " + types.toArray(new String[0]));
+					}
+				} else {
+					throw new IllegalArgumentException("@type must be a String or List");
 				}
 				break;
 			case "comment":

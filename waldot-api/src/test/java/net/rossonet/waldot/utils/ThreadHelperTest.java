@@ -25,10 +25,21 @@ class ThreadHelperTest {
 	@Test
 	void testRunWithTimeoutExceedsTime() {
 		final Callable<String> task = () -> {
-			Thread.sleep(1); // Simulate a task that takes 2 seconds
+			Thread.sleep(2_000);
 			return "Completed";
 		};
 
 		assertThrows(TimeoutException.class, () -> ThreadHelper.runWithTimeout(task, 1, TimeUnit.SECONDS));
+	}
+
+	@Test
+	void testRunWithTimeoutPropagatesTaskException() {
+		final Callable<String> task = () -> {
+			throw new IllegalStateException("boom");
+		};
+
+		final Exception exception = assertThrows(IllegalStateException.class,
+				() -> ThreadHelper.runWithTimeout(task, 1, TimeUnit.SECONDS));
+		assertEquals("boom", exception.getMessage());
 	}
 }

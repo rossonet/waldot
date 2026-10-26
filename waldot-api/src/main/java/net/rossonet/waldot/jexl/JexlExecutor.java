@@ -20,7 +20,7 @@ public class JexlExecutor implements BaseExecutor {
 
 	private static final boolean DEBUG_FLAG = true;
 
-	protected static final Logger LOGGER = LoggerFactory.getLogger("JEXEL");
+	protected static final Logger LOGGER = LoggerFactory.getLogger("JEXL");
 
 	/**
 	 * Generates a new JEXL engine with unrestricted permissions.
@@ -28,7 +28,7 @@ public class JexlExecutor implements BaseExecutor {
 	 * @return a new JexlEngine instance configured for unrestricted expression evaluation
 	 */
 	public static JexlEngine generateEngine() {
-		// XXX: provare la restrizione dei permessi o la sandbox
+		// TODO evaluate restricted permissions or a sandbox profile.
 		// return new
 		// JexlBuilder().permissions(classPermissions).debug(true).silent(false).strict(false).create();
 		final JexlEngine j = new JexlBuilder().permissions(JexlPermissions.UNRESTRICTED).debug(DEBUG_FLAG).silent(false)
@@ -44,6 +44,7 @@ public class JexlExecutor implements BaseExecutor {
 
 	protected final Set<Class<?>> functionObjects = new HashSet<>();
 
+	private volatile boolean closed = false;
 	private JexlEngine jexl = generateEngine();
 	private final String name;
 
@@ -63,8 +64,10 @@ public class JexlExecutor implements BaseExecutor {
 
 	@Override
 	public void close() throws Exception {
-		jexl.clearCache();
-		jexl = null;
+		closed = true;
+		if (jexl != null) {
+			jexl.clearCache();
+		}
 	}
 
 	@Override
@@ -74,6 +77,9 @@ public class JexlExecutor implements BaseExecutor {
 
 	@Override
 	public Object execute(final String expression, final JexlContext jexlContext) {
+		if (closed) {
+			throw new IllegalStateException("JexlExecutor is closed: " + name);
+		}
 		try {
 			final JexlScript compiled = jexl.createScript(expression);
 			return compiled.execute(jexlContext);
@@ -94,7 +100,7 @@ public class JexlExecutor implements BaseExecutor {
 	}
 
 	@Override
-	public void setFunctionObject(final String id, final Object function) {
+	public synchronized void setFunctionObject(final String id, final Object function) {
 		functionList.add(id);
 		baseJexlContext.set(id, function);
 		functionObjects.add(function.getClass());

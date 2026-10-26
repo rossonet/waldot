@@ -52,17 +52,27 @@ public class DigitalTwinModelIdentifier {
 	private final int version;
 
 	private DigitalTwinModelIdentifier(final String value) {
+		if (value == null) {
+			throw new IllegalArgumentException("DigitalTwinModelIdentifier cannot be null or empty");
+		}
 		String cleanValue = value.toLowerCase().trim();
-		if (cleanValue == null || cleanValue.isEmpty()) {
+		if (cleanValue.isEmpty()) {
 			throw new IllegalArgumentException("DigitalTwinModelIdentifier cannot be null or empty");
 		}
 		if (TextHelper.isDirtyValue(cleanValue)) {
 			cleanValue = TextHelper.cleanText(cleanValue);
 		}
-		scheme = cleanValue.split(":")[0];
+		if (!cleanValue.contains(":") || !cleanValue.contains(";")) {
+			throw new IllegalArgumentException("DigitalTwinModelIdentifier must be in format scheme:path;version");
+		}
+		scheme = cleanValue.split(":", 2)[0];
 		final String others = cleanValue.substring(scheme.length() + 1);
-		path = others.split(";")[0];
-		version = Integer.valueOf(others.split(";")[1]);
+		if (!others.contains(";")) {
+			throw new IllegalArgumentException("DigitalTwinModelIdentifier must include a version section");
+		}
+		final String[] pathAndVersion = others.split(";", 2);
+		path = pathAndVersion[0];
+		version = Integer.parseInt(pathAndVersion[1]);
 	}
 
 	/**

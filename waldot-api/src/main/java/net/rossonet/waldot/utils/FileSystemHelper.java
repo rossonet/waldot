@@ -19,7 +19,12 @@ public class FileSystemHelper {
 
 	public static void deleteDirectoryRecursive(final File file) {
 		if (Files.exists(Paths.get(file.getAbsolutePath()))) {
-			for (final File subfile : file.listFiles()) {
+			final File[] nestedFiles = file.listFiles();
+			if (nestedFiles == null) {
+				file.delete();
+				return;
+			}
+			for (final File subfile : nestedFiles) {
 				if (subfile.isDirectory()) {
 					deleteDirectoryRecursive(subfile);
 				}

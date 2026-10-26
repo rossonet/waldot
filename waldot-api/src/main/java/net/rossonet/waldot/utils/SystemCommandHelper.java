@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -108,8 +109,7 @@ public class SystemCommandHelper {
 	 */
 	public static class StreamGobbler implements Runnable {
 		private final Consumer<String> consumer;
-		private final InputStream errorStream;
-		private final InputStream inputStream;
+		private final InputStream stream;
 
 		/**
 		 * Creates a StreamGobbler to consume process streams.
@@ -118,17 +118,18 @@ public class SystemCommandHelper {
 		 * @param errorStream  the standard error stream
 		 * @param consumer     the consumer to process each line
 		 */
-		public StreamGobbler(final InputStream inputStream, final InputStream errorStream,
-				final Consumer<String> consumer) {
-			this.inputStream = inputStream;
-			this.errorStream = errorStream;
+		public StreamGobbler(final InputStream stream, final Consumer<String> consumer) {
+			this.stream = stream;
 			this.consumer = consumer;
 		}
 
 		@Override
 		public void run() {
-			new BufferedReader(new InputStreamReader(inputStream)).lines().forEach(consumer);
-			new BufferedReader(new InputStreamReader(errorStream)).lines().forEach(consumer);
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+				reader.lines().forEach(consumer);
+			} catch (final IOException e) {
+				throw new IllegalStateException("Failed to consume process output stream", e);
+			}
 		}
 	}
 
@@ -153,13 +154,24 @@ public class SystemCommandHelper {
 		builder.command(command);
 		builder.directory(baseDirectory);
 		final Process process = builder.start();
-		final StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), process.getErrorStream(),
-				consumer);
-		final Future<?> future = ThreadHelper.newVirtualThreadExecutor().submit(streamGobbler);
-		if (timeoutMilliSeconds != 0) {
-			future.get(timeoutMilliSeconds, TimeUnit.MILLISECONDS);
-		} else {
-			future.get();
+		final ExecutorService executor = ThreadHelper.newVirtualThreadExecutor();
+		try {
+			final Future<?> outputFuture = executor.submit(new StreamGobbler(process.getInputStream(), consumer));
+			final Future<?> errorFuture = executor.submit(new StreamGobbler(process.getErrorStream(), consumer));
+			if (timeoutMilliSeconds != 0) {
+				if (!process.waitFor(timeoutMilliSeconds, TimeUnit.MILLISECONDS)) {
+					process.destroyForcibly();
+					throw new TimeoutException("Command timed out after " + timeoutMilliSeconds + "ms");
+				}
+				outputFuture.get(timeoutMilliSeconds, TimeUnit.MILLISECONDS);
+				errorFuture.get(timeoutMilliSeconds, TimeUnit.MILLISECONDS);
+			} else {
+				process.waitFor();
+				outputFuture.get();
+				errorFuture.get();
+			}
+		} finally {
+			executor.shutdownNow();
 		}
 	}
 

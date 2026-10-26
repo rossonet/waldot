@@ -50,6 +50,20 @@ class DtdlHandlerTest {
 	}
 
 	@Test
+	void testMissingContext() {
+		final String missingContextDtdl = """
+				{
+				    "@type": "Interface",
+				    "@id": "dtmi:example:Thermostat;1"
+				}
+				""";
+
+		final Exception exception = assertThrows(IllegalArgumentException.class,
+				() -> DtdlHandler.newFromDtdlV2(missingContextDtdl));
+		assertTrue(exception.getMessage().contains("@context is mandatory"));
+	}
+
+	@Test
 	void testInvalidType() {
 		final String invalidTypeDtdl = """
 				{
@@ -64,6 +78,20 @@ class DtdlHandlerTest {
 		});
 
 		assertTrue(exception.getMessage().contains("@type must be Interface"));
+	}
+
+	@Test
+	void testMissingType() {
+		final String missingTypeDtdl = """
+				{
+				    "@context": "dtmi:dtdl:context;2",
+				    "@id": "dtmi:example:Thermostat;1"
+				}
+				""";
+
+		final Exception exception = assertThrows(IllegalArgumentException.class,
+				() -> DtdlHandler.newFromDtdlV2(missingTypeDtdl));
+		assertTrue(exception.getMessage().contains("@type is mandatory"));
 	}
 
 	@Test
@@ -121,6 +149,26 @@ class DtdlHandlerTest {
 		assertEquals("A thermostat example", handler.getDescription());
 		assertEquals(1, handler.getTelemetries().size());
 		assertEquals(1, handler.getProperties().size());
+		assertEquals(1, handler.getCommands().size());
+	}
+
+	@Test
+	void testMultiTypeCommandContentIsParsed() throws IOException {
+		final String validDtdl = """
+				{
+				    "@context": "dtmi:dtdl:context;2",
+				    "@type": "Interface",
+				    "@id": "dtmi:example:Boiler;1",
+				    "contents": [
+				        {
+				            "@type": ["Command"],
+				            "name": "Start"
+				        }
+				    ]
+				}
+				""";
+
+		final DtdlHandler handler = DtdlHandler.newFromDtdlV2(validDtdl);
 		assertEquals(1, handler.getCommands().size());
 	}
 }

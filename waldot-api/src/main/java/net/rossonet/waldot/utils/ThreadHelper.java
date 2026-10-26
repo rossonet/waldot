@@ -87,7 +87,7 @@ public final class ThreadHelper {
 			if (t instanceof Error) {
 				throw (Error) t;
 			} else if (t instanceof Exception) {
-				throw e;
+				throw (Exception) t;
 			} else {
 				throw new IllegalStateException(t);
 			}
