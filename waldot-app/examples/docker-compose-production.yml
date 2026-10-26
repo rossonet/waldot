@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   waldot:
     image: rossonet/waldot:latest
@@ -11,6 +9,7 @@ services:
     
     # Production configuration with custom branding
     command:
+      # arguments are appended to the image ENTRYPOINT (java ... MainAgent)
       - "--tcp-port"
       - "12686"
       - "--https-port"
@@ -26,7 +25,7 @@ services:
       - "--factory-username"
       - "production_admin"
       - "--factory-password"
-      - "${WALDOT_ADMIN_PASSWORD:-ChangeMe123!}"
+      - "${OPCUA_ADMIN_PASSWORD:-ChangeMe123!}"
       - "--root-node-display-name"
       - "Production Engine"
       - "--endpoint-path"
@@ -41,7 +40,7 @@ services:
     # Environment variables
     environment:
       - TZ=Europe/Rome
-      - JAVA_OPTS=-Xmx4g -Xms2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200
+      - JDK_JAVA_OPTIONS=-Xmx4g -Xms2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200
     
     restart: always
     

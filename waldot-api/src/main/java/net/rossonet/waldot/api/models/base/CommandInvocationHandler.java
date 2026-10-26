@@ -3,6 +3,10 @@ package net.rossonet.waldot.api.models.base;
 import org.eclipse.milo.opcua.sdk.server.methods.AbstractMethodInvocationHandler;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.stack.core.UaException;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ExpandedNodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
+import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
@@ -37,14 +41,37 @@ public class CommandInvocationHandler extends AbstractMethodInvocationHandler {
 		return o != null ? o : new Argument[0];
 	}
 
+	/**
+	 * Converts an input argument into the string passed to
+	 * {@link WaldotCommand#runCommand}. NodeIds are rendered in their parseable
+	 * form ({@code ns=2;s=pump-1}) because {@code NodeId.toString()} is a debug
+	 * representation that cannot be parsed back.
+	 *
+	 * @param value the value of the input variant, may be null
+	 * @return the string value, or null
+	 */
+	public static String inputToString(final Object value) {
+		if (value == null) {
+			return null;
+		} else if (value instanceof NodeId) {
+			return ((NodeId) value).toParseableString();
+		} else if (value instanceof ExpandedNodeId) {
+			return ((ExpandedNodeId) value).toParseableString();
+		} else if (value instanceof LocalizedText) {
+			return ((LocalizedText) value).text();
+		} else if (value instanceof QualifiedName) {
+			return ((QualifiedName) value).name();
+		} else {
+			return value.toString();
+		}
+	}
+
 	@Override
 	protected Variant[] invoke(final InvocationContext invocationContext, final Variant[] inputValues)
 			throws UaException {
 		final String[] inputStrings = new String[inputValues.length];
 		for (int i = 0; i < inputValues.length; i++) {
-			if (inputValues[i].getValue() != null) {
-				inputStrings[i] = inputValues[i].getValue().toString();
-			}
+			inputStrings[i] = inputToString(inputValues[i].getValue());
 		}
 		final Object[] result = ((WaldotCommand) super.getNode()).runCommand(invocationContext, inputStrings);
 		final Variant[] output = new Variant[result.length];

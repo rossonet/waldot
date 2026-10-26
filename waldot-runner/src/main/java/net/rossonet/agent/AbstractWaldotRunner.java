@@ -31,14 +31,12 @@ import picocli.CommandLine.Spec;
  * WaldotRunner is the main class for running the WaldOT OPC UA server.
  * 
  * <p>This class uses Picocli for command-line interface management and provides
- * methods to start and configure the WaldOT server. It accepts configuration
- * parameters both from command-line arguments and environment variables, with
- * command-line arguments taking precedence.</p>
+ * methods to start and configure the WaldOT server. All configuration
+ * parameters are passed as command-line options.</p>
  * 
  * <p>The server can be configured through:</p>
  * <ul>
- *   <li>Command-line options (e.g., --tcp-port 12686)</li>
- *   <li>Environment variables (e.g., WALDOT_TCP_PORT=12686)</li>
+ *   <li>Command-line options (e.g., --tcp-port 12686, --anonymous-access false)</li>
  *   <li>Default values from configuration classes</li>
  * </ul>
  * 
@@ -77,7 +75,7 @@ public abstract class AbstractWaldotRunner
 	 * <p><b>Default</b>: true</p>
 	 */
 	@Option(names = {
-			"--about-command-executable"}, description = "Enable about command execution", defaultValue = "true")
+			"--about-command-executable"}, description = "Enable about command execution", defaultValue = "true", arity = "0..1")
 	protected Boolean aboutCommandExecutable;
 
 	// Command Configuration - About
@@ -96,7 +94,7 @@ public abstract class AbstractWaldotRunner
 	 * <p><b>Default</b>: true</p>
 	 */
 	@Option(names = {
-			"--about-command-user-executable"}, description = "Allow users to execute about command", defaultValue = "true")
+			"--about-command-user-executable"}, description = "Allow users to execute about command", defaultValue = "true", arity = "0..1")
 	protected Boolean aboutCommandUserExecutable;
 
 	protected UInteger aboutCommandUserWriteMask;
@@ -115,7 +113,7 @@ public abstract class AbstractWaldotRunner
 	 * <p><b>Default</b>: true</p>
 	 */
 	@Option(names = {"--anonymous-access",
-			"-aa"}, description = "Allow anonymous client connections without authentication", defaultValue = "true")
+			"-aa"}, description = "Allow anonymous client connections without authentication", defaultValue = "true", arity = "0..1")
 	protected boolean anonymousAccessAllowed;
 
 	/**
@@ -286,7 +284,7 @@ public abstract class AbstractWaldotRunner
 	 * <p><b>Default</b>: true</p>
 	 */
 	@Option(names = {
-			"--exec-command-executable"}, description = "Enable exec command execution", defaultValue = "true")
+			"--exec-command-executable"}, description = "Enable exec command execution", defaultValue = "true", arity = "0..1")
 	protected Boolean execCommandExecutable;
 
 	// Command Configuration - Exec
@@ -310,7 +308,7 @@ public abstract class AbstractWaldotRunner
 	 * <p><b>Default</b>: true</p>
 	 */
 	@Option(names = {
-			"--exec-command-user-executable"}, description = "Allow users to execute system commands", defaultValue = "true")
+			"--exec-command-user-executable"}, description = "Allow users to execute system commands", defaultValue = "true", arity = "0..1")
 	protected Boolean execCommandUserExecutable;
 
 	protected UInteger execCommandUserWriteMask;
@@ -360,7 +358,7 @@ public abstract class AbstractWaldotRunner
 	 * <p><b>Default</b>: true</p>
 	 */
 	@Option(names = {
-			"--help-command-executable"}, description = "Enable help command execution", defaultValue = "true")
+			"--help-command-executable"}, description = "Enable help command execution", defaultValue = "true", arity = "0..1")
 	protected Boolean helpCommandExecutable;
 
 	// Command Configuration - Help
@@ -379,7 +377,7 @@ public abstract class AbstractWaldotRunner
 	 * <p><b>Default</b>: true</p>
 	 */
 	@Option(names = {
-			"--help-command-user-executable"}, description = "Allow users to execute help command", defaultValue = "true")
+			"--help-command-user-executable"}, description = "Allow users to execute help command", defaultValue = "true", arity = "0..1")
 	protected Boolean helpCommandUserExecutable;
 
 	protected UInteger helpCommandUserWriteMask;
@@ -631,7 +629,7 @@ public abstract class AbstractWaldotRunner
 	 * <p><b>Default</b>: true</p>
 	 */
 	@Option(names = {
-			"--waldot-command-executable"}, description = "Enable Gremlin query execution", defaultValue = "true")
+			"--waldot-command-executable"}, description = "Enable Gremlin query execution", defaultValue = "true", arity = "0..1")
 	protected Boolean waldotCommandExecutable;
 
 	// Command Configuration - Waldot (Gremlin Query)
@@ -656,7 +654,7 @@ public abstract class AbstractWaldotRunner
 	 * <p><b>Default</b>: true</p>
 	 */
 	@Option(names = {
-			"--waldot-command-user-executable"}, description = "Allow users to execute Gremlin queries", defaultValue = "true")
+			"--waldot-command-user-executable"}, description = "Allow users to execute Gremlin queries", defaultValue = "true", arity = "0..1")
 	protected Boolean waldotCommandUserExecutable;
 
 	protected UInteger waldotCommandUserWriteMask;

@@ -34,8 +34,10 @@ Selection logic is implemented in `OpcFactory.createMiloStrategy()`.
 
 Bootstrap is loaded from URL (`file://`, `http://`, `https://`) and auto-detects mode:
 
-- line-by-line mode (legacy);
-- full Groovy script mode (recommended).
+- line-by-line mode (legacy): one expression per line, `#` comments;
+- script mode (recommended): the whole file is one JEXL script, statements end with `;`.
+
+Both modes are executed by the console engine (Apache Commons JEXL).
 
 See `BOOTSTRAP_CONFIGURATION.md` for syntax, detection rules, and examples.
 

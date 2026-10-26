@@ -44,19 +44,7 @@ docker-compose -f docker-compose-secure.yml up
 - Username: `industrial_admin`
 - Password: `SecureP@ssw0rd!`
 
-### 4. Custom Network Configuration
-**File**: `docker-compose-network.yml`
-
-Custom network binding and hostname configuration.
-
-```bash
-docker-compose -f docker-compose-network.yml up
-```
-
-**Access**:
-- OPC UA: `opc.tcp://waldot-server:12686/waldot`
-
-### 5. Production Configuration
+### 4. Production Configuration
 **File**: `docker-compose-production.yml`
 
 Production-ready deployment with security volumes and custom branding.
@@ -71,7 +59,7 @@ docker-compose -f docker-compose-production.yml up -d
 - Mounted help documentation
 - Health check monitoring
 
-### 6. Multiple Instances
+### 5. Multiple Instances
 **File**: `docker-compose-multiple.yml`
 
 Runs multiple WaldOT instances on different ports.
@@ -84,15 +72,6 @@ docker-compose -f docker-compose-multiple.yml up
 - Instance 1: `opc.tcp://localhost:12686/waldot`
 - Instance 2: `opc.tcp://localhost:12687/waldot`
 - Instance 3: `opc.tcp://localhost:12688/waldot`
-
-### 7. Development Configuration
-**File**: `docker-compose-dev.yml`
-
-Development setup with volume mounts and debugging enabled.
-
-```bash
-docker-compose -f docker-compose-dev.yml up
-```
 
 ## Testing with OPC UA Clients
 
@@ -112,40 +91,35 @@ pip install opcua-client
 opcua-client --endpoint opc.tcp://localhost:12686/waldot
 ```
 
-## Environment Variables Reference
+## Passing Options to the Container
 
-All Picocli parameters can be set via environment variables using the format `WALDOT_<OPTION_NAME>`:
+The image `ENTRYPOINT` already contains the `java` launcher, the class path
+and the main class (`net.rossonet.agent.MainAgent`); `CMD` is empty. Every
+item of a Compose `command:` (or every argument after the image name in
+`docker run`) is passed to WaldOT as a command line option:
 
-### OPC UA Configuration
-| Environment Variable | Option | Default | Description |
-|---------------------|--------|---------|-------------|
-| `WALDOT_TCP_PORT` | `--tcp-port` | `12686` | TCP port for OPC UA |
-| `WALDOT_HTTPS_PORT` | `--https-port` | `8443` | HTTPS port |
-| `WALDOT_APPLICATION_NAME` | `--application-name` | `WaldOT OPCUA server` | Server name |
-| `WALDOT_BIND_ADDRESSES` | `--bind-addresses` | `0.0.0.0` | Bind addresses |
-| `WALDOT_BIND_HOSTNAME` | `--bind-hostname` | `127.0.0.1` | Hostname |
-| `WALDOT_ENDPOINT_PATH` | `--endpoint-path` | `/waldot` | URL path |
-| `WALDOT_PRODUCT_NAME` | `--product-name` | `WaldOT` | Product name |
-| `WALDOT_MANUFACTURER_NAME` | `--manufacturer-name` | `Zona Autonoma srl` | Manufacturer |
-| `WALDOT_SECURITY_DIR` | `--security-dir` | `.security` | Security directory |
+```yaml
+command:
+  - "--tcp-port"
+  - "4840"
+  - "--anonymous-access"
+  - "false"
+```
 
-### WaldOT Application Configuration
-| Environment Variable | Option | Default | Description |
-|---------------------|--------|---------|-------------|
-| `WALDOT_ANONYMOUS_ACCESS` | `--anonymous-access` | `true` | Allow anonymous |
-| `WALDOT_FACTORY_USERNAME` | `--factory-username` | `admin` | Default username |
-| `WALDOT_FACTORY_PASSWORD` | `--factory-password` | `password123` | Default password |
-| `WALDOT_NAMESPACE_URI` | `--namespace-uri` | `urn:rossonet:waldot:engine` | Namespace URI |
-| `WALDOT_HELP_DIRECTORY` | `--help-directory` | `/app/help` | Help files path |
-| `WALDOT_BOOT_URL` | `--boot-url` | `file:///waldot/boot.conf` | Bootstrap config |
+```bash
+docker run --rm -p 4840:4840 rossonet/waldot:latest --tcp-port 4840
+```
 
-### Node Configuration
-| Environment Variable | Option | Default | Description |
-|---------------------|--------|---------|-------------|
-| `WALDOT_ROOT_NODE_ID` | `--root-node-id` | `waldot` | Root node ID |
-| `WALDOT_ROOT_NODE_BROWSE_NAME` | `--root-node-browse-name` | `Gremlin Engine` | Root browse name |
-| `WALDOT_ASSET_NODE_ID` | `--asset-node-id` | `aas` | Asset node ID |
-| `WALDOT_INTERFACE_NODE_ID` | `--interface-node-id` | `cmd` | Interface node ID |
+Configuration is done **only** through command line options; JVM options
+go in the standard `JDK_JAVA_OPTIONS` variable. Boolean options accept an
+explicit value (`--anonymous-access false`); used alone they mean `true`.
+
+The container runs as the non-root user `waldot` (uid/gid `1000`). Host
+directories mounted for writing (for example `./security` on
+`/app/.security`) must be writable by uid `1000`.
+
+The complete list of options with defaults is in the
+[Configuration Reference](../../docs/guide/docs/CONFIGURATION.md).
 
 ## Troubleshooting
 
@@ -163,6 +137,7 @@ docker-compose -f docker-compose-custom-ports.yml up
 Ensure the security directory has correct permissions:
 ```bash
 mkdir -p security
+sudo chown 1000:1000 security
 chmod 700 security
 ```
 
@@ -208,11 +183,12 @@ volumes:
 ## Performance Tuning
 
 ### JVM Options
-Add JVM tuning parameters:
+Add JVM tuning parameters with the standard `JDK_JAVA_OPTIONS` variable,
+read by the `java` launcher:
 
 ```yaml
 environment:
-  - JAVA_OPTS=-Xmx2g -Xms1g -XX:+UseG1GC
+  - JDK_JAVA_OPTIONS=-Xmx2g -Xms1g -XX:+UseG1GC
 ```
 
 ### Increase Virtual Threads
@@ -275,13 +251,6 @@ View real-time logs:
 docker-compose logs -f waldot
 ```
 
-### Metrics
-Access metrics endpoint:
-
-```bash
-curl http://localhost:8443/metrics
-```
-
 ## Cleanup
 
 Stop and remove containers:
@@ -311,5 +280,5 @@ These examples are part of the WaldOT project, licensed under Apache License 2.0
 ## Support
 
 - GitHub Issues: https://github.com/rossonet/waldot/issues
-- Documentation: https://github.com/rossonet/waldot/docs
+- Documentation: https://github.com/rossonet/waldot/tree/master/docs/guide
 - Community: https://github.com/rossonet/waldot/discussions

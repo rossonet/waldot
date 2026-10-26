@@ -6,7 +6,7 @@
 
 ### Prerequisites
 
-- Java 21+ (for virtual threads)
+- JDK 26 (the build targets Java 26; virtual threads are used throughout)
 - Docker (for containerized deployment)
 - Git
 - IDE with Java support (IntelliJ IDEA, Eclipse, VS Code)
@@ -122,322 +122,83 @@ List<Path> paths = g.V()
 
 ## Plugin Development
 
-### Creating a Custom Plugin
+Plugins are discovered at startup: a top-level class annotated with
+`@WaldotPlugin`, with a public no-argument constructor, located in a package
+under `net.rossonet.waldot`, `plugin` or `plugins`, usually extending
+`AbstractPluginListener`. It registers vertex types
+(`registerTypeNode(...)`), edge types (`registerTypeEdge(...)`) and commands
+(`registerCommand(...)`) in `initialize(WaldotNamespace)`.
 
-**Step 1**: Create plugin class
+The complete, verified walkthrough (project setup, vertex hooks, custom edges,
+commands, packaging in the Docker image, tests) is in the
+**[Integration Guide](INTEGRATION_GUIDE.md)**.
+
+---
+
+## Working with the base plugins
+
+Vertices of the base plugins are created with `graph.addVertex` in a bootstrap
+script, in the `query` command or in Java code. Keys are lowercase; scripts are
+[JEXL](https://commons.apache.org/proper/commons-jexl/) and statements end
+with `;`.
+
+### Generator
+
+```javascript
+// sinusoidal temperature, new value in 'data' every 5 s
+var temp = graph.addVertex('id', 'office-temp', 'type', 'sim:generator', 'label', 'office-temp',
+    'algorithm', 'sinusoidal', 'min', '18', 'max', '26', 'delay', '5000');
+// production counter, +1 every minute
+var counter = graph.addVertex('id', 'items-produced', 'type', 'sim:generator', 'label', 'items-produced',
+    'algorithm', 'incremental', 'min', '0', 'max', '1000000', 'delay', '60000');
+log.info('temperature: ' + temp.value('data'));
+```
+
+### Rules engine
+
+```javascript
+var compute = graph.addVertex('id', 'main-compute', 'type', 'rules:compute', 'label', 'main-compute', 'threads', '4');
+var rule = graph.addVertex('id', 'temp-alarm', 'type', 'rules:rule', 'label', 'temp-alarm',
+    'condition', "g.V().has('id','office-temp').values('data').next() > 25.0",
+    'action', "log.warn('High temperature')",
+    'hysteresis', '5000');
+compute.addEdge('runner', rule, 'type', 'rules:execute', 'priority', '100');
+temp.addEdge('watch', rule, 'type', 'fire', 'properties-to-monitor', 'data');
+```
+
+The same code in Java:
 
 ```java
-package com.example.myplugin;
-
-import net.rossonet.waldot.api.PluginListener;
-import net.rossonet.waldot.api.annotation.WaldotPlugin;
-import net.rossonet.waldot.api.models.*;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-@WaldotPlugin
-public class MyCustomPlugin implements AutoCloseable, PluginListener {
-    private static final Logger logger = LoggerFactory.getLogger(MyCustomPlugin.class);
-    private WaldotNamespace namespace;
-    private UaObjectTypeNode myTypeNode;
-
-    @Override
-    public void initialize(WaldotNamespace waldotNamespace) {
-        this.namespace = waldotNamespace;
-        logger.info("MyCustomPlugin initialized");
-
-        // Create OPC UA type node
-        createTypeNodes();
-    }
-
-    private void createTypeNodes() {
-        myTypeNode = UaObjectTypeNode.builder(namespace.getOpcUaNodeContext())
-            .setNodeId(namespace.generateNodeId("ObjectTypes/MyCustomType"))
-            .setBrowseName(namespace.generateQualifiedName("MyCustomType"))
-            .setDisplayName(LocalizedText.english("My Custom Device"))
-            .setIsAbstract(false)
-            .build();
-
-        // Add properties
-        PluginListener.addParameterToTypeNode(
-            namespace, myTypeNode, "value", NodeIds.Double
-        );
-
-        // Register in address space
-        namespace.getStorageManager().addNode(myTypeNode);
-        myTypeNode.addReference(new Reference(
-            myTypeNode.getNodeId(),
-            NodeIds.HasSubtype,
-            NodeIds.BaseObjectType.expanded(),
-            false
-        ));
-
-        // Register constructor
-        namespace.getObjectTypeManager().registerObjectType(
-            myTypeNode.getNodeId(),
-            UaObjectNode.class,
-            PluginListener.objectNodeConstructor
-        );
-    }
-
-    @Override
-    public boolean containsVertexType(String typeDefinitionLabel) {
-        return "my:custom".equals(typeDefinitionLabel);
-    }
-
-    @Override
-    public WaldotVertex createVertex(NodeId typeDefinitionNodeId, ...) {
-        if (myTypeNode.getNodeId().equals(typeDefinitionNodeId)) {
-            return new MyCustomVertex(...);
-        }
-        return null;
-    }
-
-    @Override
-    public void start() {
-        logger.info("MyCustomPlugin started");
-    }
-
-    @Override
-    public void stop() {
-        logger.info("MyCustomPlugin stopped");
-    }
-
-    @Override
-    public void close() throws Exception {
-        logger.info("MyCustomPlugin closed");
-    }
-}
+Vertex compute = graph.addVertex("id", "main-compute", "type", "rules:compute", "label", "main-compute", "threads", "4");
+Vertex rule = graph.addVertex("id", "temp-alarm", "type", "rules:rule", "label", "temp-alarm",
+        "condition", "g.V().has('id','office-temp').values('data').next() > 25.0",
+        "action", "log.warn('High temperature')", "hysteresis", "5000");
+compute.addEdge("runner", rule, "type", "rules:execute", "priority", "100");
+temp.addEdge("watch", rule, "type", "fire", "properties-to-monitor", "data");
 ```
 
-**Step 2**: Create custom vertex
+Variables available in `condition` and `action`:
 
-```java
-public class MyCustomVertex extends AbstractOpcVertex {
-    private final ExecutorService executor;
-    private volatile boolean active = true;
+| Variable | Description |
+| -------- | ----------- |
+| `log` | logger |
+| `g` | Gremlin traversal source |
+| `graph` | the WaldOT graph |
+| `cmd` | console helper (`getVerticesCount()`, `toNumber(x)`, ...) |
+| `self` | the rule vertex |
+| `math` | `java.lang.Math` |
+| `rand` | `java.util.Random` |
+| commands | every console command, as `<folder>_<name>` |
 
-    public MyCustomVertex(...) {
-        super(...);
-        this.executor = ThreadHelper.newVirtualThreadExecutor();
+Properties, weights, counters and debug:
+[rules engine README](https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine)
+and [User Guide](USER_GUIDE.md#6-rules-engine).
 
-        // Start background task in virtual thread
-        executor.submit(this::backgroundTask);
-    }
+### Bootstrap
 
-    private void backgroundTask() {
-        while (active) {
-            try {
-                // Do work (blocking I/O is OK in virtual threads)
-                double value = fetchDataFromExternalSource();
-
-                // Update property (auto-syncs to OPC UA)
-                property("value", value);
-
-                // Sleep (doesn't block OS thread)
-                Thread.sleep(5000);
-
-            } catch (InterruptedException e) {
-                active = false;
-            } catch (Exception e) {
-                logger.error("Error in background task", e);
-            }
-        }
-    }
-
-    @Override
-    public void remove() {
-        active = false;
-        executor.shutdownNow();
-        super.remove();
-    }
-}
-```
-
-**Step 3**: Add to build
-
-```gradle
-// settings.gradle
-include 'plugins:my-custom-plugin'
-
-// plugins/my-custom-plugin/build.gradle
-plugins {
-    id 'java'
-}
-
-dependencies {
-    implementation project(':waldot-api')
-    implementation 'org.apache.tinkerpop:gremlin-core:3.7.0'
-    implementation 'org.eclipse.milo:sdk-server:0.6.13'
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
-```
-
----
-
-## Working with Generator Plugin
-
-### Create Simulated Sensors
-
-```groovy
-// Temperature sensor (sinusoidal)
-tempSensor = graph.addVertex(
-    "type", "generator",
-    "label", "office-temp",
-    "Algorithm", "sinusoidal",
-    "Min", "18",
-    "Max", "26",
-    "Delay", "5000"  // 5 seconds
-)
-
-// Pressure sensor (random)
-pressureSensor = graph.addVertex(
-    "type", "generator",
-    "label", "tank-pressure",
-    "Algorithm", "random",
-    "Min", "0",
-    "Max", "100",
-    "Delay", "1000"  // 1 second
-)
-
-// Production counter (incremental)
-counter = graph.addVertex(
-    "type", "generator",
-    "label", "items-produced",
-    "Algorithm", "incremental",
-    "Min", "0",
-    "Max", "1000000",
-    "Delay", "60000"  // 1 minute
-)
-
-// Read current value
-currentTemp = tempSensor.property("data").value()
-```
-
----
-
-## Working with Rules Engine
-
-### Create Rules
-
-```groovy
-// 1. Create compute vertex (execution manager)
-compute = graph.addVertex(
-    "type", "compute",
-    "label", "main-compute",
-    "Threads", "4"
-)
-
-// 2. Create rule
-rule = graph.addVertex(
-    "type", "rule",
-    "label", "temp-alarm",
-    "Condition", "temperature > 80.0",
-    "Action", "log.warn('High temperature: ' + temperature + '°C')",
-    "Priority", "100",
-    "Hysteresis", "5000"  // 5 sec deduplication
-)
-
-// 3. Connect rule to compute
-rule.addEdge("execute", compute, "Priority", "100")
-
-// 4. Monitor sensor
-tempSensor.addEdge("fire", rule,
-    "monitor-property", "temperature",
-    "active", "true"
-)
-```
-
-### Complex Rules with Gremlin
-
-```groovy
-// Rule: Detect multiple sensor failures
-rule = graph.addVertex(
-    "type", "rule",
-    "label", "multi-sensor-failure",
-    "Condition", "g.V().has('type','sensor').has('status','ERROR').count().next() > 5",
-    "Action", """
-        count = g.V().has('type','sensor').has('status','ERROR').count().next();
-        log.error('Multiple sensor failures: ' + count);
-        graph.addVertex('type','alert','severity','CRITICAL','count',count);
-    """
-)
-```
-
-### JEXL Context Variables
-
-Available in all rules:
-
-| Variable   | Type              | Description         |
-| ---------- | ----------------- | ------------------- |
-| `log`      | Logger            | SLF4J logger        |
-| `g`        | GraphTraversal    | Gremlin traversal   |
-| `graph`    | Graph             | TinkerPop graph     |
-| `commands` | CommandsFunction  | WaldOT commands     |
-| `self`     | RuleVertex        | Current rule        |
-| `Math`     | Math              | Java Math functions |
-| `random`   | ThreadLocalRandom | Random numbers      |
-
----
-
-## Bootstrap Configuration
-
-### Script Mode (Recommended)
-
-```groovy
-// boot.conf - Full Groovy script
-
-// Function to create monitoring zone
-def createZone(name, tempMin, tempMax) {
-  // Sensor
-  sensor = g.addV('generator')
-    .property('type', 'generator')
-    .property('label', "temp-${name}")
-    .property('Algorithm', 'random')
-    .property('Min', tempMin.toString())
-    .property('Max', tempMax.toString())
-    .next()
-
-  // Rule
-  rule = g.addV('rule')
-    .property('type', 'rule')
-    .property('Condition', "temperature > ${tempMax - 2}")
-    .property('Action', "log.warn('High temp in ${name}')")
-    .next()
-
-  // Compute
-  compute = g.addV('compute')
-    .property('type', 'compute')
-    .property('Threads', '2')
-    .next()
-
-  // Connect
-  rule.addEdge('execute', compute)
-  sensor.addEdge('fire', rule, 'monitor-property', 'temperature')
-
-  return [sensor, rule, compute]
-}
-
-// Create zones
-['office', 'warehouse', 'production'].each { name ->
-  createZone(name, 18, 26)
-}
-
-log.info("Configuration complete")
-```
-
-### Load from Remote URL
-
-```bash
-docker run \
-  -e WALDOT_BOOT_URL=https://raw.githubusercontent.com/org/repo/main/config.groovy \
-  rossonet/waldot:latest
-```
+Syntax, format detection and troubleshooting:
+[Bootstrap Configuration](https://github.com/rossonet/waldot/blob/master/waldot-namespace/BOOTSTRAP_CONFIGURATION.md).
+Complete verified scripts: [Examples](examples/README.md).
 
 ---
 
@@ -464,6 +225,26 @@ public void testCustomVertex() {
     // Cleanup
     graph.close();
 }
+```
+
+### Regression tests
+
+Fixed bugs are covered by tests that go through the same path as a user:
+
+| Test | Module | Covers |
+| ---- | ------ | ------ |
+| `regression.AnonymousAccessRegressionTest` | `waldot-namespace` | `--anonymous-access false`: no anonymous token policy on the endpoints, anonymous sessions rejected by a real Milo client, accepted by default |
+| `regression.EdgeCommandsRegressionTest` | `waldot-namespace` | `create link/fire monitored edge` called over OPC UA with NodeId arguments, edge direction, value propagation, `error:` results |
+| `regression.DeleteDirectoryAndResetRegressionTest` | `waldot-namespace` | `delete directory` removes vertices and edges of the folder tree; `cmd.reset()` empties the graph before the bootstrap (both Milo strategies) |
+| `WaldotRulesEngineEdgeCommandTest` | rules engine | `create compute monitored edge` with NodeId arguments |
+
+`RawOpcUaClient` (test package `net.rossonet.waldot.regression`) connects a
+plain Milo client to the test server with a chosen identity: use it for new
+tests that must reproduce what an external OPC UA client does.
+
+```bash
+./gradlew :waldot-namespace:test --tests 'net.rossonet.waldot.regression.*'
+./gradlew :waldot-plugin-rules-engine:test --tests '*EdgeCommandTest'
 ```
 
 ### Integration Testing with Testcontainers
@@ -562,25 +343,24 @@ vertex.addPropertyObserver((v, key, oldValue, newValue) -> {
 ```bash
 # Docker
 docker run \
-  -e JAVA_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG" \
+  -e JDK_JAVA_OPTIONS="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug" \
   rossonet/waldot:latest
 
-# Java
-java -Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG \
-     -jar waldot-app.jar
+# Java (fat jar built with ./gradlew :waldot-app:shadowJar)
+java -Dorg.slf4j.simpleLogger.defaultLogLevel=debug \
+     -jar waldot-app/build/libs/waldot-app-<version>-all.jar
 ```
 
 ### Debug Rules
 
-```groovy
-// Enable debug events
-rule.property("Debug", 2)  // 0=off, 1=events, 2=all
+```javascript
+// enable debug: 0 = off, 1 = OPC UA events, 2 = events and log
+g.V().has('id', 'temp-alarm').next().property('debug', 2);
 
-// Check metrics
-queueSize = rule.property("Queue").value()
-totalEvents = rule.property("Total").value()
-executed = rule.property("Executed").value()
-errors = rule.property("Errors").value()
+// counters
+var rule = g.V().has('id', 'temp-alarm').next();
+log.info('queue=' + rule.value('queue') + ' total=' + rule.value('total')
+    + ' executed=' + rule.value('executed') + ' errors=' + rule.value('errors'));
 ```
 
 ### Connect with OPC UA Client
@@ -609,20 +389,17 @@ errors = rule.property("Errors").value()
 
 ### Complete Documentation
 
-- [Plugin Development Manual](manuale_plugins.md) - Complete guide (Italian)
+- [Integration Guide](INTEGRATION_GUIDE.md) - How to write a plugin
 - [API JavaDoc](https://javadoc.io/doc/net.rossonet.waldot/waldot-api/latest/index.html)
 
 ---
 
 ## Examples
 
-See [Examples Directory](../../examples/) for complete Docker Compose examples:
-
-1. [Industrial Monitoring](../../examples/01-industrial-monitoring/)
-2. [Production Simulation](../../examples/02-production-simulation/)
-3. [Energy Monitoring](../../examples/03-energy-monitoring/)
-4. [Quality Control](../../examples/04-quality-control/)
-5. [Predictive Maintenance](../../examples/05-predictive-maintenance/)
+- [Docker Compose examples](https://github.com/rossonet/waldot/tree/master/waldot-app/examples) - server deployment variants
+- [Rules engine showcase: gas grid](https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine/docs/SHOWCASE_GAS_GRID.md)
+- [Generator quick start](https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-generator/docs/QUICKSTART.md)
+- [Configuration Reference](CONFIGURATION.md)
 
 ---
 

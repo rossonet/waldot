@@ -632,7 +632,8 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		if (!closed.compareAndSet(false, true)) {
 			return;
 		}
-		resetNameSpace();
+		// the graph is not emptied on close (resetNameSpace() removes every
+		// element and is meant for cmd.reset()): only the indexes are released
 		// stop the monitors of the edges
 		for (final WaldotEdge edge : new ArrayList<>(cachedEdges.values())) {
 			try {
@@ -893,10 +894,68 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		} else if (target instanceof WaldotVertexProperty) {
 			removeVertexProperty(nodeTargetId);
 		} else {
+			deleteDirectoryContent(nodeTargetId);
+			// the folder may already have been pruned with its last child
 			forgetDirectory(nodeTargetId);
-			deleteQuietly(target);
+			waldotNamespace.getStorageManager().getNode(nodeTargetId)
+					.ifPresent(this::deleteQuietly);
 		}
 		return nodeTargetId.toParseableString();
+	}
+
+	/**
+	 * Removes every edge and vertex linked in a directory folder or in one of
+	 * its sub folders (edges first, then vertices with their remaining edges).
+	 * Elements are removed with the normal removal path, so monitors, plugins
+	 * and OPC UA nodes are cleaned up as for a single deletion.
+	 *
+	 * @return the number of removed elements
+	 */
+	private int deleteDirectoryContent(final NodeId folderId) {
+		final List<NodeId> elements = new ArrayList<>();
+		synchronized (directoryLock) {
+			final DirectoryNode root = directoryNodes.get(folderId);
+			if (root == null) {
+				return 0;
+			}
+			for (final Map.Entry<NodeId, DirectoryLink> link : directoryLinks
+					.entrySet()) {
+				DirectoryNode directory = link.getValue().directory();
+				while (directory != null && directory != root) {
+					directory = directory.parentDirectory;
+				}
+				if (directory == root) {
+					elements.add(link.getKey());
+				}
+			}
+		}
+		int removed = 0;
+		for (final NodeId id : elements) {
+			if (edgeIndex.containsKey(id) || cachedEdges.containsKey(id)) {
+				try {
+					removeEdgeInternal(id, true);
+					removed++;
+				} catch (final RuntimeException e) {
+					logger.error("Error removing edge {} of directory {}", id,
+							folderId, e);
+				}
+			}
+		}
+		for (final NodeId id : elements) {
+			// only published graph vertices: commands are never removed here
+			if (cachedVertices.containsKey(id)) {
+				try {
+					removeVertex(id);
+					removed++;
+				} catch (final RuntimeException e) {
+					logger.error("Error removing vertex {} of directory {}", id,
+							folderId, e);
+				}
+			}
+		}
+		logger.info("Directory {} deleted with {} elements", folderId,
+				removed);
+		return removed;
 	}
 
 	/** Removes a node from the storage and deletes it, ignoring any error. */
@@ -1697,8 +1756,25 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public void resetNameSpace() {
 		logger.info("resetNameSpace");
-		// TODO cancellare tutto il contenuto del namespace, compresi i folder
-
+		// edges first: their monitors observe the vertices
+		for (final NodeId edgeId : new ArrayList<>(cachedEdges.keySet())) {
+			try {
+				removeEdgeInternal(edgeId, true);
+			} catch (final RuntimeException e) {
+				logger.error("Error removing edge {} during reset", edgeId, e);
+			}
+		}
+		for (final NodeId vertexId : new ArrayList<>(
+				cachedVertices.keySet())) {
+			try {
+				removeVertex(vertexId);
+			} catch (final RuntimeException e) {
+				logger.error("Error removing vertex {} during reset", vertexId,
+						e);
+			}
+		}
+		logger.info("resetNameSpace done: {} vertices, {} edges left",
+				cachedVertices.size(), cachedEdges.size());
 	}
 
 	private SharedProperties shared() {

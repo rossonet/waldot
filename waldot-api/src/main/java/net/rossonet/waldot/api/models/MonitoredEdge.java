@@ -19,23 +19,23 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
 	public static final String ABSOLUTE = "absolute";
 	public static final String ACTIVE_LABEL = "active";
-	public static final String DEADBAND_DESCRIPTION = null;
+	public static final String DEADBAND_DESCRIPTION = "minimum change of a numeric value to propagate it (empty or 0: every change)";
 	public static final String DEADBAND_LABEL = "deadband-value";
-	public static final String DEADBAND_TYPE_DESCRIPTION = null;
+	public static final String DEADBAND_TYPE_DESCRIPTION = "deadband type: absolute (default) or percentage";
 	public static final String DEADBAND_TYPE_LABEL = "deadband-type";
 	public static final String DELAY_LABEL = "delay";
-	public static final String EVENT_ACTIVE_DESCRIPTION = null;
+	public static final String EVENT_ACTIVE_DESCRIPTION = "propagate the events of the observed vertex (default true)";
 	public static final String EVENT_ACTIVE_LABEL = "active-event";
 	public static final String JOLLY_LABEL = "*";
 	protected final static Logger logger = LoggerFactory
 			.getLogger(MonitoredEdge.class);
-	public static final String MONITORED_PROPERTIES_DESCRIPTION = null;
+	public static final String MONITORED_PROPERTIES_DESCRIPTION = "comma separated properties to observe, * or empty for all";
 	public static final String MONITORED_PROPERTIES_LABEL = "properties-to-monitor";
 	public static final String PERCENTAGE = "percentage";
-	public static final String PROPERTY_ACTIVE_DESCRIPTION = null;
+	public static final String PROPERTY_ACTIVE_DESCRIPTION = "propagate the property changes of the observed vertex (default true)";
 	public static final String PROPERTY_ACTIVE_LABEL = "active-property";
-	public static final String PROPERTY_EDGE_INVERTED_DESCRIPTION = null;
-	public static final String PROPERTY_EDGE_INVERTED_LABEL = null;
+	public static final String PROPERTY_EDGE_INVERTED_DESCRIPTION = "false: link-to (source writes into target), true: link-from (source reads from target)";
+	public static final String PROPERTY_EDGE_INVERTED_LABEL = "inverted";
 	public static final String SEPARATOR = ",";
 	private final WaldotEdge edge;
 	private final WaldotNamespace engine;
@@ -229,7 +229,15 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 				return true; // se il valore non è numerico o è null, non
 								// applico il deadband
 			}
-			final Object dbValue = deadBandValue.value();
+			Object dbValue = deadBandValue.value();
+			if (dbValue instanceof String && !((String) dbValue).isBlank()) {
+				// values written by commands and scripts arrive as strings
+				try {
+					dbValue = Double.valueOf(((String) dbValue).trim());
+				} catch (final NumberFormatException e) {
+					logger.warn("Invalid deadband value '{}', deadband not applied", dbValue);
+				}
+			}
 			if (dbValue instanceof Number) {
 				final Property<Object> deadBandType = edge
 						.property(DEADBAND_TYPE_LABEL);

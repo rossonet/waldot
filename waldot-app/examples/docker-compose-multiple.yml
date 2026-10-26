@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   waldot-instance-1:
     image: rossonet/waldot:latest
@@ -10,6 +8,7 @@ services:
       - "8443:8443"
     
     command:
+      # arguments are appended to the image ENTRYPOINT (java ... MainAgent)
       - "--application-name"
       - "WaldOT Instance 1"
       - "--root-node-display-name"
@@ -36,6 +35,7 @@ services:
       - "8444:8444"
     
     command:
+      # arguments are appended to the image ENTRYPOINT (java ... MainAgent)
       - "--tcp-port"
       - "12687"
       - "--https-port"
@@ -66,6 +66,7 @@ services:
       - "8445:8445"
     
     command:
+      # arguments are appended to the image ENTRYPOINT (java ... MainAgent)
       - "--tcp-port"
       - "12688"
       - "--https-port"

@@ -1,0 +1,1800 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for WaldOT - Digital Twin Engine bridging OPC UA and Apache TinkerPop">
+      
+      
+        <meta name="author" content="Zona Autonoma srl">
+      
+      
+        <link rel="canonical" href="https://github.com/rossonet/waldot/examples/07-showcase-gas-grid.html">
+      
+      
+        <link rel="prev" href="06-showcase-evolution.html">
+      
+      
+        <link rel="next" href="../DEVELOPER_GUIDE.html">
+      
+      
+      <link rel="icon" href="../immagini/icon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.28">
+    
+    
+      
+        <title>7. Showcase Gas Grid - WaldOT Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=20px+Comfortaa,cursive:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"20px Comfortaa,cursive";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#7-showcase-gas-grid" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="WaldOT Documentation" class="md-header__button md-logo" aria-label="WaldOT Documentation" data-md-component="logo">
+      
+  <img src="../immagini/rossonet-logo-03_centered.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WaldOT Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              7. Showcase Gas Grid
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ARCHITECTURE_OVERVIEW.html" class="md-tabs__link">
+          
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../USER_GUIDE.html" class="md-tabs__link">
+          
+  
+  Users & Operators
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../DEVELOPER_GUIDE.html" class="md-tabs__link">
+          
+  
+  Developers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="https://github.com/rossonet/waldot/tree/master/waldot-api" class="md-tabs__link">
+          
+  
+  Modules & Plugins
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="WaldOT Documentation" class="md-nav__button md-logo" aria-label="WaldOT Documentation" data-md-component="logo">
+      
+  <img src="../immagini/rossonet-logo-03_centered.png" alt="logo">
+
+    </a>
+    WaldOT Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ARCHITECTURE_OVERVIEW.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Users & Operators
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Users & Operators
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../USER_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CONFIGURATION.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="01-plain-vertices.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Plain vertices
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-active-edges.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Active edges
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03-generators-and-rules.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Generators and rules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="04-bootstrap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Complete bootstrap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="05-showcase-arena.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. Showcase Dungeon Arena
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="06-showcase-evolution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6. Showcase Evolution Lab
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    7. Showcase Gas Grid
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="07-showcase-gas-grid.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    7. Showcase Gas Grid
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gas-profiles-indicative-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gas profiles (indicative values)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#graph-folder-rulesshowcasegas-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      Graph (folder rules/showcase/gas-grid)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Graph (folder rules/showcase/gas-grid)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-flow-of-a-station" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data flow of a station
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-to-observe" class="md-nav__link">
+    <span class="md-ellipsis">
+      What to observe
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-interventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Live interventions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules-engine-concepts-in-the-demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rules engine concepts in the demo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limits
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Developers
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEVELOPER_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../INTEGRATION_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Integration Guide (Plugins)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Modules & Plugins
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Modules & Plugins
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-api" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-api
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-namespace" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-namespace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/blob/master/waldot-namespace/BOOTSTRAP_CONFIGURATION.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bootstrap Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-runner" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-runner
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-app" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-generator" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generator Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rules Engine Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-tinkerpop" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TinkerPop Server Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gas-profiles-indicative-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gas profiles (indicative values)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#graph-folder-rulesshowcasegas-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      Graph (folder rules/showcase/gas-grid)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Graph (folder rules/showcase/gas-grid)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-flow-of-a-station" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data flow of a station
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-to-observe" class="md-nav__link">
+    <span class="md-ellipsis">
+      What to observe
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-interventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Live interventions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules-engine-concepts-in-the-demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rules engine concepts in the demo
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limits
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="7-showcase-gas-grid">7. Showcase: Gas Grid<a class="headerlink" href="#7-showcase-gas-grid" title="Permanent link">&para;</a></h1>
+<p>A gas distribution network controlled by <strong>PI loop controllers</strong> written as
+rules. It is designed for demos to gas utilities: plants, transmitters, valves
+and controllers are vertices; measurements travel on <code>link-to</code>/<code>link-from</code>
+edges with deadband and delay; control and safety logic are rules.</p>
+<blockquote>
+<p>The model is didactic, <strong>not a hydraulic simulation</strong>: the process is a
+first-order system and all values (pressures, demands, thresholds, delays)
+are indicative.</p>
+</blockquote>
+<h2 id="create">Create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
+<p>From an OPC UA client: <code>Commands/rules/showcase/create show case gas grid</code>.
+From a bootstrap or the <code>query</code> command:</p>
+<div class="highlight"><pre><span></span><code><span class="nx">log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="nx">create_show_case_gas_grid</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)[</span><span class="mf">0</span><span class="p">]);</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>show case gas grid created: 4 stations, gas metano, 58 vertices
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Default</th>
+<th>Range</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stations</code></td>
+<td>4</td>
+<td>2-20</td>
+<td>pressure reduction stations</td>
+</tr>
+<tr>
+<td><code>delay-ms</code></td>
+<td>200</td>
+<td>≥ 10</td>
+<td>simulation step</td>
+</tr>
+<tr>
+<td><code>setpoint</code></td>
+<td>25</td>
+<td>5-100</td>
+<td>downstream pressure (mbar)</td>
+</tr>
+<tr>
+<td><code>pipe-delay-ms</code></td>
+<td>300</td>
+<td>0-10000</td>
+<td>dead time of the pipe</td>
+</tr>
+<tr>
+<td><code>gas-type</code></td>
+<td><code>metano</code></td>
+<td><code>metano</code>, <code>metano-blu</code></td>
+<td>gas profile</td>
+</tr>
+<tr>
+<td><code>compare</code></td>
+<td><code>true</code></td>
+<td><code>true</code>, <code>false</code></td>
+<td>the last station has no deadband, for comparison</td>
+</tr>
+</tbody>
+</table>
+<p>Invalid arguments create nothing (<code>argument 'stations' must be between 2 and 20</code>).
+Vertices: <code>14 + 11 × stations</code>.</p>
+<h3 id="gas-profiles-indicative-values">Gas profiles (indicative values)<a class="headerlink" href="#gas-profiles-indicative-values" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th><code>metano</code></th>
+<th><code>metano-blu</code> (20 % hydrogen)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>relative density</td>
+<td>0.60</td>
+<td>0.48</td>
+</tr>
+<tr>
+<td>flow factor at the same opening</td>
+<td>1.00</td>
+<td>1.12</td>
+</tr>
+<tr>
+<td>nominal demand</td>
+<td>50</td>
+<td>57.5</td>
+</tr>
+<tr>
+<td>ESD threshold over the setpoint</td>
+<td>+30 %</td>
+<td>+25 %</td>
+</tr>
+<tr>
+<td>transmitter deadband</td>
+<td>2.0 mbar</td>
+<td>1.2 mbar</td>
+</tr>
+<tr>
+<td>demand deadband</td>
+<td>5 %</td>
+<td>3 %</td>
+</tr>
+<tr>
+<td>upstream pressure deadband</td>
+<td>0.3 bar</td>
+<td>0.2 bar</td>
+</tr>
+<tr>
+<td>dead time</td>
+<td><code>pipe-delay-ms</code> × 1.0</td>
+<td><code>pipe-delay-ms</code> × 1.2</td>
+</tr>
+</tbody>
+</table>
+<p>The profile is stored on the <code>gas-network</code> vertex.</p>
+<h2 id="graph-folder-rulesshowcasegas-grid">Graph (folder <code>rules/showcase/gas-grid</code>)<a class="headerlink" href="#graph-folder-rulesshowcasegas-grid" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>supply/         gas-gate-gen (upstream pressure), gas-clock (simulation step), gas-scan (scan cycle)
+transmission/   gas-trunk (high pressure line)
+stations/
+  station-i/    gas-sensor-i, gas-valve-i, gas-ctrl-i, gas-plant-i
+consumers/      gas-consumer-i + gas-demand-gen-i (demand profile)
+safety/         gas-leak-monitor
+supervisory/    gas-network (profile, network setpoint, load), gas-stats
+rules/
+  control/      gas-rule-pi-i, gas-rule-mode-guard-i
+  safety/       gas-rule-esd-trip-i, gas-rule-esd-reset-i, gas-rule-leak-detect
+  process/      gas-rule-plant-i
+  supervisory/  gas-rule-balancer, gas-rule-stats, gas-rule-bad-sensor
+compute/        gas-control-loop, gas-process, gas-supervisory
+links/          link-to and link-from edges
+triggers/       fire edges
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Vertex</th>
+<th>Main properties</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gas-plant-i</code></td>
+<td><code>pressure</code>, <code>upstream</code></td>
+<td>simulated process: the real downstream pressure</td>
+</tr>
+<tr>
+<td><code>gas-sensor-i</code></td>
+<td><code>pressure</code></td>
+<td>transmitter: sees the pressure with dead time and deadband</td>
+</tr>
+<tr>
+<td><code>gas-ctrl-i</code></td>
+<td><code>setpoint</code>, <code>mode</code>, <code>fault</code>, <code>integral</code>, <code>output</code>, <code>bias</code>, <code>kp</code>, <code>ki</code>, <code>esd-trips</code></td>
+<td>loop controller state</td>
+</tr>
+<tr>
+<td><code>gas-valve-i</code></td>
+<td><code>opening</code> (0-100 %)</td>
+<td>control valve</td>
+</tr>
+<tr>
+<td><code>gas-consumer-i</code></td>
+<td><code>demand</code></td>
+<td>demand of the station</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-flow-of-a-station">Data flow of a station<a class="headerlink" href="#data-flow-of-a-station" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>gas-gate-gen --link-to--&gt; gas-trunk --link-to--&gt; gas-plant-i.upstream
+gas-demand-gen-i --link-to--&gt; gas-consumer-i.demand
+                     rule &quot;plant&quot; (valve opening, upstream, demand) -&gt; gas-plant-i.pressure
+gas-plant-i.pressure --link-to (delay + deadband)--&gt; gas-sensor-i.pressure --fire--&gt; PI / guard / ESD rules
+gas-network.setpoint --link-to--&gt; gas-ctrl-i.setpoint
+gas-ctrl-i.output --link-from (deadband 0.5 %)--&gt; gas-valve-i.opening --&gt; rule &quot;plant&quot;
+</code></pre></div>
+<p>The loop is closed: the valve changes the pressure, the transmitter sees it
+later, the controller corrects the valve.</p>
+<h2 id="rules">Rules<a class="headerlink" href="#rules" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Fired by</th>
+<th>Condition</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gas-rule-pi-i</code></td>
+<td><code>sensor.pressure</code> and scan cycle</td>
+<td>mode <code>AUTO</code></td>
+<td>error, integral with anti-windup, <code>output</code> 0-100 %</td>
+</tr>
+<tr>
+<td><code>gas-rule-mode-guard-i</code></td>
+<td><code>sensor.pressure</code></td>
+<td>fault state changes</td>
+<td>measure &lt; 0 or &gt; 200: <code>fault</code> = <code>sensor</code>, mode <code>MANUAL</code>; back to <code>AUTO</code> with a valid measure</td>
+</tr>
+<tr>
+<td><code>gas-rule-esd-trip-i</code></td>
+<td><code>sensor.pressure</code></td>
+<td>pressure &gt; setpoint × (1 + ESD margin)</td>
+<td>mode <code>ESD</code>, output 0, <code>esd-trips</code> +1</td>
+</tr>
+<tr>
+<td><code>gas-rule-esd-reset-i</code></td>
+<td><code>sensor.pressure</code></td>
+<td>mode <code>ESD</code> and pressure &lt; 50 % of the setpoint</td>
+<td>back to <code>AUTO</code></td>
+</tr>
+<tr>
+<td><code>gas-rule-plant-i</code></td>
+<td>clock</td>
+<td>always</td>
+<td>process model</td>
+</tr>
+<tr>
+<td><code>gas-rule-balancer</code></td>
+<td>clock</td>
+<td>always</td>
+<td>network setpoint from the mean demand (hysteresis 1 s)</td>
+</tr>
+<tr>
+<td><code>gas-rule-stats</code></td>
+<td>clock</td>
+<td>always</td>
+<td>mean error, mean opening, total ESD trips (hysteresis 1 s)</td>
+</tr>
+<tr>
+<td><code>gas-rule-leak-detect</code></td>
+<td>mean opening</td>
+<td>mean opening &gt; 90 % changes the alarm state</td>
+<td><code>alarm</code> = <code>leak</code> / <code>none</code></td>
+</tr>
+<tr>
+<td><code>gas-rule-bad-sensor</code></td>
+<td>clock</td>
+<td>reads a missing transmitter</td>
+<td>fails on purpose: <code>errors</code> grows</td>
+</tr>
+</tbody>
+</table>
+<p>PI controller: <code>error = setpoint - pressure</code>,
+<code>output = clamp(bias + kp·error + ki·integral, 0, 100)</code> with <code>kp</code> = 0.4,
+<code>ki</code> = 0.1; the integral is not updated when the output is saturated.</p>
+<p>Process model, at every clock step:
+<code>target = 0.9 · opening · (upstream / 24) · flow_factor - 0.25 · (demand - nominal) - 0.25 · leak / stations</code>,
+<code>pressure = pressure + 0.3 · (target - pressure)</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Compute</th>
+<th>Threads</th>
+<th>Rules (priority)</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gas-control-loop</code></td>
+<td>1</td>
+<td>ESD trip (300), guard (250), ESD reset (200), PI (100)</td>
+<td>controllers must not overlap, safety first</td>
+</tr>
+<tr>
+<td><code>gas-process</code></td>
+<td>4</td>
+<td>plant models (100)</td>
+<td>independent, in parallel</td>
+</tr>
+<tr>
+<td><code>gas-supervisory</code></td>
+<td>1</td>
+<td>leak (60), balancer (50), stats (40), bad-sensor (10)</td>
+<td>slow logic, low priority</td>
+</tr>
+</tbody>
+</table>
+<p>Safety rules have no hysteresis: a discarded notification could hide an
+overpressure.</p>
+<h2 id="what-to-observe">What to observe<a class="headerlink" href="#what-to-observe" title="Permanent link">&para;</a></h2>
+<p>Values after about one minute with the defaults:</p>
+<table>
+<thead>
+<tr>
+<th>Station</th>
+<th><code>sensor.pressure</code></th>
+<th><code>ctrl.setpoint</code></th>
+<th><code>ctrl.mode</code></th>
+<th><code>ctrl.output</code></th>
+<th><code>valve.opening</code></th>
+<th>PI <code>total</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 (deadband)</td>
+<td>23.76</td>
+<td>25.2</td>
+<td>AUTO</td>
+<td>29.1</td>
+<td>28.95</td>
+<td>138</td>
+</tr>
+<tr>
+<td>3 (no deadband)</td>
+<td>24.51</td>
+<td>25.2</td>
+<td>AUTO</td>
+<td>30.19</td>
+<td>30.36</td>
+<td>398</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>The pressure follows the setpoint; <code>valve.opening</code> follows <code>ctrl.output</code>
+  through the <code>link-from</code> edge.</li>
+<li>Station 3 has no deadband: its PI rule is evaluated about three times more
+  often for the same regulation.</li>
+<li><code>gas-stats</code>: <code>mean-abs-error</code> 2.75, <code>mean-opening</code> 29.44, <code>esd-trips</code> 0.</li>
+<li><code>gas-rule-bad-sensor</code>: <code>errors</code> = <code>total</code>, <code>executed</code> = 0 (JEXL exceptions
+  in the log are expected for this rule).</li>
+</ul>
+<h2 id="live-interventions">Live interventions<a class="headerlink" href="#live-interventions" title="Permanent link">&para;</a></h2>
+<p>Verified on the default scenario:</p>
+<table>
+<thead>
+<tr>
+<th>Intervention</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>write 90 on <code>gas-sensor-1.pressure</code></td>
+<td>immediately <code>gas-ctrl-1.mode</code> = <code>ESD</code>, <code>output</code> = 0, <code>esd-trips</code> = 1; the other stations stay <code>AUTO</code>; after a few seconds the pressure falls and the controller is back in <code>AUTO</code></td>
+</tr>
+<tr>
+<td>write -5 on <code>gas-sensor-1.pressure</code></td>
+<td><code>fault</code> = <code>sensor</code>, mode <code>MANUAL</code> until the next valid measure from the plant (a few hundred ms)</td>
+</tr>
+<tr>
+<td>write 600 on <code>gas-leak-monitor.leak</code></td>
+<td>the valves open to compensate; when <code>gas-stats.mean-opening</code> exceeds 90 % (about 40 s) <code>gas-leak-monitor.alarm</code> = <code>leak</code>; write 0 to cancel</td>
+</tr>
+<tr>
+<td>write 40 on <code>gas-network.base-setpoint</code></td>
+<td>the balancer distributes the new setpoint (41.2 with the current demand) to all controllers; the pressures follow (43.8 after 25 s)</td>
+</tr>
+<tr>
+<td>change <code>kp</code>, <code>ki</code> of <code>gas-ctrl-i</code></td>
+<td>faster or more oscillating response</td>
+</tr>
+<tr>
+<td>change <code>deadband-value</code> or <code>delay</code> of the edge <code>pipe-to-transmitter-i</code></td>
+<td>more or fewer PI executions, more or less oscillation</td>
+</tr>
+<tr>
+<td>write <code>MANUAL</code> on <code>gas-ctrl-i.mode</code></td>
+<td>the PI rule stops acting</td>
+</tr>
+<tr>
+<td><code>gas-demand-gen-i.algorithm</code> = <code>stopped</code></td>
+<td>the demand stays constant</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rules-engine-concepts-in-the-demo">Rules engine concepts in the demo<a class="headerlink" href="#rules-engine-concepts-in-the-demo" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>condition</code> / <code>action</code></td>
+<td>PI, guard, ESD, leak</td>
+</tr>
+<tr>
+<td><code>fire</code> edge</td>
+<td><code>triggers/</code>: the measure fires the controllers</td>
+</tr>
+<tr>
+<td><code>rules:compute</code> with <code>threads</code></td>
+<td>1 thread for the loops, 4 for the process</td>
+</tr>
+<tr>
+<td><code>rules:execute</code> with <code>priority</code></td>
+<td>ESD (300) before PI (100)</td>
+</tr>
+<tr>
+<td>hysteresis</td>
+<td>balancer and statistics (1 s)</td>
+</tr>
+<tr>
+<td>counters</td>
+<td><code>queue</code>, <code>total</code>, <code>executed</code>, <code>errors</code> on every rule</td>
+</tr>
+<tr>
+<td>runtime changes</td>
+<td><code>setpoint</code>, <code>kp</code>, <code>ki</code>, <code>deadband-value</code>, <code>delay</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="limits">Limits<a class="headerlink" href="#limits" title="Permanent link">&para;</a></h2>
+<ul>
+<li>No pressure losses, line pack, temperature or real gas composition.</li>
+<li>Upstream pressure is fixed around 24 bar with a slow oscillation.</li>
+<li>The PI is discrete with a variable step (executions depend on events) and
+  is not tuned for a real plant.</li>
+<li><code>metano-blu</code> changes only some coefficients (flow, demand, thresholds,
+  delay).</li>
+</ul>
+<p>To create the scenario again restart the server or remove the <code>gas-...</code>
+vertices (see <a href="../USER_GUIDE.html#8-operations">Operations</a>). Tests: <code>WaldotRulesEngineGasGridTest</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/rossonet/waldot" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://hub.docker.com/r/rossonet/waldot" target="_blank" rel="noopener" title="hub.docker.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.annotate"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      
+    
+  </body>
+</html>

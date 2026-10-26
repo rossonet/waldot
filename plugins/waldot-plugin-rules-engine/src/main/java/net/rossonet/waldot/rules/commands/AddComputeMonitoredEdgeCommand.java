@@ -73,7 +73,8 @@ public class AddComputeMonitoredEdgeCommand extends AbstractOpcCommand {
 
 	private void enrichParameters(final String[] inputValues,
 			final List<String> parameters, int i, String field) {
-		if (inputValues[i] != null && !inputValues[i].isEmpty()) {
+		if (i < inputValues.length && inputValues[i] != null
+				&& !inputValues[i].isEmpty()) {
 			parameters.add(field);
 			parameters.add(inputValues[i]);
 		}
@@ -87,29 +88,31 @@ public class AddComputeMonitoredEdgeCommand extends AbstractOpcCommand {
 	@Override
 	public String[] runCommand(final InvocationContext invocationContext,
 			final String[] inputValues) {
-		final List<String> parameters = new ArrayList<>();
-		parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
-		parameters.add(RulesEngineConstants.EXECUTE_EDGE_LABEL);
-		enrichParameters(inputValues, parameters, 3,
-				MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
-		enrichParameters(inputValues, parameters, 4,
-				RulesEngineConstants.PRIORITY_FIELD);
-		final Object[] arrayParameters = parameters.toArray(new String[0]);
-		logger.info("create execute edge with parameters: "
-				+ Arrays.toString(arrayParameters));
-		final Vertex source = waldotNamespace
-				.getVertexNode(waldotNamespace.generateNodeId(inputValues[1]));
-		final Vertex target = waldotNamespace
-				.getVertexNode(waldotNamespace.generateNodeId(inputValues[2]));
-		if (source == null || target == null) {
-			throw new IllegalArgumentException(
-					"Source or target vertex not found: " + inputValues[1]
-							+ " -> " + inputValues[2]);
+		try {
+			final List<String> parameters = new ArrayList<>();
+			parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
+			parameters.add(RulesEngineConstants.EXECUTE_EDGE_LABEL);
+			enrichParameters(inputValues, parameters, 3,
+					MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
+			enrichParameters(inputValues, parameters, 4,
+					RulesEngineConstants.PRIORITY_FIELD);
+			final Object[] arrayParameters = parameters.toArray(new String[0]);
+			logger.info("create execute edge with parameters: "
+					+ Arrays.toString(arrayParameters));
+			final Vertex source = resolveVertexArgument(
+					inputValues.length > 1 ? inputValues[1] : null,
+					"compute");
+			final Vertex target = resolveVertexArgument(
+					inputValues.length > 2 ? inputValues[2] : null, "rule");
+			// l'edge va dal compute (source) alla regola (target)
+			final Edge edge = source.addEdge(inputValues[0], target,
+					arrayParameters);
+			return new String[]{nodeIdToString(edge.id())};
+		} catch (final RuntimeException e) {
+			logger.warn("create compute monitored edge failed: {}",
+					e.getMessage());
+			return new String[]{"error: " + e.getMessage()};
 		}
-		// l'edge va dal compute (source) alla regola (target)
-		final Edge edge = source.addEdge(inputValues[0], target,
-				arrayParameters);
-		return new String[]{edge.id().toString()};
 	}
 
 }

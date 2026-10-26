@@ -49,30 +49,22 @@ These queries run **directly on the OPC UA server**, without external databases 
 
 WaldOT includes a sophisticated **rules engine** via the `waldot-plugin-rules-engine` plugin that enables edge computing logic without external systems. Define IF-THEN-THAT rules using JEXL expressions with full access to graph traversal:
 
-**Example: Temperature Monitoring**
-```groovy
-// Create compute vertex for rule execution
-compute = graph.addVertex(
-    "type", "compute",
-    "label", "main-compute",
-    "Threads", "4"
-)
+**Example: Temperature Monitoring** (bootstrap script, JEXL)
+```javascript
+// compute vertex: executes the rules connected to it
+var compute = graph.addVertex('id', 'main-compute', 'type', 'rules:compute', 'label', 'main-compute', 'threads', '4');
 
-// Create rule: IF temperature > 80 THEN log warning
-rule = graph.addVertex(
-    "type", "rule",
-    "label", "temp-alarm",
-    "Condition", "temperature > 80.0",
-    "Action", "log.warn('High temperature alert: ' + temperature + '°C')",
-    "Priority", "100",
-    "Hysteresis", "5000"  // 5 second deduplication
-)
+// rule: IF temperature > 80 THEN log warning
+var rule = graph.addVertex('id', 'temp-alarm', 'type', 'rules:rule', 'label', 'temp-alarm',
+    'condition', "g.V().has('id','boiler').values('temperature').next() > 80.0",
+    'action', "log.warn('High temperature alert')",
+    'hysteresis', '5000');
 
-// Connect rule to compute for execution
-rule.addEdge("execute", compute, "Priority", "100")
+// the compute executes the rule
+compute.addEdge('runner', rule, 'type', 'rules:execute', 'priority', '100');
 
-// Monitor temperature sensor
-tempSensor.addEdge("fire", rule, "monitor-property", "temperature")
+// every change of boiler.temperature fires the rule
+boiler.addEdge('watch', rule, 'type', 'fire', 'properties-to-monitor', 'temperature');
 ```
 
 **Rules Engine Features:**
@@ -119,33 +111,21 @@ Access:
 
 ### Docker with Custom Bootstrap Configuration
 
-WaldOT supports loading initial graph configuration from a file or URL. You can use either:
+WaldOT builds the initial graph from a bootstrap file (local file or URL),
+executed as a [JEXL](https://commons.apache.org/proper/commons-jexl/) script.
+Statements end with `;`:
 
-**Simple Line-by-Line Format** (legacy):
-```groovy
-# boot.conf - Simple commands
-graph.addVertex('id', 'sensor1', 'label', 'temperature')
-graph.addVertex('id', 'sensor2', 'label', 'pressure')
-```
+```javascript
+// boot.conf
+var createSensor = function(name, algorithm, min, max) {
+  return graph.addVertex('id', name, 'type', 'sim:generator', 'label', name, 'directory', 'sensors',
+      'algorithm', algorithm, 'min', min, 'max', max, 'delay', '1000');
+};
 
-**Advanced Groovy Script Format** (recommended):
-```groovy
-// boot.conf - Full Groovy script with functions and logic
-def createSensor(name, type, min, max) {
-  g.addV('generator')
-    .property('type', 'generator')
-    .property('label', name)
-    .property('Algorithm', type)
-    .property('Min', min.toString())
-    .property('Max', max.toString())
-    .next()
-}
+createSensor('temp-office', 'sinusoidal', '18', '26');
+createSensor('pressure-tank', 'random', '0', '100');
 
-// Create multiple sensors
-createSensor('temp-office', 'sinusoidal', '18', '26')
-createSensor('pressure-tank', 'random', '0', '100')
-
-log.info("Sensors configured successfully")
+log.info('Sensors configured successfully');
 ```
 
 Mount your configuration file:
@@ -156,17 +136,19 @@ docker run \
   rossonet/waldot:latest
 ```
 
-Or use a remote URL:
+Or use a remote URL with the `--boot-url` option (every argument after the
+image name is passed to WaldOT as an option):
 ```bash
-docker run \
-  -e WALDOT_BOOT_URL=https://example.com/waldot-config.groovy \
-  -p 12686:12686 \
-  rossonet/waldot:latest
+docker run -p 12686:12686 rossonet/waldot:latest \
+  --boot-url https://example.com/waldot/boot.conf
 ```
 
-The bootstrap strategy automatically detects the format:
-- **Script Mode**: If it finds functions (`def`), variables (`=`), Groovy comments (`//`), or multi-line chains
-- **Line Mode**: For simple one-command-per-line files with `#` comments (legacy)
+All server options (ports, identity, security, commands) are listed in the
+[Configuration Reference](docs/guide/docs/CONFIGURATION.md).
+
+A legacy line mode (one expression per line, `#` comments) is also supported.
+Syntax and format detection: [Bootstrap Configuration](waldot-namespace/BOOTSTRAP_CONFIGURATION.md);
+step-by-step examples: [Examples](docs/guide/docs/examples/README.md).
 
 ### Build from Source
 
@@ -174,7 +156,8 @@ The bootstrap strategy automatically detects the format:
 git clone https://github.com/rossonet/waldot.git
 cd waldot
 ./gradlew clean build
-java -jar waldot-app/build/libs/waldot-app-*.jar
+./gradlew :waldot-app:shadowJar
+java -jar waldot-app/build/libs/waldot-app-*-all.jar --help
 ```
 
 ### Maven/Gradle Dependency
@@ -184,13 +167,13 @@ java -jar waldot-app/build/libs/waldot-app-*.jar
 <dependency>
     <groupId>net.rossonet.waldot</groupId>
     <artifactId>waldot-api</artifactId>
-    <version>0.6.1</version>
+    <version>0.6.2</version>
 </dependency>
 ```
 
 ```gradle
 // Gradle
-implementation 'net.rossonet.waldot:waldot-api:0.6.1'
+implementation 'net.rossonet.waldot:waldot-api:0.6.2'
 ```
 
 ## Use Cases
@@ -198,14 +181,11 @@ implementation 'net.rossonet.waldot:waldot-api:0.6.1'
 ### 1. Predictive Maintenance
 Query historical patterns and correlations:
 ```groovy
-// Find equipment that failed within 24h after temperature spike
-g.V().has('type', 'equipment')
-  .where(
-    out('hasEvent').has('type', 'failure').as('failure')
-    .V().has('type', 'temperature_sensor')
-      .has('value', gt(90))
-      .has('timestamp', within(failure.timestamp - 86400000, failure.timestamp))
-  )
+// Equipment with a failure event connected to an overheated sensor
+g.V().has('kind', 'equipment')
+  .where(out('hasEvent').has('kind', 'failure'))
+  .where(in('monitors').has('kind', 'temperature_sensor').has('value', gt(90)))
+  .values('name')
 ```
 
 ### 2. Energy Optimization
@@ -246,10 +226,21 @@ graph.addVertex('type', 'maintenance_request', 'equipment', 'pump1', 'priority',
 ### Documentation
 
 #### Core Documentation
-- **[WaldOT Reference Documentation (English)](docs/reference/waldot/README_EN.md)** - Complete architecture, OPC UA + TinkerPop integration, plugin system, and use cases
-- **[WaldOT Documentazione di Riferimento (Italiano)](docs/reference/waldot/README_IT.md)** - Documentazione completa: architettura, integrazione OPC UA + TinkerPop, sistema plugin e casi d'uso
-- **[Plugin Development Guide](docs/guide/docs/manuale_plugins.md)** - Complete guide to creating WaldOT plugins with virtual threads
-- [Agent Documentation](AGENT.md) - Developer guide for AI agents and contributors
+The full documentation site is built with MkDocs from [`docs/guide`](docs/guide) (`cd docs/guide && mkdocs serve`).
+
+- **[Documentation Hub](docs/guide/docs/README.md)** - Entry point, organized by audience
+- **[Architecture Overview](docs/guide/docs/ARCHITECTURE_OVERVIEW.md)** - Architecture, deployment scenarios, security
+- **[User Guide](docs/guide/docs/USER_GUIDE.md)** - Operating manual
+- **[Examples](docs/guide/docs/examples/README.md)** - Step-by-step examples and showcases
+- **[Configuration Reference](docs/guide/docs/CONFIGURATION.md)** - All command-line options with defaults
+- **[Developer Guide](docs/guide/docs/DEVELOPER_GUIDE.md)** - Development workflow and APIs
+- **[Integration Guide](docs/guide/docs/INTEGRATION_GUIDE.md)** - How to write a WaldOT plugin: vertex types, edge types, commands, packaging, tests
+
+#### Module Documentation
+- [waldot-api](waldot-api/README.md) - Public contracts for runtimes and plugins
+- [waldot-namespace](waldot-namespace/README.md) - OPC UA / graph bridge and Milo strategies ([bootstrap syntax](waldot-namespace/BOOTSTRAP_CONFIGURATION.md))
+- [waldot-runner](waldot-runner/README.md) - Picocli runner and server options
+- [waldot-app](waldot-app/README.md) - Server application, distribution and Docker examples
 
 #### Plugin Documentation
 - [waldot-plugin-generator](plugins/waldot-plugin-generator/README.md) - Data generator plugin for testing and simulation
@@ -351,12 +342,10 @@ Event-driven IF-THEN-THAT rule execution system with JEXL expressions, priority 
 **Documentation:** [plugins/waldot-plugin-rules-engine/README.md](plugins/waldot-plugin-rules-engine/README.md)
 
 **Quick Example:**
-```groovy
-rule = graph.addVertex(
-    "type", "rule",
-    "Condition", "temperature > 80.0 && pressure > 100.0",
-    "Action", "log.error('CRITICAL state detected')"
-)
+```javascript
+var rule = graph.addVertex('id', 'critical', 'type', 'rules:rule', 'label', 'critical',
+    'condition', "g.V().has('id','reactor').values('temperature').next() > 80.0",
+    'action', "log.error('CRITICAL state detected')");
 ```
 
 ### waldot-plugin-generator
@@ -373,14 +362,10 @@ Dynamic data simulation for testing, development, and demonstrations.
 **Documentation:** [plugins/waldot-plugin-generator/README.md](plugins/waldot-plugin-generator/README.md)
 
 **Quick Example:**
-```groovy
-tempSensor = graph.addVertex(
-    "type", "generator",
-    "Algorithm", "sinusoidal",
-    "Min", "18",
-    "Max", "26",
-    "Delay", "5000"  // Simulates temperature sensor
-)
+```javascript
+// simulated temperature sensor: new value in 'data' every 5 s
+var tempSensor = graph.addVertex('id', 'temp-1', 'type', 'sim:generator', 'label', 'temp-1',
+    'algorithm', 'sinusoidal', 'min', '18', 'max', '26', 'delay', '5000');
 ```
 
 ### waldot-plugin-tinkerpop
@@ -398,14 +383,10 @@ Native TinkerPop/Gremlin client access to WaldOT graphs.
 **Documentation:** [plugins/waldot-plugin-tinkerpop/README.md](plugins/waldot-plugin-tinkerpop/README.md)
 
 **Quick Example:**
-```groovy
-gremlinServer = graph.addVertex(
-    "type", "gremlin",
-    "Port", "8182",
-    "Bind", "0.0.0.0"  // Enables TinkerPop client connections
-)
-
-// Connect from Gremlin Console, drivers, or Graph-Explorer
+```javascript
+// Gremlin Server on port 8182 (command: label, directory, port, bind)
+tinkerpop_create_gremlin_server.exec('gremlin-1', 'services', '8182', '0.0.0.0');
+// then: curl -X POST -d '{"gremlin":"g.V().count()"}' http://localhost:8182
 ```
 
 ---
@@ -433,7 +414,7 @@ g.V().connectedComponent().by('component').group().by('component')
 
 ### Extensibility via Plugins
 
-WaldOT's **plugin architecture** enables custom vertex types, behaviors, and integrations. Plugins leverage **Java 21+ virtual threads** for massive concurrency - run thousands of active objects with minimal resource overhead.
+WaldOT's **plugin architecture** enables custom vertex types, behaviors, and integrations. Plugins leverage **Java 26 virtual threads** for massive concurrency - run thousands of active objects with minimal resource overhead.
 
 **Key Features:**
 - **Auto-discovery**: Plugins annotated with `@WaldotPlugin` are automatically loaded
@@ -468,8 +449,8 @@ public class MyIndustrialPlugin implements AutoCloseable, PluginListener {
 ```
 
 **Learn More:**
-- **[Plugin Development Guide](docs/guide/docs/manuale_plugins.md)** - Complete guide with virtual threads, patterns, and examples
-- **[Reference Documentation](docs/reference/waldot/README_EN.md)** - Architecture details and advanced topics
+- **[Integration Guide](docs/guide/docs/INTEGRATION_GUIDE.md)** - Step-by-step plugin example, lifecycle, packaging and tests
+- **[Architecture Overview](docs/guide/docs/ARCHITECTURE_OVERVIEW.md)** - Architecture details and advanced topics
 
 ### Integration Capabilities
 
@@ -483,7 +464,7 @@ public class MyIndustrialPlugin implements AutoCloseable, PluginListener {
 ## Performance & Scalability
 
 - **Edge-optimized**: Runs on devices with 1GB+ RAM
-- **Virtual threads**: Java 21 for massive concurrency
+- **Virtual threads**: Java 26 runtime for massive concurrency
 - **Persistent storage**: RocksDB backend for large graphs
 - **Streaming**: Process millions of data points without memory issues
 - **Distributed**: Cluster support via TinkerPop providers (Neo4j, JanusGraph, etc.)
@@ -508,7 +489,7 @@ We welcome contributions! Whether you're:
 - Reporting bugs
 - Suggesting features
 
-Please see [AGENT.md](AGENT.md) for development guidelines.
+Please see the [Developer Guide](docs/guide/docs/DEVELOPER_GUIDE.md) for development guidelines.
 
 **Key contribution areas**:
 - Additional storage connectors (Neo4j, JanusGraph, etc.)
@@ -533,10 +514,5 @@ See [LICENSE](LICENSE) file for details.
 ## Project Sponsor
 
 [![Zona Autonoma srl](https://raw.githubusercontent.com/rossonet/images/main/artwork/rossonet-logo/png/rossonet-logo_280_115.png)](https://www.rossonet.net)
-
----
-
-**Ready to bridge your OT and IT worlds? Get started with WaldOT today!**
-
 
 

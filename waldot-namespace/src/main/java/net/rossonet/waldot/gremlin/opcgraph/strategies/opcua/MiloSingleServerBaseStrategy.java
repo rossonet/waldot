@@ -467,7 +467,8 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 
 	@Override
 	public void close() throws Exception {
-		resetNameSpace();
+		// the graph is not emptied on close: resetNameSpace() is meant for
+		// cmd.reset()
 		referenceCache.clear();
 		cachedVertices.clear();
 		cachedEdges.clear();
@@ -650,10 +651,48 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	public String deleteOpcNodeId(String nodeId) {
 		final NodeId nodeTargetId = MiloStrategy.getNodeIdManager()
 				.convert(waldotNamespace.getGremlinGraph(), nodeId);
+		if (nodeTargetId == null) {
+			throw new IllegalArgumentException("invalid nodeId " + nodeId);
+		}
+		if (getEdges().containsKey(nodeTargetId)) {
+			removeEdge(nodeTargetId);
+			return nodeTargetId.toParseableString();
+		}
+		if (getVertices().containsKey(nodeTargetId)) {
+			removeVertex(nodeTargetId);
+			return nodeTargetId.toParseableString();
+		}
+		final UaNode target = waldotNamespace.getStorageManager()
+				.getNode(nodeTargetId).orElseThrow(
+						() -> new IllegalArgumentException(
+								"node " + nodeId + " not found"));
+		if (target instanceof UaFolderNode) {
+			deleteFolderContent((UaFolderNode) target);
+		}
 		cachedVertices.remove(nodeTargetId);
 		cachedEdges.remove(nodeTargetId);
-		return waldotNamespace.getStorageManager().removeNode(nodeTargetId)
-				.get().getNodeId().toParseableString();
+		waldotNamespace.getStorageManager().removeNode(nodeTargetId);
+		return nodeTargetId.toParseableString();
+	}
+
+	/** Removes the edges and vertices organized under a folder, recursively. */
+	private void deleteFolderContent(final UaFolderNode folder) {
+		for (final Node child : new ArrayList<>(folder.getOrganizesNodes())) {
+			final NodeId childId = child.getNodeId();
+			try {
+				if (child instanceof UaFolderNode) {
+					deleteFolderContent((UaFolderNode) child);
+					waldotNamespace.getStorageManager().removeNode(childId);
+				} else if (getEdges().containsKey(childId)) {
+					removeEdge(childId);
+				} else if (getVertices().containsKey(childId)) {
+					removeVertex(childId);
+				}
+			} catch (final RuntimeException e) {
+				logger.error("Error removing {} from folder {}", childId,
+						folder.getNodeId(), e);
+			}
+		}
 	}
 
 	@Override
@@ -1169,8 +1208,21 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	@Override
 	public void resetNameSpace() {
 		logger.info("resetNameSpace");
-		// TODO cancellare tutto il contenuto del namespace, compresi i folder
-
+		for (final NodeId edgeId : new ArrayList<>(getEdges().keySet())) {
+			try {
+				removeEdge(edgeId);
+			} catch (final RuntimeException e) {
+				logger.error("Error removing edge {} during reset", edgeId, e);
+			}
+		}
+		for (final NodeId vertexId : new ArrayList<>(getVertices().keySet())) {
+			try {
+				removeVertex(vertexId);
+			} catch (final RuntimeException e) {
+				logger.error("Error removing vertex {} during reset", vertexId,
+						e);
+			}
+		}
 	}
 
 	@Override

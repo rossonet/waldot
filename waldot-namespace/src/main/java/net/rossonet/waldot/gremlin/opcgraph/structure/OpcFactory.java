@@ -292,7 +292,12 @@ public final class OpcFactory {
 
 	public static WaldotGraph getOpcGraph(String bootStrapUrl, HistoryStrategy historyStrategy,
 			MiloStrategy miloStrategy) throws InterruptedException, ExecutionException {
-		final WaldotConfiguration configuration = DefaultHomunculusConfiguration.getDefault();
+		return getOpcGraph(bootStrapUrl, historyStrategy, miloStrategy, DefaultHomunculusConfiguration.getDefault());
+	}
+
+	public static WaldotGraph getOpcGraph(String bootStrapUrl, HistoryStrategy historyStrategy,
+			MiloStrategy miloStrategy, WaldotConfiguration configuration)
+			throws InterruptedException, ExecutionException {
 		final OpcConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		final WaldotOpcUaServer waldot = new WaldotOpcUaServer(configuration, serverConfiguration,
 				new DefaultAnonymousValidator(configuration), new DefaultIdentityValidator(configuration),

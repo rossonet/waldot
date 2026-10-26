@@ -31,7 +31,7 @@ WaldOT documentation is organized by user role to provide targeted, relevant inf
 - Testing and debugging
 - Best practices
 
-**[Plugin Development Manual](manuale_plugins.md)** - Complete plugin development guide (Italian)
+**[Integration Guide](INTEGRATION_GUIDE.md)** - How to write a WaldOT plugin (verified step-by-step example)
 
 - Plugin architecture deep dive
 - Virtual threads and concurrency
@@ -44,20 +44,19 @@ WaldOT documentation is organized by user role to provide targeted, relevant inf
 
 ### 👤 For End Users & Operators
 
-**[User Guide](USER_GUIDE.md)** - Operating and configuring WaldOT
+**[User Guide](USER_GUIDE.md)** - Operating manual
 
-- Installation and deployment
-- Configuration options
-- Using the OPC UA interface
-- Gremlin query basics
-- Monitoring and troubleshooting
-- Common workflows
+- Start the server, OPC UA address space
+- Vertices, active edges (`link-to`, `link-from`, `fire`), plugin types
+- Bootstrap file, commands, Gremlin Server
+- Rules engine, monitoring, operations, troubleshooting
 
-**[User Manual (Italian)](manuale_utente.md)** - Complete user manual in Italian
+**[Examples](examples/README.md)** - Step-by-step pages verified on the Docker image
 
-- Comprehensive configuration guide
-- Bootstrap configuration examples
-- Plugin usage instructions
+- Plain vertices, active edges, generators and rules, complete bootstrap
+- Showcases: Dungeon Arena, Evolution Lab, Gas Grid
+
+**[Configuration Reference](CONFIGURATION.md)** - All server options
 
 **Target audience**: System Administrators, OT Engineers, Operators
 
@@ -67,31 +66,32 @@ WaldOT documentation is organized by user role to provide targeted, relevant inf
 
 ### Getting Started
 
-- [Quick Start Guide](USER_GUIDE.md#quick-start)
-- [Docker Deployment](USER_GUIDE.md#docker-deployment)
-- [First Graph Creation](USER_GUIDE.md#creating-your-first-graph)
+- [Start the server](USER_GUIDE.md#1-start-the-server)
+- [Bootstrap file](USER_GUIDE.md#4-bootstrap-file)
+- [Configuration Reference](CONFIGURATION.md) - every command-line option, with defaults
 
 ### Core Features
 
-- [Generator Plugin](../../../plugins/waldot-plugin-generator/README.md) - Data simulation
-- [Rules Engine Plugin](../../../plugins/waldot-plugin-rules-engine/README.md) - Event-driven automation
-- [TinkerPop Plugin](../../../plugins/waldot-plugin-tinkerpop/README.md) - Gremlin server access
+- [Generator Plugin](https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-generator) - Data simulation
+- [Rules Engine Plugin](https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine) - Event-driven automation
+- [TinkerPop Plugin](https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-tinkerpop) - Gremlin server access
 
 ### Examples
 
-- [Example 1: Industrial Monitoring](../../examples/01-industrial-monitoring/README.md)
-- [Example 2: Production Simulation](../../examples/02-production-simulation/README.md)
-- [Example 3: Energy Monitoring](../../examples/03-energy-monitoring/README.md)
-- [Example 4: Quality Control](../../examples/04-quality-control/README.md)
-- [Example 5: Predictive Maintenance](../../examples/05-predictive-maintenance/README.md)
+- [Step-by-step examples](examples/README.md) - plain vertices, active edges, rules, bootstrap
+- Showcases: [Dungeon Arena](examples/05-showcase-arena.md), [Evolution Lab](examples/06-showcase-evolution.md), [Gas Grid](examples/07-showcase-gas-grid.md)
+- [Docker Compose examples](https://github.com/rossonet/waldot/tree/master/waldot-app/examples) - server deployment variants
 
-### Reference Documentation
+### Module Documentation
 
-- [WaldOT Reference (English)](../../reference/waldot/README_EN.md)
-- [WaldOT Reference (Italian)](../../reference/waldot/README_IT.md)
-- [Configuration Reference](../../../waldot-app/CONFIGURATION.md)
-- [Environment Variables](../../../waldot-app/ENVIRONMENT_VARIABLES.md)
-- [Bootstrap Configuration](../../../waldot-namespace/BOOTSTRAP_CONFIGURATION.md)
+Each module keeps its technical README next to the code:
+
+| Module | Content |
+| ------ | ------- |
+| [waldot-api](https://github.com/rossonet/waldot/tree/master/waldot-api) | Public contracts used by runtimes and plugins |
+| [waldot-namespace](https://github.com/rossonet/waldot/tree/master/waldot-namespace) | OPC UA ↔ graph bridge, Milo strategies, bootstrap ([syntax](https://github.com/rossonet/waldot/blob/master/waldot-namespace/BOOTSTRAP_CONFIGURATION.md)) |
+| [waldot-runner](https://github.com/rossonet/waldot/tree/master/waldot-runner) | Picocli runner with all server options |
+| [waldot-app](https://github.com/rossonet/waldot/tree/master/waldot-app) | Server application, distribution and Docker examples |
 
 ---
 
@@ -165,7 +165,7 @@ This enables:
 
 ## Technology Stack
 
-- **Java 21+** - Virtual threads for massive concurrency
+- **Java 26** (build target) - virtual threads for massive concurrency
 - **Eclipse Milo** - OPC UA server implementation
 - **Apache TinkerPop 3.x** - Graph database framework
 - **Apache Commons JEXL** - Expression language for rules

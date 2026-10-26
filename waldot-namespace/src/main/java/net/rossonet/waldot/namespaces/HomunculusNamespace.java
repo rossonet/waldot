@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
@@ -80,6 +81,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 			WaldotNamespace {
 
 	private ClientRegisterAnonymousValidator agentAnonymousValidator;
+	private final AtomicBoolean resetInProgress = new AtomicBoolean(false);
 	private ClientRegisterUsernameIdentityValidator agentIdentityValidator;
 	private ClientRegisterX509IdentityValidator agentX509IdentityValidator;
 
@@ -693,14 +695,26 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public void resetNameSpace() {
-		for (final PluginListener plugin : plugins) {
-			plugin.reset();
+		if (!resetInProgress.compareAndSet(false, true)) {
+			// cmd.reset() called by the bootstrap that the reset is running
+			logger.warn("Namespace reset already in progress, request ignored");
+			return;
 		}
-		opcMappingStrategy.resetNameSpace();
-		logger.info("Namespace reset done");
-		listeners.forEach(listener -> listener.onNamespaceReset());
-		logger.info("Running bootstrap procedure after reset");
-		runBootstrapProcedure();
+		try {
+			// remove every vertex and edge first (generators, rules and monitors
+			// are stopped by their removal), then let the plugins clear their
+			// state
+			opcMappingStrategy.resetNameSpace();
+			for (final PluginListener plugin : plugins) {
+				plugin.reset();
+			}
+			logger.info("Namespace reset done");
+			listeners.forEach(listener -> listener.onNamespaceReset());
+			logger.info("Running bootstrap procedure after reset");
+			runBootstrapProcedure();
+		} finally {
+			resetInProgress.set(false);
+		}
 	}
 
 	private void runBootstrapProcedure() {

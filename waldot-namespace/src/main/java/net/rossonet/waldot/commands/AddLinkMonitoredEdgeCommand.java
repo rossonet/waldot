@@ -65,7 +65,7 @@ public class AddLinkMonitoredEdgeCommand extends AbstractOpcCommand {
 				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(MonitoredEdge.DEADBAND_TYPE_DESCRIPTION));
 		addInputArgument(MonitoredEdge.DEADBAND_LABEL,
-				VariableNodeTypes.UInt32.getNodeId(), ValueRanks.Scalar, null,
+				VariableNodeTypes.Double.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english(MonitoredEdge.DEADBAND_DESCRIPTION));
 		addInputArgument(MonitoredEdge.EVENT_ACTIVE_LABEL,
 				VariableNodeTypes.Boolean.getNodeId(), ValueRanks.Scalar, null,
@@ -86,7 +86,8 @@ public class AddLinkMonitoredEdgeCommand extends AbstractOpcCommand {
 
 	private void enrichParameters(final String[] inputValues,
 			final List<String> parameters, int i, String field) {
-		if (inputValues[i] != null && !inputValues[i].isEmpty()) {
+		if (i < inputValues.length && inputValues[i] != null
+				&& !inputValues[i].isEmpty()) {
 			parameters.add(field);
 			parameters.add(inputValues[i]);
 		}
@@ -100,40 +101,48 @@ public class AddLinkMonitoredEdgeCommand extends AbstractOpcCommand {
 	@Override
 	public String[] runCommand(final InvocationContext invocationContext,
 			final String[] inputValues) {
-		final List<String> parameters = new ArrayList<>();
-		parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
-		// input index 6 maps to PROPERTY_EDGE_INVERTED_LABEL.
-		final boolean edgeInverted = inputValues.length > 6
-				&& inputValues[6] != null
-				&& !inputValues[6].isEmpty()
-				&& Boolean.parseBoolean(inputValues[6]);
-		if (edgeInverted) {
-			parameters.add(MiloStrategy.LINK_FROM_EDGE_TYPE);
-		} else {
-			parameters.add(MiloStrategy.LINK_TO_EDGE_TYPE);
+		try {
+			final List<String> parameters = new ArrayList<>();
+			parameters.add(MiloStrategy.TYPE_FIELD.toLowerCase());
+			// input index 6 maps to PROPERTY_EDGE_INVERTED_LABEL.
+			final boolean edgeInverted = inputValues.length > 6
+					&& inputValues[6] != null && !inputValues[6].isEmpty()
+					&& Boolean.parseBoolean(inputValues[6].trim());
+			if (edgeInverted) {
+				parameters.add(MiloStrategy.LINK_FROM_EDGE_TYPE);
+			} else {
+				parameters.add(MiloStrategy.LINK_TO_EDGE_TYPE);
+			}
+			enrichParameters(inputValues, parameters, 3,
+					MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
+			enrichParameters(inputValues, parameters, 4,
+					MonitoredEdge.MONITORED_PROPERTIES_LABEL.toLowerCase());
+			enrichParameters(inputValues, parameters, 5,
+					MonitoredEdge.PROPERTY_ACTIVE_LABEL.toLowerCase());
+			enrichParameters(inputValues, parameters, 7,
+					MonitoredEdge.DEADBAND_TYPE_LABEL.toLowerCase());
+			enrichParameters(inputValues, parameters, 8,
+					MonitoredEdge.DEADBAND_LABEL.toLowerCase());
+			enrichParameters(inputValues, parameters, 9,
+					MonitoredEdge.EVENT_ACTIVE_LABEL.toLowerCase());
+			final Object[] arrayParameters = parameters.toArray(new String[0]);
+			logger.info("create edge with parameters: "
+					+ Arrays.toString(arrayParameters));
+			final Vertex source = resolveVertexArgument(
+					inputValues.length > 1 ? inputValues[1] : null, "source");
+			final Vertex target = resolveVertexArgument(
+					inputValues.length > 2 ? inputValues[2] : null, "target");
+			// the edge goes from the source to the target vertex: link-to copies
+			// the source properties into the target, link-from copies the
+			// target properties into the source
+			final Edge edge = source.addEdge(inputValues[0], target,
+					arrayParameters);
+			return new String[]{nodeIdToString(edge.id())};
+		} catch (final RuntimeException e) {
+			logger.warn("create link monitored edge failed: {}",
+					e.getMessage());
+			return new String[]{"error: " + e.getMessage()};
 		}
-		enrichParameters(inputValues, parameters, 3,
-				MiloStrategy.DIRECTORY_PARAMETER.toLowerCase());
-		enrichParameters(inputValues, parameters, 4,
-				MonitoredEdge.MONITORED_PROPERTIES_LABEL.toLowerCase());
-		enrichParameters(inputValues, parameters, 5,
-				MonitoredEdge.PROPERTY_ACTIVE_LABEL.toLowerCase());
-		enrichParameters(inputValues, parameters, 7,
-				MonitoredEdge.DEADBAND_TYPE_LABEL.toLowerCase());
-		enrichParameters(inputValues, parameters, 8,
-				MonitoredEdge.DEADBAND_LABEL.toLowerCase());
-		enrichParameters(inputValues, parameters, 9,
-				MonitoredEdge.EVENT_ACTIVE_LABEL.toLowerCase());
-		final Object[] arrayParameters = parameters.toArray(new String[0]);
-		logger.info("create edge with parameters: "
-				+ Arrays.toString(arrayParameters));
-		final Vertex source = waldotNamespace
-				.getVertexNode(waldotNamespace.generateNodeId(inputValues[1]));
-		final Vertex target = waldotNamespace
-				.getVertexNode(waldotNamespace.generateNodeId(inputValues[2]));
-		final Edge edge = target.addEdge(inputValues[0], source,
-				arrayParameters);
-		return new String[]{edge.id().toString()};
 	}
 
 }

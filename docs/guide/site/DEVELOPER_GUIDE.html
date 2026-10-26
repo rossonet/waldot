@@ -1,0 +1,2175 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for WaldOT - Digital Twin Engine bridging OPC UA and Apache TinkerPop">
+      
+      
+        <meta name="author" content="Zona Autonoma srl">
+      
+      
+        <link rel="canonical" href="https://github.com/rossonet/waldot/DEVELOPER_GUIDE.html">
+      
+      
+        <link rel="prev" href="examples/07-showcase-gas-grid.html">
+      
+      
+        <link rel="next" href="INTEGRATION_GUIDE.html">
+      
+      
+      <link rel="icon" href="immagini/icon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.28">
+    
+    
+      
+        <title>Developer Guide - WaldOT Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=20px+Comfortaa,cursive:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"20px Comfortaa,cursive";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="stylesheets/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#waldot-developer-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="WaldOT Documentation" class="md-header__button md-logo" aria-label="WaldOT Documentation" data-md-component="logo">
+      
+  <img src="immagini/rossonet-logo-03_centered.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WaldOT Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Developer Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="ARCHITECTURE_OVERVIEW.html" class="md-tabs__link">
+          
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="USER_GUIDE.html" class="md-tabs__link">
+          
+  
+  Users & Operators
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="DEVELOPER_GUIDE.html" class="md-tabs__link">
+          
+  
+  Developers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="https://github.com/rossonet/waldot/tree/master/waldot-api" class="md-tabs__link">
+          
+  
+  Modules & Plugins
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="WaldOT Documentation" class="md-nav__button md-logo" aria-label="WaldOT Documentation" data-md-component="logo">
+      
+  <img src="immagini/rossonet-logo-03_centered.png" alt="logo">
+
+    </a>
+    WaldOT Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ARCHITECTURE_OVERVIEW.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Users & Operators
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Users & Operators
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="USER_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="CONFIGURATION.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/01-plain-vertices.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Plain vertices
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/02-active-edges.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Active edges
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/03-generators-and-rules.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Generators and rules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/04-bootstrap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Complete bootstrap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/05-showcase-arena.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. Showcase Dungeon Arena
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/06-showcase-evolution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6. Showcase Evolution Lab
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/07-showcase-gas-grid.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    7. Showcase Gas Grid
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Developers
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="DEVELOPER_GUIDE.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-minute-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      5-Minute Setup
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Quick Start
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Concepts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-waldotgraph" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. WaldotGraph
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-waldotvertex" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. WaldotVertex
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-gremlin-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Gremlin Queries
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plugin-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugin Development
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-the-base-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with the base plugins
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with the base plugins">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generator
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rules-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rules engine
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bootstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bootstrap
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-testing-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit Testing Plugins
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-testing-with-testcontainers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Testing with Testcontainers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-use-virtual-threads-for-io" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Use Virtual Threads for I/O
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-handle-interruptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Handle Interruptions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-clean-up-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Clean Up Resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-use-property-observers" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Use Property Observers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debugging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enable Debug Logging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debug Rules
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect-with-opc-ua-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connect with OPC UA Client
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Interfaces
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Classes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complete-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complete Documentation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#community" class="md-nav__link">
+    <span class="md-ellipsis">
+      Community
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="INTEGRATION_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Integration Guide (Plugins)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Modules & Plugins
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Modules & Plugins
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-api" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-api
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-namespace" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-namespace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/blob/master/waldot-namespace/BOOTSTRAP_CONFIGURATION.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bootstrap Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-runner" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-runner
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-app" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-generator" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generator Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rules Engine Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-tinkerpop" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TinkerPop Server Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-minute-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      5-Minute Setup
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Quick Start
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Concepts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-waldotgraph" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. WaldotGraph
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-waldotvertex" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. WaldotVertex
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-gremlin-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Gremlin Queries
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plugin-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Plugin Development
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-the-base-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with the base plugins
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with the base plugins">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generator
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rules-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rules engine
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bootstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bootstrap
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unit-testing-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      Unit Testing Plugins
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-testing-with-testcontainers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Testing with Testcontainers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-use-virtual-threads-for-io" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Use Virtual Threads for I/O
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-handle-interruptions" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Handle Interruptions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-clean-up-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Clean Up Resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-use-property-observers" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Use Property Observers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Debugging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enable Debug Logging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debug Rules
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect-with-opc-ua-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connect with OPC UA Client
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-interfaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Interfaces
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Classes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complete-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complete Documentation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#community" class="md-nav__link">
+    <span class="md-ellipsis">
+      Community
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="waldot-developer-guide">WaldOT Developer Guide<a class="headerlink" href="#waldot-developer-guide" title="Permanent link">&para;</a></h1>
+<p><strong>Hands-on development guide for software engineers</strong></p>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
+<ul>
+<li>JDK 26 (the build targets Java 26; virtual threads are used throughout)</li>
+<li>Docker (for containerized deployment)</li>
+<li>Git</li>
+<li>IDE with Java support (IntelliJ IDEA, Eclipse, VS Code)</li>
+</ul>
+<h3 id="5-minute-setup">5-Minute Setup<a class="headerlink" href="#5-minute-setup" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Clone repository</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/rossonet/waldot.git
+<span class="nb">cd</span><span class="w"> </span>waldot
+
+<span class="c1"># Build project</span>
+./gradlew<span class="w"> </span>clean<span class="w"> </span>build
+
+<span class="c1"># Run WaldOT</span>
+java<span class="w"> </span>-jar<span class="w"> </span>waldot-app/build/libs/waldot-app-*.jar
+
+<span class="c1"># Access OPC UA server</span>
+<span class="c1"># opc.tcp://localhost:12686/waldot</span>
+</code></pre></div>
+<h3 id="docker-quick-start">Docker Quick Start<a class="headerlink" href="#docker-quick-start" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Pull and run</span>
+docker<span class="w"> </span>pull<span class="w"> </span>rossonet/waldot:latest
+docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">12686</span>:12686<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8443<span class="w"> </span>rossonet/waldot:latest
+
+<span class="c1"># Access</span>
+<span class="c1"># OPC UA: opc.tcp://localhost:12686/waldot</span>
+<span class="c1"># HTTPS: https://localhost:8443</span>
+</code></pre></div>
+<hr />
+<h2 id="core-concepts">Core Concepts<a class="headerlink" href="#core-concepts" title="Permanent link">&para;</a></h2>
+<h3 id="1-waldotgraph">1. WaldotGraph<a class="headerlink" href="#1-waldotgraph" title="Permanent link">&para;</a></h3>
+<p>The main interface combining TinkerPop Graph with OPC UA integration.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Open graph</span>
+<span class="n">WaldotGraph</span><span class="w"> </span><span class="n">graph</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpcFactory</span><span class="p">.</span><span class="na">getOpcGraph</span><span class="p">(</span>
+<span class="w">    </span><span class="s">&quot;file:///tmp/waldot.db&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">LoggerHistoryStrategy</span><span class="p">()</span>
+<span class="p">);</span>
+
+<span class="c1">// Add vertex</span>
+<span class="n">Vertex</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="na">addVertex</span><span class="p">();</span>
+<span class="n">v</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;label&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sensor1&quot;</span><span class="p">);</span>
+<span class="n">v</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;temperature&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">25.5</span><span class="p">);</span>
+
+<span class="c1">// Query</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Vertex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sensors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="na">traversal</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="na">V</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">&quot;label&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sensor1&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">toList</span><span class="p">();</span>
+
+<span class="c1">// Close</span>
+<span class="n">graph</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+</code></pre></div>
+<h3 id="2-waldotvertex">2. WaldotVertex<a class="headerlink" href="#2-waldotvertex" title="Permanent link">&para;</a></h3>
+<p>Represents both a TinkerPop Vertex and an OPC UA Object.</p>
+<div class="highlight"><pre><span></span><code><span class="n">WaldotVertex</span><span class="w"> </span><span class="n">sensor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">WaldotVertex</span><span class="p">)</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="na">addVertex</span><span class="p">();</span>
+<span class="n">sensor</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;label&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;temp-sensor&quot;</span><span class="p">);</span>
+<span class="n">sensor</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">20.0</span><span class="p">);</span>
+
+<span class="c1">// Add edge</span>
+<span class="n">WaldotVertex</span><span class="w"> </span><span class="n">zone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">WaldotVertex</span><span class="p">)</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="na">addVertex</span><span class="p">();</span>
+<span class="n">zone</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;label&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;production-zone&quot;</span><span class="p">);</span>
+<span class="n">sensor</span><span class="p">.</span><span class="na">addEdge</span><span class="p">(</span><span class="s">&quot;located-in&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">zone</span><span class="p">);</span>
+
+<span class="c1">// Observe property changes</span>
+<span class="n">sensor</span><span class="p">.</span><span class="na">addPropertyObserver</span><span class="p">((</span><span class="n">vertex</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">oldValue</span><span class="p">,</span><span class="w"> </span><span class="n">newValue</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; changed: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">oldValue</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; → &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">newValue</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+<h3 id="3-gremlin-queries">3. Gremlin Queries<a class="headerlink" href="#3-gremlin-queries" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">GraphTraversalSource</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="na">traversal</span><span class="p">();</span>
+
+<span class="c1">// Find all sensors</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Vertex</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sensors</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">.</span><span class="na">V</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sensor&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">toList</span><span class="p">();</span>
+
+<span class="c1">// Find sensors in alarm</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">alarms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">.</span><span class="na">V</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;sensor&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">&quot;status&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;alarm&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">values</span><span class="p">(</span><span class="s">&quot;label&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">toList</span><span class="p">();</span>
+
+<span class="c1">// Complex traversal</span>
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Path</span><span class="o">&gt;</span><span class="w"> </span><span class="n">paths</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">.</span><span class="na">V</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">&quot;label&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Line1&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">out</span><span class="p">(</span><span class="s">&quot;contains&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;motor&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">has</span><span class="p">(</span><span class="s">&quot;status&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;alarm&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">path</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="na">by</span><span class="p">(</span><span class="s">&quot;label&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">toList</span><span class="p">();</span>
+</code></pre></div>
+<hr />
+<h2 id="plugin-development">Plugin Development<a class="headerlink" href="#plugin-development" title="Permanent link">&para;</a></h2>
+<p>Plugins are discovered at startup: a top-level class annotated with
+<code>@WaldotPlugin</code>, with a public no-argument constructor, located in a package
+under <code>net.rossonet.waldot</code>, <code>plugin</code> or <code>plugins</code>, usually extending
+<code>AbstractPluginListener</code>. It registers vertex types
+(<code>registerTypeNode(...)</code>), edge types (<code>registerTypeEdge(...)</code>) and commands
+(<code>registerCommand(...)</code>) in <code>initialize(WaldotNamespace)</code>.</p>
+<p>The complete, verified walkthrough (project setup, vertex hooks, custom edges,
+commands, packaging in the Docker image, tests) is in the
+<strong><a href="INTEGRATION_GUIDE.html">Integration Guide</a></strong>.</p>
+<hr />
+<h2 id="working-with-the-base-plugins">Working with the base plugins<a class="headerlink" href="#working-with-the-base-plugins" title="Permanent link">&para;</a></h2>
+<p>Vertices of the base plugins are created with <code>graph.addVertex</code> in a bootstrap
+script, in the <code>query</code> command or in Java code. Keys are lowercase; scripts are
+<a href="https://commons.apache.org/proper/commons-jexl/">JEXL</a> and statements end
+with <code>;</code>.</p>
+<h3 id="generator">Generator<a class="headerlink" href="#generator" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// sinusoidal temperature, new value in &#39;data&#39; every 5 s</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">temp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;office-temp&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;sim:generator&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;office-temp&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;algorithm&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;sinusoidal&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;min&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;18&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;max&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;26&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;delay&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;5000&#39;</span><span class="p">);</span>
+<span class="c1">// production counter, +1 every minute</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;items-produced&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;sim:generator&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;items-produced&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;algorithm&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;incremental&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;min&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;max&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;1000000&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;delay&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;60000&#39;</span><span class="p">);</span>
+<span class="nx">log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s1">&#39;temperature: &#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">temp</span><span class="p">.</span><span class="nx">value</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">));</span>
+</code></pre></div>
+<h3 id="rules-engine">Rules engine<a class="headerlink" href="#rules-engine" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="nx">compute</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;main-compute&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;rules:compute&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;main-compute&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;threads&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;4&#39;</span><span class="p">);</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">rule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;temp-alarm&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;rules:rule&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;temp-alarm&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;condition&#39;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;g.V().has(&#39;id&#39;,&#39;office-temp&#39;).values(&#39;data&#39;).next() &gt; 25.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;action&#39;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;log.warn(&#39;High temperature&#39;)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;hysteresis&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;5000&#39;</span><span class="p">);</span>
+<span class="nx">compute</span><span class="p">.</span><span class="nx">addEdge</span><span class="p">(</span><span class="s1">&#39;runner&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;rules:execute&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;priority&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;100&#39;</span><span class="p">);</span>
+<span class="nx">temp</span><span class="p">.</span><span class="nx">addEdge</span><span class="p">(</span><span class="s1">&#39;watch&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;fire&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;properties-to-monitor&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;data&#39;</span><span class="p">);</span>
+</code></pre></div>
+<p>The same code in Java:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Vertex</span><span class="w"> </span><span class="n">compute</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="na">addVertex</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;main-compute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;rules:compute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;label&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;main-compute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;threads&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;4&quot;</span><span class="p">);</span>
+<span class="n">Vertex</span><span class="w"> </span><span class="n">rule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="na">addVertex</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;temp-alarm&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;rules:rule&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;label&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;temp-alarm&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;condition&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;g.V().has(&#39;id&#39;,&#39;office-temp&#39;).values(&#39;data&#39;).next() &gt; 25.0&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">&quot;action&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;log.warn(&#39;High temperature&#39;)&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;hysteresis&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;5000&quot;</span><span class="p">);</span>
+<span class="n">compute</span><span class="p">.</span><span class="na">addEdge</span><span class="p">(</span><span class="s">&quot;runner&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;rules:execute&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;priority&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;100&quot;</span><span class="p">);</span>
+<span class="n">temp</span><span class="p">.</span><span class="na">addEdge</span><span class="p">(</span><span class="s">&quot;watch&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fire&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;properties-to-monitor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;data&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p>Variables available in <code>condition</code> and <code>action</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>log</code></td>
+<td>logger</td>
+</tr>
+<tr>
+<td><code>g</code></td>
+<td>Gremlin traversal source</td>
+</tr>
+<tr>
+<td><code>graph</code></td>
+<td>the WaldOT graph</td>
+</tr>
+<tr>
+<td><code>cmd</code></td>
+<td>console helper (<code>getVerticesCount()</code>, <code>toNumber(x)</code>, ...)</td>
+</tr>
+<tr>
+<td><code>self</code></td>
+<td>the rule vertex</td>
+</tr>
+<tr>
+<td><code>math</code></td>
+<td><code>java.lang.Math</code></td>
+</tr>
+<tr>
+<td><code>rand</code></td>
+<td><code>java.util.Random</code></td>
+</tr>
+<tr>
+<td>commands</td>
+<td>every console command, as <code>&lt;folder&gt;_&lt;name&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Properties, weights, counters and debug:
+<a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine">rules engine README</a>
+and <a href="USER_GUIDE.html#6-rules-engine">User Guide</a>.</p>
+<h3 id="bootstrap">Bootstrap<a class="headerlink" href="#bootstrap" title="Permanent link">&para;</a></h3>
+<p>Syntax, format detection and troubleshooting:
+<a href="https://github.com/rossonet/waldot/blob/master/waldot-namespace/BOOTSTRAP_CONFIGURATION.md">Bootstrap Configuration</a>.
+Complete verified scripts: <a href="examples/index.html">Examples</a>.</p>
+<hr />
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<h3 id="unit-testing-plugins">Unit Testing Plugins<a class="headerlink" href="#unit-testing-plugins" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@Test</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">testCustomVertex</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Create test graph</span>
+<span class="w">    </span><span class="n">WaldotGraph</span><span class="w"> </span><span class="n">graph</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpcFactory</span><span class="p">.</span><span class="na">getOpcGraph</span><span class="p">(</span>
+<span class="w">        </span><span class="s">&quot;file:///tmp/test.db&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">LoggerHistoryStrategy</span><span class="p">()</span>
+<span class="w">    </span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Create vertex</span>
+<span class="w">    </span><span class="n">Vertex</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="na">addVertex</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my:custom&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">v</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">42.0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Assert</span>
+<span class="w">    </span><span class="n">assertEquals</span><span class="p">(</span><span class="mf">42.0</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">).</span><span class="na">value</span><span class="p">());</span>
+
+<span class="w">    </span><span class="c1">// Cleanup</span>
+<span class="w">    </span><span class="n">graph</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="integration-testing-with-testcontainers">Integration Testing with Testcontainers<a class="headerlink" href="#integration-testing-with-testcontainers" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@Test</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">testWaldotContainer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">(</span><span class="n">GenericContainer</span><span class="o">&lt;?&gt;</span><span class="w"> </span><span class="n">waldot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">GenericContainer</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="s">&quot;rossonet/waldot:latest&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">withExposedPorts</span><span class="p">(</span><span class="mi">12686</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">        </span><span class="n">waldot</span><span class="p">.</span><span class="na">start</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Connect OPC UA client</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">endpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;opc.tcp://&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">waldot</span><span class="p">.</span><span class="na">getHost</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="o">+</span>
+<span class="w">                         </span><span class="n">waldot</span><span class="p">.</span><span class="na">getMappedPort</span><span class="p">(</span><span class="mi">12686</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/waldot&quot;</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// Test connection</span>
+<span class="w">        </span><span class="c1">// ...</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="1-use-virtual-threads-for-io">1. Use Virtual Threads for I/O<a class="headerlink" href="#1-use-virtual-threads-for-io" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// ✅ GOOD: Virtual thread for blocking I/O</span>
+<span class="n">ExecutorService</span><span class="w"> </span><span class="n">executor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ThreadHelper</span><span class="p">.</span><span class="na">newVirtualThreadExecutor</span><span class="p">();</span>
+<span class="n">executor</span><span class="p">.</span><span class="na">submit</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">active</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">httpClient</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">url</span><span class="p">).</span><span class="na">block</span><span class="p">();</span><span class="w">  </span><span class="c1">// Blocking OK</span>
+<span class="w">        </span><span class="n">processData</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">        </span><span class="n">Thread</span><span class="p">.</span><span class="na">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span><span class="w">  </span><span class="c1">// Blocking OK</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">});</span>
+
+<span class="c1">// ❌ BAD: Platform thread pool</span>
+<span class="n">ExecutorService</span><span class="w"> </span><span class="n">executor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Executors</span><span class="p">.</span><span class="na">newFixedThreadPool</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span><span class="w">  </span><span class="c1">// Limited scalability</span>
+</code></pre></div>
+<h3 id="2-handle-interruptions">2. Handle Interruptions<a class="headerlink" href="#2-handle-interruptions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// ✅ GOOD: Proper interruption handling</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">active</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">doWork</span><span class="p">();</span>
+<span class="w">        </span><span class="n">Thread</span><span class="p">.</span><span class="na">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">InterruptedException</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w">  </span><span class="c1">// Exit gracefully</span>
+<span class="w">        </span><span class="n">Thread</span><span class="p">.</span><span class="na">currentThread</span><span class="p">().</span><span class="na">interrupt</span><span class="p">();</span><span class="w">  </span><span class="c1">// Restore interrupt status</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// ❌ BAD: Ignoring interruptions</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">doWork</span><span class="p">();</span>
+<span class="w">    </span><span class="n">Thread</span><span class="p">.</span><span class="na">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span><span class="w">  </span><span class="c1">// Exception ignored</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="3-clean-up-resources">3. Clean Up Resources<a class="headerlink" href="#3-clean-up-resources" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// ✅ GOOD: Proper cleanup</span>
+<span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">close</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="n">executor</span><span class="p">.</span><span class="na">shutdownNow</span><span class="p">();</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">executor</span><span class="p">.</span><span class="na">awaitTermination</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="n">TimeUnit</span><span class="p">.</span><span class="na">SECONDS</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">logger</span><span class="p">.</span><span class="na">warn</span><span class="p">(</span><span class="s">&quot;Executor did not terminate&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="4-use-property-observers">4. Use Property Observers<a class="headerlink" href="#4-use-property-observers" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// ✅ GOOD: React to property changes</span>
+<span class="n">vertex</span><span class="p">.</span><span class="na">addPropertyObserver</span><span class="p">((</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">oldValue</span><span class="p">,</span><span class="w"> </span><span class="n">newValue</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;temperature&quot;</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">Double</span><span class="p">)</span><span class="n">newValue</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">80.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">logger</span><span class="p">.</span><span class="na">warn</span><span class="p">(</span><span class="s">&quot;High temperature detected&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">});</span>
+</code></pre></div>
+<hr />
+<h2 id="debugging">Debugging<a class="headerlink" href="#debugging" title="Permanent link">&para;</a></h2>
+<h3 id="enable-debug-logging">Enable Debug Logging<a class="headerlink" href="#enable-debug-logging" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Docker</span>
+docker<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">JDK_JAVA_OPTIONS</span><span class="o">=</span><span class="s2">&quot;-Dorg.slf4j.simpleLogger.defaultLogLevel=debug&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>rossonet/waldot:latest
+
+<span class="c1"># Java (fat jar built with ./gradlew :waldot-app:shadowJar)</span>
+java<span class="w"> </span>-Dorg.slf4j.simpleLogger.defaultLogLevel<span class="o">=</span>debug<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-jar<span class="w"> </span>waldot-app/build/libs/waldot-app-&lt;version&gt;-all.jar
+</code></pre></div>
+<h3 id="debug-rules">Debug Rules<a class="headerlink" href="#debug-rules" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// enable debug: 0 = off, 1 = OPC UA events, 2 = events and log</span>
+<span class="nx">g</span><span class="p">.</span><span class="nx">V</span><span class="p">().</span><span class="nx">has</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;temp-alarm&#39;</span><span class="p">).</span><span class="nx">next</span><span class="p">().</span><span class="nx">property</span><span class="p">(</span><span class="s1">&#39;debug&#39;</span><span class="p">,</span><span class="w"> </span><span class="mf">2</span><span class="p">);</span>
+
+<span class="c1">// counters</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">rule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">V</span><span class="p">().</span><span class="nx">has</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;temp-alarm&#39;</span><span class="p">).</span><span class="nx">next</span><span class="p">();</span>
+<span class="nx">log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s1">&#39;queue=&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">rule</span><span class="p">.</span><span class="nx">value</span><span class="p">(</span><span class="s1">&#39;queue&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; total=&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">rule</span><span class="p">.</span><span class="nx">value</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; executed=&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">rule</span><span class="p">.</span><span class="nx">value</span><span class="p">(</span><span class="s1">&#39;executed&#39;</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; errors=&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">rule</span><span class="p">.</span><span class="nx">value</span><span class="p">(</span><span class="s1">&#39;errors&#39;</span><span class="p">));</span>
+</code></pre></div>
+<h3 id="connect-with-opc-ua-client">Connect with OPC UA Client<a class="headerlink" href="#connect-with-opc-ua-client" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>UaExpert</strong>: https://www.unified-automation.com/products/development-tools/uaexpert.html</li>
+<li><strong>Prosys Browser</strong>: https://www.prosysopc.com/products/opc-ua-browser/</li>
+</ul>
+<hr />
+<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+<h3 id="key-interfaces">Key Interfaces<a class="headerlink" href="#key-interfaces" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>WaldotGraph</code> - Main graph interface</li>
+<li><code>WaldotVertex</code> - Vertex interface</li>
+<li><code>WaldotEdge</code> - Edge interface</li>
+<li><code>WaldotNamespace</code> - Namespace management</li>
+<li><code>PluginListener</code> - Plugin extension point</li>
+</ul>
+<h3 id="key-classes">Key Classes<a class="headerlink" href="#key-classes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>AbstractOpcVertex</code> - Base class for custom vertices</li>
+<li><code>AbstractOpcEdge</code> - Base class for custom edges</li>
+<li><code>ThreadHelper</code> - Virtual thread utilities</li>
+<li><code>OpcFactory</code> - Graph factory</li>
+</ul>
+<h3 id="complete-documentation">Complete Documentation<a class="headerlink" href="#complete-documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="INTEGRATION_GUIDE.html">Integration Guide</a> - How to write a plugin</li>
+<li><a href="https://javadoc.io/doc/net.rossonet.waldot/waldot-api/latest/index.html">API JavaDoc</a></li>
+</ul>
+<hr />
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/rossonet/waldot/tree/master/waldot-app/examples">Docker Compose examples</a> - server deployment variants</li>
+<li><a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine/docs/SHOWCASE_GAS_GRID.md">Rules engine showcase: gas grid</a></li>
+<li><a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-generator/docs/QUICKSTART.md">Generator quick start</a></li>
+<li><a href="CONFIGURATION.html">Configuration Reference</a></li>
+</ul>
+<hr />
+<h2 id="community">Community<a class="headerlink" href="#community" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>GitHub</strong>: https://github.com/rossonet/waldot</li>
+<li><strong>Issues</strong>: https://github.com/rossonet/waldot/issues</li>
+<li><strong>Discussions</strong>: https://github.com/rossonet/waldot/discussions</li>
+</ul>
+<hr />
+<p><strong>Happy coding!</strong> 🚀</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/rossonet/waldot" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://hub.docker.com/r/rossonet/waldot" target="_blank" rel="noopener" title="hub.docker.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.annotate"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      
+    
+  </body>
+</html>

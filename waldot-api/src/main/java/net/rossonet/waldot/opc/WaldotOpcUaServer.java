@@ -34,6 +34,7 @@ import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.IdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.UsernameIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.X509IdentityValidator;
+import org.eclipse.milo.opcua.stack.core.types.structured.UserTokenPolicy;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.UaRuntimeException;
@@ -161,6 +162,24 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		} catch (final Exception e) {
 			logger.error("Error creating server", e);
 		}
+	}
+
+	/**
+	 * User token policies advertised by every endpoint. The anonymous policy is
+	 * published only when anonymous access is allowed
+	 * ({@code --anonymous-access}, default true).
+	 *
+	 * @param anonymousAccessAllowed whether anonymous sessions are accepted
+	 * @return the token policies, in order of preference
+	 */
+	public static List<UserTokenPolicy> userTokenPolicies(final boolean anonymousAccessAllowed) {
+		final List<UserTokenPolicy> policies = new ArrayList<>();
+		if (anonymousAccessAllowed) {
+			policies.add(USER_TOKEN_POLICY_ANONYMOUS);
+		}
+		policies.add(USER_TOKEN_POLICY_USERNAME);
+		policies.add(USER_TOKEN_POLICY_X509);
+		return policies;
 	}
 
 	/*
@@ -297,8 +316,10 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		for (final String bindAddress : bindAddresses) {
 			for (final String hostname : hostnames) {
 				final Builder builder = EndpointConfig.newBuilder().setBindAddress(bindAddress).setHostname(hostname)
-						.setPath(configuration.getPath()).setCertificate(certificate).addTokenPolicies(
-								USER_TOKEN_POLICY_ANONYMOUS, USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
+						.setPath(configuration.getPath()).setCertificate(certificate)
+						.addTokenPolicies(userTokenPolicies(
+								WaldotAnonymousValidator.isAnonymousAccessAllowed(waldotConfiguration))
+								.toArray(new UserTokenPolicy[0]));
 				// TODO gestire la configurazione delle policy di sicurezza (encryption)
 				final Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None)
 						.setSecurityMode(MessageSecurityMode.None);

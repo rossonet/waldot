@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.eclipse.milo.opcua.sdk.server.Session;
 import org.eclipse.milo.opcua.sdk.server.identity.Identity.AnonymousIdentity;
+import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.UserTokenType;
 import org.eclipse.milo.opcua.stack.core.types.structured.AnonymousIdentityToken;
 import org.eclipse.milo.opcua.stack.core.types.structured.SignatureData;
@@ -54,7 +55,8 @@ public class ClientRegisterAnonymousValidator extends WaldotAnonymousValidator i
 
 	@Override
 	public AnonymousIdentity validateAnonymousToken(final Session session, final AnonymousIdentityToken token,
-			final UserTokenPolicy tokenPolicy, final SignatureData tokenSignature) {
+			final UserTokenPolicy tokenPolicy, final SignatureData tokenSignature) throws UaException {
+		checkAnonymousAccessAllowed();
 		final String sessionDataForLogging = ClientAuthenticator.generateSessionDataForLogging(session);
 		logger.info("\n *** NEW ANONYMOUS REGISTRATION CLIENT REQUEST\n{}", sessionDataForLogging);
 		return clientManagementStrategy.newAnonymousClientSession(session, token, tokenPolicy, tokenSignature);

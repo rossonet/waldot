@@ -1,0 +1,2958 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for WaldOT - Digital Twin Engine bridging OPC UA and Apache TinkerPop">
+      
+      
+        <meta name="author" content="Zona Autonoma srl">
+      
+      
+        <link rel="canonical" href="https://github.com/rossonet/waldot/ARCHITECTURE_OVERVIEW.html">
+      
+      
+        <link rel="prev" href="index.html">
+      
+      
+        <link rel="next" href="USER_GUIDE.html">
+      
+      
+      <link rel="icon" href="immagini/icon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.28">
+    
+    
+      
+        <title>Architecture Overview - WaldOT Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=20px+Comfortaa,cursive:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"20px Comfortaa,cursive";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="stylesheets/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#waldot-architecture-overview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="WaldOT Documentation" class="md-header__button md-logo" aria-label="WaldOT Documentation" data-md-component="logo">
+      
+  <img src="immagini/rossonet-logo-03_centered.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WaldOT Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="ARCHITECTURE_OVERVIEW.html" class="md-tabs__link">
+          
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="USER_GUIDE.html" class="md-tabs__link">
+          
+  
+  Users & Operators
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="DEVELOPER_GUIDE.html" class="md-tabs__link">
+          
+  
+  Developers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="https://github.com/rossonet/waldot/tree/master/waldot-api" class="md-tabs__link">
+          
+  
+  Modules & Plugins
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="WaldOT Documentation" class="md-nav__button md-logo" aria-label="WaldOT Documentation" data-md-component="logo">
+      
+  <img src="immagini/rossonet-logo-03_centered.png" alt="logo">
+
+    </a>
+    WaldOT Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="ARCHITECTURE_OVERVIEW.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executive Summary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Executive Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#business-value-proposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Business Value Proposition
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Layers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Layers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer-1-opc-ua-server-industrial-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer 1: OPC UA Server (Industrial Interface)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-2-tinkerpop-graph-database-analytical-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer 2: TinkerPop Graph Database (Analytical Engine)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-3-bidirectional-synchronization-core-innovation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer 3: Bidirectional Synchronization (Core Innovation)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-4-plugin-system-extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer 4: Plugin System (Extensibility)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Plugins
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Plugins">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-generator-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Generator Plugin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-rules-engine-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Rules Engine Plugin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-tinkerpop-server-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. TinkerPop Server Plugin
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concurrency-model-virtual-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Concurrency Model: Virtual Threads
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-architectures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment Architectures
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment Architectures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-1-edge-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture 1: Edge Device
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-2-gatewayaggregator" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture 2: Gateway/Aggregator
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-3-distributed-enterprise" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture 3: Distributed Enterprise
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Scenarios
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-opc-ua-to-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario 1: OPC UA to Cloud
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-graph-analytics-on-industrial-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario 2: Graph Analytics on Industrial Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-event-driven-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario 3: Event-Driven Automation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Characteristics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Characteristics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scalability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scalability
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#latency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Latency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Requirements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opc-ua-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPC UA Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#application-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compliance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technology Comparison
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technology Comparison">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#waldot-vs-traditional-scada" class="md-nav__link">
+    <span class="md-ellipsis">
+      WaldOT vs. Traditional SCADA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#waldot-vs-time-series-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      WaldOT vs. Time-Series Databases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#waldot-vs-pure-graph-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      WaldOT vs. Pure Graph Databases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration Strategies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-existing-opc-ua-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      From Existing OPC UA Infrastructure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-sql-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      From SQL Databases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roadmap-and-future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Roadmap and Future Enhancements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Roadmap and Future Enhancements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planned-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planned Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-contributions-welcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      Community Contributions Welcome
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decision Framework
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-waldot" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to Use WaldOT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evaluation-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluation Checklist
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proof-of-concept-1-week" class="md-nav__link">
+    <span class="md-ellipsis">
+      Proof of Concept (1 week)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pilot-project-1-month" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pilot Project (1 month)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Users & Operators
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Users & Operators
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="USER_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="CONFIGURATION.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/01-plain-vertices.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Plain vertices
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/02-active-edges.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Active edges
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/03-generators-and-rules.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Generators and rules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/04-bootstrap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Complete bootstrap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/05-showcase-arena.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. Showcase Dungeon Arena
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/06-showcase-evolution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6. Showcase Evolution Lab
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/07-showcase-gas-grid.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    7. Showcase Gas Grid
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Developers
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="DEVELOPER_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="INTEGRATION_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Integration Guide (Plugins)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Modules & Plugins
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Modules & Plugins
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-api" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-api
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-namespace" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-namespace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/blob/master/waldot-namespace/BOOTSTRAP_CONFIGURATION.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bootstrap Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-runner" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-runner
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-app" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-generator" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generator Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rules Engine Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-tinkerpop" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TinkerPop Server Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executive Summary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Executive Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#business-value-proposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Business Value Proposition
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Layers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Layers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer-1-opc-ua-server-industrial-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer 1: OPC UA Server (Industrial Interface)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-2-tinkerpop-graph-database-analytical-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer 2: TinkerPop Graph Database (Analytical Engine)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-3-bidirectional-synchronization-core-innovation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer 3: Bidirectional Synchronization (Core Innovation)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-4-plugin-system-extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer 4: Plugin System (Extensibility)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Plugins
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Plugins">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-generator-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Generator Plugin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-rules-engine-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Rules Engine Plugin
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-tinkerpop-server-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. TinkerPop Server Plugin
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concurrency-model-virtual-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Concurrency Model: Virtual Threads
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-architectures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment Architectures
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment Architectures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-1-edge-device" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture 1: Edge Device
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-2-gatewayaggregator" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture 2: Gateway/Aggregator
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architecture-3-distributed-enterprise" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture 3: Distributed Enterprise
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Scenarios
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-opc-ua-to-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario 1: OPC UA to Cloud
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-graph-analytics-on-industrial-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario 2: Graph Analytics on Industrial Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-event-driven-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario 3: Event-Driven Automation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Characteristics
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Characteristics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scalability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scalability
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#latency" class="md-nav__link">
+    <span class="md-ellipsis">
+      Latency
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Requirements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Considerations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opc-ua-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPC UA Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#application-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Application Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Compliance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Technology Comparison
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technology Comparison">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#waldot-vs-traditional-scada" class="md-nav__link">
+    <span class="md-ellipsis">
+      WaldOT vs. Traditional SCADA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#waldot-vs-time-series-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      WaldOT vs. Time-Series Databases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#waldot-vs-pure-graph-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      WaldOT vs. Pure Graph Databases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migration-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration Strategies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Migration Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from-existing-opc-ua-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      From Existing OPC UA Infrastructure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#from-sql-databases" class="md-nav__link">
+    <span class="md-ellipsis">
+      From SQL Databases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#roadmap-and-future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Roadmap and Future Enhancements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Roadmap and Future Enhancements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planned-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planned Features
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-contributions-welcome" class="md-nav__link">
+    <span class="md-ellipsis">
+      Community Contributions Welcome
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decision-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decision Framework
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision Framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-waldot" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to Use WaldOT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evaluation-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluation Checklist
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proof-of-concept-1-week" class="md-nav__link">
+    <span class="md-ellipsis">
+      Proof of Concept (1 week)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pilot-project-1-month" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pilot Project (1 month)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="waldot-architecture-overview">WaldOT Architecture Overview<a class="headerlink" href="#waldot-architecture-overview" title="Permanent link">&para;</a></h1>
+<p><strong>Strategic Technical Guide for Decision Makers and Architects</strong></p>
+<h2 id="executive-summary">Executive Summary<a class="headerlink" href="#executive-summary" title="Permanent link">&para;</a></h2>
+<p>WaldOT is a Digital Twin Engine that bridges the gap between Operational Technology (OT) and Information Technology (IT) by creating a bidirectional, real-time synchronization between OPC UA industrial systems and Apache TinkerPop graph databases.</p>
+<h3 id="business-value-proposition">Business Value Proposition<a class="headerlink" href="#business-value-proposition" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Unified Data Model</strong>: Single source of truth for industrial and analytical data</li>
+<li><strong>Real-Time Insights</strong>: Complex graph queries on live OPC UA data without ETL pipelines</li>
+<li><strong>Edge Computing</strong>: Low-latency processing directly on industrial devices</li>
+<li><strong>Reduced Integration Costs</strong>: Standard protocols (OPC UA + Gremlin) eliminate custom integrations</li>
+<li><strong>Scalability</strong>: From single devices to distributed enterprise deployments</li>
+<li><strong>Future-Proof</strong>: Built on open standards (OPC UA, Apache TinkerPop, Java 26)</li>
+</ul>
+<hr />
+<h2 id="architecture-layers">Architecture Layers<a class="headerlink" href="#architecture-layers" title="Permanent link">&para;</a></h2>
+<h3 id="layer-1-opc-ua-server-industrial-interface">Layer 1: OPC UA Server (Industrial Interface)<a class="headerlink" href="#layer-1-opc-ua-server-industrial-interface" title="Permanent link">&para;</a></h3>
+<p><strong>Technology</strong>: Eclipse Milo OPC UA SDK</p>
+<p><strong>Purpose</strong>: Expose industrial data using the OPC UA standard protocol</p>
+<p><strong>Capabilities</strong>:</p>
+<ul>
+<li>Full OPC UA server implementation (binary protocol, security, subscriptions)</li>
+<li>Standard OPC UA address space with Objects, Variables, References</li>
+<li>Event system for real-time notifications</li>
+<li>Security: X.509 certificates, user authentication, encryption</li>
+<li>Compatible with all OPC UA clients (UaExpert, Prosys, custom applications)</li>
+</ul>
+<p><strong>Deployment Scenarios</strong>:</p>
+<ul>
+<li>Standalone OPC UA server for legacy system integration</li>
+<li>Gateway between proprietary protocols and OPC UA</li>
+<li>Edge device for local data aggregation</li>
+</ul>
+<hr />
+<h3 id="layer-2-tinkerpop-graph-database-analytical-engine">Layer 2: TinkerPop Graph Database (Analytical Engine)<a class="headerlink" href="#layer-2-tinkerpop-graph-database-analytical-engine" title="Permanent link">&para;</a></h3>
+<p><strong>Technology</strong>: Apache TinkerPop 3.x</p>
+<p><strong>Purpose</strong>: Represent industrial data as a queryable graph structure</p>
+<p><strong>Capabilities</strong>:</p>
+<ul>
+<li>Vertices (nodes) represent industrial objects (machines, sensors, zones)</li>
+<li>Edges (relationships) represent connections (contains, monitors, controls)</li>
+<li>Properties store dynamic data (temperature, pressure, status)</li>
+<li>Gremlin query language for complex traversals</li>
+<li>Graph algorithms (PageRank, shortest path, community detection)</li>
+<li>Multiple storage backends (in-memory, RocksDB, Neo4j, JanusGraph)</li>
+</ul>
+<p><strong>Use Cases</strong>:</p>
+<ul>
+<li>Correlation analysis across distant equipment</li>
+<li>Root cause analysis with graph traversal</li>
+<li>Asset relationship mapping</li>
+<li>Predictive maintenance pattern detection</li>
+</ul>
+<hr />
+<h3 id="layer-3-bidirectional-synchronization-core-innovation">Layer 3: Bidirectional Synchronization (Core Innovation)<a class="headerlink" href="#layer-3-bidirectional-synchronization-core-innovation" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Keep OPC UA and TinkerPop in perfect sync</p>
+<p><strong>Synchronization Flow</strong>:</p>
+<div class="highlight"><pre><span></span><code>OPC UA Client → Write Variable → OPC UA Server
+                                      ↓
+                                 WaldOT Sync
+                                      ↓
+                              TinkerPop Graph
+                                      ↓
+                              Gremlin Listeners
+                                      ↓
+                              Rules Engine / Analytics
+
+Gremlin Query → Modify Graph → WaldOT Sync
+                                      ↓
+                              OPC UA Server
+                                      ↓
+                              OPC UA Clients (notified)
+</code></pre></div>
+<p><strong>Key Features</strong>:</p>
+<ul>
+<li><strong>Real-time</strong>: Changes propagate in milliseconds</li>
+<li><strong>Bidirectional</strong>: Modifications from either side sync to the other</li>
+<li><strong>Consistent</strong>: ACID properties maintained where supported by storage backend</li>
+<li><strong>Event-driven</strong>: Observers and listeners for reactive programming</li>
+</ul>
+<hr />
+<h3 id="layer-4-plugin-system-extensibility">Layer 4: Plugin System (Extensibility)<a class="headerlink" href="#layer-4-plugin-system-extensibility" title="Permanent link">&para;</a></h3>
+<p><strong>Technology</strong>: Java 26 with @WaldotPlugin annotation-based discovery</p>
+<p><strong>Purpose</strong>: Extend WaldOT with domain-specific functionality</p>
+<p><strong>Architecture</strong>:</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────┐
+│              Plugin Manager                          │
+│  • Auto-discovery (@WaldotPlugin)                   │
+│  • Lifecycle management (init → start → stop)       │
+│  • Type registration in OPC UA namespace            │
+└─────────────────────────────────────────────────────┘
+                      ↓
+┌─────────────────────────────────────────────────────┐
+│              Available Plugins                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │
+│  │  Generator   │  │ Rules Engine │  │ TinkerPop │ │
+│  │  Plugin      │  │   Plugin     │  │  Server   │ │
+│  └──────────────┘  └──────────────┘  └───────────┘ │
+│  ┌──────────────┐  ┌──────────────┐                │
+│  │   Custom     │  │   Custom     │                │
+│  │  Protocol    │  │  Analytics   │                │
+│  └──────────────┘  └──────────────┘                │
+└─────────────────────────────────────────────────────┘
+</code></pre></div>
+<p><strong>Plugin Capabilities</strong>:</p>
+<ul>
+<li>Register custom vertex types (e.g., "PLC", "Sensor", "Actuator")</li>
+<li>Implement custom behaviors (polling, event processing, calculations)</li>
+<li>Integrate external systems (MQTT, Modbus, REST APIs, databases)</li>
+<li>Provide reusable commands accessible via OPC UA methods</li>
+</ul>
+<p><strong>Development Effort</strong>:</p>
+<ul>
+<li>Simple plugin: 1-2 days</li>
+<li>Complex integration: 1-2 weeks</li>
+<li>Full documentation and examples provided</li>
+</ul>
+<hr />
+<h2 id="core-plugins">Core Plugins<a class="headerlink" href="#core-plugins" title="Permanent link">&para;</a></h2>
+<h3 id="1-generator-plugin">1. Generator Plugin<a class="headerlink" href="#1-generator-plugin" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Simulate dynamic data for testing and development</p>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>6 algorithms: incremental, decremental, random, sinusoidal, triangular, stopped</li>
+<li>Configurable update intervals (10ms to hours)</li>
+<li>Virtual threads for thousands of concurrent generators</li>
+<li>Perfect for testing without physical hardware</li>
+</ul>
+<p><strong>Use Cases</strong>:</p>
+<ul>
+<li>Development and testing</li>
+<li>Training and demonstrations</li>
+<li>Load testing</li>
+<li>Rule engine validation</li>
+</ul>
+<p><strong>Performance</strong>: 100,000+ generators on standard hardware</p>
+<hr />
+<h3 id="2-rules-engine-plugin">2. Rules Engine Plugin<a class="headerlink" href="#2-rules-engine-plugin" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Event-driven IF-THEN-THAT automation</p>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>JEXL expressions for conditions and actions</li>
+<li>Priority-based event queuing</li>
+<li>Hysteresis deduplication (prevent event flooding)</li>
+<li>Full graph access in rules (Gremlin queries)</li>
+<li>Virtual thread execution for concurrency</li>
+<li>Debug events for troubleshooting</li>
+</ul>
+<p><strong>Architecture</strong>:</p>
+<div class="highlight"><pre><span></span><code>[Source Node] → [FireMonitoredEdge] → [RuleVertex] → [ComputeMonitoredEdge] → [ComputeVertex]
+   (event)         (filters)          (condition)          (routes)            (executes action)
+</code></pre></div>
+<p><strong>Use Cases</strong>:</p>
+<ul>
+<li>Real-time alerting (temperature &gt; threshold)</li>
+<li>Complex condition monitoring (multiple sensors)</li>
+<li>Automated responses (shutdown on critical state)</li>
+<li>Data validation and quality checks</li>
+<li>State machine implementation</li>
+</ul>
+<p><strong>Performance</strong>: Thousands of rules, sub-millisecond latency for simple conditions</p>
+<hr />
+<h3 id="3-tinkerpop-server-plugin">3. TinkerPop Server Plugin<a class="headerlink" href="#3-tinkerpop-server-plugin" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose</strong>: Enable remote Gremlin client access</p>
+<p><strong>Features</strong>:</p>
+<ul>
+<li>Embedded Gremlin Server as graph vertices</li>
+<li>WebSocket protocol (port 8182 by default)</li>
+<li>GraphSON v3 and GraphBinary v1 serializers</li>
+<li>Compatible with standard TinkerPop clients</li>
+<li>Graph visualization tools support (Graph-Explorer, Gephi)</li>
+</ul>
+<p><strong>Use Cases</strong>:</p>
+<ul>
+<li>Remote graph queries from applications</li>
+<li>Integration with BI tools</li>
+<li>Graph visualization</li>
+<li>Multi-user access to WaldOT graph</li>
+</ul>
+<hr />
+<h2 id="concurrency-model-virtual-threads">Concurrency Model: Virtual Threads<a class="headerlink" href="#concurrency-model-virtual-threads" title="Permanent link">&para;</a></h2>
+<p><strong>Technology</strong>: Java 26 (Project Loom) Virtual Threads</p>
+<p><strong>Why Virtual Threads?</strong></p>
+<p>Traditional platform threads:</p>
+<ul>
+<li>~1 MB stack size per thread</li>
+<li>OS-managed scheduling</li>
+<li>Limited to thousands of threads</li>
+<li>Blocking I/O blocks OS thread</li>
+</ul>
+<p>Virtual threads:</p>
+<ul>
+<li>~1 KB stack size per thread</li>
+<li>JVM-managed scheduling</li>
+<li>Millions of threads possible</li>
+<li>Blocking I/O doesn't block OS thread</li>
+</ul>
+<p><strong>Impact on WaldOT</strong>:</p>
+<div class="highlight"><pre><span></span><code>Scenario: 10,000 sensors polling every second
+
+Platform Threads:
+- 10,000 threads × 1 MB = ~10 GB RAM
+- Context switching overhead
+- Not feasible
+
+Virtual Threads:
+- 10,000 threads × 1 KB = ~10 MB RAM
+- Minimal overhead
+- Easily achievable
+</code></pre></div>
+<p><strong>Design Pattern</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Each active object (generator, monitor, rule) runs in its own virtual thread</span>
+<span class="n">ExecutorService</span><span class="w"> </span><span class="n">executor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ThreadHelper</span><span class="p">.</span><span class="na">newVirtualThreadExecutor</span><span class="p">();</span>
+
+<span class="c1">// Create thousands of concurrent tasks</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100000</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">executor</span><span class="p">.</span><span class="na">submit</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">active</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Blocking operations are OK in virtual threads</span>
+<span class="w">            </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fetchSensorData</span><span class="p">();</span><span class="w">  </span><span class="c1">// Blocking I/O</span>
+<span class="w">            </span><span class="n">updateGraph</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">            </span><span class="n">Thread</span><span class="p">.</span><span class="na">sleep</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span><span class="w">  </span><span class="c1">// Blocking sleep</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>Simple, readable code (no async/await complexity)</li>
+<li>Massive concurrency with minimal resources</li>
+<li>Perfect for I/O-bound workloads (sensors, APIs, databases)</li>
+</ul>
+<hr />
+<h2 id="deployment-architectures">Deployment Architectures<a class="headerlink" href="#deployment-architectures" title="Permanent link">&para;</a></h2>
+<h3 id="architecture-1-edge-device">Architecture 1: Edge Device<a class="headerlink" href="#architecture-1-edge-device" title="Permanent link">&para;</a></h3>
+<p><strong>Scenario</strong>: Single industrial device (RTU, PLC, edge gateway)</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────┐
+│        Edge Device                   │
+│  ┌───────────────────────────────┐  │
+│  │  WaldOT Container             │  │
+│  │  • OPC UA Server              │  │
+│  │  • Local graph (RocksDB)      │  │
+│  │  • Rules engine               │  │
+│  │  • Data generators            │  │
+│  └───────────────────────────────┘  │
+│                                      │
+│  Hardware: 1GB RAM, 2 CPU cores     │
+└─────────────────────────────────────┘
+         ↓ (optional)
+    Cloud/SCADA
+</code></pre></div>
+<p><strong>Characteristics</strong>:</p>
+<ul>
+<li>Low latency (&lt;1ms for local rules)</li>
+<li>Offline capable</li>
+<li>Minimal bandwidth usage</li>
+<li>Local data processing</li>
+</ul>
+<p><strong>Use Cases</strong>:</p>
+<ul>
+<li>Remote sites with limited connectivity</li>
+<li>Real-time control loops</li>
+<li>Edge analytics</li>
+<li>Data aggregation before cloud upload</li>
+</ul>
+<hr />
+<h3 id="architecture-2-gatewayaggregator">Architecture 2: Gateway/Aggregator<a class="headerlink" href="#architecture-2-gatewayaggregator" title="Permanent link">&para;</a></h3>
+<p><strong>Scenario</strong>: Multiple devices aggregated through WaldOT gateway</p>
+<div class="highlight"><pre><span></span><code>┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│   PLC 1     │  │   PLC 2     │  │  Sensor N   │
+│ (OPC UA)    │  │ (Modbus)    │  │  (MQTT)     │
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       │                │                │
+       └────────────────┼────────────────┘
+                        ↓
+         ┌──────────────────────────────┐
+         │   WaldOT Gateway             │
+         │  • Protocol bridges          │
+         │  • Data normalization        │
+         │  • Graph aggregation         │
+         │  • Rules engine              │
+         └──────────────┬───────────────┘
+                        ↓
+                  SCADA / Cloud
+</code></pre></div>
+<p><strong>Characteristics</strong>:</p>
+<ul>
+<li>Protocol translation (Modbus, MQTT, OPC UA)</li>
+<li>Data normalization</li>
+<li>Local buffering</li>
+<li>Bandwidth optimization</li>
+</ul>
+<p><strong>Use Cases</strong>:</p>
+<ul>
+<li>Legacy system integration</li>
+<li>Multi-protocol environments</li>
+<li>Data preprocessing</li>
+<li>Local analytics before cloud</li>
+</ul>
+<hr />
+<h3 id="architecture-3-distributed-enterprise">Architecture 3: Distributed Enterprise<a class="headerlink" href="#architecture-3-distributed-enterprise" title="Permanent link">&para;</a></h3>
+<p><strong>Scenario</strong>: Multiple WaldOT instances with centralized graph database</p>
+<div class="highlight"><pre><span></span><code>┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│  WaldOT     │  │  WaldOT     │  │  WaldOT     │
+│  Edge 1     │  │  Edge 2     │  │  Edge N     │
+│ (local DB)  │  │ (local DB)  │  │ (local DB)  │
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       │                │                │
+       └────────────────┼────────────────┘
+                        ↓
+         ┌──────────────────────────────┐
+         │   Central TinkerPop Graph    │
+         │   (Neo4j / JanusGraph)       │
+         │  • Enterprise-wide view      │
+         │  • Cross-site analytics      │
+         │  • Historical data           │
+         └──────────────────────────────┘
+</code></pre></div>
+<p><strong>Characteristics</strong>:</p>
+<ul>
+<li>Distributed data collection</li>
+<li>Centralized analytics</li>
+<li>Scalable to thousands of devices</li>
+<li>Enterprise-wide visibility</li>
+</ul>
+<p><strong>Use Cases</strong>:</p>
+<ul>
+<li>Multi-site manufacturing</li>
+<li>Fleet management</li>
+<li>Enterprise asset management</li>
+<li>Centralized monitoring</li>
+</ul>
+<hr />
+<h2 id="integration-scenarios">Integration Scenarios<a class="headerlink" href="#integration-scenarios" title="Permanent link">&para;</a></h2>
+<h3 id="scenario-1-opc-ua-to-cloud">Scenario 1: OPC UA to Cloud<a class="headerlink" href="#scenario-1-opc-ua-to-cloud" title="Permanent link">&para;</a></h3>
+<p><strong>Problem</strong>: Legacy OPC UA devices need cloud connectivity</p>
+<p><strong>Solution</strong>: WaldOT as OPC UA client + cloud bridge</p>
+<div class="highlight"><pre><span></span><code>[OPC UA Devices] → [WaldOT OPC UA Client] → [Graph Processing] → [Cloud API]
+</code></pre></div>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>No changes to existing OPC UA infrastructure</li>
+<li>Data transformation and filtering at edge</li>
+<li>Bandwidth optimization</li>
+<li>Offline buffering</li>
+</ul>
+<hr />
+<h3 id="scenario-2-graph-analytics-on-industrial-data">Scenario 2: Graph Analytics on Industrial Data<a class="headerlink" href="#scenario-2-graph-analytics-on-industrial-data" title="Permanent link">&para;</a></h3>
+<p><strong>Problem</strong>: Need complex queries on industrial data (e.g., "find all motors connected to Line 1 in alarm state")</p>
+<p><strong>Solution</strong>: WaldOT exposes OPC UA as queryable graph</p>
+<div class="highlight"><pre><span></span><code>[OPC UA Data] → [WaldOT Graph] → [Gremlin Queries] → [Analytics / BI Tools]
+</code></pre></div>
+<p><strong>Example Query</strong> (Gremlin Server, <code>waldot-plugin-tinkerpop</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Find all motors in alarm state connected to Line 1</span>
+<span class="n">g</span><span class="o">.</span><span class="na">V</span><span class="o">().</span><span class="na">has</span><span class="o">(</span><span class="s1">&#39;name&#39;</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;Line1&#39;</span><span class="o">)</span>
+<span class="w">  </span><span class="o">.</span><span class="na">out</span><span class="o">(</span><span class="s1">&#39;contains&#39;</span><span class="o">)</span>
+<span class="w">  </span><span class="o">.</span><span class="na">has</span><span class="o">(</span><span class="s1">&#39;type&#39;</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;motor&#39;</span><span class="o">)</span>
+<span class="w">  </span><span class="o">.</span><span class="na">has</span><span class="o">(</span><span class="s1">&#39;status&#39;</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;alarm&#39;</span><span class="o">)</span>
+<span class="w">  </span><span class="o">.</span><span class="na">values</span><span class="o">(</span><span class="s1">&#39;name&#39;</span><span class="o">)</span>
+</code></pre></div>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>No ETL pipeline required</li>
+<li>Real-time queries on live data</li>
+<li>Complex relationship traversal</li>
+<li>Graph algorithms (PageRank, community detection)</li>
+</ul>
+<hr />
+<h3 id="scenario-3-event-driven-automation">Scenario 3: Event-Driven Automation<a class="headerlink" href="#scenario-3-event-driven-automation" title="Permanent link">&para;</a></h3>
+<p><strong>Problem</strong>: Need automated responses to complex conditions</p>
+<p><strong>Solution</strong>: WaldOT Rules Engine</p>
+<div class="highlight"><pre><span></span><code>[Sensors] → [WaldOT Graph] → [Rules Engine] → [Automated Actions]
+</code></pre></div>
+<p><strong>Example Rule</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// IF temperature &gt; 80 AND pressure &gt; 100 THEN close the inlet valve</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">reactor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;g.V().has(&#39;id&#39;,&#39;reactor&#39;).next()&quot;</span><span class="p">;</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;reactor-critical&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;rules:rule&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;reactor-critical&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;condition&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">reactor</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s2">&quot;.value(&#39;temperature&#39;) &gt; 80.0 &amp;&amp; &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">reactor</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s2">&quot;.value(&#39;pressure&#39;) &gt; 100.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;action&#39;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;g.V().has(&#39;id&#39;,&#39;inlet-valve&#39;).next().property(&#39;opening&#39;, 0.0); log.error(&#39;CRITICAL&#39;)&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p>The rule runs when a <code>fire</code> edge notifies it and a <code>rules:compute</code> executes it
+(see <a href="USER_GUIDE.html#6-rules-engine">User Guide</a>).</p>
+<p><strong>Benefits</strong>:</p>
+<ul>
+<li>Low latency (edge processing)</li>
+<li>Complex multi-sensor conditions</li>
+<li>Full graph access in rules</li>
+<li>Priority-based execution</li>
+</ul>
+<hr />
+<h2 id="performance-characteristics">Performance Characteristics<a class="headerlink" href="#performance-characteristics" title="Permanent link">&para;</a></h2>
+<h3 id="scalability">Scalability<a class="headerlink" href="#scalability" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vertices</td>
+<td>1M+</td>
+<td>Depends on storage backend</td>
+</tr>
+<tr>
+<td>Edges</td>
+<td>10M+</td>
+<td>Depends on storage backend</td>
+</tr>
+<tr>
+<td>Generators</td>
+<td>100K+</td>
+<td>Limited by CPU, not memory (virtual threads)</td>
+</tr>
+<tr>
+<td>Rules</td>
+<td>10K+</td>
+<td>Concurrent execution with virtual threads</td>
+</tr>
+<tr>
+<td>OPC UA Clients</td>
+<td>100+</td>
+<td>Standard Eclipse Milo limits</td>
+</tr>
+<tr>
+<td>Events/sec</td>
+<td>10K+</td>
+<td>Depends on rule complexity</td>
+</tr>
+</tbody>
+</table>
+<h3 id="latency">Latency<a class="headerlink" href="#latency" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Latency</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Property update (OPC UA → Graph)</td>
+<td>&lt;1ms</td>
+<td>In-memory graph</td>
+</tr>
+<tr>
+<td>Property update (Graph → OPC UA)</td>
+<td>&lt;1ms</td>
+<td>In-memory graph</td>
+</tr>
+<tr>
+<td>Simple rule execution</td>
+<td>&lt;1ms</td>
+<td>Boolean condition</td>
+</tr>
+<tr>
+<td>Complex rule (Gremlin query)</td>
+<td>1-10ms</td>
+<td>Depends on query</td>
+</tr>
+<tr>
+<td>Graph traversal (local)</td>
+<td>&lt;10ms</td>
+<td>Depends on complexity</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-requirements">Resource Requirements<a class="headerlink" href="#resource-requirements" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Deployment</th>
+<th>RAM</th>
+<th>CPU</th>
+<th>Storage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Minimal (edge)</td>
+<td>512MB</td>
+<td>1 core</td>
+<td>100MB</td>
+</tr>
+<tr>
+<td>Standard</td>
+<td>2GB</td>
+<td>2 cores</td>
+<td>1GB</td>
+</tr>
+<tr>
+<td>Large (10K vertices)</td>
+<td>4GB</td>
+<td>4 cores</td>
+<td>10GB</td>
+</tr>
+<tr>
+<td>Enterprise (100K vertices)</td>
+<td>16GB+</td>
+<td>8+ cores</td>
+<td>100GB+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="opc-ua-security">OPC UA Security<a class="headerlink" href="#opc-ua-security" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Encryption</strong>: TLS 1.2+ for all OPC UA connections</li>
+<li><strong>Authentication</strong>: X.509 certificates, username/password</li>
+<li><strong>Authorization</strong>: Role-based access control (RBAC)</li>
+<li><strong>PKI</strong>: Full Public Key Infrastructure support</li>
+<li><strong>Security Policies</strong>: Sign, SignAndEncrypt, None (configurable)</li>
+</ul>
+<h3 id="application-security">Application Security<a class="headerlink" href="#application-security" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Default Credentials</strong>: MUST be changed in production (<code>--factory-password</code>)</li>
+<li><strong>Anonymous Access</strong>: Disable in production (<code>--anonymous-access false</code>)</li>
+<li><strong>Exec Command</strong>: Disable in production (<code>--exec-command-executable false</code>)</li>
+<li><strong>Network Isolation</strong>: Bind to specific interfaces, use firewalls</li>
+<li><strong>Secrets Management</strong>: Use Docker secrets, Kubernetes secrets, or vault</li>
+</ul>
+<h3 id="compliance">Compliance<a class="headerlink" href="#compliance" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>IEC 62443</strong>: Industrial security standards compatible</li>
+<li><strong>GDPR</strong>: No personal data collected by default</li>
+<li><strong>Audit Logging</strong>: All operations logged via SLF4J</li>
+</ul>
+<hr />
+<h2 id="technology-comparison">Technology Comparison<a class="headerlink" href="#technology-comparison" title="Permanent link">&para;</a></h2>
+<h3 id="waldot-vs-traditional-scada">WaldOT vs. Traditional SCADA<a class="headerlink" href="#waldot-vs-traditional-scada" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>WaldOT</th>
+<th>Traditional SCADA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data Model</td>
+<td>Graph (flexible)</td>
+<td>Hierarchical (rigid)</td>
+</tr>
+<tr>
+<td>Query Language</td>
+<td>Gremlin (powerful)</td>
+<td>SQL (limited relationships)</td>
+</tr>
+<tr>
+<td>Real-time</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Edge Computing</td>
+<td>Yes</td>
+<td>Limited</td>
+</tr>
+<tr>
+<td>Extensibility</td>
+<td>Plugin architecture</td>
+<td>Vendor-specific</td>
+</tr>
+<tr>
+<td>Standards</td>
+<td>OPC UA, TinkerPop</td>
+<td>Proprietary</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Open-source</td>
+<td>Expensive licenses</td>
+</tr>
+</tbody>
+</table>
+<h3 id="waldot-vs-time-series-databases">WaldOT vs. Time-Series Databases<a class="headerlink" href="#waldot-vs-time-series-databases" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>WaldOT</th>
+<th>Time-Series DB</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Relationships</td>
+<td>Native (graph)</td>
+<td>Limited (tags)</td>
+</tr>
+<tr>
+<td>Complex Queries</td>
+<td>Gremlin traversal</td>
+<td>Aggregations only</td>
+</tr>
+<tr>
+<td>Real-time Updates</td>
+<td>Bidirectional</td>
+<td>Write-only</td>
+</tr>
+<tr>
+<td>OPC UA Integration</td>
+<td>Native</td>
+<td>Requires gateway</td>
+</tr>
+<tr>
+<td>Graph Algorithms</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Time-series Optimization</td>
+<td>Via plugins</td>
+<td>Native</td>
+</tr>
+</tbody>
+</table>
+<h3 id="waldot-vs-pure-graph-databases">WaldOT vs. Pure Graph Databases<a class="headerlink" href="#waldot-vs-pure-graph-databases" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>WaldOT</th>
+<th>Neo4j / JanusGraph</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OPC UA Integration</td>
+<td>Native</td>
+<td>Requires custom code</td>
+</tr>
+<tr>
+<td>Industrial Protocols</td>
+<td>Via plugins</td>
+<td>Not supported</td>
+</tr>
+<tr>
+<td>Edge Deployment</td>
+<td>Optimized</td>
+<td>Heavy</td>
+</tr>
+<tr>
+<td>Rules Engine</td>
+<td>Built-in</td>
+<td>External</td>
+</tr>
+<tr>
+<td>Data Simulation</td>
+<td>Built-in</td>
+<td>External</td>
+</tr>
+<tr>
+<td>Learning Curve</td>
+<td>Moderate</td>
+<td>Steep</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="migration-strategies">Migration Strategies<a class="headerlink" href="#migration-strategies" title="Permanent link">&para;</a></h2>
+<h3 id="from-existing-opc-ua-infrastructure">From Existing OPC UA Infrastructure<a class="headerlink" href="#from-existing-opc-ua-infrastructure" title="Permanent link">&para;</a></h3>
+<p><strong>Phase 1: Parallel Deployment</strong></p>
+<ul>
+<li>Deploy WaldOT as OPC UA client</li>
+<li>Mirror existing OPC UA data to graph</li>
+<li>Validate data consistency</li>
+<li>No changes to existing systems</li>
+</ul>
+<p><strong>Phase 2: Analytics Integration</strong></p>
+<ul>
+<li>Develop Gremlin queries for analytics</li>
+<li>Integrate with BI tools</li>
+<li>Train users on graph queries</li>
+</ul>
+<p><strong>Phase 3: Gradual Migration</strong></p>
+<ul>
+<li>Migrate non-critical systems to WaldOT</li>
+<li>Implement rules engine for automation</li>
+<li>Decommission legacy systems incrementally</li>
+</ul>
+<h3 id="from-sql-databases">From SQL Databases<a class="headerlink" href="#from-sql-databases" title="Permanent link">&para;</a></h3>
+<p><strong>Phase 1: Data Modeling</strong></p>
+<ul>
+<li>Map SQL tables to graph vertices</li>
+<li>Map foreign keys to graph edges</li>
+<li>Identify relationship patterns</li>
+</ul>
+<p><strong>Phase 2: ETL Pipeline</strong></p>
+<ul>
+<li>Extract data from SQL</li>
+<li>Transform to graph structure</li>
+<li>Load into WaldOT</li>
+</ul>
+<p><strong>Phase 3: Live Sync</strong></p>
+<ul>
+<li>Implement change data capture (CDC)</li>
+<li>Sync SQL changes to graph</li>
+<li>Validate consistency</li>
+</ul>
+<hr />
+<h2 id="roadmap-and-future-enhancements">Roadmap and Future Enhancements<a class="headerlink" href="#roadmap-and-future-enhancements" title="Permanent link">&para;</a></h2>
+<h3 id="planned-features">Planned Features<a class="headerlink" href="#planned-features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Additional Storage Backends</strong>: Cassandra, ArangoDB</li>
+<li><strong>Enhanced Security</strong>: OAuth2, SAML integration</li>
+<li><strong>Cloud Connectors</strong>: AWS IoT, Azure IoT Hub, Google Cloud IoT</li>
+<li><strong>Protocol Bridges</strong>: Modbus, BACnet, MQTT native support</li>
+<li><strong>Graph Visualization</strong>: Built-in web UI for graph exploration</li>
+<li><strong>Machine Learning Integration</strong>: TensorFlow, PyTorch model deployment</li>
+<li><strong>Distributed Computing</strong>: Apache Spark integration for large-scale analytics</li>
+</ul>
+<h3 id="community-contributions-welcome">Community Contributions Welcome<a class="headerlink" href="#community-contributions-welcome" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Protocol adapters</li>
+<li>Storage backend implementations</li>
+<li>Analytics plugins</li>
+<li>Visualization tools</li>
+<li>Documentation improvements</li>
+</ul>
+<hr />
+<h2 id="decision-framework">Decision Framework<a class="headerlink" href="#decision-framework" title="Permanent link">&para;</a></h2>
+<h3 id="when-to-use-waldot">When to Use WaldOT<a class="headerlink" href="#when-to-use-waldot" title="Permanent link">&para;</a></h3>
+<p>✅ <strong>Good Fit</strong>:</p>
+<ul>
+<li>Complex relationship queries needed</li>
+<li>Multiple data sources to integrate</li>
+<li>Edge computing requirements</li>
+<li>Real-time analytics on industrial data</li>
+<li>Event-driven automation</li>
+<li>Flexible, evolving data models</li>
+</ul>
+<p>❌ <strong>Not Ideal</strong>:</p>
+<ul>
+<li>Pure time-series data (use InfluxDB, TimescaleDB)</li>
+<li>Simple SCADA (use traditional SCADA)</li>
+<li>No relationship complexity (use SQL database)</li>
+<li>Extremely high throughput (&gt;100K events/sec sustained)</li>
+</ul>
+<h3 id="evaluation-checklist">Evaluation Checklist<a class="headerlink" href="#evaluation-checklist" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] Do you need complex relationship queries?</li>
+<li>[ ] Do you have multiple industrial protocols to integrate?</li>
+<li>[ ] Do you need edge computing capabilities?</li>
+<li>[ ] Do you need event-driven automation?</li>
+<li>[ ] Do you have a Java 26 runtime available (or can you run the Docker image)?</li>
+<li>[ ] Do you have OPC UA infrastructure or plan to adopt it?</li>
+<li>[ ] Do you need flexible, evolving data models?</li>
+</ul>
+<p>If you answered "yes" to 3+ questions, WaldOT is likely a good fit.</p>
+<hr />
+<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<h3 id="proof-of-concept-1-week">Proof of Concept (1 week)<a class="headerlink" href="#proof-of-concept-1-week" title="Permanent link">&para;</a></h3>
+<p><strong>Day 1-2</strong>: Installation and basic setup</p>
+<ul>
+<li>Deploy WaldOT Docker container</li>
+<li>Connect OPC UA client (UaExpert)</li>
+<li>Create first graph vertices</li>
+</ul>
+<p><strong>Day 3-4</strong>: Data simulation and rules</p>
+<ul>
+<li>Configure generator plugin</li>
+<li>Create simple rules</li>
+<li>Test event-driven automation</li>
+</ul>
+<p><strong>Day 5</strong>: Integration testing</p>
+<ul>
+<li>Connect to existing OPC UA devices</li>
+<li>Develop Gremlin queries</li>
+<li>Evaluate performance</li>
+</ul>
+<p><strong>Day 6-7</strong>: Documentation and presentation</p>
+<ul>
+<li>Document findings</li>
+<li>Prepare architecture proposal</li>
+<li>Present to stakeholders</li>
+</ul>
+<h3 id="pilot-project-1-month">Pilot Project (1 month)<a class="headerlink" href="#pilot-project-1-month" title="Permanent link">&para;</a></h3>
+<p><strong>Week 1</strong>: Infrastructure setup</p>
+<ul>
+<li>Production-grade deployment</li>
+<li>Security configuration</li>
+<li>Monitoring and logging</li>
+</ul>
+<p><strong>Week 2-3</strong>: Integration</p>
+<ul>
+<li>Connect to production OPC UA devices</li>
+<li>Develop custom plugins if needed</li>
+<li>Implement rules engine logic</li>
+</ul>
+<p><strong>Week 4</strong>: Validation and handover</p>
+<ul>
+<li>Performance testing</li>
+<li>User training</li>
+<li>Documentation</li>
+</ul>
+<hr />
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
+<p>WaldOT represents a paradigm shift in industrial data management by unifying OPC UA and graph databases. Its plugin architecture, virtual thread concurrency, and edge-first design make it ideal for modern Industrial IoT deployments.</p>
+<p><strong>Key Takeaways</strong>:</p>
+<ul>
+<li>Unified OT/IT data model reduces integration complexity</li>
+<li>Graph queries enable insights impossible with traditional systems</li>
+<li>Edge computing capabilities reduce latency and bandwidth</li>
+<li>Open standards ensure future-proof architecture</li>
+<li>Plugin system provides unlimited extensibility</li>
+</ul>
+<p><strong>Next Steps</strong>:</p>
+<ol>
+<li>Review <a href="DEVELOPER_GUIDE.html">Developer Guide</a> for hands-on development</li>
+<li>Review the <a href="CONFIGURATION.html">Configuration Reference</a> and the <a href="https://github.com/rossonet/waldot/tree/master/waldot-app/examples">Docker Compose examples</a></li>
+<li>Join the community on <a href="https://github.com/rossonet/waldot">GitHub</a></li>
+</ol>
+<hr />
+<p><strong>Questions? Contact</strong>: <a href="https://www.rossonet.net">Zona Autonoma srl</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/rossonet/waldot" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://hub.docker.com/r/rossonet/waldot" target="_blank" rel="noopener" title="hub.docker.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.annotate"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      
+    
+  </body>
+</html>

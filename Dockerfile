@@ -1,182 +1,81 @@
-FROM  --platform=$BUILDPLATFORM eclipse-temurin:21-jdk AS builder
+# syntax=docker/dockerfile:1
+# ==============================================================================
+# WaldOT base image (waldot-app)
+#
+# Build (BuildKit / buildx required):
+#   docker buildx build --load -t rossonet/waldot:latest .
+#
+# Run:
+#   docker run --rm -p 12686:12686 -p 8443:8443 rossonet/waldot:latest
+#
+# Every argument after the image name is passed to WaldOT as a command line
+# option, for example:
+#   docker run --rm -p 4840:4840 rossonet/waldot:latest --tcp-port 4840
+#
+# JVM options can be set with the standard JDK_JAVA_OPTIONS variable:
+#   docker run -e JDK_JAVA_OPTIONS="-Xmx2g" rossonet/waldot:latest
+#
+# Bootstrap configuration: mount a file on /waldot/boot.conf (default value of
+# --boot-url) or pass --boot-url with another file:// URL.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Stage 1: build the waldot-app distribution (Java 26 toolchain)
+# ------------------------------------------------------------------------------
+FROM --platform=$BUILDPLATFORM eclipse-temurin:26-jdk AS builder
+# Git metadata shown by the "about" command. Read from the .git directory of
+# the build context when available; otherwise (e.g. the repository is a git
+# submodule) pass them explicitly:
+#   --build-arg GIT_COMMIT=$(git rev-parse HEAD) \
+#   --build-arg GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+ARG GIT_COMMIT=unknown
+ARG GIT_BRANCH=unknown
+WORKDIR /workspace
 COPY . /workspace
-RUN cd /workspace && echo "build project" && ./gradlew clean waldot-app:generateGitProperties waldot-app:distTar -Dorg.gradle.daemon=false
+RUN GIT_COMMIT="$GIT_COMMIT" GIT_BRANCH="$GIT_BRANCH" \
+    ./gradlew --no-daemon clean waldot-app:distTar -x test \
+ && mkdir -p /dist \
+ && tar -xf waldot-app/build/distributions/*.tar -C /dist --strip-components=1
 
-FROM eclipse-temurin:21-jre-alpine AS initial
-RUN apk update
-RUN apk upgrade
-RUN mkdir -p /app
-RUN mkdir -p /app/help
-COPY ./docker/HELP.txt /app/help/index.txt
-RUN echo "Andrea Ambrosini - Zona Autonoma srl" > /app/help/author.txt
-COPY ./LICENSE /app/help/license.txt
-COPY --from=builder /workspace/waldot-app/build/distributions/*.tar /tmp/
-RUN tar -xf /tmp/*.tar -C ./app --strip-components=1 && rm -rf /tmp/*.tar
+# ------------------------------------------------------------------------------
+# Stage 2: runtime image
+# ------------------------------------------------------------------------------
+FROM eclipse-temurin:26-jre-alpine
 
-FROM eclipse-temurin:21-jre-alpine
+LABEL org.opencontainers.image.title="WaldOT" \
+      org.opencontainers.image.description="WaldOT base: graph engine exposed as OPC UA server with generator, rules engine and TinkerPop plugins" \
+      org.opencontainers.image.vendor="Zona Autonoma srl" \
+      org.opencontainers.image.source="https://github.com/rossonet/waldot" \
+      org.opencontainers.image.licenses="Apache-2.0"
 
-# ==============================================================================
-# WaldOT Environment Variables - OPC UA Server Configuration
-# ==============================================================================
-# These environment variables can be set to configure the WaldOT OPC UA server
-# at container startup. They correspond to Picocli command-line parameters.
-# If not set, default values will be used.
-# ==============================================================================
+RUN apk upgrade --no-cache \
+ && addgroup -g 1000 -S waldot \
+ && adduser -u 1000 -S -G waldot -h /app waldot \
+ && mkdir -p /app/help /app/.security /waldot \
+ && echo "Andrea Ambrosini - Zona Autonoma srl" > /app/help/author.txt \
+ && chown -R waldot:waldot /app /waldot
 
-# Network Configuration
-# TCP port for OPC UA binary protocol endpoint (opc.tcp://)
-ENV WALDOT_TCP_PORT=""
-# HTTPS port for OPC UA web services and REST API
-ENV WALDOT_HTTPS_PORT=""
-# Comma-separated list of IP addresses for server binding (e.g., 0.0.0.0 for all interfaces)
-ENV WALDOT_BIND_ADDRESSES=""
-# Hostname for OPC UA endpoint URLs and SSL certificates
-ENV WALDOT_BIND_HOSTNAME=""
-# URL path component for OPC UA endpoints (e.g., /waldot)
-ENV WALDOT_ENDPOINT_PATH=""
+# Help files served by the "help" OPC UA command (--help-directory /app/help)
+COPY --chown=waldot:waldot ./docker/HELP.txt /app/help/index.txt
+COPY --chown=waldot:waldot ./LICENSE /app/help/license.txt
 
-# Server Identity Configuration
-# OPC UA application name identifying this server instance
-ENV WALDOT_APPLICATION_NAME=""
-# Product name in OPC UA server BuildInfo
-ENV WALDOT_PRODUCT_NAME=""
-# Unique product URI for OPC UA Application Description
-ENV WALDOT_PRODUCT_URI=""
-# Manufacturer name in OPC UA BuildInfo
-ENV WALDOT_MANUFACTURER_NAME=""
-# Build number for version tracking in OPC UA BuildInfo
-ENV WALDOT_BUILD_NUMBER=""
+# Application libraries (waldot-app + plugins + dependencies), read-only for the runtime user
+COPY --from=builder /dist/lib /app/lib
 
-# Security Configuration
-# DNS address or hostname used for SSL certificate generation (Subject Alternative Name)
-ENV WALDOT_DNS_ADDRESS_CERT=""
-# Directory path for OPC UA security certificates, private keys, and PKI trust lists
-# Docker note: Mount as volume to persist security credentials across restarts
-ENV WALDOT_SECURITY_DIR=""
-
-# ==============================================================================
-# WaldOT Environment Variables - Application Configuration
-# ==============================================================================
-
-# Authentication and Authorization
-# Allow anonymous client connections without authentication (true/false)
-# Security note: Set to false in production environments
-ENV WALDOT_ANONYMOUS_ACCESS=""
-# Default administrator username for initial setup
-# Security warning: Change in production deployments!
-ENV WALDOT_FACTORY_USERNAME=""
-# Default administrator password
-# Security warning: MUST change in production! This is a critical security risk if unchanged
-ENV WALDOT_FACTORY_PASSWORD=""
-
-# Application Settings
-# OPC UA namespace URI for WaldOT-specific nodes and types
-ENV WALDOT_NAMESPACE_URI=""
-# Directory containing help documentation files
-ENV WALDOT_HELP_DIRECTORY=""
-# File URL for bootstrap configuration to load on startup
-# Format: file:// URL pointing to configuration file
-ENV WALDOT_BOOT_URL=""
-
-# Rules Engine Configuration
-# Delay in milliseconds before facts become valid in rules engine
-ENV WALDOT_FACTS_VALID_DELAY=""
-# Time in milliseconds until facts expire in rules engine (0=never expires)
-ENV WALDOT_FACTS_VALID_UNTIL=""
-
-# ==============================================================================
-# WaldOT Environment Variables - Node Configuration
-# ==============================================================================
-
-# Root Node Configuration
-# NodeId for the WaldOT root node in OPC UA address space
-ENV WALDOT_ROOT_NODE_ID=""
-# Browse name for the root node (identifier without spaces)
-ENV WALDOT_ROOT_NODE_BROWSE_NAME=""
-# Human-readable display name for the root node
-ENV WALDOT_ROOT_NODE_DISPLAY_NAME=""
-
-# Asset Root Node Configuration
-# NodeId for asset administration root node
-ENV WALDOT_ASSET_NODE_ID=""
-# Browse name for asset root node
-ENV WALDOT_ASSET_NODE_BROWSE_NAME=""
-# Display name for asset root node
-ENV WALDOT_ASSET_NODE_DISPLAY_NAME=""
-
-# Interface Root Node Configuration
-# NodeId for command interface root node
-ENV WALDOT_INTERFACE_NODE_ID=""
-# Browse name for interface root node
-ENV WALDOT_INTERFACE_NODE_BROWSE_NAME=""
-# Display name for interface root node
-ENV WALDOT_INTERFACE_NODE_DISPLAY_NAME=""
-
-# ==============================================================================
-# WaldOT Environment Variables - Command Configuration
-# ==============================================================================
-
-# About Command Configuration
-# Label for the about command
-ENV WALDOT_ABOUT_COMMAND_LABEL=""
-# Description for the about command
-ENV WALDOT_ABOUT_COMMAND_DESCRIPTION=""
-# Enable about command execution (true/false)
-ENV WALDOT_ABOUT_COMMAND_EXECUTABLE=""
-# Allow users to execute about command (true/false)
-ENV WALDOT_ABOUT_COMMAND_USER_EXECUTABLE=""
-
-# Exec Command Configuration
-# Label for the exec system command
-# Security warning: This command allows executing system commands - restrict in production!
-ENV WALDOT_EXEC_COMMAND_LABEL=""
-# Description for the exec command
-ENV WALDOT_EXEC_COMMAND_DESCRIPTION=""
-# Enable exec command execution (true/false)
-ENV WALDOT_EXEC_COMMAND_EXECUTABLE=""
-# Allow users to execute system commands (true/false)
-# Security warning: Dangerous if enabled - allows arbitrary command execution!
-ENV WALDOT_EXEC_COMMAND_USER_EXECUTABLE=""
-
-# Help Command Configuration
-# Label for the help command that lists available commands
-ENV WALDOT_HELP_COMMAND_LABEL=""
-# Description for the help command
-ENV WALDOT_HELP_COMMAND_DESCRIPTION=""
-# Enable help command execution (true/false)
-ENV WALDOT_HELP_COMMAND_EXECUTABLE=""
-# Allow users to execute help command (true/false)
-ENV WALDOT_HELP_COMMAND_USER_EXECUTABLE=""
-
-# Waldot/Gremlin Query Command Configuration
-# Label for Gremlin query execution command
-# This command allows executing Gremlin queries from OPC UA clients
-ENV WALDOT_WALDOT_COMMAND_LABEL=""
-# Description for Gremlin query command
-ENV WALDOT_WALDOT_COMMAND_DESCRIPTION=""
-# Enable Gremlin query execution (true/false)
-ENV WALDOT_WALDOT_COMMAND_EXECUTABLE=""
-# Allow users to execute Gremlin queries (true/false)
-# Security note: Queries have full graph access - consider restricting in production
-ENV WALDOT_WALDOT_COMMAND_USER_EXECUTABLE=""
-
-# ==============================================================================
-# Container Configuration
-# ==============================================================================
-
-# Expose default OPC UA TCP port
-EXPOSE 12686
-
-# Expose default HTTPS port
-EXPOSE 8443
-
-# Set working directory
+USER waldot
 WORKDIR /app
 
-# Copy application from initial stage
-COPY --from=initial / /
+# OPC UA binary (opc.tcp) and HTTPS endpoints (defaults of --tcp-port / --https-port)
+EXPOSE 12686 8443
 
-# Set entry point and default command
-# The MainAgent class will read environment variables via Picocli
-ENTRYPOINT ["java"]
-CMD ["-cp","/app/lib/*","-XX:+UnlockExperimentalVMOptions","-Djava.net.preferIPv4Stack=true","-XshowSettings:vm","-Djava.security.egd=file:/dev/./urandom", "net.rossonet.agent.MainAgent"]
+# Certificates and PKI (--security-dir defaults to .security, i.e. /app/.security)
+VOLUME ["/app/.security"]
+
+ENTRYPOINT ["java", \
+  "--add-opens", "java.base/java.lang=ALL-UNNAMED", \
+  "--add-opens", "java.base/java.util=ALL-UNNAMED", \
+  "-Djava.net.preferIPv4Stack=true", \
+  "-Djava.security.egd=file:/dev/./urandom", \
+  "-cp", "/app/lib/*", \
+  "net.rossonet.agent.MainAgent"]
+CMD []

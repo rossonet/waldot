@@ -13,7 +13,7 @@ WaldOT is a Digital Twin Engine that bridges the gap between Operational Technol
 - **Edge Computing**: Low-latency processing directly on industrial devices
 - **Reduced Integration Costs**: Standard protocols (OPC UA + Gremlin) eliminate custom integrations
 - **Scalability**: From single devices to distributed enterprise deployments
-- **Future-Proof**: Built on open standards (OPC UA, Apache TinkerPop, Java 21)
+- **Future-Proof**: Built on open standards (OPC UA, Apache TinkerPop, Java 26)
 
 ---
 
@@ -54,7 +54,6 @@ WaldOT is a Digital Twin Engine that bridges the gap between Operational Technol
 - Properties store dynamic data (temperature, pressure, status)
 - Gremlin query language for complex traversals
 - Graph algorithms (PageRank, shortest path, community detection)
-- Multiple storage backends (in-memory, RocksDB, Neo4j, JanusGraph)
 
 **Use Cases**:
 
@@ -100,7 +99,7 @@ Gremlin Query → Modify Graph → WaldOT Sync
 
 ### Layer 4: Plugin System (Extensibility)
 
-**Technology**: Java 21 with @WaldotPlugin annotation-based discovery
+**Technology**: Java 26 with @WaldotPlugin annotation-based discovery
 
 **Purpose**: Extend WaldOT with domain-specific functionality
 
@@ -221,7 +220,7 @@ Gremlin Query → Modify Graph → WaldOT Sync
 
 ## Concurrency Model: Virtual Threads
 
-**Technology**: Java 21 Project Loom Virtual Threads
+**Technology**: Java 26 (Project Loom) Virtual Threads
 
 **Why Virtual Threads?**
 
@@ -294,7 +293,6 @@ for (int i = 0; i < 100000; i++) {
 │  ┌───────────────────────────────┐  │
 │  │  WaldOT Container             │  │
 │  │  • OPC UA Server              │  │
-│  │  • Local graph (RocksDB)      │  │
 │  │  • Rules engine               │  │
 │  │  • Data generators            │  │
 │  └───────────────────────────────┘  │
@@ -360,44 +358,6 @@ for (int i = 0; i < 100000; i++) {
 
 ---
 
-### Architecture 3: Distributed Enterprise
-
-**Scenario**: Multiple WaldOT instances with centralized graph database
-
-```
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│  WaldOT     │  │  WaldOT     │  │  WaldOT     │
-│  Edge 1     │  │  Edge 2     │  │  Edge N     │
-│ (local DB)  │  │ (local DB)  │  │ (local DB)  │
-└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
-       │                │                │
-       └────────────────┼────────────────┘
-                        ↓
-         ┌──────────────────────────────┐
-         │   Central TinkerPop Graph    │
-         │   (Neo4j / JanusGraph)       │
-         │  • Enterprise-wide view      │
-         │  • Cross-site analytics      │
-         │  • Historical data           │
-         └──────────────────────────────┘
-```
-
-**Characteristics**:
-
-- Distributed data collection
-- Centralized analytics
-- Scalable to thousands of devices
-- Enterprise-wide visibility
-
-**Use Cases**:
-
-- Multi-site manufacturing
-- Fleet management
-- Enterprise asset management
-- Centralized monitoring
-
----
-
 ## Integration Scenarios
 
 ### Scenario 1: OPC UA to Cloud
@@ -429,7 +389,7 @@ for (int i = 0; i < 100000; i++) {
 [OPC UA Data] → [WaldOT Graph] → [Gremlin Queries] → [Analytics / BI Tools]
 ```
 
-**Example Query**:
+**Example Query** (Gremlin Server, `waldot-plugin-tinkerpop`):
 
 ```groovy
 // Find all motors in alarm state connected to Line 1
@@ -461,14 +421,16 @@ g.V().has('name', 'Line1')
 
 **Example Rule**:
 
-```groovy
-// IF temperature > 80 AND pressure > 100 THEN shutdown
-rule = graph.addVertex(
-    "type", "rule",
-    "Condition", "temperature > 80.0 && pressure > 100.0",
-    "Action", "commands.execute('shutdown'); log.error('CRITICAL')"
-)
+```javascript
+// IF temperature > 80 AND pressure > 100 THEN close the inlet valve
+var reactor = "g.V().has('id','reactor').next()";
+graph.addVertex('id', 'reactor-critical', 'type', 'rules:rule', 'label', 'reactor-critical',
+    'condition', reactor + ".value('temperature') > 80.0 && " + reactor + ".value('pressure') > 100.0",
+    'action', "g.V().has('id','inlet-valve').next().property('opening', 0.0); log.error('CRITICAL')");
 ```
+
+The rule runs when a `fire` edge notifies it and a `rules:compute` executes it
+(see [User Guide](USER_GUIDE.md#6-rules-engine)).
 
 **Benefits**:
 
@@ -485,8 +447,8 @@ rule = graph.addVertex(
 
 | Metric         | Value | Notes                                        |
 | -------------- | ----- | -------------------------------------------- |
-| Vertices       | 1M+   | Depends on storage backend                   |
-| Edges          | 10M+  | Depends on storage backend                   |
+| Vertices       | 1M+   |                                              |
+| Edges          | 10M+  |                                              |
 | Generators     | 100K+ | Limited by CPU, not memory (virtual threads) |
 | Rules          | 10K+  | Concurrent execution with virtual threads    |
 | OPC UA Clients | 100+  | Standard Eclipse Milo limits                 |
@@ -525,227 +487,9 @@ rule = graph.addVertex(
 
 ### Application Security
 
-- **Default Credentials**: MUST be changed in production (`WALDOT_FACTORY_PASSWORD`)
-- **Anonymous Access**: Disable in production (`WALDOT_ANONYMOUS_ACCESS=false`)
-- **Exec Command**: Disable in production (`WALDOT_EXEC_COMMAND_EXECUTABLE=false`)
+- **Default Credentials**: MUST be changed in production (`--factory-password`)
+- **Anonymous Access**: Disable in production (`--anonymous-access false`)
+- **Exec Command**: Disable in production (`--exec-command-executable false`)
 - **Network Isolation**: Bind to specific interfaces, use firewalls
 - **Secrets Management**: Use Docker secrets, Kubernetes secrets, or vault
 
-### Compliance
-
-- **IEC 62443**: Industrial security standards compatible
-- **GDPR**: No personal data collected by default
-- **Audit Logging**: All operations logged via SLF4J
-
----
-
-## Technology Comparison
-
-### WaldOT vs. Traditional SCADA
-
-| Feature        | WaldOT              | Traditional SCADA           |
-| -------------- | ------------------- | --------------------------- |
-| Data Model     | Graph (flexible)    | Hierarchical (rigid)        |
-| Query Language | Gremlin (powerful)  | SQL (limited relationships) |
-| Real-time      | Yes                 | Yes                         |
-| Edge Computing | Yes                 | Limited                     |
-| Extensibility  | Plugin architecture | Vendor-specific             |
-| Standards      | OPC UA, TinkerPop   | Proprietary                 |
-| Cost           | Open-source         | Expensive licenses          |
-
-### WaldOT vs. Time-Series Databases
-
-| Feature                  | WaldOT            | Time-Series DB    |
-| ------------------------ | ----------------- | ----------------- |
-| Relationships            | Native (graph)    | Limited (tags)    |
-| Complex Queries          | Gremlin traversal | Aggregations only |
-| Real-time Updates        | Bidirectional     | Write-only        |
-| OPC UA Integration       | Native            | Requires gateway  |
-| Graph Algorithms         | Yes               | No                |
-| Time-series Optimization | Via plugins       | Native            |
-
-### WaldOT vs. Pure Graph Databases
-
-| Feature              | WaldOT      | Neo4j / JanusGraph   |
-| -------------------- | ----------- | -------------------- |
-| OPC UA Integration   | Native      | Requires custom code |
-| Industrial Protocols | Via plugins | Not supported        |
-| Edge Deployment      | Optimized   | Heavy                |
-| Rules Engine         | Built-in    | External             |
-| Data Simulation      | Built-in    | External             |
-| Learning Curve       | Moderate    | Steep                |
-
----
-
-## Migration Strategies
-
-### From Existing OPC UA Infrastructure
-
-**Phase 1: Parallel Deployment**
-
-- Deploy WaldOT as OPC UA client
-- Mirror existing OPC UA data to graph
-- Validate data consistency
-- No changes to existing systems
-
-**Phase 2: Analytics Integration**
-
-- Develop Gremlin queries for analytics
-- Integrate with BI tools
-- Train users on graph queries
-
-**Phase 3: Gradual Migration**
-
-- Migrate non-critical systems to WaldOT
-- Implement rules engine for automation
-- Decommission legacy systems incrementally
-
-### From SQL Databases
-
-**Phase 1: Data Modeling**
-
-- Map SQL tables to graph vertices
-- Map foreign keys to graph edges
-- Identify relationship patterns
-
-**Phase 2: ETL Pipeline**
-
-- Extract data from SQL
-- Transform to graph structure
-- Load into WaldOT
-
-**Phase 3: Live Sync**
-
-- Implement change data capture (CDC)
-- Sync SQL changes to graph
-- Validate consistency
-
----
-
-## Roadmap and Future Enhancements
-
-### Planned Features
-
-- **Additional Storage Backends**: Cassandra, ArangoDB
-- **Enhanced Security**: OAuth2, SAML integration
-- **Cloud Connectors**: AWS IoT, Azure IoT Hub, Google Cloud IoT
-- **Protocol Bridges**: Modbus, BACnet, MQTT native support
-- **Graph Visualization**: Built-in web UI for graph exploration
-- **Machine Learning Integration**: TensorFlow, PyTorch model deployment
-- **Distributed Computing**: Apache Spark integration for large-scale analytics
-
-### Community Contributions Welcome
-
-- Protocol adapters
-- Storage backend implementations
-- Analytics plugins
-- Visualization tools
-- Documentation improvements
-
----
-
-## Decision Framework
-
-### When to Use WaldOT
-
-✅ **Good Fit**:
-
-- Complex relationship queries needed
-- Multiple data sources to integrate
-- Edge computing requirements
-- Real-time analytics on industrial data
-- Event-driven automation
-- Flexible, evolving data models
-
-❌ **Not Ideal**:
-
-- Pure time-series data (use InfluxDB, TimescaleDB)
-- Simple SCADA (use traditional SCADA)
-- No relationship complexity (use SQL database)
-- Extremely high throughput (>100K events/sec sustained)
-
-### Evaluation Checklist
-
-- [ ] Do you need complex relationship queries?
-- [ ] Do you have multiple industrial protocols to integrate?
-- [ ] Do you need edge computing capabilities?
-- [ ] Do you need event-driven automation?
-- [ ] Do you have Java 21+ runtime available?
-- [ ] Do you have OPC UA infrastructure or plan to adopt it?
-- [ ] Do you need flexible, evolving data models?
-
-If you answered "yes" to 3+ questions, WaldOT is likely a good fit.
-
----
-
-## Getting Started
-
-### Proof of Concept (1 week)
-
-**Day 1-2**: Installation and basic setup
-
-- Deploy WaldOT Docker container
-- Connect OPC UA client (UaExpert)
-- Create first graph vertices
-
-**Day 3-4**: Data simulation and rules
-
-- Configure generator plugin
-- Create simple rules
-- Test event-driven automation
-
-**Day 5**: Integration testing
-
-- Connect to existing OPC UA devices
-- Develop Gremlin queries
-- Evaluate performance
-
-**Day 6-7**: Documentation and presentation
-
-- Document findings
-- Prepare architecture proposal
-- Present to stakeholders
-
-### Pilot Project (1 month)
-
-**Week 1**: Infrastructure setup
-
-- Production-grade deployment
-- Security configuration
-- Monitoring and logging
-
-**Week 2-3**: Integration
-
-- Connect to production OPC UA devices
-- Develop custom plugins if needed
-- Implement rules engine logic
-
-**Week 4**: Validation and handover
-
-- Performance testing
-- User training
-- Documentation
-
----
-
-## Conclusion
-
-WaldOT represents a paradigm shift in industrial data management by unifying OPC UA and graph databases. Its plugin architecture, virtual thread concurrency, and edge-first design make it ideal for modern Industrial IoT deployments.
-
-**Key Takeaways**:
-
-- Unified OT/IT data model reduces integration complexity
-- Graph queries enable insights impossible with traditional systems
-- Edge computing capabilities reduce latency and bandwidth
-- Open standards ensure future-proof architecture
-- Plugin system provides unlimited extensibility
-
-**Next Steps**:
-
-1. Review [Developer Guide](DEVELOPER_GUIDE.md) for hands-on development
-2. Explore [Examples](../../examples/) for real-world use cases
-3. Join the community on [GitHub](https://github.com/rossonet/waldot)
-
----
-
-**Questions? Contact**: [Zona Autonoma srl](https://www.rossonet.net)

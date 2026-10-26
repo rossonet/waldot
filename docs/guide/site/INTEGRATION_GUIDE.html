@@ -1,0 +1,2319 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for WaldOT - Digital Twin Engine bridging OPC UA and Apache TinkerPop">
+      
+      
+        <meta name="author" content="Zona Autonoma srl">
+      
+      
+        <link rel="canonical" href="https://github.com/rossonet/waldot/INTEGRATION_GUIDE.html">
+      
+      
+        <link rel="prev" href="DEVELOPER_GUIDE.html">
+      
+      
+      
+      <link rel="icon" href="immagini/icon.ico">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.28">
+    
+    
+      
+        <title>Integration Guide (Plugins) - WaldOT Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=20px+Comfortaa,cursive:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"20px Comfortaa,cursive";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="stylesheets/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#waldot-integration-guide-writing-a-plugin" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="WaldOT Documentation" class="md-header__button md-logo" aria-label="WaldOT Documentation" data-md-component="logo">
+      
+  <img src="immagini/rossonet-logo-03_centered.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WaldOT Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Integration Guide (Plugins)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="ARCHITECTURE_OVERVIEW.html" class="md-tabs__link">
+          
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="USER_GUIDE.html" class="md-tabs__link">
+          
+  
+  Users & Operators
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="DEVELOPER_GUIDE.html" class="md-tabs__link">
+          
+  
+  Developers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="https://github.com/rossonet/waldot/tree/master/waldot-api" class="md-tabs__link">
+          
+  
+  Modules & Plugins
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="WaldOT Documentation" class="md-nav__button md-logo" aria-label="WaldOT Documentation" data-md-component="logo">
+      
+  <img src="immagini/rossonet-logo-03_centered.png" alt="logo">
+
+    </a>
+    WaldOT Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Architecture
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Architecture
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="ARCHITECTURE_OVERVIEW.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Users & Operators
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Users & Operators
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="USER_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="CONFIGURATION.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Examples
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/01-plain-vertices.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1. Plain vertices
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/02-active-edges.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2. Active edges
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/03-generators-and-rules.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3. Generators and rules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/04-bootstrap.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4. Complete bootstrap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/05-showcase-arena.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    5. Showcase Dungeon Arena
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/06-showcase-evolution.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    6. Showcase Evolution Lab
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="examples/07-showcase-gas-grid.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    7. Showcase Gas Grid
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Developers
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="DEVELOPER_GUIDE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Integration Guide (Plugins)
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="INTEGRATION_GUIDE.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Integration Guide (Plugins)
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-what-a-plugin-can-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. What a plugin can do
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-discovery-and-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Discovery and lifecycle
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Discovery and lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discovery
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lifecycle
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-project-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Project setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Project setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-module-inside-the-waldot-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A: module inside the WaldOT repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-external-jar-added-to-an-existing-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option B: external jar added to an existing image
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-step-by-step-a-threshold-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Step by step: a threshold plugin
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Step by step: a threshold plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-the-plugin-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1 The plugin class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-the-vertex-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2 The vertex class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-the-creation-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3 The creation command
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-using-the-new-vertex" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.4 Using the new vertex
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-writing-vertices" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Writing vertices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Writing vertices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#constructor-and-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructor and identity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#managed-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Managed properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reacting-to-the-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reacting to the graph
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      Background work
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publishing-opc-ua-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publishing OPC UA events
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-custom-edge-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Custom edge types
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Commands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vertex-creation-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vertex creation commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-commands-appear" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where commands appear
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Testing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Checklist
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Modules & Plugins
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Modules & Plugins
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-api" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-api
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-namespace" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-namespace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/blob/master/waldot-namespace/BOOTSTRAP_CONFIGURATION.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bootstrap Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-runner" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-runner
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/waldot-app" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    waldot-app
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-generator" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generator Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rules Engine Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-tinkerpop" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TinkerPop Server Plugin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-what-a-plugin-can-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. What a plugin can do
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-discovery-and-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Discovery and lifecycle
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Discovery and lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discovery
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Lifecycle
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-project-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Project setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Project setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-module-inside-the-waldot-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A: module inside the WaldOT repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-external-jar-added-to-an-existing-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option B: external jar added to an existing image
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-step-by-step-a-threshold-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Step by step: a threshold plugin
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Step by step: a threshold plugin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-the-plugin-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1 The plugin class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-the-vertex-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2 The vertex class
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-the-creation-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3 The creation command
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-using-the-new-vertex" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.4 Using the new vertex
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-writing-vertices" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Writing vertices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Writing vertices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#constructor-and-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Constructor and identity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#managed-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Managed properties
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reacting-to-the-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reacting to the graph
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      Background work
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publishing-opc-ua-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Publishing OPC UA events
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-custom-edge-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Custom edge types
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Commands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vertex-creation-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vertex creation commands
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-commands-appear" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where commands appear
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Testing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Checklist
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="waldot-integration-guide-writing-a-plugin">WaldOT Integration Guide: Writing a Plugin<a class="headerlink" href="#waldot-integration-guide-writing-a-plugin" title="Permanent link">&para;</a></h1>
+<p>This guide explains how to extend WaldOT with a <strong>plugin</strong>: a Java library that
+adds new <em>active</em> vertex types, edge types and commands to the graph. Every
+example on this page has been compiled against the libraries of the
+<code>rossonet/waldot</code> image and executed in a container.</p>
+<p>The built-in plugins of the <code>waldot-app</code> distribution are the reference
+implementations:</p>
+<table>
+<thead>
+<tr>
+<th>Plugin</th>
+<th>Module</th>
+<th>Vertex types</th>
+<th>Edge types</th>
+<th>Commands (folder)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generator</td>
+<td><code>plugins/waldot-plugin-generator</code></td>
+<td><code>sim:generator</code>, <code>sim:event-generator</code></td>
+<td>—</td>
+<td><code>create generator</code>, <code>create event generator</code> (<code>simulator</code>)</td>
+</tr>
+<tr>
+<td>Rules engine</td>
+<td><code>plugins/waldot-plugin-rules-engine</code></td>
+<td><code>rules:rule</code>, <code>rules:compute</code></td>
+<td><code>rules:execute</code></td>
+<td><code>create rule</code>, <code>create compute</code>, <code>create compute monitored edge</code>, showcases (<code>rules</code>)</td>
+</tr>
+<tr>
+<td>TinkerPop</td>
+<td><code>plugins/waldot-plugin-tinkerpop</code></td>
+<td><code>gremlin</code></td>
+<td>—</td>
+<td><code>create gremlin server</code> (<code>tinkerpop</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1-what-a-plugin-can-do">1. What a plugin can do<a class="headerlink" href="#1-what-a-plugin-can-do" title="Permanent link">&para;</a></h2>
+<p>In WaldOT every vertex of the graph is also an OPC UA object and every vertex
+property is an OPC UA variable. A plugin contributes:</p>
+<ul>
+<li><strong>vertex types</strong>: a Java class (subclass of <code>AbstractOpcVertex</code>) plus an OPC UA
+  <code>ObjectType</code>. When a vertex is created with <code>type = &lt;your label&gt;</code> WaldOT asks
+  your plugin to build it. The vertex can run code: react to property writes,
+  receive notifications through <code>fire</code> edges, run background threads, publish
+  OPC UA events;</li>
+<li><strong>edge types</strong>: labels for which your plugin is notified when an edge is
+  added or removed, with the possibility to veto the creation;</li>
+<li><strong>commands</strong>: OPC UA methods under the <code>Commands</code> folder that are also
+  callable from bootstrap scripts, rule actions and the query console.</li>
+</ul>
+<p>Everything a plugin does is visible from any OPC UA client: the vertex
+variables, the events it posts, the commands it exposes.</p>
+<hr />
+<h2 id="2-discovery-and-lifecycle">2. Discovery and lifecycle<a class="headerlink" href="#2-discovery-and-lifecycle" title="Permanent link">&para;</a></h2>
+<h3 id="discovery">Discovery<a class="headerlink" href="#discovery" title="Permanent link">&para;</a></h3>
+<p>At startup <code>WaldotOpcUaServer</code> scans the class path for <strong>top-level classes</strong>
+annotated with <code>@WaldotPlugin</code> in these packages (and their sub-packages):</p>
+<div class="highlight"><pre><span></span><code>net.rossonet.waldot    plugin    plugins
+</code></pre></div>
+<p>The class must implement <code>PluginListener</code> (in practice: extend
+<code>AbstractPluginListener</code>) and have a <strong>public no-argument constructor</strong>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A class in any other package (for example <code>com.mycompany.waldot</code>) is
+<strong>not</strong> discovered. Use <code>plugins.&lt;vendor&gt;.&lt;name&gt;</code> for third-party plugins.</p>
+</div>
+<p>The log confirms the discovery:</p>
+<div class="highlight"><pre><span></span><code>INFO net.rossonet.waldot.opc.WaldotOpcUaServer - Found plugin: plugins.example.ThresholdPlugin
+INFO net.rossonet.waldot.namespaces.HomunculusNamespace - Registering commands from plugin ThresholdPlugin
+</code></pre></div>
+<h3 id="lifecycle">Lifecycle<a class="headerlink" href="#lifecycle" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Method</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Registration</td>
+<td><code>initialize(WaldotNamespace)</code></td>
+<td>Register vertex types, edge types and commands. Called once, before the OPC UA server starts.</td>
+</tr>
+<tr>
+<td>Command registration</td>
+<td><code>getCommands()</code></td>
+<td>Returns the commands to publish (filled by <code>registerCommand(...)</code>). Read right after <code>initialize</code>.</td>
+</tr>
+<tr>
+<td>Start</td>
+<td><code>start()</code></td>
+<td>Called just before the bootstrap file is executed (and again after a namespace reset).</td>
+</tr>
+<tr>
+<td>Vertex creation</td>
+<td><code>containsVertexType(label)</code>, <code>getVertexTypeNode(label)</code>, <code>containsVertexTypeNode(nodeId)</code>, <code>createVertex(...)</code></td>
+<td>Handled by <code>AbstractPluginListener</code> once the type is registered.</td>
+</tr>
+<tr>
+<td>Edge creation / removal</td>
+<td><code>containsEdgeType(label)</code>, <code>notifyAddEdge(...)</code>, <code>notifyRemoveEdge(...)</code></td>
+<td>Called only for the edge types you registered. Throw <code>PluginBlockingException</code> to refuse an edge.</td>
+</tr>
+<tr>
+<td>Reset</td>
+<td><code>reset()</code></td>
+<td>Namespace reset: clear plugin state; the bootstrap runs again afterwards.</td>
+</tr>
+<tr>
+<td>Shutdown</td>
+<td><code>stop()</code></td>
+<td>Stop background activity of the plugin.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-project-setup">3. Project setup<a class="headerlink" href="#3-project-setup" title="Permanent link">&para;</a></h2>
+<p>All WaldOT modules target <strong>Java 26</strong>. A plugin only needs <code>waldot-api</code> at
+compile time: it brings Eclipse Milo, Apache TinkerPop and the WaldOT base
+classes.</p>
+<h3 id="option-a-module-inside-the-waldot-repository">Option A: module inside the WaldOT repository<a class="headerlink" href="#option-a-module-inside-the-waldot-repository" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Create <code>plugins/waldot-plugin-&lt;name&gt;/</code> with <code>src/main/java/...</code>.</li>
+<li>
+<p>Register it in <code>settings.gradle</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">include</span><span class="w"> </span><span class="s1">&#39;waldot-plugin-&lt;name&gt;&#39;</span>
+<span class="n">project</span><span class="o">(</span><span class="s1">&#39;:waldot-plugin-&lt;name&gt;&#39;</span><span class="o">).</span><span class="na">projectDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="o">(</span><span class="s1">&#39;plugins/waldot-plugin-&lt;name&gt;&#39;</span><span class="o">)</span>
+</code></pre></div>
+</li>
+<li>
+<p>Minimal <code>build.gradle</code> (same layout as the built-in plugins):</p>
+<div class="highlight"><pre><span></span><code><span class="n">group</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;net.rossonet.waldot&#39;</span>
+<span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;${rootProject.version}&quot;</span>
+
+<span class="n">apply</span><span class="w"> </span><span class="nl">plugin:</span><span class="w"> </span><span class="s1">&#39;java-library&#39;</span>
+
+<span class="n">java</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">sourceCompatibility</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JavaVersion</span><span class="o">.</span><span class="na">VERSION_26</span>
+<span class="w">    </span><span class="n">targetCompatibility</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JavaVersion</span><span class="o">.</span><span class="na">VERSION_26</span>
+<span class="o">}</span>
+
+<span class="n">repositories</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">mavenCentral</span><span class="o">()</span>
+<span class="w">    </span><span class="n">maven</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="s1">&#39;https://jitpack.io&#39;</span><span class="w"> </span><span class="o">}</span>
+<span class="o">}</span>
+
+<span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="n">project</span><span class="o">(</span><span class="s1">&#39;:waldot-deps&#39;</span><span class="o">)</span>
+<span class="w">    </span><span class="n">api</span><span class="w"> </span><span class="n">project</span><span class="o">(</span><span class="s1">&#39;:waldot-api&#39;</span><span class="o">)</span>
+<span class="w">    </span><span class="n">testImplementation</span><span class="w"> </span><span class="n">project</span><span class="o">(</span><span class="s1">&#39;:waldot-namespace&#39;</span><span class="o">)</span>
+<span class="w">    </span><span class="n">testImplementation</span><span class="w"> </span><span class="n">testFixtures</span><span class="o">(</span><span class="n">project</span><span class="o">(</span><span class="s1">&#39;:waldot-client&#39;</span><span class="o">))</span>
+<span class="w">    </span><span class="n">testImplementation</span><span class="o">(</span><span class="n">platform</span><span class="o">(</span><span class="s1">&#39;org.junit:junit-bom:5.13.1&#39;</span><span class="o">))</span>
+<span class="w">    </span><span class="n">testImplementation</span><span class="o">(</span><span class="s1">&#39;org.junit.jupiter:junit-jupiter&#39;</span><span class="o">)</span>
+<span class="w">    </span><span class="n">testRuntimeOnly</span><span class="o">(</span><span class="s1">&#39;org.junit.platform:junit-platform-launcher&#39;</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+</li>
+<li>
+<p>Add it to the application in <code>waldot-app/build.gradle</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">implementation</span><span class="w"> </span><span class="nf">project</span><span class="o">(</span><span class="s1">&#39;:waldot-plugin-&lt;name&gt;&#39;</span><span class="o">)</span>
+</code></pre></div>
+<p>The next <code>docker buildx build</code> produces an image that contains it.</p>
+</li>
+</ol>
+<h3 id="option-b-external-jar-added-to-an-existing-image">Option B: external jar added to an existing image<a class="headerlink" href="#option-b-external-jar-added-to-an-existing-image" title="Permanent link">&para;</a></h3>
+<p>The image starts WaldOT with the class path <code>/app/lib/*</code>: any jar placed in
+<code>/app/lib</code> is loaded and scanned for plugins.</p>
+<ol>
+<li>
+<p>Compile against the WaldOT libraries (for example the jars of the image):</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>lib
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>--entrypoint<span class="w"> </span>sh<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/lib:/out&quot;</span><span class="w"> </span>rossonet/waldot:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-c<span class="w"> </span><span class="s1">&#39;cp /app/lib/*.jar /out/&#39;</span>
+javac<span class="w"> </span>--release<span class="w"> </span><span class="m">26</span><span class="w"> </span>-cp<span class="w"> </span><span class="s2">&quot;lib/*&quot;</span><span class="w"> </span>-d<span class="w"> </span>out<span class="w"> </span><span class="k">$(</span>find<span class="w"> </span>src<span class="w"> </span>-name<span class="w"> </span><span class="s1">&#39;*.java&#39;</span><span class="k">)</span>
+jar<span class="w"> </span>--create<span class="w"> </span>--file<span class="w"> </span>my-plugin.jar<span class="w"> </span>-C<span class="w"> </span>out<span class="w"> </span>.
+</code></pre></div>
+</li>
+<li>
+<p>Mount the jar (development):</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">12686</span>:12686<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/my-plugin.jar:/app/lib/my-plugin.jar:ro&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/boot.conf:/waldot/boot.conf:ro&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>rossonet/waldot:latest
+</code></pre></div>
+<p>or build a derived image (production):</p>
+<div class="highlight"><pre><span></span><code><span class="k">FROM</span><span class="w"> </span><span class="s">rossonet/waldot:latest</span>
+<span class="k">COPY</span><span class="w"> </span>my-plugin.jar<span class="w"> </span>/app/lib/
+</code></pre></div>
+</li>
+</ol>
+<p>Third-party libraries not already present in <code>/app/lib</code> must be shipped with
+the plugin (extra jars in <code>/app/lib</code> or a shaded jar).</p>
+<hr />
+<h2 id="4-step-by-step-a-threshold-plugin">4. Step by step: a threshold plugin<a class="headerlink" href="#4-step-by-step-a-threshold-plugin" title="Permanent link">&para;</a></h2>
+<p>The example adds the vertex type <code>example:threshold</code>. The vertex compares its
+<code>value</code> with its <code>limit</code>, keeps <code>alarm</code> and <code>exceeded-count</code> up to date and
+posts an OPC UA event on every transition. <code>value</code> can be written by an OPC UA
+client, by a rule, by a Gremlin query or, more interestingly, by a <code>link-to</code>
+edge coming from another vertex.</p>
+<div class="highlight"><pre><span></span><code>src/main/java/plugins/example/
+├── ThresholdPlugin.java         plugin: registers type and command
+├── ThresholdVertex.java         active vertex
+└── CreateThresholdCommand.java  OPC UA / console command
+</code></pre></div>
+<h3 id="41-the-plugin-class">4.1 The plugin class<a class="headerlink" href="#41-the-plugin-class" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">plugins.example</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.api.annotation.WaldotPlugin</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.api.models.WaldotNamespace</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.plugin.AbstractPluginListener</span><span class="p">;</span>
+
+<span class="nd">@WaldotPlugin</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ThresholdPlugin</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">AbstractPluginListener</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="cm">/** Value of the &quot;type&quot; property that selects this plugin. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">TYPE_LABEL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;example:threshold&quot;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/** Folder of the plugin commands under the OPC UA &quot;Commands&quot; node. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">COMMAND_DIRECTORY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;example&quot;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">WaldotNamespace</span><span class="w"> </span><span class="n">waldotNamespace</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">super</span><span class="p">.</span><span class="na">initialize</span><span class="p">(</span><span class="n">waldotNamespace</span><span class="p">);</span>
+<span class="w">        </span><span class="n">commands</span><span class="p">.</span><span class="na">clear</span><span class="p">();</span>
+<span class="w">        </span><span class="c1">// OPC UA ObjectType + Java class + type label</span>
+<span class="w">        </span><span class="n">registerTypeNode</span><span class="p">(</span><span class="n">ThresholdVertex</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;ExampleThresholdObjectType&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s">&quot;Example Threshold&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">TYPE_LABEL</span><span class="p">);</span>
+<span class="w">        </span><span class="n">waldotNamespace</span><span class="p">.</span><span class="na">getOpcuaServer</span><span class="p">().</span><span class="na">updateReferenceTypeTree</span><span class="p">();</span>
+<span class="w">        </span><span class="c1">// OPC UA method Commands/example/&quot;create threshold&quot;,</span>
+<span class="w">        </span><span class="c1">// console function example_create_threshold</span>
+<span class="w">        </span><span class="n">registerCommand</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">CreateThresholdCommand</span><span class="p">(</span><span class="n">waldotNamespace</span><span class="p">));</span>
+<span class="w">        </span><span class="n">logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Example threshold plugin initialized&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>registerTypeNode(vertexClass, typeNodeId, displayName, typeLabel)</code>:</p>
+<ul>
+<li>creates the OPC UA <code>ObjectType</code> <code>ObjectTypes/&lt;typeNodeId&gt;</code> (subtype of
+  <code>BaseObjectType</code>) with a <code>Label</code> variable;</li>
+<li>calls the <strong>static</strong> method <code>generateParameters(WaldotNamespace,
+  UaObjectTypeNode)</code> of the vertex class (by reflection) to describe the other
+  variables of the type;</li>
+<li>binds <code>typeLabel</code> to the class: <code>AbstractPluginListener.createVertex(...)</code>
+  then instantiates the class through the standard constructor shown below.</li>
+</ul>
+<p>If the vertex needs extra constructor arguments (for example a shared
+executor), override <code>createVertex(...)</code> as <code>WaldotGeneratorPlugin</code> does for
+<code>sim:generator</code>.</p>
+<h3 id="42-the-vertex-class">4.2 The vertex class<a class="headerlink" href="#42-the-vertex-class" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">plugins.example</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.sdk.server.nodes.UaNode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.stack.core.NodeIds</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.stack.core.types.builtin.DataValue</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.stack.core.types.builtin.NodeId</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.api.PluginListener</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.api.models.WaldotGraph</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.api.models.WaldotNamespace</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.opc.AbstractOpcVertex</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ThresholdVertex</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">AbstractOpcVertex</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">AutoCloseable</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">ALARM</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;alarm&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">COUNT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;exceeded-count&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">LIMIT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;limit&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">VALUE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;value&quot;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/** Called by registerTypeNode(...): variables of the OPC UA ObjectType. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">generateParameters</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">WaldotNamespace</span><span class="w"> </span><span class="n">namespace</span><span class="p">,</span>
+<span class="w">            </span><span class="kd">final</span><span class="w"> </span><span class="n">UaObjectTypeNode</span><span class="w"> </span><span class="n">typeNode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PluginListener</span><span class="p">.</span><span class="na">addParameterToTypeNode</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span><span class="w"> </span><span class="n">typeNode</span><span class="p">,</span><span class="w"> </span><span class="n">LIMIT</span><span class="p">,</span><span class="w"> </span><span class="n">NodeIds</span><span class="p">.</span><span class="na">Double</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;alarm threshold&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PluginListener</span><span class="p">.</span><span class="na">addParameterToTypeNode</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span><span class="w"> </span><span class="n">typeNode</span><span class="p">,</span><span class="w"> </span><span class="n">VALUE</span><span class="p">,</span><span class="w"> </span><span class="n">NodeIds</span><span class="p">.</span><span class="na">Double</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;monitored value&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PluginListener</span><span class="p">.</span><span class="na">addParameterToTypeNode</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span><span class="w"> </span><span class="n">typeNode</span><span class="p">,</span><span class="w"> </span><span class="n">ALARM</span><span class="p">,</span><span class="w"> </span><span class="n">NodeIds</span><span class="p">.</span><span class="na">Boolean</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true when value &gt; limit&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PluginListener</span><span class="p">.</span><span class="na">addParameterToTypeNode</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span><span class="w"> </span><span class="n">typeNode</span><span class="p">,</span><span class="w"> </span><span class="n">COUNT</span><span class="p">,</span><span class="w"> </span><span class="n">NodeIds</span><span class="p">.</span><span class="na">Int64</span><span class="p">,</span>
+<span class="w">                </span><span class="s">&quot;number of times the limit was exceeded&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">inAlarm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+
+<span class="w">    </span><span class="cm">/** Constructor signature required by AbstractPluginListener.createVertex(...). */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">ThresholdVertex</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">WaldotGraph</span><span class="w"> </span><span class="n">graph</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">UaNodeContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">NodeId</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span>
+<span class="w">            </span><span class="kd">final</span><span class="w"> </span><span class="n">QualifiedName</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">LocalizedText</span><span class="w"> </span><span class="n">displayName</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">LocalizedText</span><span class="w"> </span><span class="n">description</span><span class="p">,</span>
+<span class="w">            </span><span class="kd">final</span><span class="w"> </span><span class="n">UInteger</span><span class="w"> </span><span class="n">writeMask</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">UInteger</span><span class="w"> </span><span class="n">userWriteMask</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">UByte</span><span class="w"> </span><span class="n">eventNotifier</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">long</span><span class="w"> </span><span class="n">version</span><span class="p">,</span>
+<span class="w">            </span><span class="kd">final</span><span class="w"> </span><span class="n">Object</span><span class="o">[]</span><span class="w"> </span><span class="n">propertyKeyValues</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">nodeId</span><span class="p">,</span><span class="w"> </span><span class="n">browseName</span><span class="p">,</span><span class="w"> </span><span class="n">displayName</span><span class="p">,</span><span class="w"> </span><span class="n">description</span><span class="p">,</span><span class="w"> </span><span class="n">writeMask</span><span class="p">,</span><span class="w"> </span><span class="n">userWriteMask</span><span class="p">,</span>
+<span class="w">                </span><span class="n">eventNotifier</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// managed properties: typed, with default value and optional validation</span>
+<span class="w">        </span><span class="n">addManagedProperty</span><span class="p">(</span><span class="n">LIMIT</span><span class="p">,</span><span class="w"> </span><span class="n">NodeIds</span><span class="p">.</span><span class="na">Double</span><span class="p">,</span><span class="w"> </span><span class="n">Double</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="mf">100.0</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="w"> </span><span class="n">oldValue</span><span class="p">,</span><span class="w"> </span><span class="n">newValue</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">newValue</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">newValue</span><span class="p">.</span><span class="na">isNaN</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PropertyChangeException</span><span class="p">(</span><span class="s">&quot;limit must be a number&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">propertyKeyValues</span><span class="p">);</span>
+<span class="w">        </span><span class="n">addManagedProperty</span><span class="p">(</span><span class="n">VALUE</span><span class="p">,</span><span class="w"> </span><span class="n">NodeIds</span><span class="p">.</span><span class="na">Double</span><span class="p">,</span><span class="w"> </span><span class="n">Double</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">propertyKeyValues</span><span class="p">);</span>
+<span class="w">        </span><span class="n">addManagedProperty</span><span class="p">(</span><span class="n">ALARM</span><span class="p">,</span><span class="w"> </span><span class="n">NodeIds</span><span class="p">.</span><span class="na">Boolean</span><span class="p">,</span><span class="w"> </span><span class="n">Boolean</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">propertyKeyValues</span><span class="p">);</span>
+<span class="w">        </span><span class="n">addManagedProperty</span><span class="p">(</span><span class="n">COUNT</span><span class="p">,</span><span class="w"> </span><span class="n">NodeIds</span><span class="p">.</span><span class="na">Int64</span><span class="p">,</span><span class="w"> </span><span class="n">Long</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="n">L</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">propertyKeyValues</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">synchronized</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">check</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">Double</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRuntimeParameter</span><span class="p">(</span><span class="n">VALUE</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">Double</span><span class="w"> </span><span class="n">limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRuntimeParameter</span><span class="p">(</span><span class="n">LIMIT</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">limit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">alarm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">limit</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">alarm</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">inAlarm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">inAlarm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">alarm</span><span class="p">;</span>
+<span class="w">            </span><span class="n">updatePropertyIfChanged</span><span class="p">(</span><span class="n">ALARM</span><span class="p">,</span><span class="w"> </span><span class="n">alarm</span><span class="p">);</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">alarm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="kd">final</span><span class="w"> </span><span class="n">Long</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRuntimeParameter</span><span class="p">(</span><span class="n">COUNT</span><span class="p">);</span>
+<span class="w">                </span><span class="n">updatePropertyIfChanged</span><span class="p">(</span><span class="n">COUNT</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">count</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="n">L</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">count</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="c1">// OPC UA event, visible to every client subscribed to the vertex</span>
+<span class="w">            </span><span class="n">sendLogEvent</span><span class="p">(</span><span class="s">&quot;threshold&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">alarm</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">&quot;limit exceeded: &quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s">&quot;back to normal: &quot;</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; / &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">limit</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">alarm</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">700</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Required by GremlinElement. */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="nf">clone</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ThresholdVertex</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="w"> </span><span class="n">getNodeContext</span><span class="p">(),</span><span class="w"> </span><span class="n">getNodeId</span><span class="p">(),</span><span class="w"> </span><span class="n">getBrowseName</span><span class="p">(),</span><span class="w"> </span><span class="n">getDisplayName</span><span class="p">(),</span>
+<span class="w">                </span><span class="n">getDescription</span><span class="p">(),</span><span class="w"> </span><span class="n">getWriteMask</span><span class="p">(),</span><span class="w"> </span><span class="n">getUserWriteMask</span><span class="p">(),</span><span class="w"> </span><span class="n">getEventNotifier</span><span class="p">(),</span><span class="w"> </span><span class="n">version</span><span class="p">(),</span>
+<span class="w">                </span><span class="n">getPropertiesAsStringArray</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">close</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// release threads, sockets, files... (nothing to do here)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** A &quot;fire&quot; edge pointing to this vertex delivers source events here. */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">fireEvent</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">UaNode</span><span class="w"> </span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">BaseEventType</span><span class="w"> </span><span class="n">event</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">priority</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">check</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** A &quot;fire&quot; edge pointing to this vertex delivers source property changes here. */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">fireProperty</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">UaNode</span><span class="w"> </span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">propertyLabel</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DataValue</span><span class="w"> </span><span class="n">value</span><span class="p">,</span>
+<span class="w">            </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">priority</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">check</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Every property write (OPC UA client, Gremlin, rule, link edge) passes here. */</span>
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">notifyPropertyValueChanging</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">label</span><span class="p">,</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DataValue</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">super</span><span class="p">.</span><span class="na">notifyPropertyValueChanging</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">);</span><span class="w"> </span><span class="c1">// keeps managed properties in sync</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">VALUE</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">LIMIT</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">label</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">check</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">notifyRemoveVertex</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">close</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="43-the-creation-command">4.3 The creation command<a class="headerlink" href="#43-the-creation-command" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">plugins.example</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.List</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.api.models.WaldotNamespace</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.opc.AbstractCreateVertexCommand</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CreateThresholdCommand</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">AbstractCreateVertexCommand</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">CreateThresholdCommand</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">WaldotNamespace</span><span class="w"> </span><span class="n">waldotNamespace</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">waldotNamespace</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;create threshold&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Create an example threshold vertex&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="n">ThresholdPlugin</span><span class="p">.</span><span class="na">COMMAND_DIRECTORY</span><span class="p">,</span><span class="w"> </span><span class="n">ThresholdPlugin</span><span class="p">.</span><span class="na">TYPE_LABEL</span><span class="p">,</span><span class="w"> </span><span class="n">Language</span><span class="p">.</span><span class="na">ENGLISH</span><span class="p">,</span>
+<span class="w">                </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">VertexParameter</span><span class="p">.</span><span class="na">optional</span><span class="p">(</span><span class="n">ThresholdVertex</span><span class="p">.</span><span class="na">LIMIT</span><span class="p">,</span><span class="w"> </span><span class="n">VariableNodeTypes</span><span class="p">.</span><span class="na">Double</span><span class="p">,</span>
+<span class="w">                        </span><span class="s">&quot;alarm threshold, default 100&quot;</span><span class="p">)));</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">List</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">keyValues</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">findValue</span><span class="p">(</span><span class="n">keyValues</span><span class="p">,</span><span class="w"> </span><span class="n">ThresholdVertex</span><span class="p">.</span><span class="na">LIMIT</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">limit</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">Double</span><span class="p">.</span><span class="na">parseDouble</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;the limit must not be negative&quot;</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="44-using-the-new-vertex">4.4 Using the new vertex<a class="headerlink" href="#44-using-the-new-vertex" title="Permanent link">&para;</a></h3>
+<p>Bootstrap file (script mode, JEXL syntax):</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// a generator feeds the threshold vertex through a link-to edge</span>
+<span class="nx">gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;gen-1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;sim:generator&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;gen-1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;directory&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;example&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;algorithm&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;sinusoidal&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;min&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;max&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;200&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;delay&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;300&#39;</span><span class="p">);</span>
+<span class="nx">thr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;thr-1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;example:threshold&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;thr-1&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;directory&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;example&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">&#39;limit&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;150&#39;</span><span class="p">);</span>
+<span class="nx">gen</span><span class="p">.</span><span class="nx">addEdge</span><span class="p">(</span><span class="s1">&#39;feeds&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">thr</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;link-to&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;properties-to-monitor&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;value&#39;</span><span class="p">);</span>
+
+<span class="c1">// the same vertex type created through the plugin command</span>
+<span class="nx">log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s1">&#39;created by command: &#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">example_create_threshold</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="s1">&#39;thr-2&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;example&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;50&#39;</span><span class="p">)[</span><span class="mf">0</span><span class="p">]);</span>
+<span class="nx">log</span><span class="p">.</span><span class="nx">info</span><span class="p">(</span><span class="s1">&#39;invalid: &#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">example_create_threshold</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="s1">&#39;thr-3&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;example&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-1&#39;</span><span class="p">)[</span><span class="mf">0</span><span class="p">]);</span>
+</code></pre></div>
+<p>Observed result:</p>
+<div class="highlight"><pre><span></span><code>INFO AbstractOpcCommand - create vertex with parameters: [type, example:threshold, label, thr-2, directory, example, limit, 50]
+INFO CONSOLE - invalid: error: the limit must not be negative
+</code></pre></div>
+<p>Reading <code>ns=2;s=thr-1</code> with an OPC UA client every two seconds:</p>
+<div class="highlight"><pre><span></span><code>{&#39;limit&#39;: 150.0, &#39;value&#39;: 66.17,  &#39;alarm&#39;: False, &#39;exceeded-count&#39;: 20, &#39;type&#39;: &#39;example:threshold&#39;}
+{&#39;limit&#39;: 150.0, &#39;value&#39;: 136.32, &#39;alarm&#39;: False, &#39;exceeded-count&#39;: 20, &#39;type&#39;: &#39;example:threshold&#39;}
+{&#39;limit&#39;: 150.0, &#39;value&#39;: 188.59, &#39;alarm&#39;: True,  &#39;exceeded-count&#39;: 22, &#39;type&#39;: &#39;example:threshold&#39;}
+</code></pre></div>
+<p>and the folder <code>Commands/example</code> contains the method <code>create threshold</code>.</p>
+<hr />
+<h2 id="5-writing-vertices">5. Writing vertices<a class="headerlink" href="#5-writing-vertices" title="Permanent link">&para;</a></h2>
+<h3 id="constructor-and-identity">Constructor and identity<a class="headerlink" href="#constructor-and-identity" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The constructor must have exactly the signature shown above
+  (<code>WaldotGraph, UaNodeContext, NodeId, QualifiedName, LocalizedText,
+  LocalizedText, UInteger, UInteger, UByte, long, Object[]</code>) when you rely on
+  <code>registerTypeNode(...)</code>.</li>
+<li><code>clone()</code> is abstract in <code>GremlinElement</code>: implement it with the same
+  constructor.</li>
+<li><code>propertyKeyValues</code> contains the key/value pairs passed to
+  <code>graph.addVertex(...)</code> or to the command.</li>
+<li>Reserved keys handled by WaldOT: <code>id</code> (OPC UA identifier, for example
+  <code>ns=2;s=thr-1</code>), <code>type</code>, <code>label</code>, <code>directory</code> (OPC UA folder, levels
+  separated by <code>/</code>), <code>name</code>, <code>description</code>, history flags. <code>label</code> and <code>type</code>
+  cannot be changed after creation.</li>
+<li>Use <strong>lowercase</strong> property keys: keys arrive lowercase in
+  <code>notifyPropertyValueChanging</code> and the built-in plugins register their
+  managed properties in lowercase.</li>
+</ul>
+<h3 id="managed-properties">Managed properties<a class="headerlink" href="#managed-properties" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">addManagedProperty</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="w"> </span><span class="n">opcUaDataType</span><span class="p">,</span><span class="w"> </span><span class="n">javaType</span><span class="p">,</span><span class="w"> </span><span class="n">isRequired</span><span class="p">,</span><span class="w"> </span><span class="n">defaultValue</span><span class="p">,</span>
+<span class="w">        </span><span class="n">callbackOnChange</span><span class="p">,</span><span class="w"> </span><span class="n">isNecessaryRestartVertex</span><span class="p">,</span><span class="w"> </span><span class="n">propertyKeyValues</span><span class="p">);</span>
+</code></pre></div>
+<ul>
+<li>The initial value is taken from <code>propertyKeyValues</code> and converted to
+  <code>javaType</code> (<code>String</code>, <code>Integer</code>, <code>Long</code>, <code>Boolean</code>, <code>Double</code>, <code>Float</code>, <code>Byte</code>,
+  <code>Instant</code>, <code>JSONObject</code>); if absent or not convertible the default is used.</li>
+<li>Every later write (OPC UA client, Gremlin <code>property(...)</code>, rule, link edge)
+  goes through the conversion and, if present, through <code>callbackOnChange</code>;
+  throwing <code>PropertyChangeException</code> rejects the value.</li>
+<li><code>getRuntimeParameter(label)</code> returns the current typed value;
+  <code>setRuntimeParameter(label, value)</code> updates it without notifications.</li>
+<li><code>property(key, value)</code> / <code>updatePropertyIfChanged(key, value)</code> write a graph
+  property: the OPC UA variable is updated and observers (<code>link-*</code> and <code>fire</code>
+  edges, history) are notified.</li>
+</ul>
+<h3 id="reacting-to-the-graph">Reacting to the graph<a class="headerlink" href="#reacting-to-the-graph" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>Triggered by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>notifyPropertyValueChanging(label, value)</code></td>
+<td>Any write of a property of this vertex. <strong>Always call <code>super</code></strong> first: it keeps label/type immutable, updates managed properties, notifies observers and history.</td>
+</tr>
+<tr>
+<td><code>fireProperty(node, label, value, priority)</code></td>
+<td>A <code>fire</code> edge whose source changed one of its <code>properties-to-monitor</code>.</td>
+</tr>
+<tr>
+<td><code>fireEvent(node, event, priority)</code></td>
+<td>A <code>fire</code> edge whose source posted an OPC UA event.</td>
+</tr>
+<tr>
+<td><code>notifyRemoveVertex()</code></td>
+<td>The vertex is being removed: stop threads and release resources.</td>
+</tr>
+</tbody>
+</table>
+<p><code>link-to</code> and <code>link-from</code> edges write directly into the target (or source)
+properties, so a vertex fed by a link edge sees the change in
+<code>notifyPropertyValueChanging</code>. These hooks run on the caller thread: keep them
+short and move long or blocking work to a thread of the vertex.</p>
+<h3 id="background-work">Background work<a class="headerlink" href="#background-work" title="Permanent link">&para;</a></h3>
+<p>Active vertices that poll a device or produce data run their own loop on a
+<strong>virtual thread</strong>, started in the constructor and stopped in <code>close()</code> /
+<code>notifyRemoveVertex()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">runner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Thread</span><span class="p">.</span><span class="na">ofVirtual</span><span class="p">().</span><span class="na">name</span><span class="p">(</span><span class="s">&quot;my-vertex-&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">getNodeId</span><span class="p">().</span><span class="na">toParseableString</span><span class="p">()).</span><span class="na">unstarted</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">loop</span><span class="p">);</span>
+<span class="n">runner</span><span class="p">.</span><span class="na">start</span><span class="p">();</span>
+</code></pre></div>
+<p>Read the parameters at every cycle (as <code>sim:event-generator</code> does) so that
+OPC UA clients and rules can change them at runtime.</p>
+<h3 id="publishing-opc-ua-events">Publishing OPC UA events<a class="headerlink" href="#publishing-opc-ua-events" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>sendLogEvent(category, message, severity)</code> posts a <code>SystemEventType</code> event
+  whose source is the vertex (severity 1–1000).</li>
+<li><code>postEvent(BaseEventTypeNode)</code> posts an event built with
+  <code>getNamespace().getEventFactory()</code>.</li>
+</ul>
+<p>Events reach subscribed OPC UA clients and every <code>fire</code> edge leaving the
+vertex, so they can trigger rules.</p>
+<hr />
+<h2 id="6-custom-edge-types">6. Custom edge types<a class="headerlink" href="#6-custom-edge-types" title="Permanent link">&para;</a></h2>
+<p>Built-in edge behaviors (<code>link-to</code>, <code>link-from</code>, <code>fire</code>) are provided by the
+namespace. A plugin declares its own edge labels with
+<code>registerTypeEdge("&lt;prefix&gt;:&lt;name&gt;")</code> in <code>initialize(...)</code>. For those labels:</p>
+<ul>
+<li><code>notifyAddEdge(edge, source, target, label, type, keyValues)</code> is called after
+  the edge is created; throwing <code>PluginBlockingException</code> removes it and the
+  caller receives an error;</li>
+<li><code>notifyRemoveEdge(edge)</code> is called on removal;</li>
+<li><code>AbstractPluginListener</code> forwards both notifications to source and target
+  vertices that implement <code>EdgeMonitoredVertex</code>
+  (<code>notifyAddTargetMonitoredEdge</code>, <code>notifyAddSourceMonitoredEdge</code>, ...).</li>
+</ul>
+<p>The rules engine uses this mechanism for <code>rules:execute</code>: <code>ComputeVertex</code>
+implements <code>EdgeMonitoredVertex</code> and refuses the edge when the target is not a
+rule:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">notifyAddTargetMonitoredEdge</span><span class="p">(</span><span class="n">WaldotEdge</span><span class="w"> </span><span class="n">edge</span><span class="p">,</span><span class="w"> </span><span class="n">WaldotVertex</span><span class="w"> </span><span class="n">targetVertex</span><span class="p">,</span>
+<span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">label</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">[]</span><span class="w"> </span><span class="n">propertyKeyValues</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">PluginBlockingException</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">RulesEngineConstants</span><span class="p">.</span><span class="na">EXECUTE_EDGE_LABEL</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="n">type</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">targetVertex</span><span class="w"> </span><span class="k">instanceof</span><span class="w"> </span><span class="n">ComputableFireableAbstractOpcVertex</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PluginBlockingException</span><span class="p">(</span><span class="s">&quot;The target of a &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">type</span>
+<span class="w">                </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; edge must be a rule vertex, but it is &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">targetVertex</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// ... start serving the rule</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="7-commands">7. Commands<a class="headerlink" href="#7-commands" title="Permanent link">&para;</a></h2>
+<h3 id="vertex-creation-commands">Vertex creation commands<a class="headerlink" href="#vertex-creation-commands" title="Permanent link">&para;</a></h3>
+<p><code>AbstractCreateVertexCommand</code> builds a complete OPC UA method from a list of
+<code>VertexParameter</code>s:</p>
+<ul>
+<li>inputs: <code>label</code>, <code>directory</code>, then one argument per parameter
+  (<code>VertexParameter.optional(...)</code> / <code>VertexParameter.required(...)</code> with an
+  OPC UA type from <code>VariableNodeTypes</code>);</li>
+<li>output: <code>result</code>, the NodeId of the new vertex or a message starting with
+  <code>error:</code>;</li>
+<li>empty inputs are skipped (the vertex uses its defaults), numeric and boolean
+  values are checked, then <code>validate(keyValues)</code> runs your own checks;</li>
+<li><code>clone()</code> uses the constructor with the <code>WaldotNamespace</code> as only argument.</li>
+</ul>
+<h3 id="where-commands-appear">Where commands appear<a class="headerlink" href="#where-commands-appear" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Access</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OPC UA</td>
+<td>method <code>Commands/&lt;directory&gt;/&lt;command name&gt;</code>, e.g. <code>Commands/example/create threshold</code></td>
+</tr>
+<tr>
+<td>Bootstrap scripts, rule actions, <code>query</code> console</td>
+<td>object <code>&lt;directory&gt;_&lt;command name&gt;</code> with spaces replaced by <code>_</code>, invoked with <code>.exec(...)</code>: <code>example_create_threshold.exec('thr-2', 'example', '50')</code></td>
+</tr>
+</tbody>
+</table>
+<p>For commands that are not vertex factories extend <code>AbstractOpcCommand</code> and
+implement <code>runCommand(InvocationContext, String[])</code>.</p>
+<hr />
+<h2 id="8-testing">8. Testing<a class="headerlink" href="#8-testing" title="Permanent link">&para;</a></h2>
+<p>Plugin tests start a complete in-process namespace with <code>OpcFactory</code> (module
+<code>waldot-namespace</code>) and the test fixtures of <code>waldot-client</code>; the plugin is
+discovered from the test class path like in production:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">plugins.example</span><span class="p">;</span>
+
+<span class="kn">import static</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.Assertions.assertEquals</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Files</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.apache.tinkerpop.gremlin.structure.Vertex</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.AfterEach</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.BeforeEach</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.api.models.WaldotGraph</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">net.rossonet.waldot.test.WaldotTestEnvironment</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ThresholdVertexTest</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">WaldotGraph</span><span class="w"> </span><span class="n">g</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@BeforeEach</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">beforeEach</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">Files</span><span class="p">.</span><span class="na">deleteIfExists</span><span class="p">(</span><span class="n">WaldotTestEnvironment</span><span class="p">.</span><span class="na">bootFile</span><span class="p">());</span>
+<span class="w">        </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpcFactory</span><span class="p">.</span><span class="na">getOpcGraph</span><span class="p">(</span><span class="n">WaldotTestEnvironment</span><span class="p">.</span><span class="na">bootUrl</span><span class="p">(),</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LoggerHistoryStrategy</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@AfterEach</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">afterEach</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">WaldotTestEnvironment</span><span class="p">.</span><span class="na">cleanup</span><span class="p">(</span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Test</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">alarmFollowsValue</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">Vertex</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">g</span><span class="p">.</span><span class="na">addVertex</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;example:threshold&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;label&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;t&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;limit&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;10&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">v</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;value&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">20.0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">assertEquals</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;alarm&quot;</span><span class="p">).</span><span class="na">value</span><span class="p">());</span>
+<span class="w">        </span><span class="n">assertEquals</span><span class="p">(</span><span class="mi">1L</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">.</span><span class="na">property</span><span class="p">(</span><span class="s">&quot;exceeded-count&quot;</span><span class="p">).</span><span class="na">value</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>See <code>plugins/waldot-plugin-generator/src/test/java</code> for complete examples,
+including OPC UA client checks with <code>WaldotTestClientHandler</code>. Property writes
+are processed synchronously, so the assertions can follow the write directly;
+only values produced by background threads need polling.</p>
+<hr />
+<h2 id="9-checklist">9. Checklist<a class="headerlink" href="#9-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] Plugin class annotated with <code>@WaldotPlugin</code>, top-level, public no-arg
+      constructor, in a package under <code>net.rossonet.waldot</code>, <code>plugin</code> or
+      <code>plugins</code>.</li>
+<li>[ ] Type labels with a unique prefix (<code>vendor:type</code>) to avoid clashes with
+      <code>sim:*</code>, <code>rules:*</code> and other plugins.</li>
+<li>[ ] Vertex class with the standard constructor, static
+      <code>generateParameters(...)</code>, <code>clone()</code>.</li>
+<li>[ ] Lowercase property keys; <code>super.notifyPropertyValueChanging(...)</code> called
+      first.</li>
+<li>[ ] Threads stopped in <code>close()</code> / <code>notifyRemoveVertex()</code>; plugin state
+      cleared in <code>reset()</code>.</li>
+<li>[ ] Commands created through <code>AbstractCreateVertexCommand</code> with
+      <code>validate(...)</code> for cross-parameter checks.</li>
+<li>[ ] Compiled for Java 26; extra dependencies shipped in <code>/app/lib</code>.</li>
+<li>[ ] Behavior verified with an OPC UA client: variables, events, commands.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/rossonet/waldot" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://hub.docker.com/r/rossonet/waldot" target="_blank" rel="noopener" title="hub.docker.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.annotate"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      
+    
+  </body>
+</html>

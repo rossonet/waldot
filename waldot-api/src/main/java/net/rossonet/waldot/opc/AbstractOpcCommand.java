@@ -42,6 +42,7 @@ import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.models.WaldotVertexProperty;
 import net.rossonet.waldot.api.models.base.GremlinCommandVertex;
+import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.utils.TextHelper;
 
 /**
@@ -135,6 +136,46 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	@Override
 	public void addEventObserver(final EventObserver eventObserver) {
 		eventObservers.add(eventObserver);
+	}
+
+	/**
+	 * Renders an element id for a command result: NodeIds in their parseable
+	 * form ({@code ns=2;s=...}).
+	 *
+	 * @param id the element id
+	 * @return the string form of the id
+	 */
+	protected static String nodeIdToString(final Object id) {
+		return id instanceof NodeId ? ((NodeId) id).toParseableString() : String.valueOf(id);
+	}
+
+	/**
+	 * Resolves a vertex passed as command argument. Accepted forms: the parseable
+	 * NodeId ({@code ns=2;s=pump-1}, {@code ns=2;i=120001}) or the plain id used
+	 * in the bootstrap ({@code pump-1}).
+	 *
+	 * @param value the argument value
+	 * @param role  role of the vertex, used in the error message
+	 * @return the vertex, never null
+	 * @throws IllegalArgumentException if the argument is empty or the vertex
+	 *                                  does not exist
+	 */
+	protected WaldotVertex resolveVertexArgument(final String value, final String role) {
+		if (value == null || value.isBlank()) {
+			throw new IllegalArgumentException(role + " vertex not specified");
+		}
+		final WaldotGraph actualGraph = graph != null ? graph : waldotNamespace.getGremlinGraph();
+		NodeId nodeId = null;
+		try {
+			nodeId = MiloStrategy.getNodeIdManager().convert(actualGraph, value.trim());
+		} catch (final RuntimeException e) {
+			LOGGER.debug("invalid node id {}", value, e);
+		}
+		final WaldotVertex vertex = nodeId == null ? null : waldotNamespace.getVertexNode(nodeId);
+		if (vertex == null) {
+			throw new IllegalArgumentException(role + " vertex '" + value + "' not found");
+		}
+		return vertex;
 	}
 
 	@Override

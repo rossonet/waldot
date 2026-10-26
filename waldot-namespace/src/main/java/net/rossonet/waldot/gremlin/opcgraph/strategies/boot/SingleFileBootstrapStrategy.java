@@ -35,8 +35,8 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 	 * </p>
 	 * <ul>
 	 * <li>Variable assignments: varName = value</li>
-	 * <li>Function definitions: def functionName</li>
-	 * <li>Groovy comments: double-slash or slash-star</li>
+	 * <li>Function definitions: def functionName (detected, but rejected by JEXL)</li>
+	 * <li>Comments: double-slash or slash-star</li>
 	 * <li>Multi-line method chains with proper indentation</li>
 	 * <li>Control structures: if, for, while</li>
 	 * </ul>
@@ -55,7 +55,7 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 
 		// Script mode indicators:
 
-		// 1. Groovy comments (//, /* */)
+		// 1. Comments (//, /* */)
 		if (cleanContent.contains("//") || cleanContent.contains("/*")) {
 			return true;
 		}
@@ -106,54 +106,44 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 	 * 
 	 * <h3>Format 1: Line-by-line execution (legacy, backward compatible)</h3>
 	 * <p>
-	 * Each non-comment, non-empty line is executed as a separate Groovy expression.
+	 * Each non-comment, non-empty line is executed as a separate JEXL expression.
 	 * Lines starting with '#' are treated as comments and skipped.
 	 * </p>
 	 * 
 	 * <pre>{@code
 	 * # This is a comment
-	 * graph.addVertex('id', 'sensor1', 'label', 'temp-sensor')
-	 * graph.addVertex('id', 'sensor2', 'label', 'pressure-sensor')
+	 * graph.addVertex('id', 'sensor1', 'label', 'sensor1')
+	 * graph.addVertex('id', 'sensor2', 'label', 'sensor2')
 	 * }</pre>
 	 * 
-	 * <h3>Format 2: Multi-line Groovy script (new format)</h3>
+	 * <h3>Format 2: JEXL script</h3>
 	 * <p>
-	 * If the file contains multi-line constructs (variable assignments, functions,
-	 * control structures), the entire content is treated as a single Groovy script.
-	 * Comments with '//' or '/*' are preserved for the Groovy parser.
+	 * If the file contains multi-line constructs (variable assignments, control
+	 * structures, comments), the entire content is executed as a single JEXL
+	 * script by the console engine. Statements must end with ';'.
 	 * </p>
 	 * 
 	 * <pre>{@code
-	 * // Function to create a sensor
-	 * def createSensor(name, type) {
-	 *   g.addV('generator')
-	 *     .property('type', 'generator')
-	 *     .property('label', name)
-	 *     .property('Algorithm', type)
-	 *     .next()
-	 * }
-	 * 
-	 * // Create multiple sensors
-	 * createSensor('temp-sensor', 'sinusoidal')
-	 * createSensor('pressure-sensor', 'random')
-	 * 
-	 * log.info("Sensors configured")
+	 * // function stored in a variable
+	 * var createSensor = function(name, algorithm) {
+	 *   return graph.addVertex('id', name, 'type', 'sim:generator', 'label', name,
+	 *       'algorithm', algorithm);
+	 * };
+	 * createSensor('temp-sensor', 'sinusoidal');
+	 * createSensor('pressure-sensor', 'random');
+	 * log.info('Sensors configured');
 	 * }</pre>
 	 * 
 	 * <p>
 	 * The method automatically detects which format to use by analyzing the
-	 * content:
-	 * <ul>
-	 * <li>If it finds variable assignments (=), function definitions (def), or
-	 * multi-line constructs, it uses script mode</li>
-	 * <li>Otherwise, it uses line-by-line mode for backward compatibility</li>
-	 * </ul>
+	 * content (see {@link #detectScriptMode(String)}).
+	 * </p>
 	 * 
 	 * <p>
 	 * <b>Remote URLs</b>: The configuration can be loaded from:
 	 * <ul>
 	 * <li>Local files: {@code file:///path/to/boot.conf}</li>
-	 * <li>HTTP/HTTPS: {@code https://example.com/config.groovy}</li>
+	 * <li>HTTP/HTTPS: {@code https://example.com/boot.conf}</li>
 	 * <li>Any URL supported by Java's URL class</li>
 	 * </ul>
 	 * 
