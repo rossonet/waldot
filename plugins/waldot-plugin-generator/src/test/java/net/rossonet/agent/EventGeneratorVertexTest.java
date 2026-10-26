@@ -63,6 +63,21 @@ public class EventGeneratorVertexTest {
 		g = null;
 	}
 
+	@Test
+	public void allConfiguredEventTypesAreMapped() throws Exception {
+		for (final var entry : EventGeneratorVertex.EVENT_TYPES.entrySet()) {
+			events.clear();
+			final EventGeneratorVertex generator = create("label",
+					"type-" + entry.getKey(), "algorithm", "sequential",
+					"delay", "20", "messages", "x", "event-type",
+					entry.getKey());
+			waitFor("event type " + entry.getKey(), () -> events.stream()
+					.anyMatch(e -> entry.getValue().equals(e.getEventType())));
+			generator.property("algorithm", "stopped");
+			generator.close();
+		}
+	}
+
 	@BeforeEach
 	public void beforeEach() throws Exception {
 		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
@@ -76,6 +91,19 @@ public class EventGeneratorVertexTest {
 		assertNotNull(plugin);
 	}
 
+	@Test
+	public void burstWithMaxEventsStops() throws Exception {
+		final EventGeneratorVertex generator = create("label", "burst",
+				"algorithm", "burst", "burst-size", "4", "max-events", "10",
+				"delay", "20", "messages", "a|b");
+		waitFor("stop", () -> "stopped"
+				.equals(generator.property("algorithm").value().toString()));
+		Thread.sleep(100);
+		assertEquals(10, events.size());
+		assertEquals(10L, generator.getCounter());
+		assertEquals("10", generator.property("count").value().toString());
+	}
+
 	private CreateEventSimulatorCommand command() {
 		for (final WaldotCommand c : plugin.getCommands()) {
 			if (c instanceof CreateEventSimulatorCommand) {
@@ -83,6 +111,34 @@ public class EventGeneratorVertexTest {
 			}
 		}
 		throw new AssertionError("command not registered");
+	}
+
+	@Test
+	public void commandCreatesTheVertexAndValidates() {
+		final String[] ok = command().runCommand(null,
+				new String[]{"from-command", "tests/events", "random", "100",
+						"5", "x|y", "|", "${message}", "cat", "audit", "10",
+						"20", "", "3", "0", "0", "10", "7"});
+		assertEquals(1, ok.length);
+		assertFalse(ok[0].startsWith(AbstractCreateVertexCommand.ERROR_PREFIX),
+				ok[0]);
+		assertNotNull(
+				g.getWaldotNamespace().getVertexNode(NodeId.parse(ok[0])));
+		for (final String[] wrong : List.of(new String[]{"x", "", "bad"},
+				new String[]{"x", "", "", "5"},
+				new String[]{"x", "", "", "", "", "", "", "", "", "unknown"},
+				new String[]{"x", "", "", "", "", "", "", "", "", "", "900",
+						"100"},
+				new String[]{"x", "", "", "", "", "", "", "", "", "", "", "",
+						"10|2000"},
+				new String[]{"x", "", "", "", "", "", "", "", "", "", "", "",
+						"", "0"})) {
+			final String[] result = command().runCommand(null, wrong);
+			assertTrue(
+					result[0].startsWith(
+							AbstractCreateVertexCommand.ERROR_PREFIX),
+					String.join(",", wrong) + " -> " + result[0]);
+		}
 	}
 
 	private EventGeneratorVertex create(Object... keyValues) {
@@ -98,61 +154,55 @@ public class EventGeneratorVertexTest {
 	}
 
 	@Test
-	public void burstWithMaxEventsStops() throws Exception {
-		final EventGeneratorVertex generator = create("label", "burst",
-				"algorithm", "burst", "burst-size", "4", "max-events", "10",
-				"delay", "20", "messages", "a|b");
-		waitFor("stop", () -> "stopped".equals(
-				generator.property("algorithm").value().toString()));
-		Thread.sleep(100);
-		assertEquals(10, events.size());
-		assertEquals(10L, generator.getCounter());
-		assertEquals("10",
-				generator.property("count").value().toString());
-	}
-
-	@Test
-	public void commandCreatesTheVertexAndValidates() {
-		final String[] ok = command().runCommand(null,
-				new String[]{"from-command", "tests/events", "random", "100",
-						"5", "x|y", "|", "${message}", "cat", "audit", "10",
-						"20", "", "3", "0", "0", "10", "7"});
-		assertEquals(1, ok.length);
-		assertFalse(ok[0].startsWith(AbstractCreateVertexCommand.ERROR_PREFIX),
-				ok[0]);
-		assertNotNull(g.getWaldotNamespace().getVertexNode(NodeId.parse(ok[0])));
-		for (final String[] wrong : List.of(new String[]{"x", "", "bad"},
-				new String[]{"x", "", "", "5"},
-				new String[]{"x", "", "", "", "", "", "", "", "", "unknown"},
-				new String[]{"x", "", "", "", "", "", "", "", "", "", "900",
-						"100"},
-				new String[]{"x", "", "", "", "", "", "", "", "", "", "", "",
-						"10|2000"},
-				new String[]{"x", "", "", "", "", "", "", "", "", "", "", "",
-						"", "0"})) {
-			final String[] result = command().runCommand(null, wrong);
-			assertTrue(result[0]
-					.startsWith(AbstractCreateVertexCommand.ERROR_PREFIX),
-					String.join(",", wrong) + " -> " + result[0]);
-		}
-	}
-
-	@Test
 	public void linkedPropertyIsUsedInTheTemplate() throws Exception {
 		final Vertex source = g.addVertex("label", "temperature-source",
 				"temperature", 1.0);
 		final EventGeneratorVertex generator = create("label", "linked",
 				"delay", "20", "template", "temperature=${p:temperature}");
-		source.addEdge("feeds", generator, "type", "link-to", "properties-to-monitor",
-				"temperature");
+		source.addEdge("feeds", generator, "type", "link-to",
+				"properties-to-monitor", "temperature");
 		source.property("temperature", 42.5);
-		waitFor("linked value", () -> events.stream()
-				.anyMatch(e -> e.getMessage().text().equals("temperature=42.5")));
+		waitFor("linked value", () -> events.stream().anyMatch(
+				e -> e.getMessage().text().equals("temperature=42.5")));
 	}
 
 	@Test
-	public void sequentialMessagesWithTemplateAndSeverities()
+	public void placeholdersExpandSourceCategoryTimeAndEpoch()
 			throws Exception {
+		create("label", "source-a", "algorithm", "sequential", "delay", "20",
+				"messages", "m", "category", "cat-${counter}", "template",
+				"${source}|${category}|${epoch}|${time}");
+		waitFor("placeholder event", () -> !events.isEmpty());
+		final BaseEventType event = events.get(0);
+		final String text = event.getMessage().text();
+		final String[] parts = text.split("\\|");
+		assertEquals(4, parts.length, text);
+		assertEquals("source-a", parts[0]);
+		assertTrue(parts[1].startsWith("cat-"), text);
+		assertTrue(parts[2].matches("\\d+"), text);
+		assertTrue(parts[3].contains("T"), text);
+	}
+
+	@Test
+	public void randomChoiceWithSeedUsesTheListAndTheRange() throws Exception {
+		create("label", "random", "algorithm", "random", "delay", "10",
+				"messages", "alpha|beta|gamma", "template",
+				"${message} ${random}", "random-min", "5", "random-max", "6",
+				"min-severity", "300", "max-severity", "310", "seed", "42");
+		waitFor("events", () -> events.size() >= 20);
+		for (final BaseEventType event : events) {
+			final String[] parts = event.getMessage().text().split(" ");
+			assertTrue(List.of("alpha", "beta", "gamma").contains(parts[0]));
+			final int value = Integer.parseInt(parts[1]);
+			assertTrue(value >= 5 && value <= 6, "random " + value);
+			final int severity = event.getSeverity().intValue();
+			assertTrue(severity >= 300 && severity <= 310,
+					"severity " + severity);
+		}
+	}
+
+	@Test
+	public void sequentialMessagesWithTemplateAndSeverities() throws Exception {
 		final EventGeneratorVertex generator = create("label", "sequential",
 				"algorithm", "sequential", "delay", "20", "messages",
 				"start;run ${counter};stop", "separator", ";", "severities",
@@ -172,58 +222,7 @@ public class EventGeneratorVertexTest {
 		Thread.sleep(150);
 		assertTrue(events.size() <= stoppedAt + 1,
 				"the generator did not stop");
-		assertTrue(generator.property("data").value().toString()
-				.startsWith("["));
-	}
-
-	@Test
-	public void randomChoiceWithSeedUsesTheListAndTheRange()
-			throws Exception {
-		create("label", "random", "algorithm", "random", "delay", "10",
-				"messages", "alpha|beta|gamma", "template",
-				"${message} ${random}", "random-min", "5", "random-max", "6",
-				"min-severity", "300", "max-severity", "310", "seed", "42");
-		waitFor("events", () -> events.size() >= 20);
-		for (final BaseEventType event : events) {
-			final String[] parts = event.getMessage().text().split(" ");
-			assertTrue(List.of("alpha", "beta", "gamma").contains(parts[0]));
-			final int value = Integer.parseInt(parts[1]);
-			assertTrue(value >= 5 && value <= 6, "random " + value);
-			final int severity = event.getSeverity().intValue();
-			assertTrue(severity >= 300 && severity <= 310,
-					"severity " + severity);
-		}
-	}
-
-	@Test
-	public void allConfiguredEventTypesAreMapped() throws Exception {
-		for (final var entry : EventGeneratorVertex.EVENT_TYPES.entrySet()) {
-			events.clear();
-			final EventGeneratorVertex generator = create(
-					"label", "type-" + entry.getKey(), "algorithm",
-					"sequential", "delay", "20", "messages", "x",
-					"event-type", entry.getKey());
-			waitFor("event type " + entry.getKey(), () -> events.stream()
-					.anyMatch(e -> entry.getValue().equals(e.getEventType())));
-			generator.property("algorithm", "stopped");
-			generator.close();
-		}
-	}
-
-	@Test
-	public void placeholdersExpandSourceCategoryTimeAndEpoch()
-			throws Exception {
-		create("label", "source-a", "algorithm", "sequential", "delay", "20",
-				"messages", "m", "category", "cat-${counter}", "template",
-				"${source}|${category}|${epoch}|${time}");
-		waitFor("placeholder event", () -> !events.isEmpty());
-		final BaseEventType event = events.get(0);
-		final String text = event.getMessage().text();
-		final String[] parts = text.split("\\|");
-		assertEquals(4, parts.length, text);
-		assertEquals("source-a", parts[0]);
-		assertTrue(parts[1].startsWith("cat-"), text);
-		assertTrue(parts[2].matches("\\d+"), text);
-		assertTrue(parts[3].contains("T"), text);
+		assertTrue(
+				generator.property("data").value().toString().startsWith("["));
 	}
 }

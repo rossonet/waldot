@@ -48,14 +48,17 @@ public class GremlinPluginTest {
 		g.addVertex("id", "label1", "type", "gremlin", "bind", "127.0.0.9");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
-		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1", "127.0.0.9");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1",
+				"127.0.0.9");
 		assert waldotTestClientHandler.checkOpcUaVertexBindReadOnly("label1");
-		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1", "127.0.0.9");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1",
+				"127.0.0.9");
 
 	}
 
 	private void bootstrapUrlServerInit(String url)
-			throws ConfigurationException, InterruptedException, ExecutionException {
+			throws ConfigurationException, InterruptedException,
+			ExecutionException {
 		LogHelper.changeJulLogLevel("fine");
 		g = OpcFactory.getOpcGraph(url, new LoggerHistoryStrategy());
 		Thread.sleep(1);
@@ -108,16 +111,18 @@ public class GremlinPluginTest {
 		simpleServerInit();
 		final String baseBind = "127.0.0.";
 		int number = 1;
-		final Vertex v = g.addVertex("port", baseBind + String.valueOf(number), "id", "number2", "type", "gremlin");
+		final Vertex v = g.addVertex("port", baseBind + String.valueOf(number),
+				"id", "number2", "type", "gremlin");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("number2");
-		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("number2", baseBind + String.valueOf(number));
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals(
+				"number2", baseBind + String.valueOf(number));
 		for (int i = 0; i < 10; i++) {
 			number++;
 			v.property("port", baseBind + String.valueOf(number));
 			Thread.sleep(1);
-			assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("number2",
-					baseBind + String.valueOf(number));
+			assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals(
+					"number2", baseBind + String.valueOf(number));
 		}
 
 	}
@@ -128,9 +133,11 @@ public class GremlinPluginTest {
 		g.addVertex("id", "label1", "type", "gremlin");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
-		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1", "0.0.0.0");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1",
+				"0.0.0.0");
 		assert waldotTestClientHandler.checkOpcUaVertexBindReadOnly("label1");
-		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1", "0.0.0.0");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1",
+				"0.0.0.0");
 
 	}
 
@@ -140,9 +147,11 @@ public class GremlinPluginTest {
 		g.addVertex("id", "label1", "type", "gremlin");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
-		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1", "1025");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1",
+				"1025");
 		assert waldotTestClientHandler.checkOpcUaVertexPortReadOnly("label1");
-		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1", "1025");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1",
+				"1025");
 
 	}
 
@@ -152,9 +161,11 @@ public class GremlinPluginTest {
 		g.addVertex("id", "label1", "type", "gremlin", "port", "2686");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
-		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1", "2686");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1",
+				"2686");
 		assert waldotTestClientHandler.checkOpcUaVertexPortReadOnly("label1");
-		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1", "2686");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1",
+				"2686");
 
 	}
 
@@ -162,20 +173,24 @@ public class GremlinPluginTest {
 	public void portRewriteTest() throws Exception {
 		simpleServerInit();
 		int number = 8600;
-		final Vertex v = g.addVertex("port", String.valueOf(number), "id", "number2", "type", "gremlin");
+		final Vertex v = g.addVertex("port", String.valueOf(number), "id",
+				"number2", "type", "gremlin");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("number2");
-		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("number2", String.valueOf(number));
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals(
+				"number2", String.valueOf(number));
 		for (int i = 0; i < 10; i++) {
 			number++;
 			v.property("port", String.valueOf(number));
 			Thread.sleep(1);
-			assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("number2", String.valueOf(number));
+			assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals(
+					"number2", String.valueOf(number));
 		}
 
 	}
 
-	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {
+	private void simpleServerInit() throws ConfigurationException,
+			InterruptedException, ExecutionException {
 		bootstrapUrlServerInit(WaldotTestEnvironment.bootUrl());
 	}
 
@@ -187,24 +202,30 @@ public class GremlinPluginTest {
 		g.addVertex("id", "server", "type", "gremlin", "port", "9090");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("server");
-		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("server", "9090");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("server",
+				"9090");
 		assert waldotTestClientHandler.checkOpcUaVertexBindReadOnly("server");
-		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("server", "9090");
+		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("server",
+				"9090");
 
 	}
 
 	@Test
 	public void testGremlinServerConnection() throws Exception {
 		simpleServerInit();
-		waldotTestClientHandler.createVertexWithOpcUa("a", "A", null, new String[0]);
-		g.addVertex("label", "test gremlin", "type", "gremlin", "directory", "server", "port", "5623");
-		waldotTestClientHandler.createVertexWithOpcUa("b", "B", null, new String[0]);
+		waldotTestClientHandler.createVertexWithOpcUa("a", "A", null,
+				new String[0]);
+		g.addVertex("label", "test gremlin", "type", "gremlin", "directory",
+				"server", "port", "5623");
+		waldotTestClientHandler.createVertexWithOpcUa("b", "B", null,
+				new String[0]);
 		final Cluster cluster = Cluster.build().addContactPoint("127.0.0.1") // host
 				.port(5623) // porta
 				.serializer( // GraphBinary è default da 3.7
 						new GraphBinaryMessageSerializerV1())
 				.create();
-		final GraphTraversalSource g = traversal().withRemote(DriverRemoteConnection.using(cluster, "g"));
+		final GraphTraversalSource g = traversal()
+				.withRemote(DriverRemoteConnection.using(cluster, "g"));
 
 		assert g.V().hasLabel("test gremlin").count().next() == 1;
 		assert g.V().hasLabel("A").count().next() == 1;

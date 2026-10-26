@@ -16,10 +16,10 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
+import net.rossonet.waldot.rules.RulesEngineConstants;
 
 /**
  * Creates a <code>rules:execute</code> edge: the compute vertex (source) will execute the rule (target).

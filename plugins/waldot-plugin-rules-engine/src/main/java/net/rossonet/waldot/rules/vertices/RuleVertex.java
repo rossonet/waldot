@@ -23,11 +23,11 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.jexl.ClonableMapContext;
+import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.utils.LogHelper;
@@ -136,10 +136,7 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * </p>
 	 */
 	public enum DebugEventType {
-		AFTER_ACTION_COMPILE, AFTER_ACTION_COMPILE_EXCEPTION, AFTER_ACTION_EXECUTION, AFTER_ACTION_EXECUTION_EXCEPTION,
-		AFTER_CONDITION_COMPILE, AFTER_CONDITION_COMPILE_EXCEPTION, AFTER_CONDITION_EXECUTION,
-		AFTER_CONDITION_EXECUTION_EXCEPTION, BEFORE_ACTION_COMPILE, BEFORE_ACTION_EXECUTION, BEFORE_CONDITION_COMPILE,
-		BEFORE_CONDITION_EXECUTION
+		AFTER_ACTION_COMPILE, AFTER_ACTION_COMPILE_EXCEPTION, AFTER_ACTION_EXECUTION, AFTER_ACTION_EXECUTION_EXCEPTION, AFTER_CONDITION_COMPILE, AFTER_CONDITION_COMPILE_EXCEPTION, AFTER_CONDITION_EXECUTION, AFTER_CONDITION_EXECUTION_EXCEPTION, BEFORE_ACTION_COMPILE, BEFORE_ACTION_EXECUTION, BEFORE_CONDITION_COMPILE, BEFORE_CONDITION_EXECUTION
 	}
 
 	public final class RuleVertexFireableAction extends FireableAction {
@@ -162,16 +159,23 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 				updateTotal();
 				final String conditionSource = getCondition();
 				CompiledScript condition = compiledCondition;
-				if (condition == null || !condition.source.equals(conditionSource)) {
+				if (condition == null
+						|| !condition.source.equals(conditionSource)) {
 					try {
-						sendDebugEvent(DebugEventType.BEFORE_CONDITION_COMPILE, null);
-						condition = new CompiledScript(conditionSource, engine().createScript(conditionSource));
+						sendDebugEvent(DebugEventType.BEFORE_CONDITION_COMPILE,
+								null);
+						condition = new CompiledScript(conditionSource,
+								engine().createScript(conditionSource));
 						compiledCondition = condition;
-						sendDebugEvent(DebugEventType.AFTER_CONDITION_COMPILE, null);
+						sendDebugEvent(DebugEventType.AFTER_CONDITION_COMPILE,
+								null);
 					} catch (final Throwable e) {
-						sendDebugEvent(DebugEventType.AFTER_CONDITION_COMPILE_EXCEPTION,
-								LogHelper.stackTraceToString(e, 2 + getDebug()));
-						logger.error("Error compiling rule vertex condition", e);
+						sendDebugEvent(
+								DebugEventType.AFTER_CONDITION_COMPILE_EXCEPTION,
+								LogHelper.stackTraceToString(e,
+										2 + getDebug()));
+						logger.error("Error compiling rule vertex condition",
+								e);
 						updateThrowable();
 						return;
 					}
@@ -179,22 +183,28 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 				final ClonableMapContext context = newContext();
 				boolean conditionResult = false;
 				try {
-					sendDebugEvent(DebugEventType.BEFORE_CONDITION_EXECUTION, null);
-					final Object conditionResultObject = condition.script.execute(context);
+					sendDebugEvent(DebugEventType.BEFORE_CONDITION_EXECUTION,
+							null);
+					final Object conditionResultObject = condition.script
+							.execute(context);
 					if (conditionResultObject instanceof Boolean) {
 						conditionResult = (Boolean) conditionResultObject;
-						sendDebugEvent(DebugEventType.AFTER_CONDITION_EXECUTION, conditionResultObject.toString());
+						sendDebugEvent(DebugEventType.AFTER_CONDITION_EXECUTION,
+								conditionResultObject.toString());
 					} else {
-						logger.warn("Condition script did not return a boolean value, result: '{}'",
+						logger.warn(
+								"Condition script did not return a boolean value, result: '{}'",
 								conditionResultObject);
-						sendDebugEvent(DebugEventType.AFTER_CONDITION_EXECUTION_EXCEPTION,
-								"Condition script did not return a boolean value, result: '" + conditionResultObject
-										+ "'");
+						sendDebugEvent(
+								DebugEventType.AFTER_CONDITION_EXECUTION_EXCEPTION,
+								"Condition script did not return a boolean value, result: '"
+										+ conditionResultObject + "'");
 						updateThrowable();
 						return;
 					}
 				} catch (final Throwable e) {
-					sendDebugEvent(DebugEventType.AFTER_CONDITION_EXECUTION_EXCEPTION,
+					sendDebugEvent(
+							DebugEventType.AFTER_CONDITION_EXECUTION_EXCEPTION,
 							LogHelper.stackTraceToString(e, 2 + getDebug()));
 					logger.error("Error executing rule vertex condition", e);
 					updateThrowable();
@@ -205,28 +215,38 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 				}
 				final String actionSource = getAction();
 				CompiledScript actionScript = compiledAction;
-				if (actionScript == null || !actionScript.source.equals(actionSource)) {
+				if (actionScript == null
+						|| !actionScript.source.equals(actionSource)) {
 					try {
-						sendDebugEvent(DebugEventType.BEFORE_ACTION_COMPILE, null);
-						actionScript = new CompiledScript(actionSource, engine().createScript(actionSource));
+						sendDebugEvent(DebugEventType.BEFORE_ACTION_COMPILE,
+								null);
+						actionScript = new CompiledScript(actionSource,
+								engine().createScript(actionSource));
 						compiledAction = actionScript;
-						sendDebugEvent(DebugEventType.AFTER_ACTION_COMPILE, null);
+						sendDebugEvent(DebugEventType.AFTER_ACTION_COMPILE,
+								null);
 					} catch (final Throwable e) {
-						sendDebugEvent(DebugEventType.AFTER_ACTION_COMPILE_EXCEPTION,
-								LogHelper.stackTraceToString(e, 2 + getDebug()));
+						sendDebugEvent(
+								DebugEventType.AFTER_ACTION_COMPILE_EXCEPTION,
+								LogHelper.stackTraceToString(e,
+										2 + getDebug()));
 						logger.error("Error compiling rule vertex action", e);
 						updateThrowable();
 						return;
 					}
 				}
 				try {
-					sendDebugEvent(DebugEventType.BEFORE_ACTION_EXECUTION, null);
-					final Object actionResultObject = actionScript.script.execute(context);
+					sendDebugEvent(DebugEventType.BEFORE_ACTION_EXECUTION,
+							null);
+					final Object actionResultObject = actionScript.script
+							.execute(context);
 					updateExecuted();
 					sendDebugEvent(DebugEventType.AFTER_ACTION_EXECUTION,
-							"Action executed successfully, result: '" + actionResultObject + "'");
+							"Action executed successfully, result: '"
+									+ actionResultObject + "'");
 				} catch (final Throwable e) {
-					sendDebugEvent(DebugEventType.AFTER_ACTION_EXECUTION_EXCEPTION,
+					sendDebugEvent(
+							DebugEventType.AFTER_ACTION_EXECUTION_EXCEPTION,
 							LogHelper.stackTraceToString(e, 2 + getDebug()));
 					if (!isTimedOut()) {
 						updateThrowable();
@@ -243,26 +263,35 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(RuleVertex.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(RuleVertex.class);
 
-	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode) {
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.CONDITION_FIELD,
-				NodeIds.String, RulesEngineConstants.CONDITION_FIELD_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.ACTION_FIELD,
-				NodeIds.String, RulesEngineConstants.ACTION_FIELD_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.DEBUG_LEVEL_LABEL,
-				NodeIds.Int32, RulesEngineConstants.DEBUG_LEVEL_LABEL_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.HYSTERESIS_LABEL,
-				NodeIds.Int64, RulesEngineConstants.HYSTERESIS_LABEL_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.QUEUE_SIZE_LABEL,
-				NodeIds.Int64, RulesEngineConstants.QUEUE_SIZE_LABEL_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.TOTAL_SIZE_LABEL,
-				NodeIds.Int64, RulesEngineConstants.TOTAL_SIZE_LABEL_DESCRIPTION);
+	public static void generateParameters(WaldotNamespace waldotNamespace,
+			UaObjectTypeNode typeNode) {
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.CONDITION_FIELD, NodeIds.String,
+				RulesEngineConstants.CONDITION_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.ACTION_FIELD, NodeIds.String,
+				RulesEngineConstants.ACTION_FIELD_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.DEBUG_LEVEL_LABEL, NodeIds.Int32,
+				RulesEngineConstants.DEBUG_LEVEL_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.HYSTERESIS_LABEL, NodeIds.Int64,
+				RulesEngineConstants.HYSTERESIS_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.QUEUE_SIZE_LABEL, NodeIds.Int64,
+				RulesEngineConstants.QUEUE_SIZE_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.TOTAL_SIZE_LABEL, NodeIds.Int64,
+				RulesEngineConstants.TOTAL_SIZE_LABEL_DESCRIPTION);
 		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
 				RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL, NodeIds.Int64,
 				RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.ERRORS_SIZE_LABEL,
-				NodeIds.Int64, RulesEngineConstants.ERRORS_SIZE_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.ERRORS_SIZE_LABEL, NodeIds.Int64,
+				RulesEngineConstants.ERRORS_SIZE_LABEL_DESCRIPTION);
 	}
 
 	private volatile boolean closed = false;
@@ -284,61 +313,82 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * Standard vertex constructor, used by the plugin to create the vertex. The
 	 * rules engine plugin is looked up in the namespace of the graph.
 	 */
-	public RuleVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-			UByte eventNotifier, long version, Object[] propertyKeyValues) {
-		this(WaldotRulesEnginePlugin.getInstance(graph.getWaldotNamespace()), graph, context, nodeId, browseName,
-				displayName, description, writeMask, userWriteMask, eventNotifier, version, propertyKeyValues);
+	public RuleVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
+			QualifiedName browseName, LocalizedText displayName,
+			LocalizedText description, UInteger writeMask,
+			UInteger userWriteMask, UByte eventNotifier, long version,
+			Object[] propertyKeyValues) {
+		this(WaldotRulesEnginePlugin.getInstance(graph.getWaldotNamespace()),
+				graph, context, nodeId, browseName, displayName, description,
+				writeMask, userWriteMask, eventNotifier, version,
+				propertyKeyValues);
 	}
 
-	public RuleVertex(WaldotRulesEnginePlugin waldotRulesEnginePlugin, WaldotGraph graph, UaNodeContext context,
-			NodeId nodeId, QualifiedName browseName, LocalizedText displayName, LocalizedText description,
-			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier, long version, Object[] propertyKeyValues) {
-		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
-				version);
+	public RuleVertex(WaldotRulesEnginePlugin waldotRulesEnginePlugin,
+			WaldotGraph graph, UaNodeContext context, NodeId nodeId,
+			QualifiedName browseName, LocalizedText displayName,
+			LocalizedText description, UInteger writeMask,
+			UInteger userWriteMask, UByte eventNotifier, long version,
+			Object[] propertyKeyValues) {
+		super(graph, context, nodeId, browseName, displayName, description,
+				writeMask, userWriteMask, eventNotifier, version);
 		waldotNamespace = graph.getWaldotNamespace();
 		this.waldotRulesEnginePlugin = waldotRulesEnginePlugin;
-		addManagedProperty(RulesEngineConstants.CONDITION_FIELD, NodeIds.String, String.class, false,
-				RulesEngineConstants.DEFAULT_CONDITION_VALUE, null, false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.ACTION_FIELD, NodeIds.String, String.class, false,
-				RulesEngineConstants.DEFAULT_ACTION_VALUE, null, false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.DEBUG_LEVEL_LABEL, NodeIds.Int32, Integer.class, false, 0, null,
-				false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.HYSTERESIS_LABEL, NodeIds.Int64, Long.class, false, 0L,
-				hysteresisCallback(), false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.QUEUE_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
-				false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.TOTAL_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
-				false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L,
+		addManagedProperty(RulesEngineConstants.CONDITION_FIELD, NodeIds.String,
+				String.class, false,
+				RulesEngineConstants.DEFAULT_CONDITION_VALUE, null, false,
+				propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.ACTION_FIELD, NodeIds.String,
+				String.class, false, RulesEngineConstants.DEFAULT_ACTION_VALUE,
 				null, false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.ERRORS_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
-				false, propertyKeyValues);
-		// i contatori ripartono dai valori presenti nelle proprietà (es. vertice ricreato)
+		addManagedProperty(RulesEngineConstants.DEBUG_LEVEL_LABEL,
+				NodeIds.Int32, Integer.class, false, 0, null, false,
+				propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.HYSTERESIS_LABEL, NodeIds.Int64,
+				Long.class, false, 0L, hysteresisCallback(), false,
+				propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.QUEUE_SIZE_LABEL, NodeIds.Int64,
+				Long.class, false, 0L, null, false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.TOTAL_SIZE_LABEL, NodeIds.Int64,
+				Long.class, false, 0L, null, false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL,
+				NodeIds.Int64, Long.class, false, 0L, null, false,
+				propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.ERRORS_SIZE_LABEL,
+				NodeIds.Int64, Long.class, false, 0L, null, false,
+				propertyKeyValues);
+		// i contatori ripartono dai valori presenti nelle proprietà (es.
+		// vertice ricreato)
 		total.set(readCounter(RulesEngineConstants.TOTAL_SIZE_LABEL));
-		executed.set(readCounter(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL));
+		executed.set(
+				readCounter(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL));
 		errors.set(readCounter(RulesEngineConstants.ERRORS_SIZE_LABEL));
 	}
 
-	private void applyHysteresis(Object newValue) throws PropertyChangeException {
+	private void applyHysteresis(Object newValue)
+			throws PropertyChangeException {
 		final long hysteresis;
 		try {
-			hysteresis = newValue instanceof Number ? ((Number) newValue).longValue()
+			hysteresis = newValue instanceof Number
+					? ((Number) newValue).longValue()
 					: Long.parseLong(String.valueOf(newValue));
 		} catch (final NumberFormatException e) {
-			throw new PropertyChangeException("Invalid hysteresis '" + newValue + "'", e);
+			throw new PropertyChangeException(
+					"Invalid hysteresis '" + newValue + "'", e);
 		}
 		if (hysteresis < 0) {
-			throw new PropertyChangeException("Hysteresis must be non-negative, but it is " + hysteresis);
+			throw new PropertyChangeException(
+					"Hysteresis must be non-negative, but it is " + hysteresis);
 		}
 		setHysteresisTimeMs(hysteresis);
 	}
 
 	@Override
 	public Object clone() {
-		return new RuleVertex(waldotRulesEnginePlugin, graph, getNodeContext(), getNodeId(), getBrowseName(),
-				getDisplayName(), getDescription(), getWriteMask(), getUserWriteMask(), getEventNotifier(), version(),
-				getPropertiesAsStringArray());
+		return new RuleVertex(waldotRulesEnginePlugin, graph, getNodeContext(),
+				getNodeId(), getBrowseName(), getDisplayName(),
+				getDescription(), getWriteMask(), getUserWriteMask(),
+				getEventNotifier(), version(), getPropertiesAsStringArray());
 	}
 
 	@Override
@@ -348,8 +398,10 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	}
 
 	private JexlEngine engine() {
-		if (waldotRulesEnginePlugin == null || waldotRulesEnginePlugin.getJexlEngine() == null) {
-			throw new IllegalStateException("The rules engine plugin is not initialized");
+		if (waldotRulesEnginePlugin == null
+				|| waldotRulesEnginePlugin.getJexlEngine() == null) {
+			throw new IllegalStateException(
+					"The rules engine plugin is not initialized");
 		}
 		return waldotRulesEnginePlugin.getJexlEngine();
 	}
@@ -364,8 +416,11 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * @return action script
 	 */
 	public String getAction() {
-		final String value = getRuntimeParameter(RulesEngineConstants.ACTION_FIELD);
-		return value == null || value.isBlank() ? RulesEngineConstants.DEFAULT_ACTION_VALUE : value;
+		final String value = getRuntimeParameter(
+				RulesEngineConstants.ACTION_FIELD);
+		return value == null || value.isBlank()
+				? RulesEngineConstants.DEFAULT_ACTION_VALUE
+				: value;
 	}
 
 	/**
@@ -374,8 +429,11 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * @return condition script
 	 */
 	public String getCondition() {
-		final String value = getRuntimeParameter(RulesEngineConstants.CONDITION_FIELD);
-		return value == null || value.isBlank() ? RulesEngineConstants.DEFAULT_CONDITION_VALUE : value;
+		final String value = getRuntimeParameter(
+				RulesEngineConstants.CONDITION_FIELD);
+		return value == null || value.isBlank()
+				? RulesEngineConstants.DEFAULT_CONDITION_VALUE
+				: value;
 	}
 
 	/**
@@ -384,7 +442,8 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * @return debug level
 	 */
 	public int getDebug() {
-		final Integer value = getRuntimeParameter(RulesEngineConstants.DEBUG_LEVEL_LABEL);
+		final Integer value = getRuntimeParameter(
+				RulesEngineConstants.DEBUG_LEVEL_LABEL);
 		return value == null || value < 0 ? 0 : value;
 	}
 
@@ -397,12 +456,14 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	}
 
 	@Override
-	protected FireableAction getRunnableEvent(UaNode node, BaseEventType event) {
+	protected FireableAction getRunnableEvent(UaNode node,
+			BaseEventType event) {
 		return generateRunnableEvent();
 	}
 
 	@Override
-	protected FireableAction getRunnablePropertyEvent(UaNode node, String propertyLabel) {
+	protected FireableAction getRunnablePropertyEvent(UaNode node,
+			String propertyLabel) {
 		return generateRunnableEvent();
 	}
 
@@ -416,13 +477,15 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private ChangedPropertyCallback<Long> hysteresisCallback() {
-		final ChangedPropertyCallback<Object> callback = (label, oldValue, newValue) -> applyHysteresis(newValue);
+		final ChangedPropertyCallback<Object> callback = (label, oldValue,
+				newValue) -> applyHysteresis(newValue);
 		return (ChangedPropertyCallback) callback;
 	}
 
 	private ClonableMapContext newContext() {
 		if (waldotRulesEnginePlugin == null) {
-			throw new IllegalStateException("The rules engine plugin is not initialized");
+			throw new IllegalStateException(
+					"The rules engine plugin is not initialized");
 		}
 		return waldotRulesEnginePlugin.newJexlContext(this);
 	}
@@ -441,18 +504,24 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 				}
 				try {
 					final UUID randomUUID = UUID.randomUUID();
-					final BaseEventTypeNode eventNode = waldotNamespace.getEventFactory()
-							.createEvent(waldotNamespace.generateNodeId(randomUUID), NodeIds.SystemEventType);
-					eventNode.setBrowseName(waldotNamespace.generateQualifiedName(eventType.name()));
-					eventNode.setDisplayName(LocalizedText.english(eventType.name()));
-					eventNode.setEventId(ByteString.of(randomUUID.toString().getBytes()));
+					final BaseEventTypeNode eventNode = waldotNamespace
+							.getEventFactory().createEvent(
+									waldotNamespace.generateNodeId(randomUUID),
+									NodeIds.SystemEventType);
+					eventNode.setBrowseName(waldotNamespace
+							.generateQualifiedName(eventType.name()));
+					eventNode.setDisplayName(
+							LocalizedText.english(eventType.name()));
+					eventNode.setEventId(
+							ByteString.of(randomUUID.toString().getBytes()));
 					eventNode.setEventType(NodeIds.SystemEventType);
 					eventNode.setSourceNode(getNodeId());
 					eventNode.setSourceName(getBrowseName().getName());
 					eventNode.setTime(DateTime.now());
 					eventNode.setReceiveTime(DateTime.NULL_VALUE);
 					if (message == null || message.isEmpty()) {
-						eventNode.setMessage(LocalizedText.english(eventType.name()));
+						eventNode.setMessage(
+								LocalizedText.english(eventType.name()));
 					} else {
 						eventNode.setMessage(LocalizedText.english(message));
 					}
@@ -468,7 +537,20 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 			}
 		}
 		if (debug > 1) {
-				logger.info("Debug event, type: {}, message: {}", eventType, message);
+			logger.info("Debug event, type: {}, message: {}", eventType,
+					message);
+		}
+	}
+
+	// l'incremento e la pubblicazione sono nello stesso blocco: gli
+	// aggiornamenti concorrenti non possono lasciare nella proprietà un valore
+	// vecchio
+	private void updateCounter(String label, AtomicLong counter) {
+		synchronized (counterLock) {
+			final long value = counter.incrementAndGet();
+			if (!isRemoved()) {
+				property(label, Long.valueOf(value));
+			}
 		}
 	}
 
@@ -476,7 +558,8 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * Counts one action executed successfully.
 	 */
 	public void updateExecuted() {
-		updateCounter(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL, executed);
+		updateCounter(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL,
+				executed);
 	}
 
 	/**
@@ -491,17 +574,6 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 */
 	public void updateTotal() {
 		updateCounter(RulesEngineConstants.TOTAL_SIZE_LABEL, total);
-	}
-
-	// l'incremento e la pubblicazione sono nello stesso blocco: gli aggiornamenti
-	// concorrenti non possono lasciare nella proprietà un valore vecchio
-	private void updateCounter(String label, AtomicLong counter) {
-		synchronized (counterLock) {
-			final long value = counter.incrementAndGet();
-			if (!isRemoved()) {
-				property(label, Long.valueOf(value));
-			}
-		}
 	}
 
 }

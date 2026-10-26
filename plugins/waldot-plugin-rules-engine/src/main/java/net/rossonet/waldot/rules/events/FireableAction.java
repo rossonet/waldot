@@ -50,16 +50,10 @@ public abstract class FireableAction implements Runnable {
 	}
 
 	/**
-	 * Sets the execution starting time.
-	 * <p>
-	 * Chiamato da ComputeVertex quando l'azione viene presa dalla coda
-	 * per essere eseguita.
-	 * </p>
-	 * 
-	 * @param timeMillis starting time in milliseconds
+	 * @return true when the action has been marked as timed out
 	 */
-	public void setStartingTime(long timeMillis) {
-		startingTime = timeMillis;
+	public boolean isTimedOut() {
+		return timedOut.get();
 	}
 
 	/**
@@ -72,17 +66,23 @@ public abstract class FireableAction implements Runnable {
 	}
 
 	/**
-	 * @return true when the action has been marked as timed out
-	 */
-	public boolean isTimedOut() {
-		return timedOut.get();
-	}
-
-	/**
 	 * Hook invoked by ComputeVertex when timeout cancellation happens.
 	 */
 	public void onTimeout() {
 		// default no-op
+	}
+
+	/**
+	 * Sets the execution starting time.
+	 * <p>
+	 * Chiamato da ComputeVertex quando l'azione viene presa dalla coda
+	 * per essere eseguita.
+	 * </p>
+	 * 
+	 * @param timeMillis starting time in milliseconds
+	 */
+	public void setStartingTime(long timeMillis) {
+		startingTime = timeMillis;
 	}
 
 }

@@ -1,6 +1,52 @@
 package net.rossonet.waldot.dataGenerator;
 
-import static net.rossonet.waldot.dataGenerator.GeneratorConstants.*;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_ALGORITHM;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_BURST_SIZE;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_CATEGORY;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_MAX_SEVERITY;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_MESSAGES;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_MIN_SEVERITY;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_RANDOM_MAX;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_SEPARATOR;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_TEMPLATE;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_TYPE;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_ALGORITHM_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_ALGORITHM_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_BURST_SIZE_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_BURST_SIZE_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_CATEGORY_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_CATEGORY_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_COUNT_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_COUNT_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_DATA_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_DELAY_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_DELAY_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_JITTER_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_JITTER_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_LAST_SEVERITY_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_LAST_SEVERITY_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MAX_EVENTS_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MAX_EVENTS_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MAX_SEVERITY_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MAX_SEVERITY_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MESSAGES_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MESSAGES_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MIN_SEVERITY_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MIN_SEVERITY_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_RANDOM_MAX_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_RANDOM_MAX_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_RANDOM_MIN_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_RANDOM_MIN_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEED_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEED_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEPARATOR_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEPARATOR_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEVERITIES_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEVERITIES_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_TEMPLATE_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_TEMPLATE_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_TYPE_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_TYPE_FIELD;
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
 
 import java.time.Instant;
@@ -81,16 +127,16 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 	 */
 	public static void generateParameters(WaldotNamespace waldotNamespace,
 			UaObjectTypeNode typeNode) {
-		param(waldotNamespace, typeNode, EVENT_ALGORITHM_FIELD,
-				NodeIds.String, EVENT_ALGORITHM_DESCRIPTION);
+		param(waldotNamespace, typeNode, EVENT_ALGORITHM_FIELD, NodeIds.String,
+				EVENT_ALGORITHM_DESCRIPTION);
 		param(waldotNamespace, typeNode, EVENT_DELAY_FIELD, NodeIds.Int64,
 				EVENT_DELAY_DESCRIPTION);
 		param(waldotNamespace, typeNode, EVENT_JITTER_FIELD, NodeIds.Int64,
 				EVENT_JITTER_DESCRIPTION);
 		param(waldotNamespace, typeNode, EVENT_MESSAGES_FIELD, NodeIds.String,
 				EVENT_MESSAGES_DESCRIPTION);
-		param(waldotNamespace, typeNode, EVENT_SEPARATOR_FIELD,
-				NodeIds.String, EVENT_SEPARATOR_DESCRIPTION);
+		param(waldotNamespace, typeNode, EVENT_SEPARATOR_FIELD, NodeIds.String,
+				EVENT_SEPARATOR_DESCRIPTION);
 		param(waldotNamespace, typeNode, EVENT_TEMPLATE_FIELD, NodeIds.String,
 				EVENT_TEMPLATE_DESCRIPTION);
 		param(waldotNamespace, typeNode, EVENT_CATEGORY_FIELD, NodeIds.String,
@@ -101,16 +147,16 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 				NodeIds.Int64, EVENT_MIN_SEVERITY_DESCRIPTION);
 		param(waldotNamespace, typeNode, EVENT_MAX_SEVERITY_FIELD,
 				NodeIds.Int64, EVENT_MAX_SEVERITY_DESCRIPTION);
-		param(waldotNamespace, typeNode, EVENT_SEVERITIES_FIELD,
-				NodeIds.String, EVENT_SEVERITIES_DESCRIPTION);
-		param(waldotNamespace, typeNode, EVENT_BURST_SIZE_FIELD,
-				NodeIds.Int64, EVENT_BURST_SIZE_DESCRIPTION);
-		param(waldotNamespace, typeNode, EVENT_MAX_EVENTS_FIELD,
-				NodeIds.Int64, EVENT_MAX_EVENTS_DESCRIPTION);
-		param(waldotNamespace, typeNode, EVENT_RANDOM_MIN_FIELD,
-				NodeIds.Int64, EVENT_RANDOM_MIN_DESCRIPTION);
-		param(waldotNamespace, typeNode, EVENT_RANDOM_MAX_FIELD,
-				NodeIds.Int64, EVENT_RANDOM_MAX_DESCRIPTION);
+		param(waldotNamespace, typeNode, EVENT_SEVERITIES_FIELD, NodeIds.String,
+				EVENT_SEVERITIES_DESCRIPTION);
+		param(waldotNamespace, typeNode, EVENT_BURST_SIZE_FIELD, NodeIds.Int64,
+				EVENT_BURST_SIZE_DESCRIPTION);
+		param(waldotNamespace, typeNode, EVENT_MAX_EVENTS_FIELD, NodeIds.Int64,
+				EVENT_MAX_EVENTS_DESCRIPTION);
+		param(waldotNamespace, typeNode, EVENT_RANDOM_MIN_FIELD, NodeIds.Int64,
+				EVENT_RANDOM_MIN_DESCRIPTION);
+		param(waldotNamespace, typeNode, EVENT_RANDOM_MAX_FIELD, NodeIds.Int64,
+				EVENT_RANDOM_MAX_DESCRIPTION);
 		param(waldotNamespace, typeNode, EVENT_SEED_FIELD, NodeIds.String,
 				EVENT_SEED_DESCRIPTION);
 		param(waldotNamespace, typeNode, EVENT_COUNT_FIELD, NodeIds.Int64,
@@ -162,6 +208,8 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 
 	private long cursor;
 
+	private String lastPublishError;
+
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private Random random = new Random();
@@ -205,8 +253,8 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 		addString(EVENT_SEED_FIELD, null, propertyKeyValues);
 		addManagedProperty(EVENT_COUNT_FIELD, NodeIds.Int64, Long.class, false,
 				0L, null, false, propertyKeyValues);
-		addManagedProperty(EVENT_LAST_SEVERITY_FIELD, NodeIds.Int64,
-				Long.class, false, 0L, null, false, propertyKeyValues);
+		addManagedProperty(EVENT_LAST_SEVERITY_FIELD, NodeIds.Int64, Long.class,
+				false, 0L, null, false, propertyKeyValues);
 		addManagedProperty(VALUE_KEY, NodeIds.String, String.class, false, "",
 				null, false, propertyKeyValues);
 		runnerThread = Thread.ofVirtual()
@@ -224,6 +272,18 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 			Object[] keyValues) {
 		addManagedProperty(label, NodeIds.String, String.class, false,
 				defaultValue, null, false, keyValues);
+	}
+
+	private EventAlgorithm algorithm() {
+		final String text = stringValue(EVENT_ALGORITHM_FIELD,
+				DEFAULT_EVENT_ALGORITHM).toLowerCase(Locale.ROOT);
+		try {
+			return EventAlgorithm.valueOf(text);
+		} catch (final IllegalArgumentException e) {
+			logger.warn("unknown algorithm '{}' in {}, no event generated",
+					text, this);
+			return EventAlgorithm.stopped;
+		}
 	}
 
 	@Override
@@ -246,8 +306,7 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 		while (active && !Thread.currentThread().isInterrupted()) {
 			long wait = GeneratorConstants.DEFAULT_DELAY;
 			try {
-				wait = Math.max(MIN_DELAY,
-						longValue(EVENT_DELAY_FIELD, wait));
+				wait = Math.max(MIN_DELAY, longValue(EVENT_DELAY_FIELD, wait));
 				refreshSeed();
 				final long jitter = Math.max(0,
 						longValue(EVENT_JITTER_FIELD, 0));
@@ -283,8 +342,8 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 		final int events;
 		switch (algorithm) {
 			case burst :
-				events = (int) Math.max(1, Math.min(10000,
-						longValue(EVENT_BURST_SIZE_FIELD,
+				events = (int) Math.max(1,
+						Math.min(10000, longValue(EVENT_BURST_SIZE_FIELD,
 								DEFAULT_EVENT_BURST_SIZE)));
 				break;
 			case random :
@@ -313,18 +372,6 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 		return published;
 	}
 
-	private EventAlgorithm algorithm() {
-		final String text = stringValue(EVENT_ALGORITHM_FIELD,
-				DEFAULT_EVENT_ALGORITHM).toLowerCase(Locale.ROOT);
-		try {
-			return EventAlgorithm.valueOf(text);
-		} catch (final IllegalArgumentException e) {
-			logger.warn("unknown algorithm '{}' in {}, no event generated",
-					text, this);
-			return EventAlgorithm.stopped;
-		}
-	}
-
 	private void generateEvent(boolean randomChoice) {
 		final String separator = stringValue(EVENT_SEPARATOR_FIELD,
 				DEFAULT_EVENT_SEPARATOR);
@@ -343,8 +390,8 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 		final String category = render(
 				stringValue(EVENT_CATEGORY_FIELD, DEFAULT_EVENT_CATEGORY), "",
 				index, severity, now, "");
-		final String message = render(messages.get(index), "", index,
-				severity, now, category);
+		final String message = render(messages.get(index), "", index, severity,
+				now, category);
 		final String text = render(
 				stringValue(EVENT_TEMPLATE_FIELD, DEFAULT_EVENT_TEMPLATE),
 				message, index, severity, now, category);
@@ -381,6 +428,11 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 		return min + (long) (random.nextDouble() * (max - min + 1));
 	}
 
+	@Override
+	public void notifyRemoveVertex() {
+		close();
+	}
+
 	private void publish(String category, String text, int severity,
 			long time) {
 		final UUID id = UUID.randomUUID();
@@ -414,8 +466,6 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 			}
 		}
 	}
-
-	private String lastPublishError;
 
 	private void refreshSeed() {
 		final String seed = stringValue(EVENT_SEED_FIELD, "");
@@ -524,10 +574,5 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 		}
 		final String text = property.value().toString();
 		return text.isEmpty() ? defaultValue : text;
-	}
-
-	@Override
-	public void notifyRemoveVertex() {
-		close();
 	}
 }

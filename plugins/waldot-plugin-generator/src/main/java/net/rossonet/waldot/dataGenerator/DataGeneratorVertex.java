@@ -144,8 +144,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 			UaObjectTypeNode dataGeneratorTypeNode) {
 		PluginListener.addParameterToTypeNode(waldotNamespace,
 				dataGeneratorTypeNode, GeneratorConstants.ALGORITHM_FIELD,
-				NodeIds.String,
-				GeneratorConstants.ALGORITHM_FIELD_DESCRIPTION);
+				NodeIds.String, GeneratorConstants.ALGORITHM_FIELD_DESCRIPTION);
 		PluginListener.addParameterToTypeNode(waldotNamespace,
 				dataGeneratorTypeNode, GeneratorConstants.DELAY_FIELD,
 				NodeIds.UInt64, GeneratorConstants.DELAY_DESCRIPTION);
@@ -217,8 +216,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 			Thread.currentThread().setName(getNodeId().toParseableString());
 
 			// Loop principale di generazione
-			while (active == true
-					&& !Thread.currentThread().isInterrupted()) {
+			while (active == true && !Thread.currentThread().isInterrupted()) {
 				// Un errore nella propagazione del valore non deve fermare il
 				// generatore (l'eccezione sarebbe inghiottita dal Future)
 				try {
@@ -393,8 +391,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 				postNodeIdData = GeneratorConstants.DEFAULT_POST_NODE_ID_DATA;
 			}
 		} else {
-			logger.info(GeneratorConstants.POST_NODE_ID_DATA_FIELD
-					.toLowerCase()
+			logger.info(GeneratorConstants.POST_NODE_ID_DATA_FIELD.toLowerCase()
 					+ " not found in propertyKeyValues, using default {} '{}'",
 					GeneratorConstants.POST_NODE_ID_DATA_FIELD,
 					GeneratorConstants.DEFAULT_POST_NODE_ID_DATA);
@@ -676,8 +673,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 				logger.warn(
 						"Changing delay from {} to {} is not allowed, reverting to original value",
 						delay, value.getValue().getValue().toString());
-				property(GeneratorConstants.DELAY_FIELD.toLowerCase(),
-						delay);
+				property(GeneratorConstants.DELAY_FIELD.toLowerCase(), delay);
 			}
 		}
 
@@ -754,8 +750,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 			logger.warn(
 					"Changing postNodeIdData in runtime from {} to {} is not allowed, reverting to original value",
 					postNodeIdData, value.getValue().getValue().toString());
-			property(
-					GeneratorConstants.POST_NODE_ID_DATA_FIELD.toLowerCase(),
+			property(GeneratorConstants.POST_NODE_ID_DATA_FIELD.toLowerCase(),
 					postNodeIdData);
 		}
 	}

@@ -51,21 +51,6 @@ public class DataGeneratorVertexBehaviorTest {
 				new LoggerHistoryStrategy());
 	}
 
-	private DataGeneratorVertex create(Object... keyValues) {
-		final Object[] all = new Object[keyValues.length + 2];
-		all[0] = MiloStrategy.TYPE_FIELD.toLowerCase();
-		all[1] = GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL;
-		System.arraycopy(keyValues, 0, all, 2, keyValues.length);
-		final Vertex vertex = g.addVertex(all);
-		return assertInstanceOf(DataGeneratorVertex.class, vertex);
-	}
-
-	private double data(DataGeneratorVertex generator) {
-		return Double
-				.parseDouble(generator.property(DataGeneratorVertex.VALUE_KEY).value()
-						.toString());
-	}
-
 	@Test
 	public void closeStopsTheGeneratorLoop() throws Exception {
 		final DataGeneratorVertex generator = create("label", "close-test",
@@ -76,6 +61,20 @@ public class DataGeneratorVertexBehaviorTest {
 		final double frozen = data(generator);
 		Thread.sleep(150);
 		assertEquals(frozen, data(generator), 0.000001);
+	}
+
+	private DataGeneratorVertex create(Object... keyValues) {
+		final Object[] all = new Object[keyValues.length + 2];
+		all[0] = MiloStrategy.TYPE_FIELD.toLowerCase();
+		all[1] = GeneratorConstants.DATA_GENERATOR_OBJECT_TYPE_LABEL;
+		System.arraycopy(keyValues, 0, all, 2, keyValues.length);
+		final Vertex vertex = g.addVertex(all);
+		return assertInstanceOf(DataGeneratorVertex.class, vertex);
+	}
+
+	private double data(DataGeneratorVertex generator) {
+		return Double.parseDouble(generator
+				.property(DataGeneratorVertex.VALUE_KEY).value().toString());
 	}
 
 	@Test
@@ -89,15 +88,15 @@ public class DataGeneratorVertexBehaviorTest {
 	}
 
 	@Test
-	public void sinusoidalUsesFractionalAmplitudeForSmallRange() throws Exception {
+	public void sinusoidalUsesFractionalAmplitudeForSmallRange()
+			throws Exception {
 		final DataGeneratorVertex generator = create("label", "sin-small",
 				"algorithm", "sinusoidal", "delay", "20", "min", "0", "max",
 				"1");
-		waitFor("fractional sinusoidal value",
-				() -> {
-					final double value = data(generator);
-					return value > 0.0 && value < 1.0;
-				});
+		waitFor("fractional sinusoidal value", () -> {
+			final double value = data(generator);
+			return value > 0.0 && value < 1.0;
+		});
 	}
 
 	@Test

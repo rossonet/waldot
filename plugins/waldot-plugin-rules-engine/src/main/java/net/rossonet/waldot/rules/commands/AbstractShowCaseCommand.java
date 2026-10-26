@@ -9,12 +9,12 @@ import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
-import net.rossonet.waldot.rules.RulesEngineConstants;
-import net.rossonet.waldot.dataGenerator.GeneratorConstants;
 import net.rossonet.waldot.api.models.MonitoredEdge;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
+import net.rossonet.waldot.dataGenerator.GeneratorConstants;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
+import net.rossonet.waldot.rules.RulesEngineConstants;
 
 /**
  * Base class of the commands that build a complete, running example graph
@@ -36,6 +36,47 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	private static final String LONG_LABEL_RESULT = "result of the show case creation";
 
 	/**
+	 * Parses an optional decimal argument.
+	 * 
+	 * @return the value, or the default when the argument is empty
+	 * @throws IllegalArgumentException when the argument is not a number
+	 */
+	protected static double doubleArgument(String[] inputValues, int index,
+			double defaultValue, String name) {
+		final String text = stringArgument(inputValues, index, null);
+		if (text == null) {
+			return defaultValue;
+		}
+		try {
+			return Double.parseDouble(text);
+		} catch (final NumberFormatException e) {
+			throw new IllegalArgumentException(
+					"argument '" + name + "' is not a number: " + text);
+		}
+	}
+
+	/**
+	 * Parses an optional numeric argument.
+	 * 
+	 * @return the value, or the default when the argument is empty
+	 * @throws IllegalArgumentException when the argument is not a number
+	 */
+	protected static long longArgument(String[] inputValues, int index,
+			long defaultValue, String name) {
+		if (inputValues == null || inputValues.length <= index
+				|| inputValues[index] == null
+				|| inputValues[index].trim().isEmpty()) {
+			return defaultValue;
+		}
+		try {
+			return Long.parseLong(inputValues[index].trim());
+		} catch (final NumberFormatException e) {
+			throw new IllegalArgumentException("argument '" + name
+					+ "' is not a number: " + inputValues[index]);
+		}
+	}
+
+	/**
 	 * Returns the Gremlin/JEXL expression that resolves a vertex by its id.
 	 * 
 	 * @param id id of the vertex
@@ -50,6 +91,33 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	 */
 	public static String refOrNull(String id) {
 		return "g.V().has('id', '" + id + "').tryNext().orElse(null)";
+	}
+
+	/**
+	 * Returns the JEXL statement that writes a property of a vertex.
+	 * 
+	 * @param id         id of the vertex
+	 * @param property   property label
+	 * @param expression JEXL expression of the new value
+	 * @return JEXL statement
+	 */
+	public static String set(String id, String property, String expression) {
+		return ref(id) + ".property('" + property + "', " + expression + ")";
+	}
+
+	/**
+	 * Returns an optional text argument, trimmed.
+	 * 
+	 * @return the value, or the default when the argument is empty
+	 */
+	protected static String stringArgument(String[] inputValues, int index,
+			String defaultValue) {
+		if (inputValues == null || inputValues.length <= index
+				|| inputValues[index] == null
+				|| inputValues[index].trim().isEmpty()) {
+			return defaultValue;
+		}
+		return inputValues[index].trim();
 	}
 
 	/**
@@ -71,18 +139,6 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 			String fallbackExpression) {
 		return "g.V().has('id', '" + id + "').values('" + property
 				+ "').tryNext().orElse(" + fallbackExpression + ")";
-	}
-
-	/**
-	 * Returns the JEXL statement that writes a property of a vertex.
-	 * 
-	 * @param id         id of the vertex
-	 * @param property   property label
-	 * @param expression JEXL expression of the new value
-	 * @return JEXL statement
-	 */
-	public static String set(String id, String property, String expression) {
-		return ref(id) + ".property('" + property + "', " + expression + ")";
 	}
 
 	protected AbstractShowCaseCommand(final WaldotNamespace waldotNamespace,
@@ -135,8 +191,7 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 			int priority, String directory) {
 		return edge(compute, rule, name,
 				RulesEngineConstants.EXECUTE_EDGE_LABEL, directory,
-				RulesEngineConstants.PRIORITY_FIELD,
-				String.valueOf(priority));
+				RulesEngineConstants.PRIORITY_FIELD, String.valueOf(priority));
 	}
 
 	/**
@@ -173,26 +228,9 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 				String.valueOf(delayMs));
 	}
 
-	/**
-	 * Parses an optional numeric argument.
-	 * 
-	 * @return the value, or the default when the argument is empty
-	 * @throws IllegalArgumentException when the argument is not a number
-	 */
-	protected static long longArgument(String[] inputValues, int index,
-			long defaultValue, String name) {
-		if (inputValues == null || inputValues.length <= index
-				|| inputValues[index] == null
-				|| inputValues[index].trim().isEmpty()) {
-			return defaultValue;
-		}
-		try {
-			return Long.parseLong(inputValues[index].trim());
-		} catch (final NumberFormatException e) {
-			throw new IllegalArgumentException(
-					"argument '" + name + "' is not a number: "
-							+ inputValues[index]);
-		}
+	@Override
+	public String getDirectory() {
+		return BASE_DIRECTORY;
 	}
 
 	/**
@@ -253,6 +291,16 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 	}
 
 	/**
+	 * Creates the link-to edge (the value of the source is copied to the
+	 * destination).
+	 */
+	protected Edge linkTo(Vertex source, Vertex destination, String name,
+			String property, String directory) {
+		return edge(source, destination, name, MiloStrategy.LINK_TO_EDGE_TYPE,
+				directory, MonitoredEdge.MONITORED_PROPERTIES_LABEL, property);
+	}
+
+	/**
 	 * Creates the link-to edge with rename, deadband and delay.
 	 */
 	protected Edge linkTo(Vertex source, Vertex destination, String name,
@@ -261,52 +309,6 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 		return link(MiloStrategy.LINK_TO_EDGE_TYPE, source, destination, name,
 				property, renamedTo, deadbandType, deadband, delayMs,
 				directory);
-	}
-
-	/**
-	 * Parses an optional decimal argument.
-	 * 
-	 * @return the value, or the default when the argument is empty
-	 * @throws IllegalArgumentException when the argument is not a number
-	 */
-	protected static double doubleArgument(String[] inputValues, int index,
-			double defaultValue, String name) {
-		final String text = stringArgument(inputValues, index, null);
-		if (text == null) {
-			return defaultValue;
-		}
-		try {
-			return Double.parseDouble(text);
-		} catch (final NumberFormatException e) {
-			throw new IllegalArgumentException(
-					"argument '" + name + "' is not a number: " + text);
-		}
-	}
-
-	/**
-	 * Returns an optional text argument, trimmed.
-	 * 
-	 * @return the value, or the default when the argument is empty
-	 */
-	protected static String stringArgument(String[] inputValues, int index,
-			String defaultValue) {
-		if (inputValues == null || inputValues.length <= index
-				|| inputValues[index] == null
-				|| inputValues[index].trim().isEmpty()) {
-			return defaultValue;
-		}
-		return inputValues[index].trim();
-	}
-
-	/**
-	 * Creates the link-to edge (the value of the source is copied to the
-	 * destination).
-	 */
-	protected Edge linkTo(Vertex source, Vertex destination, String name,
-			String property, String directory) {
-		return edge(source, destination, name,
-				MiloStrategy.LINK_TO_EDGE_TYPE, directory,
-				MonitoredEdge.MONITORED_PROPERTIES_LABEL, property);
 	}
 
 	/**
@@ -319,8 +321,7 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 				RulesEngineConstants.ACTION_FIELD, action,
 				RulesEngineConstants.HYSTERESIS_LABEL,
 				String.valueOf(hysteresisMs),
-				RulesEngineConstants.DEBUG_LEVEL_LABEL,
-				String.valueOf(debug));
+				RulesEngineConstants.DEBUG_LEVEL_LABEL, String.valueOf(debug));
 	}
 
 	/**
@@ -342,10 +343,5 @@ public abstract class AbstractShowCaseCommand extends AbstractOpcCommand {
 		all.add(directory);
 		all.addAll(java.util.Arrays.asList(extra));
 		return getGraph().addVertex(all.toArray());
-	}
-
-	@Override
-	public String getDirectory() {
-		return BASE_DIRECTORY;
 	}
 }

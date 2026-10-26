@@ -77,7 +77,8 @@ public final class RunnableEvent {
 	 * @param event OPC-UA event
 	 * @param action executable action for this event
 	 */
-	public RunnableEvent(UaNode node, BaseEventType event, FireableAction action) {
+	public RunnableEvent(UaNode node, BaseEventType event,
+			FireableAction action) {
 		this.type = TypeEvent.EVENT;
 		this.node = node;
 		this.action = action;
@@ -97,28 +98,14 @@ public final class RunnableEvent {
 	 * @param value new property value
 	 * @param action executable action for this property change
 	 */
-	public RunnableEvent(UaNode node, String label, Object value, FireableAction action) {
+	public RunnableEvent(UaNode node, String label, Object value,
+			FireableAction action) {
 		this.type = TypeEvent.PROPERTY_CHANGE;
 		this.node = node;
 		this.action = action;
 		this.event = null;
 		this.label = label;
 		this.value = value;
-	}
-
-	/**
-	 * Returns the executable action with starting time set.
-	 * <p>
-	 * Imposta il tempo di inizio sull'azione e la ritorna per l'esecuzione.
-	 * Chiamato da ComputeVertex quando l'azione viene estratta dalla coda.
-	 * </p>
-	 * 
-	 * @param startingTimeMs execution starting time in milliseconds
-	 * @return executable action with starting time set
-	 */
-	public FireableAction getAction(long startingTimeMs) {
-		action.setStartingTime(startingTimeMs);
-		return action;
 	}
 
 	/**
@@ -136,8 +123,24 @@ public final class RunnableEvent {
 			return false;
 		}
 		final RunnableEvent other = (RunnableEvent) obj;
-		return type == other.type && Objects.equals(sourceNodeId(), other.sourceNodeId())
+		return type == other.type
+				&& Objects.equals(sourceNodeId(), other.sourceNodeId())
 				&& Objects.equals(label, other.label);
+	}
+
+	/**
+	 * Returns the executable action with starting time set.
+	 * <p>
+	 * Imposta il tempo di inizio sull'azione e la ritorna per l'esecuzione.
+	 * Chiamato da ComputeVertex quando l'azione viene estratta dalla coda.
+	 * </p>
+	 * 
+	 * @param startingTimeMs execution starting time in milliseconds
+	 * @return executable action with starting time set
+	 */
+	public FireableAction getAction(long startingTimeMs) {
+		action.setStartingTime(startingTimeMs);
+		return action;
 	}
 
 	public BaseEventType getEvent() {

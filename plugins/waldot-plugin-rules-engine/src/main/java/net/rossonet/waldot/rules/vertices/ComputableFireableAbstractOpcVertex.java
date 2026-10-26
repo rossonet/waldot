@@ -10,10 +10,10 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
-import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.jexl.HysteresisPriorityQueue;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
+import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.rules.events.RunnableEvent;
 
@@ -79,22 +79,29 @@ import net.rossonet.waldot.rules.events.RunnableEvent;
  * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
-public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVertex implements AutoCloseable {
+public abstract class ComputableFireableAbstractOpcVertex
+		extends
+			AbstractOpcVertex
+		implements
+			AutoCloseable {
 
 	// Intervallo di pulizia della coda (10 secondi)
 	private static final long CLEAN_UP_INTERVAL_MS = 10000L;
 
-	private final HysteresisPriorityQueue<RunnableEvent> eventQueue = new HysteresisPriorityQueue<>(0);
+	private final HysteresisPriorityQueue<RunnableEvent> eventQueue = new HysteresisPriorityQueue<>(
+			0);
 
 	private volatile long lastCleanUpTimeMs = System.currentTimeMillis();
 
 	private final Object publishLock = new Object();
 
-	public ComputableFireableAbstractOpcVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId,
-			QualifiedName browseName, LocalizedText displayName, LocalizedText description, UInteger writeMask,
-			UInteger userWriteMask, UByte eventNotifier, long version) {
-		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
-				version);
+	public ComputableFireableAbstractOpcVertex(WaldotGraph graph,
+			UaNodeContext context, NodeId nodeId, QualifiedName browseName,
+			LocalizedText displayName, LocalizedText description,
+			UInteger writeMask, UInteger userWriteMask, UByte eventNotifier,
+			long version) {
+		super(graph, context, nodeId, browseName, displayName, description,
+				writeMask, userWriteMask, eventNotifier, version);
 	}
 
 	private void cleanUpIfNeeded() {
@@ -130,7 +137,8 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	@Override
 	public void fireEvent(UaNode node, BaseEventType event, int priority) {
 		// Crea RunnableEvent e mette in coda con priorità
-		offer(new RunnableEvent(node, event, getRunnableEvent(node, event)), priority);
+		offer(new RunnableEvent(node, event, getRunnableEvent(node, event)),
+				priority);
 	}
 
 	/**
@@ -146,9 +154,11 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	 * @param priority event priority
 	 */
 	@Override
-	public void fireProperty(UaNode node, String propertyLabel, DataValue value, int priority) {
+	public void fireProperty(UaNode node, String propertyLabel, DataValue value,
+			int priority) {
 		// Crea RunnableEvent per property change e mette in coda
-		offer(new RunnableEvent(node, propertyLabel, value, getRunnablePropertyEvent(node, propertyLabel)), priority);
+		offer(new RunnableEvent(node, propertyLabel, value,
+				getRunnablePropertyEvent(node, propertyLabel)), priority);
 	}
 
 	/**
@@ -171,7 +181,8 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	 * @param event OPC-UA event
 	 * @return executable action
 	 */
-	protected abstract FireableAction getRunnableEvent(UaNode node, BaseEventType event);
+	protected abstract FireableAction getRunnableEvent(UaNode node,
+			BaseEventType event);
 
 	/**
 	 * Creates executable action for a property change.
@@ -184,7 +195,8 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	 * @param propertyLabel property that changed
 	 * @return executable action
 	 */
-	protected abstract FireableAction getRunnablePropertyEvent(UaNode node, String propertyLabel);
+	protected abstract FireableAction getRunnablePropertyEvent(UaNode node,
+			String propertyLabel);
 
 	public boolean isHisteresisEnabled() {
 		return getHysteresisTimeMs() != 0;
@@ -222,7 +234,8 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	private void publishQueueSize() {
 		synchronized (publishLock) {
 			if (!isRemoved()) {
-				property(RulesEngineConstants.QUEUE_SIZE_LABEL, Long.valueOf(eventQueue.size()));
+				property(RulesEngineConstants.QUEUE_SIZE_LABEL,
+						Long.valueOf(eventQueue.size()));
 			}
 		}
 	}
@@ -235,7 +248,8 @@ public abstract class ComputableFireableAbstractOpcVertex extends AbstractOpcVer
 	 */
 	protected void setHysteresisTimeMs(long hysteresisTimeMs) {
 		if (hysteresisTimeMs < 0) {
-			throw new IllegalArgumentException("Hysteresis time must be non-negative");
+			throw new IllegalArgumentException(
+					"Hysteresis time must be non-negative");
 		}
 		eventQueue.setHysteresisMs(hysteresisTimeMs);
 	}

@@ -78,9 +78,11 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 	public static final double DEFAULT_SETPOINT_MBAR = 25.0;
 	public static final int DEFAULT_STATIONS = 4;
 	public static final String DELAY_LABEL = "delay-ms";
+	private static final String DIR = BASE_DIRECTORY + "/gas-grid";
 	public static final String GAS_TYPE_LABEL = "gas-type";
 	public static final String GATE_ID = "gas-gate-gen";
 	public static final String LEAK_ID = "gas-leak-monitor";
+	private static final String LINKS = DIR + "/links";
 	/** The existence of this vertex marks the scenario as already created. */
 	public static final String NETWORK_ID = "gas-network";
 	public static final String PIPE_DELAY_LABEL = "pipe-delay-ms";
@@ -94,12 +96,10 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 	public static final String STATIONS_LABEL = "stations";
 	public static final String STATS_ID = "gas-stats";
 	public static final String SUPERVISORY_COMPUTE_ID = "gas-supervisory";
-	public static final String TRUNK_ID = "gas-trunk";
-	public static final double SUPPLY_NOMINAL_BAR = 24.0;
 
-	private static final String DIR = BASE_DIRECTORY + "/gas-grid";
-	private static final String LINKS = DIR + "/links";
+	public static final double SUPPLY_NOMINAL_BAR = 24.0;
 	private static final String TRIGGERS = DIR + "/triggers";
+	public static final String TRUNK_ID = "gas-trunk";
 
 	public static String consumerId(int station) {
 		return "gas-consumer-" + station;
@@ -113,16 +113,20 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 		return "gas-plant-" + station;
 	}
 
+	private static String pv(int s) {
+		return val(sensorId(s), "pressure");
+	}
+
+	public static String ruleId(String kind, int station) {
+		return "gas-rule-" + kind + "-" + station;
+	}
+
 	public static String sensorId(int station) {
 		return "gas-sensor-" + station;
 	}
 
 	public static String valveId(int station) {
 		return "gas-valve-" + station;
-	}
-
-	public static String ruleId(String kind, int station) {
-		return "gas-rule-" + kind + "-" + station;
 	}
 
 	/** Number of vertices created for a number of stations. */
@@ -133,8 +137,9 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 	public CreateShowCaseGasGridCommand(final WaldotNamespace waldotNamespace) {
 		super(waldotNamespace, "create show case gas grid",
 				"creates the Gas Grid example: a gas distribution network with PI loop controllers on the valves");
-		addStringArgument(STATIONS_LABEL, "number of pressure reducing stations (2-20, default "
-				+ DEFAULT_STATIONS + ")");
+		addStringArgument(STATIONS_LABEL,
+				"number of pressure reducing stations (2-20, default "
+						+ DEFAULT_STATIONS + ")");
 		addStringArgument(DELAY_LABEL,
 				"clock of the simulation in milliseconds (default "
 						+ DEFAULT_DELAY_MS + ", minimum 10)");
@@ -155,10 +160,6 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 		return new CreateShowCaseGasGridCommand(this.waldotNamespace);
 	}
 
-	private static String pv(int s) {
-		return val(sensorId(s), "pressure");
-	}
-
 	@Override
 	public String[] runCommand(final InvocationContext invocationContext,
 			final String[] inputValues) {
@@ -173,12 +174,11 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 		try {
 			stationsArg = longArgument(inputValues, 0, DEFAULT_STATIONS,
 					STATIONS_LABEL);
-			delay = longArgument(inputValues, 1, DEFAULT_DELAY_MS,
-					DELAY_LABEL);
+			delay = longArgument(inputValues, 1, DEFAULT_DELAY_MS, DELAY_LABEL);
 			setpoint = doubleArgument(inputValues, 2, DEFAULT_SETPOINT_MBAR,
 					SETPOINT_LABEL);
-			pipeDelayArg = longArgument(inputValues, 3,
-					DEFAULT_PIPE_DELAY_MS, PIPE_DELAY_LABEL);
+			pipeDelayArg = longArgument(inputValues, 3, DEFAULT_PIPE_DELAY_MS,
+					PIPE_DELAY_LABEL);
 		} catch (final IllegalArgumentException e) {
 			return new String[]{e.getMessage()};
 		}
@@ -225,8 +225,8 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 
 		// network: marker of the scenario, gas profile and operator setpoint
 		final Vertex network = vertex(NETWORK_ID, null, "Gas network",
-				DIR + "/supervisory", "gas-type", profile.name,
-				"h2-percent", profile.hydrogenPercent, "relative-density",
+				DIR + "/supervisory", "gas-type", profile.name, "h2-percent",
+				profile.hydrogenPercent, "relative-density",
 				profile.relativeDensity, "flow-factor", profile.flowFactor,
 				"supply-bar", SUPPLY_NOMINAL_BAR, "nominal-demand",
 				nominalDemand, "esd-margin-pct", profile.esdMarginPercent,
@@ -245,18 +245,19 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 				DIR + "/supply", "sinusoidal", 22, 26, delay * 5);
 		final Vertex clock = generator(CLOCK_ID, "Simulation clock",
 				DIR + "/supply", "incremental", 0, 1000000, delay);
-		linkTo(gate, trunk, "gate-to-trunk", "data", "pressure",
-				"absolute", profile.deadbandSupplyBar, null, LINKS);
-		// cyclic scan of the loops: a transmitter inside its deadband is silent, so
-		// the controllers also run on a slow clock (like the scan of a PLC)
+		linkTo(gate, trunk, "gate-to-trunk", "data", "pressure", "absolute",
+				profile.deadbandSupplyBar, null, LINKS);
+		// cyclic scan of the loops: a transmitter inside its deadband is
+		// silent, so the controllers also run on a slow clock (like the scan of
+		// a PLC)
 		final Vertex scan = generator(SCAN_ID, "Controller scan clock",
 				DIR + "/supply", "incremental", 0, 1000000, delay * 4);
 
 		// compute vertices
 		final Vertex control = compute(CONTROL_COMPUTE_ID,
 				"Control loop compute", DIR + "/compute", 1);
-		final Vertex process = compute(PROCESS_COMPUTE_ID,
-				"Process compute", DIR + "/compute", 4);
+		final Vertex process = compute(PROCESS_COMPUTE_ID, "Process compute",
+				DIR + "/compute", 4);
 		final Vertex supervisory = compute(SUPERVISORY_COMPUTE_ID,
 				"Supervisory compute", DIR + "/compute", 1);
 
@@ -274,15 +275,14 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 			final String pid = plantId(i);
 			final String kid = consumerId(i);
 
-			final Vertex sensor = vertex(sid, null,
-					"Pressure transmitter " + i, dir, "pressure", setpoint);
-			final Vertex valve = vertex(vid, null, "Regulating valve " + i,
-					dir, "opening", bias);
-			final Vertex controller = vertex(cid, null,
-					"Loop controller " + i, dir, "setpoint", setpoint, "mode",
-					"AUTO", "fault", "none", "integral", 0.0, "last-error",
-					0.0, "output", bias, "bias", bias, "kp", 0.4, "ki", 0.1,
-					"esd-trips", 0.0);
+			final Vertex sensor = vertex(sid, null, "Pressure transmitter " + i,
+					dir, "pressure", setpoint);
+			final Vertex valve = vertex(vid, null, "Regulating valve " + i, dir,
+					"opening", bias);
+			final Vertex controller = vertex(cid, null, "Loop controller " + i,
+					dir, "setpoint", setpoint, "mode", "AUTO", "fault", "none",
+					"integral", 0.0, "last-error", 0.0, "output", bias, "bias",
+					bias, "kp", 0.4, "ki", 0.1, "esd-trips", 0.0);
 			final Vertex plant = vertex(pid, null, "Process " + i, dir,
 					"pressure", setpoint, "upstream", SUPPLY_NOMINAL_BAR);
 			final Vertex consumer = vertex(kid, null,
@@ -294,8 +294,8 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 					Math.round(nominalDemand * 1.2), delay * 3);
 
 			// links with deadband and delay
-			linkTo(demandGenerator, consumer, "demand-to-consumer-" + i,
-					"data", "demand", "percentage",
+			linkTo(demandGenerator, consumer, "demand-to-consumer-" + i, "data",
+					"demand", "percentage",
 					noDeadband ? null : profile.deadbandDemandPercent, null,
 					LINKS);
 			linkTo(trunk, plant, "trunk-to-process-" + i, "pressure",
@@ -307,8 +307,8 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 					LINKS);
 			linkTo(network, controller, "setpoint-to-controller-" + i,
 					"setpoint", null, null, null, null, LINKS);
-			linkFrom(valve, controller, "valve-from-controller-" + i,
-					"output", "opening", "absolute", 0.5, null, LINKS);
+			linkFrom(valve, controller, "valve-from-controller-" + i, "output",
+					"opening", "absolute", 0.5, null, LINKS);
 
 			// rules
 			final String sp = val(cid, "setpoint");
@@ -318,9 +318,9 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 					"var err = " + sp + " - " + pv(i) + "; " + "var i0 = "
 							+ val(cid, "integral") + "; "
 							+ "var i1 = i0 + err; " + "var bias = "
-							+ val(cid, "bias") + "; var kp = "
-							+ val(cid, "kp") + "; var ki = " + val(cid, "ki")
-							+ "; " + "var raw = bias + kp * err + ki * i1; "
+							+ val(cid, "bias") + "; var kp = " + val(cid, "kp")
+							+ "; var ki = " + val(cid, "ki") + "; "
+							+ "var raw = bias + kp * err + ki * i1; "
 							+ "var sat = (raw > 100.0 && err > 0.0) || (raw < 0.0 && err < 0.0); "
 							+ "var i2 = sat ? i0 : i1; "
 							+ "var outv = math.max(0.0, math.min(100.0, bias + kp * err + ki * i2)); "
@@ -334,17 +334,17 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 							+ val(cid, "fault") + " == 'none')",
 					"var bad = " + pv(i) + " < 0.0 || " + pv(i) + " > 200.0; "
 							+ set(cid, "fault", "bad ? 'sensor' : 'none'")
-							+ "; " + "if (bad) { if (" + mode
-							+ " == 'AUTO') { " + set(cid, "mode", "'MANUAL'")
-							+ "; } } else { if (" + mode + " == 'MANUAL') { "
+							+ "; " + "if (bad) { if (" + mode + " == 'AUTO') { "
+							+ set(cid, "mode", "'MANUAL'") + "; } } else { if ("
+							+ mode + " == 'MANUAL') { "
 							+ set(cid, "mode", "'AUTO'") + "; } }",
 					0, 0);
-			// no hysteresis on safety rules: a discarded notification could hide the overpressure
+			// no hysteresis on safety rules: a discarded notification could
+			// hide the overpressure
 			final Vertex esdTrip = rule(ruleId("esd-trip", i),
 					"Overpressure ESD " + i, DIR + "/rules/safety",
-					pv(i) + " > " + sp + " * (1.0 + " + margin
-							+ " / 100.0) && " + pv(i) + " <= 200.0 && " + mode
-							+ " != 'ESD'",
+					pv(i) + " > " + sp + " * (1.0 + " + margin + " / 100.0) && "
+							+ pv(i) + " <= 200.0 && " + mode + " != 'ESD'",
 					set(cid, "mode", "'ESD'") + "; "
 							+ set(cid, "integral", "0.0") + "; "
 							+ set(cid, "output", "0.0") + "; "
@@ -429,14 +429,13 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 				"var bad = " + saturated + "; "
 						+ set(LEAK_ID, "alarm", "bad ? 'leak' : 'none'")
 						+ "; if (bad) { "
-						+ set(LEAK_ID, "alarms", val(LEAK_ID, "alarms")
-								+ " + 1.0")
+						+ set(LEAK_ID, "alarms",
+								val(LEAK_ID, "alarms") + " + 1.0")
 						+ "; }",
 				0, 0);
 		// broken on purpose: arithmetic exception, 'errors' grows
-		final Vertex broken = rule("gas-rule-bad-sensor",
-				"Broken rule (demo)", DIR + "/rules/supervisory",
-				"1 / 0 > 0.0",
+		final Vertex broken = rule("gas-rule-bad-sensor", "Broken rule (demo)",
+				DIR + "/rules/supervisory", "1 / 0 > 0.0",
 				"log.info('never executed')", 0, 0);
 
 		execute(supervisory, leakRule, "runs-leak-detect", 60,
@@ -449,8 +448,8 @@ public class CreateShowCaseGasGridCommand extends AbstractShowCaseCommand {
 		fire(clock, broken, "clock-breaks", "data", TRIGGERS);
 		fire(stats, leakRule, "stats-detect-leak", "mean-opening", TRIGGERS);
 
-		return new String[]{"show case gas grid created: " + n
-				+ " stations, gas " + profile.name + ", " + vertexCount(n)
-				+ " vertices"};
+		return new String[]{
+				"show case gas grid created: " + n + " stations, gas "
+						+ profile.name + ", " + vertexCount(n) + " vertices"};
 	}
 }

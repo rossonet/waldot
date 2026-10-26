@@ -121,7 +121,8 @@ public class WaldotTinkerPopPlugin extends AbstractPluginListener {
 		super.initialize(waldotNamespace);
 		commands.clear();
 		registerTypeNode(TinkerPopVertex.class, GREMLIN_TYPE_NODE_ID,
-				GREMLIN_TYPE_DISPLAY_NAME, TinkerPopConstants.GREMLIN_TYPE_LABEL);
+				GREMLIN_TYPE_DISPLAY_NAME,
+				TinkerPopConstants.GREMLIN_TYPE_LABEL);
 		registerCommand(new CreateGremlinServerCommand(waldotNamespace));
 		logger.info("Initializing Waldot TinkerPop Plugin");
 	}

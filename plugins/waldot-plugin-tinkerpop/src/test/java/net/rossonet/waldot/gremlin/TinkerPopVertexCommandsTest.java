@@ -18,8 +18,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import net.rossonet.waldot.test.WaldotTestEnvironment;
-import net.rossonet.waldot.tinkerpop.TinkerPopConstants;
 import net.rossonet.waldot.WaldotTinkerPopPlugin;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
@@ -27,6 +25,8 @@ import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
 import net.rossonet.waldot.opc.AbstractCreateVertexCommand;
+import net.rossonet.waldot.test.WaldotTestEnvironment;
+import net.rossonet.waldot.tinkerpop.TinkerPopConstants;
 import net.rossonet.waldot.tinkerpop.TinkerPopVertex;
 import net.rossonet.waldot.utils.NetworkHelper;
 
@@ -37,7 +37,9 @@ public class TinkerPopVertexCommandsTest {
 
 	private static void assertError(final String[] result) {
 		assertEquals(1, result.length);
-		assertTrue(result[0].startsWith(AbstractCreateVertexCommand.ERROR_PREFIX), result[0]);
+		assertTrue(
+				result[0].startsWith(AbstractCreateVertexCommand.ERROR_PREFIX),
+				result[0]);
 	}
 
 	private WaldotGraph g;
@@ -52,7 +54,8 @@ public class TinkerPopVertexCommandsTest {
 	@BeforeEach
 	public void beforeEach() throws Exception {
 		clean();
-		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy());
+		g = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(),
+				new LoggerHistoryStrategy());
 		for (final PluginListener p : g.getWaldotNamespace().getPlugins()) {
 			if (p instanceof WaldotTinkerPopPlugin) {
 				plugin = (WaldotTinkerPopPlugin) p;
@@ -73,8 +76,10 @@ public class TinkerPopVertexCommandsTest {
 	}
 
 	private AbstractCreateVertexCommand command(final String type) {
-		return createCommands().stream().filter(c -> c.getVertexType().equals(type)).findFirst()
-				.orElseThrow(() -> new AssertionError("no create command for " + type));
+		return createCommands().stream()
+				.filter(c -> c.getVertexType().equals(type)).findFirst()
+				.orElseThrow(() -> new AssertionError(
+						"no create command for " + type));
 	}
 
 	@Test
@@ -90,33 +95,45 @@ public class TinkerPopVertexCommandsTest {
 		}
 	}
 
-	private WaldotVertex created(final String[] result) {
-		assertEquals(1, result.length);
-		assertFalse(result[0].startsWith(AbstractCreateVertexCommand.ERROR_PREFIX), result[0]);
-		final WaldotVertex vertex = g.getWaldotNamespace().getVertexNode(NodeId.parse(result[0]));
-		assertNotNull(vertex, "vertex " + result[0] + " not found");
-		return vertex;
+	private List<AbstractCreateVertexCommand> createCommands() {
+		return plugin.getCommands().stream()
+				.filter(AbstractCreateVertexCommand.class::isInstance)
+				.map(AbstractCreateVertexCommand.class::cast).toList();
 	}
 
-	private List<AbstractCreateVertexCommand> createCommands() {
-		return plugin.getCommands().stream().filter(AbstractCreateVertexCommand.class::isInstance)
-				.map(AbstractCreateVertexCommand.class::cast).toList();
+	private WaldotVertex created(final String[] result) {
+		assertEquals(1, result.length);
+		assertFalse(
+				result[0].startsWith(AbstractCreateVertexCommand.ERROR_PREFIX),
+				result[0]);
+		final WaldotVertex vertex = g.getWaldotNamespace()
+				.getVertexNode(NodeId.parse(result[0]));
+		assertNotNull(vertex, "vertex " + result[0] + " not found");
+		return vertex;
 	}
 
 	@Test
 	public void createGremlinServerOnAFreePort() throws Exception {
 		final int port = NetworkHelper.findAvailablePort(28182);
 		final TinkerPopVertex server = assertInstanceOf(TinkerPopVertex.class,
-				created(command(TinkerPopConstants.GREMLIN_TYPE_LABEL).runCommand(null,
-						new String[] { "gremlin-test", "tests/gremlin", String.valueOf(port), "127.0.0.1" })));
+				created(command(TinkerPopConstants.GREMLIN_TYPE_LABEL)
+						.runCommand(null,
+								new String[]{"gremlin-test", "tests/gremlin",
+										String.valueOf(port), "127.0.0.1"})));
 		try {
-			assertEquals(String.valueOf(port), server.property(TinkerPopConstants.PORT_FIELD).value().toString());
-			assertEquals("127.0.0.1", server.property(TinkerPopConstants.BIND_HOST_FIELD).value().toString());
+			assertEquals(String.valueOf(port),
+					server.property(TinkerPopConstants.PORT_FIELD).value()
+							.toString());
+			assertEquals("127.0.0.1",
+					server.property(TinkerPopConstants.BIND_HOST_FIELD).value()
+							.toString());
 			final long end = System.currentTimeMillis() + 20000;
-			while (System.currentTimeMillis() < end && NetworkHelper.checkLocalPortAvailable(port)) {
+			while (System.currentTimeMillis() < end
+					&& NetworkHelper.checkLocalPortAvailable(port)) {
 				Thread.sleep(100);
 			}
-			assertFalse(NetworkHelper.checkLocalPortAvailable(port), "the gremlin server is not listening");
+			assertFalse(NetworkHelper.checkLocalPortAvailable(port),
+					"the gremlin server is not listening");
 		} finally {
 			server.remove();
 		}
@@ -126,15 +143,18 @@ public class TinkerPopVertexCommandsTest {
 	public void everyVertexTypeHasACreateCommand() {
 		final Set<String> covered = new HashSet<>();
 		createCommands().forEach(c -> covered.add(c.getVertexType()));
-		assertEquals(Set.of(TinkerPopConstants.GREMLIN_TYPE_LABEL), plugin.getManagedVertexTypes());
-		assertTrue(covered.containsAll(plugin.getManagedVertexTypes()), "covered: " + covered);
+		assertEquals(Set.of(TinkerPopConstants.GREMLIN_TYPE_LABEL),
+				plugin.getManagedVertexTypes());
+		assertTrue(covered.containsAll(plugin.getManagedVertexTypes()),
+				"covered: " + covered);
 	}
 
 	@Test
 	public void invalidParametersReturnAnError() {
-		final AbstractCreateVertexCommand command = command(TinkerPopConstants.GREMLIN_TYPE_LABEL);
-		assertError(command.runCommand(null, new String[] { "x", "", "70000" }));
-		assertError(command.runCommand(null, new String[] { "x", "", "0" }));
-		assertError(command.runCommand(null, new String[] { "x", "", "port" }));
+		final AbstractCreateVertexCommand command = command(
+				TinkerPopConstants.GREMLIN_TYPE_LABEL);
+		assertError(command.runCommand(null, new String[]{"x", "", "70000"}));
+		assertError(command.runCommand(null, new String[]{"x", "", "0"}));
+		assertError(command.runCommand(null, new String[]{"x", "", "port"}));
 	}
 }

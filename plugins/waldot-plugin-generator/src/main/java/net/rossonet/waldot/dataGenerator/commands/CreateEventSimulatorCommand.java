@@ -1,6 +1,40 @@
 package net.rossonet.waldot.dataGenerator.commands;
 
-import static net.rossonet.waldot.dataGenerator.GeneratorConstants.*;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_MAX_SEVERITY;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.DEFAULT_EVENT_MIN_SEVERITY;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_ALGORITHM_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_ALGORITHM_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_BURST_SIZE_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_BURST_SIZE_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_CATEGORY_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_CATEGORY_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_DELAY_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_DELAY_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_GENERATOR_OBJECT_TYPE_LABEL;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_JITTER_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_JITTER_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MAX_EVENTS_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MAX_EVENTS_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MAX_SEVERITY_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MAX_SEVERITY_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MESSAGES_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MESSAGES_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MIN_SEVERITY_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_MIN_SEVERITY_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_RANDOM_MAX_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_RANDOM_MAX_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_RANDOM_MIN_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_RANDOM_MIN_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEED_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEED_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEPARATOR_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEPARATOR_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEVERITIES_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_SEVERITIES_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_TEMPLATE_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_TEMPLATE_FIELD;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_TYPE_DESCRIPTION;
+import static net.rossonet.waldot.dataGenerator.GeneratorConstants.EVENT_TYPE_FIELD;
 
 import java.util.Arrays;
 import java.util.List;
@@ -114,8 +148,7 @@ public class CreateEventSimulatorCommand extends AbstractCreateVertexCommand {
 				checkLong(keyValues, EVENT_MIN_SEVERITY_FIELD, 1, 1000),
 				checkLong(keyValues, EVENT_MAX_SEVERITY_FIELD, 1, 1000),
 				checkLong(keyValues, EVENT_BURST_SIZE_FIELD, 1, 10000),
-				checkLong(keyValues, EVENT_MAX_EVENTS_FIELD, 0,
-						Long.MAX_VALUE),
+				checkLong(keyValues, EVENT_MAX_EVENTS_FIELD, 0, Long.MAX_VALUE),
 				checkLong(keyValues, EVENT_RANDOM_MIN_FIELD, Long.MIN_VALUE,
 						Long.MAX_VALUE),
 				checkLong(keyValues, EVENT_RANDOM_MAX_FIELD, Long.MIN_VALUE,
@@ -126,7 +159,8 @@ public class CreateEventSimulatorCommand extends AbstractCreateVertexCommand {
 		}
 		final String severities = findValue(keyValues, EVENT_SEVERITIES_FIELD);
 		if (severities != null) {
-			final String separator = findValue(keyValues, EVENT_SEPARATOR_FIELD);
+			final String separator = findValue(keyValues,
+					EVENT_SEPARATOR_FIELD);
 			for (final String item : EventGeneratorVertex.split(severities,
 					separator)) {
 				try {

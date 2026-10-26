@@ -23,7 +23,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
@@ -32,6 +31,7 @@ import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.exception.PluginBlockingException;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 import net.rossonet.waldot.plugin.EdgeMonitoredVertex;
+import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.rules.edges.ComputeMonitoredEdge;
 import net.rossonet.waldot.rules.events.FireableAction;
 import net.rossonet.waldot.rules.events.RunnableEvent;
@@ -118,7 +118,10 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * @author Andrea Ambrosini - Zona Autonoma srl
  * @since 0.4.0
  */
-public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, EdgeMonitoredVertex {
+public class ComputeVertex extends AbstractOpcVertex
+		implements
+			AutoCloseable,
+			EdgeMonitoredVertex {
 
 	/**
 	 * Thread manager runnable that polls dirty nodes and executes actions.
@@ -131,21 +134,25 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 				try {
 					reapRunners();
 					if (runners.size() >= getThreads()) {
-						// pool pieno: attende che si liberi uno slot senza bloccare i controlli di timeout
+						// pool pieno: attende che si liberi uno slot senza
+						// bloccare i controlli di timeout
 						Thread.sleep(FULL_POOL_WAIT_MS);
 						continue;
 					}
-					final DirtyNode dirty = dirtyNodes.poll(MANAGER_POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
+					final DirtyNode dirty = dirtyNodes.poll(
+							MANAGER_POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
 					if (dirty == null) {
 						continue;
 					}
-					final ComputableFireableAbstractOpcVertex vertex = servedFireableNodes.get(dirty.getNodeId());
+					final ComputableFireableAbstractOpcVertex vertex = servedFireableNodes
+							.get(dirty.getNodeId());
 					if (vertex == null) {
 						// la regola è stata scollegata nel frattempo
 						continue;
 					}
-					// un solo evento per volta: la regola, se ha ancora eventi, rientra in coda
-					// con il suo nuovo peso e le altre regole non restano indietro
+					// un solo evento per volta: la regola, se ha ancora eventi,
+					// rientra in coda con il suo nuovo peso e le altre regole
+					// non restano indietro
 					final RunnableEvent newEvent = vertex.poll();
 					if (newEvent != null) {
 						submit(dirty.getNodeId(), newEvent);
@@ -182,7 +189,9 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 		@Override
 		public int compareTo(DirtyNode other) {
 			final int byWeight = Integer.compare(other.weight, this.weight);
-			return byWeight != 0 ? byWeight : Long.compare(this.sequence, other.sequence);
+			return byWeight != 0
+					? byWeight
+					: Long.compare(this.sequence, other.sequence);
 		}
 
 		public NodeId getNodeId() {
@@ -199,7 +208,8 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 
 	private static final long MANAGER_POLL_INTERVAL_MS = 50;
 
-	public static void generateParameters(WaldotNamespace waldotNamespace, UaObjectTypeNode typeNode) {
+	public static void generateParameters(WaldotNamespace waldotNamespace,
+			UaObjectTypeNode typeNode) {
 		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
 				RulesEngineConstants.THREAD_POOL_SIZE_FIELD, NodeIds.Int32,
 				RulesEngineConstants.THREAD_POOL_SIZE_FIELD_DESCRIPTION);
@@ -209,8 +219,9 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
 				RulesEngineConstants.PRIORITY_FACTOR_FIELD, NodeIds.Double,
 				RulesEngineConstants.PRIORITY_FACTOR_FIELD_DESCRIPTION);
-		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode, RulesEngineConstants.QUEUE_SIZE_LABEL,
-				NodeIds.Int64, RulesEngineConstants.COMPUTE_QUEUE_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.QUEUE_SIZE_LABEL, NodeIds.Int64,
+				RulesEngineConstants.COMPUTE_QUEUE_LABEL_DESCRIPTION);
 	}
 
 	private volatile boolean active = true;
@@ -233,32 +244,43 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 
 	protected final WaldotNamespace waldotNamespace;
 
-	public ComputeVertex(WaldotGraph graph, UaNodeContext context, NodeId nodeId, QualifiedName browseName,
-			LocalizedText displayName, LocalizedText description, UInteger writeMask, UInteger userWriteMask,
-			UByte eventNotifier, long version, Object[] propertyKeyValues) {
-		super(graph, context, nodeId, browseName, displayName, description, writeMask, userWriteMask, eventNotifier,
-				version);
+	public ComputeVertex(WaldotGraph graph, UaNodeContext context,
+			NodeId nodeId, QualifiedName browseName, LocalizedText displayName,
+			LocalizedText description, UInteger writeMask,
+			UInteger userWriteMask, UByte eventNotifier, long version,
+			Object[] propertyKeyValues) {
+		super(graph, context, nodeId, browseName, displayName, description,
+				writeMask, userWriteMask, eventNotifier, version);
 		waldotNamespace = graph.getWaldotNamespace();
-		addManagedProperty(RulesEngineConstants.THREAD_POOL_SIZE_FIELD, NodeIds.Int32, Integer.class, false,
-				RulesEngineConstants.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE, null, false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.EXECUTION_TIMEOUT_MS_FIELD, NodeIds.Int64, Long.class, false,
-				RulesEngineConstants.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE, null, false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.PRIORITY_FACTOR_FIELD, NodeIds.Double, Double.class, false,
-				RulesEngineConstants.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE, null, false, propertyKeyValues);
-		addManagedProperty(RulesEngineConstants.QUEUE_SIZE_LABEL, NodeIds.Int64, Long.class, false, 0L, null,
+		addManagedProperty(RulesEngineConstants.THREAD_POOL_SIZE_FIELD,
+				NodeIds.Int32, Integer.class, false,
+				RulesEngineConstants.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE, null,
 				false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.EXECUTION_TIMEOUT_MS_FIELD,
+				NodeIds.Int64, Long.class, false,
+				RulesEngineConstants.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE,
+				null, false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.PRIORITY_FACTOR_FIELD,
+				NodeIds.Double, Double.class, false,
+				RulesEngineConstants.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE, null,
+				false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.QUEUE_SIZE_LABEL, NodeIds.Int64,
+				Long.class, false, 0L, null, false, propertyKeyValues);
 	}
 
 	public int calcolateWeight(int executorEdgePriority, int queueSize) {
-		final double weight = executorEdgePriority * getPriorityFactor() + queueSize;
-		return (int) Math.max(Integer.MIN_VALUE, Math.min(Integer.MAX_VALUE, Math.round(weight)));
+		final double weight = executorEdgePriority * getPriorityFactor()
+				+ queueSize;
+		return (int) Math.max(Integer.MIN_VALUE,
+				Math.min(Integer.MAX_VALUE, Math.round(weight)));
 	}
 
 	@Override
 	public Object clone() {
-		return new ComputeVertex(graph, getNodeContext(), getNodeId(), getBrowseName(), getDisplayName(),
-				getDescription(), getWriteMask(), getUserWriteMask(), getEventNotifier(), version(),
-				getPropertiesAsStringArray());
+		return new ComputeVertex(graph, getNodeContext(), getNodeId(),
+				getBrowseName(), getDisplayName(), getDescription(),
+				getWriteMask(), getUserWriteMask(), getEventNotifier(),
+				version(), getPropertiesAsStringArray());
 	}
 
 	@Override
@@ -300,7 +322,8 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	public void forget(NodeId ruleNodeId) {
 		servedFireableNodes.remove(ruleNodeId);
 		synchronized (dirtyNodes) {
-			dirtyNodes.removeIf(dirtyNode -> dirtyNode.getNodeId().equals(ruleNodeId));
+			dirtyNodes.removeIf(
+					dirtyNode -> dirtyNode.getNodeId().equals(ruleNodeId));
 		}
 		publishQueueSize();
 	}
@@ -311,7 +334,8 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	 * @return execution timeout in ms
 	 */
 	public long getExecutionTimeoutMs() {
-		final Long value = getRuntimeParameter(RulesEngineConstants.EXECUTION_TIMEOUT_MS_FIELD);
+		final Long value = getRuntimeParameter(
+				RulesEngineConstants.EXECUTION_TIMEOUT_MS_FIELD);
 		return value == null || value <= 0
 				? RulesEngineConstants.DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE
 				: value;
@@ -332,7 +356,8 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	 * @return priority factor
 	 */
 	public double getPriorityFactor() {
-		final Double value = getRuntimeParameter(RulesEngineConstants.PRIORITY_FACTOR_FIELD);
+		final Double value = getRuntimeParameter(
+				RulesEngineConstants.PRIORITY_FACTOR_FIELD);
 		return value == null || value.isNaN() || value.isInfinite() || value < 0
 				? RulesEngineConstants.DEFAULT_PRIORITY_FACTOR_IN_COMPUTE
 				: value;
@@ -354,8 +379,11 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	 * @return thread pool size
 	 */
 	public int getThreads() {
-		final Integer value = getRuntimeParameter(RulesEngineConstants.THREAD_POOL_SIZE_FIELD);
-		return value == null || value < 1 ? RulesEngineConstants.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE : value;
+		final Integer value = getRuntimeParameter(
+				RulesEngineConstants.THREAD_POOL_SIZE_FIELD);
+		return value == null || value < 1
+				? RulesEngineConstants.DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE
+				: value;
 	}
 
 	public boolean isActive() {
@@ -363,32 +391,36 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	}
 
 	/**
-	 * Installs the {@link ComputeMonitoredEdge} for a <code>rules:execute</code> edge going out of this vertex.
-	 */
-	@Override
-	public void notifyAddTargetMonitoredEdge(WaldotEdge edge, WaldotVertex targetVertex, String label, String type,
-			Object[] propertyKeyValues) throws PluginBlockingException {
-		if (!RulesEngineConstants.EXECUTE_EDGE_LABEL.equals(type)) {
-			return;
-		}
-		if (!(targetVertex instanceof ComputableFireableAbstractOpcVertex)) {
-			throw new PluginBlockingException(
-					"The target of a " + type + " edge must be a rule vertex, but it is " + targetVertex);
-		}
-		servedFireableNodes.put(targetVertex.getNodeId(), (ComputableFireableAbstractOpcVertex) targetVertex);
-		edge.setMonitor(new ComputeMonitoredEdge(getNamespace(), edge, this, targetVertex));
-	}
-
-	/**
 	 * A compute vertex cannot be the target of a <code>rules:execute</code> edge.
 	 */
 	@Override
-	public void notifyAddSourceMonitoredEdge(WaldotEdge edge, WaldotVertex sourceVertex, String label, String type,
+	public void notifyAddSourceMonitoredEdge(WaldotEdge edge,
+			WaldotVertex sourceVertex, String label, String type,
 			Object[] propertyKeyValues) throws PluginBlockingException {
 		if (RulesEngineConstants.EXECUTE_EDGE_LABEL.equals(type)) {
 			throw new PluginBlockingException("A " + type
 					+ " edge must go from the compute vertex to the rule: a compute vertex cannot be its target");
 		}
+	}
+
+	/**
+	 * Installs the {@link ComputeMonitoredEdge} for a <code>rules:execute</code> edge going out of this vertex.
+	 */
+	@Override
+	public void notifyAddTargetMonitoredEdge(WaldotEdge edge,
+			WaldotVertex targetVertex, String label, String type,
+			Object[] propertyKeyValues) throws PluginBlockingException {
+		if (!RulesEngineConstants.EXECUTE_EDGE_LABEL.equals(type)) {
+			return;
+		}
+		if (!(targetVertex instanceof ComputableFireableAbstractOpcVertex)) {
+			throw new PluginBlockingException("The target of a " + type
+					+ " edge must be a rule vertex, but it is " + targetVertex);
+		}
+		servedFireableNodes.put(targetVertex.getNodeId(),
+				(ComputableFireableAbstractOpcVertex) targetVertex);
+		edge.setMonitor(new ComputeMonitoredEdge(getNamespace(), edge, this,
+				targetVertex));
 	}
 
 	/**
@@ -400,20 +432,25 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	 * @param queueSize new size of the queue of the rule
 	 * @param executorEdgePriority priority of the edge
 	 */
-	public void notifyQueueSizeChange(UaNode sourceNode, String queueSizeLabel, DataValue queueSize,
-			int executorEdgePriority) {
-		final Object size = queueSize == null || queueSize.getValue() == null ? null
+	public void notifyQueueSizeChange(UaNode sourceNode, String queueSizeLabel,
+			DataValue queueSize, int executorEdgePriority) {
+		final Object size = queueSize == null || queueSize.getValue() == null
+				? null
 				: queueSize.getValue().getValue();
-		if (!isActive() || !(size instanceof Number) || !(sourceNode instanceof ComputableFireableAbstractOpcVertex)) {
+		if (!isActive() || !(size instanceof Number)
+				|| !(sourceNode instanceof ComputableFireableAbstractOpcVertex)) {
 			return;
 		}
 		final int intSize = ((Number) size).intValue();
 		final NodeId ruleId = sourceNode.getNodeId();
 		synchronized (dirtyNodes) {
-			dirtyNodes.removeIf(dirtyNode -> dirtyNode.getNodeId().equals(ruleId));
+			dirtyNodes.removeIf(
+					dirtyNode -> dirtyNode.getNodeId().equals(ruleId));
 			if (intSize > 0) {
-				servedFireableNodes.put(ruleId, (ComputableFireableAbstractOpcVertex) sourceNode);
-				dirtyNodes.offer(new DirtyNode(ruleId, calcolateWeight(executorEdgePriority, intSize)));
+				servedFireableNodes.put(ruleId,
+						(ComputableFireableAbstractOpcVertex) sourceNode);
+				dirtyNodes.offer(new DirtyNode(ruleId,
+						calcolateWeight(executorEdgePriority, intSize)));
 			}
 		}
 		if (intSize > 0) {
@@ -425,7 +462,8 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	private void publishQueueSize() {
 		synchronized (publishLock) {
 			if (!isRemoved()) {
-				property(RulesEngineConstants.QUEUE_SIZE_LABEL, Long.valueOf(dirtyNodes.size()));
+				property(RulesEngineConstants.QUEUE_SIZE_LABEL,
+						Long.valueOf(dirtyNodes.size()));
 			}
 		}
 	}
@@ -436,13 +474,15 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	private void reapRunners() {
 		final long now = System.currentTimeMillis();
 		final long timeout = getExecutionTimeoutMs();
-		for (final Entry<Future<?>, FireableAction> running : runners.entrySet()) {
+		for (final Entry<Future<?>, FireableAction> running : runners
+				.entrySet()) {
 			final Future<?> future = running.getKey();
 			final FireableAction action = running.getValue();
 			if (future.isDone()) {
 				runners.remove(future);
 			} else if (action.getStartingTime() + timeout < now) {
-				logger.warn("Action started at {} is taking more than {} ms to execute. Cancelling...",
+				logger.warn(
+						"Action started at {} is taking more than {} ms to execute. Cancelling...",
 						action.getStartingTime(), timeout);
 				if (action.markTimedOut()) {
 					action.onTimeout();
@@ -454,7 +494,8 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 	}
 
 	private void submit(NodeId ruleId, RunnableEvent event) {
-		final FireableAction action = event.getAction(System.currentTimeMillis());
+		final FireableAction action = event
+				.getAction(System.currentTimeMillis());
 		final FutureTask<Void> task = new FutureTask<>(() -> {
 			try {
 				action.run();
@@ -462,7 +503,8 @@ public class ComputeVertex extends AbstractOpcVertex implements AutoCloseable, E
 				logger.error("Error executing action for node " + ruleId, t);
 			}
 		}, null);
-		// l'azione è registrata prima di partire: il conteggio delle azioni in corso non ha buchi
+		// l'azione è registrata prima di partire: il conteggio delle azioni in
+		// corso non ha buchi
 		runners.put(task, action);
 		executor.execute(task);
 	}

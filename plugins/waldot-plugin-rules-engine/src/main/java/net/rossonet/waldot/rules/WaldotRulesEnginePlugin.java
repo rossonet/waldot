@@ -1,6 +1,8 @@
 package net.rossonet.waldot.rules;
 
-import static net.rossonet.waldot.rules.RulesEngineConstants.*;
+import static net.rossonet.waldot.rules.RulesEngineConstants.COMPUTE_NODE_PARAMETER;
+import static net.rossonet.waldot.rules.RulesEngineConstants.EXECUTE_EDGE_LABEL;
+import static net.rossonet.waldot.rules.RulesEngineConstants.RULE_NODE_PARAMETER;
 
 import java.util.ArrayList;
 import java.util.List;

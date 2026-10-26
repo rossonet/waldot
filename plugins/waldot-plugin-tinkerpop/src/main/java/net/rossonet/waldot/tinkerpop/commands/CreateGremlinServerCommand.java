@@ -2,9 +2,9 @@ package net.rossonet.waldot.tinkerpop.commands;
 
 import java.util.List;
 
-import net.rossonet.waldot.tinkerpop.TinkerPopConstants;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.opc.AbstractCreateVertexCommand;
+import net.rossonet.waldot.tinkerpop.TinkerPopConstants;
 
 /**
  * OPC UA command that creates a Gremlin Server vertex (
@@ -17,11 +17,15 @@ public class CreateGremlinServerCommand extends AbstractCreateVertexCommand {
 	private static final String COMMAND_NAME = "create gremlin server";
 
 	public CreateGremlinServerCommand(final WaldotNamespace waldotNamespace) {
-		super(waldotNamespace, COMMAND_NAME, COMMAND_DESCRIPTION, TinkerPopConstants.BASE_CMD_DIRECTORY,
+		super(waldotNamespace, COMMAND_NAME, COMMAND_DESCRIPTION,
+				TinkerPopConstants.BASE_CMD_DIRECTORY,
 				TinkerPopConstants.GREMLIN_TYPE_LABEL, Language.ENGLISH,
-				List.of(VertexParameter.optional(TinkerPopConstants.PORT_FIELD, VariableNodeTypes.UInt16,
+				List.of(VertexParameter.optional(TinkerPopConstants.PORT_FIELD,
+						VariableNodeTypes.UInt16,
 						TinkerPopConstants.PORT_FIELD_DESCRIPTION),
-						VertexParameter.optional(TinkerPopConstants.BIND_HOST_FIELD, VariableNodeTypes.String,
+						VertexParameter.optional(
+								TinkerPopConstants.BIND_HOST_FIELD,
+								VariableNodeTypes.String,
 								TinkerPopConstants.BIND_HOST_FIELD_DESCRIPTION)));
 	}
 

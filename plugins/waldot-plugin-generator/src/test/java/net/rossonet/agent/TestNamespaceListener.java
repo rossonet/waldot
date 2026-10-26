@@ -58,13 +58,15 @@ public class TestNamespaceListener implements NamespaceListener {
 
 	@Override
 	public void onMonitoringModeChanged(List<MonitoredItem> monitoredItems) {
-		System.out.println("--LISTENER-- Monitoring mode changed: " + monitoredItems);
+		System.out.println(
+				"--LISTENER-- Monitoring mode changed: " + monitoredItems);
 		System.out.flush();
 	}
 
 	@Override
 	public void onNamespaceCreated(ManagedNamespaceWithLifecycle namespace) {
-		System.out.println("--LISTENER-- Namespace created: " + namespace.getNamespaceUri());
+		System.out.println("--LISTENER-- Namespace created: "
+				+ namespace.getNamespaceUri());
 		System.out.flush();
 	}
 

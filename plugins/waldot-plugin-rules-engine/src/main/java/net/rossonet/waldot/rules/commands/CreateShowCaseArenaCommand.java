@@ -24,14 +24,14 @@ public class CreateShowCaseArenaCommand extends AbstractShowCaseCommand {
 	public static final String COMBAT_COMPUTE_ID = "arena-combat";
 	public static final String DEFAULT_DELAY_LABEL = "delay-ms";
 	public static final long DEFAULT_DELAY_MS = 250;
+	private static final String DIR = BASE_DIRECTORY + "/arena";
 	public static final String ECONOMY_COMPUTE_ID = "arena-economy";
 	public static final String PLAYER_ID = "arena-player";
 	/** The existence of this vertex marks the scenario as already created. */
 	public static final String TOWER_ID = "arena-tower";
 	public static final String TURN_ID = "arena-turn";
-	public static final String WAVE_ID = "arena-wave";
 
-	private static final String DIR = BASE_DIRECTORY + "/arena";
+	public static final String WAVE_ID = "arena-wave";
 
 	public CreateShowCaseArenaCommand(final WaldotNamespace waldotNamespace) {
 		super(waldotNamespace, "create show case arena",
@@ -66,16 +66,14 @@ public class CreateShowCaseArenaCommand extends AbstractShowCaseCommand {
 		}
 
 		// game state (all numeric values are doubles)
-		final Vertex tower = vertex(TOWER_ID, null, "Tower",
-				DIR + "/state", "data", 0.0, "hp", 100.0, "kills", 0.0,
-				"spells", 0.0);
-		final Vertex wave = vertex(WAVE_ID, null, "Wave",
-				DIR + "/state", "data", 0.0, "difficulty", 1.0);
-		final Vertex player = vertex(PLAYER_ID, null, "Player",
-				DIR + "/state", "level", 1.0, "gold", 0.0, "score", 0.0,
-				"defeats", 0.0);
-		final Vertex turn = vertex(TURN_ID, null, "Turn",
-				DIR + "/state", "data", 0.0);
+		final Vertex tower = vertex(TOWER_ID, null, "Tower", DIR + "/state",
+				"data", 0.0, "hp", 100.0, "kills", 0.0, "spells", 0.0);
+		final Vertex wave = vertex(WAVE_ID, null, "Wave", DIR + "/state",
+				"data", 0.0, "difficulty", 1.0);
+		final Vertex player = vertex(PLAYER_ID, null, "Player", DIR + "/state",
+				"level", 1.0, "gold", 0.0, "score", 0.0, "defeats", 0.0);
+		final Vertex turn = vertex(TURN_ID, null, "Turn", DIR + "/state",
+				"data", 0.0);
 
 		// compute vertices
 		final Vertex combat = compute(COMBAT_COMPUTE_ID, "Combat compute",
@@ -97,16 +95,14 @@ public class CreateShowCaseArenaCommand extends AbstractShowCaseCommand {
 		final Vertex fireSpell = rule("arena-rule-fire-spell", "Fire spell",
 				DIR + "/rules",
 				val(TOWER_ID, "data") + " > 80.0 && " + waveData + " > 20.0",
-				set(TOWER_ID, "kills", kills + " + 1.0") + "; "
-						+ set(TOWER_ID, "spells",
-								val(TOWER_ID, "spells") + " + 1.0"),
+				set(TOWER_ID, "kills", kills + " + 1.0") + "; " + set(TOWER_ID,
+						"spells", val(TOWER_ID, "spells") + " + 1.0"),
 				300, 0);
 		final Vertex towerDamage = rule("arena-rule-tower-damage",
 				"Tower damage", DIR + "/rules",
 				waveData + " > 50.0 + 5.0 * " + level,
-				set(TOWER_ID, "hp",
-						"math.max(0.0, " + towerHp + " - 1.0 - " + difficulty
-								+ " / 2.0)"),
+				set(TOWER_ID, "hp", "math.max(0.0, " + towerHp + " - 1.0 - "
+						+ difficulty + " / 2.0)"),
 				200, 0);
 		final Vertex levelUp = rule("arena-rule-level-up", "Level up",
 				DIR + "/rules", kills + " > 0.0 && " + kills + " % 5.0 == 0.0",
@@ -124,10 +120,11 @@ public class CreateShowCaseArenaCommand extends AbstractShowCaseCommand {
 				0, 0);
 		final Vertex turnTick = rule("arena-rule-turn-tick", "Turn tick",
 				DIR + "/rules", val(TURN_ID, "data") + " % 10.0 == 0.0",
-				set(PLAYER_ID, "score", val(PLAYER_ID, "score") + " + 10.0 * "
-						+ level),
+				set(PLAYER_ID, "score",
+						val(PLAYER_ID, "score") + " + 10.0 * " + level),
 				0, 0);
-		// broken on purpose: the condition always fails, the 'errors' counter grows
+		// broken on purpose: the condition always fails, the 'errors' counter
+		// grows
 		final Vertex broken = rule("arena-rule-broken", "Broken rule (demo)",
 				DIR + "/rules", "1 / 0 > 0", "log.info('never executed')", 0,
 				0);
@@ -152,14 +149,12 @@ public class CreateShowCaseArenaCommand extends AbstractShowCaseCommand {
 		fire(turn, broken, "turn-breaks", "data", DIR + "/triggers");
 
 		// generators feed the game state
-		final Vertex waveGenerator = generator("arena-gen-wave",
-				"Enemy waves", DIR + "/generators", "random", 0, 100, delay);
-		final Vertex manaGenerator = generator("arena-gen-mana",
-				"Tower mana", DIR + "/generators", "sinusoidal", 0, 100,
-				delay);
-		final Vertex turnGenerator = generator("arena-gen-turn",
-				"Turn clock", DIR + "/generators", "incremental", 0, 1000000,
-				delay * 2);
+		final Vertex waveGenerator = generator("arena-gen-wave", "Enemy waves",
+				DIR + "/generators", "random", 0, 100, delay);
+		final Vertex manaGenerator = generator("arena-gen-mana", "Tower mana",
+				DIR + "/generators", "sinusoidal", 0, 100, delay);
+		final Vertex turnGenerator = generator("arena-gen-turn", "Turn clock",
+				DIR + "/generators", "incremental", 0, 1000000, delay * 2);
 		linkTo(waveGenerator, wave, "enemies-to-wave", "data",
 				DIR + "/generators");
 		linkTo(manaGenerator, tower, "mana-to-tower", "data",

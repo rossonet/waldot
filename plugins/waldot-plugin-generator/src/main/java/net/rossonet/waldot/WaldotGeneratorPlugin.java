@@ -102,14 +102,14 @@ public class WaldotGeneratorPlugin extends AbstractPluginListener {
 	/** OPC-UA display name for data generator type */
 	private static final String WALDOT_DATA_GENERATOR_DISPLAY_NAME = "WaldOT Data Generator";
 
+	/** OPC-UA object type name */
+	private static final String WALDOT_DATA_GENERATOR_OBJECT_TYPE = "WaldOTDataGeneratorObjectType";
+
 	/** OPC-UA display name for the event generator type */
 	private static final String WALDOT_EVENT_GENERATOR_DISPLAY_NAME = "WaldOT Event Generator";
 
 	/** OPC-UA object type name of the event generator */
 	private static final String WALDOT_EVENT_GENERATOR_OBJECT_TYPE = "WaldOTEventGeneratorObjectType";
-
-	/** OPC-UA object type name */
-	private static final String WALDOT_DATA_GENERATOR_OBJECT_TYPE = "WaldOTDataGeneratorObjectType";
 
 	// Nodo tipo OPC-UA per i generatori
 	private UaObjectTypeNode dataGeneratorTypeNode;

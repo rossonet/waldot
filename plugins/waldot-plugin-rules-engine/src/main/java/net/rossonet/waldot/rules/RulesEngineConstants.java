@@ -32,7 +32,8 @@ public final class RulesEngineConstants {
 	public static final String DEFAULT_CONDITION_VALUE = "true";
 	public static final int DEFAULT_DELAY_BEFORE_EVALUATION = 0;
 	public static final int DEFAULT_DELAY_BEFORE_EXECUTE = 0;
-	public static final long DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE = 120000; // 2 minuti
+	public static final long DEFAULT_EXECUTION_TIMEOUT_MS_IN_COMPUTE = 120000; // 2
+																				// minuti
 	public static final double DEFAULT_PRIORITY_FACTOR_IN_COMPUTE = 100.0;
 	public static final int DEFAULT_PRIORITY_VALUE = 100;
 	public static final int DEFAULT_THREAD_POOL_SIZE_IN_COMPUTE = 1;
