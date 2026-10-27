@@ -710,10 +710,10 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public OpcGraphComputerView createGraphComputerView(final WaldotGraph graph,
 			final GraphFilter graphFilter,
-			final Set<VertexComputeKey> VertexComputeKey) {
+			final Set<VertexComputeKey> vertexComputeKeys) {
 		logger.info(
 				"createGraphComputerView: graph={}, graphFilter={}, VertexComputeKey={}",
-				graph, graphFilter, VertexComputeKey);
+				graph, graphFilter, vertexComputeKeys);
 		// TODO implementare anche la funzionalità GraphComputerView
 		throw new UnsupportedOperationException("Not implemented yet");
 	}

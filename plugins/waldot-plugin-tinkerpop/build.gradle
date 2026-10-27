@@ -12,11 +12,6 @@ description = "WaldOT plugin TinkerPop legacy connector"
 group = 'net.rossonet.waldot'
 version = "${rootProject.version}"
 
-ext {
-    sourceCompatibility = JavaVersion.VERSION_26
-    targetCompatibility = JavaVersion.VERSION_26
-}
-
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }

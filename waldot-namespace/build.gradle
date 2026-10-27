@@ -7,11 +7,6 @@ description = "WaldOT OpcUA namespace"
 group = 'net.rossonet.waldot'
 version = "${rootProject.version}"
 
-ext {
-    sourceCompatibility = JavaVersion.VERSION_26
-    targetCompatibility = JavaVersion.VERSION_26
-}
-
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
@@ -78,6 +73,8 @@ java {
 
 test {
     useJUnitPlatform()
+    // La suite completa (server Milo embedded) supera l'heap di default -> OOM nel test executor
+    maxHeapSize = "2g"
     //applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
 }
 

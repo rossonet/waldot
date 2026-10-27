@@ -9,8 +9,6 @@ group = 'net.rossonet.waldot'
 version = '0.6.2'
 
 ext {
-    sourceCompatibility = JavaVersion.VERSION_26
-    targetCompatibility = JavaVersion.VERSION_26
     debianName = "${project.name}"
     packageName = "${project.name}"
 }
@@ -18,6 +16,15 @@ ext {
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
+}
+
+// Java: versione centralizzata per tutti i progetti (non usare "ext { sourceCompatibility = ... }",
+// crea solo proprieta' extra ignorate dal plugin Java)
+allprojects {
+    plugins.withType(JavaPlugin).configureEach {
+        // convention: i moduli possono sovrascriverla con un proprio toolchain
+        java.toolchain.languageVersion.convention(JavaLanguageVersion.of(25))
+    }
 }
 
 task eclipseClosedDependencies {}

@@ -52,6 +52,7 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private MonitoredEdge monitoredEdge;
+	private final Object monitorLock = new Object();
 
 	private final Set<WaldotProperty<?>> propertiesToDelete = new HashSet<>();
 
@@ -136,9 +137,6 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	@Override
 	public Set<String> keys() {
-		if (null == getProperties()) {
-			return Collections.emptySet();
-		}
 		if (null == getProperties()) {
 			return Collections.emptySet();
 		}
@@ -254,9 +252,11 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	@Override
 	public void removeRelatedOpcUaNodes() {
-		if (monitoredEdge != null) {
-			monitoredEdge.remove();
-			monitoredEdge = null;
+		synchronized (monitorLock) {
+			if (monitoredEdge != null) {
+				monitoredEdge.remove();
+				monitoredEdge = null;
+			}
 		}
 		for (final WaldotProperty<?> property : propertiesToDelete) {
 			property.remove();
@@ -269,11 +269,17 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	@Override
 	public void setMonitor(final MonitoredEdge monitoredEdge) {
-		if (this.monitoredEdge != null) {
-			this.monitoredEdge.remove();
+		// the replacement of the monitor must be atomic: two concurrent calls could
+		// otherwise both initialize their monitor and leak the one not removed
+		synchronized (monitorLock) {
+			if (this.monitoredEdge != null) {
+				this.monitoredEdge.remove();
+			}
+			this.monitoredEdge = monitoredEdge;
+			if (this.monitoredEdge != null) {
+				this.monitoredEdge.initialize();
+			}
 		}
-		this.monitoredEdge = monitoredEdge;
-		this.monitoredEdge.initialize();
 	}
 
 	@Override

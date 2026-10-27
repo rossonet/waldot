@@ -43,8 +43,9 @@ final class RawOpcUaClient implements AutoCloseable {
 		} catch (final UaException e) {
 			try {
 				client.disconnect();
-			} catch (final Exception ignored) {
-				// nothing to do
+			} catch (final Exception disconnectError) {
+				// keep the connection error as the primary failure
+				e.addSuppressed(disconnectError);
 			}
 			throw e;
 		}

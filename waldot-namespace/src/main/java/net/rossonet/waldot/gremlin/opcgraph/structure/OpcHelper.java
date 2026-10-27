@@ -7,8 +7,11 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Property;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.structure.VertexProperty;
 import org.apache.tinkerpop.gremlin.util.iterator.IteratorUtils;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
@@ -29,30 +32,24 @@ public final class OpcHelper {
 				v -> IteratorUtils.cast(v.properties()));
 
 		Iterator it;
-		if (!type.isPresent()) {
-			it = IteratorUtils.concat(vertices.get(), edges.get(), vertexProperties.get());
+		final Class<E> requested = type.orElse(null);
+		if (requested != null && Edge.class.isAssignableFrom(requested)) {
+			it = edges.get();
+		} else if (requested != null && Vertex.class.isAssignableFrom(requested)) {
+			it = vertices.get();
+		} else if (requested != null && VertexProperty.class.isAssignableFrom(requested)) {
+			it = vertexProperties.get();
 		} else {
-			switch (type.get().getSimpleName()) {
-			case "Edge":
-				it = edges.get();
-				break;
-			case "Vertex":
-				it = vertices.get();
-				break;
-			case "VertexProperty":
-				it = vertexProperties.get();
-				break;
-			default:
-				it = IteratorUtils.concat(vertices.get(), edges.get(), vertexProperties.get());
-			}
+			it = IteratorUtils.concat(vertices.get(), edges.get(), vertexProperties.get());
 		}
 
 		final Pattern pattern = Pattern.compile(regex);
 
 		// get properties
 		it = IteratorUtils.<Element, Property>flatMap(it, e -> IteratorUtils.cast(e.properties()));
-		// filter by regex
-		it = IteratorUtils.<Property>filter(it, p -> pattern.matcher(p.value().toString()).matches());
+		// filter by regex (properties without a value are skipped)
+		it = IteratorUtils.<Property>filter(it,
+				p -> p.isPresent() && p.value() != null && pattern.matcher(p.value().toString()).matches());
 
 		return it;
 	}

@@ -1,8 +1,8 @@
 package net.rossonet.waldot.gremlin.opcgraph.strategies.client;
 
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.milo.opcua.sdk.server.Session;
 import org.eclipse.milo.opcua.sdk.server.identity.Identity;
@@ -10,6 +10,8 @@ import org.eclipse.milo.opcua.sdk.server.identity.Identity.AnonymousIdentity;
 import org.eclipse.milo.opcua.sdk.server.identity.Identity.UsernameIdentity;
 import org.eclipse.milo.opcua.sdk.server.identity.Identity.X509UserIdentity;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
+import org.eclipse.milo.opcua.stack.core.StatusCodes;
+import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.structured.AnonymousIdentityToken;
@@ -37,14 +39,14 @@ public class BaseClientManagementStrategy implements ClientManagementStrategy {
 	}
 
 	protected ClientRegisterAnonymousValidator agentAnonymousValidator;
-	private UaFolderNode agentFolder;
 	protected ClientRegisterUsernameIdentityValidator agentIdentityValidator;
 	protected ClientRegisterX509IdentityValidator agentX509IdentityValidator;
 	private UaFolderNode assetRootNode;
 	private UaFolderNode clientFolder;
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
-	private final Map<NodeId, SessionData> sessions = new HashMap<>();
+	// accessed concurrently by the OPC UA session activation threads
+	private final Map<NodeId, SessionData> sessions = new ConcurrentHashMap<>();
 
 	private WaldotNamespace waldotNamespace;
 
@@ -58,6 +60,23 @@ public class BaseClientManagementStrategy implements ClientManagementStrategy {
 
 	}
 
+	/**
+	 * Converts the session identity to the expected type. A {@code null} identity
+	 * is returned as is (previous behaviour); an identity of another type is
+	 * rejected instead of failing with a {@link ClassCastException}.
+	 */
+	static <T extends Identity> T castIdentity(final Identity identity, final Class<T> expected)
+			throws UaException {
+		if (identity == null) {
+			return null;
+		}
+		if (expected.isInstance(identity)) {
+			return expected.cast(identity);
+		}
+		throw new UaException(StatusCodes.Bad_IdentityTokenRejected, "session identity is "
+				+ identity.getClass().getSimpleName() + ", expected " + expected.getSimpleName());
+	}
+
 	@Override
 	public void close() throws Exception {
 		// capire cosa chiudere
@@ -67,7 +86,6 @@ public class BaseClientManagementStrategy implements ClientManagementStrategy {
 	@Override
 	public void generateAssetFolders(final UaFolderNode assetRootNode) {
 		this.assetRootNode = assetRootNode;
-		generateClientFolder();
 		generateClientFolder();
 
 	}
@@ -83,7 +101,7 @@ public class BaseClientManagementStrategy implements ClientManagementStrategy {
 
 	@Override
 	public UaFolderNode getAssetClientsFolderNode() {
-		return agentFolder;
+		return clientFolder;
 	}
 
 	private Identity getSessionIdentity(final Session session) {
@@ -107,36 +125,36 @@ public class BaseClientManagementStrategy implements ClientManagementStrategy {
 
 	@Override
 	public AnonymousIdentity newAnonymousClientSession(Session session, AnonymousIdentityToken token,
-			UserTokenPolicy tokenPolicy, SignatureData tokenSignature) {
+			UserTokenPolicy tokenPolicy, SignatureData tokenSignature) throws UaException {
 		// TODO implementare l'autenticazione anonima
 		registerSessionIfNeeded(session);
-		return (AnonymousIdentity) getSessionIdentity(session);
+		return castIdentity(getSessionIdentity(session), AnonymousIdentity.class);
 	}
 
 	@Override
 	public UsernameIdentity newUsernameIdentityClientSession(Session session, UserNameIdentityToken token,
-			UserTokenPolicy tokenPolicy, SignatureData tokenSignature) {
+			UserTokenPolicy tokenPolicy, SignatureData tokenSignature) throws UaException {
 		// TODO implementare l'autenticazione con username e password
 		registerSessionIfNeeded(session);
-		return (UsernameIdentity) getSessionIdentity(session);
+		return castIdentity(getSessionIdentity(session), UsernameIdentity.class);
 	}
 
 	@Override
-	public X509UserIdentity newX509IdentityClientSession(Session session, X509Certificate identityCertificate) {
+	public X509UserIdentity newX509IdentityClientSession(Session session, X509Certificate identityCertificate)
+			throws UaException {
 		// TODO implementare l'autenticazione con certificato X509
 		registerSessionIfNeeded(session);
-		return (X509UserIdentity) getSessionIdentity(session);
+		return castIdentity(getSessionIdentity(session), X509UserIdentity.class);
 	}
 
 	private void registerSessionIfNeeded(final Session session) {
-		if (sessions.containsKey(session.getSessionId())) {
-			logger.debug("Session {} already registered", session.getSessionId());
-			return;
-		} else {
+		// putIfAbsent is atomic: two concurrent activations of the same session
+		// register it only once
+		if (sessions.putIfAbsent(session.getSessionId(), new SessionData(session)) == null) {
 			logger.info("Registering new session: {}", session.getSessionId());
-			sessions.put(session.getSessionId(), new SessionData(session));
+		} else {
+			logger.debug("Session {} already registered", session.getSessionId());
 		}
-
 	}
 
 }

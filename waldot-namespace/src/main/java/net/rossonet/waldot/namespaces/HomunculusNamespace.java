@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.configuration2.Configuration;
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
@@ -122,6 +123,24 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 			final BootstrapStrategy bootstrapProcedureStrategy,
 			final ClientManagementStrategy agentManagementStrategy,
 			final String bootstrapUrl) {
+		this(server, opcMappingStrategy, historyStrategy, consoleStrategy, configuration,
+				bootstrapProcedureStrategy, agentManagementStrategy, bootstrapUrl, null);
+	}
+
+	/**
+	 * @param gremlinConfiguration configuration of the Gremlin graph (e.g.
+	 *                             {@code gremlin.opcgraph.defaultVertexPropertyCardinality});
+	 *                             {@code null} for the defaults
+	 */
+	public HomunculusNamespace(final WaldotOpcUaServer server,
+			final MiloStrategy opcMappingStrategy,
+			HistoryStrategy historyStrategy,
+			final ConsoleStrategy consoleStrategy,
+			final WaldotConfiguration configuration,
+			final BootstrapStrategy bootstrapProcedureStrategy,
+			final ClientManagementStrategy agentManagementStrategy,
+			final String bootstrapUrl,
+			final Configuration gremlinConfiguration) {
 		super(server.getServer(), configuration.getManagerNamespaceUri());
 		this.waldotOpcUaServer = server;
 		this.opcMappingStrategy = opcMappingStrategy;
@@ -139,7 +158,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		// getLifecycleManager().addLifecycle(dictionaryManager);
 		getLifecycleManager().addLifecycle(subscriptionModel);
 		getLifecycleManager().addStartupTask(this::runBootstrapProcedure);
-		gremlin = OpcGraph.open();
+		gremlin = gremlinConfiguration == null ? OpcGraph.open() : OpcGraph.open(gremlinConfiguration);
 		gremlin.setNamespace(this);
 		agentManagementStrategy.initialize(this);
 		opcMappingStrategy.initialize(this);
@@ -760,7 +779,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		builder.append(getVerticesCount());
 		builder.append(", WaldotEdgesCount=");
 		builder.append(getEdgesCount());
-		builder.append(", ");
 		builder.append("]");
 		return builder.toString();
 	}

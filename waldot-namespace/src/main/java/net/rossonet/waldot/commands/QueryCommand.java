@@ -55,7 +55,7 @@ public class QueryCommand extends AbstractOpcCommand {
 		final String[] output = new String[2];
 		try {
 			final Object runExpression = getNamespace()
-					.runExpression(inputValues[0]);
+					.runExpression(CommandArguments.requireFirst(inputValues, "command"));
 			if (runExpression != null) {
 				output[0] = runExpression.toString();
 				output[1] = "";
@@ -65,7 +65,7 @@ public class QueryCommand extends AbstractOpcCommand {
 			}
 		} catch (final Exception e) {
 			output[0] = "";
-			output[1] = e.getMessage();
+			output[1] = CommandArguments.errorMessage(e);
 		}
 		return output;
 	}

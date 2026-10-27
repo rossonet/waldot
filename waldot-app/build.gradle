@@ -19,8 +19,6 @@ group = 'net.rossonet.waldot'
 version = "${rootProject.version}"
 
 ext {
-    sourceCompatibility = JavaVersion.VERSION_26
-    targetCompatibility = JavaVersion.VERSION_26
     mainClassName = "net.rossonet.agent.MainAgent"
     mainPicocliCommandClass = "net.rossonet.agent.WaldotRunner"
     debianName = "${project.name}"

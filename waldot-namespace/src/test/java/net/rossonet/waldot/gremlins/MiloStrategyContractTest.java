@@ -142,6 +142,8 @@ public class MiloStrategyContractTest {
 			}
 		} finally {
 			pool.shutdownNow();
+			// wait for the worker threads before the graph is closed by the test teardown
+			pool.awaitTermination(30, TimeUnit.SECONDS);
 		}
 		for (int t = 0; t < threads; t++) {
 			for (int k = 0; k < keysPerThread; k++) {

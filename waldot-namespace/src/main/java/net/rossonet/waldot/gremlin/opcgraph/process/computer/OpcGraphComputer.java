@@ -58,7 +58,7 @@ public final class OpcGraphComputer implements GraphComputer {
 		TraversalStrategies.GlobalCache.registerStrategies(OpcGraphComputer.class, TraversalStrategies.GlobalCache
 				.getStrategies(GraphComputer.class).clone().removeStrategies(GraphFilterStrategy.class));
 	}
-	private final ThreadFactory _threadFactoryBoss = new BasicThreadFactory.Builder()
+	private final ThreadFactory threadFactoryBoss = new BasicThreadFactory.Builder()
 			.namingPattern(OpcGraphComputer.class.getSimpleName() + "-boss").build();
 
 	/**
@@ -66,7 +66,7 @@ public final class OpcGraphComputer implements GraphComputer {
 	 * {@link GraphComputer} is only used once for a {@link VertexProgram} a single
 	 * threaded executor is sufficient.
 	 */
-	private final ExecutorService computerService = Executors.newSingleThreadExecutor(_threadFactoryBoss);
+	private final ExecutorService computerService = Executors.newSingleThreadExecutor(threadFactoryBoss);
 	private boolean executed = false;
 	private final AbstractOpcGraph graph;
 	private final GraphFilter graphFilter = new GraphFilter();
@@ -201,6 +201,9 @@ public final class OpcGraphComputer implements GraphComputer {
 			final WaldotGraphComputerView view = graph.getWaldotNamespace().createGraphComputerView(this.graph,
 					this.graphFilter,
 					null != this.vertexProgram ? this.vertexProgram.getVertexComputeKeys() : Collections.emptySet());
+			// closed in the finally block below (closeNow() on errors): try-with-resources
+			// is not used because the pool must be reachable from the catch blocks
+			@SuppressWarnings("resource")
 			final OpcWorkerPool workers = new OpcWorkerPool(this.graph, this.memory, this.workers);
 			try {
 				if (null != this.vertexProgram) {

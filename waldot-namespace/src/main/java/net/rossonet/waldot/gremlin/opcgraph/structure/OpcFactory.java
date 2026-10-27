@@ -124,9 +124,10 @@ public final class OpcFactory {
 	 */
 	public static WaldotGraph createTheCrew() throws InterruptedException, ExecutionException {
 		final Configuration conf = new BaseConfiguration();
-		final WaldotGraph g = getOpcGraph(conf);
+		// the configuration is read when the graph is created: set it before
 		conf.setProperty(OpcGraph.GREMLIN_OPCGRAPH_DEFAULT_VERTEX_PROPERTY_CARDINALITY,
 				VertexProperty.Cardinality.list.name());
+		final WaldotGraph g = getOpcGraph(conf);
 		generateTheCrew(g);
 		return g;
 	}
@@ -255,16 +256,29 @@ public final class OpcFactory {
 	/** System property overriding the bootstrap file used by {@link #getOpcGraph()}. */
 	public static final String BOOT_FILE_PROPERTY = "waldot.boot.file";
 
-	public static WaldotGraph getOpcGraph() throws InterruptedException, ExecutionException {
-		final String bootFile = System.getProperty(BOOT_FILE_PROPERTY);
-		final String bootUrl = bootFile == null || bootFile.isBlank() ? "file:///tmp/boot.conf"
-				: java.nio.file.Path.of(bootFile).toUri().toString();
-		return getOpcGraph(bootUrl, new LoggerHistoryStrategy());
-	};
+	/**
+	 * Default bootstrap file of {@link #getOpcGraph()} (embedded/test usage; the
+	 * server runner uses file:///waldot/boot.conf).
+	 */
+	public static final String DEFAULT_EMBEDDED_BOOT_URL = "file:///tmp/boot.conf";
 
-	private static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {
-		// TODO: evaluate how to wire this method to the provided configuration.
-		return getOpcGraph();
+	private static String embeddedBootUrl() {
+		final String bootFile = System.getProperty(BOOT_FILE_PROPERTY);
+		return bootFile == null || bootFile.isBlank() ? DEFAULT_EMBEDDED_BOOT_URL
+				: java.nio.file.Path.of(bootFile).toUri().toString();
+	}
+
+	public static WaldotGraph getOpcGraph() throws InterruptedException, ExecutionException {
+		return getOpcGraph(embeddedBootUrl(), new LoggerHistoryStrategy());
+	}
+
+	/**
+	 * Creates an embedded graph using the given Gremlin configuration (e.g.
+	 * {@link OpcGraph#GREMLIN_OPCGRAPH_DEFAULT_VERTEX_PROPERTY_CARDINALITY}).
+	 */
+	public static WaldotGraph getOpcGraph(final Configuration conf) throws InterruptedException, ExecutionException {
+		return getOpcGraph(embeddedBootUrl(), new LoggerHistoryStrategy(), createMiloStrategy(),
+				DefaultHomunculusConfiguration.getDefault(), conf);
 	}
 
 	/** System property that selects the Milo strategy: optimized (default) or base. */
@@ -298,6 +312,16 @@ public final class OpcFactory {
 	public static WaldotGraph getOpcGraph(String bootStrapUrl, HistoryStrategy historyStrategy,
 			MiloStrategy miloStrategy, WaldotConfiguration configuration)
 			throws InterruptedException, ExecutionException {
+		return getOpcGraph(bootStrapUrl, historyStrategy, miloStrategy, configuration, null);
+	}
+
+	/**
+	 * @param gremlinConfiguration configuration of the Gremlin graph, {@code null}
+	 *                             for the defaults
+	 */
+	public static WaldotGraph getOpcGraph(String bootStrapUrl, HistoryStrategy historyStrategy,
+			MiloStrategy miloStrategy, WaldotConfiguration configuration, Configuration gremlinConfiguration)
+			throws InterruptedException, ExecutionException {
 		final OpcConfiguration serverConfiguration = DefaultOpcUaConfiguration.getDefault();
 		final WaldotOpcUaServer waldot = new WaldotOpcUaServer(configuration, serverConfiguration,
 				new DefaultAnonymousValidator(configuration), new DefaultIdentityValidator(configuration),
@@ -318,7 +342,7 @@ public final class OpcFactory {
 		waldot.setShutdownHook(shutdownHook);
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, miloStrategy,
 				historyStrategy, new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
-				new BaseClientManagementStrategy(), bootStrapUrl);
+				new BaseClientManagementStrategy(), bootStrapUrl, gremlinConfiguration);
 		waldot.startup(namespace).get();
 		logger.info("Waldot OPC-UA Server started");
 		return waldot.getGremlinGraph();

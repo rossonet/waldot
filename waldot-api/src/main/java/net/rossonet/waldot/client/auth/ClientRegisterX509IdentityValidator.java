@@ -4,6 +4,7 @@ import java.security.cert.X509Certificate;
 
 import org.eclipse.milo.opcua.sdk.server.Session;
 import org.eclipse.milo.opcua.sdk.server.identity.Identity.X509UserIdentity;
+import org.eclipse.milo.opcua.stack.core.UaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ public class ClientRegisterX509IdentityValidator extends WaldotX509IdentityValid
 	}
 
 	protected X509UserIdentity authenticateIdentityCertificate(final Session session,
-			final X509Certificate identityCertificate) {
+			final X509Certificate identityCertificate) throws UaException {
 		final String sessionDataForLogging = ClientAuthenticator.generateSessionDataForLogging(session);
 		logger.info("\n *** NEW AGENT UPDATE CERTIFICATE REQUEST\n{}", sessionDataForLogging);
 		return clientManagementStrategy.newX509IdentityClientSession(session, identityCertificate);

@@ -55,7 +55,7 @@ public class DeleteDirectory extends AbstractOpcCommand {
 		final String[] output = new String[2];
 		try {
 			final Object runExpression = getNamespace()
-					.deleteDirectory(inputValues[0]);
+					.deleteDirectory(CommandArguments.requireFirst(inputValues, "directory"));
 			if (runExpression != null) {
 				output[0] = runExpression.toString();
 				output[1] = "";
@@ -65,7 +65,7 @@ public class DeleteDirectory extends AbstractOpcCommand {
 			}
 		} catch (final Exception e) {
 			output[0] = "";
-			output[1] = e.getMessage();
+			output[1] = CommandArguments.errorMessage(e);
 		}
 		return output;
 	}

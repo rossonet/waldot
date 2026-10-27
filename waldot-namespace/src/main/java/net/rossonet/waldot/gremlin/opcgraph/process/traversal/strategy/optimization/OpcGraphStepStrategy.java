@@ -47,6 +47,8 @@ public final class OpcGraphStepStrategy extends AbstractTraversalStrategy<Traver
             return;
 
         for (final GraphStep originalGraphStep : TraversalHelper.getStepsOfClass(GraphStep.class, traversal)) {
+            // the step is owned (and closed) by the traversal it is inserted into
+            @SuppressWarnings("resource")
             final OpcGraphStep<?, ?> tinkerGraphStep = new OpcGraphStep<>(originalGraphStep);
             TraversalHelper.replaceStep(originalGraphStep, tinkerGraphStep, traversal);
             Step<?, ?> currentStep = tinkerGraphStep.getNextStep();

@@ -17,6 +17,13 @@ import net.rossonet.waldot.utils.LogHelper;
 @WaldotBootstrapStrategy
 public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 
+	/**
+	 * Variable assignment at line start, optionally declared with {@code var}
+	 * (e.g. {@code x = 1} or {@code var x = 1}); {@code ==} is excluded.
+	 */
+	private static final java.util.regex.Pattern ASSIGNMENT_PATTERN = java.util.regex.Pattern
+			.compile("^\\s*(?:var\\s+)?\\w+\\s*=(?!=)", java.util.regex.Pattern.MULTILINE);
+
 	private AgentStatus agentStatus = AgentStatus.INIT;
 	private Logger logger;
 	private WaldotNamespace waldotNamespace;
@@ -49,9 +56,13 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 	 * @param content The full configuration file content
 	 * @return true if script mode should be used, false for line-by-line mode
 	 */
-	private boolean detectScriptMode(final String content) {
-		// Remove '#' comments for detection (legacy line-mode syntax).
-		final String cleanContent = content.replaceAll("#[^\n]*\n", "\n");
+	static boolean detectScriptMode(final String content) {
+		if (content == null || content.isBlank()) {
+			return false;
+		}
+		// Remove '#' comments for detection (legacy line-mode syntax), also on the
+		// last line without a trailing newline.
+		final String cleanContent = content.replaceAll("(?m)^\\s*#[^\n]*$", "");
 
 		// Script mode indicators:
 
@@ -66,9 +77,8 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 		}
 
 		// 3. Variable assignments (excluding object property syntax).
-		// Look for patterns such as "varName = " at line start.
-		if (java.util.regex.Pattern.compile("^\\s*\\w+\\s*=(?!=)", java.util.regex.Pattern.MULTILINE)
-				.matcher(cleanContent).find()) {
+		// Look for patterns such as "varName = " or "var varName = " at line start.
+		if (ASSIGNMENT_PATTERN.matcher(cleanContent).find()) {
 			return true;
 		}
 

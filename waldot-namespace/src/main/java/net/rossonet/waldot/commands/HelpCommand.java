@@ -18,8 +18,8 @@ import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
 
 public class HelpCommand extends AbstractOpcCommand {
-	private static final String _TXT = ".txt";
-	private static final String INDEX_TXT = "index" + _TXT;
+	private static final String TXT_EXTENSION = ".txt";
+	private static final String INDEX_TXT = "index" + TXT_EXTENSION;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public HelpCommand(final WaldotNamespace waldotNamespace) {
@@ -52,7 +52,7 @@ public class HelpCommand extends AbstractOpcCommand {
 	public String[] runCommand(final InvocationContext invocationContext, final String[] inputValues) {
 		Path target;
 		if (inputValues != null && inputValues.length > 0 && inputValues[0] != null && !inputValues[0].isEmpty()) {
-			target = Path.of(getNamespace().getConfiguration().getHelpDirectory(), inputValues[0] + _TXT);
+			target = Path.of(getNamespace().getConfiguration().getHelpDirectory(), inputValues[0] + TXT_EXTENSION);
 		} else {
 			target = Path.of(getNamespace().getConfiguration().getHelpDirectory(), INDEX_TXT);
 		}

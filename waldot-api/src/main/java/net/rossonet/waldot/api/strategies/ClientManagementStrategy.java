@@ -7,6 +7,7 @@ import org.eclipse.milo.opcua.sdk.server.identity.Identity.AnonymousIdentity;
 import org.eclipse.milo.opcua.sdk.server.identity.Identity.UsernameIdentity;
 import org.eclipse.milo.opcua.sdk.server.identity.Identity.X509UserIdentity;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
+import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.structured.AnonymousIdentityToken;
 import org.eclipse.milo.opcua.stack.core.types.structured.SignatureData;
 import org.eclipse.milo.opcua.stack.core.types.structured.UserNameIdentityToken;
@@ -107,6 +108,7 @@ public interface ClientManagementStrategy extends AutoCloseable {
 	 * @param tokenPolicy the token policy
 	 * @param tokenSignature the token signature
 	 * @return the AnonymousIdentity for the session
+	 * @throws UaException if the identity is rejected
 	 * @see Session
 	 * @see AnonymousIdentityToken
 	 * @see UserTokenPolicy
@@ -114,7 +116,7 @@ public interface ClientManagementStrategy extends AutoCloseable {
 	 * @see AnonymousIdentity
 	 */
 	AnonymousIdentity newAnonymousClientSession(Session session, AnonymousIdentityToken token,
-			UserTokenPolicy tokenPolicy, SignatureData tokenSignature);
+			UserTokenPolicy tokenPolicy, SignatureData tokenSignature) throws UaException;
 
 	/**
 	 * Creates a new username/password client identity.
@@ -124,6 +126,7 @@ public interface ClientManagementStrategy extends AutoCloseable {
 	 * @param tokenPolicy the token policy
 	 * @param tokenSignature the token signature
 	 * @return the UsernameIdentity for the session
+	 * @throws UaException if the identity is rejected
 	 * @see Session
 	 * @see UserNameIdentityToken
 	 * @see UserTokenPolicy
@@ -131,7 +134,7 @@ public interface ClientManagementStrategy extends AutoCloseable {
 	 * @see UsernameIdentity
 	 */
 	UsernameIdentity newUsernameIdentityClientSession(Session session, UserNameIdentityToken token,
-			UserTokenPolicy tokenPolicy, SignatureData tokenSignature);
+			UserTokenPolicy tokenPolicy, SignatureData tokenSignature) throws UaException;
 
 	/**
 	 * Creates a new X.509 certificate client identity.
@@ -139,10 +142,12 @@ public interface ClientManagementStrategy extends AutoCloseable {
 	 * @param session the OPC UA session
 	 * @param identityCertificate the client certificate
 	 * @return the X509UserIdentity for the session
+	 * @throws UaException if the identity is rejected
 	 * @see Session
 	 * @see X509Certificate
 	 * @see X509UserIdentity
 	 */
-	X509UserIdentity newX509IdentityClientSession(Session session, X509Certificate identityCertificate);
+	X509UserIdentity newX509IdentityClientSession(Session session, X509Certificate identityCertificate)
+			throws UaException;
 
 }

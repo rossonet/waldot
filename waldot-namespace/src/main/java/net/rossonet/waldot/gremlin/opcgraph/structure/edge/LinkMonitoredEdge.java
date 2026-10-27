@@ -26,11 +26,11 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 
 	@Override
 	protected void createObserverNeeded() {
-		if (direction.equals(LinkDirection.TO)) {
+		if (direction == LinkDirection.TO) {
 			getSourceVertex().addEventObserver(this);
 			getSourceVertex().addPropertyObserver(this);
 		}
-		if (direction.equals(LinkDirection.FROM)) {
+		if (direction == LinkDirection.FROM) {
 			getTargetVertex().addEventObserver(this);
 			getTargetVertex().addPropertyObserver(this);
 		}
@@ -55,9 +55,9 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 	@Override
 	protected Object getLastValue(final String propertyLabel) {
 		final Property<Object> last;
-		if (direction.equals(LinkDirection.TO)) {
+		if (direction == LinkDirection.TO) {
 			last = getTargetVertex().property(getDestinationLabel(propertyLabel));
-		} else if (direction.equals(LinkDirection.FROM)) {
+		} else if (direction == LinkDirection.FROM) {
 			last = getSourceVertex().property(getDestinationLabel(propertyLabel));
 		} else {
 			logger.error("Invalid direction for LinkMonitoredEdge: {}", direction);
@@ -71,14 +71,14 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 		if (isActive() && isPropertyNotificationActive() && isMonitoredProperty(propertyLabel)) {
 		final String destinationLabel = getDestinationLabel(propertyLabel);
 			if (isDeadBandExceeded(propertyLabel, value)) {
-				if (direction.equals(LinkDirection.TO)) {
+				if (direction == LinkDirection.TO) {
 					if (isDelayProperty()) {
 						sendWithDelay(getTargetVertex(), destinationLabel, value.getValue().getValue());
 					} else {
 						getTargetVertex().property(destinationLabel, value.getValue().getValue());
 					}
 				}
-				if (direction.equals(LinkDirection.FROM)) {
+				if (direction == LinkDirection.FROM) {
 					if (isDelayProperty()) {
 						sendWithDelay(getSourceVertex(), destinationLabel, value.getValue().getValue());
 					} else {
