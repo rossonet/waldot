@@ -35,7 +35,9 @@ import net.rossonet.waldot.test.WaldotTestEnvironment;
  */
 class EdgeCommandsRegressionTest {
 
-	private static final NodeId EDGES_FOLDER = new NodeId(2, "c:manage/edges");
+	// command folders are addressed without prefix, as the base strategy and
+	// the client library do (e.g. ns=2;s=information, ns=2;s=manage/edges)
+	private static final NodeId EDGES_FOLDER = new NodeId(2, "manage/edges");
 
 	private static void awaitValue(final Vertex vertex, final String key, final Object expected)
 			throws InterruptedException {

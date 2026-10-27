@@ -76,6 +76,14 @@ comment; to force line mode use only `#` comments and one expression per line.
 > and is **rejected by JEXL** (`ambiguous statement error`). Define functions
 > as shown below.
 
+> **Warning (Gremlin terminal steps)**: JEXL does not resolve the terminal
+> methods of a Gremlin traversal (`next()`, `iterate()`, `toList()`,
+> `hasNext()`, ...): they are `default` methods inherited through multiple
+> interfaces and the JEXL uberspect does not find them
+> (`JEXL error : next`). Prefer the `WaldotGraph` API
+> (`graph.addVertex(...)`, `graph.vertices(...)`) or iterate the traversal
+> with `for (var v : g.V()) { ... }`, which works. The examples below that
+> call `.next()` on a traversal must be read accordingly.
 ---
 
 ## Script context
@@ -219,7 +227,6 @@ try {
 }
 log.info('vertices=' + cmd.getVerticesCount() + ' commands=' + cmd.listCommands().size());
 ```
-
 ```
 WARN CONSOLE - caught: Vertex with id already exists: NodeId{ns=2, id=dup}
 ```

@@ -241,6 +241,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	private final ConcurrentHashMap<NodeId, ConcurrentSkipListMap<Long, EdgeEntry>> outEdges = new ConcurrentHashMap<>();
 	private final Object parametersLock = new Object();
 	private final Set<NodeId> pendingEdgeIds = ConcurrentHashMap.newKeySet();
+	private final Set<NodeId> pendingVertexIds = ConcurrentHashMap.newKeySet();
 	private transient final ConcurrentHashMap<String, NodeId> referenceCache = new ConcurrentHashMap<>();
 	private UaFolderNode rootNode;
 	private volatile SharedProperties sharedProperties;
@@ -440,8 +441,6 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 						rollbackError);
 			}
 			throw e;
-		} finally {
-			pendingEdgeIds.remove(nodeId);
 		}
 	}
 
@@ -512,72 +511,81 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 				? requestedNodeId
 				: waldotNamespace.getNodeIdManager()
 						.getNextId(waldotNamespace.getGremlinGraph());
-		if (cachedVertices.containsKey(nodeId)
-				|| waldotNamespace.hasNodeId(nodeId)) {
-			// checked before touching anything: the rollback below must never
-			// delete the nodes of an element that already exists
+		// atomic reservation: two concurrent threads cannot pass the check
+		// with the same nodeId (TOCTOU fix)
+		if (!pendingVertexIds.add(nodeId)) {
 			throw Graph.Exceptions.vertexWithIdAlreadyExists(nodeId);
 		}
-		String label = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				LABEL_FIELD.toLowerCase());
-		if (label == null) {
-			label = DEFAULT_VERTEX_LABEL;
-			logger.debug(LABEL_FIELD.toLowerCase()
-					+ " not found in propertyKeyValues, using default label '{}'",
-					label);
-		}
-		String name = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
-				NAME_FIELD.toLowerCase());
-		if (name == null) {
-			name = label;
-			logger.debug(NAME_FIELD.toLowerCase()
-					+ " not found in propertyKeyValues, using default name '{}'",
-					name);
-		}
-		final QualifiedName browseName = waldotNamespace
-				.generateQualifiedName(name);
-		final LocalizedText displayName = new LocalizedText(name);
-		String description = MiloStrategy.getKeyValuesProperty(
-				propertyKeyValues, DESCRIPTION_PARAMETER.toLowerCase());
-		if (description == null) {
-			description = label;
-			logger.debug(DESCRIPTION_PARAMETER
-					+ " not found in propertyKeyValues, using default '{}'",
-					description);
-		}
 		try {
-			NodeId typeDefinition = getVertexTypeNode(propertyKeyValues);
-			if (typeDefinition == null) {
-				typeDefinition = referenceNodes().vertexTypeNode.getNodeId();
-				logger.debug(TYPE_FIELD.toLowerCase()
-						+ " not found in propertyKeyValues, using default type '{}'",
-						typeDefinition);
+			if (cachedVertices.containsKey(nodeId)
+					|| waldotNamespace.hasNodeId(nodeId)) {
+				// checked before touching anything: the rollback below must never
+				// delete the nodes of an element that already exists
+				throw Graph.Exceptions.vertexWithIdAlreadyExists(nodeId);
 			}
-			final AbstractOpcVertex vertex = createVertex(nodeId,
-					typeDefinition, label, description, browseName, displayName,
-					propertyKeyValues,
-					MiloSingleServerBaseReferenceNodeBuilder
-							.getWriteMask(propertyKeyValues),
-					MiloSingleServerBaseReferenceNodeBuilder
-							.getUserWriteMask(propertyKeyValues),
-					MiloSingleServerBaseReferenceNodeBuilder
-							.getEventNotifier(propertyKeyValues),
-					MiloSingleServerBaseReferenceNodeBuilder
-							.getVersion(propertyKeyValues));
-			addDeletedCommand(vertex);
-			addPropertyCommand(vertex);
-			cachedVertices.put(vertex.getNodeId(), vertex);
-			return vertex;
-		} catch (final RuntimeException | Error e) {
-			// an invalid property must not leave a ghost node in the address
-			// space
+			String label = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+					LABEL_FIELD.toLowerCase());
+			if (label == null) {
+				label = DEFAULT_VERTEX_LABEL;
+				logger.debug(LABEL_FIELD.toLowerCase()
+						+ " not found in propertyKeyValues, using default label '{}'",
+						label);
+			}
+			String name = MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+					NAME_FIELD.toLowerCase());
+			if (name == null) {
+				name = label;
+				logger.debug(NAME_FIELD.toLowerCase()
+						+ " not found in propertyKeyValues, using default name '{}'",
+						name);
+			}
+			final QualifiedName browseName = waldotNamespace
+					.generateQualifiedName(name);
+			final LocalizedText displayName = new LocalizedText(name);
+			String description = MiloStrategy.getKeyValuesProperty(
+					propertyKeyValues, DESCRIPTION_PARAMETER.toLowerCase());
+			if (description == null) {
+				description = label;
+				logger.debug(DESCRIPTION_PARAMETER
+						+ " not found in propertyKeyValues, using default '{}'",
+						description);
+			}
 			try {
-				discardVertexNodes(nodeId);
-			} catch (final Throwable rollbackError) {
-				logger.error("Rollback of vertex {} failed", nodeId,
-						rollbackError);
+				NodeId typeDefinition = getVertexTypeNode(propertyKeyValues);
+				if (typeDefinition == null) {
+					typeDefinition = referenceNodes().vertexTypeNode.getNodeId();
+					logger.debug(TYPE_FIELD.toLowerCase()
+							+ " not found in propertyKeyValues, using default type '{}'",
+							typeDefinition);
+				}
+				final AbstractOpcVertex vertex = createVertex(nodeId,
+						typeDefinition, label, description, browseName, displayName,
+						propertyKeyValues,
+						MiloSingleServerBaseReferenceNodeBuilder
+								.getWriteMask(propertyKeyValues),
+						MiloSingleServerBaseReferenceNodeBuilder
+								.getUserWriteMask(propertyKeyValues),
+						MiloSingleServerBaseReferenceNodeBuilder
+								.getEventNotifier(propertyKeyValues),
+						MiloSingleServerBaseReferenceNodeBuilder
+								.getVersion(propertyKeyValues));
+				addDeletedCommand(vertex);
+				addPropertyCommand(vertex);
+				cachedVertices.put(vertex.getNodeId(), vertex);
+				return vertex;
+			} catch (final RuntimeException | Error e) {
+				// an invalid property must not leave a ghost node in the address
+				// space
+				try {
+					discardVertexNodes(nodeId);
+				} catch (final Throwable rollbackError) {
+					logger.error("Rollback of vertex {} failed", nodeId,
+							rollbackError);
+				}
+				throw e;
 			}
-			throw e;
+		} finally {
+			pendingVertexIds.remove(nodeId);
 		}
 	}
 
@@ -652,6 +660,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		vertexProperties.clear();
 		edgeProperties.clear();
 		pendingEdgeIds.clear();
+		pendingVertexIds.clear();
 		synchronized (directoryLock) {
 			directoryLinks.clear();
 			directoryNodes.clear();
@@ -1155,11 +1164,9 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public <DATA_TYPE> WaldotVertex getVertexPropertyReference(
 			final WaldotVertexProperty<DATA_TYPE> opcVertexProperty) {
-		// the property node knows its vertex: no need to scan the references
-		final Object owner = opcVertexProperty.element();
-		if (owner instanceof WaldotVertex) {
-			return (WaldotVertex) owner;
-		}
+		// NOTE: do NOT call opcVertexProperty.element() here: it delegates back
+		// to this method via the namespace, causing infinite recursion
+		// (StackOverflowError) when the property has no resolvable owner.
 		for (final Reference r : opcVertexProperty.getReferences()) {
 			if (r.getReferenceTypeId().equals(NodeIds.HasComponent)
 					&& r.isInverse()) {
@@ -1367,9 +1374,15 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 						? null
 						: directoryNodes.get(folder.getNodeId());
 				if (folder == null) {
+					// NodeId without prefix for command directories: the base
+					// strategy and the client library address them as
+					// ns=2;s=<directory> (e.g. ns=2;s=information)
+					final NodeId folderNodeId = component
+							? waldotNamespace.generateNodeId(key)
+							: waldotNamespace.generateNodeId(prefix + ":" + key);
 					folder = new UaFolderNode(
 							waldotNamespace.getOpcUaNodeContext(),
-							waldotNamespace.generateNodeId(prefix + ":" + key),
+							folderNodeId,
 							waldotNamespace.generateQualifiedName(name),
 							LocalizedText.english(name));
 					waldotNamespace.getStorageManager().addNode(folder);

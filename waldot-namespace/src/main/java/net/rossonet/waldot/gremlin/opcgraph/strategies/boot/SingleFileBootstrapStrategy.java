@@ -153,9 +153,9 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 	 *         array with one expression per element.
 	 */
 	private String[] getConfigurationfromUrl(final String bootstrapUrl) {
-		try {
-			final InputStream is = new URI(bootstrapUrl).toURL().openConnection().getInputStream();
-			final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		// try-with-resources: the stream is closed even on read errors
+		try (InputStream is = new URI(bootstrapUrl).toURL().openConnection().getInputStream();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 			final StringBuilder fullContent = new StringBuilder();
 			final List<String> individualLines = new ArrayList<>();
 			String line;
@@ -170,7 +170,6 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 					individualLines.add(line.trim());
 				}
 			}
-			reader.close();
 
 			final String content = fullContent.toString();
 
@@ -194,8 +193,8 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 				}
 			}
 		} catch (final Exception e) {
-			logger.error("Error reading bootstrap configuration from URL: " + bootstrapUrl + "\n"
-					+ LogHelper.stackTraceToString(e, 5));
+			logger.error("Error reading bootstrap configuration from URL: {}\n{}", bootstrapUrl,
+					LogHelper.stackTraceToString(e, 5));
 			agentStatus = AgentStatus.FAULT;
 		}
 		return new String[0];
@@ -219,12 +218,12 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 				try {
 					final Object runExpression = waldotNamespace.runExpression(line);
 					if (runExpression != null) {
-						logger.info("[" + num + "]: " + line + " ->\n" + runExpression + "\n");
+						logger.info("[{}]: {} ->\n{}\n", num, line, runExpression);
 					} else {
-						logger.info("[" + num + "]: " + line + " -> no result\n");
+						logger.info("[{}]: {} -> no result\n", num, line);
 					}
 				} catch (final Exception e) {
-					logger.error("Error executing command '" + line + "': " + e.getMessage());
+					logger.error("Error executing command '{}': {}", line, e.getMessage());
 				}
 			}
 			agentStatus = AgentStatus.READY;

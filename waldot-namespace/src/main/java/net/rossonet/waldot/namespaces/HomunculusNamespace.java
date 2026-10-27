@@ -239,23 +239,45 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public void close() throws Exception {
+		// each close is isolated: a failing strategy must not prevent the
+		// cleanup of the others
 		if (timer != null) {
-			timer.shutdownNow();
+			try {
+				timer.shutdownNow();
+			} catch (final Exception e) {
+				logger.warn("Error shutting down timer: {}", e.getMessage());
+			}
 		}
-		bootstrapProcedureStrategy.close();
-		logger.info("bootstrap procedure strategy closed");
-		consoleStrategy.close();
-		logger.info("console strategy closed");
-		plugins.forEach(plugin -> plugin.stop());
+		closeQuietly("bootstrap procedure strategy", bootstrapProcedureStrategy);
+		closeQuietly("console strategy", consoleStrategy);
+		for (final PluginListener plugin : plugins) {
+			try {
+				plugin.stop();
+			} catch (final Exception e) {
+				logger.warn("Error stopping plugin {}: {}", plugin.getClass().getSimpleName(), e.getMessage());
+			}
+		}
 		logger.info("all plugins stopped");
-		clientManagementStrategy.close();
-		logger.info("client management strategy closed");
-		opcMappingStrategy.close();
-		logger.info("opc mapping strategy closed");
-		historyStrategy.close();
-		logger.info("history strategy closed");
-		waldotOpcUaServer.close();
-		logger.info("opcua server closed");
+		closeQuietly("client management strategy", clientManagementStrategy);
+		closeQuietly("opc mapping strategy", opcMappingStrategy);
+		closeQuietly("history strategy", historyStrategy);
+		try {
+			waldotOpcUaServer.close();
+			logger.info("opcua server closed");
+		} catch (final Exception e) {
+			logger.warn("Error closing OPC UA server: {}", e.getMessage());
+		}
+	}
+
+	private void closeQuietly(final String name, final AutoCloseable resource) {
+		try {
+			if (resource != null) {
+				resource.close();
+			}
+			logger.info("{} closed", name);
+		} catch (final Exception e) {
+			logger.warn("Error closing {}: {}", name, e.getMessage());
+		}
 	}
 
 	@Override
@@ -585,7 +607,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		subscriptionModel.onDataItemsModified(dataItems);
 		listeners.forEach(listener -> listener.onDataItemsModified(dataItems));
 		historyStrategy.onDataItemsModified(dataItems);
-		subscriptionModel.onDataItemsModified(dataItems);
 	}
 
 	@Override

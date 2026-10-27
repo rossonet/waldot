@@ -44,7 +44,9 @@ public class QueryCommand extends AbstractOpcCommand {
 
 	@Override
 	public String getDirectory() {
-		return MiloStrategy.MANAGE_CMD_DIRECTORY;
+		// the client library looks up the query command under the
+		// "information" folder (see WaldOTAgentClientImplV1.runExpression)
+		return MiloStrategy.INFOMATION_CMD_DIRECTORY;
 	}
 
 	@Override

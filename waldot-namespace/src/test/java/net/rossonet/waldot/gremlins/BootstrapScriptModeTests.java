@@ -21,11 +21,12 @@ import net.rossonet.waldot.test.WaldotTestEnvironment;
 import net.rossonet.waldot.utils.LogHelper;
 
 /**
- * Tests for the new script mode in SingleFileBootstrapStrategy.
- * 
+ * Tests for the script mode in SingleFileBootstrapStrategy.
+ *
  * <p>This test class verifies that the bootstrap strategy correctly handles
- * both the legacy line-by-line format and the new multi-line Groovy script format.</p>
- * 
+ * both the legacy line-by-line format and the JEXL script format
+ * (see BOOTSTRAP_CONFIGURATION.md).</p>
+ *
  * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public class BootstrapScriptModeTests {
@@ -106,8 +107,8 @@ public class BootstrapScriptModeTests {
 	public void testScriptModeWithVariableAssignment() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("// Script mode test with variable\n");
-		sb.append("sensor = graph.addVertex('id', 'test-var', 'label', 'test-script', 'value', 100)\n");
-		sb.append("sensor.property('extra', 'data')\n");
+		sb.append("var sensor = graph.addVertex('id', 'test-var', 'label', 'test-script', 'value', 100);\n");
+		sb.append("sensor.property('extra', 'data');\n");
 		Files.writeString(WaldotTestEnvironment.tmpPath("boot-script.conf"), sb.toString());
 		
 		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-script.conf"));
@@ -128,14 +129,14 @@ public class BootstrapScriptModeTests {
 	@Test
 	public void testScriptModeWithFunctionDefinition() throws Exception {
 		final StringBuilder sb = new StringBuilder();
-		sb.append("// Function to create sensor\n");
-		sb.append("def createSensor(id, val) {\n");
-		sb.append("  graph.addVertex('id', id, 'label', 'sensor', 'value', val)\n");
-		sb.append("}\n");
+		sb.append("// Function to create sensor (JEXL syntax)\n");
+		sb.append("var createSensor = function(id, val) {\n");
+		sb.append("  return graph.addVertex('id', id, 'label', 'sensor', 'value', val);\n");
+		sb.append("};\n");
 		sb.append("\n");
 		sb.append("// Create two sensors\n");
-		sb.append("createSensor('sensor1', 42)\n");
-		sb.append("createSensor('sensor2', 84)\n");
+		sb.append("createSensor('sensor1', 42);\n");
+		sb.append("createSensor('sensor2', 84);\n");
 		Files.writeString(WaldotTestEnvironment.tmpPath("boot-function.conf"), sb.toString());
 		
 		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-function.conf"));
@@ -149,21 +150,24 @@ public class BootstrapScriptModeTests {
 
 	/**
 	 * Test 3: Multi-line method chains (script mode).
-	 * 
+	 *
 	 * <p>Verifica che le catene di metodi multi-linea con indentazione
-	 * attivino lo script mode.</p>
+	 * attivino lo script mode. Nota: JEXL non risolve i metodi terminali
+	 * delle traversal Gremlin (next/iterate/toList) per un bug noto di
+	 * risoluzione dei default methods ereditati via interfacce multiple;
+	 * si usa graph.addVertex che e' il metodo pubblico del grafo.</p>
 	 */
 	@Test
 	public void testScriptModeWithMultilineChains() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("// Multi-line chain test\n");
-		sb.append("sensor = g.addV('generator')\n");
-		sb.append("  .property('type', 'generator')\n");
-		sb.append("  .property('label', 'temp-sensor')\n");
-		sb.append("  .property('Algorithm', 'sinusoidal')\n");
-		sb.append("  .property('Min', '18')\n");
-		sb.append("  .property('Max', '26')\n");
-		sb.append("  .next()\n");
+		sb.append("var sensor = graph.addVertex(\n");
+		sb.append("  'id', 'temp-sensor',\n");
+		sb.append("  'label', 'temp-sensor',\n");
+		sb.append("  'Algorithm', 'sinusoidal',\n");
+		sb.append("  'Min', '18',\n");
+		sb.append("  'Max', '26'\n");
+		sb.append(");\n");
 		Files.writeString(WaldotTestEnvironment.tmpPath("boot-multiline.conf"), sb.toString());
 		
 		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-multiline.conf"));
@@ -181,20 +185,20 @@ public class BootstrapScriptModeTests {
 	@Test
 	public void testScriptModeWithLoopsAndConditionals() throws Exception {
 		final StringBuilder sb = new StringBuilder();
-		sb.append("// Advanced script with loops\n");
-		sb.append("def createZone(name, tempTarget) {\n");
-		sb.append("  temp = graph.addVertex('id', \"temp-${name}\", 'label', \"sensor-${name}\", 'target', tempTarget)\n");
+		sb.append("// Advanced script with loops (JEXL syntax)\n");
+		sb.append("var createZone = function(name, tempTarget) {\n");
+		sb.append("  var temp = graph.addVertex('id', 'temp-' + name, 'label', 'sensor-' + name, 'target', tempTarget);\n");
 		sb.append("  if (tempTarget > 20) {\n");
-		sb.append("    temp.property('mode', 'hot')\n");
+		sb.append("    temp.property('mode', 'hot');\n");
 		sb.append("  } else {\n");
-		sb.append("    temp.property('mode', 'cold')\n");
+		sb.append("    temp.property('mode', 'cold');\n");
 		sb.append("  }\n");
-		sb.append("  return temp\n");
-		sb.append("}\n");
+		sb.append("  return temp;\n");
+		sb.append("};\n");
 		sb.append("\n");
 		sb.append("// Create 3 zones\n");
-		sb.append("3.times { i ->\n");
-		sb.append("  createZone(\"zone${i}\", 18 + i * 2)\n");
+		sb.append("for (var i : [0, 1, 2]) {\n");
+		sb.append("  createZone('zone' + i, 18 + i * 2);\n");
 		sb.append("}\n");
 		Files.writeString(WaldotTestEnvironment.tmpPath("boot-advanced.conf"), sb.toString());
 		
@@ -241,17 +245,19 @@ public class BootstrapScriptModeTests {
 
 	/**
 	 * Test 6: Mixed format detection.
-	 * 
-	 * <p>Verifica che quando ci sono sia commenti '#' che '//', venga
-	 * correttamente rilevato lo script mode.</p>
+	 *
+	 * <p>Verifica che un commento '//' attivi lo script mode anche in un file
+	 * che usa assegnazioni semplici. Nota: in script mode i commenti '#' non
+	 * sono validi (tokenization error), come documentato in
+	 * BOOTSTRAP_CONFIGURATION.md.</p>
 	 */
 	@Test
 	public void testMixedCommentFormatDetection() throws Exception {
 		final StringBuilder sb = new StringBuilder();
-		sb.append("# Old style comment\n");
 		sb.append("// New style comment - triggers script mode\n");
-		sb.append("v1 = graph.addVertex('id', 'mixed1', 'label', 'mixed-test', 'value', 111)\n");
-		sb.append("v2 = graph.addVertex('id', 'mixed2', 'label', 'mixed-test', 'value', 222)\n");
+		sb.append("## double-hash comment allowed in script mode\n");
+		sb.append("var v1 = graph.addVertex('id', 'mixed1', 'label', 'mixed-test', 'value', 111);\n");
+		sb.append("var v2 = graph.addVertex('id', 'mixed2', 'label', 'mixed-test', 'value', 222);\n");
 		Files.writeString(WaldotTestEnvironment.tmpPath("boot-script.conf"), sb.toString());
 		
 		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-script.conf"));
@@ -271,25 +277,23 @@ public class BootstrapScriptModeTests {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("// Real-world HVAC monitoring system\n");
 		sb.append("\n");
-		sb.append("// Helper function\n");
-		sb.append("def createRoom(name, tempMin, tempMax) {\n");
-		sb.append("  sensor = graph.addVertex(\n");
-		sb.append("    'id', \"sensor-${name}\",\n");
+		sb.append("// Helper function (JEXL syntax)\n");
+		sb.append("var createRoom = function(name, tempMin, tempMax) {\n");
+		sb.append("  return graph.addVertex(\n");
+		sb.append("    'id', 'sensor-' + name,\n");
 		sb.append("    'label', name,\n");
-		sb.append("    'type', 'sensor',\n");
 		sb.append("    'tempMin', tempMin,\n");
 		sb.append("    'tempMax', tempMax\n");
-		sb.append("  )\n");
-		sb.append("  return sensor\n");
-		sb.append("}\n");
+		sb.append("  );\n");
+		sb.append("};\n");
 		sb.append("\n");
 		sb.append("// Create rooms\n");
-		sb.append("office = createRoom('office', 18, 26)\n");
-		sb.append("server = createRoom('server-room', 16, 22)\n");
-		sb.append("warehouse = createRoom('warehouse', 10, 30)\n");
+		sb.append("var office = createRoom('office', 18, 26);\n");
+		sb.append("var server = createRoom('server-room', 16, 22);\n");
+		sb.append("var warehouse = createRoom('warehouse', 10, 30);\n");
 		sb.append("\n");
 		sb.append("// Log summary\n");
-		sb.append("log.info(\"HVAC system configured with 3 rooms\")\n");
+		sb.append("log.info('HVAC system configured with 3 rooms');\n");
 		Files.writeString(WaldotTestEnvironment.tmpPath("boot-advanced.conf"), sb.toString());
 		
 		bootstrapUrlServerInit(WaldotTestEnvironment.tmpUrl("boot-advanced.conf"));

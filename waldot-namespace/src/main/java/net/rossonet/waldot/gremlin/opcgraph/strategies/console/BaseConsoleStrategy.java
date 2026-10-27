@@ -17,8 +17,9 @@ import net.rossonet.waldot.jexl.JexlExecutor;
 @WaldotConsoleStrategy
 public class BaseConsoleStrategy implements ConsoleStrategy {
 	private BaseExecutor baseExecutor;
-	private final List<WaldotCommand> commands = new ArrayList<>();
-	private boolean dirty = false;
+	// thread safe: plugins register commands from their own threads
+	private final List<WaldotCommand> commands = new java.util.concurrent.CopyOnWriteArrayList<>();
+	private volatile boolean dirty = false;
 
 	private Logger logger;
 	private WaldotNamespace waldotNamespace;
@@ -84,20 +85,23 @@ public class BaseConsoleStrategy implements ConsoleStrategy {
 		dirty = false;
 	}
 
-	@Override
-	public Object runExpression(final String expression) {
+	// synchronized: the dirty check and the reset must be atomic, otherwise two
+	// threads can both rebuild the executor losing concurrently registered commands
+	private synchronized BaseExecutor executor() {
 		if (dirty || baseExecutor == null) {
 			reset();
 		}
-		return baseExecutor.execute(expression);
+		return baseExecutor;
+	}
+
+	@Override
+	public Object runExpression(final String expression) {
+		return executor().execute(expression);
 	}
 
 	@Override
 	public Object runExpression(final String expression, final JexlContext jexlContext) {
-		if (dirty || baseExecutor == null) {
-			reset();
-		}
-		return baseExecutor.execute(expression, jexlContext);
+		return executor().execute(expression, jexlContext);
 	}
 
 }

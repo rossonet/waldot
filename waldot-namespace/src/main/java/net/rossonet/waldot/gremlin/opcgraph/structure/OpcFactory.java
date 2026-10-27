@@ -153,8 +153,8 @@ public final class OpcFactory {
 	 * Generate the graph in {@link #createGratefulDead()} into an existing graph.
 	 */
 	public static void generateGratefulDead(final WaldotGraph graph) {
-		final InputStream stream = OpcFactory.class.getResourceAsStream("grateful-dead.kryo");
-		try {
+		// try-with-resources: the stream is always closed
+		try (InputStream stream = OpcFactory.class.getResourceAsStream("grateful-dead.kryo")) {
 			graph.io(gryo()).reader().create().readGraph(stream, graph);
 		} catch (final Exception ex) {
 			throw new IllegalStateException(ex);
@@ -302,18 +302,20 @@ public final class OpcFactory {
 		final WaldotOpcUaServer waldot = new WaldotOpcUaServer(configuration, serverConfiguration,
 				new DefaultAnonymousValidator(configuration), new DefaultIdentityValidator(configuration),
 				new DefaultX509IdentityValidator(configuration));
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				try {
-					if (waldot != null && waldot.getServer() != null) {
-						waldot.getServer().shutdown();
-					}
-				} catch (final Exception e) {
-					e.printStackTrace();
+		// one shutdown hook per server instance, removed when the server is
+		// closed: repeated getOpcGraph() calls must not accumulate hooks
+		final Thread shutdownHook = new Thread(() -> {
+			try {
+				if (waldot.getServer() != null) {
+					waldot.getServer().shutdown();
 				}
+			} catch (final Exception e) {
+				logger.warn("Error shutting down OPC UA server: {}", e.getMessage());
 			}
 		});
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
+		// the server removes the hook on close(): no leak on repeated creations
+		waldot.setShutdownHook(shutdownHook);
 		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, miloStrategy,
 				historyStrategy, new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
 				new BaseClientManagementStrategy(), bootStrapUrl);

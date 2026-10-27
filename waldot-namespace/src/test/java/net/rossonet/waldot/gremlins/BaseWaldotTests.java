@@ -102,7 +102,9 @@ public class BaseWaldotTests {
 		if (result != null && result instanceof String[]) {
 			final String[] aboutLines = (String[]) result;
 			System.out.println("About command output composed of " + aboutLines.length + " lines");
-			assert aboutLines.length == 5;
+			// the first 5 lines are the fixed about fields; further lines are
+			// the optional git.properties entries (present in the build output)
+			assert aboutLines.length >= 5;
 			int lineCounter = 1;
 			for (final String line : aboutLines) {
 				comparation.add(line);
@@ -115,7 +117,7 @@ public class BaseWaldotTests {
 			throw new Exception("About command did not return expected result");
 		}
 		final List<String> info = waldotTestClientHandler.getServerInfo();
-		assert info.size() == 5;
+		assert info.size() == comparation.size();
 		for (int i = 0; i < info.size(); i++) {
 			assert info.get(i).equals(comparation.get(i));
 		}
@@ -146,14 +148,17 @@ public class BaseWaldotTests {
 
 	@Test
 	public void runHelpCommandExpression() throws Exception {
-		DefaultHomunculusConfiguration.DEFAULT_HELP_DIRECTORY = "/tmp";
+		// dedicated, unique help directory: the test must not depend on the
+		// shared /tmp content nor on the static default help directory
+		final Path helpDir = Files.createTempDirectory("waldot-help-test");
+		DefaultHomunculusConfiguration.DEFAULT_HELP_DIRECTORY = helpDir.toString();
 		final StringBuilder sb = new StringBuilder();
 		sb.append("HELP_TEST\n");
 		sb.append("SECONDA LINEA\n");
-		Files.writeString(Path.of("/tmp/index.txt"), sb.toString());
+		Files.writeString(helpDir.resolve("index.txt"), sb.toString());
 		final StringBuilder sb2 = new StringBuilder();
 		sb2.append("https://www.apache.org/licenses/LICENSE-2.0\n");
-		Files.writeString(Path.of("/tmp/funzione.txt"), sb2.toString());
+		Files.writeString(helpDir.resolve("funzione.txt"), sb2.toString());
 		simpleServerInit();
 		final Object result = g.getWaldotNamespace().getConsoleStrategy().runExpression("help.exec()");
 		if (result != null && result instanceof String[]) {
@@ -169,7 +174,7 @@ public class BaseWaldotTests {
 			final String[] subLines = (String[]) resultSub;
 			assert subLines.length > 0;
 			System.out.println("Sub help output: " + subLines[0]);
-			assert subLines[0].equals("https://www.apache.org/licenses/LICENSE-2.0\n");
+			assert subLines[0].equals("https://www.apache.org/licenses/LICENSE-2.0" + System.lineSeparator());
 		} else {
 			throw new Exception("Help command did not return expected result");
 		}

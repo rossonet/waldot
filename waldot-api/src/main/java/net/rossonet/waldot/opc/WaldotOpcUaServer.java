@@ -126,6 +126,8 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	private OpcUaServer server;
 
+	private volatile Thread shutdownHook;
+
 	private FileBasedTrustListManager trustListManager;
 
 	private final WaldotConfiguration waldotConfiguration;
@@ -241,6 +243,25 @@ public class WaldotOpcUaServer implements AutoCloseable {
 			}
 			trustListManager = null;
 		}
+		// remove the JVM shutdown hook registered for this server (if any):
+		// leaving it would leak one hook per server instance
+		if (shutdownHook != null) {
+			try {
+				Runtime.getRuntime().removeShutdownHook(shutdownHook);
+			} catch (final IllegalStateException e) {
+				// JVM already shutting down: the hook is running, nothing to do
+			}
+			shutdownHook = null;
+		}
+	}
+
+	/**
+	 * Registers the JVM shutdown hook associated to this server, so that
+	 * {@link #close()} can remove it and repeated server creations do not
+	 * accumulate hooks.
+	 */
+	public void setShutdownHook(final Thread hook) {
+		this.shutdownHook = hook;
 	}
 
 	private OpcUaServer create(final OpcConfiguration configuration, final WaldotAnonymousValidator anonymousValidator,
