@@ -26,6 +26,16 @@ allprojects {
 			downloadJavadoc = true
 			downloadSources = true
 		}
+		// cleanEclipse non rimuove la configurazione APT (.factorypath e prefs) lasciata
+		// da import Buildship precedenti: con percorsi obsoleti (es. /root/.gradle/...)
+		// Eclipse segnala "Unable to load annotation processor factory".
+		// Nessun modulo usa annotation processor in Eclipse: la configurazione va rimossa.
+		def cleanEclipseApt = tasks.register('cleanEclipseApt', Delete) {
+			description = 'Removes stale Eclipse APT configuration (.factorypath, apt prefs).'
+			delete layout.projectDirectory.file('.factorypath')
+			delete layout.projectDirectory.file('.settings/org.eclipse.jdt.apt.core.prefs')
+		}
+		tasks.named('cleanEclipse') { dependsOn cleanEclipseApt }
 	}
 }
 
