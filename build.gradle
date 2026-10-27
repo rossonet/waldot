@@ -1,7 +1,10 @@
+// Build root di WaldOT (solo i progetti in waldot/, vedi settings.gradle).
+// Nel build combinato wot-addons questo file NON viene valutato: le opzioni comuni
+// stanno in gradle/conventions.gradle, applicato da entrambi i build.
 plugins {
-        id 'java'
-        id 'eclipse'
-        id 'org.jreleaser' version '1.21.0' apply false
+	id 'java'
+	id 'eclipse'
+	id 'org.jreleaser' version '1.21.0' apply false
 }
 
 description = "WaldOT - TinkerPop implementation with Milo OpcUA"
@@ -9,106 +12,15 @@ group = 'net.rossonet.waldot'
 version = '0.6.2'
 
 ext {
-    debianName = "${project.name}"
-    packageName = "${project.name}"
+	debianName = "${project.name}"
+	packageName = "${project.name}"
 }
 
 repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
+	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
-// Java: versione centralizzata per tutti i progetti (non usare "ext { sourceCompatibility = ... }",
-// crea solo proprieta' extra ignorate dal plugin Java)
-allprojects {
-    plugins.withType(JavaPlugin).configureEach {
-        // convention: i moduli possono sovrascriverla con un proprio toolchain
-        java.toolchain.languageVersion.convention(JavaLanguageVersion.of(25))
-    }
-}
-
-task eclipseClosedDependencies {}
-
-task eclipseClosedDependencies_ {}
-
-eclipse {
-    classpath {
-        downloadJavadoc = true
-        downloadSources = true
-    }
-}
-
-/*
- * Git metadata (git.properties, read by the OPC UA "about" command).
- *
- * The git directory is resolved also when the repository is checked out as a
- * git submodule or worktree, where ".git" is a file containing
- * "gitdir: <path>". When no git directory is available (for example in a
- * Docker build context that does not contain it) a fallback git.properties is
- * generated from the GIT_COMMIT / GIT_BRANCH environment variables or the
- * gitCommit / gitBranch Gradle properties.
- */
-def resolveGitDirectory = { File projectRoot ->
-        final File dotGit = new File(projectRoot, '.git')
-        if (dotGit.isDirectory()) {
-                return dotGit
-        }
-        if (dotGit.isFile()) {
-                final String line = dotGit.readLines().find { it.startsWith('gitdir:') }
-                if (line != null) {
-                        File gitDir = new File(line.substring('gitdir:'.length()).trim())
-                        if (!gitDir.isAbsolute()) {
-                                gitDir = new File(projectRoot, gitDir.path)
-                        }
-                        gitDir = gitDir.canonicalFile
-                        if (gitDir.isDirectory()) {
-                                return gitDir
-                        }
-                }
-        }
-        return null
-}
-ext.waldotGitDirectory = resolveGitDirectory(rootProject.projectDir)
-
-subprojects {
-        afterEvaluate { proj ->
-                if (proj.plugins.hasPlugin('com.gorylenko.gradle-git-properties')) {
-                        final File gitDir = rootProject.ext.waldotGitDirectory
-                        if (gitDir != null) {
-                                proj.gitProperties {
-                                        dotGitDirectory = gitDir
-                                        failOnNoGitDirectory = false
-                                }
-                        } else {
-                                proj.gitProperties {
-                                        failOnNoGitDirectory = false
-                                }
-                                proj.tasks.named('generateGitProperties') { enabled = false }
-                                final def fallbackDir = proj.layout.buildDirectory.dir('generated/fallback-git')
-                                final def fallbackTask = proj.tasks.register('generateFallbackGitProperties') {
-                                        description = 'Writes git.properties when no git directory is available'
-                                        final String commit = System.getenv('GIT_COMMIT') ?: proj.findProperty('gitCommit') ?: 'unknown'
-                                        final String branch = System.getenv('GIT_BRANCH') ?: proj.findProperty('gitBranch') ?: 'unknown'
-                                        final String buildVersion = proj.version.toString()
-                                        inputs.property('commit', commit)
-                                        inputs.property('branch', branch)
-                                        inputs.property('version', buildVersion)
-                                        outputs.dir(fallbackDir)
-                                        doLast {
-                                                final File file = fallbackDir.get().file('git.properties').asFile
-                                                file.parentFile.mkdirs()
-                                                file.text = "git.branch=${branch}\n" +
-                                                                "git.commit.id=${commit}\n" +
-                                                                "git.commit.id.abbrev=${commit.length() > 7 ? commit.substring(0, 7) : commit}\n" +
-                                                                "git.build.version=${buildVersion}\n"
-                                        }
-                                }
-                                proj.tasks.named('processResources') {
-                                        from(fallbackTask)
-                                }
-                        }
-                }
-        }
-}
-
-task view { doLast { println "Working on project ${project.name} [ ${project.description} ]" } }
+// Convenzioni comuni (Java, Eclipse, test, Javadoc, clean, JNA, git.properties):
+// file condiviso con il build combinato wot-addons (../build.gradle).
+apply from: 'gradle/conventions.gradle'

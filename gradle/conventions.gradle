@@ -1,0 +1,209 @@
+// =====================================================================================
+// CONVENZIONI COMUNI dei build Gradle di WaldOT
+// File condiviso, applicato da:
+//   - waldot/build.gradle          (build standalone di WaldOT)   -> apply from: 'gradle/conventions.gradle'
+//   - wot-addons/build.gradle      (build combinato WaldOT Addons) -> apply from: 'waldot/gradle/conventions.gradle'
+// Nel build combinato waldot/build.gradle NON viene valutato: tutte le opzioni comuni
+// devono quindi stare qui e non nei due build root.
+// =====================================================================================
+
+// --- Java ----------------------------------------------------------------------------
+// Toolchain 25 come convention per tutti i progetti: un modulo puo' sovrascriverla con il
+// proprio java { toolchain { ... } } (es. pandapipes-api usa 21). Senza questa impostazione
+// il target sarebbe la JVM che esegue Gradle (es. 26) e i moduli con target 25 non
+// risolverebbero le dipendenze di progetto ("only compatible with JVM runtime version 26").
+// NB: non usare "ext { sourceCompatibility = ... }": crea solo proprieta' extra ignorate.
+allprojects {
+	plugins.withType(JavaPlugin).configureEach {
+		java.toolchain.languageVersion.convention(JavaLanguageVersion.of(25))
+	}
+}
+
+// --- Eclipse -------------------------------------------------------------------------
+allprojects {
+	plugins.withType(EclipsePlugin).configureEach {
+		eclipse.classpath {
+			downloadJavadoc = true
+			downloadSources = true
+		}
+	}
+}
+
+// --- Test ----------------------------------------------------------------------------
+// Evita blocchi: timeout per ogni test/lifecycle e per l'intero task test
+allprojects {
+	tasks.withType(Test).configureEach {
+		systemProperty 'junit.jupiter.execution.timeout.default', '900s'
+		systemProperty 'junit.jupiter.execution.timeout.lifecycle.method.default', '600s'
+		timeout = java.time.Duration.ofMinutes(15)
+	}
+}
+
+// I test che richiedono servizi esterni (Docker/Testcontainers, rete reale, KVM,
+// snmpd...) sono marcati con @Tag("integration") ed esclusi dal task "test";
+// si eseguono con il task "integrationTest".
+// Ogni JVM di test usa porte OPC UA e directory temporanee proprie
+// (WaldotTestEnvironment), quindi i fork e i moduli possono girare in parallelo.
+// -PtestForks=N imposta il numero massimo di fork per modulo (default: core/4).
+def testForks = (project.findProperty('testForks') ?: Math.max(1, (int) (Runtime.runtime.availableProcessors() / 4))) as int
+// moduli con convenzioni di test proprie (yoda definisce gia' integrationTest per le classi *IT)
+def ownTestConventions = ['yoda']
+configure(subprojects.findAll { !(it.name in ownTestConventions) }) {
+	plugins.withType(JavaPlugin).configureEach {
+		def integrationTest = tasks.register('integrationTest', Test) {
+			description = 'Runs the tests tagged "integration" (external services, Docker).'
+			group = 'verification'
+			testClassesDirs = sourceSets.test.output.classesDirs
+			classpath = sourceSets.test.runtimeClasspath
+			// many modules have no integration tests
+			failOnNoDiscoveredTests = false
+			shouldRunAfter tasks.named('test')
+		}
+		afterEvaluate {
+			// configured after the module build script, which may call useJUnitPlatform() again
+			tasks.named('test', Test) {
+				useJUnitPlatform {
+					excludeTags 'integration'
+				}
+				// some modules contain only integration tests
+				failOnNoDiscoveredTests = false
+				maxParallelForks = testForks
+			}
+			integrationTest.configure {
+				useJUnitPlatform {
+					includeTags 'integration'
+				}
+				maxParallelForks = 1
+			}
+		}
+	}
+}
+
+// --- Javadoc -------------------------------------------------------------------------
+// Tag custom usati dai client API generati; riporta tutti gli errori/warning
+allprojects {
+	tasks.withType(Javadoc).configureEach {
+		options.tags = ['http.response.details:a:HTTP response details', 'example:a:Example']
+		options.addStringOption('Xmaxerrs', '10000')
+		options.addStringOption('Xmaxwarns', '10000')
+	}
+}
+
+// --- Clean ---------------------------------------------------------------------------
+// Rimuove anche bin/ (Eclipse) e build/.
+// NB: "delete" va invocato in fase di configurazione: dentro doLast il delegate e'
+// il task Delete, e Delete.delete(...) aggiunge solo target quando il task ha gia' finito.
+allprojects {
+	tasks.withType(Delete).matching { it.name == 'clean' }.configureEach {
+		delete layout.projectDirectory.dir('bin')
+		delete layout.buildDirectory
+	}
+}
+
+// --- Dipendenze: JNA -----------------------------------------------------------------
+// Versioni diverse (es. 4.4.0 portata da TSS.Java) definiscono le stesse classi
+// com.sun.jna.* di jna-jpms 5.x usato da oshi e vanno in conflitto
+// (NoSuchMethodError: Native.load): jna/jna-platform sono sostituiti dalle varianti
+// jpms e allineati alla stessa versione.
+subprojects {
+	configurations.configureEach {
+		resolutionStrategy.eachDependency { details ->
+			if (details.requested.group == 'net.java.dev.jna') {
+				switch (details.requested.name) {
+					case 'jna':
+						details.useTarget 'net.java.dev.jna:jna-jpms:5.19.1'
+						break
+					case 'jna-platform':
+						details.useTarget 'net.java.dev.jna:jna-platform-jpms:5.19.1'
+						break
+					case 'jna-jpms':
+					case 'jna-platform-jpms':
+						details.useVersion '5.19.1'
+						break
+				}
+			}
+		}
+	}
+}
+
+// --- Git metadata (git.properties, letto dal comando OPC UA "about") -----------------
+// Per ogni modulo si usa il repository git piu' vicino risalendo dalla sua directory:
+// i moduli di waldot ricevono cosi' il commit del submodule waldot anche nel build
+// combinato. ".git" puo' essere una directory o, per submodule/worktree, un file
+// "gitdir: <path>". Senza repository (es. contesto Docker) viene generato un
+// git.properties di fallback da GIT_COMMIT / GIT_BRANCH o dalle proprieta' Gradle
+// gitCommit / gitBranch.
+def resolveGitDirectory = { File startDir ->
+	for (File dir = startDir.canonicalFile; dir != null; dir = dir.parentFile) {
+		final File dotGit = new File(dir, '.git')
+		if (dotGit.isDirectory()) {
+			return dotGit
+		}
+		if (dotGit.isFile()) {
+			final String line = dotGit.readLines().find { it.startsWith('gitdir:') }
+			if (line != null) {
+				File gitDir = new File(line.substring('gitdir:'.length()).trim())
+				if (!gitDir.isAbsolute()) {
+					gitDir = new File(dir, gitDir.path)
+				}
+				gitDir = gitDir.canonicalFile
+				if (gitDir.isDirectory()) {
+					return gitDir
+				}
+			}
+		}
+	}
+	return null
+}
+
+subprojects {
+	afterEvaluate { proj ->
+		if (proj.plugins.hasPlugin('com.gorylenko.gradle-git-properties')) {
+			final File gitDir = resolveGitDirectory(proj.projectDir)
+			if (gitDir != null) {
+				proj.gitProperties {
+					dotGitDirectory = gitDir
+					failOnNoGitDirectory = false
+				}
+			} else {
+				proj.gitProperties {
+					failOnNoGitDirectory = false
+				}
+				proj.tasks.named('generateGitProperties') { enabled = false }
+				final def fallbackDir = proj.layout.buildDirectory.dir('generated/fallback-git')
+				final def fallbackTask = proj.tasks.register('generateFallbackGitProperties') {
+					description = 'Writes git.properties when no git directory is available'
+					final String commit = System.getenv('GIT_COMMIT') ?: proj.findProperty('gitCommit') ?: 'unknown'
+					final String branch = System.getenv('GIT_BRANCH') ?: proj.findProperty('gitBranch') ?: 'unknown'
+					final String buildVersion = proj.version.toString()
+					inputs.property('commit', commit)
+					inputs.property('branch', branch)
+					inputs.property('version', buildVersion)
+					outputs.dir(fallbackDir)
+					doLast {
+						final File file = fallbackDir.get().file('git.properties').asFile
+						file.parentFile.mkdirs()
+						file.text = "git.branch=${branch}\n" +
+								"git.commit.id=${commit}\n" +
+								"git.commit.id.abbrev=${commit.length() > 7 ? commit.substring(0, 7) : commit}\n" +
+								"git.build.version=${buildVersion}\n"
+					}
+				}
+				proj.tasks.named('processResources') {
+					from(fallbackTask)
+				}
+			}
+		}
+	}
+}
+
+// --- Utility -------------------------------------------------------------------------
+// hook usati da Buildship/Eclipse
+tasks.register('eclipseClosedDependencies')
+tasks.register('eclipseClosedDependencies_')
+
+// solo progetto root: i moduli definiscono gia' il proprio task "view"
+tasks.register('view') {
+	final String info = "Working on project ${project.name} [ ${project.description} ]"
+	doLast { println info }
+}
