@@ -100,6 +100,30 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 		return nodes != null ? nodes : lastReferenceNodes;
 	}
 
+	/**
+	 * Forgets the reference nodes generated for a namespace; to be called when
+	 * the namespace is closed.
+	 * <p>
+	 * The registry is a {@link java.util.WeakHashMap}, but its values (OPC UA
+	 * nodes) strongly reference their node context, hence the server and the
+	 * namespace used as key: without an explicit removal the entries are never
+	 * collected and every closed namespace stays in memory with its whole
+	 * address space.
+	 * </p>
+	 *
+	 * @param namespace the closed namespace (null is ignored)
+	 */
+	public static void unregister(final WaldotNamespace namespace) {
+		if (namespace == null) {
+			return;
+		}
+		final ReferenceNodes removed = REFERENCE_NODES_BY_NAMESPACE
+				.remove(namespace);
+		if (removed != null && removed == lastReferenceNodes) {
+			lastReferenceNodes = null;
+		}
+	}
+
 	public static UaObjectTypeNode edgeTypeNode;
 
 	public static final UByte edgeVariableAccessLevel = AccessLevel

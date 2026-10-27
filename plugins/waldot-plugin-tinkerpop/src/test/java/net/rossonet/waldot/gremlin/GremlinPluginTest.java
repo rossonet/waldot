@@ -1,5 +1,7 @@
 package net.rossonet.waldot.gremlin;
 
+import static net.rossonet.waldot.tinkerpop.TinkerPopConstants.BIND_HOST_FIELD;
+import static net.rossonet.waldot.tinkerpop.TinkerPopConstants.PORT_FIELD;
 import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 
 import java.io.IOException;
@@ -45,7 +47,7 @@ public class GremlinPluginTest {
 	@Test
 	public void bindInVertexTest() throws Exception {
 		simpleServerInit();
-		g.addVertex("id", "label1", "type", "gremlin", "bind", "127.0.0.9");
+		g.addVertex("id", "label1", "type", "gremlin", BIND_HOST_FIELD, "127.0.0.9");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
 		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("label1",
@@ -111,7 +113,7 @@ public class GremlinPluginTest {
 		simpleServerInit();
 		final String baseBind = "127.0.0.";
 		int number = 1;
-		final Vertex v = g.addVertex("port", baseBind + String.valueOf(number),
+		final Vertex v = g.addVertex(BIND_HOST_FIELD, baseBind + String.valueOf(number),
 				"id", "number2", "type", "gremlin");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("number2");
@@ -119,7 +121,7 @@ public class GremlinPluginTest {
 				"number2", baseBind + String.valueOf(number));
 		for (int i = 0; i < 10; i++) {
 			number++;
-			v.property("port", baseBind + String.valueOf(number));
+			v.property(BIND_HOST_FIELD, baseBind + String.valueOf(number));
 			Thread.sleep(1);
 			assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals(
 					"number2", baseBind + String.valueOf(number));
@@ -158,7 +160,7 @@ public class GremlinPluginTest {
 	@Test
 	public void portInVertexTest() throws Exception {
 		simpleServerInit();
-		g.addVertex("id", "label1", "type", "gremlin", "port", "2686");
+		g.addVertex("id", "label1", "type", "gremlin", PORT_FIELD, "2686");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("label1");
 		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("label1",
@@ -173,7 +175,7 @@ public class GremlinPluginTest {
 	public void portRewriteTest() throws Exception {
 		simpleServerInit();
 		int number = 8600;
-		final Vertex v = g.addVertex("port", String.valueOf(number), "id",
+		final Vertex v = g.addVertex(PORT_FIELD, String.valueOf(number), "id",
 				"number2", "type", "gremlin");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("number2");
@@ -181,7 +183,7 @@ public class GremlinPluginTest {
 				"number2", String.valueOf(number));
 		for (int i = 0; i < 10; i++) {
 			number++;
-			v.property("port", String.valueOf(number));
+			v.property(PORT_FIELD, String.valueOf(number));
 			Thread.sleep(1);
 			assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals(
 					"number2", String.valueOf(number));
@@ -199,13 +201,13 @@ public class GremlinPluginTest {
 		simpleServerInit();
 		// OpcFactory.generateClassic(g);
 		OpcFactory.generateModern(g);
-		g.addVertex("id", "server", "type", "gremlin", "port", "9090");
+		g.addVertex("id", "server", "type", "gremlin", PORT_FIELD, "9090");
 		Thread.sleep(1);
 		assert waldotTestClientHandler.checkOpcUaVertexExists("server");
-		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("server",
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("server",
 				"9090");
-		assert waldotTestClientHandler.checkOpcUaVertexBindReadOnly("server");
-		assert waldotTestClientHandler.checkOpcUaVertexBindValueEquals("server",
+		assert waldotTestClientHandler.checkOpcUaVertexPortReadOnly("server");
+		assert waldotTestClientHandler.checkOpcUaVertexPortValueEquals("server",
 				"9090");
 
 	}
@@ -216,7 +218,7 @@ public class GremlinPluginTest {
 		waldotTestClientHandler.createVertexWithOpcUa("a", "A", null,
 				new String[0]);
 		g.addVertex("label", "test gremlin", "type", "gremlin", "directory",
-				"server", "port", "5623");
+				"server", PORT_FIELD, "5623");
 		waldotTestClientHandler.createVertexWithOpcUa("b", "B", null,
 				new String[0]);
 		final Cluster cluster = Cluster.build().addContactPoint("127.0.0.1") // host

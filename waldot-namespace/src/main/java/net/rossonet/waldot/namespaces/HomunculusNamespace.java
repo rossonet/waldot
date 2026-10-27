@@ -74,6 +74,7 @@ import net.rossonet.waldot.jexl.JexlCmdFunction;
 import net.rossonet.waldot.logger.TraceLogger;
 import net.rossonet.waldot.logger.TraceLogger.ContexLogger;
 import net.rossonet.waldot.opc.AbstractOpcCommand;
+import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 import net.rossonet.waldot.opc.WaldotOpcUaServer;
 import net.rossonet.waldot.utils.ThreadHelper;
 
@@ -286,6 +287,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		} catch (final Exception e) {
 			logger.warn("Error closing OPC UA server: {}", e.getMessage());
 		}
+		// release the static per-namespace registry, otherwise the closed
+		// namespace (and its whole address space) is never garbage collected
+		MiloSingleServerBaseReferenceNodeBuilder.unregister(this);
 	}
 
 	private void closeQuietly(final String name, final AutoCloseable resource) {
