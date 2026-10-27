@@ -24,6 +24,16 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 	private static final java.util.regex.Pattern ASSIGNMENT_PATTERN = java.util.regex.Pattern
 			.compile("^\\s*(?:var\\s+)?\\w+\\s*=(?!=)", java.util.regex.Pattern.MULTILINE);
 
+	/** Connect timeout for a remote bootstrap URL. {@code 0} is not accepted (it would mean infinite). */
+	public static final String CONNECT_TIMEOUT_PROPERTY = "waldot.boot.connect-timeout-ms";
+
+	public static final int DEFAULT_CONNECT_TIMEOUT_MS = 10_000;
+
+	/** Read timeout for a remote bootstrap URL. */
+	public static final String READ_TIMEOUT_PROPERTY = "waldot.boot.read-timeout-ms";
+
+	public static final int DEFAULT_READ_TIMEOUT_MS = 30_000;
+
 	private AgentStatus agentStatus = AgentStatus.INIT;
 	private Logger logger;
 	private WaldotNamespace waldotNamespace;
@@ -61,45 +71,102 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 			return false;
 		}
 		// Remove '#' comments for detection (legacy line-mode syntax), also on the
-		// last line without a trailing newline.
-		final String cleanContent = content.replaceAll("(?m)^\\s*#[^\n]*$", "");
+		// last line without a trailing newline. Only a line whose first non-space
+		// character is '#' is a comment: a '#' inside a string must be kept.
+		final String cleanContent = content.replaceAll("(?m)^\\s*#[^\\n]*$", "");
+		// Indicators are matched on the text with string and template literals
+		// removed, so a URL or a quoted '//' does not force script mode.
+		final String scanned = maskLiterals(cleanContent);
 
 		// Script mode indicators:
 
 		// 1. Comments (//, /* */)
-		if (cleanContent.contains("//") || cleanContent.contains("/*")) {
+		if (scanned.contains("//") || scanned.contains("/*")) {
 			return true;
 		}
 
-		// 2. Function definitions
-		if (cleanContent.matches("(?s).*\\bdef\\s+\\w+\\s*\\(.*")) {
+		// 2. Function definitions (Groovy 'def'; JEXL rejects it, but it is not line mode)
+		if (scanned.matches("(?s).*\\bdef\\s+\\w+\\s*\\(.*")) {
 			return true;
 		}
 
 		// 3. Variable assignments (excluding object property syntax).
 		// Look for patterns such as "varName = " or "var varName = " at line start.
-		if (ASSIGNMENT_PATTERN.matcher(cleanContent).find()) {
+		if (ASSIGNMENT_PATTERN.matcher(scanned).find()) {
 			return true;
 		}
 
 		// 4. Multi-line method chains with indentation.
 		// Look for patterns such as ".property(...)\n  .property(...)".
-		if (cleanContent.matches("(?s).*\\.\\w+\\([^)]*\\)\\s*\n\\s+\\.\\w+\\(.*")) {
+		if (scanned.matches("(?s).*\\.\\w+\\([^)]*\\)\\s*\n\\s+\\.\\w+\\(.*")) {
 			return true;
 		}
 
 		// 5. Control structures
-		if (cleanContent.matches("(?s).*(\\bif\\s*\\(|\\bfor\\s*\\(|\\bwhile\\s*\\(|\\btimes\\s*\\{).*")) {
+		if (scanned.matches("(?s).*(\\bif\\s*\\(|\\bfor\\s*\\(|\\bwhile\\s*\\(|\\btimes\\s*\\{).*")) {
 			return true;
 		}
 
 		// 6. Closures/blocks with meaningful content.
-		if (cleanContent.matches("(?s).*\\{[^}]{20,}\\}.*")) {
+		if (scanned.matches("(?s).*\\{[^}]{20,}\\}.*")) {
 			return true;
 		}
 
 		// Default: line-by-line mode for backward compatibility.
 		return false;
+	}
+
+	/**
+	 * Replaces the contents of {@code '...'}, {@code "..."} and backtick templates
+	 * with empty quotes, keeping newlines so line-anchored patterns still see the
+	 * original layout. Used only to decide the bootstrap mode.
+	 */
+	static String maskLiterals(final String content) {
+		final StringBuilder out = new StringBuilder(content.length());
+		int i = 0;
+		while (i < content.length()) {
+			final char c = content.charAt(i);
+			if (c == '\'' || c == '"' || c == '`') {
+				final char quote = c;
+				out.append(quote).append(quote);
+				i++;
+				while (i < content.length()) {
+					final char ch = content.charAt(i);
+					if (ch == '\\' && i + 1 < content.length()) {
+						i += 2;
+						continue;
+					}
+					if (ch == quote) {
+						i++;
+						break;
+					}
+					if (ch == '\n') {
+						out.append('\n');
+					}
+					i++;
+				}
+			} else {
+				out.append(c);
+				i++;
+			}
+		}
+		return out.toString();
+	}
+
+	private static int timeoutMs(final String property, final int defaultMs) {
+		final String raw = System.getProperty(property);
+		if (raw == null || raw.isBlank()) {
+			return defaultMs;
+		}
+		try {
+			final int value = Integer.parseInt(raw.trim());
+			if (value > 0) {
+				return value;
+			}
+		} catch (final NumberFormatException ignored) {
+			// fall through
+		}
+		return defaultMs;
 	}
 
 	@Override
@@ -163,8 +230,9 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 	 *         array with one expression per element.
 	 */
 	private String[] getConfigurationfromUrl(final String bootstrapUrl) {
-		// try-with-resources: the stream is closed even on read errors
-		try (InputStream is = new URI(bootstrapUrl).toURL().openConnection().getInputStream();
+		// try-with-resources: the stream is closed even on read errors.
+		// Connect and read timeouts apply to remote URLs; file: URLs ignore them.
+		try (InputStream is = openBootstrapStream(bootstrapUrl);
 				BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 			final StringBuilder fullContent = new StringBuilder();
 			final List<String> individualLines = new ArrayList<>();
@@ -210,6 +278,13 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 		return new String[0];
 	}
 
+	private InputStream openBootstrapStream(final String bootstrapUrl) throws Exception {
+		final java.net.URLConnection connection = new URI(bootstrapUrl).toURL().openConnection();
+		connection.setConnectTimeout(timeoutMs(CONNECT_TIMEOUT_PROPERTY, DEFAULT_CONNECT_TIMEOUT_MS));
+		connection.setReadTimeout(timeoutMs(READ_TIMEOUT_PROPERTY, DEFAULT_READ_TIMEOUT_MS));
+		return connection.getInputStream();
+	}
+
 	@Override
 	public void initialize(final WaldotNamespace waldotNamespace) {
 		this.waldotNamespace = waldotNamespace;
@@ -217,9 +292,10 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 		logger = waldotNamespace.getBootLogger();
 	}
 
-	private void runBootConfiguration(final String[] configuration) {
+	private void runBootConfiguration(final String[] configuration, final boolean readFailed) {
 		if (configuration != null && configuration.length > 0) {
 			int num = 0;
+			int failures = 0;
 			for (final String line : configuration) {
 				if (line.startsWith("#") || line.isEmpty()) {
 					continue;
@@ -233,21 +309,31 @@ public class SingleFileBootstrapStrategy implements BootstrapStrategy {
 						logger.info("[{}]: {} -> no result\n", num, line);
 					}
 				} catch (final Exception e) {
+					failures++;
 					logger.error("Error executing command '{}': {}", line, e.getMessage());
 				}
 			}
-			agentStatus = AgentStatus.READY;
-			logger.info("Bootstrap procedure completed successfully.");
+			if (failures > 0) {
+				agentStatus = AgentStatus.FAULT;
+				logger.error("Bootstrap procedure completed with {} error(s).", failures);
+			} else {
+				agentStatus = AgentStatus.READY;
+				logger.info("Bootstrap procedure completed successfully.");
+			}
 		} else {
 			logger.warn("the bootstrap configuration is empty or null. No commands to execute.");
+			if (readFailed) {
+				agentStatus = AgentStatus.FAULT;
+			}
 		}
 	}
 
 	@Override
 	public void runBootstrapProcedure() {
 		final String[] configuration = getConfigurationfromUrl(waldotNamespace.getBootstrapUrl());
+		final boolean readFailed = agentStatus == AgentStatus.FAULT;
 		agentStatus = AgentStatus.BOOT;
-		runBootConfiguration(configuration);
+		runBootConfiguration(configuration, readFailed);
 
 	}
 

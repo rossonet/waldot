@@ -140,6 +140,8 @@ Example: disable the `exec` command entirely
 | -------- | ------- | ----------- |
 | `waldot.milo.strategy` | `optimized` | Milo strategy used by the namespace: `optimized` or `base` (legacy). Unknown values fall back to `optimized`. |
 | `waldot.boot.file` | `/tmp/boot.conf` | Bootstrap file used by `OpcFactory.getOpcGraph()` (embedded/test usage only, not by the server runner). |
+| `waldot.boot.connect-timeout-ms` | `10000` | Connect timeout for a remote `--boot-url`. `file:` URLs ignore it. A value `<= 0` or not numeric keeps the default. |
+| `waldot.boot.read-timeout-ms` | `30000` | Read timeout for a remote `--boot-url`. |
 
 ## Bootstrap file
 

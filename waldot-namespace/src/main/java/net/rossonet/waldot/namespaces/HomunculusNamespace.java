@@ -84,6 +84,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	private ClientRegisterAnonymousValidator agentAnonymousValidator;
 	private final AtomicBoolean resetInProgress = new AtomicBoolean(false);
+	private final AtomicBoolean closed = new AtomicBoolean(false);
 	private ClientRegisterUsernameIdentityValidator agentIdentityValidator;
 	private ClientRegisterX509IdentityValidator agentX509IdentityValidator;
 
@@ -259,6 +260,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public void close() throws Exception {
+		if (!closed.compareAndSet(false, true)) {
+			return;
+		}
 		// each close is isolated: a failing strategy must not prevent the
 		// cleanup of the others
 		if (timer != null) {
@@ -271,11 +275,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		closeQuietly("bootstrap procedure strategy", bootstrapProcedureStrategy);
 		closeQuietly("console strategy", consoleStrategy);
 		for (final PluginListener plugin : plugins) {
-			try {
-				plugin.stop();
-			} catch (final Exception e) {
-				logger.warn("Error stopping plugin {}: {}", plugin.getClass().getSimpleName(), e.getMessage());
-			}
+			stopPlugin(plugin);
 		}
 		logger.info("all plugins stopped");
 		closeQuietly("client management strategy", clientManagementStrategy);
@@ -290,6 +290,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		// release the static per-namespace registry, otherwise the closed
 		// namespace (and its whole address space) is never garbage collected
 		MiloSingleServerBaseReferenceNodeBuilder.unregister(this);
+		// the Gremlin graph owns the service registry; closing it here covers
+		// callers that only close the namespace. OpcGraph.close() is idempotent.
+		closeQuietly("gremlin graph", gremlin);
 	}
 
 	private void closeQuietly(final String name, final AutoCloseable resource) {
@@ -307,8 +310,12 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	public WaldotGraphComputerView createGraphComputerView(
 			final WaldotGraph graph, final GraphFilter graphFilter,
 			final Set<VertexComputeKey> object) {
-		return opcMappingStrategy.createGraphComputerView(graph, graphFilter,
-				object);
+		final WaldotGraphComputerView view = opcMappingStrategy
+				.createGraphComputerView(graph, graphFilter, object);
+		// inComputerMode() reads this field; without the assignment the
+		// computer view is created and immediately discarded
+		this.graphComputerView = view;
+		return view;
 	}
 
 	@Override
@@ -334,7 +341,11 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public void dropGraphComputerView() {
-		opcMappingStrategy.dropGraphComputerView();
+		try {
+			opcMappingStrategy.dropGraphComputerView();
+		} finally {
+			graphComputerView = null;
+		}
 	}
 
 	@Override
@@ -492,7 +503,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public Set<PluginListener> getPlugins() {
-		return plugins;
+		return Set.copyOf(plugins);
 	}
 
 	@Override
@@ -750,7 +761,15 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 			// state
 			opcMappingStrategy.resetNameSpace();
 			for (final PluginListener plugin : plugins) {
-				plugin.reset();
+				// stop background work before clearing state; start() runs
+				// again from the bootstrap below
+				stopPlugin(plugin);
+				try {
+					plugin.reset();
+				} catch (final Exception e) {
+					logger.warn("Error resetting plugin {}: {}",
+							plugin.getClass().getSimpleName(), e.getMessage());
+				}
 			}
 			logger.info("Namespace reset done");
 			listeners.forEach(listener -> listener.onNamespaceReset());
@@ -787,9 +806,34 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		return builder.toString();
 	}
 
+	private void stopPlugin(final PluginListener plugin) {
+		try {
+			plugin.stop();
+		} catch (final Exception e) {
+			logger.warn("Error stopping plugin {}: {}",
+					plugin.getClass().getSimpleName(), e.getMessage());
+		}
+	}
+
 	@Override
 	public void unregisterPlugin(final PluginListener plugin) {
-		plugins.remove(plugin);
+		if (plugin == null || !plugins.remove(plugin)) {
+			return;
+		}
+		stopPlugin(plugin);
+		final Collection<WaldotCommand> commands = plugin.getCommands();
+		if (commands == null) {
+			return;
+		}
+		for (final WaldotCommand command : List.copyOf(commands)) {
+			try {
+				removeCommand(command);
+			} catch (final Exception e) {
+				logger.warn("Error removing command of plugin {}: {}",
+						plugin.getClass().getSimpleName(), e.getMessage());
+			}
+		}
+		logger.info("Plugin {} unregistered", plugin.getClass().getSimpleName());
 	}
 
 }

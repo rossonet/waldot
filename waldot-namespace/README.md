@@ -37,7 +37,7 @@ Bootstrap is loaded from URL (`file://`, `http://`, `https://`) and auto-detects
 - line-by-line mode (legacy): one expression per line, `#` comments;
 - script mode (recommended): the whole file is one JEXL script, statements end with `;`.
 
-Both modes are executed by the console engine (Apache Commons JEXL).
+Both modes are executed by the console engine (Apache Commons JEXL). A failed expression sets the bootstrap status to `FAULT` and is not reported as a successful procedure. Remote URLs use a connect timeout of 10 s and a read timeout of 30 s (`waldot.boot.connect-timeout-ms`, `waldot.boot.read-timeout-ms`).
 
 See `BOOTSTRAP_CONFIGURATION.md` for syntax, detection rules, and examples.
 

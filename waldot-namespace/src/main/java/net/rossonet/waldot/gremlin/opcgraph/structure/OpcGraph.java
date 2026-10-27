@@ -1,6 +1,7 @@
 package net.rossonet.waldot.gremlin.opcgraph.structure;
 
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.Configuration;
@@ -121,6 +122,8 @@ public class OpcGraph extends AbstractOpcGraph {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
+	private final AtomicBoolean closed = new AtomicBoolean(false);
+
 	private WaldotNamespace opcNamespace;
 
 	OpcGraph(final Configuration configuration) {
@@ -160,8 +163,37 @@ public class OpcGraph extends AbstractOpcGraph {
 	}
 
 	@Override
+	public void close() {
+		if (!closed.compareAndSet(false, true)) {
+			return;
+		}
+		try {
+			closeProcedure();
+		} finally {
+			serviceRegistry.close();
+		}
+	}
+
+	/**
+	 * @return {@code true} after {@link #close()} has run once
+	 */
+	public boolean isClosed() {
+		return closed.get();
+	}
+
+	@Override
 	public void closeProcedure() {
 		logger.info("opc graph closed");
+		// closing the graph must also release the namespace (OPC UA server,
+		// plugins, strategies). HomunculusNamespace.close() is idempotent and
+		// closes this graph only when it was not already closing.
+		if (opcNamespace != null) {
+			try {
+				opcNamespace.close();
+			} catch (final Exception e) {
+				logger.warn("Error closing namespace from graph: {}", e.getMessage());
+			}
+		}
 	}
 
 	@Override

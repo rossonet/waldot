@@ -9,13 +9,18 @@ by `SingleFileBootstrapStrategy` from the URL given with `--boot-url`
 the file again, so the graph is rebuilt from scratch. A `cmd.reset()` called
 by the bootstrap file itself is ignored.
 
+Embedded graphs created with `OpcFactory.getOpcGraph()` do **not** use that
+default: they load `file:///tmp/boot.conf`, or the file named by
+`-Dwaldot.boot.file`.
+
 The file is executed by the WaldOT console engine, which is based on
 **Apache Commons JEXL 3** (not Groovy). The same engine runs the `query`
 OPC UA command and the console, so everything that works in a bootstrap file
-also works there.
+also works there. Rule `condition` / `action` scripts use the same engine.
 
-Every example on this page has been executed in the `rossonet/waldot` image.
-
+The syntax below matches `BootstrapScriptModeTests` and
+`SingleFileBootstrapStrategyDetectTest`. Log excerpts are typical, not a
+byte-for-byte transcript of one run (NodeIds in particular are not stable).
 ---
 
 ## Formats
@@ -32,16 +37,21 @@ The format is detected automatically from the content.
 ```
 # line mode: one expression per line
 graph.addVertex('id', 'l1', 'label', 'l1')
-g.addV('plain').property('id', 'l2').property('label', 'l2').next()
-log.info('line mode ok: ' + g.V().count().next())
+graph.addVertex('id', 'l2', 'label', 'l2')
+log.info('line mode ok: ' + cmd.getVerticesCount())
 ```
 
 Log:
 
 ```
-INFO BOOT - Bootstrap configuration loaded in LINE-BY-LINE MODE from URL: [file:///waldot/boot.conf]
+INFO BOOT - Bootstrap configuration loaded in LINE-BY-LINE MODE from URL: file:///waldot/boot.conf
 INFO CONSOLE - line mode ok: 2
+INFO BOOT - Bootstrap procedure completed successfully.
 ```
+
+An error on a line is logged and the following lines are still executed.
+The agent status becomes `FAULT` and the success line above is replaced by
+`Bootstrap procedure completed with N error(s).`
 
 ### Script mode
 
@@ -54,23 +64,27 @@ The whole file is executed as **one JEXL script**:
 - variables (`var x = ...;`), functions, loops, conditions, `try/catch`;
 - an error stops the whole script: the vertices already created remain, the
   following statements are not executed (use `try/catch` around optional
-  parts).
+  parts). The agent status becomes `FAULT` and WaldOT logs
+  `Bootstrap procedure completed with 1 error(s).` instead of the success line.
 
 ### Automatic detection
 
-Script mode is selected when the content (ignoring `#` lines) contains at
-least one of:
+Script mode is selected when the content, ignoring lines whose first
+non-space character is `#` and ignoring text inside `'...'`, `"..."` and
+backtick templates, contains at least one of:
 
-1. `//` or `/*`;
-2. `def name(`;
-3. an assignment at the beginning of a line (`name = ...`, `var name = ...`);
+1. `//` or `/*` (a URL such as `https://...` inside a string does **not** count);
+2. `def name(` (Groovy; see the warning below);
+3. an assignment at the beginning of a line (`name = ...`, `var name = ...`;
+   `==` does not count);
 4. a method chain continued on an indented line (`.foo(...)` followed by a
    line starting with `.bar(`);
 5. `if (`, `for (`, `while (`, `times {`;
 6. a block `{ ... }` with at least 20 characters.
 
 Otherwise line mode is used. To force script mode start the file with a `//`
-comment; to force line mode use only `#` comments and one expression per line.
+comment; to force line mode use only `#` comments and one expression per line,
+and do not put `//`, assignments or control structures outside strings.
 
 > **Warning**: detection rule 2 recognizes `def`, but `def` is Groovy syntax
 > and is **rejected by JEXL** (`ambiguous statement error`). Define functions
@@ -82,8 +96,8 @@ comment; to force line mode use only `#` comments and one expression per line.
 > interfaces and the JEXL uberspect does not find them
 > (`JEXL error : next`). Prefer the `WaldotGraph` API
 > (`graph.addVertex(...)`, `graph.vertices(...)`) or iterate the traversal
-> with `for (var v : g.V()) { ... }`, which works. The examples below that
-> call `.next()` on a traversal must be read accordingly.
+> with `for (var v : g.V()) { ... }`, which works. Do not call `.next()`
+> on a traversal, including inside a rule `condition`.
 ---
 
 ## Script context
@@ -91,18 +105,19 @@ comment; to force line mode use only `#` comments and one expression per line.
 | Name | Object | Use |
 | ---- | ------ | --- |
 | `graph` | `WaldotGraph` | `graph.addVertex('key', 'value', ...)`, vertex/edge lookup |
-| `g` | Gremlin traversal source | `g.V().has('label', 'x').next()`, `g.addV(...)` |
+| `g` | Gremlin traversal source | `g.V().has('label', 'x')` as the source of `for (var v : ...)`, `g.addV(...)` |
 | `log` | console logger | `log.info(...)`, `log.warn(...)`, `log.error(...)` |
 | `cmd` | console helper | `cmd.getVerticesCount()`, `cmd.getEdgesCount()`, `cmd.listCommands()`, `cmd.toNumber(x)`, `cmd.echo(x)`, `cmd.help()` |
 | `<directory>_<command>` | every registered command | invoked with `.exec(...)`, e.g. `simulator_create_generator.exec(...)`, `query.exec(...)`, `about.exec()` |
 
-The name of a command object is its OPC UA folder and name with spaces
-replaced by `_` (the list is printed at startup as
-`Registering console command: [...]`). `exec(...)` takes the input arguments
-of the OPC UA method as strings, in order, and returns an array: element `0`
-is the result (for creation commands the NodeId of the vertex or
-`error: ...`).
-
+The console name is `TextHelper.cleanText(directory + "_" + command)`:
+lower case, and every run of characters other than letters, digits, `_`,
+`;` and `:` becomes a single `_`. `create generator` in the `simulator`
+folder is therefore `simulator_create_generator`. The name is also printed at
+startup as `Registering console command: [...]`. `exec(...)` takes the input
+arguments of the OPC UA method as strings, in order, and returns an array:
+element `0` is the result (for creation commands the NodeId of the vertex,
+for example `ns=2;s=cmd-gen` when the id is a string, or `error: ...`).
 ---
 
 ## Vertex and edge syntax
@@ -163,8 +178,12 @@ while (i < 2) {
   i = i + 1;
 }
 
-if (g.V().has('label', 'temp-lab').hasNext()) {
-  log.info('lab sensor present, vertices: ' + g.V().count().next());
+var labPresent = false;
+for (var v : g.V().has('label', 'temp-lab')) {
+  labPresent = true;
+}
+if (labPresent) {
+  log.info('lab sensor present, vertices: ' + cmd.getVerticesCount());
 }
 
 // plugin command: label, directory, algorithm, delay, min, max, post-node-id-data
@@ -175,14 +194,17 @@ log.info('command result: ' + gen[0]);
 Log:
 
 ```
-INFO BOOT - Bootstrap configuration loaded in SCRIPT MODE from URL: [file:///waldot/boot.conf]
+INFO BOOT - Bootstrap configuration loaded in SCRIPT MODE from URL: file:///waldot/boot.conf
 INFO CONSOLE - created sensor office
 INFO CONSOLE - created sensor warehouse
 INFO CONSOLE - created sensor lab
 INFO CONSOLE - lab sensor present, vertices: 5
-INFO CONSOLE - command result: ns=2;i=120001
+INFO CONSOLE - command result: ns=2;s=cmd-gen
 INFO BOOT - Bootstrap procedure completed successfully.
 ```
+
+`ns=2;s=cmd-gen` is the shape of a string NodeId for id `cmd-gen`. A numeric
+id would be `ns=2;i=...` and is assigned by the server, so do not hard-code it.
 
 ### Generator, link, rule
 
@@ -203,7 +225,7 @@ var compute = graph.addVertex('id', 'main-compute', 'type', 'rules:compute', 'la
     'directory', 'plant/rules', 'threads', '2');
 var alarm = graph.addVertex('id', 'temp-alarm', 'type', 'rules:rule', 'label', 'temp-alarm',
     'directory', 'plant/rules',
-    'condition', "g.V().has('id','control-room').next().property('temperature').value().toString().toDouble() > 25.0",
+    'condition', "var hot = false; for (var v : g.V().has('id', 'control-room')) { var raw = v.property('temperature').value(); hot = raw != null && Double.parseDouble(raw.toString()) > 25.0; } hot",
     'action', "log.warn('High temperature in control room')",
     'hysteresis', '10000');
 compute.addEdge('runner', alarm, 'type', 'rules:execute', 'priority', '100');
@@ -251,7 +273,14 @@ docker run -p 12686:12686 rossonet/waldot:latest \
 ```
 
 Any URL supported by Java (`file://`, `http://`, `https://`) can be used.
-Prefer HTTPS and trusted sources: the file can run any console command.
+Prefer HTTPS and trusted sources: the file can run any console command,
+including `cmd.exit()`, which stops the JVM.
+
+Remote URLs use a connect timeout of 10 seconds and a read timeout of
+30 seconds (`-Dwaldot.boot.connect-timeout-ms`, `-Dwaldot.boot.read-timeout-ms`;
+a value `<= 0` or not numeric is ignored and the default is kept). `file:`
+URLs are not subject to those timeouts. A URL that cannot be read leaves the
+agent status at `FAULT` and does not log a successful bootstrap.
 
 ### Missing or empty file
 
@@ -273,6 +302,8 @@ WARN BOOT - the bootstrap configuration is empty or null. No commands to execute
 | `Vertex with id already exists` | duplicated `id` | use unique ids or `try/catch` |
 | `Changing label from X to Y is not allowed` | `g.addV('X').property('label','Y')` | the label of `addV` wins; use `graph.addVertex('label', ...)` |
 | `No valid bootstrap configuration found` | line-mode file with only comments | add expressions or remove the file |
+| `Bootstrap procedure completed with N error(s).` | one or more expressions threw; status is `FAULT` | fix the expression; line mode still runs the following lines, script mode stops at the first error |
+| `Error reading bootstrap configuration` | URL missing, unreadable, or timed out | check `--boot-url` and, for HTTP, the timeout properties |
 
 Check which mode was chosen:
 

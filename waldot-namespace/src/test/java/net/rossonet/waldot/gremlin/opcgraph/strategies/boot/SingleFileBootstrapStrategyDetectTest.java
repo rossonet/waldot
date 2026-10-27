@@ -42,6 +42,19 @@ class SingleFileBootstrapStrategyDetectTest {
 	}
 
 	@Test
+	void quotedUrlDoesNotForceScriptMode() {
+		assertFalse(SingleFileBootstrapStrategy.detectScriptMode(
+				"graph.addVertex('id', 'a', 'source', 'https://example.com/boot.conf')\n"));
+		assertFalse(SingleFileBootstrapStrategy
+				.detectScriptMode("graph.addVertex('note', 'see // docs and def foo(')\n"));
+	}
+
+	@Test
+	void slashCommentOutsideStringIsScriptMode() {
+		assertTrue(SingleFileBootstrapStrategy.detectScriptMode("// comment\ngraph.addVertex('id', 'a');\n"));
+	}
+
+	@Test
 	void simpleCommandsAreLineMode() {
 		final String content = "# legacy comment\n" + "graph.addVertex('id', 'sensor1', 'label', 'sensor1')\n"
 				+ "graph.addVertex('id', 'sensor2', 'label', 'sensor2')\n";
