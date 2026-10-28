@@ -74,6 +74,7 @@ VOLUME ["/app/.security"]
 ENTRYPOINT ["java", \
   "--add-opens", "java.base/java.lang=ALL-UNNAMED", \
   "--add-opens", "java.base/java.util=ALL-UNNAMED", \
+  "--add-opens", "java.base/java.util.concurrent.atomic=ALL-UNNAMED", \
   "-Djava.net.preferIPv4Stack=true", \
   "-Djava.security.egd=file:/dev/./urandom", \
   "-cp", "/app/lib/*", \

@@ -23,7 +23,6 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
-import net.rossonet.waldot.gremlin.opcgraph.process.computer.OpcGraphComputer;
 import net.rossonet.waldot.gremlin.opcgraph.services.OpcServiceRegistry;
 
 /**
@@ -150,19 +149,27 @@ public abstract class AbstractOpcGraph implements WaldotGraph {
 		serviceRegistry.close();
 	}
 
+	/**
+	 * GraphComputer (OLAP) is not supported: the graph is the live OPC UA
+	 * address space and the computer view is not implemented.
+	 *
+	 * @throws UnsupportedOperationException always
+	 *                                       ({@link Exceptions#graphComputerNotSupported()})
+	 */
 	@Override
 	public GraphComputer compute() {
-		return new OpcGraphComputer(this);
+		throw Exceptions.graphComputerNotSupported();
 	}
 
 	////////////// STRUCTURE API METHODS //////////////////
-	@SuppressWarnings("unchecked")
+	/**
+	 * GraphComputer (OLAP) is not supported, see {@link #compute()}.
+	 *
+	 * @throws UnsupportedOperationException always
+	 */
 	@Override
 	public <C extends GraphComputer> C compute(final Class<C> graphComputerClass) {
-		if (!graphComputerClass.equals(OpcGraphComputer.class)) {
-			throw Exceptions.graphDoesNotSupportProvidedGraphComputer(graphComputerClass);
-		}
-		return (C) new OpcGraphComputer(this);
+		throw Exceptions.graphComputerNotSupported();
 	}
 
 	@Override

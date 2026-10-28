@@ -79,7 +79,9 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 
 	@Override
 	public Element element() {
-		return getPropertyReference();
+		// the owner edge is known from construction: asking the namespace
+		// would call back element() (infinite recursion)
+		return referenceEdge;
 	}
 
 	@Override
@@ -94,7 +96,7 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 
 	@Override
 	public WaldotEdge getPropertyReference() {
-		return getNamespace().getPropertyReference(this);
+		return referenceEdge;
 	}
 
 	public WaldotEdge getReferenceEdge() {

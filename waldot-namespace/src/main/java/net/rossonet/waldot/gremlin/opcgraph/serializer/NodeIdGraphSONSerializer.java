@@ -50,11 +50,12 @@ public final class NodeIdGraphSONSerializer extends TinkerPopJacksonModule {
 			@Override
 			public NodeId deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 				final JsonNode n = p.readValueAsTree();
+				// asText(): toString() would keep the JSON quotes
 				if (n.has(GraphSONTokens.VALUE)) {
-					return NodeId.parse(n.get(GraphSONTokens.VALUE).toString());
+					return NodeId.parse(n.get(GraphSONTokens.VALUE).asText());
 				}
 				// fallback se non tipizzato
-				return NodeId.parse(n.toString());
+				return NodeId.parse(n.asText());
 			}
 		});
 	}

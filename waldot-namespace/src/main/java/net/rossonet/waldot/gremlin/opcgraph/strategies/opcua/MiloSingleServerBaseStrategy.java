@@ -15,7 +15,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.apache.tinkerpop.gremlin.process.computer.VertexComputeKey;
 import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Graph.Variables;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
@@ -108,6 +111,20 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		return nodes;
 	}
 
+	/**
+	 * Traversal starting from the element of a per-element command. The NodeId
+	 * is used as it is: its identifier alone does not resolve generated
+	 * numeric ids, and an edge must start from E().
+	 */
+	private GraphTraversal<?, ? extends Element> elementTraversal(
+			final GremlinElement element) {
+		final GraphTraversalSource g = waldotNamespace.getGremlinGraph()
+				.traversal();
+		return element instanceof Edge
+				? g.E(element.getNodeId())
+				: g.V(element.getNodeId());
+	}
+
 	private void addDeletedCommand(GremlinElement vertex) {
 		final AbstractOpcCommand deleteCommand = new AbstractOpcCommand(
 				waldotNamespace.getGremlinGraph(), waldotNamespace,
@@ -126,8 +143,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				String output = "";
 				String error = "";
 				try {
-					output = waldotNamespace.getGremlinGraph().traversal()
-							.V(vertex.getNodeId().getIdentifier()).drop()
+					output = elementTraversal(vertex).drop()
 							.iterate() + " element deleted";
 				} catch (final Exception e) {
 					logger.error("Error deleting element {}: {}",
@@ -340,8 +356,7 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 				final String label = inputValues[0];
 				final String value = inputValues[1];
 				try {
-					output = waldotNamespace.getGremlinGraph().traversal()
-							.V(vertex.getNodeId().getIdentifier())
+					output = elementTraversal(vertex)
 							.property(label, value).iterate() + " property '"
 							+ label + "' updated with value '" + value + "'";
 				} catch (final Exception e) {
@@ -483,9 +498,10 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 		logger.info(
 				"createGraphComputerView: graph={}, graphFilter={}, VertexComputeKey={}",
 				graph, graphFilter, vertexComputeKeys);
-		// TODO valutare come implementare GraphComputerView (per ora non si
-		// presuppone l'uso di computazioni sul grafo)
-		throw new UnsupportedOperationException("Not implemented yet");
+		// GraphComputer (OLAP) is not supported: see
+		// WaldotNamespace#createGraphComputerView
+		throw new UnsupportedOperationException(
+				"GraphComputer (OLAP) is not supported by WaldOT");
 	}
 
 	@Override
@@ -837,12 +853,21 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	@Override
 	public <DATA_TYPE> WaldotEdge getPropertyReference(
 			final WaldotProperty<DATA_TYPE> property) {
+		if (property instanceof net.rossonet.waldot.opc.AbstractOpcProperty) {
+			return ((net.rossonet.waldot.opc.AbstractOpcProperty<DATA_TYPE>) property)
+					.getReferenceEdge();
+		}
 		for (final Reference r : property.getReferences()) {
 			if (r.getReferenceTypeId().equals(NodeIds.HasComponent)
 					&& r.isInverse()) {
-				final NodeId nodeId = r.getSourceNodeId();
-				return (OpcEdge) waldotNamespace.getStorageManager()
-						.get(nodeId);
+				// inverse reference stored on the property: the edge is the
+				// target
+				final UaNode node = r.getTargetNodeId()
+						.toNodeId(waldotNamespace.getNamespaceTable())
+						.flatMap(id -> waldotNamespace.getStorageManager()
+								.getNode(id))
+						.orElse(null);
+				return node instanceof WaldotEdge ? (WaldotEdge) node : null;
 			}
 		}
 		return null;
@@ -1007,6 +1032,12 @@ public class MiloSingleServerBaseStrategy implements MiloStrategy {
 	private void linkCommandDirectoryStructure(AbstractOpcCommand command) {
 		final Map<String, UaFolderNode> commandDirectories = folderManager
 				.getCommandDirectories();
+		if (command.getDirectory() == null
+				|| command.getDirectory().trim().isEmpty()) {
+			// no directory: the command is linked to the commands root
+			interfaceRootNode.addComponent(command);
+			return;
+		}
 		if (!commandDirectories.containsKey(command.getDirectory())) {
 			final String[] components = command.getDirectory()
 					.split(DIRECTORY_SPLIT_SIMBOL);

@@ -78,6 +78,24 @@ import net.rossonet.waldot.opc.WaldotOpcUaServer;
  * // Execute expressions
  * namespace.runExpression("g.V().count()");
  * }</pre>
+ *
+ * <h2>OPC UA commands from Gremlin</h2>
+ * <p>The commands (method nodes) of vertices and edges, and the global
+ * commands of the console, can be run from any Gremlin query with the
+ * TinkerPop {@code call()} step and the service {@code waldot.command}; the
+ * service {@code waldot.commands} lists them:</p>
+ * <pre>{@code
+ * namespace.runExpression(
+ *     "g.V('device:001').call('waldot.command', {'command':'property','args':['k','v']}).toList()");
+ * namespace.runExpression("g.V('device:001').call('waldot.commands').toList()");
+ * }</pre>
+ * <p>The commands run in Barrier mode (after all the elements are collected),
+ * once per element, and return one map {@code element, command, outputs,
+ * error} per invocation. The service is disabled unless the configuration key
+ * (or system property) {@code waldot.gremlin.commands.enabled} is
+ * {@code true} (default {@code false}). Commands run without
+ * {@code InvocationContext}: no OPC UA session and no OPC UA user, only the
+ * {@code Executable}/{@code UserExecutable} attributes are checked.</p>
  * 
  * @author Andrea Ambrosini - Zona Autonoma srl
  */
@@ -140,6 +158,11 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * 
 	 * <p>Sets up the graph for graph computer (OLAP) processing with the
 	 * specified filter and compute keys.</p>
+	 * 
+	 * <p><b>Not supported</b> by the shipped implementation: the Milo
+	 * strategies throw {@link UnsupportedOperationException}, so
+	 * {@link #getGraphComputerView()} is always {@code null} and
+	 * {@link #inComputerMode()} always {@code false}.</p>
 	 * 
 	 * @param graph the WaldotGraph to use
 	 * @param graphFilter the GraphFilter for vertex/edge filtering
@@ -419,6 +442,9 @@ public interface WaldotNamespace extends AutoCloseable {
 	/**
 	 * Returns the current GraphComputer view, if in OLAP mode.
 	 * 
+	 * <p>GraphComputer is not supported by the shipped implementation, which
+	 * always returns {@code null}.</p>
+	 * 
 	 * @return the WaldotGraphComputerView, or null if not in computer mode
 	 * @see WaldotGraphComputerView
 	 */
@@ -506,7 +532,11 @@ public interface WaldotNamespace extends AutoCloseable {
 	/**
 	 * Returns all registered plugins.
 	 * 
-	 * @return set of PluginListener
+	 * <p>The result is an unmodifiable snapshot: use
+	 * {@link #registerPlugin(PluginListener)} and
+	 * {@link #unregisterPlugin(PluginListener)} to change the plugins.</p>
+	 * 
+	 * @return unmodifiable snapshot of the PluginListener set
 	 * @see PluginListener
 	 */
 	Set<PluginListener> getPlugins();
@@ -633,6 +663,9 @@ public interface WaldotNamespace extends AutoCloseable {
 	/**
 	 * Checks if the graph is in computer mode (OLAP processing).
 	 * 
+	 * <p>GraphComputer is not supported by the shipped implementation, which
+	 * always returns {@code false}.</p>
+	 * 
 	 * @return true if in computer mode, false otherwise
 	 */
 	boolean inComputerMode();
@@ -718,7 +751,9 @@ public interface WaldotNamespace extends AutoCloseable {
 	 * Registers a command with the namespace.
 	 * 
 	 * <p>Registered commands become available through the console and can
-	 * be invoked via OPC UA method calls.</p>
+	 * be invoked via OPC UA method calls. The OPC UA implementation requires
+	 * a {@code net.rossonet.waldot.opc.AbstractOpcCommand} and throws
+	 * {@link IllegalArgumentException} otherwise.</p>
 	 * 
 	 * @param command the WaldotCommand to register
 	 * @see WaldotCommand

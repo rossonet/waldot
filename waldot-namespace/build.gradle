@@ -75,7 +75,11 @@ test {
     useJUnitPlatform()
     // La suite completa (server Milo embedded) supera l'heap di default -> OOM nel test executor
     maxHeapSize = "2g"
-    //applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
+    // Gryo (Kryo FieldSerializer) needs reflective access to the JDK classes
+    // it registers (e.g. AtomicLong): same options as the Dockerfile/waldot-app
+    jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED',
+            '--add-opens=java.base/java.util=ALL-UNNAMED',
+            '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED'
 }
 
 jacocoTestReport {

@@ -360,6 +360,9 @@ public interface MiloStrategy extends AutoCloseable {
 	/**
 	 * Creates a GraphComputer view for OLAP processing.
 	 * 
+	 * <p><b>Not supported</b> by the shipped strategies, which throw
+	 * {@link UnsupportedOperationException}.</p>
+	 * 
 	 * @param graph the WaldotGraph
 	 * @param graphFilter the GraphFilter for filtering
 	 * @param vertexComputeKey the compute keys

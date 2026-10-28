@@ -41,6 +41,50 @@ Both modes are executed by the console engine (Apache Commons JEXL). A failed ex
 
 See `BOOTSTRAP_CONFIGURATION.md` for syntax, detection rules, and examples.
 
+## OPC UA commands from Gremlin
+
+The commands of vertices and edges (`delete`, `property`, plugin commands) and
+the global console commands can be run from any Gremlin query with the
+TinkerPop `call()` step. `OpcGraph` always registers two services:
+
+- `waldot.command` (`OpcCommandServiceFactory`): runs a command;
+- `waldot.commands` (`OpcCommandListServiceFactory`): lists the commands
+  (`command`, `description`, `inputs`), runs nothing, always available.
+
+```javascript
+// JEXL console / bootstrap
+g.V('device-1').call('waldot.command', {'command': 'property', 'args': ['color', 'red']}).toList();
+g.V().has('type', 'tmp').call('waldot.command', {'command': 'delete'}).toList();
+g.call('waldot.command', {'command': 'about'}).toList();   // global command
+g.V('device-1').call('waldot.commands').toList();
+```
+
+```groovy
+// remote Gremlin Server
+g.V('device-1').call('waldot.command', [command: 'property', args: ['color', 'red']]).toList()
+```
+
+- **Flag**: `waldot.gremlin.commands.enabled`, default `false`. Read at every
+  query from the namespace configuration, then the system property with the
+  same name (`GremlinCommandSettings`). When it is off the query fails with an
+  `IllegalStateException` naming the flag.
+- **Barrier mode**: mid traversal all the elements are collected first, then
+  the command runs once per element (bulk ignored), in order, in the query
+  thread. Optional parameter `ChunkSize` to run smaller groups.
+- **Result**: one map per invocation with `element` (NodeId as
+  `toParseableString()`, `null` for global commands), `command`, `outputs`
+  (output argument name, `out0`... when missing, to value) and `error`
+  (`null` or the message). Unknown/ambiguous commands, removed elements,
+  `Executable`/`UserExecutable` false, missing arguments and exceptions are
+  reported in `error` and do not stop the other invocations.
+- **No OPC UA user context**: commands run with `runCommand(null, args)`, so
+  there is no OPC UA session nor user; only `Executable`/`UserExecutable` are
+  checked.
+- **Java**: `WaldotTraversalDsl.exec(command, args...)` and `commands()` are
+  shortcuts for the same `call()` steps.
+
+See `docs/guide/docs/CONFIGURATION.md` for the full reference.
+
 ## Build and test
 
 From repository root:

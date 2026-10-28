@@ -56,7 +56,7 @@ import org.apache.tinkerpop.shaded.kryo.io.Input;
 import org.apache.tinkerpop.shaded.kryo.io.Output;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
-import net.rossonet.waldot.gremlin.opcgraph.serializer.NodeIdCustomTypeSerializer;
+import net.rossonet.waldot.gremlin.opcgraph.serializer.NodeIdGryoSerializer;
 import net.rossonet.waldot.gremlin.opcgraph.serializer.NodeIdGraphSONSerializer;
 
 /**
@@ -240,7 +240,7 @@ public final class OpcIoRegistryV2 extends AbstractIoRegistry {
 		register(GryoIo.class, OpcGraph.class, new TinkerGraphGryoSerializer());
 		register(GraphSONIo.class, null, new TinkerModuleV2());
 		register(GraphSONIo.class, NodeId.class, new NodeIdGraphSONSerializer());
-		register(GryoIo.class, NodeId.class, new NodeIdCustomTypeSerializer());
+		register(GryoIo.class, NodeId.class, new NodeIdGryoSerializer());
 		// register(GryoIo.class, UShort.class, new UShortCustomTypeSerializer());
 		// register(GraphSONIo.class, UShort.class, new UShortGraphSONSerializer());
 	}

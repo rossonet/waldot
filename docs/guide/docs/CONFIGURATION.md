@@ -142,6 +142,82 @@ Example: disable the `exec` command entirely
 | `waldot.boot.file` | `/tmp/boot.conf` | Bootstrap file used by `OpcFactory.getOpcGraph()` (embedded/test usage only, not by the server runner). |
 | `waldot.boot.connect-timeout-ms` | `10000` | Connect timeout for a remote `--boot-url`. `file:` URLs ignore it. A value `<= 0` or not numeric keeps the default. |
 | `waldot.boot.read-timeout-ms` | `30000` | Read timeout for a remote `--boot-url`. |
+| `waldot.gremlin.commands.enabled` | `false` | Enables the Gremlin service `waldot.command`, which runs OPC UA commands from Gremlin queries (see [OPC UA commands from Gremlin](#opc-ua-commands-from-gremlin)). Also read from the namespace configuration map, which takes precedence. |
+
+## OPC UA commands from Gremlin
+
+The commands of vertices and edges (for example the per-element `delete` and
+`property` methods) and the global commands of the console can be run from
+any Gremlin query (JEXL console, rules, bootstrap, Gremlin Server) with the
+TinkerPop `call()` step:
+
+| Service | Mode | Purpose |
+| ------- | ---- | ------- |
+| `waldot.command` | Barrier (`g.V()...call(...)`), Start (`g.call(...)`) | Runs a command. Disabled unless `waldot.gremlin.commands.enabled=true`. |
+| `waldot.commands` | Streaming (`g.V()...call(...)`), Start (`g.call(...)`) | Lists the commands (`command`, `description`, `inputs`). Always available, runs nothing. |
+
+Parameters of `waldot.command`:
+
+| Parameter | Required | Description |
+| --------- | -------- | ----------- |
+| `command` | yes | Browse name or console name of the command. |
+| `args` | no | List of arguments, each converted with `String.valueOf`. |
+| `ChunkSize` | no | Barrier only: elements collected before each execution (default: all). |
+
+**Flag.** The flag `waldot.gremlin.commands.enabled` defaults to `false`: with
+the flag off the query fails with an `IllegalStateException` that names the
+flag. It is read, in order, from the namespace configuration map, the Java
+system property and the default, at every query (no restart needed for the
+system property). On the server it is set with a system property:
+
+```bash
+docker run -e JDK_JAVA_OPTIONS="-Dwaldot.gremlin.commands.enabled=true" rossonet/waldot:latest
+```
+
+**Barrier mode.** Mid traversal the service collects **all** the input
+elements first, then runs the command once per element (whatever its bulk),
+one at a time, in the order of the traversers and in the thread of the query.
+A query such as `g.V().has('type', 'tmp').call('waldot.command', [command: 'delete'])`
+therefore never modifies the graph while it is still being traversed. Slow
+commands run in sequence: use `ChunkSize` to run them in smaller groups.
+
+**Result.** One map for each invocation:
+
+| Key | Value |
+| --- | ----- |
+| `element` | NodeId of the vertex or edge (`ns=2;s=...`), `null` for global commands. |
+| `command` | Requested command. |
+| `outputs` | Output argument name (`out0`, `out1`... when missing) to value (string or primitive). |
+| `error` | `null`, or the reason why the command did not run: unknown or ambiguous command, removed element, `Executable`/`UserExecutable` false, missing arguments, exception of the command. |
+
+An error never stops the other invocations of the same query.
+
+**Security.** Commands run with a `null` `InvocationContext`: there is no
+OPC UA session and no OPC UA user, so the user-level checks of an OPC UA
+method call do not apply; only the `Executable` and `UserExecutable`
+attributes of the method node are checked. Whoever can run Gremlin queries
+can run every executable command: enable the flag only where this is
+acceptable.
+
+Examples from the JEXL console or bootstrap (`g` is the traversal source):
+
+```javascript
+g.V('device-1').call('waldot.command', {'command': 'property', 'args': ['color', 'red']}).toList();
+g.V().has('type', 'tmp').call('waldot.command', {'command': 'delete'}).toList();
+g.call('waldot.command', {'command': 'about'}).toList();
+g.V('device-1').call('waldot.commands').toList();
+```
+
+Examples with a remote Gremlin Server (Groovy script or bytecode):
+
+```groovy
+g.V('device-1').call('waldot.command', [command: 'property', args: ['color', 'red']]).toList()
+g.E(edgeId).call('waldot.command', [command: 'delete']).next()
+g.call('waldot.commands').toList()
+```
+
+From Java, `WaldotTraversalDsl` offers the shortcuts `exec(command, args...)`
+and `commands()`.
 
 ## Bootstrap file
 

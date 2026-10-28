@@ -97,7 +97,6 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	private final ConsoleStrategy consoleStrategy;
 	// private final DataTypeManager dictionaryManager;
-	private WaldotGraphComputerView graphComputerView;
 	private final WaldotGraph gremlin;
 	private final HistoryStrategy historyStrategy;
 	private final JexlCmdFunction jexlWaldotCommandHelper;
@@ -306,16 +305,22 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		}
 	}
 
+	/**
+	 * GraphComputer (OLAP) is <b>not supported</b>: the Milo strategies throw
+	 * {@link UnsupportedOperationException}, so no view is ever created,
+	 * {@link #getGraphComputerView()} returns {@code null} and
+	 * {@link #inComputerMode()} is always {@code false}.
+	 *
+	 * @throws UnsupportedOperationException always, with the shipped strategies
+	 */
 	@Override
 	public WaldotGraphComputerView createGraphComputerView(
 			final WaldotGraph graph, final GraphFilter graphFilter,
 			final Set<VertexComputeKey> object) {
-		final WaldotGraphComputerView view = opcMappingStrategy
-				.createGraphComputerView(graph, graphFilter, object);
-		// inComputerMode() reads this field; without the assignment the
-		// computer view is created and immediately discarded
-		this.graphComputerView = view;
-		return view;
+		// delegated so that the strategy can log the request; the result is
+		// deliberately not kept (see the Javadoc)
+		return opcMappingStrategy.createGraphComputerView(graph, graphFilter,
+				object);
 	}
 
 	@Override
@@ -341,11 +346,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public void dropGraphComputerView() {
-		try {
-			opcMappingStrategy.dropGraphComputerView();
-		} finally {
-			graphComputerView = null;
-		}
+		opcMappingStrategy.dropGraphComputerView();
 	}
 
 	@Override
@@ -455,9 +456,13 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		return getServer().getEventFactory();
 	}
 
+	/**
+	 * @return always {@code null}: GraphComputer (OLAP) is not supported, see
+	 *         {@link #createGraphComputerView(WaldotGraph, GraphFilter, Set)}
+	 */
 	@Override
 	public WaldotGraphComputerView getGraphComputerView() {
-		return graphComputerView;
+		return null;
 	}
 
 	@Override
@@ -585,9 +590,12 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		return historyStrategy.historyUpdate(context, updateDetails);
 	}
 
+	/**
+	 * @return always {@code false}: GraphComputer (OLAP) is not supported
+	 */
 	@Override
 	public boolean inComputerMode() {
-		return null != getGraphComputerView();
+		return false;
 	}
 
 	@Override
@@ -694,12 +702,28 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 				agentIdentityValidator, agentX509IdentityValidator);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The command must be an {@link AbstractOpcCommand}: the Milo strategies
+	 * link it into the OPC UA address space as a method node. The type is
+	 * checked before any registration, so a wrong command leaves neither the
+	 * strategies nor the console in a half registered state.</p>
+	 *
+	 * @throws IllegalArgumentException if the command is {@code null} or not
+	 *                                  an {@link AbstractOpcCommand}
+	 */
 	@Override
 	public void registerCommand(final WaldotCommand command) {
-		opcMappingStrategy.registerCommand(command);
-		consoleStrategy.registerCommand(command);
-		getStorageManager().addNode((AbstractOpcCommand) command);
-		listeners.forEach(listener -> listener.onCommandRegistered(command));
+		if (!(command instanceof final AbstractOpcCommand opcCommand)) {
+			throw new IllegalArgumentException("command must extend "
+					+ AbstractOpcCommand.class.getName() + ": "
+					+ (command == null ? "null" : command.getClass().getName()));
+		}
+		opcMappingStrategy.registerCommand(opcCommand);
+		consoleStrategy.registerCommand(opcCommand);
+		getStorageManager().addNode(opcCommand);
+		listeners.forEach(listener -> listener.onCommandRegistered(opcCommand));
 	}
 
 	@Override

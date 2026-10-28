@@ -128,5 +128,6 @@ configurations {
 
 application {
     mainClass = "${mainClassName}"
-    applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
+    // java.util.concurrent.atomic: needed by Gryo (Kryo) serialization of the Gremlin graph
+    applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED","--add-opens", "java.base/java.util.concurrent.atomic=ALL-UNNAMED"]
 }

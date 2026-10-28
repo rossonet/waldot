@@ -2,18 +2,23 @@ package net.rossonet.waldot.regression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.tinkerpop.gremlin.process.computer.GraphFilter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.rossonet.waldot.api.PluginListener;
+import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.MiloSingleServerOptimizedStrategy;
@@ -83,6 +88,35 @@ class NamespaceLifecycleRegressionTest {
 		namespace.unregisterPlugin(plugin);
 		assertFalse(namespace.getPlugins().contains(plugin));
 		assertEquals(List.of("stop", "reset", "start", "stop"), events);
+	}
+
+	@Test
+	void registerCommandRejectsANonOpcCommandBeforeRegistering() throws Exception {
+		graph = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy(),
+				new MiloSingleServerOptimizedStrategy());
+		final WaldotNamespace namespace = graph.getWaldotNamespace();
+		final int commandsBefore = namespace.listConfiguredCommands().size();
+		final WaldotCommand foreign = (WaldotCommand) Proxy.newProxyInstance(WaldotCommand.class.getClassLoader(),
+				new Class<?>[] { WaldotCommand.class }, (proxy, method, args) -> switch (method.getName()) {
+				case "hashCode" -> System.identityHashCode(proxy);
+				case "equals" -> proxy == args[0];
+				case "toString" -> "foreign-command";
+				default -> null;
+				});
+		assertThrows(IllegalArgumentException.class, () -> namespace.registerCommand(foreign));
+		assertThrows(IllegalArgumentException.class, () -> namespace.registerCommand(null));
+		assertEquals(commandsBefore, namespace.listConfiguredCommands().size());
+	}
+
+	@Test
+	void graphComputerIsNotSupported() throws Exception {
+		graph = OpcFactory.getOpcGraph(WaldotTestEnvironment.bootUrl(), new LoggerHistoryStrategy(),
+				new MiloSingleServerOptimizedStrategy());
+		final WaldotNamespace namespace = graph.getWaldotNamespace();
+		assertThrows(UnsupportedOperationException.class,
+				() -> namespace.createGraphComputerView(graph, new GraphFilter(), Set.of()));
+		assertFalse(namespace.inComputerMode());
+		assertNull(namespace.getGraphComputerView());
 	}
 
 	private void cleanup() throws Exception {
