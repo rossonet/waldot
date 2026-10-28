@@ -1,4 +1,4 @@
-package net.rossonet.waldot.client.v2;
+package net.rossonet.waldot.client.integration;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
 import static org.junit.jupiter.api.Assertions.assertEquals;

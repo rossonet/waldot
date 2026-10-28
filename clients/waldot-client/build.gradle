@@ -29,9 +29,11 @@ dependencies {
     // OPCUA CLIENT
     api group: 'org.eclipse.milo', name: 'milo-sdk-client', version: '1.1.0'
     testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
-    // integration tests: an embedded WaldOT server (no cycle: waldot-namespace
-    // uses the client only in its tests)
-    testImplementation project(':waldot-namespace')
+    // NOTE: no dependency on waldot-namespace, not even for the tests: Eclipse does
+    // not separate the test scope and would report a build path cycle
+    // (waldot-namespace already uses the client in its tests). The integration
+    // tests of the client with an embedded server are in waldot-namespace
+    // (package net.rossonet.waldot.client.integration).
     testImplementation project(':waldot-deps')
     testImplementation(platform('org.junit:junit-bom:5.13.1'))
 	testImplementation('org.junit.jupiter:junit-jupiter')

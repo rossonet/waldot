@@ -1,4 +1,4 @@
-package net.rossonet.waldot.client.v2;
+package net.rossonet.waldot.client.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
