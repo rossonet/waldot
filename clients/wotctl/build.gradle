@@ -1,82 +1,40 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-    dependencies {
-        classpath "com.gorylenko.gradle-git-properties:gradle-git-properties:2.5.7"
-        classpath 'com.netflix.nebula:gradle-ospackage-plugin:11.11.2'
-        classpath 'de.undercouch:gradle-download-task:5.6.0'
-    }
-}
-
 plugins {
     id "com.gradleup.shadow" version "9.3.2"
+    id "com.gorylenko.gradle-git-properties" version "2.5.7"
 }
 
-description = "WaldOT console interface"
+description = "WaldOT command line interface (waldot)"
 group = 'net.rossonet.waldot'
 version = "${rootProject.version}"
-
-ext {
-    mainClassName = "net.rossonet.cli.MainCli"
-    mainPicocliCommandClass = "net.rossonet.cli.WaldotCommandRunner"
-    debianName = "${project.name}"
-    packageName = "${project.name}"
-    ossrhPassword = System.getenv('OSSRH_PASSWORD')
-}
 
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
 }
 
-//apply plugin: 'com.palantir.docker'
 apply plugin: 'java'
 apply plugin: 'eclipse'
-apply plugin: "com.gorylenko.gradle-git-properties"
 apply plugin: 'jacoco'
-apply plugin: "com.netflix.nebula.ospackage"
-apply plugin: 'base'
-apply plugin: 'distribution'
 apply plugin: 'application'
 
-configurations.all {
-  resolutionStrategy { 
-    force 'org.slf4j:slf4j-api:2.0.17'
-    force 'org.slf4j:slf4j-simple:2.0.17'
-    force("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.2")
-  }
-}
-
-
-configurations {
-    picocliBuild
+ext {
+    cliMainClass = "net.rossonet.waldot.cli.WaldotCli"
+    cliJarName = "waldot-cli.jar"
 }
 
 dependencies {
-     
-    picocliBuild("info.picocli:picocli-codegen:4.7.7")
-    
-    implementation project(':waldot-api')
-    implementation project(':waldot-deps')
+    // only the client: no dependency on waldot-namespace (Eclipse build path
+    // cycle, waldot-namespace uses wotctl in its integration tests)
     implementation project(':waldot-client')
-    implementation("com.google.guava:guava:33.5.0-jre")
-
-    implementation 'org.slf4j:slf4j-api:2.0.17'
-    implementation 'org.slf4j:slf4j-simple:2.0.17'
-
+    // TinkerPop structure (vertices, edges) of the query results
+    implementation project(':waldot-deps')
     implementation group: 'info.picocli', name: 'picocli', version: '4.7.7'
-    implementation group: 'info.picocli', name: 'picocli-shell-jline3', version: '4.7.7'
-    implementation 'org.jline:jline:3.30.6'
-    implementation("com.googlecode.lanterna:lanterna:3.1.3")
+    implementation 'org.slf4j:slf4j-api:2.0.17'
+    runtimeOnly 'org.slf4j:slf4j-simple:2.0.17'
 
-    testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '2.0.2'
-    testImplementation group: 'org.apache.tinkerpop', name: 'gremlin-test', version: '3.8.2'
-    testImplementation group: 'com.google.inject', name: 'guice', version: '7.0.0'
     testImplementation(platform('org.junit:junit-bom:5.13.1'))
-	testImplementation('org.junit.jupiter:junit-jupiter')
-	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 task eclipseClosedDependencies {}
@@ -85,7 +43,6 @@ task eclipseClosedDependencies_ {}
 
 compileJava {
     options.encoding = "UTF-8"
-    options.compilerArgs.addAll(['-XprintProcessorInfo'])
 }
 
 eclipse {
@@ -97,24 +54,34 @@ eclipse {
 
 task view { doLast { println "Working on project ${project.name} [ ${project.description} ]" } }
 
+application {
+    mainClass = cliMainClass
+    applicationName = 'waldot'
+}
+
 jar {
     manifest {
-        attributes 'Main-Class': "${mainClassName}"
+        attributes 'Main-Class': cliMainClass,
+                   'Implementation-Title': 'waldot',
+                   'Implementation-Version': project.version
     }
     enabled = true
 }
 
-jar.doLast { task ->
-	ant.checksum file: task.archiveFile.get().asFile
-}
-
+// executable fat jar: java -jar build/libs/waldot-cli.jar
 shadowJar {
+    archiveFileName = cliJarName
     mergeServiceFiles()
-}
-
-java {
-    withJavadocJar()
-    withSourcesJar()
+    // the signatures of the signed dependencies (e.g. BouncyCastle) are not
+    // valid in the fat jar
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.EC'
+    manifest {
+        attributes 'Main-Class': cliMainClass,
+                   'Implementation-Title': 'waldot',
+                   'Implementation-Version': project.version,
+                   'Multi-Release': 'true'
+    }
+    doLast { println("fat jar of ${project.name}: ${archiveFile.get().asFile}") }
 }
 
 gitProperties {
@@ -123,24 +90,11 @@ gitProperties {
     dateFormatTimeZone = 'GMT'
 }
 
-shadowJar.doLast{ println ("You can find the fat jar of ${project.name} at $buildDir/libs/${project.name}-${version}-all.jar") }
-
 test {
     useJUnitPlatform()
 }
 
-javadoc{
+javadoc {
     destinationDir = file("${project.buildDir}/docs/javadoc/${project.name}/")
-    failOnError=false
-}
-
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-
-application {
-    mainClass = "${mainClassName}"
-    applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED","--add-opens", "java.base/java.util=ALL-UNNAMED"] 
+    failOnError = false
 }
