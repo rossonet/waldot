@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 
+import net.rossonet.waldot.client.api.AuthenticationMode;
 import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
 
 public class DefaultWaldOTAgentClientConfigurationV1
@@ -34,6 +35,8 @@ public class DefaultWaldOTAgentClientConfigurationV1
 	public static String DEFAULT_NEW_CERTIFICATE_UNIT = "WaldOT Agent Client";
 	public static String DEFAULT_NEW_ORGANIZATION = "Zona Autonoma srl";
 	public static String DISCOVERY_PATH = "/discovery";
+	public static final String DEFAULT_COMMANDS_ROOT_NODE_ID = "cmd";
+	public static final String DEFAULT_WALDOT_NAMESPACE_URI = "urn:rossonet:waldot:engine";
 	public static final long serialVersionUID = 977371251684189681L;
 
 	private int acknowledgeTimeout = 5000;
@@ -91,6 +94,106 @@ public class DefaultWaldOTAgentClientConfigurationV1
 
 	private String username;
 
+	private AuthenticationMode authenticationMode = AuthenticationMode.ANONYMOUS;
+
+	private String commandsRootNodeId = DEFAULT_COMMANDS_ROOT_NODE_ID;
+
+	private double defaultPublishingInterval = 500.0;
+
+	private double defaultSamplingInterval = 250.0;
+
+	private long reconnectInitialDelay = 500L;
+
+	private int reconnectMaxAttempts = 0;
+
+	private long reconnectMaxDelay = 30_000L;
+
+	private String waldotNamespaceUri = DEFAULT_WALDOT_NAMESPACE_URI;
+
+	@Override
+	public AuthenticationMode getAuthenticationMode() {
+		return authenticationMode;
+	}
+
+	@Override
+	public String getCommandsRootNodeId() {
+		return commandsRootNodeId;
+	}
+
+	@Override
+	public double getDefaultPublishingInterval() {
+		return defaultPublishingInterval;
+	}
+
+	@Override
+	public double getDefaultSamplingInterval() {
+		return defaultSamplingInterval;
+	}
+
+	@Override
+	public String getPassword() {
+		return password;
+	}
+
+	@Override
+	public long getReconnectInitialDelay() {
+		return reconnectInitialDelay;
+	}
+
+	@Override
+	public int getReconnectMaxAttempts() {
+		return reconnectMaxAttempts;
+	}
+
+	@Override
+	public long getReconnectMaxDelay() {
+		return reconnectMaxDelay;
+	}
+
+	@Override
+	public String getWaldotNamespaceUri() {
+		return waldotNamespaceUri;
+	}
+
+	@Override
+	public void setAuthenticationMode(final AuthenticationMode authenticationMode) {
+		this.authenticationMode = authenticationMode == null ? AuthenticationMode.ANONYMOUS : authenticationMode;
+	}
+
+	@Override
+	public void setCommandsRootNodeId(final String commandsRootNodeId) {
+		this.commandsRootNodeId = commandsRootNodeId;
+	}
+
+	@Override
+	public void setDefaultPublishingInterval(final double defaultPublishingInterval) {
+		this.defaultPublishingInterval = defaultPublishingInterval;
+	}
+
+	@Override
+	public void setDefaultSamplingInterval(final double defaultSamplingInterval) {
+		this.defaultSamplingInterval = defaultSamplingInterval;
+	}
+
+	@Override
+	public void setReconnectInitialDelay(final long reconnectInitialDelay) {
+		this.reconnectInitialDelay = reconnectInitialDelay;
+	}
+
+	@Override
+	public void setReconnectMaxAttempts(final int reconnectMaxAttempts) {
+		this.reconnectMaxAttempts = reconnectMaxAttempts;
+	}
+
+	@Override
+	public void setReconnectMaxDelay(final long reconnectMaxDelay) {
+		this.reconnectMaxDelay = reconnectMaxDelay;
+	}
+
+	@Override
+	public void setWaldotNamespaceUri(final String waldotNamespaceUri) {
+		this.waldotNamespaceUri = waldotNamespaceUri;
+	}
 	@Override
 	public int getAcknowledgeTimeout() {
 		return acknowledgeTimeout;
@@ -248,8 +351,8 @@ public class DefaultWaldOTAgentClientConfigurationV1
 
 	@Override
 	public boolean hasCertificateAuthentication() {
-		// TODO completare metodo hashCertificateAuthentication
-		return false;
+		return authenticationMode == AuthenticationMode.CERTIFICATE && cryptoCertificateChain != null
+				&& !cryptoCertificateChain.isEmpty() && cryptoPrivateKey != null;
 	}
 
 	@Override

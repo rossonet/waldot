@@ -458,6 +458,12 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 						rollbackError);
 			}
 			throw e;
+		} finally {
+			// the reservation only guards the creation: once the edge is in
+			// the edgeIndex (or rolled back) the id must be claimable again,
+			// otherwise an edge removed and created again with the same
+			// explicit id (e.g. a restore) would be refused forever
+			pendingEdgeIds.remove(nodeId);
 		}
 	}
 

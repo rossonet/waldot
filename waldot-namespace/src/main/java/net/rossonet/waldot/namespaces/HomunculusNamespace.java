@@ -65,9 +65,17 @@ import net.rossonet.waldot.client.auth.ClientRegisterX509IdentityValidator;
 import net.rossonet.waldot.commands.AboutCommand;
 import net.rossonet.waldot.commands.AddFireMonitoredEdgeCommand;
 import net.rossonet.waldot.commands.AddLinkMonitoredEdgeCommand;
+import net.rossonet.waldot.commands.ClearGraphCommand;
 import net.rossonet.waldot.commands.DeleteDirectory;
+import net.rossonet.waldot.commands.DescribeElementCommand;
+import net.rossonet.waldot.commands.ExportGraphCommand;
 import net.rossonet.waldot.commands.HelpCommand;
+import net.rossonet.waldot.commands.ImportGraphCommand;
 import net.rossonet.waldot.commands.QueryCommand;
+import net.rossonet.waldot.commands.QueryJsonCommand;
+import net.rossonet.waldot.commands.ReadGraphBlockCommand;
+import net.rossonet.waldot.commands.exchange.GraphTransferStore;
+import net.rossonet.waldot.api.exchange.DataExchangeProtocol;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraphVariables;
 import net.rossonet.waldot.jexl.JexlCmdFunction;
@@ -98,6 +106,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	private final ConsoleStrategy consoleStrategy;
 	// private final DataTypeManager dictionaryManager;
 	private final WaldotGraph gremlin;
+	private final GraphTransferStore graphTransfers = new GraphTransferStore();
 	private final HistoryStrategy historyStrategy;
 	private final JexlCmdFunction jexlWaldotCommandHelper;
 	private final List<NamespaceListener> listeners = new java.util.concurrent.CopyOnWriteArrayList<>();
@@ -192,6 +201,26 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		}
 		registerCommand(new AddFireMonitoredEdgeCommand(this));
 		registerCommand(new AddLinkMonitoredEdgeCommand(this));
+		addDataExchangeCommands();
+	}
+
+	/**
+	 * Commands used by the clients to exchange structured data: JSON query
+	 * results, element descriptions, graph snapshots (see
+	 * {@link DataExchangeProtocol}). Disabled with
+	 * {@code -Dwaldot.commands.exchange.enabled=false}.
+	 */
+	private void addDataExchangeCommands() {
+		if (!DataExchangeProtocol.isEnabled()) {
+			logger.info("data exchange commands disabled");
+			return;
+		}
+		registerCommand(new QueryJsonCommand(this));
+		registerCommand(new DescribeElementCommand(this));
+		registerCommand(new ExportGraphCommand(this, graphTransfers));
+		registerCommand(new ReadGraphBlockCommand(this, graphTransfers));
+		registerCommand(new ImportGraphCommand(this, graphTransfers));
+		registerCommand(new ClearGraphCommand(this));
 	}
 
 	@Override

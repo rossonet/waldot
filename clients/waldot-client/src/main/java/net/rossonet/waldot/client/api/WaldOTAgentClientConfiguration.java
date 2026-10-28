@@ -25,15 +25,27 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 
 	String getApplicationUri();
 
+	/** @return identity used to open the session (default anonymous) */
+	AuthenticationMode getAuthenticationMode();
+
 	String getBaseWaldOTOpcEndpoint();
 
 	int getChannelLifetime();
+
+	/** @return NodeId identifier (string) of the commands root folder */
+	String getCommandsRootNodeId();
 
 	int getConnectTimeout();
 
 	List<X509Certificate> getCryptoCertificateChain();
 
 	PrivateKey getCryptoPrivateKey();
+
+	/** @return default publishing interval (ms) of the subscription groups */
+	double getDefaultPublishingInterval();
+
+	/** @return default sampling interval (ms) of the monitored items */
+	double getDefaultSamplingInterval();
 
 	String getDiscoveryEndpoint();
 
@@ -71,6 +83,20 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 
 	MessageSecurityMode getMessageSecurityMode();
 
+	String getPassword();
+
+	/** @return first delay (ms) before a new connection attempt */
+	long getReconnectInitialDelay();
+
+	/**
+	 * @return maximum number of consecutive failed connection attempts, 0 for
+	 *         no limit
+	 */
+	int getReconnectMaxAttempts();
+
+	/** @return maximum delay (ms) between two connection attempts */
+	long getReconnectMaxDelay();
+
 	int getRequestTimeout();
 
 	SecurityPolicy getSecurityPolicy();
@@ -78,6 +104,9 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 	int getSessionTimeout();
 
 	String getUsername();
+
+	/** @return URI of the WaldOT namespace (to resolve its index) */
+	String getWaldotNamespaceUri();
 
 	boolean hasCertificateAuthentication();
 
@@ -93,15 +122,23 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 
 	void setApplicationUri(String applicationUri);
 
+	void setAuthenticationMode(AuthenticationMode authenticationMode);
+
 	void setBaseWaldOTOpcEndpoint(String baseWaldOTOpcEndpoint);
 
 	void setChannelLifetime(int channelLifetime);
+
+	void setCommandsRootNodeId(String commandsRootNodeId);
 
 	void setConnectTimeout(int connectTimeout);
 
 	void setCryptoCertificateChain(List<X509Certificate> cryptoCertificateChain);
 
 	void setCryptoPrivateKey(PrivateKey cryptoPrivateKey);
+
+	void setDefaultPublishingInterval(double defaultPublishingInterval);
+
+	void setDefaultSamplingInterval(double defaultSamplingInterval);
 
 	void setForceCertificateValidator(boolean forceCertificateValidator);
 
@@ -143,6 +180,12 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 
 	void setPassword(String password);
 
+	void setReconnectInitialDelay(long reconnectInitialDelay);
+
+	void setReconnectMaxAttempts(int reconnectMaxAttempts);
+
+	void setReconnectMaxDelay(long reconnectMaxDelay);
+
 	void setRequestTimeout(int requestTimeout);
 
 	void setSecurityPolicy(SecurityPolicy securityPolicy);
@@ -150,5 +193,7 @@ public interface WaldOTAgentClientConfiguration extends Serializable {
 	void setSessionTimeout(int sessionTimeout);
 
 	void setUsername(String username);
+
+	void setWaldotNamespaceUri(String waldotNamespaceUri);
 
 }

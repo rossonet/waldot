@@ -2,14 +2,12 @@ package net.rossonet.waldot.client.utils;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.sdk.client.AddressSpace.BrowseOptions;
 import org.eclipse.milo.opcua.sdk.client.NodeCache;
-import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.client.subscriptions.MonitoredItemSynchronizationException;
 import org.eclipse.milo.opcua.sdk.client.subscriptions.OpcUaMonitoredItem;
@@ -21,16 +19,15 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
+import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.BrowseDirection;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.eclipse.milo.opcua.stack.core.types.structured.ContentFilter;
 import org.eclipse.milo.opcua.stack.core.types.structured.EventFilter;
-import org.eclipse.milo.opcua.stack.core.types.structured.ReadResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
 import org.eclipse.milo.opcua.stack.core.types.structured.ReferenceDescription;
 import org.eclipse.milo.opcua.stack.core.types.structured.SimpleAttributeOperand;
-import org.eclipse.milo.opcua.stack.core.types.structured.WriteResponse;
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteValue;
 
 import net.rossonet.waldot.api.models.WaldotEdge;
@@ -41,6 +38,17 @@ import net.rossonet.waldot.client.v1.DefaultWaldOTAgentClientConfigurationV1;
 import net.rossonet.waldot.client.v1.WaldOTAgentClientImplV1;
 import net.rossonet.waldot.opc.MiloSingleServerBaseReferenceNodeBuilder;
 
+/**
+ * Test helper: an OPC UA client (first version) connected to a WaldOT server
+ * running in the same JVM, with checks that compare the OPC UA address space
+ * with the Gremlin graph.
+ * <p>
+ * Node naming used by the checks (string identifiers in the WaldOT
+ * namespace): vertex {@code <id>}, vertex property {@code <id>/<key>},
+ * standard attributes {@code <id>.Label}, {@code <id>.Type},
+ * {@code <id>.Port}, {@code <id>.Bind}.
+ * </p>
+ */
 public class WaldotTestClientHandler implements AutoCloseable {
 
 	public interface EventObserver {
@@ -52,6 +60,25 @@ public class WaldotTestClientHandler implements AutoCloseable {
 	private static final long CONNECTION_POLL_MSEC = 50L;
 
 	private static final long CONNECTION_TIMEOUT_MSEC = Long.getLong("waldot.test.client.timeout.msec", 15_000L);
+
+	private static final String[] EVENT_FIELDS = { "EventId", "EventType", "Severity", "Time", "Message" };
+
+	private static String attributeText(final Object value) {
+		if (value instanceof QualifiedName) {
+			return ((QualifiedName) value).getName();
+		}
+		if (value instanceof LocalizedText) {
+			return ((LocalizedText) value).getText();
+		}
+		return String.valueOf(value);
+	}
+
+	private static boolean valuesEqual(final Object value, final Object expected) {
+		if (value instanceof Number && expected instanceof Number) {
+			return Double.compare(((Number) value).doubleValue(), ((Number) expected).doubleValue()) == 0;
+		}
+		return String.valueOf(value).equals(String.valueOf(expected));
+	}
 
 	private final WaldOTAgentClientImplV1 client;
 
@@ -84,281 +111,106 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		System.out.println("opc client connected");
 	}
 
-	public boolean checkOpcUaEdgeBrowserNameNameValueEquals(final WaldotEdge edge, final String expectedValue) {
+	/** Compares a string read from the address space with the expected value. */
+	private boolean checkOpcUaAttribute(final NodeId nodeId, final AttributeId attribute, final String expected) {
 		try {
-			resetCache();
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(edge.getNodeId(), AttributeId.BrowseName.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = ((QualifiedName) results[0].value().getValue()).getName();
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
+			final String value = attributeText(readAttribute(nodeId, attribute));
+			System.out.println("Read value: " + value + " expected: " + expected);
+			return expected.equals(value);
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	public boolean checkOpcUaEdgeBrowserNameNameValueEquals(final WaldotEdge edge, final String expectedValue) {
+		return checkOpcUaAttribute(edge.getNodeId(), AttributeId.BrowseName, expectedValue);
 	}
 
 	public boolean checkOpcUaEdgeDescriptionValueEquals(final WaldotEdge edge, final String expectedValue) {
-		try {
-			resetCache();
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(edge.getNodeId(), AttributeId.Description.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = ((LocalizedText) results[0].value().getValue()).getText();
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(edge.getNodeId(), AttributeId.Description, expectedValue);
 	}
 
 	public boolean checkOpcUaEdgeDisplayNameValueEquals(final WaldotEdge edge, final String expectedValue) {
-		try {
-			resetCache();
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(edge.getNodeId(), AttributeId.DisplayName.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = ((LocalizedText) results[0].value().getValue()).getText();
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(edge.getNodeId(), AttributeId.DisplayName, expectedValue);
 	}
 
 	public boolean checkOpcUaEdgeLabelReadOnly(final WaldotEdge edge) {
-
-		final NodeId completedNodeId = graph.getWaldotNamespace()
-				.generateNodeId(edge.getNodeId().getIdentifier().toString() + ".Label");
-		final OpcUaClient clientOpc = client.getOpcUaClient();
-		try {
-			resetCache();
-			final List<WriteValue> writeValues = new ArrayList<>();
-			writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					DataValue.valueOnly(new Variant(UUID.randomUUID().toString()))));
-			final WriteResponse writeResponse = clientOpc.write(writeValues);
-			System.out.println("Write response: " + writeResponse);
-			if (writeResponse.getResults()[0].isGood()) {
-				System.out.println("Label is not read-only");
-				return false;
-			} else {
-				System.out.println("Label is read-only");
-				return true;
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return true;
-		}
+		return isReadOnly(nodeId(edge.getNodeId().getIdentifier().toString() + ".Label"));
 	}
 
 	public boolean checkOpcUaEdgeLabelValueEquals(final WaldotEdge edge, final String expectedValue) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace()
-					.generateNodeId(edge.getNodeId().getIdentifier().toString() + ".Label");
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = (String) results[0].value().getValue();
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(nodeId(edge.getNodeId().getIdentifier().toString() + ".Label"), AttributeId.Value,
+				expectedValue);
 	}
 
 	public boolean checkOpcUaVertexBindReadOnly(final String nodeId) {
-		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Bind");
-		final OpcUaClient clientOpc = client.getOpcUaClient();
-		try {
-			resetCache();
-			final List<WriteValue> writeValues = new ArrayList<>();
-			writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					DataValue.valueOnly(new Variant(UUID.randomUUID().toString()))));
-			final WriteResponse writeResponse = clientOpc.write(writeValues);
-			System.out.println("Write response: " + writeResponse);
-			if (writeResponse.getResults()[0].isGood()) {
-				System.out.println("Port is not read-only");
-				return false;
-			} else {
-				System.out.println("Port is read-only");
-				return true;
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return true;
-		}
+		return isReadOnly(nodeId(nodeId + ".Bind"));
 	}
 
 	public boolean checkOpcUaVertexBindValueEquals(final String nodeId, final String expectedValue) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Bind");
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = (String) results[0].value().getValue();
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(nodeId(nodeId + ".Bind"), AttributeId.Value, expectedValue);
 	}
 
 	public boolean checkOpcUaVertexBrowserNameNameValueEquals(final String nodeId, final String expectedValue) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.BrowseName.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = ((QualifiedName) results[0].value().getValue()).getName();
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(nodeId(nodeId), AttributeId.BrowseName, expectedValue);
 	}
 
 	public boolean checkOpcUaVertexDescriptionValueEquals(final String nodeId, final String expectedValue) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Description.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = ((LocalizedText) results[0].value().getValue()).getText();
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(nodeId(nodeId), AttributeId.Description, expectedValue);
 	}
 
 	public boolean checkOpcUaVertexDisplayNameValueEquals(final String nodeId, final String expectedValue) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.DisplayName.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = ((LocalizedText) results[0].value().getValue()).getText();
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(nodeId(nodeId), AttributeId.DisplayName, expectedValue);
 	}
 
+	/**
+	 * Checks that the edge {@code typeEdge} between two vertices is published
+	 * in the address space: main reference (forward from the source, inverse
+	 * on the target) and reference descriptions on both vertices.
+	 */
 	public boolean checkOpcUaVertexEdge(final long nodeOut, final long nodeIn, final String typeEdge) {
 		try {
 			resetCache();
-			final NodeId out = graph.getWaldotNamespace().generateNodeId(nodeOut);
-			final NodeId in = graph.getWaldotNamespace().generateNodeId(nodeIn);
-			final UaNode outObject = client.getOpcUaClient().getAddressSpace().getNode(out);
-			final UaNode inObject = client.getOpcUaClient().getAddressSpace().getNode(in);
-			final BrowseOptions searchOutOptions = new BrowseOptions(BrowseDirection.Forward,
-					NodeIds.NonHierarchicalReferences, true, uint(0xFF), uint(0x3F), uint(0));
-
+			final UaNode outObject = client.getOpcUaClient().getAddressSpace()
+					.getNode(graph.getWaldotNamespace().generateNodeId(nodeOut));
+			final UaNode inObject = client.getOpcUaClient().getAddressSpace()
+					.getNode(graph.getWaldotNamespace().generateNodeId(nodeIn));
+			final List<ReferenceDescription> outReferences = outObject
+					.browse(nonHierarchical(BrowseDirection.Forward, NodeIds.NonHierarchicalReferences));
+			final boolean foundOut = outReferences.stream()
+					.anyMatch(r -> typeEdge.equals(r.getReferenceTypeId().getIdentifier()));
 			boolean descriptionOut = false;
-			boolean foundOut = false;
-			for (final ReferenceDescription r : outObject.browse(searchOutOptions)) {
-				// System.out.println("Browsing from out node: " +
-				// r.getReferenceTypeId().getIdentifier());
-				if (typeEdge.equals(r.getReferenceTypeId().getIdentifier())) {
-					foundOut = true;
-				}
-				if (MiloSingleServerBaseReferenceNodeBuilder.HAS_REFERENCE_DESCRIPTION_REFERENCE
-						.equals(r.getReferenceTypeId().getIdentifier())) {
-					final ReferenceDescription ref = r;
-					final BrowseOptions edgetOptions = new BrowseOptions(BrowseDirection.Forward,
-							ref.getReferenceTypeId(), true, uint(0xFF), uint(0x3F), uint(0));
-					final List<? extends UaNode> browseNodes = outObject.browseNodes(edgetOptions);
-
-					for (final UaNode nodeEdge : browseNodes) {
-						final String edgeNodeLabel = graph.getWaldotNamespace().getEdgeNode(nodeEdge.getNodeId())
-								.label();
-						if (edgeNodeLabel.equals(typeEdge)) {
-							descriptionOut = true;
-						}
+			for (final ReferenceDescription r : outReferences) {
+				if (isReferenceDescription(r)) {
+					for (final UaNode nodeEdge : outObject
+							.browseNodes(nonHierarchical(BrowseDirection.Forward, r.getReferenceTypeId()))) {
+						descriptionOut |= edgeLabelIs(nodeEdge.getNodeId(), typeEdge);
 					}
 				}
 			}
 			if (!foundOut || !descriptionOut) {
 				return false;
 			}
-			final BrowseOptions searchInOptions = new BrowseOptions(BrowseDirection.Inverse,
-					NodeIds.NonHierarchicalReferences, true, uint(0xFF), uint(0x3F), uint(0));
-			boolean foundIn = false;
-			for (final ReferenceDescription r : inObject.browse(searchInOptions)) {
-				// System.out.println("Browsing from in node: " +
-				// r.getReferenceTypeId().getIdentifier());
-				if (typeEdge.equals(r.getReferenceTypeId().getIdentifier())) {
-					foundIn = true;
-					break;
-				}
-			}
+			final boolean foundIn = inObject
+					.browse(nonHierarchical(BrowseDirection.Inverse, NodeIds.NonHierarchicalReferences)).stream()
+					.anyMatch(r -> typeEdge.equals(r.getReferenceTypeId().getIdentifier()));
 			if (!foundIn) {
 				return false;
 			}
-			final BrowseOptions searchInDescriptionOptions = new BrowseOptions(BrowseDirection.Forward,
-					NodeIds.NonHierarchicalReferences, true, uint(0xFF), uint(0x3F), uint(0));
 			boolean descriptionIn = false;
-			for (final ReferenceDescription r : inObject.browse(searchInDescriptionOptions)) {
-				// System.out.println("Browsing from in node: " +
-				// r.getReferenceTypeId().getIdentifier());
-				if (MiloSingleServerBaseReferenceNodeBuilder.HAS_REFERENCE_DESCRIPTION_REFERENCE
-						.equals(r.getReferenceTypeId().getIdentifier())) {
-					// descriptionIn = true;
-					final ReferenceDescription ref = r;
-					final BrowseOptions edgetOptions = new BrowseOptions(BrowseDirection.Forward,
-							ref.getReferenceTypeId(), true, uint(0xFF), uint(0x3F), uint(0));
-					final UaNode nodeEdge = outObject.browseNodes(edgetOptions).get(0);
-					if (nodeEdge == null) {
+			for (final ReferenceDescription r : inObject
+					.browse(nonHierarchical(BrowseDirection.Forward, NodeIds.NonHierarchicalReferences))) {
+				if (isReferenceDescription(r)) {
+					final List<? extends UaNode> edges = outObject
+							.browseNodes(nonHierarchical(BrowseDirection.Forward, r.getReferenceTypeId()));
+					if (edges.isEmpty() || edges.get(0) == null) {
 						return false;
 					}
-					final String edgeNodeLabel = graph.getWaldotNamespace().getEdgeNode(nodeEdge.getNodeId()).label();
-					if (edgeNodeLabel.equals(typeEdge)) {
-						descriptionIn = true;
-					}
+					descriptionIn |= edgeLabelIs(edges.get(0).getNodeId(), typeEdge);
 				}
 			}
-			if (!descriptionIn) {
-				return false;
-			}
-			return true;
+			return descriptionIn;
 		} catch (final Exception e) {
 			e.printStackTrace();
 			return false;
@@ -366,146 +218,38 @@ public class WaldotTestClientHandler implements AutoCloseable {
 	}
 
 	public boolean checkOpcUaVertexExists(final long nodeId) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final UaNode node = client.getOpcUaClient().getAddressSpace().getNode(completedNodeId);
-			return node != null;
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-
+		return opcUaNodeExists(graph.getWaldotNamespace().generateNodeId(nodeId));
 	}
 
 	public boolean checkOpcUaVertexExists(final String nodeId) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final UaNode node = client.getOpcUaClient().getAddressSpace().getNode(completedNodeId);
-			return node != null;
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-
+		return opcUaNodeExists(nodeId(nodeId));
 	}
 
 	public boolean checkOpcUaVertexLabelReadOnly(final String nodeId) {
-		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Label");
-		final OpcUaClient clientOpc = client.getOpcUaClient();
-		try {
-			resetCache();
-			final List<WriteValue> writeValues = new ArrayList<>();
-			writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					DataValue.valueOnly(new Variant(UUID.randomUUID().toString()))));
-			final WriteResponse writeResponse = clientOpc.write(writeValues);
-			System.out.println("Write response: " + writeResponse);
-			if (writeResponse.getResults()[0].isGood()) {
-				System.out.println("Label is not read-only");
-				return false;
-			} else {
-				System.out.println("Label is read-only");
-				return true;
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return true;
-		}
+		return isReadOnly(nodeId(nodeId + ".Label"));
 	}
 
 	public boolean checkOpcUaVertexLabelValueEquals(final String nodeId, final String expectedValue) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Label");
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = (String) results[0].value().getValue();
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(nodeId(nodeId + ".Label"), AttributeId.Value, expectedValue);
 	}
 
 	public boolean checkOpcUaVertexPortReadOnly(final String nodeId) {
-		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Port");
-		final OpcUaClient clientOpc = client.getOpcUaClient();
-		try {
-			resetCache();
-			final List<WriteValue> writeValues = new ArrayList<>();
-			writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					DataValue.valueOnly(new Variant(UUID.randomUUID().toString()))));
-			final WriteResponse writeResponse = clientOpc.write(writeValues);
-			System.out.println("Write response: " + writeResponse);
-			if (writeResponse.getResults()[0].isGood()) {
-				System.out.println("Port is not read-only");
-				return false;
-			} else {
-				System.out.println("Port is read-only");
-				return true;
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return true;
-		}
+		return isReadOnly(nodeId(nodeId + ".Port"));
 	}
 
 	public boolean checkOpcUaVertexPortValueEquals(final String nodeId, final String expectedValue) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Port");
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = String.valueOf(results[0].value().getValue());
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(nodeId(nodeId + ".Port"), AttributeId.Value, expectedValue);
 	}
 
 	public boolean checkOpcUaVertexTypeValueEquals(final String nodeId, final String expectedValue) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + ".Type");
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final String value = String.valueOf(results[0].value().getValue());
-			System.out.println("Read value: " + value + " expected: " + expectedValue);
-			return expectedValue.equals(value);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaAttribute(nodeId(nodeId + ".Type"), AttributeId.Value, expectedValue);
 	}
 
 	public boolean checkOpcUaVertexValueBetween(final String nodeId, final String valueLabel, final int minValue,
 			final int maxValue) {
 		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final double value = ((Number) results[0].value().getValue()).doubleValue();
+			final double value = ((Number) readAttribute(propertyNodeId(nodeId, valueLabel), AttributeId.Value))
+					.doubleValue();
 			System.out.println("Read value: " + value + " expected between: " + minValue + " and " + maxValue);
 			return value >= minValue && value <= maxValue;
 		} catch (final Exception e) {
@@ -515,35 +259,13 @@ public class WaldotTestClientHandler implements AutoCloseable {
 	}
 
 	public boolean checkOpcUaVertexValueEquals(final long nodeId, final String valueLabel, final Object expectedValue) {
-		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final Object value = results[0].value().getValue();
-			return valuesEqual(value, expectedValue);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkOpcUaVertexValueEquals(String.valueOf(nodeId), valueLabel, expectedValue);
 	}
 
 	public boolean checkOpcUaVertexValueEquals(final String nodeId, final String valueLabel,
 			final Object expectedValue) {
 		try {
-			resetCache();
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
-			final List<ReadValueId> readValueIds = new ArrayList<>();
-			readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-					QualifiedName.NULL_VALUE));
-			final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-					TimestampsToReturn.Both, readValueIds);
-			final DataValue[] results = readResponse.getResults();
-			final Object value = results[0].value().getValue();
+			final Object value = readAttribute(propertyNodeId(nodeId, valueLabel), AttributeId.Value);
 			System.out.println("Read value: " + value + " expected: " + expectedValue);
 			return valuesEqual(value, expectedValue);
 		} catch (final Exception e) {
@@ -553,33 +275,17 @@ public class WaldotTestClientHandler implements AutoCloseable {
 	}
 
 	public boolean checkVertexExists(final long nodeId) {
-		try {
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final Vertex v = graph.vertex(completedNodeId);
-			return v != null;
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return graphVertex(graph.getWaldotNamespace().generateNodeId(nodeId)) != null;
 	}
 
 	public boolean checkVertexExists(final String nodeId) {
-		try {
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final Vertex v = graph.vertex(completedNodeId);
-			return v != null;
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return graphVertex(nodeId(nodeId)) != null;
 	}
 
 	public boolean checkVertexValueBetween(final String nodeId, final String valueLabel, final int minValue,
 			final int maxValue) {
 		try {
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final Vertex v = graph.vertex(completedNodeId);
-			final double value = ((Number) v.property(valueLabel).value()).doubleValue();
+			final double value = ((Number) graphVertex(nodeId(nodeId)).property(valueLabel).value()).doubleValue();
 			System.out.println("Vertex value: " + value + " expected between: " + minValue + " and " + maxValue);
 			return value >= minValue && value <= maxValue;
 		} catch (final Exception e) {
@@ -589,22 +295,12 @@ public class WaldotTestClientHandler implements AutoCloseable {
 	}
 
 	public boolean checkVertexValueEquals(final long nodeId, final String valueLabel, final Object expectedValue) {
-		try {
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final Vertex v = graph.vertex(completedNodeId);
-			final Object value = v.property(valueLabel).value();
-			return valuesEqual(value, expectedValue);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		return checkVertexValueEquals(graph.getWaldotNamespace().generateNodeId(nodeId), valueLabel, expectedValue);
 	}
 
-	public boolean checkVertexValueEquals(final String nodeId, final String valueLabel, final Object expectedValue) {
+	private boolean checkVertexValueEquals(final NodeId nodeId, final String valueLabel, final Object expectedValue) {
 		try {
-			final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId);
-			final Vertex v = graph.vertex(completedNodeId);
-			final Object value = v.property(valueLabel).value();
+			final Object value = graphVertex(nodeId).property(valueLabel).value();
 			System.out.println("Vertex value: " + value + " expected: " + expectedValue);
 			return valuesEqual(value, expectedValue);
 		} catch (final Exception e) {
@@ -613,17 +309,13 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		}
 	}
 
-	private static boolean valuesEqual(final Object value, final Object expected) {
-		if (value instanceof Number && expected instanceof Number) {
-			return Double.compare(((Number) value).doubleValue(), ((Number) expected).doubleValue()) == 0;
-		}
-		return String.valueOf(value).equals(String.valueOf(expected));
+	public boolean checkVertexValueEquals(final String nodeId, final String valueLabel, final Object expectedValue) {
+		return checkVertexValueEquals(nodeId(nodeId), valueLabel, expectedValue);
 	}
 
 	@Override
 	public void close() throws Exception {
 		disconnect();
-
 	}
 
 	public String[] createEdgeWithOpcUa(final String type, final String sourceNodeId, final String destinationNodeId,
@@ -634,7 +326,6 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			e.printStackTrace();
 			return new String[] { "", e.getMessage() };
 		}
-
 	}
 
 	public String[] createVertexWithOpcUa(final String id, final String label, final String type,
@@ -645,7 +336,6 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			e.printStackTrace();
 			return new String[] { "", e.getMessage() };
 		}
-
 	}
 
 	public String[] deleteVertexWithOpcUa(final int id) {
@@ -664,7 +354,6 @@ public class WaldotTestClientHandler implements AutoCloseable {
 			e.printStackTrace();
 			return new String[] { "", e.getMessage() };
 		}
-
 	}
 
 	public void disconnect() {
@@ -673,30 +362,92 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
+	}
 
+	private boolean edgeLabelIs(final NodeId edgeNodeId, final String label) {
+		final WaldotEdge edge = graph.getWaldotNamespace().getEdgeNode(edgeNodeId);
+		return edge != null && label.equals(edge.label());
+	}
+
+	/** @return the underlying client */
+	public WaldOTAgentClientImplV1 getClient() {
+		return client;
 	}
 
 	public List<String> getServerInfo() throws UaException {
 		return client.getServerInfo();
 	}
 
+	private Vertex graphVertex(final NodeId nodeId) {
+		try {
+			return graph.vertex(nodeId);
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private static boolean isReferenceDescription(final ReferenceDescription reference) {
+		return MiloSingleServerBaseReferenceNodeBuilder.HAS_REFERENCE_DESCRIPTION_REFERENCE
+				.equals(reference.getReferenceTypeId().getIdentifier());
+	}
+
+	/**
+	 * Tries to write a random string in the node value.
+	 *
+	 * @return true if the write is refused (or fails)
+	 */
+	private boolean isReadOnly(final NodeId nodeId) {
+		try {
+			final StatusCode result = client.getOpcUaClient()
+					.write(List.of(new WriteValue(nodeId, AttributeId.Value.uid(), null,
+							DataValue.valueOnly(new Variant(UUID.randomUUID().toString())))))
+					.getResults()[0];
+			System.out.println("Write result on " + nodeId.toParseableString() + ": " + result);
+			return !result.isGood();
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return true;
+		}
+	}
+
+	private static BrowseOptions nonHierarchical(final BrowseDirection direction, final NodeId referenceType) {
+		return new BrowseOptions(direction, referenceType, true, uint(0xFF), uint(0x3F), uint(0));
+	}
+
+	private NodeId nodeId(final String identifier) {
+		return graph.getWaldotNamespace().generateNodeId(identifier);
+	}
+
+	private boolean opcUaNodeExists(final NodeId nodeId) {
+		try {
+			resetCache();
+			return client.getOpcUaClient().getAddressSpace().getNode(nodeId) != null;
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	private NodeId propertyNodeId(final String vertexId, final String key) {
+		return nodeId(vertexId + "/" + key);
+	}
+
+	/** Reads an attribute without any cache (maxAge 0). */
+	private Object readAttribute(final NodeId nodeId, final AttributeId attribute) throws UaException {
+		final DataValue[] results = client.getOpcUaClient().read(0.0, TimestampsToReturn.Both,
+				List.of(new ReadValueId(nodeId, attribute.uid(), null, QualifiedName.NULL_VALUE))).getResults();
+		return results[0].value().getValue();
+	}
+
 	public long readIntOpcUaVertexValue(final String nodeId, final String valueLabel) throws UaException {
-		resetCache();
-		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
-		final List<ReadValueId> readValueIds = new ArrayList<>();
-		readValueIds.add(new ReadValueId(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-				QualifiedName.NULL_VALUE));
-		final ReadResponse readResponse = client.getOpcUaClient().read(0.0, // maxAge
-				TimestampsToReturn.Both, readValueIds);
-		final DataValue[] results = readResponse.getResults();
-		final Object value = results[0].value().getValue();
+		final Object value = readAttribute(propertyNodeId(nodeId, valueLabel), AttributeId.Value);
 		System.out.println("Read value: " + value);
 		return ((Number) value).longValue();
 	}
 
 	private void resetCache() {
 		client.getOpcUaClient().getAddressSpace().setNodeCache(new NodeCache());
-
 	}
 
 	public List<String> runExpression(final String expression) {
@@ -715,24 +466,15 @@ public class WaldotTestClientHandler implements AutoCloseable {
 		} catch (final UaException e) {
 			e.printStackTrace();
 		}
-		final EventFilter eventFilter = new EventFilter(new SimpleAttributeOperand[] {
-				new SimpleAttributeOperand(NodeIds.BaseEventType,
-						new QualifiedName[] { new QualifiedName(0, "EventId") }, AttributeId.Value.uid(), null),
-				new SimpleAttributeOperand(NodeIds.BaseEventType,
-						new QualifiedName[] { new QualifiedName(0, "EventType") }, AttributeId.Value.uid(), null),
-				new SimpleAttributeOperand(NodeIds.BaseEventType,
-						new QualifiedName[] { new QualifiedName(0, "Severity") }, AttributeId.Value.uid(), null),
-				new SimpleAttributeOperand(NodeIds.BaseEventType, new QualifiedName[] { new QualifiedName(0, "Time") },
-						AttributeId.Value.uid(), null),
-				new SimpleAttributeOperand(NodeIds.BaseEventType,
-						new QualifiedName[] { new QualifiedName(0, "Message") }, AttributeId.Value.uid(), null) },
-				new ContentFilter(null));
-
-		final var monitoredItem = OpcUaMonitoredItem.newEventItem(graph.getWaldotNamespace().generateNodeId(nodeId),
-				eventFilter);
-		monitoredItem.setEventValueListener((item, vs) -> {
-			observer.onEvent(nodeId, vs[1].getValue().toString(), vs[4].getValue());
-		});
+		final SimpleAttributeOperand[] select = new SimpleAttributeOperand[EVENT_FIELDS.length];
+		for (int i = 0; i < EVENT_FIELDS.length; i++) {
+			select[i] = new SimpleAttributeOperand(NodeIds.BaseEventType,
+					new QualifiedName[] { new QualifiedName(0, EVENT_FIELDS[i]) }, AttributeId.Value.uid(), null);
+		}
+		final var monitoredItem = OpcUaMonitoredItem.newEventItem(nodeId(nodeId),
+				new EventFilter(select, new ContentFilter(null)));
+		monitoredItem.setEventValueListener(
+				(item, vs) -> observer.onEvent(nodeId, vs[1].getValue().toString(), vs[4].getValue()));
 		subscription.addMonitoredItem(monitoredItem);
 		try {
 			subscription.synchronizeMonitoredItems();
@@ -743,13 +485,12 @@ public class WaldotTestClientHandler implements AutoCloseable {
 	}
 
 	public void writeOpcUaVertexValue(final String nodeId, final String valueLabel, final Object newValue) {
-		final NodeId completedNodeId = graph.getWaldotNamespace().generateNodeId(nodeId + "/" + valueLabel);
-		final List<WriteValue> writeValues = new ArrayList<>();
-		writeValues.add(new WriteValue(completedNodeId, AttributeId.Value.uid(), null, // indexRange
-				DataValue.valueOnly(new Variant(newValue))));
 		try {
-			final WriteResponse writeResponse = client.getOpcUaClient().write(writeValues);
-			System.out.println("Write response: " + writeResponse);
+			final StatusCode result = client.getOpcUaClient()
+					.write(List.of(new WriteValue(propertyNodeId(nodeId, valueLabel), AttributeId.Value.uid(), null,
+							DataValue.valueOnly(new Variant(newValue)))))
+					.getResults()[0];
+			System.out.println("Write result: " + result);
 		} catch (final UaException e) {
 			e.printStackTrace();
 		}

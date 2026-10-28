@@ -1,70 +1,47 @@
 package net.rossonet.waldot.client.v1;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.KeyPair;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.milo.opcua.sdk.client.DiscoveryClient;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClientConfig;
-import org.eclipse.milo.opcua.sdk.client.OpcUaClientConfigBuilder;
 import org.eclipse.milo.opcua.sdk.client.OpcUaSession;
-import org.eclipse.milo.opcua.sdk.client.identity.AnonymousProvider;
-import org.eclipse.milo.opcua.sdk.client.identity.IdentityProvider;
-import org.eclipse.milo.opcua.sdk.client.identity.UsernameProvider;
-import org.eclipse.milo.opcua.sdk.client.identity.X509IdentityProvider;
-import org.eclipse.milo.opcua.sdk.client.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.stack.core.UaException;
-import org.eclipse.milo.opcua.stack.core.security.CertificateValidator;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
-import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
-import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
-import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
-import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
-import org.eclipse.milo.opcua.stack.core.types.enumerated.UserTokenType;
-import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 import org.eclipse.milo.opcua.stack.core.types.structured.ServiceFault;
-import org.eclipse.milo.opcua.stack.core.util.EndpointUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.rossonet.waldot.api.strategies.MiloStrategy;
 import net.rossonet.waldot.client.api.WaldOTAgentClient;
 import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
-import net.rossonet.waldot.client.api.WaldotAgentClientObserver;
+import net.rossonet.waldot.client.api.WaldotClientListener;
+import net.rossonet.waldot.client.support.BaseOperationCalls;
+import net.rossonet.waldot.client.support.OpcClientConfigurator;
 import net.rossonet.waldot.utils.LogHelper;
-import net.rossonet.waldot.utils.SslHelper.KeyStoreHelper;
 import net.rossonet.waldot.utils.ThreadHelper;
 
+/**
+ * First version of the agent client: a control thread checks the session
+ * every {@link WaldOTAgentClient#CONTROL_THREAD_SLEEP_TIME_MSEC} and
+ * rebuilds the connection when it is faulted.
+ */
 public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
-	private static final String ABOUT_COMMAND = "about";
 	private final static Logger logger = LoggerFactory.getLogger(WaldOTAgentClient.class);
-	private static final String QUERY_COMMAND = "query";
-	public static String SELFSIGNED_CERTIFICATE_ALIAS = "waldot-selfsigned";
-	public static String SIGNED_CERTIFICATE_ALIAS = "waldot-signed";
+	public static String SELFSIGNED_CERTIFICATE_ALIAS = OpcClientConfigurator.SELFSIGNED_CERTIFICATE_ALIAS;
+	public static String SIGNED_CERTIFICATE_ALIAS = OpcClientConfigurator.SIGNED_CERTIFICATE_ALIAS;
 
-	private transient Status _status = Status.INIT;
-	private boolean activeConnectionRequest = false;
-	private final KeyStoreHelper certificateHelper;
-	private transient OpcUaClient client = null;
+	private volatile Status _status = Status.INIT;
+	private volatile boolean activeConnectionRequest = false;
+	private volatile OpcUaClient client = null;
 	private int clientFaultCounter;
 
 	private final WaldOTAgentClientConfiguration configuration;
+	private final OpcClientConfigurator configurator;
 	private final Thread controlThread = Thread.ofVirtual().unstarted(() -> {
 		Thread.currentThread().setName("waldot-client");
 		Thread.currentThread().setPriority(CONTROL_THREAD_PRIORITY);
@@ -73,8 +50,11 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 			try {
 				periodicalCheck();
 				Thread.sleep(CONTROL_THREAD_SLEEP_TIME_MSEC);
+			} catch (final InterruptedException e) {
+				Thread.currentThread().interrupt();
+				break;
 			} catch (final Throwable t) {
-				logger.warn("control thread error ", LogHelper.stackTraceToString(t, 5));
+				logger.warn("control thread error {}", LogHelper.stackTraceToString(t, 5));
 			}
 		}
 		logger.info("Control thread terminated");
@@ -82,31 +62,29 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	private ByteString lastNonce = null;
 
-	private WaldotAgentClientObserver waldotAgentClientObserver;
+	private final List<WaldotClientListener> listeners = new CopyOnWriteArrayList<>();
 
 	public WaldOTAgentClientImplV1(final WaldOTAgentClientConfiguration configuration) {
 		this.configuration = configuration;
-		certificateHelper = new KeyStoreHelper(configuration.getKeyStorePath(), configuration.getKeyStorePassword());
-		try {
-			if (certificateHelper.hasCertificate(SELFSIGNED_CERTIFICATE_ALIAS)
-					|| certificateHelper.hasCertificate(SIGNED_CERTIFICATE_ALIAS)) {
-				logger.info("Certificate already exists in keystore, using it");
-			} else {
-				logger.info("Certificate not found in keystore, creating self-signed certificate");
-				createSelfSignedCertificate(configuration);
-			}
-		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-			logger.error("Error while checking certificate in keystore: {}", LogHelper.stackTraceToString(e, 5));
-			logger.info("Creating self-signed certificate");
-			createSelfSignedCertificate(configuration);
-		}
+		this.configurator = new OpcClientConfigurator(configuration);
 	}
 
 	@Override
+	public void addListener(final WaldotClientListener listener) {
+		if (listener != null) {
+			listeners.add(listener);
+		}
+	}
+
 	public void changeStatus(final Status newStatus) {
+		final Status previous = _status;
 		_status = newStatus;
-		if (waldotAgentClientObserver != null) {
-			waldotAgentClientObserver.onStatusChanged(newStatus);
+		for (final WaldotClientListener listener : listeners) {
+			try {
+				listener.onStatusChanged(previous, newStatus);
+			} catch (final RuntimeException e) {
+				logger.warn("status listener error: {}", e.getMessage());
+			}
 		}
 	}
 
@@ -135,25 +113,15 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 	public void close() throws Exception {
 		stopConnectionProcedure();
 		changeStatus(Status.CLOSED);
+		controlThread.interrupt();
 	}
 
-	public String[] createEdge(String label, String sourceNodeId, String destinationNodeId, String[] keyValues)
-			throws UaException {
-		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace().getObjectNode(new NodeId(2, "waldot/Edges"));
+	@Override
+	public String[] createEdge(final String label, final String sourceNodeId, final String destinationNodeId,
+			final String[] keyValues) throws UaException {
 		logger.info("Creating edge with label: {}, sourceNodeId: {}, destinationNodeId: {}, keyValues: {}", label,
 				sourceNodeId, destinationNodeId, String.join(",", keyValues));
-
-		final Variant sourceVariant = Variant.of(sourceNodeId);
-		final Variant labelVariant = Variant.of(label);
-		final Variant destinationVariant = Variant.of(destinationNodeId);
-		final Variant keyValuesVariant = Variant.of(String.join(",", keyValues));
-		final Variant[] outputs = cmdNode.callMethod("add edge",
-				new Variant[] { labelVariant, sourceVariant, destinationVariant, keyValuesVariant });
-		final List<String> out = new ArrayList<>();
-		for (final Variant output : outputs) {
-			out.add((String) output.getValue());
-		}
-		return out.toArray(new String[0]);
+		return BaseOperationCalls.createEdge(client, label, sourceNodeId, destinationNodeId, keyValues);
 	}
 
 	private OpcUaClient createOpcClient(final OpcUaClientConfig actualConfiguration) throws UaException {
@@ -163,50 +131,22 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		return createdClient;
 	}
 
-	private void createSelfSignedCertificate(final WaldOTAgentClientConfiguration configuration) {
-		certificateHelper.createSelfSignedCertificate(SELFSIGNED_CERTIFICATE_ALIAS, configuration.getAgentUniqueName(),
-				configuration.getGenerateCertOrganization(), configuration.getGenerateCertUnit(),
-				configuration.getGenerateCertLocality(), configuration.getGenerateCertState(),
-				configuration.getGenerateCertCountry(), null, configuration.getGenerateCertDns(),
-				configuration.getGenerateCertIp(), configuration.getGenerateCertDnsAlias());
-	}
-
-	public String[] createVertex(String id, String label, String type, String[] keyValues) throws UaException {
-		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace().getObjectNode(new NodeId(2, "waldot/Vertices"));
+	@Override
+	public String[] createVertex(final String id, final String label, final String type, final String[] keyValues)
+			throws UaException {
 		logger.info("Creating vertex with id: {}, label: {}, type: {}, keyValues: {}", id, label, type,
 				String.join(",", keyValues));
-
-		final Variant idVariant = Variant.of(id);
-		final Variant labelVariant = Variant.of(label);
-		final Variant typeVariant = Variant.of(type);
-		final Variant keyValuesVariant = Variant.of(String.join(",", keyValues));
-		final Variant[] outputs = cmdNode.callMethod("add vertex",
-				new Variant[] { idVariant, labelVariant, typeVariant, keyValuesVariant });
-		final List<String> out = new ArrayList<>();
-		for (final Variant output : outputs) {
-			out.add((String) output.getValue());
-		}
-		return out.toArray(new String[0]);
+		return BaseOperationCalls.createVertex(client, id, label, type, keyValues);
 	}
 
-	public String[] deleteVertex(int id) throws UaException {
-		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace().getObjectNode(new NodeId(2, id));
-		final Variant[] outputs = cmdNode.callMethod("delete", new Variant[0]);
-		final List<String> out = new ArrayList<>();
-		for (final Variant output : outputs) {
-			out.add((String) output.getValue());
-		}
-		return out.toArray(new String[0]);
+	@Override
+	public String[] deleteVertex(final int id) throws UaException {
+		return BaseOperationCalls.deleteVertex(client, id);
 	}
 
-	public String[] deleteVertex(String id) throws UaException {
-		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace().getObjectNode(new NodeId(2, id));
-		final Variant[] outputs = cmdNode.callMethod("delete", new Variant[0]);
-		final List<String> out = new ArrayList<>();
-		for (final Variant output : outputs) {
-			out.add((String) output.getValue());
-		}
-		return out.toArray(new String[0]);
+	@Override
+	public String[] deleteVertex(final String id) throws UaException {
+		return BaseOperationCalls.deleteVertex(client, id);
 	}
 
 	private void doActionClientStart() {
@@ -216,7 +156,7 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 					changeStatus(Status.RUNNING);
 					logger.info("Connected to server");
 				} else {
-					client = createOpcClient(getGeneralConfigBuilder().build());
+					client = createOpcClient(configurator.build());
 					// connect() is synchronous: if the session is already available the client
 					// can be considered running without waiting for the next control cycle
 					if (checkClientConnected(client)) {
@@ -251,19 +191,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	private X509Certificate getCertificateActualConnection() {
-		try {
-			return getKeyPairActualConnection().getPublic() instanceof X509Certificate
-					? (X509Certificate) getKeyPairActualConnection().getPublic()
-					: null;
-		} catch (final Exception e) {
-			logger.error("Error while getting certificate for actual connection: {}",
-					LogHelper.stackTraceToString(e, 7));
-			changeStatus(Status.FAULTED);
-			return null;
-		}
-	}
-
 	private OpcUaSession getClientSessionWithTimeout(final OpcUaClient clientOpc) throws Exception {
 		final Callable<OpcUaSession> callable = new Callable<OpcUaSession>() {
 			@Override
@@ -281,132 +208,6 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		return configuration;
 	}
 
-	private EndpointDescription getEndpoint() {
-		EndpointDescription targetEndpoint = null;
-		List<EndpointDescription> endpoints = null;
-		try {
-			final String discoveryEndpoint = configuration.getDiscoveryEndpoint();
-			logger.info("Discovering OPCUA endpoints on: {}", discoveryEndpoint);
-			endpoints = DiscoveryClient.getEndpoints(discoveryEndpoint).get();
-		} catch (final Exception exception) {
-			logger.error("Error while discovering OPCUA endpoints: {}", LogHelper.stackTraceToString(exception, 5));
-		}
-		final MessageSecurityMode searchSecurityMode = configuration.getMessageSecurityMode();
-		final String securityPolicyUri = configuration.getSecurityPolicy().getUri();
-		if (endpoints != null && !endpoints.isEmpty()) {
-			for (final EndpointDescription e : endpoints) {
-				if (e.getSecurityPolicyUri().equals(securityPolicyUri)
-						&& e.getSecurityMode().equals(searchSecurityMode)) {
-					logger.debug("found endpoint: {}", e);
-					targetEndpoint = e;
-					break;
-				}
-			}
-		}
-		if (targetEndpoint == null) {
-			logger.error("no endpoint found with security policy: {} and security mode: {}", securityPolicyUri,
-					searchSecurityMode);
-		} else if (configuration.getForceDiscoveredEndpointUrl() != null
-				&& !configuration.getForceDiscoveredEndpointUrl().isEmpty()) {
-			logger.warn("force discovery endpoint URL: {}", configuration.getForceDiscoveredEndpointUrl());
-			targetEndpoint = EndpointUtil.updateUrl(targetEndpoint, configuration.getForceDiscoveredEndpointUrl());
-		}
-		try {
-			logServerCertificate(targetEndpoint);
-		} catch (final CertificateException e) {
-			logger.error("Error while logging server certificate: {}", LogHelper.stackTraceToString(e, 5));
-		}
-		return targetEndpoint;
-	}
-
-	private OpcUaClientConfigBuilder getGeneralConfigBuilder() throws KeyStoreException, NoSuchAlgorithmException,
-			CertificateException, IOException, UnrecoverableKeyException {
-		final OpcUaClientConfigBuilder config = OpcUaClientConfig.builder().setEndpoint(getEndpoint())
-				.setApplicationUri(configuration.getApplicationUri())
-				.setApplicationName(LocalizedText.english(configuration.getApplicationName()));
-		config.setSessionTimeout(UInteger.valueOf(configuration.getSessionTimeout()));
-		// config.setConnectTimeout(UInteger.valueOf(configuration.getConnectTimeout()));
-		config.setKeepAliveTimeout(UInteger.valueOf(configuration.getKeepAliveTimeout()));
-		config.setRequestTimeout(UInteger.valueOf(configuration.getRequestTimeout()));
-		// config.setChannelLifetime(UInteger.valueOf(configuration.getChannelLifetime()));
-		// config.setAcknowledgeTimeout(UInteger.valueOf(configuration.getAcknowledgeTimeout()));
-		config.setIdentityProvider(getIdentityProviderActualConnection());
-		config.setKeyPair(getKeyPairActualConnection());
-		// config.setCertificateChain(getCertificateChainActualConnection());
-		config.setCertificate(getCertificateActualConnection());
-		if (configuration.isForceCertificateValidator()) {
-			final CertificateValidator alwaysValidCert = new CertificateValidator() {
-
-				@Override
-				public void validateCertificateChain(final List<X509Certificate> certificateChain,
-						final String applicationUri, final String... validHostNames) throws UaException {
-					final StringBuilder sb = new StringBuilder();
-					final StringBuilder hosts = new StringBuilder();
-					for (final X509Certificate c : certificateChain) {
-						sb.append("\n" + c + "\n");
-					}
-					for (final String host : validHostNames) {
-						sb.append(host + ", ");
-					}
-					logger.warn(
-							"because forceCertificateValidator is true, the function validateCertificateChain authorizes the follow certificates"
-									+ sb.toString() + "\nApplicationUri is " + applicationUri + " and endpoint is "
-									+ getEndpoint().getEndpointUrl() + "\nValid hostnames are: " + hosts.toString());
-
-				}
-
-			};
-			config.setCertificateValidator(alwaysValidCert);
-		}
-		return config;
-	}
-
-	private IdentityProvider getIdentityProviderActualConnection() {
-		IdentityProvider idp = null;
-		final UserTokenType authMode = UserTokenType.Anonymous;
-		switch (authMode) {
-		case UserTokenType.UserName:
-			final String username = null;
-			final String password = null;
-			if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
-				idp = new UsernameProvider(username, password);
-			} else {
-				logger.warn(
-						"Username and/or password not set for UserName authentication, using AnonymousProvider instead.");
-			}
-
-			break;
-		case UserTokenType.Anonymous:
-			idp = new AnonymousProvider();
-			break;
-		case UserTokenType.Certificate:
-			final X509Certificate authCertificateChain = null;
-			final PrivateKey authPrivateKey = null;
-			idp = new X509IdentityProvider(authCertificateChain, authPrivateKey);
-			break;
-		default:
-			idp = new AnonymousProvider();
-			break;
-		}
-		return idp;
-	}
-
-	private KeyPair getKeyPairActualConnection() throws UnrecoverableKeyException, KeyStoreException,
-			NoSuchAlgorithmException, CertificateException, IOException {
-		try {
-			final KeyPair signed = certificateHelper.getKeyPair(SIGNED_CERTIFICATE_ALIAS);
-			if (signed != null) {
-				return signed;
-			} else {
-				return certificateHelper.getKeyPair(SELFSIGNED_CERTIFICATE_ALIAS);
-			}
-		} catch (final Exception e) {
-			logger.error("Error while getting signed certificate, falling back to self-signed: {}",
-					LogHelper.stackTraceToString(e, 2));
-			return certificateHelper.getKeyPair(SELFSIGNED_CERTIFICATE_ALIAS);
-		}
-	}
-
 	public ByteString getLastNonce() {
 		return lastNonce;
 	}
@@ -417,15 +218,9 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 
 	}
 
+	@Override
 	public List<String> getServerInfo() throws UaException {
-		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace()
-				.getObjectNode(new NodeId(2, MiloStrategy.INFOMATION_CMD_DIRECTORY));
-		final Variant[] outputs = cmdNode.callMethod(ABOUT_COMMAND, new Variant[] {});
-		final List<String> out = new ArrayList<>();
-		for (final Variant output : outputs) {
-			out.add((String) output.getValue());
-		}
-		return out;
+		return BaseOperationCalls.getServerInfo(client);
 	}
 
 	@Override
@@ -433,16 +228,16 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		return _status;
 	}
 
-	private void logServerCertificate(final EndpointDescription endpoint) throws CertificateException {
-		if (!endpoint.getServerCertificate().isNullOrEmpty()) {
-			logger.info("Server certificate for endpoint {}: {}", endpoint, CertificateFactory.getInstance("X.509")
-					.generateCertificate(new ByteArrayInputStream(endpoint.getServerCertificate().bytes())));
-		}
-	}
-
 	@Override
 	public void onServiceFault(final ServiceFault serviceFault) {
 		logger.error("Service fault received: {}", serviceFault);
+		for (final WaldotClientListener listener : listeners) {
+			try {
+				listener.onServiceFault(serviceFault);
+			} catch (final RuntimeException e) {
+				logger.warn("service fault listener error: {}", e.getMessage());
+			}
+		}
 		changeStatus(Status.FAULTED);
 	}
 
@@ -476,20 +271,14 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		}
 	}
 
-	public List<String> runExpression(String expression) throws UaException {
-		final UaObjectNode cmdNode = getOpcUaClient().getAddressSpace()
-				.getObjectNode(new NodeId(2, MiloStrategy.INFOMATION_CMD_DIRECTORY));
-		final Variant[] outputs = cmdNode.callMethod(QUERY_COMMAND, new Variant[] { new Variant(expression) });
-		final List<String> out = new ArrayList<>();
-		for (final Variant output : outputs) {
-			out.add((String) output.getValue());
-		}
-		return out;
+	@Override
+	public void removeListener(final WaldotClientListener listener) {
+		listeners.remove(listener);
 	}
 
 	@Override
-	public void setStatusObserver(final WaldotAgentClientObserver waldotAgentClientObserver) {
-		this.waldotAgentClientObserver = waldotAgentClientObserver;
+	public List<String> runExpression(final String expression) throws UaException {
+		return BaseOperationCalls.runExpression(client, expression);
 	}
 
 	@Override
@@ -497,7 +286,12 @@ public class WaldOTAgentClientImplV1 implements WaldOTAgentClient {
 		// the flag must be set before starting the control thread, otherwise the first
 		// control cycle could be skipped
 		activeConnectionRequest = true;
-		controlThread.start();
+		if (_status == Status.STOPPED) {
+			changeStatus(Status.INIT);
+		}
+		if (controlThread.getState() == Thread.State.NEW) {
+			controlThread.start();
+		}
 		return CompletableFuture.completedFuture(this);
 
 	}
