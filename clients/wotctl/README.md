@@ -152,3 +152,7 @@ Test:
 Il modulo dipende solo da `waldot-client` (e da `waldot-deps`). Non deve
 dipendere da `waldot-namespace`: Eclipse segnalerebbe un ciclo, perché
 `waldot-namespace` usa `wotctl` nei suoi test.
+
+## Licenza
+
+Apache License 2.0, come tutto il progetto WaldOT. Vedi il file [LICENSE](LICENSE).
