@@ -816,8 +816,12 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		final MetaDataProperty<DATA_TYPE> entry = managedProperties.get(label);
 		if (entry != null && value != null
 				&& entry.getJavaType().isInstance(value)) {
-			setProperty(entry.getQualifiedProperty(),
-					entry.getJavaType().cast(value));
+			final DATA_TYPE typedValue = entry.getJavaType().cast(value);
+			// espone il parametro anche come proprieta' del vertice
+			// (property(key), getVertexProperties()), come avviene per i
+			// valori passati alla creazione
+			property(label, typedValue);
+			setProperty(entry.getQualifiedProperty(), typedValue);
 		}
 	}
 
