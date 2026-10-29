@@ -73,8 +73,13 @@ public class DataGeneratorVertexBehaviorTest {
 	}
 
 	private double data(DataGeneratorVertex generator) {
-		return Double.parseDouble(generator
-				.property(DataGeneratorVertex.VALUE_KEY).value().toString());
+		// the value is written asynchronously by the runner thread
+		final org.apache.tinkerpop.gremlin.structure.VertexProperty<Object> p = generator
+				.property(DataGeneratorVertex.VALUE_KEY);
+		if (!p.isPresent()) {
+			return Double.NaN;
+		}
+		return Double.parseDouble(p.value().toString());
 	}
 
 	@Test
