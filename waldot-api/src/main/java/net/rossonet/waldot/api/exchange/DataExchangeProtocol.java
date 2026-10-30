@@ -119,7 +119,7 @@ public final class DataExchangeProtocol {
 	public static final String MAX_RENDER_VERTICES_PROPERTY = "waldot.commands.exchange.max-render-vertices";
 
 	/** Default of {@value #MAX_RENDER_VERTICES_PROPERTY}. */
-	public static final int DEFAULT_MAX_RENDER_VERTICES = 5000;
+	public static final int DEFAULT_MAX_RENDER_VERTICES = 50000;
 
 	/**
 	 * @return true unless the commands were disabled with

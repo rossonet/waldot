@@ -528,6 +528,14 @@ class WaldotClientV2IntegrationTest {
 		assertEquals(2, dot.edges());
 		assertFalse(dot.hasWarnings(), dot.warnings().toString());
 
+		// un vertices.max oltre il limite del server viene ridotto
+		neighbours.vertices().max(DataExchangeProtocol.DEFAULT_MAX_RENDER_VERTICES + 1);
+		final GraphRendering reduced = client.graph().render(neighbours);
+		assertEquals(3, reduced.vertices());
+		assertEquals(List.of("vertices.max " + (DataExchangeProtocol.DEFAULT_MAX_RENDER_VERTICES + 1)
+				+ " reduced to the server limit " + DataExchangeProtocol.DEFAULT_MAX_RENDER_VERTICES),
+				reduced.warnings());
+
 		for (int i = 0; i < 80; i++) {
 			graph.addVertex("id", "render-" + i, "name", "render vertex " + i);
 		}

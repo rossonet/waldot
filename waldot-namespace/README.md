@@ -109,7 +109,7 @@ properties only on request. With `roots` the vertices are those reached within
 drawn, the others are reported in the `warnings` output. The SVG layout is
 computed by Eclipse ELK (`net.rossonet.waldot.commands.render`), so no Graphviz
 is needed on the server. `-Dwaldot.commands.exchange.max-render-vertices`
-(default 5000) caps `vertices.max`. A drawing bigger than `blockSize` is
+(default 50000) caps `vertices.max`. A drawing bigger than `blockSize` is
 downloaded with `read graph block`, like a snapshot.
 
 From the client: `client.graph().render(options)`; from the command line:
