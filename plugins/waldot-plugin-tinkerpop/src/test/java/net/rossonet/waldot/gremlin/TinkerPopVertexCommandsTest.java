@@ -1,5 +1,6 @@
 package net.rossonet.waldot.gremlin;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource.traversal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -12,6 +13,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.tinkerpop.gremlin.driver.Cluster;
+import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.util.ser.GraphBinaryMessageSerializerV1;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.junit.jupiter.api.AfterEach;
@@ -24,6 +29,7 @@ import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotVertex;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcFactory;
+import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
 import net.rossonet.waldot.opc.AbstractCreateVertexCommand;
 import net.rossonet.waldot.test.WaldotTestEnvironment;
 import net.rossonet.waldot.tinkerpop.TinkerPopConstants;
@@ -137,6 +143,83 @@ public class TinkerPopVertexCommandsTest {
 		} finally {
 			server.remove();
 		}
+	}
+
+	@Test
+	public void changingThePortRestartsTheServer() throws Exception {
+		final int firstPort = NetworkHelper.findAvailablePort(28183);
+		final TinkerPopVertex server = createServer(firstPort);
+		try {
+			awaitPortTaken(firstPort);
+			int secondPort = NetworkHelper.findAvailablePort(28184);
+			while (secondPort == firstPort) {
+				secondPort = NetworkHelper.findAvailablePort(28184);
+			}
+			server.property(TinkerPopConstants.PORT_FIELD,
+					String.valueOf(secondPort));
+			awaitPortTaken(secondPort);
+			final int newPort = secondPort;
+			awaitTrue(() -> NetworkHelper.checkLocalPortAvailable(firstPort),
+					"the old port " + firstPort + " is still in use");
+			awaitTrue(() -> TinkerPopConstants._STATUS_RUNNING.equals(server
+					.property(TinkerPopConstants.STATUS_FIELD.toLowerCase())
+					.value()), "the restarted server is not running");
+			final Cluster cluster = Cluster.build().addContactPoint("127.0.0.1")
+					.port(newPort)
+					.serializer(new GraphBinaryMessageSerializerV1()).create();
+			try {
+				final GraphTraversalSource remote = traversal()
+						.withRemote(DriverRemoteConnection.using(cluster, "g"));
+				assertTrue(remote.V().count().next() >= 1);
+			} finally {
+				cluster.close();
+			}
+		} finally {
+			server.remove();
+		}
+	}
+
+	@Test
+	public void removingTheServerDoesNotCloseTheGraph() throws Exception {
+		final int port = NetworkHelper.findAvailablePort(28185);
+		final TinkerPopVertex server = createServer(port);
+		awaitPortTaken(port);
+		// close() waits for the end of the stop, when Gremlin Server closes
+		// the graphs left in its graph manager
+		server.remove();
+		assertTrue(NetworkHelper.checkLocalPortAvailable(port),
+				"the port " + port + " has not been released");
+		assertFalse(((OpcGraph) g).isClosed(),
+				"stopping the gremlin server closed the WaldOT graph");
+		assertNotNull(g.addVertex("id", "after-gremlin-remove"));
+	}
+
+	private void awaitPortTaken(final int port) throws Exception {
+		awaitTrue(() -> !NetworkHelper.checkLocalPortAvailable(port),
+				"the gremlin server is not listening on " + port);
+	}
+
+	private void awaitTrue(final Condition condition, final String message)
+			throws Exception {
+		final long end = System.currentTimeMillis() + 30000;
+		while (System.currentTimeMillis() < end && !condition.check()) {
+			Thread.sleep(100);
+		}
+		assertTrue(condition.check(), message);
+	}
+
+	private TinkerPopVertex createServer(final int port) {
+		return assertInstanceOf(TinkerPopVertex.class,
+				created(command(TinkerPopConstants.GREMLIN_TYPE_LABEL)
+						.runCommand(null,
+								new String[]{"gremlin-test-" + port,
+										"tests/gremlin", String.valueOf(port),
+										"127.0.0.1"})));
+	}
+
+	@FunctionalInterface
+	private interface Condition {
+		boolean check() throws Exception;
 	}
 
 	@Test

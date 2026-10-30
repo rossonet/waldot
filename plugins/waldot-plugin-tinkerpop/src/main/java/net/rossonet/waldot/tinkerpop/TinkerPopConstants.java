@@ -63,6 +63,15 @@ public final class TinkerPopConstants {
 			+ "vertex: " + _STATUS_RUNNING + ", " + _STATUS_STOPPED + " or "
 			+ STATUS_FAILED + " (for example when the port is already in use)";
 
+	/** Maximum wait for the bind of the server port, in seconds */
+	public static final int START_TIMEOUT_SEC = 30;
+
+	/**
+	 * Maximum wait for the stop of the server (and the release of its port),
+	 * in seconds
+	 */
+	public static final int STOP_TIMEOUT_SEC = 15;
+
 	private TinkerPopConstants() {
 	}
 
