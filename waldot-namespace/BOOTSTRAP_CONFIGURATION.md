@@ -110,6 +110,7 @@ and do not put `//`, assignments or control structures outside strings.
 | `cmd` | console helper | `cmd.getVerticesCount()`, `cmd.getEdgesCount()`, `cmd.listCommands()`, `cmd.toNumber(x)`, `cmd.echo(x)`, `cmd.help()` |
 | `<directory>_<command>` | every registered command | invoked with `.exec(...)`, e.g. `simulator_create_generator.exec(...)`, `query.exec(...)`, `about.exec()` |
 
+
 The console name is `TextHelper.cleanText(directory + "_" + command)`:
 lower case, and every run of characters other than letters, digits, `_`,
 `;` and `:` becomes a single `_`. `create generator` in the `simulator`
