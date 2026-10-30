@@ -204,6 +204,8 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 
 	private volatile boolean active = true;
 
+	private volatile boolean paused = false;
+
 	private long counter;
 
 	private long cursor;
@@ -300,6 +302,33 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 		runnerThread.interrupt();
 	}
 
+	/**
+	 * Suspends the generation (the plugin was stopped): the cycle keeps
+	 * running but publishes nothing until {@link #resumeGeneration()}.
+	 */
+	public void pauseGeneration() {
+		paused = true;
+	}
+
+	/** Resumes the generation suspended by {@link #pauseGeneration()}. */
+	public void resumeGeneration() {
+		paused = false;
+	}
+
+	/**
+	 * @return {@code true} while the generation thread is alive
+	 */
+	public boolean isGenerating() {
+		return runnerThread.isAlive() && !paused;
+	}
+
+	/**
+	 * @return {@code true} after {@link #close()}
+	 */
+	public boolean isClosed() {
+		return !active;
+	}
+
 	private void cycle() {
 		// the first cycle waits a delay: the edges that receive the events are
 		// usually created just after the vertex
@@ -323,7 +352,7 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 				return;
 			}
 			try {
-				if (active) {
+				if (active && !paused) {
 					generateCycle();
 				}
 			} catch (final RuntimeException e) {

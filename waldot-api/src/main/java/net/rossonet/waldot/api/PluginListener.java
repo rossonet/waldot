@@ -59,7 +59,31 @@ import net.rossonet.waldot.exception.PluginBlockingException;
  *     }
  * }
  * }</pre>
- * 
+ *
+ * <h2>Lifecycle</h2>
+ * <p>The namespace drives each plugin instance (one instance per namespace)
+ * through these calls:</p>
+ * <ol>
+ *   <li>{@link #initialize(WaldotNamespace)}: once, when the plugin is
+ *   registered;</li>
+ *   <li>{@link #start()}: when the bootstrap procedure runs, at startup and
+ *   again after every reset;</li>
+ *   <li>{@link #stop()}: a <b>restartable pause</b>, called before
+ *   {@link #reset()} (by {@code WaldotNamespace.resetNameSpace()}) and by
+ *   {@code WaldotNamespace.unregisterPlugin(...)}. The plugin must stop its
+ *   background work but keep its resources (executors, connections), because
+ *   {@link #start()} may follow;</li>
+ *   <li>{@code close()}: the <b>definitive release</b>. A plugin that owns
+ *   resources (threads, executors, sockets, static references) implements
+ *   {@link AutoCloseable}; the namespace calls {@code close()} exactly once,
+ *   when the namespace itself is closed, always <i>after</i> {@link #stop()}
+ *   and after the {@link AutoCloseable} vertices of the graph have been
+ *   closed. After {@code close()} the plugin is never started again.</li>
+ * </ol>
+ * <p>Both {@link #stop()} and {@code close()} must not throw when called
+ * after a failed startup and must tolerate a second call: the namespace logs
+ * any exception and goes on with the shutdown of the other plugins.</p>
+ *
  * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface PluginListener {
@@ -402,11 +426,18 @@ public interface PluginListener {
 	}
 
 	/**
-	 * Stops the plugin gracefully.
-	 * 
-	 * <p>This method is called to pause plugin operation. Implementations
-	 * should stop any background tasks but maintain state for potential restart.</p>
-	 * 
+	 * Pauses the plugin.
+	 *
+	 * <p>Called before {@link #reset()}, when the plugin is unregistered and,
+	 * as first step, when the namespace is closed. Implementations stop their
+	 * background tasks but keep the resources needed by a following
+	 * {@link #start()}: the definitive release belongs to {@code close()} of
+	 * the plugins that implement {@link AutoCloseable} (see the lifecycle in
+	 * the class documentation). Must be idempotent and must not throw if the
+	 * plugin was never started.</p>
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 *
 	 * @see #start()
 	 */
 	default void stop() {

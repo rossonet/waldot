@@ -77,8 +77,11 @@ java {
 
 test {
     useJUnitPlatform()
-    // La suite completa (server Milo embedded) supera l'heap di default -> OOM nel test executor
-    maxHeapSize = "2g"
+    // Prima i namespace chiusi restavano in heap (server Milo trattenuti dai
+    // thread dei vertici) e servivano 2g; dalle fasi H2/H3 close() li rilascia:
+    // suite completa misurata a 1g con al massimo ~213 MB dopo il GC e nessun
+    // GC completo, poi verificata verde a 512m
+    maxHeapSize = "512m"
     // Gryo (Kryo FieldSerializer) needs reflective access to the JDK classes
     // it registers (e.g. AtomicLong): same options as the Dockerfile/waldot-app
     jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED',

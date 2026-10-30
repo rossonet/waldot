@@ -242,10 +242,24 @@ public interface WaldotVertex extends Vertex, WaldotElement, BaseObjectType {
 	 * <p>This callback is invoked before the vertex is deleted, allowing the
 	 * implementation to perform cleanup operations or prevent deletion if needed.</p>
 	 * 
-	 * <p>The default implementation does nothing. Override to implement
-	 * custom pre-removal logic.</p>
+	 * <p>The default implementation closes the vertex if it implements
+	 * {@link AutoCloseable}: a removed vertex must release its threads and
+	 * sockets, otherwise they keep the vertex, the graph and the whole OPC UA
+	 * server reachable. An exception of {@code close()} is logged and does not
+	 * stop the removal. Implementations of {@code close()} must therefore be
+	 * idempotent: the namespace closes the {@link AutoCloseable} vertices also
+	 * when it is closed.</p>
 	 */
 	default void notifyRemoveVertex() {
+		if (this instanceof final AutoCloseable closeable) {
+			try {
+				closeable.close();
+			} catch (final Exception e) {
+				org.slf4j.LoggerFactory.getLogger(WaldotVertex.class).warn(
+						"Error closing the removed vertex {} ({})", getNodeId(),
+						getClass().getName(), e);
+			}
+		}
 	}
 
 	/**

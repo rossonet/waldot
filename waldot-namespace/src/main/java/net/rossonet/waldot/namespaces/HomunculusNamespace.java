@@ -286,11 +286,31 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		}
 	}
 
+	/**
+	 * Closes the namespace and releases every resource reachable from it.
+	 * <p>
+	 * Order: timer, bootstrap and console strategies; the
+	 * {@link AutoCloseable} vertices of the graph (while the plugins, whose
+	 * sessions and clients they may use, are still alive); every plugin with
+	 * {@link PluginListener#stop()} followed by {@code close()} when it is
+	 * {@link AutoCloseable}; a second pass on the vertices created meanwhile;
+	 * client management, mapping and history strategies; the OPC UA server;
+	 * the static registry of the reference nodes; the Gremlin graph.
+	 * </p>
+	 * <p>
+	 * The vertices are not removed from the graph (no address space change and
+	 * no event during the shutdown) and each one is closed at most once by the
+	 * namespace. Every step is isolated: an exception is logged and the
+	 * shutdown goes on. Steps longer than {@value #SLOW_CLOSE_STEP_MSEC} ms are
+	 * logged with their duration. A second call does nothing.
+	 * </p>
+	 */
 	@Override
 	public void close() throws Exception {
 		if (!closed.compareAndSet(false, true)) {
 			return;
 		}
+		final long begin = System.nanoTime();
 		// each close is isolated: a failing strategy must not prevent the
 		// cleanup of the others
 		if (timer != null) {
@@ -302,36 +322,119 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		}
 		closeQuietly("bootstrap procedure strategy", bootstrapProcedureStrategy);
 		closeQuietly("console strategy", consoleStrategy);
+		final Set<Object> closedVertices = java.util.Collections
+				.newSetFromMap(new java.util.IdentityHashMap<>());
+		final int firstPass = closeVertices(closedVertices);
 		for (final PluginListener plugin : plugins) {
-			stopPlugin(plugin);
+			closePlugin(plugin);
 		}
-		logger.info("all plugins stopped");
+		logger.info("all plugins stopped and closed");
+		// vertices created concurrently (e.g. by a plugin pass running while
+		// the namespace was closing)
+		final int secondPass = closeVertices(closedVertices);
 		closeQuietly("client management strategy", clientManagementStrategy);
 		closeQuietly("opc mapping strategy", opcMappingStrategy);
 		closeQuietly("history strategy", historyStrategy);
-		try {
-			waldotOpcUaServer.close();
-			logger.info("opcua server closed");
-		} catch (final Exception e) {
-			logger.warn("Error closing OPC UA server: {}", e.getMessage());
-		}
+		timedStep("OPC UA server", () -> {
+			if (waldotOpcUaServer != null) {
+				waldotOpcUaServer.close();
+				logger.info("opcua server closed");
+			}
+		});
 		// release the static per-namespace registry, otherwise the closed
 		// namespace (and its whole address space) is never garbage collected
-		MiloSingleServerBaseReferenceNodeBuilder.unregister(this);
+		timedStep("reference nodes registry",
+				() -> MiloSingleServerBaseReferenceNodeBuilder.unregister(this));
 		// the Gremlin graph owns the service registry; closing it here covers
 		// callers that only close the namespace. OpcGraph.close() is idempotent.
 		closeQuietly("gremlin graph", gremlin);
+		logger.info("namespace closed in {} ms ({} + {} vertices closed)",
+				(System.nanoTime() - begin) / 1_000_000L, firstPass,
+				secondPass);
+	}
+
+	/** Duration over which a close step is logged as slow. */
+	private static final long SLOW_CLOSE_STEP_MSEC = 1_000L;
+
+	@FunctionalInterface
+	private interface CloseStep {
+		void run() throws Exception;
+	}
+
+	/**
+	 * Closes the plugin for good: {@link PluginListener#stop()} and then
+	 * {@code close()} if it is {@link AutoCloseable}. Each call is isolated.
+	 */
+	private void closePlugin(final PluginListener plugin) {
+		final String name = plugin.getClass().getSimpleName();
+		timedStep("stop of plugin " + name, plugin::stop);
+		if (plugin instanceof final AutoCloseable closeable) {
+			timedStep("close of plugin " + name, closeable::close);
+		}
+	}
+
+	/**
+	 * Closes the {@link AutoCloseable} vertices of the graph not closed yet.
+	 *
+	 * @param alreadyClosed identity set of the vertices already closed,
+	 *                      updated by the call
+	 * @return number of vertices closed by this pass
+	 */
+	private int closeVertices(final Set<Object> alreadyClosed) {
+		final List<WaldotVertex> snapshot;
+		try {
+			snapshot = new ArrayList<>(getVertices().values());
+		} catch (final Throwable e) {
+			rethrowIfFatal(e);
+			logger.warn("Error reading the vertices to close: {}",
+					e.getMessage());
+			return 0;
+		}
+		int count = 0;
+		for (final WaldotVertex vertex : snapshot) {
+			if (vertex instanceof final AutoCloseable closeable
+					&& alreadyClosed.add(vertex)) {
+				count++;
+				timedStep("vertex " + vertex.getNodeId() + " ("
+						+ vertex.getClass().getSimpleName() + ")",
+						closeable::close);
+			}
+		}
+		return count;
+	}
+
+	private static void rethrowIfFatal(final Throwable e) {
+		if (e instanceof final VirtualMachineError fatal) {
+			throw fatal;
+		}
+	}
+
+	/**
+	 * Runs a close step: logs (and swallows) its failure, logs its duration
+	 * when it is slow.
+	 */
+	private void timedStep(final String name, final CloseStep step) {
+		final long start = System.nanoTime();
+		try {
+			step.run();
+		} catch (final Throwable e) {
+			rethrowIfFatal(e);
+			logger.warn("Error closing {}: {}", name, e.toString(), e);
+		} finally {
+			final long elapsed = (System.nanoTime() - start) / 1_000_000L;
+			if (elapsed > SLOW_CLOSE_STEP_MSEC) {
+				logger.info("closing {} took {} ms", name, elapsed);
+			}
+		}
 	}
 
 	private void closeQuietly(final String name, final AutoCloseable resource) {
-		try {
+		timedStep(name, () -> {
 			if (resource != null) {
 				resource.close();
 			}
 			logger.info("{} closed", name);
-		} catch (final Exception e) {
-			logger.warn("Error closing {}: {}", name, e.getMessage());
-		}
+		});
 	}
 
 	/**

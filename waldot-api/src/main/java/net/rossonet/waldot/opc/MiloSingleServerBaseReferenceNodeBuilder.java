@@ -117,11 +117,63 @@ public class MiloSingleServerBaseReferenceNodeBuilder {
 		if (namespace == null) {
 			return;
 		}
-		final ReferenceNodes removed = REFERENCE_NODES_BY_NAMESPACE
-				.remove(namespace);
-		if (removed != null && removed == lastReferenceNodes) {
-			lastReferenceNodes = null;
+		synchronized (REFERENCE_NODES_BY_NAMESPACE) {
+			final ReferenceNodes removed = REFERENCE_NODES_BY_NAMESPACE
+					.remove(namespace);
+			if (removed == null) {
+				return;
+			}
+			// the legacy statics hold the nodes of the last initialized
+			// namespace: if they belong to the closed one they would keep its
+			// server reachable, so they move to a namespace still open (or are
+			// cleared when none is left)
+			if (removed == lastReferenceNodes
+					|| removed.edgeTypeNode == edgeTypeNode) {
+				ReferenceNodes replacement = null;
+				for (final ReferenceNodes candidate : REFERENCE_NODES_BY_NAMESPACE
+						.values()) {
+					replacement = candidate;
+				}
+				lastReferenceNodes = replacement;
+				applyLegacyStatics(replacement);
+			}
 		}
+	}
+
+	/**
+	 * Copies a snapshot in the legacy static fields; {@code null} clears them.
+	 */
+	private static void applyLegacyStatics(final ReferenceNodes nodes) {
+		edgeTypeNode = nodes == null ? null : nodes.edgeTypeNode;
+		vertexTypeNode = nodes == null ? null : nodes.vertexTypeNode;
+		interfaceTypeNode = nodes == null ? null : nodes.interfaceTypeNode;
+		labelVertexTypeNode = nodes == null ? null : nodes.labelVertexTypeNode;
+		typeVertexTypeNode = nodes == null ? null : nodes.typeVertexTypeNode;
+		historyVertexTypeNode = nodes == null
+				? null
+				: nodes.historyVertexTypeNode;
+		labelEdgeTypeNode = nodes == null ? null : nodes.labelEdgeTypeNode;
+		typeEdgeTypeNode = nodes == null ? null : nodes.typeEdgeTypeNode;
+		sourceNodeTypeNode = nodes == null ? null : nodes.sourceNodeTypeNode;
+		targetNodeTypeNode = nodes == null ? null : nodes.targetNodeTypeNode;
+		referenceTypeTypeNode = nodes == null
+				? null
+				: nodes.referenceTypeTypeNode;
+		isForwardTypeNode = nodes == null ? null : nodes.isForwardTypeNode;
+		hasGremlinPropertyReferenceType = nodes == null
+				? null
+				: nodes.hasGremlinPropertyReferenceType;
+		hasReferenceDescriptionReferenceType = nodes == null
+				? null
+				: nodes.hasReferenceDescriptionReferenceType;
+		hasSourceNodeReferenceType = nodes == null
+				? null
+				: nodes.hasSourceNodeReferenceType;
+		hasTargetNodeReferenceType = nodes == null
+				? null
+				: nodes.hasTargetNodeReferenceType;
+		// write only field, never part of a snapshot
+		historyContext = null;
 	}
 
 	public static UaObjectTypeNode edgeTypeNode;

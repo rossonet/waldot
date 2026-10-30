@@ -340,10 +340,33 @@ public final class OpcFactory {
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		// the server removes the hook on close(): no leak on repeated creations
 		waldot.setShutdownHook(shutdownHook);
-		final HomunculusNamespace namespace = new HomunculusNamespace(waldot, miloStrategy,
-				historyStrategy, new BaseConsoleStrategy(), configuration, new SingleFileBootstrapStrategy(),
-				new BaseClientManagementStrategy(), bootStrapUrl, gremlinConfiguration);
-		waldot.startup(namespace).get();
+		final HomunculusNamespace namespace;
+		try {
+			namespace = new HomunculusNamespace(waldot, miloStrategy, historyStrategy, new BaseConsoleStrategy(),
+					configuration, new SingleFileBootstrapStrategy(), new BaseClientManagementStrategy(), bootStrapUrl,
+					gremlinConfiguration);
+		} catch (final RuntimeException | Error e) {
+			// no namespace to close: release the server (and its shutdown hook)
+			try {
+				waldot.close();
+			} catch (final RuntimeException closeError) {
+				e.addSuppressed(closeError);
+			}
+			throw e;
+		}
+		try {
+			waldot.startup(namespace).get();
+		} catch (final InterruptedException | ExecutionException | RuntimeException e) {
+			// failed start: the plugins are already registered and started, the
+			// namespace must release them, the server and the static registries
+			logger.error("Waldot OPC-UA Server startup failed, closing the namespace", e);
+			try {
+				namespace.close();
+			} catch (final Exception closeError) {
+				e.addSuppressed(closeError);
+			}
+			throw e;
+		}
 		logger.info("Waldot OPC-UA Server started");
 		return waldot.getGremlinGraph();
 	}

@@ -1,6 +1,8 @@
 package net.rossonet.waldot.dataGenerator;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality;
@@ -10,6 +12,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectTypeNode;
 import org.eclipse.milo.opcua.stack.core.NodeIds;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ExpandedNodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.QualifiedName;
@@ -160,8 +163,8 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 				GeneratorConstants.POST_NODE_ID_DATA_DESCRIPTION);
 	}
 
-	// Flag per controllare l'attività del thread di generazione
-	private transient boolean active = true;
+	// false dopo close(): il generatore non riparte piu'
+	private transient volatile boolean active = true;
 
 	// Valore attuale generato
 	private double actualValue;
@@ -200,69 +203,77 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 
 	private final QualifiedProperty<String> postNodeIdDataProperty;
 
+	// esecuzione corrente del ciclo di generazione (null se in pausa o chiuso)
+	private transient Future<?> generation;
+
+	// incrementato a ogni pausa: un ciclo avviato prima termina anche se
+	// l'interrupt venisse assorbito da una chiamata intermedia
+	private transient volatile long generationEpoch;
+
+	private final transient Object generationLock = new Object();
+
 	/**
-	 * Runnable per il thread di generazione dei dati.
+	 * Ciclo di generazione dei dati.
 	 * <p>
-	 * Loop infinito che genera valori secondo l'algoritmo configurato
-	 * e aggiorna la proprietà "data" a intervalli regolari.
+	 * Genera valori secondo l'algoritmo configurato e aggiorna la proprietà
+	 * "data" a intervalli regolari, finché il vertice è attivo e l'esecuzione
+	 * non è stata sospesa o interrotta.
 	 * </p>
+	 *
+	 * @param epoch epoca dell'avvio, vedi {@link #pauseGeneration()}
 	 */
-	private transient Runnable runner = new Runnable() {
+	private void runGeneration(final long epoch) {
+		logger.info("Thread for generator node "
+				+ getNodeId().toParseableString() + " started");
+		Thread.currentThread().setName(getNodeId().toParseableString());
 
-		@Override
-		public void run() {
-			logger.info("Thread for generator node "
-					+ getNodeId().toParseableString() + " started");
-			Thread.currentThread().setName(getNodeId().toParseableString());
-
-			// Loop principale di generazione
-			while (active == true && !Thread.currentThread().isInterrupted()) {
-				// Un errore nella propagazione del valore non deve fermare il
-				// generatore (l'eccezione sarebbe inghiottita dal Future)
-				try {
-					// Seleziona l'algoritmo di generazione
-					switch (algorithm) {
-						case decremental :
-							generateNextDecremental();
-							break;
-						case incremental :
-							generateNextIncremental();
-							break;
-						case random :
-							generateNextRandom();
-							break;
-						case sinusoidal :
-							generateNextSinusoidal();
-							break;
-						case triangular :
-							generateNextTriangular();
-							break;
-						case stopped :
-							// Non genera nulla, mantiene il valore corrente
-							break;
-						default :
-							logger.warn(
-									"algorithm not implemented: " + algorithm);
-							break;
-					}
-				} catch (final RuntimeException e) {
-					logger.warn("Error generating the value of node "
-							+ getNodeId().toParseableString(), e);
+		// Loop principale di generazione
+		while (active && generationEpoch == epoch
+				&& !Thread.currentThread().isInterrupted()) {
+			// Un errore nella propagazione del valore non deve fermare il
+			// generatore (l'eccezione sarebbe inghiottita dal Future)
+			try {
+				// Seleziona l'algoritmo di generazione
+				switch (algorithm) {
+					case decremental :
+						generateNextDecremental();
+						break;
+					case incremental :
+						generateNextIncremental();
+						break;
+					case random :
+						generateNextRandom();
+						break;
+					case sinusoidal :
+						generateNextSinusoidal();
+						break;
+					case triangular :
+						generateNextTriangular();
+						break;
+					case stopped :
+						// Non genera nulla, mantiene il valore corrente
+						break;
+					default :
+						logger.warn("algorithm not implemented: " + algorithm);
+						break;
 				}
-				try {
-					// Attende prima della prossima generazione
-					Thread.sleep(delay);
-				} catch (final InterruptedException e) {
-					logger.info("generator thread interrupted for node {}",
-							getNodeId().toParseableString());
-					Thread.currentThread().interrupt();
-					break;
-				}
+			} catch (final RuntimeException e) {
+				logger.warn("Error generating the value of node "
+						+ getNodeId().toParseableString(), e);
 			}
-			logger.info("Thread for generator node "
-					+ getNodeId().toParseableString() + " stopped");
+			try {
+				// Attende prima della prossima generazione
+				Thread.sleep(delay);
+			} catch (final InterruptedException e) {
+				logger.debug("generator thread interrupted for node {}",
+						getNodeId().toParseableString());
+				Thread.currentThread().interrupt();
+				break;
+			}
 		}
-	};
+		logger.info("Thread for generator node "
+				+ getNodeId().toParseableString() + " stopped");
+	}
 
 	// Seed per algoritmi sinusoidali e triangolari
 	private long seed;
@@ -298,6 +309,11 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 				writeMask, userWriteMask, eventNotifier, version);
 		this.executor = executor;
 		waldotNamespace = graph.getWaldotNamespace();
+		// tipo dei nodi del namespace di questo vertice (non dell'ultimo
+		// namespace inizializzato nella JVM)
+		final ExpandedNodeId labelType = MiloSingleServerBaseReferenceNodeBuilder
+				.forNamespace(waldotNamespace).labelVertexTypeNode.getNodeId()
+				.expanded();
 
 		final String keyValuesPropertyDelay = MiloStrategy.getKeyValuesProperty(
 				propertyKeyValues,
@@ -307,8 +323,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 		delayProperty = new QualifiedProperty<Long>(
 				getNamespace().getNamespaceUri(),
 				GeneratorConstants.DELAY_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
+				labelType,
 				ValueRanks.Scalar, Long.class);
 		setProperty(delayProperty, delay);
 		final String keyValuesPropertyMin = MiloStrategy.getKeyValuesProperty(
@@ -333,8 +348,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 		minProperty = new QualifiedProperty<Long>(
 				getNamespace().getNamespaceUri(),
 				GeneratorConstants.MIN_VALUE_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
+				labelType,
 				ValueRanks.Scalar, Long.class);
 		setProperty(minProperty, min);
 
@@ -360,8 +374,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 		maxProperty = new QualifiedProperty<Long>(
 				getNamespace().getNamespaceUri(),
 				GeneratorConstants.MAX_VALUE_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
+				labelType,
 				ValueRanks.Scalar, Long.class);
 		setProperty(maxProperty, max);
 		if (min > max) {
@@ -399,8 +412,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 		postNodeIdDataProperty = new QualifiedProperty<String>(
 				getNamespace().getNamespaceUri(),
 				GeneratorConstants.POST_NODE_ID_DATA_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
+				labelType,
 				ValueRanks.Scalar, String.class);
 		setProperty(postNodeIdDataProperty, postNodeIdData);
 
@@ -412,8 +424,7 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 		algorithmProperty = new QualifiedProperty<String>(
 				getNamespace().getNamespaceUri(),
 				GeneratorConstants.ALGORITHM_FIELD,
-				MiloSingleServerBaseReferenceNodeBuilder.labelVertexTypeNode
-						.getNodeId().expanded(),
+				labelType,
 				ValueRanks.Scalar, String.class);
 		setProperty(algorithmProperty, algorithm.name());
 
@@ -424,7 +435,66 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 			preparePostNodeIdData();
 		}
 		// Avvia il thread di generazione
-		executor.submit(runner);
+		startGeneration();
+	}
+
+	/**
+	 * Avvia il ciclo di generazione se il vertice è attivo e non è già in
+	 * esecuzione. Se l'executor del plugin è già chiuso il generatore resta
+	 * fermo.
+	 */
+	private void startGeneration() {
+		synchronized (generationLock) {
+			if (!active || generation != null && !generation.isDone()) {
+				return;
+			}
+			final long epoch = generationEpoch;
+			try {
+				generation = executor.submit(() -> runGeneration(epoch));
+			} catch (final RejectedExecutionException e) {
+				logger.warn("generator plugin closed, node {} not started",
+						getNodeId().toParseableString());
+				generation = null;
+			}
+		}
+	}
+
+	/**
+	 * Sospende la generazione: interrompe il thread e lo rilascia. Il vertice
+	 * resta nel grafo e {@link #resumeGeneration()} la riavvia.
+	 */
+	public void pauseGeneration() {
+		synchronized (generationLock) {
+			generationEpoch++;
+			if (generation != null) {
+				generation.cancel(true);
+				generation = null;
+			}
+		}
+	}
+
+	/**
+	 * Riavvia la generazione sospesa con {@link #pauseGeneration()}; non fa
+	 * nulla se è già in esecuzione o se il vertice è chiuso.
+	 */
+	public void resumeGeneration() {
+		startGeneration();
+	}
+
+	/**
+	 * @return {@code true} se il ciclo di generazione è in esecuzione
+	 */
+	public boolean isGenerating() {
+		synchronized (generationLock) {
+			return generation != null && !generation.isDone();
+		}
+	}
+
+	/**
+	 * @return {@code true} dopo {@link #close()}
+	 */
+	public boolean isClosed() {
+		return !active;
 	}
 
 	/**
@@ -544,15 +614,16 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 	}
 
 	/**
-	 * Stops the generation thread.
+	 * Stops the generation thread for good.
 	 * <p>
-	 * Ferma il thread di generazione impostando active = false.
-	 * Il thread terminerà al prossimo ciclo del loop.
+	 * Imposta active = false e interrompe il thread di generazione, che termina
+	 * subito anche con un delay lungo e rilascia il vertice. Idempotente.
 	 * </p>
 	 */
 	@Override
 	public void close() {
 		active = false;
+		pauseGeneration();
 	}
 
 	/**

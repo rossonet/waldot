@@ -69,7 +69,10 @@ class NamespaceLifecycleRegressionTest {
 		graph.getWaldotNamespace().registerPlugin(plugin);
 		events.clear();
 		((OpcGraph) graph).close();
-		assertTrue(events.contains("stop"));
+		// definitive release: stop (pause) and then close, once
+		assertEquals(List.of("stop", "close"), events);
+		graph.getWaldotNamespace().close();
+		assertEquals(List.of("stop", "close"), events);
 		graph = null;
 	}
 
@@ -84,6 +87,7 @@ class NamespaceLifecycleRegressionTest {
 		assertThrows(UnsupportedOperationException.class, () -> namespace.getPlugins().clear());
 		events.clear();
 		namespace.resetNameSpace();
+		// a reset pauses the plugin, it never closes it
 		assertEquals(List.of("stop", "reset", "start"), events);
 		namespace.unregisterPlugin(plugin);
 		assertFalse(namespace.getPlugins().contains(plugin));
@@ -128,12 +132,17 @@ class NamespaceLifecycleRegressionTest {
 		Files.deleteIfExists(WaldotTestEnvironment.bootFile());
 	}
 
-	private static final class RecordingPlugin implements PluginListener {
+	private static final class RecordingPlugin implements PluginListener, AutoCloseable {
 
 		private final List<String> events;
 
 		private RecordingPlugin(final List<String> events) {
 			this.events = events;
+		}
+
+		@Override
+		public void close() {
+			events.add("close");
 		}
 
 		@Override

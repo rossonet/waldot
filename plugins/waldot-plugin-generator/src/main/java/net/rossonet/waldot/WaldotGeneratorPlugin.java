@@ -1,6 +1,9 @@
 package net.rossonet.waldot;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
@@ -120,19 +123,102 @@ public class WaldotGeneratorPlugin extends AbstractPluginListener {
 
 	protected WaldotNamespace waldotNamespace;
 
+	private final AtomicBoolean closed = new AtomicBoolean(false);
+
 	/**
-	 * Closes the plugin and shuts down the executor service.
+	 * Closes the plugin for good: stops the generators of the namespace and
+	 * shuts down the executor, interrupting every generator thread still
+	 * alive. Idempotent; the generators created afterwards do not start.
 	 * <p>
 	 * Chiude il plugin fermando tutti i thread virtuali dei generatori attivi.
 	 * </p>
-	 * 
+	 *
 	 * @throws Exception if shutdown fails
 	 */
 	@Override
 	public void close() throws Exception {
+		if (!closed.compareAndSet(false, true)) {
+			return;
+		}
+		for (final WaldotVertex vertex : generators()) {
+			if (vertex instanceof final AutoCloseable closeable) {
+				try {
+					closeable.close();
+				} catch (final Exception e) {
+					logger.warn("Error closing generator {}: {}",
+							vertex.getNodeId(), e.getMessage());
+				}
+			}
+		}
 		// Ferma tutti i thread virtuali dei generatori
 		executor.shutdownNow();
 		super.close();
+	}
+
+	/**
+	 * @return the generator vertices currently in the graph of the namespace
+	 *         (empty before the initialization or if the graph is not
+	 *         readable)
+	 */
+	private List<WaldotVertex> generators() {
+		if (waldotNamespace == null) {
+			return List.of();
+		}
+		try {
+			final List<WaldotVertex> result = new ArrayList<>();
+			for (final WaldotVertex vertex : waldotNamespace.getVertices()
+					.values()) {
+				if (vertex instanceof DataGeneratorVertex
+						|| vertex instanceof EventGeneratorVertex) {
+					result.add(vertex);
+				}
+			}
+			return result;
+		} catch (final RuntimeException e) {
+			logger.warn("Error reading the generators: {}", e.getMessage());
+			return List.of();
+		}
+	}
+
+	/**
+	 * @return {@code true} after {@link #close()}
+	 */
+	public boolean isClosed() {
+		return closed.get();
+	}
+
+	/**
+	 * Resumes the generators paused by {@link #stop()}.
+	 */
+	@Override
+	public void start() {
+		if (closed.get()) {
+			return;
+		}
+		for (final WaldotVertex vertex : generators()) {
+			if (vertex instanceof final DataGeneratorVertex data) {
+				data.resumeGeneration();
+			} else if (vertex instanceof final EventGeneratorVertex event) {
+				event.resumeGeneration();
+			}
+		}
+	}
+
+	/**
+	 * Pauses every generator of the namespace (restartable with
+	 * {@link #start()}): the data generators release their thread, the event
+	 * generators stop publishing. The executor stays open, it is shut down by
+	 * {@link #close()}.
+	 */
+	@Override
+	public void stop() {
+		for (final WaldotVertex vertex : generators()) {
+			if (vertex instanceof final DataGeneratorVertex data) {
+				data.pauseGeneration();
+			} else if (vertex instanceof final EventGeneratorVertex event) {
+				event.pauseGeneration();
+			}
+		}
 	}
 
 	/**
