@@ -142,7 +142,8 @@ public final class GraphRenderOptions {
 
 		public Layout spacing(final double value) {
 			if (!(value >= 0.1 && value <= 10.0)) {
-				throw new IllegalArgumentException("layout.spacing must be between 0.1 and 10: " + value);
+				throw new IllegalArgumentException(
+						"layout.spacing must be between 0.1 and 10: " + value);
 			}
 			spacing = value;
 			return this;
@@ -203,7 +204,9 @@ public final class GraphRenderOptions {
 
 		public Properties maxValueLength(final int value) {
 			if (value < 4) {
-				throw new IllegalArgumentException("properties.maxValueLength must be at least 4: " + value);
+				throw new IllegalArgumentException(
+						"properties.maxValueLength must be at least 4: "
+								+ value);
 			}
 			maxValueLength = value;
 			return this;
@@ -324,7 +327,8 @@ public final class GraphRenderOptions {
 
 		public Vertices depth(final Integer value) {
 			if (value != null && value < 0) {
-				throw new IllegalArgumentException("vertices.depth must not be negative: " + value);
+				throw new IllegalArgumentException(
+						"vertices.depth must not be negative: " + value);
 			}
 			depth = value;
 			return this;
@@ -424,7 +428,8 @@ public final class GraphRenderOptions {
 
 		public Vertices max(final int value) {
 			if (value < 1) {
-				throw new IllegalArgumentException("vertices.max must be positive: " + value);
+				throw new IllegalArgumentException(
+						"vertices.max must be positive: " + value);
 			}
 			max = value;
 			return this;
@@ -458,7 +463,8 @@ public final class GraphRenderOptions {
 		public Vertices where(final Map<String, String> value) {
 			final Map<String, String> checked = new LinkedHashMap<>();
 			if (value != null) {
-				value.forEach((k, v) -> checked.put(k, checkRegex(v == null ? "" : v, "vertices.where." + k)));
+				value.forEach((k, v) -> checked.put(k,
+						checkRegex(v == null ? "" : v, "vertices.where." + k)));
 			}
 			where = checked;
 			return this;
@@ -466,7 +472,7 @@ public final class GraphRenderOptions {
 	}
 
 	/** Default of {@code vertices.max}. */
-	public static final int DEFAULT_MAX_VERTICES = 500;
+	public static final int DEFAULT_MAX_VERTICES = 50000;
 
 	private static final ObjectMapper JSON = new ObjectMapper();
 
@@ -474,33 +480,50 @@ public final class GraphRenderOptions {
 		return value == null || value.isBlank() ? null : value;
 	}
 
-	private static String checkRegex(final String value, final String name) {
-		if (value != null) {
-			try {
-				Pattern.compile(value);
-			} catch (final PatternSyntaxException e) {
-				throw new IllegalArgumentException(name + " is not a valid regular expression: " + value, e);
-			}
+	private static boolean booleanValue(final JsonNode node,
+			final String name) {
+		if (node.isBoolean()) {
+			return node.booleanValue();
 		}
-		return value;
+		if (node.isTextual()
+				&& ("true".equalsIgnoreCase(node.textValue().trim())
+						|| "false".equalsIgnoreCase(node.textValue().trim()))) {
+			return Boolean.parseBoolean(node.textValue().trim());
+		}
+		throw new IllegalArgumentException("'" + name + "' must be a boolean");
 	}
 
-	private static void checkKeys(final JsonNode node, final String path, final String... allowed) {
+	private static void checkKeys(final JsonNode node, final String path,
+			final String... allowed) {
 		if (node == null || node.isNull()) {
 			return;
 		}
 		if (!node.isObject()) {
-			throw new IllegalArgumentException("'" + path + "' must be a JSON object");
+			throw new IllegalArgumentException(
+					"'" + path + "' must be a JSON object");
 		}
 		final Set<String> keys = Set.of(allowed);
 		final Iterator<String> names = node.fieldNames();
 		while (names.hasNext()) {
 			final String name = names.next();
 			if (!keys.contains(name)) {
-				throw new IllegalArgumentException(
-						"unknown option '" + (path.isEmpty() ? name : path + "." + name) + "'");
+				throw new IllegalArgumentException("unknown option '"
+						+ (path.isEmpty() ? name : path + "." + name) + "'");
 			}
 		}
+	}
+
+	private static String checkRegex(final String value, final String name) {
+		if (value != null) {
+			try {
+				Pattern.compile(value);
+			} catch (final PatternSyntaxException e) {
+				throw new IllegalArgumentException(
+						name + " is not a valid regular expression: " + value,
+						e);
+			}
+		}
+		return value;
 	}
 
 	private static List<String> copy(final List<String> value) {
@@ -530,37 +553,46 @@ public final class GraphRenderOptions {
 		try {
 			root = JSON.readTree(json);
 		} catch (final JsonProcessingException e) {
-			throw new IllegalArgumentException("invalid options JSON: " + e.getOriginalMessage(), e);
+			throw new IllegalArgumentException(
+					"invalid options JSON: " + e.getOriginalMessage(), e);
 		}
-		checkKeys(root, "", "format", "vertices", "edges", "properties", "layout", "style");
+		checkKeys(root, "", "format", "vertices", "edges", "properties",
+				"layout", "style");
 		if (root.has("format")) {
-			options.format(parseEnum(Format.class, root.get("format"), "format"));
+			options.format(
+					parseEnum(Format.class, root.get("format"), "format"));
 		}
 		final JsonNode v = root.get("vertices");
-		checkKeys(v, "vertices", "roots", "depth", "direction", "types", "excludeTypes", "labels", "directories",
-				"match", "where", "expression", "includeEphemeral", "includeIsolated", "max");
+		checkKeys(v, "vertices", "roots", "depth", "direction", "types",
+				"excludeTypes", "labels", "directories", "match", "where",
+				"expression", "includeEphemeral", "includeIsolated", "max");
 		if (v != null && !v.isNull()) {
 			final Vertices vertices = options.vertices();
 			if (v.has("roots")) {
 				vertices.roots(stringList(v.get("roots"), "vertices.roots"));
 			}
 			if (v.has("depth")) {
-				vertices.depth(v.get("depth").isNull() ? null : intValue(v.get("depth"), "vertices.depth"));
+				vertices.depth(v.get("depth").isNull()
+						? null
+						: intValue(v.get("depth"), "vertices.depth"));
 			}
 			if (v.has("direction")) {
-				vertices.direction(parseEnum(Direction.class, v.get("direction"), "vertices.direction"));
+				vertices.direction(parseEnum(Direction.class,
+						v.get("direction"), "vertices.direction"));
 			}
 			if (v.has("types")) {
 				vertices.types(stringList(v.get("types"), "vertices.types"));
 			}
 			if (v.has("excludeTypes")) {
-				vertices.excludeTypes(stringList(v.get("excludeTypes"), "vertices.excludeTypes"));
+				vertices.excludeTypes(stringList(v.get("excludeTypes"),
+						"vertices.excludeTypes"));
 			}
 			if (v.has("labels")) {
 				vertices.labels(stringList(v.get("labels"), "vertices.labels"));
 			}
 			if (v.has("directories")) {
-				vertices.directories(stringList(v.get("directories"), "vertices.directories"));
+				vertices.directories(stringList(v.get("directories"),
+						"vertices.directories"));
 			}
 			if (v.has("match")) {
 				vertices.match(stringValue(v.get("match"), "vertices.match"));
@@ -569,13 +601,17 @@ public final class GraphRenderOptions {
 				vertices.where(stringMap(v.get("where"), "vertices.where"));
 			}
 			if (v.has("expression")) {
-				vertices.expression(stringValue(v.get("expression"), "vertices.expression"));
+				vertices.expression(stringValue(v.get("expression"),
+						"vertices.expression"));
 			}
 			if (v.has("includeEphemeral")) {
-				vertices.includeEphemeral(booleanValue(v.get("includeEphemeral"), "vertices.includeEphemeral"));
+				vertices.includeEphemeral(
+						booleanValue(v.get("includeEphemeral"),
+								"vertices.includeEphemeral"));
 			}
 			if (v.has("includeIsolated")) {
-				vertices.includeIsolated(booleanValue(v.get("includeIsolated"), "vertices.includeIsolated"));
+				vertices.includeIsolated(booleanValue(v.get("includeIsolated"),
+						"vertices.includeIsolated"));
 			}
 			if (v.has("max")) {
 				vertices.max(intValue(v.get("max"), "vertices.max"));
@@ -585,94 +621,99 @@ public final class GraphRenderOptions {
 		checkKeys(e, "edges", "labels", "excludeLabels", "types");
 		if (e != null && !e.isNull()) {
 			if (e.has("labels")) {
-				options.edges().labels(stringList(e.get("labels"), "edges.labels"));
+				options.edges()
+						.labels(stringList(e.get("labels"), "edges.labels"));
 			}
 			if (e.has("excludeLabels")) {
-				options.edges().excludeLabels(stringList(e.get("excludeLabels"), "edges.excludeLabels"));
+				options.edges().excludeLabels(stringList(e.get("excludeLabels"),
+						"edges.excludeLabels"));
 			}
 			if (e.has("types")) {
-				options.edges().types(stringList(e.get("types"), "edges.types"));
+				options.edges()
+						.types(stringList(e.get("types"), "edges.types"));
 			}
 		}
 		final JsonNode p = root.get("properties");
-		checkKeys(p, "properties", "vertex", "edge", "includeRuntime", "hideReserved", "maxValueLength",
-				"tooltips");
+		checkKeys(p, "properties", "vertex", "edge", "includeRuntime",
+				"hideReserved", "maxValueLength", "tooltips");
 		if (p != null && !p.isNull()) {
 			final Properties properties = options.properties();
 			if (p.has("vertex")) {
-				properties.vertex(stringList(p.get("vertex"), "properties.vertex"));
+				properties.vertex(
+						stringList(p.get("vertex"), "properties.vertex"));
 			}
 			if (p.has("edge")) {
 				properties.edge(stringList(p.get("edge"), "properties.edge"));
 			}
 			if (p.has("includeRuntime")) {
-				properties.includeRuntime(booleanValue(p.get("includeRuntime"), "properties.includeRuntime"));
+				properties.includeRuntime(booleanValue(p.get("includeRuntime"),
+						"properties.includeRuntime"));
 			}
 			if (p.has("hideReserved")) {
-				properties.hideReserved(booleanValue(p.get("hideReserved"), "properties.hideReserved"));
+				properties.hideReserved(booleanValue(p.get("hideReserved"),
+						"properties.hideReserved"));
 			}
 			if (p.has("maxValueLength")) {
-				properties.maxValueLength(intValue(p.get("maxValueLength"), "properties.maxValueLength"));
+				properties.maxValueLength(intValue(p.get("maxValueLength"),
+						"properties.maxValueLength"));
 			}
 			if (p.has("tooltips")) {
-				properties.tooltips(booleanValue(p.get("tooltips"), "properties.tooltips"));
+				properties.tooltips(
+						booleanValue(p.get("tooltips"), "properties.tooltips"));
 			}
 		}
 		final JsonNode l = root.get("layout");
 		checkKeys(l, "layout", "algorithm", "direction", "groupBy", "spacing");
 		if (l != null && !l.isNull()) {
 			if (l.has("algorithm")) {
-				options.layout().algorithm(parseEnum(Algorithm.class, l.get("algorithm"), "layout.algorithm"));
+				options.layout().algorithm(parseEnum(Algorithm.class,
+						l.get("algorithm"), "layout.algorithm"));
 			}
 			if (l.has("direction")) {
-				options.layout()
-						.direction(parseEnum(LayoutDirection.class, l.get("direction"), "layout.direction"));
+				options.layout().direction(parseEnum(LayoutDirection.class,
+						l.get("direction"), "layout.direction"));
 			}
 			if (l.has("groupBy")) {
-				options.layout().groupBy(parseEnum(GroupBy.class, l.get("groupBy"), "layout.groupBy"));
+				options.layout().groupBy(parseEnum(GroupBy.class,
+						l.get("groupBy"), "layout.groupBy"));
 			}
 			if (l.has("spacing")) {
 				if (!l.get("spacing").isNumber()) {
-					throw new IllegalArgumentException("'layout.spacing' must be a number");
+					throw new IllegalArgumentException(
+							"'layout.spacing' must be a number");
 				}
 				options.layout().spacing(l.get("spacing").asDouble());
 			}
 		}
 		final JsonNode s = root.get("style");
-		checkKeys(s, "style", "theme", "colorBy", "legend", "edgeLabels", "title", "highlight");
+		checkKeys(s, "style", "theme", "colorBy", "legend", "edgeLabels",
+				"title", "highlight");
 		if (s != null && !s.isNull()) {
 			final Style style = options.style();
 			if (s.has("theme")) {
-				style.theme(parseEnum(Theme.class, s.get("theme"), "style.theme"));
+				style.theme(
+						parseEnum(Theme.class, s.get("theme"), "style.theme"));
 			}
 			if (s.has("colorBy")) {
-				style.colorBy(parseEnum(ColorBy.class, s.get("colorBy"), "style.colorBy"));
+				style.colorBy(parseEnum(ColorBy.class, s.get("colorBy"),
+						"style.colorBy"));
 			}
 			if (s.has("legend")) {
 				style.legend(booleanValue(s.get("legend"), "style.legend"));
 			}
 			if (s.has("edgeLabels")) {
-				style.edgeLabels(booleanValue(s.get("edgeLabels"), "style.edgeLabels"));
+				style.edgeLabels(
+						booleanValue(s.get("edgeLabels"), "style.edgeLabels"));
 			}
 			if (s.has("title")) {
 				style.title(stringValue(s.get("title"), "style.title"));
 			}
 			if (s.has("highlight")) {
-				style.highlight(stringList(s.get("highlight"), "style.highlight"));
+				style.highlight(
+						stringList(s.get("highlight"), "style.highlight"));
 			}
 		}
 		return options;
-	}
-
-	private static boolean booleanValue(final JsonNode node, final String name) {
-		if (node.isBoolean()) {
-			return node.booleanValue();
-		}
-		if (node.isTextual() && ("true".equalsIgnoreCase(node.textValue().trim())
-				|| "false".equalsIgnoreCase(node.textValue().trim()))) {
-			return Boolean.parseBoolean(node.textValue().trim());
-		}
-		throw new IllegalArgumentException("'" + name + "' must be a boolean");
 	}
 
 	private static int intValue(final JsonNode node, final String name) {
@@ -689,8 +730,18 @@ public final class GraphRenderOptions {
 		throw new IllegalArgumentException("'" + name + "' must be an integer");
 	}
 
+	private static String lower(final Enum<?> value) {
+		return value.name().toLowerCase(Locale.ROOT);
+	}
+
+	private static <E extends Enum<E>> E parseEnum(final Class<E> type,
+			final JsonNode node, final String name) {
+		return parseEnum(type, stringValue(node, name), name);
+	}
+
 	/** Parses an enum constant ignoring the case. */
-	public static <E extends Enum<E>> E parseEnum(final Class<E> type, final String value, final String name) {
+	public static <E extends Enum<E>> E parseEnum(final Class<E> type,
+			final String value, final String name) {
 		if (value != null) {
 			for (final E constant : type.getEnumConstants()) {
 				if (constant.name().equalsIgnoreCase(value.trim())) {
@@ -702,21 +753,20 @@ public final class GraphRenderOptions {
 		for (final E constant : type.getEnumConstants()) {
 			allowed.add(constant.name().toLowerCase(Locale.ROOT));
 		}
-		throw new IllegalArgumentException("'" + name + "' must be one of " + allowed + ": " + value);
-	}
-
-	private static <E extends Enum<E>> E parseEnum(final Class<E> type, final JsonNode node, final String name) {
-		return parseEnum(type, stringValue(node, name), name);
+		throw new IllegalArgumentException(
+				"'" + name + "' must be one of " + allowed + ": " + value);
 	}
 
 	private static <T> T require(final T value, final String name) {
 		if (value == null) {
-			throw new IllegalArgumentException("'" + name + "' must not be null");
+			throw new IllegalArgumentException(
+					"'" + name + "' must not be null");
 		}
 		return value;
 	}
 
-	private static List<String> stringList(final JsonNode node, final String name) {
+	private static List<String> stringList(final JsonNode node,
+			final String name) {
 		final List<String> result = new ArrayList<>();
 		if (node == null || node.isNull()) {
 			return result;
@@ -726,32 +776,42 @@ public final class GraphRenderOptions {
 			return result;
 		}
 		if (!node.isArray()) {
-			throw new IllegalArgumentException("'" + name + "' must be a list of strings");
+			throw new IllegalArgumentException(
+					"'" + name + "' must be a list of strings");
 		}
 		for (final JsonNode item : node) {
 			if (!item.isValueNode() || item.isNull()) {
-				throw new IllegalArgumentException("'" + name + "' must be a list of strings");
+				throw new IllegalArgumentException(
+						"'" + name + "' must be a list of strings");
 			}
 			result.add(item.asText());
 		}
 		return result;
 	}
 
-	private static Map<String, String> stringMap(final JsonNode node, final String name) {
+	private static Map<String, String> stringMap(final JsonNode node,
+			final String name) {
 		final Map<String, String> result = new LinkedHashMap<>();
 		if (node == null || node.isNull()) {
 			return result;
 		}
 		if (!node.isObject()) {
-			throw new IllegalArgumentException("'" + name + "' must be a JSON object");
+			throw new IllegalArgumentException(
+					"'" + name + "' must be a JSON object");
 		}
 		node.fields().forEachRemaining(entry -> {
 			if (!entry.getValue().isValueNode() || entry.getValue().isNull()) {
-				throw new IllegalArgumentException("'" + name + "." + entry.getKey() + "' must be a string");
+				throw new IllegalArgumentException("'" + name + "."
+						+ entry.getKey() + "' must be a string");
 			}
 			result.put(entry.getKey(), entry.getValue().asText());
 		});
 		return result;
+	}
+
+	private static void strings(final ArrayNode array,
+			final List<String> values) {
+		values.forEach(array::add);
 	}
 
 	private static String stringValue(final JsonNode node, final String name) {
@@ -759,7 +819,8 @@ public final class GraphRenderOptions {
 			return null;
 		}
 		if (!node.isValueNode()) {
-			throw new IllegalArgumentException("'" + name + "' must be a string");
+			throw new IllegalArgumentException(
+					"'" + name + "' must be a string");
 		}
 		return node.asText();
 	}
@@ -856,14 +917,6 @@ public final class GraphRenderOptions {
 		} catch (final JsonProcessingException ex) {
 			throw new IllegalStateException(ex);
 		}
-	}
-
-	private static String lower(final Enum<?> value) {
-		return value.name().toLowerCase(Locale.ROOT);
-	}
-
-	private static void strings(final ArrayNode array, final List<String> values) {
-		values.forEach(array::add);
 	}
 
 	@Override
