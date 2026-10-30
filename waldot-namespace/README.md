@@ -85,6 +85,50 @@ g.V('device-1').call('waldot.command', [command: 'property', args: ['color', 're
 
 See `docs/guide/docs/CONFIGURATION.md` for the full reference.
 
+## Closing the namespace, the plugins and the vertices
+
+`HomunculusNamespace.close()` releases everything the namespace started, so a
+closed namespace (and the whole address space of its OPC UA server) can be
+garbage collected. It runs only once (a second call does nothing), every step
+is isolated (an exception is logged and the shutdown goes on) and steps
+longer than 1 s are logged with their duration.
+
+Order:
+
+1. namespace timer, bootstrap procedure strategy and console strategy;
+2. `close()` of every `AutoCloseable` vertex of the graph: the vertices are
+   not removed from the graph (no address space change, no event), each one
+   is closed at most once;
+3. for every plugin `PluginListener.stop()` and then, if the plugin
+   implements `AutoCloseable`, `close()`;
+4. a second pass on the vertices created meanwhile (for example by a plugin
+   task still running during step 3);
+5. client management, OPC mapping and history strategies;
+6. OPC UA server;
+7. static per-namespace registry (`MiloSingleServerBaseReferenceNodeBuilder.unregister`,
+   the legacy static references move to another open namespace or become
+   `null`);
+8. Gremlin graph (`OpcGraph.close()`, idempotent).
+
+Semantics that plugins and vertices must respect:
+
+- `stop()` is a restartable pause (also used by `resetNameSpace()` and
+  `unregisterPlugin(...)`), `close()` is the definitive release. Both are
+  idempotent and must not throw after a failed startup;
+- removing a vertex closes it: the default of
+  `WaldotVertex.notifyRemoveVertex()` calls `close()` on `AutoCloseable`
+  vertices, so `close()` must also be idempotent;
+- nothing started by a plugin or a vertex (threads, executors, sockets,
+  timers, static fields, listeners of external libraries) may keep a
+  reference to the namespace after the close;
+- `OpcFactory` closes the namespace when its startup fails.
+
+Regression tests: `NamespaceCloseRegressionTest` (no thread, no port and no
+reachable namespace after the close, idempotence) and
+`NamespaceLifecycleRegressionTest`. The plugin modules cover their own
+resources (for example `GeneratorCloseReleasesNamespaceTest` in
+`waldot-plugin-generator`).
+
 ## Build and test
 
 From repository root:
@@ -92,6 +136,10 @@ From repository root:
 ```bash
 ./gradlew :waldot-namespace:test
 ```
+
+The test JVM runs with `maxHeapSize = 512m`: every test closes its namespace,
+so the heap holds one namespace at a time (before the close fixes the tests
+needed 2 GB because every closed namespace stayed reachable).
 
 Run coverage report and verification:
 

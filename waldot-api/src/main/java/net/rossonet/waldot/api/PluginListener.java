@@ -84,6 +84,24 @@ import net.rossonet.waldot.exception.PluginBlockingException;
  * after a failed startup and must tolerate a second call: the namespace logs
  * any exception and goes on with the shutdown of the other plugins.</p>
  *
+ * <p>Order of {@code WaldotNamespace.close()} (each step isolated and timed,
+ * the whole sequence runs only once):</p>
+ * <ol>
+ *   <li>namespace timer, bootstrap procedure and console strategies;</li>
+ *   <li>{@code close()} of every {@link AutoCloseable} vertex of the graph
+ *   (default of {@code WaldotVertex.notifyRemoveVertex()}): threads, sockets
+ *   and timers owned by the vertices end here;</li>
+ *   <li>for every plugin {@link #stop()} and then, if the plugin is
+ *   {@link AutoCloseable}, {@code close()};</li>
+ *   <li>a second pass on the vertices created meanwhile by a plugin;</li>
+ *   <li>client management, OPC mapping and history strategies, OPC UA
+ *   server, static registry of the namespace, Gremlin graph.</li>
+ * </ol>
+ * <p>After the close nothing started by the plugin may keep a reference to
+ * the namespace (threads, executors, static fields, listeners of external
+ * libraries), otherwise the whole address space of the closed server stays
+ * reachable.</p>
+ *
  * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public interface PluginListener {
@@ -428,8 +446,10 @@ public interface PluginListener {
 	/**
 	 * Pauses the plugin.
 	 *
-	 * <p>Called before {@link #reset()}, when the plugin is unregistered and,
-	 * as first step, when the namespace is closed. Implementations stop their
+	 * <p>Called before {@link #reset()}, when the plugin is unregistered and
+	 * when the namespace is closed (after the {@link AutoCloseable} vertices
+	 * have been closed and just before {@code close()} of the plugin, if it
+	 * is {@link AutoCloseable}). Implementations stop their
 	 * background tasks but keep the resources needed by a following
 	 * {@link #start()}: the definitive release belongs to {@code close()} of
 	 * the plugins that implement {@link AutoCloseable} (see the lifecycle in

@@ -139,6 +139,28 @@ boiler.addEdge("to-syslog", syslogSender, "type", "fire")
 
 The vertex is created also by the OPC UA command `create event generator` (folder `simulator`).
 
+## Lifecycle and shutdown
+
+Every generator (`sim:generator`, `sim:event-generator`) runs on a virtual
+thread of the plugin executor. The plugin follows the lifecycle of
+`PluginListener` (see the Javadoc of the interface and the `waldot-namespace`
+README):
+
+| Call | Effect |
+|---|---|
+| `stop()` (reset, unregister, first half of the namespace close) | pause: `DataGeneratorVertex.pauseGeneration()` cancels the scheduled cycle (`Future.cancel(true)`), `EventGeneratorVertex.pauseGeneration()` stops publishing; the values stay unchanged |
+| `start()` | resumes the paused generators (`resumeGeneration()`); ignored after `close()` |
+| `close()` of the plugin (namespace close, only once) | `close()` of every generator, then `executor.shutdownNow()` |
+| `close()` of a generator (also when the vertex is removed) | `active = false`, the cycle is cancelled or the thread interrupted at once, even with a long `delay`; idempotent |
+
+After `WaldotNamespace.close()` no generator thread is alive and the
+namespace, with its OPC UA server, can be garbage collected. Before this
+behaviour every closed namespace stayed in memory, kept alive by the virtual
+threads of its generators (each generator thread references its vertex, the
+graph and the whole address space). `GeneratorCloseReleasesNamespaceTest`
+covers the immediate interruption, the pause and resume, and the release of
+the namespace (`WeakReference` collected after the close).
+
 ## Documentation
 
 Complete documentation in `docs/` directory:
