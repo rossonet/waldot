@@ -24,6 +24,7 @@ import net.rossonet.waldot.cli.commands.EdgeCommand;
 import net.rossonet.waldot.cli.commands.PropertyCommand;
 import net.rossonet.waldot.cli.commands.QueryCommand;
 import net.rossonet.waldot.cli.commands.ReadCommand;
+import net.rossonet.waldot.cli.commands.RenderCommand;
 import net.rossonet.waldot.cli.commands.ResolveCommand;
 import net.rossonet.waldot.cli.commands.SnapshotCommand;
 import net.rossonet.waldot.cli.commands.SubscribeCommand;
@@ -106,6 +107,9 @@ import picocli.CommandLine.UnmatchedArgumentException;
 				"  waldot snapshot export -f grafo.json.gz",
 				"  waldot snapshot import --clear -f grafo.json.gz",
 				"",
+				"  # disegno SVG dell'impianto, raggruppato per cartella",
+				"  waldot render -f impianto.svg --group-by directory",
+				"",
 				"  # inoltro dei valori a un broker MQTT (mosquitto_pub -l legge le righe da stdin)",
 				"  waldot subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l",
 				"",
@@ -118,7 +122,7 @@ import picocli.CommandLine.UnmatchedArgumentException;
 				"    rossonet/waldot-client subscribe -p s1:value",
 				"" }, subcommands = { HelpCommand.class, AboutCommand.class, QueryCommand.class, DescribeCommand.class,
 						CommandsCommand.class, VertexCommand.class, EdgeCommand.class, PropertyCommand.class,
-						SnapshotCommand.class, BrowseCommand.class, ReadCommand.class, WriteCommand.class,
+						SnapshotCommand.class, RenderCommand.class, BrowseCommand.class, ReadCommand.class, WriteCommand.class,
 						CallCommand.class, ResolveCommand.class, SubscribeCommand.class })
 public class WaldotCli implements Callable<Integer> {
 

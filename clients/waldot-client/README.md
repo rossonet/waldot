@@ -42,6 +42,13 @@ try (WaldotClient client = WaldotClient.create(configuration)) {
 	GraphSnapshot snapshot = client.snapshots().exportGraph();
 	client.snapshots().restore(snapshot); // clear graph + import graph
 
+	// drawing of the graph (command "render graph": SVG laid out by Eclipse ELK, or DOT)
+	GraphRenderOptions view = new GraphRenderOptions();
+	view.vertices().roots(List.of("plc-1")).depth(2).includeEphemeral(true);
+	view.properties().vertex(List.of("unit", "status")).includeRuntime(true);
+	view.layout().groupBy(GraphRenderOptions.GroupBy.DIRECTORY);
+	Files.write(Path.of("plc-1.svg"), client.graph().render(view).data());
+
 	// plain OPC UA address space
 	client.addressSpace().browse(client.addressSpace().waldotNodeId("cmd"));
 }

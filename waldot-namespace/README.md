@@ -7,6 +7,7 @@ The `waldot-namespace` module is the runtime bridge between OPC UA and the in-me
 - exposes graph vertices, edges, properties, and commands as OPC UA nodes;
 - executes bootstrap scripts at startup;
 - manages graph mutation commands (`query`, `help`, `about`, edge helpers);
+- exchanges structured data with the clients (JSON queries, snapshots, SVG/DOT drawings of the graph);
 - provides two Milo strategies:
   - `base`: legacy implementation;
   - `optimized`: hardened implementation with better consistency and indexing.
@@ -84,6 +85,35 @@ g.V('device-1').call('waldot.command', [command: 'property', args: ['color', 're
   shortcuts for the same `call()` steps.
 
 See `docs/guide/docs/CONFIGURATION.md` for the full reference.
+
+## Drawing the graph (`render graph`)
+
+The data exchange command `render graph` (folder `information`, see
+`DataExchangeProtocol`) draws the graph, or a part of it, as a standalone SVG
+or as Graphviz DOT. Its only structured input is `options`, a JSON object
+parsed by `GraphRenderOptions` (waldot-api, shared with the client). Every key
+is optional and unknown keys are rejected:
+
+| Section      | Keys                                                                                   |
+|--------------|----------------------------------------------------------------------------------------|
+| `format`     | `svg` (default) or `dot`                                                               |
+| `vertices`   | `roots`, `depth`, `direction`, `types`, `excludeTypes`, `labels`, `directories`, `match`, `where`, `expression`, `includeEphemeral`, `includeIsolated`, `max` |
+| `edges`      | `labels`, `excludeLabels`, `types`                                                     |
+| `properties` | `vertex`, `edge` (key globs), `includeRuntime` (`run!...`), `hideReserved`, `maxValueLength`, `tooltips` |
+| `layout`     | `algorithm` (`layered`, `force`, `stress`, `mrtree`, `radial`), `direction`, `groupBy` (`directory`, `type`), `spacing` |
+| `style`      | `theme` (`auto`, `light`, `dark`), `colorBy`, `legend`, `edgeLabels`, `title`, `highlight` |
+
+The command vertices are never drawn; the ephemeral elements and the runtime
+properties only on request. With `roots` the vertices are those reached within
+`depth` hops along the accepted edges. Only the edges between drawn vertices are
+drawn, the others are reported in the `warnings` output. The SVG layout is
+computed by Eclipse ELK (`net.rossonet.waldot.commands.render`), so no Graphviz
+is needed on the server. `-Dwaldot.commands.exchange.max-render-vertices`
+(default 5000) caps `vertices.max`. A drawing bigger than `blockSize` is
+downloaded with `read graph block`, like a snapshot.
+
+From the client: `client.graph().render(options)`; from the command line:
+`waldot render -f graph.svg ...`.
 
 ## Closing the namespace, the plugins and the vertices
 

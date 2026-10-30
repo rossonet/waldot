@@ -43,6 +43,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 
 import net.rossonet.waldot.api.exchange.DataExchangeProtocol;
+import net.rossonet.waldot.api.exchange.GraphRenderOptions;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.client.api.WaldOTAgentClient;
 import net.rossonet.waldot.client.api.WaldOTAgentClient.Status;
@@ -58,6 +59,7 @@ import net.rossonet.waldot.client.api.command.CommandResult;
 import net.rossonet.waldot.client.api.graph.ElementDescription;
 import net.rossonet.waldot.client.api.graph.GraphChangeResult;
 import net.rossonet.waldot.client.api.graph.GraphSnapshot;
+import net.rossonet.waldot.client.api.graph.GraphRendering;
 import net.rossonet.waldot.client.api.graph.QueryResult;
 import net.rossonet.waldot.client.api.subscription.DataItemOptions;
 import net.rossonet.waldot.client.api.subscription.EventItemOptions;
@@ -506,6 +508,37 @@ class WaldotClientV2IntegrationTest {
 				() -> client.snapshots().importGraph(snapshot, true, DataExchangeProtocol.MAX_BLOCK_SIZE + 1));
 		assertThrows(WaldotClientException.class, () -> client.snapshots()
 				.importGraph(GraphSnapshot.of("not graphson".getBytes()), true));
+	}
+
+	@Test
+	void renderGraph() {
+		final GraphRendering svg = client.graph().render(new GraphRenderOptions());
+		assertEquals("svg", svg.format());
+		assertEquals(6, svg.vertices());
+		assertEquals(6, svg.edges());
+		assertTrue(svg.asString().startsWith("<?xml"), svg.asString());
+		assertTrue(svg.asString().contains("data-node-id=\"ns=2;s=x-marko\""), svg.asString());
+
+		final GraphRenderOptions neighbours = new GraphRenderOptions().format(GraphRenderOptions.Format.DOT);
+		neighbours.vertices().roots(List.of("x-marko")).direction(GraphRenderOptions.Direction.OUT);
+		neighbours.edges().labels(List.of("knows"));
+		final GraphRendering dot = client.graph().render(neighbours);
+		assertEquals("dot", dot.format());
+		assertEquals(3, dot.vertices());
+		assertEquals(2, dot.edges());
+		assertFalse(dot.hasWarnings(), dot.warnings().toString());
+
+		for (int i = 0; i < 80; i++) {
+			graph.addVertex("id", "render-" + i, "name", "render vertex " + i);
+		}
+		final GraphRendering chunked = client.graph().render(new GraphRenderOptions(),
+				DataExchangeProtocol.MIN_BLOCK_SIZE);
+		assertTrue(chunked.blocks() > 1, chunked.toString());
+		assertTrue(chunked.asString().endsWith("</svg>\n"));
+
+		final WaldotClientException error = assertThrows(WaldotClientException.class,
+				() -> client.graph().render(GraphRenderOptions.fromJson("{\"vertices\":{\"roots\":[\"none\"]}}")));
+		assertTrue(error.getMessage().contains("none"), error.getMessage());
 	}
 
 	// ---- H: address space -------------------------------------------------

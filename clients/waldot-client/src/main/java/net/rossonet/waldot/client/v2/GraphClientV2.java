@@ -1,6 +1,7 @@
 package net.rossonet.waldot.client.v2;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,9 +10,12 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
 import net.rossonet.waldot.api.exchange.DataExchangeProtocol;
+import net.rossonet.waldot.api.exchange.GraphRenderOptions;
 import net.rossonet.waldot.client.api.WaldotClientException;
 import net.rossonet.waldot.client.api.command.CommandResult;
 import net.rossonet.waldot.client.api.graph.ElementDescription;
+import net.rossonet.waldot.client.api.graph.GraphRendering;
+import net.rossonet.waldot.client.api.graph.GraphSnapshot;
 import net.rossonet.waldot.client.api.graph.QueryResult;
 import net.rossonet.waldot.client.api.graph.WaldotGraphClient;
 import net.rossonet.waldot.client.support.BaseOperationCalls;
@@ -20,7 +24,7 @@ import net.rossonet.waldot.client.support.GraphSonSupport;
 
 /**
  * Graph access of the client v2 through the commands {@code query},
- * {@code query json} and {@code describe element}.
+ * {@code query json}, {@code describe element} and {@code render graph}.
  */
 final class GraphClientV2 implements WaldotGraphClient {
 
@@ -106,6 +110,27 @@ final class GraphClientV2 implements WaldotGraphClient {
 		} catch (final IOException e) {
 			throw WaldotClientException.of("invalid GraphSON result of '" + expression + "'", e);
 		}
+	}
+
+	@Override
+	public GraphRendering render(final GraphRenderOptions options, final int blockSize) {
+		GraphSnapshotClientV2.checkBlockSize(blockSize);
+		final CommandResult result = owner.commandClient().invokeGlobal(DataExchangeProtocol.RENDER_GRAPH_COMMAND,
+				(options == null ? new GraphRenderOptions() : options).toJson(), "true", String.valueOf(blockSize))
+				.orThrow();
+		final byte[] payload = BlockDownloads.payload(owner, result, blockSize);
+		final byte[] data;
+		try {
+			data = GraphSnapshot.of(payload).uncompressed();
+		} catch (final UncheckedIOException e) {
+			throw WaldotClientException.of("invalid drawing of the graph", e);
+		}
+		final String warnings = result.getString(DataExchangeProtocol.ARG_WARNINGS).trim();
+		return new GraphRendering(data, result.getString(DataExchangeProtocol.ARG_FORMAT).trim(),
+				BlockDownloads.intOutput(result, DataExchangeProtocol.ARG_VERTICES),
+				BlockDownloads.intOutput(result, DataExchangeProtocol.ARG_EDGES),
+				warnings.isEmpty() ? List.of() : List.of(warnings.split("\n")),
+				Math.max(1, BlockDownloads.intOutput(result, DataExchangeProtocol.ARG_BLOCKS)));
 	}
 
 	@Override

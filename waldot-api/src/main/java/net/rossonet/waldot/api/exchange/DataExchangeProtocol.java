@@ -3,7 +3,7 @@ package net.rossonet.waldot.api.exchange;
 /**
  * Names and limits of the OPC UA base commands used to exchange structured
  * data between a WaldOT server and its clients (structured query results,
- * element descriptions, graph snapshots).
+ * element descriptions, graph snapshots, graph drawings).
  * <p>
  * The constants are shared by the server commands (waldot-namespace) and by
  * the client library (waldot-client), so that both sides always agree on
@@ -32,6 +32,14 @@ package net.rossonet.waldot.api.exchange;
  * {@code edges}, {@code error};</li>
  * <li>{@value #CLEAR_GRAPH_COMMAND} (folder {@value #MANAGE_DIRECTORY}): no
  * inputs; outputs {@code vertices}, {@code edges} (removed elements),
+ * {@code error};</li>
+ * <li>{@value #RENDER_GRAPH_COMMAND} (folder {@value #INFORMATION_DIRECTORY}):
+ * inputs {@code options} (JSON, see {@link GraphRenderOptions}),
+ * {@code compress}, {@code blockSize}; outputs {@code data} (base64, single
+ * block), {@code transferId} (chunked transfer read with
+ * {@value #READ_GRAPH_BLOCK_COMMAND}), {@code blocks}, {@code size},
+ * {@code format} ({@code svg} or {@code dot}), {@code vertices},
+ * {@code edges} (drawn elements), {@code warnings} (one per line),
  * {@code error}.</li>
  * </ul>
  * All the arguments are strings; an empty {@code error} means success.
@@ -49,6 +57,7 @@ public final class DataExchangeProtocol {
 	public static final String READ_GRAPH_BLOCK_COMMAND = "read graph block";
 	public static final String IMPORT_GRAPH_COMMAND = "import graph";
 	public static final String CLEAR_GRAPH_COMMAND = "clear graph";
+	public static final String RENDER_GRAPH_COMMAND = "render graph";
 
 	/** Input/output argument names. */
 	public static final String ARG_COMMAND = "command";
@@ -67,6 +76,9 @@ public final class DataExchangeProtocol {
 	public static final String ARG_INDEX = "index";
 	public static final String ARG_LAST = "last";
 	public static final String ARG_CLEAR_BEFORE = "clearBefore";
+	public static final String ARG_OPTIONS = "options";
+	public static final String ARG_FORMAT = "format";
+	public static final String ARG_WARNINGS = "warnings";
 
 	/** Serialization format of the snapshots (one vertex per line). */
 	public static final String SNAPSHOT_FORMAT = "graphson-v3-adjacency";
@@ -98,6 +110,16 @@ public final class DataExchangeProtocol {
 	 * (default 10 minutes).
 	 */
 	public static final String TRANSFER_TTL_PROPERTY = "waldot.commands.exchange.transfer-ttl-msec";
+
+	/**
+	 * System property: most vertices drawn by {@value #RENDER_GRAPH_COMMAND},
+	 * whatever the requested {@code vertices.max} (default
+	 * {@value #DEFAULT_MAX_RENDER_VERTICES}).
+	 */
+	public static final String MAX_RENDER_VERTICES_PROPERTY = "waldot.commands.exchange.max-render-vertices";
+
+	/** Default of {@value #MAX_RENDER_VERTICES_PROPERTY}. */
+	public static final int DEFAULT_MAX_RENDER_VERTICES = 5000;
 
 	/**
 	 * @return true unless the commands were disabled with

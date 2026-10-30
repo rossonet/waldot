@@ -1,10 +1,8 @@
 package net.rossonet.waldot.client.v2;
 
 import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.ARG_BLOCKS;
-import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.ARG_DATA;
 import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.ARG_EDGES;
 import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.ARG_ERROR;
-import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.ARG_LAST;
 import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.ARG_TRANSFER_ID;
 import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.ARG_VERTICES;
 import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.CLEAR_GRAPH_COMMAND;
@@ -12,9 +10,7 @@ import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.EXPORT_GRAPH
 import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.IMPORT_GRAPH_COMMAND;
 import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.MAX_BLOCK_SIZE;
 import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.MIN_BLOCK_SIZE;
-import static net.rossonet.waldot.api.exchange.DataExchangeProtocol.READ_GRAPH_BLOCK_COMMAND;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -35,15 +31,7 @@ final class GraphSnapshotClientV2 implements GraphSnapshotClient {
 	}
 
 	private static int intOutput(final CommandResult result, final String name) {
-		final String value = result.getString(name).trim();
-		if (value.isEmpty()) {
-			return 0;
-		}
-		try {
-			return Integer.parseInt(value);
-		} catch (final NumberFormatException e) {
-			throw new WaldotClientException("invalid output '" + name + "': " + value);
-		}
+		return BlockDownloads.intOutput(result, name);
 	}
 
 	private final WaldotClientImplV2 owner;
@@ -68,21 +56,8 @@ final class GraphSnapshotClientV2 implements GraphSnapshotClient {
 		final int vertices = intOutput(result, ARG_VERTICES);
 		final int edges = intOutput(result, ARG_EDGES);
 		final int blocks = Math.max(1, intOutput(result, ARG_BLOCKS));
-		final String transferId = result.getString(ARG_TRANSFER_ID).trim();
-		if (transferId.isEmpty()) {
-			return new GraphSnapshot(Base64.getDecoder().decode(result.getString(ARG_DATA).trim()), compress,
-					vertices, edges, 1);
-		}
-		final ByteArrayOutputStream data = new ByteArrayOutputStream(blocks * blockSize);
-		for (int index = 0; index < blocks; index++) {
-			final CommandResult block = owner.commandClient()
-					.invokeGlobal(READ_GRAPH_BLOCK_COMMAND, transferId, String.valueOf(index)).orThrow();
-			data.writeBytes(Base64.getDecoder().decode(block.getString(ARG_DATA).trim()));
-			if (Boolean.parseBoolean(block.getString(ARG_LAST).trim()) && index != blocks - 1) {
-				throw new WaldotClientException("unexpected last block " + index + " of " + blocks);
-			}
-		}
-		return new GraphSnapshot(data.toByteArray(), compress, vertices, edges, blocks);
+		return new GraphSnapshot(BlockDownloads.payload(owner, result, blockSize), compress, vertices, edges,
+				blocks);
 	}
 
 	@Override

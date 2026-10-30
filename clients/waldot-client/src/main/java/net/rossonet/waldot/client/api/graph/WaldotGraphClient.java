@@ -6,6 +6,9 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
+import net.rossonet.waldot.api.exchange.DataExchangeProtocol;
+import net.rossonet.waldot.api.exchange.GraphRenderOptions;
+
 /**
  * Structured access to the graph of the server.
  * <p>
@@ -32,6 +35,23 @@ public interface WaldotGraphClient {
 
 	/** @return the NodeId of the OPC UA variable of a property */
 	NodeId propertyNodeId(NodeId element, String key);
+
+	/**
+	 * Draws the graph (or a part of it) as SVG or Graphviz DOT with the
+	 * {@code render graph} command.
+	 *
+	 * @param options selection, properties, layout and style
+	 */
+	default GraphRendering render(final GraphRenderOptions options) {
+		return render(options, DataExchangeProtocol.DEFAULT_BLOCK_SIZE);
+	}
+
+	/**
+	 * Same as {@link #render(GraphRenderOptions)} with the block size of the
+	 * transfer (between {@link DataExchangeProtocol#MIN_BLOCK_SIZE} and
+	 * {@link DataExchangeProtocol#MAX_BLOCK_SIZE}).
+	 */
+	GraphRendering render(GraphRenderOptions options, int blockSize);
 
 	/** Runs the text {@code query} command (result rendered as text). */
 	QueryResult query(String expression);

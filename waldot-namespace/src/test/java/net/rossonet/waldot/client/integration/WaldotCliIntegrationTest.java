@@ -215,6 +215,35 @@ class WaldotCliIntegrationTest {
 	}
 
 	@Test
+	void renderToFile() throws Exception {
+		final Path svg = tmp.resolve("graph.svg");
+		final Result rendered = run("render", "-f", svg.toString(), "--root", "x-marko", "--layout", "MRTREE",
+				"--props", "age", "-o", "json");
+		assertEquals(0, rendered.exitCode(), rendered.err());
+		final JsonNode json = MAPPER.readTree(rendered.out());
+		assertEquals("svg", json.get("format").asText());
+		assertEquals(3, json.get("vertices").asInt());
+		assertTrue(Files.readString(svg).contains("age = 29"));
+
+		final Path dot = tmp.resolve("graph.dot");
+		final Result dotResult = run("render", "-f", dot.toString(), "--edge-label", "knows", "--no-isolated", "-o",
+				"value");
+		assertEquals(0, dotResult.exitCode(), dotResult.err());
+		assertEquals(dot.toString(), dotResult.out().trim());
+		assertTrue(Files.readString(dot).startsWith("digraph waldot {"));
+
+		final Path options = tmp.resolve("options.json");
+		Files.writeString(options, "{\"vertices\":{\"labels\":[\"software\"]}}");
+		final Result fromFile = run("render", "--options-file", options.toString(), "-f",
+				tmp.resolve("software.svg").toString(), "-o", "value");
+		assertEquals(0, fromFile.exitCode(), fromFile.err());
+
+		Files.writeString(options, "{\"vertices\":{\"lables\":[]}}");
+		assertEquals(ExitCodes.USAGE, run("render", "--options-file", options.toString()).exitCode());
+		assertEquals(ExitCodes.USAGE, run("render", "--layout", "spiral").exitCode());
+	}
+
+	@Test
 	void subscribeWithCount() throws Exception {
 		final AtomicBoolean running = new AtomicBoolean(true);
 		final CompletableFuture<Result> subscription = CompletableFuture.supplyAsync(() -> run("subscribe", "-p",

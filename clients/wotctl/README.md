@@ -12,6 +12,7 @@ tutte le funzioni:
 | comandi WaldOT          | `commands list`, `commands call` (globali o `--element`)       |
 | modifica del grafo      | `vertex add/delete`, `edge add/delete`, `property get/set`     |
 | backup                  | `snapshot export`, `snapshot import [--clear]`, `snapshot clear --yes` |
+| disegno del grafo       | `render` (SVG o Graphviz DOT, con filtri e layout)             |
 | spazio degli indirizzi  | `browse`, `read`, `write`, `call`, `resolve`                   |
 | sottoscrizioni          | `subscribe` (proprietà `-p`, nodi `-n`, eventi `-e`)           |
 
@@ -104,6 +105,12 @@ waldot vertex delete sensor-1
 # backup e ripristino
 waldot snapshot export -f grafo.json.gz
 waldot snapshot import --clear -f grafo.json.gz
+
+# disegno del grafo (SVG con layout Eclipse ELK calcolato dal server)
+waldot render -f impianto.svg --group-by directory
+waldot render -f plc.svg --root plc-1 --depth 2 --include-runtime --include-ephemeral
+waldot render -f regole.svg --edge-label fire --edge-label link-to --no-isolated
+waldot render -f grafo.dot && dot -Tpng grafo.dot -o grafo.png
 
 # spazio degli indirizzi OPC UA
 waldot browse --depth 2

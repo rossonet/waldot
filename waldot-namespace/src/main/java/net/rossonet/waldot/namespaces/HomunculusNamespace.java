@@ -74,6 +74,7 @@ import net.rossonet.waldot.commands.ImportGraphCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.commands.QueryJsonCommand;
 import net.rossonet.waldot.commands.ReadGraphBlockCommand;
+import net.rossonet.waldot.commands.RenderGraphCommand;
 import net.rossonet.waldot.commands.exchange.GraphTransferStore;
 import net.rossonet.waldot.api.exchange.DataExchangeProtocol;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
@@ -206,7 +207,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	/**
 	 * Commands used by the clients to exchange structured data: JSON query
-	 * results, element descriptions, graph snapshots (see
+	 * results, element descriptions, graph snapshots, graph drawings (see
 	 * {@link DataExchangeProtocol}). Disabled with
 	 * {@code -Dwaldot.commands.exchange.enabled=false}.
 	 */
@@ -221,6 +222,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		registerCommand(new ReadGraphBlockCommand(this, graphTransfers));
 		registerCommand(new ImportGraphCommand(this, graphTransfers));
 		registerCommand(new ClearGraphCommand(this));
+		registerCommand(new RenderGraphCommand(this, graphTransfers));
 	}
 
 	@Override

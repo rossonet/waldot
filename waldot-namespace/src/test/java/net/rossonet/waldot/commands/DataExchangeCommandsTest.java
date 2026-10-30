@@ -115,7 +115,7 @@ class DataExchangeCommandsTest {
 		for (final String name : List.of(DataExchangeProtocol.QUERY_JSON_COMMAND,
 				DataExchangeProtocol.DESCRIBE_ELEMENT_COMMAND, DataExchangeProtocol.EXPORT_GRAPH_COMMAND,
 				DataExchangeProtocol.READ_GRAPH_BLOCK_COMMAND, DataExchangeProtocol.IMPORT_GRAPH_COMMAND,
-				DataExchangeProtocol.CLEAR_GRAPH_COMMAND)) {
+				DataExchangeProtocol.CLEAR_GRAPH_COMMAND, DataExchangeProtocol.RENDER_GRAPH_COMMAND)) {
 			assertNotNull(command(name));
 		}
 		assertEquals(DataExchangeProtocol.INFORMATION_DIRECTORY,
