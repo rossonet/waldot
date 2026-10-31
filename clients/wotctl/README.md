@@ -16,6 +16,7 @@ funzioni:
 | spazio degli indirizzi  | `browse`, `read`, `write`, `call`, `resolve`                   |
 | sottoscrizioni          | `subscribe` (proprietà `-p`, nodi `-n`, eventi `-e`)           |
 | shell                   | `completion` (script di autocompletamento bash/zsh)            |
+| plugin                  | comandi aggiunti da altri moduli ([Plugin](#plugin))           |
 
 La guida completa, in italiano, è integrata nel comando:
 
@@ -68,6 +69,36 @@ Lo script si trova già pronto anche nelle distribuzioni:
 - `completion/wotctl_completion` nell'archivio del binario nativo.
 
 Il task `./gradlew :wotctl:completionScript` lo genera in `build/completion/`.
+
+## Plugin
+
+Altri moduli possono aggiungere comandi a `wotctl` senza modificarlo, con la SPI
+`net.rossonet.waldot.cli.spi`:
+
+```java
+public class AcmePlugin implements WotctlPlugin {
+    public String name() { return "acme"; }
+    public void register(final WotctlCommands commands) {
+        commands.add(AcmeCommand.class)                    // wotctl acme ...
+                .add("snapshot", AcmeCheckCommand.class);  // wotctl snapshot acme-check
+    }
+}
+```
+
+- **Scoperta**: i plugin si dichiarano in
+  `META-INF/services/net.rossonet.waldot.cli.spi.WotctlPlugin` e si trovano con `ServiceLoader`.
+  Un nome già usato è un errore.
+- **Comportamento**: i comandi sono normali comandi picocli. Estendono `ClientCommand`
+  (connessione, `-o`, codici di uscita) o `CommandGroup`, e ricevono la guida in italiano, i
+  codici di uscita e l'autocompletamento del core. `wotctl --version` elenca i plugin.
+- **Distribuzione**: il binario nativo non carica jar a runtime, quindi i plugin entrano in build.
+  Un modulo di distribuzione dipende da `wotctl` e dai plugin e applica `gradle/wotctl-cli.gradle`,
+  ottenendo fat jar, installDist con lo script di completamento, binario nativo e archivio.
+- **Moduli dei plugin**: applicano `gradle/wotctl-plugin.gradle`, che fornisce la dipendenza
+  `compileOnly` da wotctl, le test fixtures (`CliTestSupport`, `CommandTestBase`, `MockClient`)
+  e il task `nativeMetadata` per i metadati di native-image raccolti con l'agent.
+- **Esempi**: un plugin di riferimento e una distribuzione si trovano in wot-addons
+  (`wotctl-addons/`).
 
 ## Regole per gli script
 

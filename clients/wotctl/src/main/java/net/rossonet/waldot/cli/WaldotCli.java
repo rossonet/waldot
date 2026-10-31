@@ -2,15 +2,14 @@ package net.rossonet.waldot.cli;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -34,6 +33,9 @@ import net.rossonet.waldot.cli.commands.SnapshotCommand;
 import net.rossonet.waldot.cli.commands.SubscribeCommand;
 import net.rossonet.waldot.cli.commands.VertexCommand;
 import net.rossonet.waldot.cli.commands.WriteCommand;
+import net.rossonet.waldot.cli.spi.PluginLoader;
+import net.rossonet.waldot.cli.spi.PluginVersion;
+import net.rossonet.waldot.cli.spi.WotctlPlugin;
 import net.rossonet.waldot.cli.support.CliException;
 import net.rossonet.waldot.cli.support.ExitCodes;
 import net.rossonet.waldot.client.api.WaldotClientException;
@@ -130,36 +132,45 @@ public class WaldotCli implements Callable<Integer> {
 		/** Resource with the property {@code version}. */
 		static final String RESOURCE = "/net/rossonet/waldot/cli/wotctl-version.properties";
 
+		private final List<WotctlPlugin> plugins;
+
+		/** Without plugins (instance created by picocli). */
+		public Version() {
+			this(List.of());
+		}
+
+		/** With a line for each plugin. */
+		Version(final List<WotctlPlugin> plugins) {
+			this.plugins = plugins;
+		}
+
 		/** @return the version of wotctl, null if unknown */
 		static String version() {
-			try (InputStream input = WaldotCli.class
-					.getResourceAsStream(RESOURCE)) {
-				if (input != null) {
-					final Properties properties = new Properties();
-					properties.load(input);
-					final String version = properties.getProperty("version");
-					if (version != null && !version.isBlank()) {
-						return version.trim();
-					}
-				}
-			} catch (final IOException e) {
-				// from the manifest
-			}
-			return WaldotCli.class.getPackage().getImplementationVersion();
+			final String version = PluginVersion
+					.fromResource(WaldotCli.class, RESOURCE);
+			return version != null
+					? version
+					: WaldotCli.class.getPackage().getImplementationVersion();
 		}
 
 		@Override
 		public String[] getVersion() {
 			final String version = version();
-			return new String[]{
-					"wotctl " + (version == null ? "(sviluppo)" : version),
-					"Java " + System.getProperty("java.version") + " ("
-							+ System.getProperty("java.vendor")
-							+ (isNativeImage() ? ", binario nativo GraalVM" : "")
-							+ ")",
-					"OS " + System.getProperty("os.name") + " "
-							+ System.getProperty("os.version") + " "
-							+ System.getProperty("os.arch")};
+			final List<String> lines = new ArrayList<>();
+			lines.add("wotctl " + (version == null ? "(sviluppo)" : version));
+			for (final WotctlPlugin plugin : plugins) {
+				final String pluginVersion = plugin.version();
+				lines.add("plugin " + plugin.name() + " "
+						+ (pluginVersion == null ? "(sviluppo)" : pluginVersion));
+			}
+			lines.add("Java " + System.getProperty("java.version") + " ("
+					+ System.getProperty("java.vendor")
+					+ (isNativeImage() ? ", binario nativo GraalVM" : "")
+					+ ")");
+			lines.add("OS " + System.getProperty("os.name") + " "
+					+ System.getProperty("os.version") + " "
+					+ System.getProperty("os.arch"));
+			return lines.toArray(String[]::new);
 		}
 	}
 
@@ -279,7 +290,17 @@ public class WaldotCli implements Callable<Integer> {
 		final PrintWriter err = new PrintWriter(
 				new OutputStreamWriter(System.err, StandardCharsets.UTF_8),
 				true);
-		final int exitCode = newCommandLine(out, err).execute(args);
+		final CommandLine commandLine;
+		try {
+			commandLine = newCommandLine(out, err);
+		} catch (final IllegalStateException e) {
+			// a plugin that cannot be loaded or uses a name already taken
+			err.println("wotctl: errore: " + message(e));
+			err.flush();
+			System.exit(ExitCodes.SERVER_ERROR);
+			return;
+		}
+		final int exitCode = commandLine.execute(args);
 		out.flush();
 		err.flush();
 		System.exit(exitCode);
@@ -293,12 +314,31 @@ public class WaldotCli implements Callable<Integer> {
 	}
 
 	/**
-	 * Creates the command line with the Italian texts, the exception handlers
-	 * and the given output streams (used also by the tests).
+	 * Creates the command line with the commands of the plugins on the
+	 * classpath, the Italian texts, the exception handlers and the given output
+	 * streams (used also by the tests).
+	 *
+	 * @throws IllegalStateException if a plugin cannot be loaded or uses a name
+	 *                               already taken
 	 */
 	public static CommandLine newCommandLine(final PrintWriter out,
 			final PrintWriter err) {
+		return newCommandLine(out, err, PluginLoader.plugins());
+	}
+
+	/**
+	 * Creates the command line with the commands of the given plugins.
+	 *
+	 * @throws IllegalStateException if a plugin uses a name already taken
+	 */
+	public static CommandLine newCommandLine(final PrintWriter out,
+			final PrintWriter err, final List<WotctlPlugin> plugins) {
 		final CommandLine commandLine = new CommandLine(new WaldotCli());
+		// before the settings below, that apply only to the subcommands already
+		// present
+		PluginLoader.register(commandLine, plugins);
+		// created here, not by picocli: it lists the plugins
+		commandLine.getCommandSpec().versionProvider(new Version(plugins));
 		commandLine.setResourceBundle(ResourceBundle
 				.getBundle("net.rossonet.waldot.cli.messages", Locale.ROOT));
 		commandLine.setCaseInsensitiveEnumValuesAllowed(true);

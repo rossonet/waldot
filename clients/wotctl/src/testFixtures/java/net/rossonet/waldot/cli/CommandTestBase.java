@@ -33,7 +33,7 @@ public abstract class CommandTestBase {
 	}
 
 	@BeforeEach
-	void installMockClient() {
+	protected void installMockClient() {
 		mock = new MockClient();
 		ClientCommand.clientFactory(configuration -> {
 			mock.configuration = configuration;
@@ -44,7 +44,7 @@ public abstract class CommandTestBase {
 	}
 
 	@AfterEach
-	void resetHooks() {
+	protected void resetHooks() {
 		ClientCommand.resetTestHooks();
 	}
 

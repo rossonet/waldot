@@ -1,0 +1,53 @@
+// Plugin of wotctl (commands added with net.rossonet.waldot.cli.spi.WotctlPlugin,
+// found with ServiceLoader). The module applies the plugins java and
+// org.graalvm.buildtools.native (only for the tracing agent: -Pagent), and sets,
+// before 'apply from':
+//   ext.pluginVersionResource       resource written with the version of the module
+//                                   (e.g. net/rossonet/waldot/cli/acme/acme-version.properties),
+//                                   read with PluginVersion.fromResource
+//   ext.nativeMetadataDir           see wotctl-native.gradle
+//   ext.nativeMetadataTestPackages  see wotctl-native.gradle (the package of the plugin)
+// wotctl is only a compile dependency: the plugin is added to wotctl by a
+// distribution module (see wotctl-cli.gradle).
+
+apply from: new File(buildscript.sourceFile.parentFile, 'wotctl-native.gradle')
+
+dependencies {
+    // API of the plugins: SPI, ClientCommand, Printer, picocli, waldot-client
+    compileOnly project(':wotctl')
+    testImplementation project(':wotctl')
+    // CliTestSupport, CommandTestBase, MockClient
+    testImplementation testFixtures(project(':wotctl'))
+    testImplementation(platform('org.junit:junit-bom:5.13.1'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+}
+
+// version of the plugin as a resource: the native binary has no manifest
+def pluginVersionResource = project.ext.pluginVersionResource
+def generatePluginVersion = tasks.register('generatePluginVersion') {
+    def output = layout.buildDirectory.file("generated/plugin-version/${pluginVersionResource}")
+    def pluginVersion = project.version.toString()
+    inputs.property('version', pluginVersion)
+    outputs.file(output)
+    doLast {
+        output.get().asFile.text = "version=${pluginVersion}\n"
+    }
+}
+
+processResources {
+    from(generatePluginVersion) {
+        into new File(pluginVersionResource).parent
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': project.name,
+                   'Implementation-Version': project.version
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -7,11 +7,14 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import net.rossonet.waldot.cli.spi.PluginLoader;
+import net.rossonet.waldot.cli.spi.WotctlPlugin;
 import picocli.CommandLine;
 
 /**
  * Runs the command line in the test JVM capturing stdout and stderr (and
- * optionally feeding stdin).
+ * optionally feeding stdin). Test fixture of wotctl, used also by the tests of
+ * the plugins ({@code testImplementation testFixtures(project(':wotctl'))}).
  */
 public final class CliTestSupport {
 
@@ -24,12 +27,18 @@ public final class CliTestSupport {
 		}
 	}
 
-	/** Runs the command line. */
+	/** Runs the command line with the plugins on the classpath. */
 	public static Result run(final String... args) {
+		return run(PluginLoader.plugins(), args);
+	}
+
+	/** Runs the command line with the given plugins. */
+	public static Result run(final List<WotctlPlugin> plugins,
+			final String... args) {
 		final StringWriter out = new StringWriter();
 		final StringWriter err = new StringWriter();
-		final CommandLine commandLine = WaldotCli
-				.newCommandLine(new PrintWriter(out), new PrintWriter(err));
+		final CommandLine commandLine = WaldotCli.newCommandLine(
+				new PrintWriter(out), new PrintWriter(err), plugins);
 		final int exitCode = commandLine.execute(args);
 		return new Result(exitCode, out.toString(), err.toString());
 	}

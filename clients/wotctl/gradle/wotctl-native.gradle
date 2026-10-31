@@ -1,0 +1,73 @@
+// Native-image settings shared by wotctl, its distributions (wotctl-cli.gradle)
+// and its plugins (wotctl-plugin.gradle). The module applies the plugin
+// org.graalvm.buildtools.native (without version: it is declared by the build
+// root) and sets, before 'apply from':
+//   ext.nativeMetadataDir           directory of the reachability metadata of the
+//                                   module (src/main/resources/META-INF/native-image/<group>/<artifact>)
+//   ext.nativeMetadataTestPackages  (optional) packages of the test classes to
+//                                   drop from the metadata, default net.rossonet.waldot.cli
+//   ext.nativeMetadataKeepPackages  (optional, plugins) keeps only the entries of
+//                                   these packages: the entries of wotctl, run by the
+//                                   tests of the plugin, are already in its metadata
+//
+// The metadata are collected with the tracing agent on the unit tests:
+//   GRAALVM_HOME=... ./gradlew :<module>:test -Pagent && ./gradlew :<module>:nativeMetadata
+
+graalvmNative {
+    // native-image from GRAALVM_HOME (or JAVA_HOME): the normal build and the
+    // tests do not need GraalVM
+    toolchainDetection = false
+    metadataRepository {
+        enabled = true
+    }
+    agent {
+        defaultMode = 'standard'
+    }
+}
+
+tasks.named('test', Test) {
+    // the tracing agent of native-image (-Pagent) exists only in GraalVM
+    if (project.hasProperty('agent') && System.getenv('GRAALVM_HOME') != null) {
+        executable = "${System.getenv('GRAALVM_HOME')}/bin/java"
+    }
+}
+
+// Copies the metadata collected by the tracing agent on the unit tests
+// (./gradlew :<module>:test -Pagent) without the entries of the tests (JUnit,
+// Mockito, ByteBuddy, test classes and test fixtures of wotctl)
+tasks.register('nativeMetadata') {
+    description = 'Copies the native-image metadata of the tracing agent, without the test entries.'
+    group = 'native'
+    def input = layout.buildDirectory.file('native/agent-output/test/reachability-metadata.json')
+    def output = file("${project.ext.nativeMetadataDir}/reachability-metadata.json")
+    def packages = (project.ext.has('nativeMetadataTestPackages')
+            ? project.ext.nativeMetadataTestPackages
+            : ['net.rossonet.waldot.cli']).collect { it.replace('.', '\\.') }.join('|')
+    def keepPackages = project.ext.has('nativeMetadataKeepPackages')
+            ? project.ext.nativeMetadataKeepPackages.collect { it.replace('.', '[.\\/]') }.join('|')
+            : ''
+    inputs.file(input)
+    inputs.property('testPackages', packages)
+    inputs.property('keepPackages', keepPackages)
+    outputs.file(output)
+    doLast {
+        // the entries are matched as JSON text
+        def testOnly = ~("org[.\\/]mockito|net[.\\/]bytebuddy|org[.\\/]junit|org[.\\/]opentest4j|org[.\\/]apiguardian|mockito-extensions|junit-platform|MockitoMock|(${packages})\\.([a-z]+\\.)?([A-Za-z]+Test|CliTestSupport|MockClient|CommandTestBase)[\$\"]")
+        def own = keepPackages ? ~("(${keepPackages})") : null
+        def keep = { entry ->
+            def json = groovy.json.JsonOutput.toJson(entry)
+            !(json =~ testOnly) && (own == null || json =~ own)
+        }
+        def key = { entry -> groovy.json.JsonOutput.toJson(entry.type ?: entry.glob ?: entry.bundle ?: entry) }
+        def metadata = new groovy.json.JsonSlurper().parse(input.get().asFile)
+        def filtered = [:]
+        metadata.each { section, entries ->
+            filtered[section] = entries instanceof List ? entries.findAll(keep).sort(key) : entries
+        }
+        output.parentFile.mkdirs()
+        output.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(filtered)) + '\n'
+        filtered.each { section, entries ->
+            println "${section}: ${metadata[section].size()} -> ${entries.size()} entries"
+        }
+    }
+}
