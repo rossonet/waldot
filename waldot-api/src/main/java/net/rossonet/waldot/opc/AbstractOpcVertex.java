@@ -522,10 +522,13 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	@Override
 	public Set<String> keys() {
-		if (null == getVertexProperties()) {
-			return Collections.emptySet();
+		if (inComputerMode()) {
+			return super.keys();
 		}
-		return inComputerMode() ? super.keys() : getVertexProperties().keySet();
+		final ImmutableMap<String, WaldotVertexProperty<Object>> vertexProperties = getVertexProperties();
+		return vertexProperties == null
+				? Collections.emptySet()
+				: vertexProperties.keySet();
 	}
 
 	@Override
@@ -641,21 +644,18 @@ public abstract class AbstractOpcVertex extends GremlinElement
 					.filter(p -> ElementHelper.keyExists(p.key(), propertyKeys))
 					.iterator();
 		} else {
-			final ImmutableMap<String, WaldotVertexProperty<Object>> vertexProperties = getVertexProperties();
-			if (null == vertexProperties) {
-				return Collections.emptyIterator();
-			}
 			if (propertyKeys.length == 0) {
-				return (Iterator) vertexProperties.values().iterator();
+				final ImmutableMap<String, WaldotVertexProperty<Object>> vertexProperties = getVertexProperties();
+				return vertexProperties == null
+						? Collections.emptyIterator()
+						: (Iterator) vertexProperties.values().iterator();
 			}
 			final Set<VertexProperty<V>> result = new HashSet<>();
-			for (final Entry<String, WaldotVertexProperty<Object>> p : vertexProperties
-					.entrySet()) {
-				for (final String key : propertyKeys) {
-					if (p.getKey().equals(key)) {
-						result.add((VertexProperty<V>) p.getValue());
-						break;
-					}
+			for (final String key : propertyKeys) {
+				final WaldotVertexProperty<V> property = getNamespace()
+						.getVertexProperty(this, key);
+				if (property != null) {
+					result.add(property);
 				}
 			}
 			return result.iterator();
@@ -681,13 +681,11 @@ public abstract class AbstractOpcVertex extends GremlinElement
 						.multiplePropertiesExistForProvidedKey(key);
 			}
 		} else {
-			for (final Entry<String, WaldotVertexProperty<Object>> p : getVertexProperties()
-					.entrySet()) {
-				if (p.getKey().equals(key)) {
-					return (VertexProperty<V>) p.getValue();
-				}
-			}
-			return VertexProperty.<V>empty();
+			// direct lookup: copying every property to read one was the main
+			// CPU cost of the plugins that poll their configuration
+			final WaldotVertexProperty<V> property = getNamespace()
+					.getVertexProperty(this, key);
+			return property != null ? property : VertexProperty.<V>empty();
 		}
 	}
 

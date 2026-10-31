@@ -9,6 +9,8 @@ import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -63,7 +65,6 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateBuilder;
-import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +83,15 @@ public class SslHelper {
 		private final Logger logger = LoggerFactory.getLogger(getClass());
 		private final String keyStoreFilePath;
 		private final String keyStorePassword;
+
+		/**
+		 * Keystore read from the file, reused while the file does not change:
+		 * every PKCS12 load derives the keys again (PBKDF2), and a client
+		 * connection reads the keystore several times.
+		 */
+		private KeyStore cachedKeyStore;
+		private FileTime cachedModifiedTime;
+		private long cachedSize;
 
 		/**
 		 * Creates a new KeyStoreHelper for managing certificates in a PKCS12 keystore.
@@ -116,7 +126,7 @@ public class SslHelper {
 			boolean result = false;
 			try {
 				final KeyStore keyStore = loadOrCreateKeyStore();
-				final KeyPair keyPair = SelfSignedCertificateGenerator.generateRsaKeyPair(2048);
+				final KeyPair keyPair = GeneratedKeyPairs.rsa2048();
 				final SelfSignedCertificateBuilder builder = new SelfSignedCertificateBuilder(keyPair)
 						.setCommonName(commonName).setOrganization(organization).setOrganizationalUnit(unit)
 						.setLocalityName(locality).setStateName(state).setCountryCode(country).setApplicationUri(uri)
@@ -124,7 +134,7 @@ public class SslHelper {
 				final X509Certificate certificate = builder.build();
 				keyStore.setKeyEntry(certificateLabel, keyPair.getPrivate(), keyStorePassword.toCharArray(),
 						new X509Certificate[] { certificate });
-				keyStore.store(new FileOutputStream(keyStoreFilePath), keyStorePassword.toCharArray());
+				storeKeyStore(keyStore);
 				result = true;
 			} catch (final Exception df) {
 				logger.error("error in key generation", df);
@@ -290,22 +300,43 @@ public class SslHelper {
 			return keyStore.containsAlias(certificateLabel);
 		}
 
-		private KeyStore loadOrCreateKeyStore()
+		private synchronized KeyStore loadOrCreateKeyStore()
 				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-			final KeyStore keyStore = KeyStore.getInstance("PKCS12");
-			if (!Files.exists(Path.of(keyStoreFilePath))) {
+			final Path path = Path.of(keyStoreFilePath);
+			if (!Files.exists(path)) {
+				cachedKeyStore = null;
 				logger.info("Creating new keystore at {}", keyStoreFilePath);
+				final KeyStore keyStore = KeyStore.getInstance("PKCS12");
 				keyStore.load(null, keyStorePassword.toCharArray());
-			} else {
-				logger.info("Loading existing keystore from {}", keyStoreFilePath);
-				try (FileInputStream fis = new FileInputStream(keyStoreFilePath)) {
-					keyStore.load(fis, keyStorePassword.toCharArray());
-				} catch (final IOException e) {
-					logger.error("Failed to load keystore", e);
-					throw new KeyStoreException("Could not load keystore", e);
-				}
+				return keyStore;
 			}
+			final BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class);
+			if (cachedKeyStore != null && attributes.lastModifiedTime().equals(cachedModifiedTime)
+					&& attributes.size() == cachedSize) {
+				return cachedKeyStore;
+			}
+			logger.info("Loading existing keystore from {}", keyStoreFilePath);
+			final KeyStore keyStore = KeyStore.getInstance("PKCS12");
+			try (FileInputStream fis = new FileInputStream(keyStoreFilePath)) {
+				keyStore.load(fis, keyStorePassword.toCharArray());
+			} catch (final IOException e) {
+				logger.error("Failed to load keystore", e);
+				throw new KeyStoreException("Could not load keystore", e);
+			}
+			cachedKeyStore = keyStore;
+			cachedModifiedTime = attributes.lastModifiedTime();
+			cachedSize = attributes.size();
 			return keyStore;
+		}
+
+		private synchronized void storeKeyStore(final KeyStore keyStore)
+				throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+			// read again at the next access, also when the write fails (the
+			// instance has already been changed by the caller)
+			cachedKeyStore = null;
+			try (FileOutputStream out = new FileOutputStream(keyStoreFilePath)) {
+				keyStore.store(out, keyStorePassword.toCharArray());
+			}
 		}
 
 		/**
@@ -332,7 +363,7 @@ public class SslHelper {
 				final X509Certificate[] clientCertificateChain = new X509Certificate[] { clientCertificate };
 				keyStore.setKeyEntry(certificateLabel, clientKeyPair.getPrivate(), keyStorePassword.toCharArray(),
 						clientCertificateChain);
-				keyStore.store(new FileOutputStream(keyStoreFilePath), keyStorePassword.toCharArray());
+				storeKeyStore(keyStore);
 				result = true;
 				logger.info("keypair imported successfully");
 			} catch (final Exception df) {

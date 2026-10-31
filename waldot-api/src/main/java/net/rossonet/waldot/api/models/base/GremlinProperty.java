@@ -58,6 +58,14 @@ public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implemen
 
 	private boolean removed = false;
 
+	/**
+	 * The NodeId never changes after creation: it is kept here so that
+	 * {@link #getNodeId()} does not take the node monitor (Milo synchronizes
+	 * {@code getAttribute} on the node, which made every {@code id()} and
+	 * {@code hashCode()} contend with attribute writes).
+	 */
+	private final NodeId nodeId;
+
 	protected GremlinProperty(final WaldotGraph graph, final String key, final DATA_TYPE value,
 			final UaNodeContext context, final NodeId nodeId, final LocalizedText description, final UInteger writeMask,
 			final UInteger userWriteMask, final NodeId dataType, final Integer valueRank,
@@ -68,6 +76,13 @@ public abstract class GremlinProperty<DATA_TYPE> extends UaVariableNode implemen
 				minimumSamplingInterval, historizing);
 		getFilterChain().addLast(filterChain);
 		currentVersion = -1;
+		this.nodeId = nodeId;
+	}
+
+	@Override
+	public NodeId getNodeId() {
+		// null only while the Milo constructor is still running
+		return nodeId != null ? nodeId : super.getNodeId();
 	}
 
 	@Override

@@ -171,7 +171,9 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	/**
 	 * Insertion ordered, thread safe map key &rarr; property node. The factory
 	 * of {@link #getOrCreate} runs inside the monitor, so two threads can never
-	 * create the same property node.
+	 * create the same property node: it must not call methods that take the
+	 * monitor of the owning vertex or edge (for instance
+	 * {@code getBrowseName()}), which are read before.
 	 */
 	private static final class PropertyBag<P> {
 		private final Map<String, P> items = new LinkedHashMap<>();
@@ -751,6 +753,17 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 						+ PROPERTY_SPLIT_SIMBOL_IN_NODEID + key);
 		final PropertyBag<OpcProperty<?>> bag = edgeProperties
 				.computeIfAbsent(opcEdge.getNodeId(), k -> new PropertyBag<>());
+		final OpcProperty<DATA_TYPE> known = (OpcProperty<DATA_TYPE>) bag
+				.get(key);
+		if (known != null) {
+			known.setValue(newDataValue(value));
+			return known;
+		}
+		// read before entering the bag monitor: getBrowseName() takes the edge
+		// node monitor, so calling it inside the factory makes a lock cycle
+		// with a thread that holds the edge and reads its properties
+		final LocalizedText description = LocalizedText.english(
+				key + " of edge property " + opcEdge.getBrowseName().getName());
 		final AtomicBoolean created = new AtomicBoolean(false);
 		final OpcProperty<DATA_TYPE> property = (OpcProperty<DATA_TYPE>) bag
 				.getOrCreate(key, () -> {
@@ -763,8 +776,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 					final OpcProperty<DATA_TYPE> newProperty = new OpcProperty(
 							waldotNamespace.getGremlinGraph(), opcEdge, key,
 							value, opcEdge.getNodeContext(), nodeId,
-							LocalizedText.english(key + " of edge property "
-									+ opcEdge.getBrowseName().getName()),
+							description,
 							MiloSingleServerBaseReferenceNodeBuilder.edgeVariableWriteMask,
 							MiloSingleServerBaseReferenceNodeBuilder.edgeVariableUserWriteMask,
 							NodeIds.BaseDataType, ValueRanks.Scalar, null,
@@ -803,6 +815,17 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		final PropertyBag<OpcVertexProperty<?>> bag = vertexProperties
 				.computeIfAbsent(opcVertex.getNodeId(),
 						k -> new PropertyBag<>());
+		final OpcVertexProperty<DATA_TYPE> known = (OpcVertexProperty<DATA_TYPE>) bag
+				.get(key);
+		if (known != null) {
+			known.setValue(newDataValue(value));
+			return known;
+		}
+		// read before entering the bag monitor: getBrowseName() takes the
+		// vertex node monitor, so calling it inside the factory makes a lock
+		// cycle with a thread that holds the vertex and reads its properties
+		final LocalizedText description = LocalizedText.english(key
+				+ " of vertex property " + opcVertex.getBrowseName().getName());
 		final AtomicBoolean created = new AtomicBoolean(false);
 		final OpcVertexProperty<DATA_TYPE> property = (OpcVertexProperty<DATA_TYPE>) bag
 				.getOrCreate(key, () -> {
@@ -815,8 +838,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 					final OpcVertexProperty<DATA_TYPE> newProperty = new OpcVertexProperty(
 							waldotNamespace.getGremlinGraph(), opcVertex, key,
 							value, opcVertex.getNodeContext(), nodeId,
-							LocalizedText.english(key + " of vertex property "
-									+ opcVertex.getBrowseName().getName()),
+							description,
 							MiloSingleServerBaseReferenceNodeBuilder.variableWriteMask,
 							MiloSingleServerBaseReferenceNodeBuilder.variableUserWriteMask,
 							NodeIds.BaseDataType, ValueRanks.Scalar, null,
@@ -1115,17 +1137,33 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getProperties(
-			final WaldotEdge opcEdge) {
-		final List<WaldotProperty<DATA_TYPE>> result = new ArrayList<>();
+	public <DATA_TYPE> WaldotProperty<DATA_TYPE> getEdgeProperty(
+			final WaldotEdge opcEdge, final String key) {
 		final PropertyBag<OpcProperty<?>> bag = edgeProperties
 				.get(opcEdge.getNodeId());
 		if (bag != null) {
-			for (final OpcProperty<?> p : bag.snapshot().values()) {
-				result.add((WaldotProperty<DATA_TYPE>) p);
+			final OpcProperty<?> property = bag.get(key);
+			if (property != null) {
+				return (WaldotProperty<DATA_TYPE>) property;
 			}
-			return result;
 		}
+		// not found by key: a key with a namespace prefix ("1:name") is stored
+		// as given but matched by browse name, so fall back to the scan
+		return MiloStrategy.super.getEdgeProperty(opcEdge, key);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getProperties(
+			final WaldotEdge opcEdge) {
+		final PropertyBag<OpcProperty<?>> bag = edgeProperties
+				.get(opcEdge.getNodeId());
+		if (bag != null) {
+			return new ArrayList<>(
+					(Collection<WaldotProperty<DATA_TYPE>>) (Collection<?>) bag
+							.snapshot().values());
+		}
+		final List<WaldotProperty<DATA_TYPE>> result = new ArrayList<>();
 		// edge not created by this strategy: tolerant scan of the references
 		for (final UaNode node : linkedPropertyNodes(opcEdge.getReferences())) {
 			if (node instanceof WaldotProperty) {
@@ -1167,17 +1205,14 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	@Override
 	public <DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(
 			final WaldotVertex opcVertex) {
-		final Map<String, WaldotVertexProperty<DATA_TYPE>> result = new LinkedHashMap<>();
 		final PropertyBag<OpcVertexProperty<?>> bag = vertexProperties
 				.get(opcVertex.getNodeId());
 		if (bag != null) {
-			for (final Map.Entry<String, OpcVertexProperty<?>> e : bag
-					.snapshot().entrySet()) {
-				result.put(e.getKey(),
-						(WaldotVertexProperty<DATA_TYPE>) e.getValue());
-			}
-			return result;
+			// the snapshot is already a private copy
+			return (Map<String, WaldotVertexProperty<DATA_TYPE>>) (Map<String, ?>) bag
+					.snapshot();
 		}
+		final Map<String, WaldotVertexProperty<DATA_TYPE>> result = new LinkedHashMap<>();
 		// vertex not created by this strategy: tolerant scan of the references
 		for (final UaNode node : linkedPropertyNodes(
 				opcVertex.getReferences())) {
@@ -1187,6 +1222,18 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			}
 		}
 		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> getVertexProperty(
+			final WaldotVertex opcVertex, final String key) {
+		final PropertyBag<OpcVertexProperty<?>> bag = vertexProperties
+				.get(opcVertex.getNodeId());
+		if (bag != null) {
+			return (WaldotVertexProperty<DATA_TYPE>) bag.get(key);
+		}
+		return MiloStrategy.super.getVertexProperty(opcVertex, key);
 	}
 
 	@Override

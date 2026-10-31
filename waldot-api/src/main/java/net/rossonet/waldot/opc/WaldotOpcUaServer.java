@@ -13,8 +13,10 @@ import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -85,6 +87,11 @@ import net.rossonet.waldot.utils.ThreadHelper;
  * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public class WaldotOpcUaServer implements AutoCloseable {
+
+	/** Plugin classes found by {@link #findPluginClasses}, per class loader. */
+	private static final Map<ClassLoader, List<Class<?>>> PLUGIN_CLASSES = new HashMap<>();
+
+	private static final Logger staticLogger = LoggerFactory.getLogger(WaldotOpcUaServer.class);
 
 	public static final String[] PLUGINS_BASE_SEARCH_PACKAGE = new String[] { "net.rossonet.waldot", "plugin",
 			"plugins" };
@@ -514,22 +521,43 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		return x509IdentityValidator;
 	}
 
-	private void registerPluginsInNamespace() throws IOException {
-		final ClassPath cp = ClassPath.from(Thread.currentThread().getContextClassLoader());
-		for (final String basePackage : PLUGINS_BASE_SEARCH_PACKAGE) {
-			logger.info("Searching plugins in base package: {}", basePackage);
-			for (final ClassPath.ClassInfo classInfo : cp.getTopLevelClassesRecursive(basePackage)) {
-				final Class<?> clazz = classInfo.load();
-				if (clazz.isAnnotationPresent(WaldotPlugin.class)) {
-					logger.info("Found plugin: {}", clazz.getName());
-					try {
-						final PluginListener candidate = (PluginListener) clazz.getConstructor().newInstance();
-						getManagerNamespace().registerPlugin(candidate);
-					} catch (final Exception e) {
-						logger.error("Error creating plugin", e);
+	/**
+	 * Scans the classpath of {@code classLoader} for the {@link WaldotPlugin}
+	 * classes. The scan loads every class of the searched packages, so its
+	 * result is kept for the life of the class loader.
+	 */
+	private static List<Class<?>> findPluginClasses(final ClassLoader classLoader) throws IOException {
+		synchronized (PLUGIN_CLASSES) {
+			final List<Class<?>> cached = PLUGIN_CLASSES.get(classLoader);
+			if (cached != null) {
+				return cached;
+			}
+			final List<Class<?>> found = new ArrayList<>();
+			final ClassPath cp = ClassPath.from(classLoader);
+			for (final String basePackage : PLUGINS_BASE_SEARCH_PACKAGE) {
+				staticLogger.info("Searching plugins in base package: {}", basePackage);
+				for (final ClassPath.ClassInfo classInfo : cp.getTopLevelClassesRecursive(basePackage)) {
+					final Class<?> clazz = classInfo.load();
+					if (clazz.isAnnotationPresent(WaldotPlugin.class)) {
+						staticLogger.info("Found plugin: {}", clazz.getName());
+						found.add(clazz);
 					}
-
 				}
+			}
+			final List<Class<?>> result = List.copyOf(found);
+			PLUGIN_CLASSES.put(classLoader, result);
+			return result;
+		}
+	}
+
+	private void registerPluginsInNamespace() throws IOException {
+		// a new instance of every plugin for each server
+		for (final Class<?> clazz : findPluginClasses(Thread.currentThread().getContextClassLoader())) {
+			try {
+				final PluginListener candidate = (PluginListener) clazz.getConstructor().newInstance();
+				getManagerNamespace().registerPlugin(candidate);
+			} catch (final Exception e) {
+				logger.error("Error creating plugin", e);
 			}
 		}
 	}
@@ -550,8 +578,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 	/**
 	 * Starts the OPC UA server with the specified namespace. This method
 	 * initializes the namespace, registers all plugins, and starts the OPC UA
-	 * server. The method blocks for approximately 2 seconds to allow the server to
-	 * fully start.
+	 * server.
 	 *
 	 * @param waldotNamespace the namespace to use for the OPC UA address space
 	 * @return a CompletableFuture that will be completed with the running
@@ -564,9 +591,8 @@ public class WaldotOpcUaServer implements AutoCloseable {
 			managerNamespace.registerAgentValidators(agentAnonymousValidator, agentIdentityValidator,
 					agentX509IdentityValidator);
 			managerNamespace.startup();
-			final CompletableFuture<OpcUaServer> future = server.startup();
-			Thread.sleep(2_000);
-			return future;
+			// the callers wait on the future, which completes when the server is up
+			return server.startup();
 		} catch (final Exception e) {
 			logger.error("Error creating server", e);
 			return CompletableFuture.failedFuture(e);

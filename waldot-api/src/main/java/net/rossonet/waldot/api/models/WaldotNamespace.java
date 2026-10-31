@@ -393,6 +393,28 @@ public interface WaldotNamespace extends AutoCloseable {
 			WaldotEdge edge);
 
 	/**
+	 * Returns one property of an edge, without copying the others.
+	 * 
+	 * @param edge the edge to query
+	 * @param key  the property key
+	 * @param <DATA_TYPE> the type of the property value
+	 * @return the property, or {@code null} if the edge has no such property
+	 */
+	default <DATA_TYPE> WaldotProperty<DATA_TYPE> getEdgeProperty(
+			final WaldotEdge edge, final String key) {
+		final List<WaldotProperty<DATA_TYPE>> properties = getEdgeProperties(
+				edge);
+		if (properties != null) {
+			for (final WaldotProperty<DATA_TYPE> property : properties) {
+				if (property.getBrowseName().getName().equals(key)) {
+					return property;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Returns a map of all edges in the graph, keyed by NodeId.
 	 * 
 	 * @return map of NodeId to WaldotEdge
@@ -609,6 +631,21 @@ public interface WaldotNamespace extends AutoCloseable {
 	 */
 	<DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(
 			WaldotVertex vertex);
+
+	/**
+	 * Returns one property of a vertex, without copying the others.
+	 * 
+	 * @param vertex the vertex to query
+	 * @param key    the property key
+	 * @param <DATA_TYPE> the type of the property value
+	 * @return the property, or {@code null} if the vertex has no such property
+	 */
+	default <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> getVertexProperty(
+			final WaldotVertex vertex, final String key) {
+		final Map<String, WaldotVertexProperty<DATA_TYPE>> properties = getVertexProperties(
+				vertex);
+		return properties == null ? null : properties.get(key);
+	}
 
 	/**
 	 * Returns the vertex that owns a vertex property.

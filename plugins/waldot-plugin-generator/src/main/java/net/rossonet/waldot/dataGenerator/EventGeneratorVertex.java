@@ -102,6 +102,14 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 		implements
 			AutoCloseable {
 
+	/**
+	 * Lock of the state of this vertex. Not the vertex monitor: Milo
+	 * synchronizes the attribute access of the node on it, so blocking work or
+	 * property reads under {@code synchronized (this)} stall the OPC UA reads
+	 * and can make lock cycles with the namespace.
+	 */
+	private final Object vertexLock = new Object();
+
 	/** Generation algorithms of the events. */
 	public enum EventAlgorithm {
 		burst, random, sequential, stopped
@@ -366,39 +374,41 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 	 *
 	 * @return number of events published in the cycle
 	 */
-	public synchronized int generateCycle() {
-		final EventAlgorithm algorithm = algorithm();
-		final int events;
-		switch (algorithm) {
-			case burst :
-				events = (int) Math.max(1,
-						Math.min(10000, longValue(EVENT_BURST_SIZE_FIELD,
-								DEFAULT_EVENT_BURST_SIZE)));
-				break;
-			case random :
-			case sequential :
-				events = 1;
-				break;
-			case stopped :
-			default :
-				return 0;
-		}
-		int published = 0;
-		for (int i = 0; i < events; i++) {
-			final long maxEvents = longValue(EVENT_MAX_EVENTS_FIELD, 0);
-			if (maxEvents > 0 && counter >= maxEvents) {
-				property(EVENT_ALGORITHM_FIELD, EventAlgorithm.stopped.name());
-				break;
+	public int generateCycle() {
+		synchronized (vertexLock) {
+			final EventAlgorithm algorithm = algorithm();
+			final int events;
+			switch (algorithm) {
+				case burst :
+					events = (int) Math.max(1,
+							Math.min(10000, longValue(EVENT_BURST_SIZE_FIELD,
+									DEFAULT_EVENT_BURST_SIZE)));
+					break;
+				case random :
+				case sequential :
+					events = 1;
+					break;
+				case stopped :
+				default :
+					return 0;
 			}
-			generateEvent(algorithm == EventAlgorithm.random);
-			published++;
+			int published = 0;
+			for (int i = 0; i < events; i++) {
+				final long maxEvents = longValue(EVENT_MAX_EVENTS_FIELD, 0);
+				if (maxEvents > 0 && counter >= maxEvents) {
+					property(EVENT_ALGORITHM_FIELD, EventAlgorithm.stopped.name());
+					break;
+				}
+				generateEvent(algorithm == EventAlgorithm.random);
+				published++;
+			}
+			final long maxEvents = longValue(EVENT_MAX_EVENTS_FIELD, 0);
+			if (maxEvents > 0 && counter >= maxEvents
+					&& algorithm() != EventAlgorithm.stopped) {
+				property(EVENT_ALGORITHM_FIELD, EventAlgorithm.stopped.name());
+			}
+			return published;
 		}
-		final long maxEvents = longValue(EVENT_MAX_EVENTS_FIELD, 0);
-		if (maxEvents > 0 && counter >= maxEvents
-				&& algorithm() != EventAlgorithm.stopped) {
-			property(EVENT_ALGORITHM_FIELD, EventAlgorithm.stopped.name());
-		}
-		return published;
 	}
 
 	private void generateEvent(boolean randomChoice) {
@@ -568,10 +578,12 @@ public class EventGeneratorVertex extends AbstractOpcVertex
 	/**
 	 * Resets the counter and the position in the list of the messages.
 	 */
-	public synchronized void reset() {
-		counter = 0;
-		cursor = 0;
-		property(EVENT_COUNT_FIELD, 0L);
+	public void reset() {
+		synchronized (vertexLock) {
+			counter = 0;
+			cursor = 0;
+			property(EVENT_COUNT_FIELD, 0L);
+		}
 	}
 
 	private int severity(int index, String separator) {

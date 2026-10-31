@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateBuilder;
-import org.eclipse.milo.opcua.stack.core.util.SelfSignedCertificateGenerator;
 import org.eclipse.milo.shaded.com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +106,7 @@ public class KeyStoreLoader {
 		if (!serverKeyStore.exists()) {
 			keyStore.load(null, PASSWORD);
 
-			final KeyPair keyPair = SelfSignedCertificateGenerator.generateRsaKeyPair(2048);
+			final KeyPair keyPair = GeneratedKeyPairs.rsa2048();
 
 			final String applicationUri = "urn:rossonet:waldot:camillo:" + UUID.randomUUID();
 
@@ -130,9 +129,13 @@ public class KeyStoreLoader {
 			final X509Certificate certificate = builder.build();
 
 			keyStore.setKeyEntry(SERVER_ALIAS, keyPair.getPrivate(), PASSWORD, new X509Certificate[] { certificate });
-			keyStore.store(new FileOutputStream(serverKeyStore), PASSWORD);
+			try (FileOutputStream out = new FileOutputStream(serverKeyStore)) {
+				keyStore.store(out, PASSWORD);
+			}
 		} else {
-			keyStore.load(new FileInputStream(serverKeyStore), PASSWORD);
+			try (FileInputStream in = new FileInputStream(serverKeyStore)) {
+				keyStore.load(in, PASSWORD);
+			}
 		}
 
 		final Key serverPrivateKey = keyStore.getKey(SERVER_ALIAS, PASSWORD);

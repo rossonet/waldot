@@ -565,6 +565,12 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	}
 
 	@Override
+	public <DATA_TYPE> WaldotProperty<DATA_TYPE> getEdgeProperty(
+			final WaldotEdge waldotEdge, final String key) {
+		return opcMappingStrategy.getEdgeProperty(waldotEdge, key);
+	}
+
+	@Override
 	public Map<NodeId, WaldotEdge> getEdges() {
 		return opcMappingStrategy.getEdges();
 	}
@@ -681,6 +687,12 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	public <DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(
 			final WaldotVertex opcVertex) {
 		return opcMappingStrategy.getVertexProperties(opcVertex);
+	}
+
+	@Override
+	public <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> getVertexProperty(
+			final WaldotVertex opcVertex, final String key) {
+		return opcMappingStrategy.getVertexProperty(opcVertex, key);
 	}
 
 	@Override

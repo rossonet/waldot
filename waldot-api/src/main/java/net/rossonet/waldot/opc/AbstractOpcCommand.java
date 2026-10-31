@@ -6,8 +6,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -76,6 +78,17 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	}
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractOpcCommand.class);
+
+	/**
+	 * Arguments are immutable and the same for every command of a kind, and
+	 * every vertex has its own commands: one shared instance each (hundreds of
+	 * thousands of copies in a large graph).
+	 */
+	private static final Map<Argument, Argument> SHARED_ARGUMENTS = new ConcurrentHashMap<>();
+
+	private static Argument shared(final Argument argument) {
+		return SHARED_ARGUMENTS.computeIfAbsent(argument, a -> a);
+	}
 
 	protected boolean allowNullPropertyValues = false;
 
@@ -181,7 +194,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	@Override
 	public void addInputArgument(final String name, final NodeId dataType, final Integer valueRank,
 			final UInteger[] arrayDimensions, final LocalizedText description) {
-		final Argument arg = new Argument(name, dataType, valueRank, arrayDimensions, description);
+		final Argument arg = shared(new Argument(name, dataType, valueRank, arrayDimensions, description));
 		inputArguments.add(arg);
 		setInputArguments(inputArguments.toArray(new Argument[0]));
 	}
@@ -189,7 +202,7 @@ public abstract class AbstractOpcCommand extends GremlinCommandVertex implements
 	@Override
 	public void addOutputArgument(final String name, final NodeId dataType, final Integer valueRank,
 			final UInteger[] arrayDimensions, final LocalizedText description) {
-		final Argument arg = new Argument(name, dataType, valueRank, arrayDimensions, description);
+		final Argument arg = shared(new Argument(name, dataType, valueRank, arrayDimensions, description));
 		outputArguments.add(arg);
 		setOutputArguments(outputArguments.toArray(new Argument[0]));
 	}

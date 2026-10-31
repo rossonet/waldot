@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.client.utils.WaldotTestClientHandler;
+import net.rossonet.waldot.utils.GeneratedKeyPairs;
 import net.rossonet.waldot.utils.NetworkHelper;
 
 /**
@@ -178,6 +179,8 @@ public final class WaldotTestEnvironment {
 		setIfAbsent(SECURITY_DIR_PROPERTY, tmpDir.resolve(".security").toString());
 		setIfAbsent(CLIENT_KEYSTORE_PROPERTY, tmpDir.resolve("waldot-client.ks").toString());
 		setIfAbsent(BOOT_FILE_PROPERTY, tmpDir.resolve("boot.conf").toString());
+		// one RSA key per JVM for all the generated certificates
+		setIfAbsent(GeneratedKeyPairs.REUSE_PROPERTY, "true");
 		initialized = true;
 		System.out.println("WaldOT test environment: opc.tcp port " + System.getProperty(TCP_PORT_PROPERTY)
 				+ ", tmp dir " + tmpDir);

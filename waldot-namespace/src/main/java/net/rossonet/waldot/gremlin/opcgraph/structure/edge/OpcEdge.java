@@ -137,11 +137,12 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	@Override
 	public Set<String> keys() {
-		if (null == getProperties()) {
+		final ImmutableList<WaldotProperty<Object>> properties = getProperties();
+		if (null == properties) {
 			return Collections.emptySet();
 		}
 		final Set<String> result = new HashSet<>();
-		for (final WaldotProperty<Object> p : getProperties()) {
+		for (final WaldotProperty<Object> p : properties) {
 			result.add(p.getBrowseName().getName());
 		}
 		return result;
@@ -218,12 +219,9 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 		if (this.isRemoved()) {
 			return Property.empty();
 		}
-		for (final WaldotProperty<Object> p : getProperties()) {
-			if (p.getBrowseName().getName().equals(key)) {
-				return (Property<V>) p;
-			}
-		}
-		return VertexProperty.<V>empty();
+		final WaldotProperty<V> property = getNamespace().getEdgeProperty(this,
+				key);
+		return property != null ? property : VertexProperty.<V>empty();
 	}
 
 	@Override

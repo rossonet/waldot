@@ -468,6 +468,25 @@ public interface MiloStrategy extends AutoCloseable {
 	<DATA_TYPE> List<WaldotProperty<DATA_TYPE>> getProperties(WaldotEdge edge);
 
 	/**
+	 * Returns one property of an edge, without copying the others.
+	 * 
+	 * @param edge the edge to query
+	 * @param key  the property key
+	 * @param <DATA_TYPE> the type of the property value
+	 * @return the property, or {@code null} if the edge has no such property
+	 */
+	default <DATA_TYPE> WaldotProperty<DATA_TYPE> getEdgeProperty(
+			final WaldotEdge edge, final String key) {
+		for (final WaldotProperty<DATA_TYPE> property : this
+				.<DATA_TYPE>getProperties(edge)) {
+			if (property.getBrowseName().getName().equals(key)) {
+				return property;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Returns the edge that owns a property.
 	 * 
 	 * @param opcProperty the property to look up
@@ -494,6 +513,21 @@ public interface MiloStrategy extends AutoCloseable {
 	 */
 	<DATA_TYPE> Map<String, WaldotVertexProperty<DATA_TYPE>> getVertexProperties(
 			WaldotVertex opcVertex);
+
+	/**
+	 * Returns one property of a vertex, without copying the others.
+	 * 
+	 * @param opcVertex the vertex to query
+	 * @param key       the property key
+	 * @param <DATA_TYPE> the type of the property value
+	 * @return the property, or {@code null} if the vertex has no such property
+	 */
+	default <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> getVertexProperty(
+			final WaldotVertex opcVertex, final String key) {
+		final Map<String, WaldotVertexProperty<DATA_TYPE>> properties = getVertexProperties(
+				opcVertex);
+		return properties == null ? null : properties.get(key);
+	}
 
 	/**
 	 * Returns the vertex that owns a property.
