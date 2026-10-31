@@ -14,7 +14,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot describe}: description of a vertex or an edge.
+ * {@code wotctl describe}: description of a vertex or an edge.
  */
 @Command(name = "describe", header = "Descrive un vertice o un arco (proprietà, archi, comandi).", mixinStandardHelpOptions = true, description = {
 		"Descrive un vertice o un arco: tipo, label, nomi OPC UA, proprietà (con il NodeId",
@@ -25,10 +25,10 @@ import picocli.CommandLine.Parameters;
 				"         description, eventNotifier, source, target, properties, outEdges,",
 				"         inEdges, commands; jsonl: lo stesso oggetto su una riga;",
 				"  value: una riga 'chiave=valore' per ogni proprietà.", "",
-				"Esempi:", "  waldot describe sensor-1",
-				"  waldot describe 'ns=2;s=sensor-1' -o json   (il ';' va protetto dalla shell)",
-				"  waldot describe sensor-1 -o json | jq -r '.properties[].key'",
-				"  waldot describe sensor-1 -o value | grep '^temperature='"})
+				"Esempi:", "  wotctl describe sensor-1",
+				"  wotctl describe 'ns=2;s=sensor-1' -o json   (il ';' va protetto dalla shell)",
+				"  wotctl describe sensor-1 -o json | jq -r '.properties[].key'",
+				"  wotctl describe sensor-1 -o value | grep '^temperature='"})
 public class DescribeCommand extends ClientCommand {
 
 	private static void edges(final StringBuilder text, final String title,

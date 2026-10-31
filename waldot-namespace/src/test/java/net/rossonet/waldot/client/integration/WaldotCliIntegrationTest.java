@@ -38,7 +38,7 @@ import net.rossonet.waldot.test.WaldotTestEnvironment;
 import picocli.CommandLine;
 
 /**
- * The {@code waldot} command line interface (module wotctl) against an
+ * The {@code wotctl} command line interface against an
  * embedded WaldOT server: queries, graph changes, snapshots, address space
  * and subscriptions, with the exit codes.
  */

@@ -18,7 +18,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot read}: values and attributes of nodes.
+ * {@code wotctl read}: values and attributes of nodes.
  */
 @Command(name = "read", header = "Legge valori e attributi di nodi OPC UA.", mixinStandardHelpOptions = true, description = {
 		"Legge il valore (attributo Value) di uno o più nodi OPC UA in un'unica richiesta,",
@@ -30,10 +30,10 @@ import picocli.CommandLine.Parameters;
 				"  text : '<nodeId> = <valore>' (con '[<attributo>]' e lo stato se non Good);",
 				"  value: solo i valori, uno per riga;",
 				"  json/jsonl: {\"nodeId\",\"attribute\",\"value\",\"status\",\"sourceTime\",\"serverTime\"}.",
-				"", "Esempi:", "  waldot read sensor-1/temperature -o value",
-				"  waldot read 'ns=2;s=sensor-1/temperature' 'ns=2;s=sensor-2/temperature' -o jsonl",
-				"  waldot read i=2258 -o value                 # ora corrente del server",
-				"  waldot read sensor-1 --attribute DisplayName --attribute Description"})
+				"", "Esempi:", "  wotctl read sensor-1/temperature -o value",
+				"  wotctl read 'ns=2;s=sensor-1/temperature' 'ns=2;s=sensor-2/temperature' -o jsonl",
+				"  wotctl read i=2258 -o value                 # ora corrente del server",
+				"  wotctl read sensor-1 --attribute DisplayName --attribute Description"})
 public class ReadCommand extends ClientCommand {
 
 	/** A value read. */

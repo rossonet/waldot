@@ -10,14 +10,14 @@ import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot help [COMANDO [SOTTOCOMANDO]]}: guida di un comando.
+ * {@code wotctl help [COMANDO [SOTTOCOMANDO]]}: guida di un comando.
  */
 @Command(name = "help", header = "Mostra la guida di un comando.", helpCommand = true, mixinStandardHelpOptions = true, description = {
 		"Mostra la guida completa di un comando o di un sottocomando.",
-		"Senza argomenti mostra la guida generale di waldot.",
+		"Senza argomenti mostra la guida generale di wotctl.",
 		"Equivale all'opzione -h/--help del comando."}, footer = {"%nEsempi:",
-				"  waldot help", "  waldot help subscribe",
-				"  waldot help snapshot import", "  waldot subscribe --help"})
+				"  wotctl help", "  wotctl help subscribe",
+				"  wotctl help snapshot import", "  wotctl subscribe --help"})
 public class HelpCommand implements IHelpCommandInitializable2, Runnable {
 
 	private Help.ColorScheme colorScheme;

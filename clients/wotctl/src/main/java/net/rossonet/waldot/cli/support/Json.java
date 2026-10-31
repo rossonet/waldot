@@ -2,6 +2,7 @@ package net.rossonet.waldot.cli.support;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -163,8 +164,12 @@ public final class Json {
 		for (final RecordComponent component : record.getClass()
 				.getRecordComponents()) {
 			try {
-				node.set(component.getName(), toNode(
-						component.getAccessor().invoke(record), depth + 1));
+				final Method accessor = component.getAccessor();
+				// records nested in classes that are not public (e.g. the
+				// results of the commands)
+				accessor.trySetAccessible();
+				node.set(component.getName(),
+						toNode(accessor.invoke(record), depth + 1));
 			} catch (final ReflectiveOperationException | RuntimeException e) {
 				node.put(component.getName(), "?");
 			}

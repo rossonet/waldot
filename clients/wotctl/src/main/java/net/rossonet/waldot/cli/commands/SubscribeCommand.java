@@ -43,7 +43,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 /**
- * {@code waldot subscribe}: streams values and events on stdout.
+ * {@code wotctl subscribe}: streams values and events on stdout.
  */
 @Command(name = "subscribe", header = "Sottoscrive valori ed eventi e li scrive su stdout.", mixinStandardHelpOptions = true, description = {
 		"Sottoscrive proprietà dei vertici, variabili OPC UA ed eventi e scrive su stdout",
@@ -78,15 +78,15 @@ import picocli.CommandLine.Option;
 				"  mosquitto_pub -l legge stdin e pubblica una riga per messaggio sullo stesso",
 				"  topic; per un topic diverso per ogni riga si usa il formato topic con un ciclo",
 				"  'while read'. (mosquitto_sub serve invece a ricevere, non a pubblicare.)",
-				"", "Esempi:", "  waldot subscribe -p sensor-1:value",
-				"  waldot subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l",
-				"  waldot subscribe -p s1:value -p s2:value -e s1 -o topic --topic-prefix waldot \\",
+				"", "Esempi:", "  wotctl subscribe -p sensor-1:value",
+				"  wotctl subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l",
+				"  wotctl subscribe -p s1:value -p s2:value -e s1 -o topic --topic-prefix waldot \\",
 				"    | while read -r t p; do mosquitto_pub -t \"$t\" -m \"$p\"; done",
-				"  waldot subscribe -p pump-3:speed --sampling 100 --publishing 500 --queue 20 -o jsonl",
-				"  waldot subscribe -n 'ns=0;i=2258' --count 3 -o value        # 3 letture dell'ora",
-				"  waldot subscribe -e plant-1 --event-fields Message,Severity -o jsonl | jq .fields",
-				"  waldot subscribe -p s1:value --duration 1h -o jsonl >> registro.jsonl",
-				"  waldot subscribe -p s1:value -o value | head -n 1        # primo valore e uscita",
+				"  wotctl subscribe -p pump-3:speed --sampling 100 --publishing 500 --queue 20 -o jsonl",
+				"  wotctl subscribe -n 'ns=0;i=2258' --count 3 -o value        # 3 letture dell'ora",
+				"  wotctl subscribe -e plant-1 --event-fields Message,Severity -o jsonl | jq .fields",
+				"  wotctl subscribe -p s1:value --duration 1h -o jsonl >> registro.jsonl",
+				"  wotctl subscribe -p s1:value -o value | head -n 1        # primo valore e uscita",
 				"  docker run --rm -e WALDOT_ENDPOINT=opc.tcp://server:12686/waldot \\",
 				"    rossonet/waldot-client subscribe -p s1:value"})
 public class SubscribeCommand extends ClientCommand {
@@ -129,7 +129,7 @@ public class SubscribeCommand extends ClientCommand {
 	@Option(names = "--discard-oldest", negatable = true, defaultValue = "true", fallbackValue = "true", description = {
 			"Con la coda piena scarta la notifica più vecchia (predefinito);",
 			"--no-discard-oldest scarta invece la più recente."})
-	private final boolean discardOldest = true;
+	private boolean discardOldest;
 
 	private final CountDownLatch done = new CountDownLatch(1);
 
@@ -176,12 +176,12 @@ public class SubscribeCommand extends ClientCommand {
 			"publishing; predefinito: quello della configurazione del client)."})
 	private Double sampling;
 	private boolean stopped;
-	@Option(names = "--topic-prefix", paramLabel = "PREFISSO", description = "Prefisso dei topic del formato topic (predefinito ${DEFAULT-VALUE}).")
-	private final String topicPrefix = "waldot";
-	@Option(names = "--trigger", paramLabel = "TRIGGER", description = {
+	@Option(names = "--topic-prefix", paramLabel = "PREFISSO", defaultValue = "waldot", description = "Prefisso dei topic del formato topic (predefinito ${DEFAULT-VALUE}).")
+	private String topicPrefix;
+	@Option(names = "--trigger", paramLabel = "TRIGGER", defaultValue = "StatusValue", description = {
 			"Cosa genera una notifica: Status (solo lo stato), StatusValue (stato o valore,",
 			"predefinito), StatusValueTimestamp (anche il solo timestamp)."})
-	private final DataChangeTrigger trigger = DataChangeTrigger.StatusValue;
+	private DataChangeTrigger trigger;
 
 	@Override
 	protected void configure(
@@ -309,7 +309,7 @@ public class SubscribeCommand extends ClientCommand {
 		});
 		final SubscriptionGroup group = publishing == null
 				? client.subscriptions().defaultGroup()
-				: client.subscriptions().createGroup("waldot-cli",
+				: client.subscriptions().createGroup("wotctl",
 						SubscriptionGroupOptions
 								.withPublishingInterval(publishing));
 		final DataItemOptions dataOptions = dataOptions();

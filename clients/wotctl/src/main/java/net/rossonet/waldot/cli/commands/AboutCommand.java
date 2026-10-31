@@ -8,7 +8,7 @@ import net.rossonet.waldot.client.api.WaldotClient;
 import picocli.CommandLine.Command;
 
 /**
- * {@code waldot about}: server information.
+ * {@code wotctl about}: server information.
  */
 @Command(name = "about", header = "Informazioni sul server WaldOT (anche verifica della connessione).", mixinStandardHelpOptions = true, description = {
 		"Mostra le informazioni sul server WaldOT (comando 'about': versione, namespace,",
@@ -17,9 +17,9 @@ import picocli.CommandLine.Command;
 				"Output:",
 				"  text, value: una riga per ogni riga della risposta;",
 				"  json: array di stringhe; jsonl: una stringa JSON per riga.",
-				"", "Esempi:", "  waldot about",
-				"  waldot about --endpoint opc.tcp://192.168.1.10:12686/waldot",
-				"  waldot about --connect-timeout 3s >/dev/null && echo raggiungibile"})
+				"", "Esempi:", "  wotctl about",
+				"  wotctl about --endpoint opc.tcp://192.168.1.10:12686/waldot",
+				"  wotctl about --connect-timeout 3s >/dev/null && echo raggiungibile"})
 public class AboutCommand extends ClientCommand {
 
 	@Override

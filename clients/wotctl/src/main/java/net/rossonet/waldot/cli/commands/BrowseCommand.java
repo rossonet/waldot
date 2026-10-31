@@ -21,7 +21,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot browse}: references of a node of the address space.
+ * {@code wotctl browse}: references of a node of the address space.
  */
 @Command(name = "browse", header = "Esplora lo spazio degli indirizzi OPC UA.", mixinStandardHelpOptions = true, description = {
 		"Esplora lo spazio degli indirizzi OPC UA a partire da un nodo (predefinito: la",
@@ -34,9 +34,9 @@ import picocli.CommandLine.Parameters;
 				"  value: i NodeId, uno per riga;",
 				"  json/jsonl: {\"depth\",\"parent\",\"referenceTypeId\",\"forward\",\"targetId\",",
 				"              \"browseName\",\"displayName\",\"nodeClass\",\"typeDefinitionId\"}.",
-				"", "Esempi:", "  waldot browse", "  waldot browse --depth 3",
-				"  waldot browse sensor-1 --node-class Variable -o value",
-				"  waldot browse i=2253 --references all --direction both -o json"})
+				"", "Esempi:", "  wotctl browse", "  wotctl browse --depth 3",
+				"  wotctl browse sensor-1 --node-class Variable -o value",
+				"  wotctl browse i=2253 --references all --direction both -o json"})
 public class BrowseCommand extends ClientCommand {
 
 	/** A reference found at a depth. */
@@ -69,11 +69,11 @@ public class BrowseCommand extends ClientCommand {
 		all, hierarchical
 	}
 
-	@Option(names = "--depth", paramLabel = "N", description = "Profondità della visita (predefinita 1, solo i figli diretti).")
-	private final int depth = 1;
+	@Option(names = "--depth", paramLabel = "N", defaultValue = "1", description = "Profondità della visita (predefinita 1, solo i figli diretti).")
+	private int depth;
 
-	@Option(names = "--direction", paramLabel = "DIREZIONE", description = "Direzione dei riferimenti: ${COMPLETION-CANDIDATES} (predefinita Forward).")
-	private final BrowseDirection direction = BrowseDirection.Forward;
+	@Option(names = "--direction", paramLabel = "DIREZIONE", defaultValue = "Forward", description = "Direzione dei riferimenti: ${COMPLETION-CANDIDATES} (predefinita Forward).")
+	private BrowseDirection direction;
 
 	@Parameters(index = "0", arity = "0..1", paramLabel = "NODO", description = "Nodo di partenza (predefinito i=85, la cartella Objects).")
 	private String node;
@@ -81,8 +81,8 @@ public class BrowseCommand extends ClientCommand {
 	@Option(names = "--node-class", split = ",", paramLabel = "CLASSE", description = "Solo i nodi di queste classi (Object, Variable, Method, ObjectType, VariableType, ReferenceType, DataType, View), separate da virgole.")
 	private final List<NodeClass> nodeClasses = new ArrayList<>();
 
-	@Option(names = "--references", paramLabel = "TIPO", description = "Riferimenti da seguire: ${COMPLETION-CANDIDATES} (predefinito hierarchical).")
-	private final References references = References.hierarchical;
+	@Option(names = "--references", paramLabel = "TIPO", defaultValue = "hierarchical", description = "Riferimenti da seguire: ${COMPLETION-CANDIDATES} (predefinito hierarchical).")
+	private References references;
 
 	private void browse(final WaldotClient client, final BrowseFilter filter,
 			final NodeId start, final int level, final Set<NodeId> visited,

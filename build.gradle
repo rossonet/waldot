@@ -5,6 +5,9 @@ plugins {
 	id 'java'
 	id 'eclipse'
 	id 'org.jreleaser' version '1.21.0' apply false
+	// GraalVM native-image: declared once here (one class loader for the shared
+	// build service of the plugin), applied by the modules without a version
+	id 'org.graalvm.buildtools.native' version '1.1.18' apply false
 }
 
 description = "WaldOT - TinkerPop implementation with Milo OpcUA"

@@ -1,7 +1,13 @@
 package net.rossonet.waldot.cli.support;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
@@ -42,6 +48,38 @@ public abstract class ClientCommand implements Callable<Integer> {
 		}
 	}
 
+	private static final Function<WaldOTAgentClientConfiguration, WaldotClient> DEFAULT_CLIENT_FACTORY = WaldotClient::create;
+
+	private static final Supplier<OutputStream> DEFAULT_STDOUT = () -> new FileOutputStream(
+			FileDescriptor.out);
+
+	private static volatile Function<WaldOTAgentClientConfiguration, WaldotClient> clientFactory = DEFAULT_CLIENT_FACTORY;
+
+	private static volatile Supplier<OutputStream> stdout = DEFAULT_STDOUT;
+
+	/**
+	 * Replaces the factory of the clients (used by the tests to run the
+	 * commands without a server).
+	 */
+	public static void clientFactory(
+			final Function<WaldOTAgentClientConfiguration, WaldotClient> factory) {
+		clientFactory = Objects.requireNonNull(factory, "factory");
+	}
+
+	/** Restores the default factory and standard output. */
+	public static void resetTestHooks() {
+		clientFactory = DEFAULT_CLIENT_FACTORY;
+		stdout = DEFAULT_STDOUT;
+	}
+
+	/**
+	 * Replaces the raw standard output of the binary data (snapshot export,
+	 * render) used by the tests.
+	 */
+	public static void stdout(final Supplier<OutputStream> supplier) {
+		stdout = Objects.requireNonNull(supplier, "supplier");
+	}
+
 	@ArgGroup(validate = false, order = 100, heading = "%nConnessione (ogni opzione ha anche una variabile d'ambiente WALDOT_*):%n")
 	protected ConnectionOptions connection = new ConnectionOptions();
 
@@ -70,9 +108,9 @@ public abstract class ClientCommand implements Callable<Integer> {
 		final WaldOTAgentClientConfiguration configuration = connectionOptions
 				.toConfiguration(spec.commandLine());
 		configure(configuration);
-		final WaldotClient client = WaldotClient.create(configuration);
+		final WaldotClient client = clientFactory.apply(configuration);
 		final Closer closer = new Closer(client);
-		final Thread hook = new Thread(closer, "waldot-cli-shutdown");
+		final Thread hook = new Thread(closer, "wotctl-shutdown");
 		Runtime.getRuntime().addShutdownHook(hook);
 		try {
 			try {
@@ -119,6 +157,14 @@ public abstract class ClientCommand implements Callable<Integer> {
 		} catch (final RuntimeException e) {
 			throw usage("node id non valido: '" + value + "'");
 		}
+	}
+
+	/**
+	 * @return the raw standard output, for the binary data that do not go
+	 *         through the {@link Printer} (not closed by the caller)
+	 */
+	protected OutputStream rawStdout() {
+		return stdout.get();
 	}
 
 	/** @return true if the command supports the {@code topic} format */

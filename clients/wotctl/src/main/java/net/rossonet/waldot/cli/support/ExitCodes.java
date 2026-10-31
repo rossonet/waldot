@@ -1,7 +1,7 @@
 package net.rossonet.waldot.cli.support;
 
 /**
- * Exit codes of the {@code waldot} command line interface.
+ * Exit codes of the {@code wotctl} command line interface.
  */
 public final class ExitCodes {
 

@@ -17,7 +17,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot resolve}: follows a path of browse names.
+ * {@code wotctl resolve}: follows a path of browse names.
  */
 @Command(name = "resolve", header = "Risolve un percorso di browse name in un NodeId.", mixinStandardHelpOptions = true, description = {
 		"Risolve un percorso di browse name a partire da un nodo (predefinito: la cartella",
@@ -28,9 +28,9 @@ import picocli.CommandLine.Parameters;
 				"Output:",
 				"  text, value: il NodeId; json/jsonl: {\"start\",\"path\",\"nodeId\"}.",
 				"", "Esempi:",
-				"  waldot resolve Server ServerStatus CurrentTime",
-				"  waldot read \"$(waldot resolve Server ServerStatus State)\" -o value",
-				"  waldot resolve --start sensor-1 temperature"})
+				"  wotctl resolve Server ServerStatus CurrentTime",
+				"  wotctl read \"$(wotctl resolve Server ServerStatus State)\" -o value",
+				"  wotctl resolve --start sensor-1 temperature"})
 public class ResolveCommand extends ClientCommand {
 
 	/** Result of the resolution. */

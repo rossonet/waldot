@@ -131,7 +131,9 @@ public class ConnectionOptions {
 	@Option(names = "--keystore", paramLabel = "FILE", order = 8, description = {
 			"Keystore PKCS12 con il certificato applicativo del client (creato se non esiste;",
 			"predefinito /tmp/waldot-client.ks). Variabile: WALDOT_KEYSTORE."})
-	String keystore = env("WALDOT_KEYSTORE");
+	Path keystore = env("WALDOT_KEYSTORE") == null
+			? null
+			: Path.of(env("WALDOT_KEYSTORE"));
 
 	@Option(names = "--keystore-password", paramLabel = "PASSWORD", order = 9, description = {
 			"Password del keystore applicativo. Variabile: WALDOT_KEYSTORE_PASSWORD."})
@@ -169,12 +171,12 @@ public class ConnectionOptions {
 			"Timeout di ogni richiesta OPC UA. Variabile: WALDOT_REQUEST_TIMEOUT."})
 	String requestTimeout = env("WALDOT_REQUEST_TIMEOUT");
 
-	@Option(names = "--security-mode", paramLabel = "MODO", order = 3, description = {
+	@Option(names = "--security-mode", paramLabel = "MODO", order = 3, completionCandidates = Completions.SecurityModes.class, description = {
 			"Modalità dei messaggi: None, Sign, SignAndEncrypt (predefinita: None, oppure",
 			"SignAndEncrypt se la policy non è None). Variabile: WALDOT_SECURITY_MODE."})
 	String securityMode = env("WALDOT_SECURITY_MODE");
 
-	@Option(names = "--security-policy", paramLabel = "POLICY", order = 2, description = {
+	@Option(names = "--security-policy", paramLabel = "POLICY", order = 2, completionCandidates = Completions.SecurityPolicies.class, description = {
 			"Security policy: None, Basic128Rsa15, Basic256, Basic256Sha256,",
 			"Aes128_Sha256_RsaOaep, Aes256_Sha256_RsaPss (predefinita: None, oppure",
 			"Basic256Sha256 se è indicato solo --security-mode). Variabile: WALDOT_SECURITY_POLICY."})
@@ -295,7 +297,7 @@ public class ConnectionOptions {
 				builder.keyStore(
 						keystore == null
 								? configuration.getKeyStorePath()
-								: keystore,
+								: keystore.toString(),
 						keystorePassword == null
 								? configuration.getKeyStorePassword()
 								: keystorePassword);

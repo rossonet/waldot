@@ -20,7 +20,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot commands list|call}: the WaldOT commands (OPC UA methods).
+ * {@code wotctl commands list|call}: the WaldOT commands (OPC UA methods).
  */
 @Command(name = "commands", header = "Elenca e invoca i comandi del server e degli elementi.", mixinStandardHelpOptions = true, description = {
 		"Elenca e invoca i comandi di WaldOT, cioè i metodi OPC UA esposti dal server:",
@@ -30,11 +30,11 @@ import picocli.CommandLine.Parameters;
 		"    si indicano con --element."}, subcommands = {
 				CommandsCommand.ListCommand.class,
 				CommandsCommand.CallCommand.class}, footer = {"Esempi:",
-						"  waldot commands list",
-						"  waldot commands list --element sensor-1 -o json",
-						"  waldot commands call about",
-						"  waldot commands call 'export graph' -o json",
-						"  waldot commands call property --element sensor-1 setpoint 21.5"})
+						"  wotctl commands list",
+						"  wotctl commands list --element sensor-1 -o json",
+						"  wotctl commands call about",
+						"  wotctl commands call 'export graph' -o json",
+						"  wotctl commands call property --element sensor-1 setpoint 21.5"})
 public class CommandsCommand extends CommandGroup {
 
 	@Command(name = "call", header = "Invoca un comando globale o di un elemento.", mixinStandardHelpOptions = true, description = {
@@ -50,10 +50,10 @@ public class CommandsCommand extends CommandGroup {
 					"         altrimenti una riga 'nome: valore' per ogni uscita;",
 					"  value: il valore di ogni uscita (esclusa 'error'), uno per riga;",
 					"  json/jsonl: {\"command\",\"status\",\"outputs\":{nome: valore}}.",
-					"", "Esempi:", "  waldot commands call about",
-					"  waldot commands call query \"g.V().count()\"",
-					"  waldot commands call delete --element sensor-old",
-					"  waldot commands call property --element sensor-1 unit '°C' -o json"})
+					"", "Esempi:", "  wotctl commands call about",
+					"  wotctl commands call query \"g.V().count()\"",
+					"  wotctl commands call delete --element sensor-old",
+					"  wotctl commands call property --element sensor-1 unit '°C' -o json"})
 	public static class CallCommand extends ClientCommand {
 
 		@Parameters(index = "1..*", arity = "0..*", paramLabel = "ARGOMENTO", description = "Argomenti del comando, nell'ordine degli ingressi.")
@@ -114,10 +114,10 @@ public class CommandsCommand extends CommandGroup {
 					"  value: solo i nomi, uno per riga;",
 					"  json/jsonl: oggetti con objectId, methodId, name, path, description, inputs,",
 					"              outputs (ogni argomento con name, dataType, valueRank, description).",
-					"", "Esempi:", "  waldot commands list",
-					"  waldot commands list -o value | sort",
-					"  waldot commands list --element sensor-1",
-					"  waldot commands list -o json | jq '.[] | select(.name==\"about\")'"})
+					"", "Esempi:", "  wotctl commands list",
+					"  wotctl commands list -o value | sort",
+					"  wotctl commands list --element sensor-1",
+					"  wotctl commands list -o json | jq '.[] | select(.name==\"about\")'"})
 	public static class ListCommand extends ClientCommand {
 
 		private static String arguments(

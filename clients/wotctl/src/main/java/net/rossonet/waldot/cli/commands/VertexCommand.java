@@ -15,14 +15,14 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot vertex add|delete}.
+ * {@code wotctl vertex add|delete}.
  */
 @Command(name = "vertex", header = "Aggiunge o elimina vertici.", mixinStandardHelpOptions = true, description = {
 		"Aggiunge o elimina vertici del grafo."}, subcommands = {
 				VertexCommand.AddCommand.class,
 				VertexCommand.DeleteCommand.class}, footer = {"Esempi:",
-						"  waldot vertex add --id sensor-1 --label sensor -P zone=A -P unit=C",
-						"  waldot vertex delete sensor-1"})
+						"  wotctl vertex add --id sensor-1 --label sensor -P zone=A -P unit=C",
+						"  wotctl vertex delete sensor-1"})
 public class VertexCommand extends CommandGroup {
 
 	@Command(name = "add", header = "Aggiunge un vertice.", mixinStandardHelpOptions = true, description = {
@@ -35,9 +35,9 @@ public class VertexCommand extends CommandGroup {
 					"  value: l'id del vertice (se indicato con --id) o la risposta del server;",
 					"  json/jsonl: {\"kind\":\"vertex\",\"id\",\"output\"}.",
 					"", "Esempi:",
-					"  waldot vertex add --id sensor-1 --label sensor --type temperature",
-					"  waldot vertex add --label person -P name=marko -P age=29",
-					"  waldot vertex add --id pump-3 --label pump -o json"})
+					"  wotctl vertex add --id sensor-1 --label sensor --type temperature",
+					"  wotctl vertex add --label person -P name=marko -P age=29",
+					"  wotctl vertex add --id pump-3 --label pump -o json"})
 	public static class AddCommand extends ClientCommand {
 
 		@Option(names = "--id", paramLabel = "ID", description = "Identificatore del nuovo vertice (stringa nel namespace di WaldOT).")
@@ -51,6 +51,8 @@ public class VertexCommand extends CommandGroup {
 				"--property"}, paramLabel = "CHIAVE=VALORE", description = "Proprietà iniziale (ripetibile).")
 		private final Map<String, String> properties = new LinkedHashMap<>();
 
+		private String[] keyValues;
+
 		@Option(names = {"-t",
 				"--type"}, paramLabel = "TIPO", description = "Tipo del vertice (proprietà 'type', usata dai plugin per scegliere il comportamento).")
 		private String type;
@@ -61,12 +63,17 @@ public class VertexCommand extends CommandGroup {
 			final String output = GraphEdits.checkAnswer(
 					client.createVertex(id == null ? "" : id, label,
 							type == null ? "" : type,
-							GraphEdits.keyValues(spec, properties)),
+							keyValues),
 					"aggiunta del vertice");
 			final Created created = new Created("vertex", id, output);
 			printer.single(created, c -> c, Created::output,
 					c -> c.id() != null ? c.id() : c.output());
 			return 0;
+		}
+
+		@Override
+		protected void validate() {
+			keyValues = GraphEdits.keyValues(spec, properties);
 		}
 	}
 
@@ -76,8 +83,8 @@ public class VertexCommand extends CommandGroup {
 					"Output:",
 					"  text : 'eliminato <id>' per ogni vertice; value: gli id;",
 					"  json/jsonl: {\"id\",\"deleted\",\"output\"}.", "",
-					"Esempi:", "  waldot vertex delete sensor-1",
-					"  waldot query -o value \"g.V().hasLabel('tmp')\" | xargs -r waldot vertex delete"})
+					"Esempi:", "  wotctl vertex delete sensor-1",
+					"  wotctl query -o value \"g.V().hasLabel('tmp')\" | xargs -r wotctl vertex delete"})
 	public static class DeleteCommand extends ClientCommand {
 
 		@Parameters(arity = "1..*", paramLabel = "ID", description = "Id dei vertici da eliminare.")

@@ -1,7 +1,5 @@
 package net.rossonet.waldot.cli.commands;
 
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -21,7 +19,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 /**
- * {@code waldot snapshot export|import|clear}.
+ * {@code wotctl snapshot export|import|clear}.
  */
 @Command(name = "snapshot", header = "Backup, ripristino e svuotamento del grafo.", mixinStandardHelpOptions = true, description = {
 		"Backup e ripristino dell'intero grafo con i comandi 'export graph', 'read graph",
@@ -30,11 +28,11 @@ import picocli.CommandLine.Option;
 				SnapshotCommand.ExportCommand.class,
 				SnapshotCommand.ImportCommand.class,
 				SnapshotCommand.ClearCommand.class}, footer = {"Esempi:",
-						"  waldot snapshot export -f backup-$(date +%%F).json.gz",
-						"  waldot snapshot import --clear -f backup-2026-10-28.json.gz",
-						"  waldot snapshot export --endpoint opc.tcp://a:12686/waldot \\",
-						"    | waldot snapshot import --clear --endpoint opc.tcp://b:12686/waldot",
-						"  waldot snapshot clear --yes"})
+						"  wotctl snapshot export -f backup-$(date +%%F).json.gz",
+						"  wotctl snapshot import --clear -f backup-2026-10-28.json.gz",
+						"  wotctl snapshot export --endpoint opc.tcp://a:12686/waldot \\",
+						"    | wotctl snapshot import --clear --endpoint opc.tcp://b:12686/waldot",
+						"  wotctl snapshot clear --yes"})
 public class SnapshotCommand extends CommandGroup {
 
 	@Command(name = "clear", header = "Elimina l'intero grafo (richiede --yes).", mixinStandardHelpOptions = true, description = {
@@ -43,7 +41,7 @@ public class SnapshotCommand extends CommandGroup {
 					"Output:",
 					"  text : 'eliminati V vertici e E archi'; value: 'V E';",
 					"  json/jsonl: {\"vertices\",\"edges\",\"warnings\"}.", "",
-					"Esempi:", "  waldot snapshot clear --yes"})
+					"Esempi:", "  wotctl snapshot clear --yes"})
 	public static class ClearCommand extends ClientCommand {
 
 		@Option(names = "--yes", description = "Conferma l'eliminazione dell'intero grafo.")
@@ -75,17 +73,18 @@ public class SnapshotCommand extends CommandGroup {
 					"  text : 'esportati V vertici e E archi (N byte, B blocchi) in FILE';",
 					"  value: il percorso del file;",
 					"  json/jsonl: {\"file\",\"size\",\"compressed\",\"vertices\",\"edges\",\"blocks\"}.",
-					"", "Esempi:", "  waldot snapshot export -f grafo.json.gz",
-					"  waldot snapshot export --no-compress -f grafo.json",
-					"  waldot snapshot export --no-compress | jq '.vertices | length'",
-					"  waldot snapshot export --include-ephemeral --block-size 262144 -f completo.gz"})
+					"", "Esempi:", "  wotctl snapshot export -f grafo.json.gz",
+					"  wotctl snapshot export --no-compress -f grafo.json",
+					"  wotctl snapshot export --no-compress | jq '.vertices | length'",
+					"  wotctl snapshot export --include-ephemeral --block-size 262144 -f completo.gz"})
 	public static class ExportCommand extends ClientCommand {
 
 		private static final Logger logger = LoggerFactory
 				.getLogger(ExportCommand.class);
 
-		@Option(names = "--block-size", paramLabel = "BYTE", description = "Dimensione dei blocchi del trasferimento (predefinita ${DEFAULT-VALUE}).")
-		private final int blockSize = DataExchangeProtocol.DEFAULT_BLOCK_SIZE;
+		@Option(names = "--block-size", paramLabel = "BYTE", defaultValue = ""
+			+ DataExchangeProtocol.DEFAULT_BLOCK_SIZE, description = "Dimensione dei blocchi del trasferimento (predefinita ${DEFAULT-VALUE}).")
+		private int blockSize;
 
 		@Option(names = {"-f",
 				"--file"}, paramLabel = "FILE", description = "File di destinazione ('-' = stdout, predefinito).")
@@ -104,8 +103,7 @@ public class SnapshotCommand extends CommandGroup {
 					.exportGraph(!noCompress, includeEphemeral, blockSize);
 			final byte[] data = snapshot.data();
 			if (file == null || "-".equals(file.toString())) {
-				final OutputStream stdout = new FileOutputStream(
-						FileDescriptor.out);
+				final OutputStream stdout = rawStdout();
 				stdout.write(data);
 				stdout.flush();
 				logger.info(
@@ -149,13 +147,14 @@ public class SnapshotCommand extends CommandGroup {
 					"  text : 'importati V vertici e E archi'; value: 'V E';",
 					"  json/jsonl: {\"vertices\",\"edges\",\"warnings\"}.", "",
 					"Esempi:",
-					"  waldot snapshot import --clear -f grafo.json.gz",
-					"  waldot snapshot import < aggiunte.json",
-					"  curl -s https://example.org/grafo.json.gz | waldot snapshot import --clear"})
+					"  wotctl snapshot import --clear -f grafo.json.gz",
+					"  wotctl snapshot import < aggiunte.json",
+					"  curl -s https://example.org/grafo.json.gz | wotctl snapshot import --clear"})
 	public static class ImportCommand extends ClientCommand {
 
-		@Option(names = "--block-size", paramLabel = "BYTE", description = "Dimensione dei blocchi del caricamento (predefinita ${DEFAULT-VALUE}).")
-		private final int blockSize = DataExchangeProtocol.DEFAULT_BLOCK_SIZE;
+		@Option(names = "--block-size", paramLabel = "BYTE", defaultValue = ""
+			+ DataExchangeProtocol.DEFAULT_BLOCK_SIZE, description = "Dimensione dei blocchi del caricamento (predefinita ${DEFAULT-VALUE}).")
+		private int blockSize;
 
 		@Option(names = "--clear", description = "Elimina il grafo corrente prima di importare.")
 		private boolean clear;

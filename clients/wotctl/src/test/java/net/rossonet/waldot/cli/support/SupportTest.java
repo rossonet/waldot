@@ -72,6 +72,65 @@ class SupportTest {
 	}
 
 	@Test
+	void durationsConverterAndLimits() {
+		assertEquals(Duration.ofMinutes(5), new Durations().convert("5m"));
+		assertEquals(Duration.ofMillis(1500), Durations.parse(" 1S500MS "));
+		assertThrows(IllegalArgumentException.class, () -> Durations.parse("PT-10S"));
+		assertThrows(IllegalArgumentException.class, () -> Durations.parse("Pxyz"));
+		assertThrows(IllegalArgumentException.class, () -> Durations.parse(null));
+		assertThrows(IllegalArgumentException.class, () -> Durations.parse("-5s"));
+	}
+
+	@Test
+	void jsonOfOtherTypes() throws Exception {
+		assertEquals("null", Json.compact(Json.toNode(null)));
+		assertEquals("\"Infinity\"", Json.compact(Json.toNode(Float.POSITIVE_INFINITY)));
+		assertEquals("1.5", Json.compact(Json.toNode(1.5f)));
+		assertEquals("7", Json.compact(Json.toNode((short) 7)));
+		assertEquals("12345678901", Json.compact(Json.toNode(12345678901L)));
+		assertEquals("123456789012345678901234567890",
+				Json.compact(Json.toNode(new java.math.BigInteger("123456789012345678901234567890"))));
+		assertEquals("1.25", Json.compact(Json.toNode(new java.math.BigDecimal("1.25"))));
+		assertEquals("\"x\"", Json.compact(Json.toNode('x')));
+		assertEquals("\"PT1S\"", Json.compact(Json.toNode(Duration.ofSeconds(1))));
+		assertEquals("\"SECONDS\"", Json.compact(Json.toNode(java.util.concurrent.TimeUnit.SECONDS)));
+		assertEquals("\"AQ==\"", Json.compact(Json.toNode(new byte[] { 1 })));
+		assertEquals("null", Json.compact(Json.toNode(ByteString.NULL_VALUE)));
+		assertEquals("null", Json.compact(Json.toNode(LocalizedText.NULL_VALUE)));
+		assertEquals("null", Json.compact(Json.toNode(DateTime.NULL_VALUE)));
+		assertEquals("\"i=85\"", Json.compact(Json.toNode(
+				org.eclipse.milo.opcua.stack.core.types.builtin.ExpandedNodeId.parse("i=85"))));
+		assertEquals("3", Json.compact(Json.toNode(new Variant(3))));
+		assertEquals("\"a\"", Json.compact(Json.toNode(java.util.Optional.of("a"))));
+		assertEquals("null", Json.compact(Json.toNode(java.util.Optional.empty())));
+		assertEquals("[1,2]", Json.compact(Json.toNode(List.of(1, 2).iterator())));
+		assertEquals("[\"a\",\"b\"]", Json.compact(Json.toNode(new String[] { "a", "b" })));
+		assertEquals("\"0x81FF0000\"", Json.compact(Json.toNode(new StatusCode(0x81FF0000L))));
+		final JsonNode snapshot = Json.toNode(new net.rossonet.waldot.client.api.graph.GraphSnapshot(
+				new byte[] { 1, 2, 3 }, true, 4, 5, 6));
+		assertEquals(3, snapshot.get("size").asInt());
+		assertEquals(4, snapshot.get("vertices").asInt());
+		// a bean: through Jackson
+		assertEquals("{\"name\":\"n\"}", Json.compact(Json.toNode(new Bean())));
+		// too deep: the text
+		Object nested = "fondo";
+		for (int i = 0; i < 80; i++) {
+			nested = List.of(nested);
+		}
+		assertTrue(Json.compact(Json.toNode(nested)).contains("fondo"));
+		assertTrue(Json.pretty(Json.toNode(Map.of("a", 1))).contains("\n"));
+		assertEquals(null, Json.statusName(null));
+		assertEquals("Good", Json.statusName(StatusCode.GOOD));
+	}
+
+	/** A bean serialized by Jackson. */
+	public static final class Bean {
+		public String getName() {
+			return "n";
+		}
+	}
+
+	@Test
 	void jsonOfOpcUaTypes() {
 		assertEquals("\"ns=2;s=sensor-1\"", Json.compact(Json.toNode(new NodeId(2, "sensor-1"))));
 		assertEquals("\"testo\"", Json.compact(Json.toNode(LocalizedText.english("testo"))));

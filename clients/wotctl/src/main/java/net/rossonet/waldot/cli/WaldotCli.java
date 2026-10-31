@@ -2,12 +2,15 @@ package net.rossonet.waldot.cli;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -19,6 +22,7 @@ import net.rossonet.waldot.cli.commands.AboutCommand;
 import net.rossonet.waldot.cli.commands.BrowseCommand;
 import net.rossonet.waldot.cli.commands.CallCommand;
 import net.rossonet.waldot.cli.commands.CommandsCommand;
+import net.rossonet.waldot.cli.commands.CompletionCommand;
 import net.rossonet.waldot.cli.commands.DescribeCommand;
 import net.rossonet.waldot.cli.commands.EdgeCommand;
 import net.rossonet.waldot.cli.commands.PropertyCommand;
@@ -44,11 +48,11 @@ import picocli.CommandLine.Spec;
 import picocli.CommandLine.UnmatchedArgumentException;
 
 /**
- * {@code waldot}: command line interface of WaldOT, not interactive and
+ * {@code wotctl}: command line interface of WaldOT, not interactive and
  * scriptable. The data go to stdout (a line at a time), logs and errors to
  * stderr.
  */
-@Command(name = "waldot", mixinStandardHelpOptions = true, versionProvider = WaldotCli.Version.class, description = {
+@Command(name = "wotctl", mixinStandardHelpOptions = true, versionProvider = WaldotCli.Version.class, description = {
 		"Interfaccia a riga di comando di WaldOT: non interattiva, pensata per gli script bash,",
 		"le pipe e i container. Si collega a un server WaldOT via OPC UA (client v2) ed espone",
 		"tutte le funzioni del client: interrogazioni del grafo, comandi del server e degli",
@@ -69,12 +73,12 @@ import picocli.CommandLine.UnmatchedArgumentException;
 		"Le opzioni di connessione (--endpoint, sicurezza, identità, timeout, riconnessione)",
 		"si indicano dopo il nome del comando e hanno tutte una variabile d'ambiente",
 		"WALDOT_* equivalente: in un container basta 'docker run -e WALDOT_ENDPOINT=...'.",
-		"Per la guida completa di un comando: waldot help COMANDO oppure waldot COMANDO --help."}, footer = {
+		"Per la guida completa di un comando: wotctl help COMANDO oppure wotctl COMANDO --help."}, footer = {
 				"Identificatori dei nodi:",
 				"  Dove è richiesto un vertice, un arco o un nodo si può usare la forma OPC UA",
 				"  (ns=2;s=sensor-1, i=85, ns=0;i=2253) oppure il solo identificatore stringa",
 				"  nel namespace di WaldOT (sensor-1). Nella shell la forma OPC UA va tra apici",
-				"  perché contiene ';' (waldot read 'ns=2;s=sensor-1/value').",
+				"  perché contiene ';' (wotctl read 'ns=2;s=sensor-1/value').",
 				"", "Durate:",
 				"  500ms, 10s, 2m, 1h, 1d, combinazioni come 1m30s, ISO-8601 (PT10S) oppure un",
 				"  numero di secondi (10, 2.5).", "", "Variabili d'ambiente:",
@@ -88,20 +92,20 @@ import picocli.CommandLine.UnmatchedArgumentException;
 				"  WALDOT_OUTPUT (formato predefinito), WALDOT_LOG_LEVEL (livello di log).",
 				"  Un'opzione indicata sulla riga di comando prevale sulla variabile.",
 				"", "Esempi:", "  # informazioni sul server",
-				"  waldot about --endpoint opc.tcp://server:12686/waldot", "",
+				"  wotctl about --endpoint opc.tcp://server:12686/waldot", "",
 				"  # vertici di tipo sensor in JSON Lines, filtrati con jq",
-				"  waldot query -o jsonl \"g.V().hasLabel('sensor')\" | jq -r .id",
+				"  wotctl query -o jsonl \"g.V().hasLabel('sensor')\" | jq -r .id",
 				"", "  # valore di una proprietà in una variabile di shell",
-				"  T=$(waldot property get sensor-1 temperature -o value)", "",
+				"  T=$(wotctl property get sensor-1 temperature -o value)", "",
 				"  # backup e ripristino del grafo",
-				"  waldot snapshot export -f grafo.json.gz",
-				"  waldot snapshot import --clear -f grafo.json.gz", "",
+				"  wotctl snapshot export -f grafo.json.gz",
+				"  wotctl snapshot import --clear -f grafo.json.gz", "",
 				"  # disegno SVG dell'impianto, raggruppato per cartella",
-				"  waldot render -f impianto.svg --group-by directory", "",
+				"  wotctl render -f impianto.svg --group-by directory", "",
 				"  # inoltro dei valori a un broker MQTT (mosquitto_pub -l legge le righe da stdin)",
-				"  waldot subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l",
+				"  wotctl subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l",
 				"", "  # più proprietà ed eventi, un topic MQTT per ogni riga",
-				"  waldot subscribe -p s1:value -p s2:value -e s1 -o topic --topic-prefix waldot \\",
+				"  wotctl subscribe -p s1:value -p s2:value -e s1 -o topic --topic-prefix waldot \\",
 				"    | while read -r t p; do mosquitto_pub -t \"$t\" -m \"$p\"; done",
 				"", "  # dal container Docker",
 				"  docker run --rm -e WALDOT_ENDPOINT=opc.tcp://server:12686/waldot \\",
@@ -113,19 +117,46 @@ import picocli.CommandLine.UnmatchedArgumentException;
 						SnapshotCommand.class, RenderCommand.class,
 						BrowseCommand.class, ReadCommand.class,
 						WriteCommand.class, CallCommand.class,
-						ResolveCommand.class, SubscribeCommand.class})
+						ResolveCommand.class, SubscribeCommand.class,
+						CompletionCommand.class})
 public class WaldotCli implements Callable<Integer> {
 
-	/** Version from the manifest of the jar. */
+	/**
+	 * Version from the resource written by the build (also in the native
+	 * binary, that has no manifest), otherwise from the manifest of the jar.
+	 */
 	public static final class Version implements IVersionProvider {
+
+		/** Resource with the property {@code version}. */
+		static final String RESOURCE = "/net/rossonet/waldot/cli/wotctl-version.properties";
+
+		/** @return the version of wotctl, null if unknown */
+		static String version() {
+			try (InputStream input = WaldotCli.class
+					.getResourceAsStream(RESOURCE)) {
+				if (input != null) {
+					final Properties properties = new Properties();
+					properties.load(input);
+					final String version = properties.getProperty("version");
+					if (version != null && !version.isBlank()) {
+						return version.trim();
+					}
+				}
+			} catch (final IOException e) {
+				// from the manifest
+			}
+			return WaldotCli.class.getPackage().getImplementationVersion();
+		}
+
 		@Override
 		public String[] getVersion() {
-			final String version = WaldotCli.class.getPackage()
-					.getImplementationVersion();
+			final String version = version();
 			return new String[]{
-					"waldot " + (version == null ? "(sviluppo)" : version),
+					"wotctl " + (version == null ? "(sviluppo)" : version),
 					"Java " + System.getProperty("java.version") + " ("
-							+ System.getProperty("java.vendor") + ")",
+							+ System.getProperty("java.vendor")
+							+ (isNativeImage() ? ", binario nativo GraalVM" : "")
+							+ ")",
 					"OS " + System.getProperty("os.name") + " "
 							+ System.getProperty("os.version") + " "
 							+ System.getProperty("os.arch")};
@@ -224,6 +255,12 @@ public class WaldotCli implements Callable<Integer> {
 		return ExitCodes.SERVER_ERROR;
 	}
 
+	/** @return true when running as a GraalVM native image */
+	static boolean isNativeImage() {
+		return "runtime".equals(
+				System.getProperty("org.graalvm.nativeimage.imagecode"));
+	}
+
 	private static boolean isConnectionProblem(final StatusCode status) {
 		return status != null && CONNECTION_STATUS.contains(status.getValue());
 	}
@@ -276,7 +313,7 @@ public class WaldotCli implements Callable<Integer> {
 		commandLine.setParameterExceptionHandler((exception, args) -> {
 			final CommandLine failed = exception.getCommandLine();
 			final PrintWriter writer = failed.getErr();
-			writer.println("waldot: uso errato: " + exception.getMessage());
+			writer.println("wotctl: uso errato: " + exception.getMessage());
 			UnmatchedArgumentException.printSuggestions(exception, writer);
 			writer.println("Guida: " + failed.getCommandSpec().qualifiedName()
 					+ " --help");
@@ -289,7 +326,7 @@ public class WaldotCli implements Callable<Integer> {
 					if (!(exception instanceof net.rossonet.waldot.cli.support.OutputClosedException)) {
 						final PrintWriter writer = failed.getErr();
 						writer.println(
-								"waldot: "
+								"wotctl: "
 										+ (code == ExitCodes.CONNECTION
 												? "errore di connessione: "
 												: "errore: ")
@@ -310,7 +347,7 @@ public class WaldotCli implements Callable<Integer> {
 		}
 	}
 
-	/** Short synopsis: {@code waldot comando [OPZIONI] PARAMETRI}. */
+	/** Short synopsis: {@code wotctl comando [OPZIONI] PARAMETRI}. */
 	private static String synopsis(final CommandSpec spec) {
 		final StringBuilder synopsis = new StringBuilder(spec.qualifiedName())
 				.append(" [OPZIONI]");

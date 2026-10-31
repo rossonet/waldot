@@ -2,7 +2,7 @@ package net.rossonet.waldot.cli.support;
 
 /**
  * The standard output was closed by the downstream process of the pipe (e.g.
- * {@code waldot subscribe ... | head -n 3}): the command stops cleanly with
+ * {@code wotctl subscribe ... | head -n 3}): the command stops cleanly with
  * exit code {@value ExitCodes#OK}.
  */
 public final class OutputClosedException extends CliException {

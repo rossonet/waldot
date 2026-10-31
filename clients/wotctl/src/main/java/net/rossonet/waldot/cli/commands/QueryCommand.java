@@ -20,7 +20,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot query}: runs a query on the graph.
+ * {@code wotctl query}: runs a query on the graph.
  */
 @Command(name = "query", header = "Interroga il grafo del server (traversal Gremlin).", mixinStandardHelpOptions = true, description = {
 		"Esegue un'interrogazione sul grafo del server. L'espressione è valutata dal server",
@@ -43,13 +43,13 @@ import picocli.CommandLine.Parameters;
 				"         \"inV\",\"properties\"} (gli id sono NodeId come ns=2;s=x);",
 				"  jsonl: un oggetto JSON compatto per riga (ideale con jq);",
 				"  value: un valore per riga; per vertici e archi l'id.", "",
-				"Esempi:", "  waldot query \"g.V().count()\" -o value",
-				"  waldot query -o jsonl \"g.V().hasLabel('sensor')\" | jq -r '.properties.name'",
-				"  waldot query -o value \"g.V().hasLabel('sensor').values('name')\"",
-				"  waldot query --text \"g.V().valueMap().toList()\"",
-				"  waldot query --graphson \"g.E().limit(5)\" > archi.json",
-				"  echo \"g.V().limit(3)\" | waldot query -f - -o json",
-				"  waldot query -f interrogazione.txt -o jsonl"})
+				"Esempi:", "  wotctl query \"g.V().count()\" -o value",
+				"  wotctl query -o jsonl \"g.V().hasLabel('sensor')\" | jq -r '.properties.name'",
+				"  wotctl query -o value \"g.V().hasLabel('sensor').values('name')\"",
+				"  wotctl query --text \"g.V().valueMap().toList()\"",
+				"  wotctl query --graphson \"g.E().limit(5)\" > archi.json",
+				"  echo \"g.V().limit(3)\" | wotctl query -f - -o json",
+				"  wotctl query -f interrogazione.txt -o jsonl"})
 public class QueryCommand extends ClientCommand {
 
 	@Parameters(index = "0", arity = "0..1", paramLabel = "ESPRESSIONE", description = "Espressione da eseguire (racchiuderla tra virgolette doppie, con apici singoli all'interno).")

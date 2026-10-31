@@ -1,7 +1,5 @@
 package net.rossonet.waldot.cli.commands;
 
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import net.rossonet.waldot.api.exchange.DataExchangeProtocol;
 import net.rossonet.waldot.api.exchange.GraphRenderOptions;
 import net.rossonet.waldot.cli.support.ClientCommand;
+import net.rossonet.waldot.cli.support.Completions;
 import net.rossonet.waldot.cli.support.Printer;
 import net.rossonet.waldot.client.api.WaldotClient;
 import net.rossonet.waldot.client.api.graph.GraphRendering;
@@ -25,7 +24,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 /**
- * {@code waldot render}: draws the graph as SVG or Graphviz DOT.
+ * {@code wotctl render}: draws the graph as SVG or Graphviz DOT.
  */
 @Command(name = "render", header = "Disegna il grafo (SVG o Graphviz DOT).", mixinStandardHelpOptions = true, description = {
 		"Disegna il grafo, o una sua parte, con il comando 'render graph' del server. Il",
@@ -45,32 +44,33 @@ import picocli.CommandLine.Option;
 				"  value: il percorso del file;",
 				"  json/jsonl: {\"file\",\"format\",\"size\",\"vertices\",\"edges\",\"blocks\",\"warnings\"}.",
 				"", "Esempi:",
-				"  waldot render -f impianto.svg --group-by directory",
-				"  waldot render -f plc.svg --root plc-1 --depth 2 --include-runtime --include-ephemeral",
-				"  waldot render -f regole.svg --edge-label fire --edge-label link-to --no-isolated",
-				"  waldot render -f linea1.svg --directory impianto/linea1 --layout mrtree --props unit,status",
-				"  waldot render -f allarmi.svg --where status=alarm --root sensore-1 --theme dark",
-				"  waldot render -f grafo.dot && dot -Tpng grafo.dot -o grafo.png",
-				"  waldot render --options-file vista.json --max 2000 > vista.svg"})
+				"  wotctl render -f impianto.svg --group-by directory",
+				"  wotctl render -f plc.svg --root plc-1 --depth 2 --include-runtime --include-ephemeral",
+				"  wotctl render -f regole.svg --edge-label fire --edge-label link-to --no-isolated",
+				"  wotctl render -f linea1.svg --directory impianto/linea1 --layout mrtree --props unit,status",
+				"  wotctl render -f allarmi.svg --where status=alarm --root sensore-1 --theme dark",
+				"  wotctl render -f grafo.dot && dot -Tpng grafo.dot -o grafo.png",
+				"  wotctl render --options-file vista.json --max 2000 > vista.svg"})
 public class RenderCommand extends ClientCommand {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(RenderCommand.class);
 
-	@Option(names = "--layout", paramLabel = "ALGORITMO", description = "layered (predefinito), force, stress, mrtree, radial.")
+	@Option(names = "--layout", paramLabel = "ALGORITMO", completionCandidates = Completions.RenderAlgorithms.class, description = "layered (predefinito), force, stress, mrtree, radial.")
 	private GraphRenderOptions.Algorithm algorithm;
 
-	@Option(names = "--block-size", paramLabel = "BYTE", description = "Dimensione dei blocchi del trasferimento (predefinita ${DEFAULT-VALUE}).")
-	private final int blockSize = DataExchangeProtocol.DEFAULT_BLOCK_SIZE;
+	@Option(names = "--block-size", paramLabel = "BYTE", defaultValue = ""
+			+ DataExchangeProtocol.DEFAULT_BLOCK_SIZE, description = "Dimensione dei blocchi del trasferimento (predefinita ${DEFAULT-VALUE}).")
+	private int blockSize;
 
-	@Option(names = "--color-by", paramLabel = "CRITERIO", description = "Colore dei vertici: type (predefinito), label, directory, none.")
+	@Option(names = "--color-by", paramLabel = "CRITERIO", completionCandidates = Completions.RenderColors.class, description = "Colore dei vertici: type (predefinito), label, directory, none.")
 	private GraphRenderOptions.ColorBy colorBy;
 
 	@Option(names = {"-d",
 			"--depth"}, paramLabel = "N", description = "Passi dai vertici di partenza (predefinito 1).")
 	private Integer depth;
 
-	@Option(names = "--direction", paramLabel = "VERSO", description = "Archi seguiti dai vertici di partenza: out, in, both (predefinito).")
+	@Option(names = "--direction", paramLabel = "VERSO", completionCandidates = Completions.RenderDirections.class, description = "Archi seguiti dai vertici di partenza: out, in, both (predefinito).")
 	private GraphRenderOptions.Direction direction;
 
 	@Option(names = "--directory", split = ",", paramLabel = "CARTELLA", description = "Solo i vertici in queste cartelle (e sottocartelle).")
@@ -95,10 +95,10 @@ public class RenderCommand extends ClientCommand {
 			"--file"}, paramLabel = "FILE", description = "File di destinazione ('-' = stdout, predefinito).")
 	private Path file;
 
-	@Option(names = "--format", paramLabel = "FORMATO", description = "svg o dot (predefinito svg, dot per i file .dot e .gv).")
+	@Option(names = "--format", paramLabel = "FORMATO", completionCandidates = Completions.RenderFormats.class, description = "svg o dot (predefinito svg, dot per i file .dot e .gv).")
 	private GraphRenderOptions.Format format;
 
-	@Option(names = "--group-by", paramLabel = "CRITERIO", description = "Raggruppa i vertici: none (predefinito), directory, type.")
+	@Option(names = "--group-by", paramLabel = "CRITERIO", completionCandidates = Completions.RenderGroups.class, description = "Raggruppa i vertici: none (predefinito), directory, type.")
 	private GraphRenderOptions.GroupBy groupBy;
 
 	@Option(names = "--highlight", split = ",", paramLabel = "ID", description = "Elementi da evidenziare (i vertici di partenza lo sono sempre).")
@@ -113,7 +113,7 @@ public class RenderCommand extends ClientCommand {
 	@Option(names = "--label", split = ",", paramLabel = "ETICHETTA", description = "Solo i vertici con queste etichette.")
 	private List<String> labels;
 
-	@Option(names = "--layout-direction", paramLabel = "VERSO", description = "right (predefinito), down, left, up.")
+	@Option(names = "--layout-direction", paramLabel = "VERSO", completionCandidates = Completions.RenderLayoutDirections.class, description = "right (predefinito), down, left, up.")
 	private GraphRenderOptions.LayoutDirection layoutDirection;
 
 	@Option(names = "--match", paramLabel = "REGEX", description = "Solo i vertici con id, nome o display name che contengono la regex.")
@@ -138,7 +138,7 @@ public class RenderCommand extends ClientCommand {
 			"--root"}, paramLabel = "ID", description = "Vertice di partenza (ripetibile).")
 	private List<String> roots;
 
-	@Option(names = "--theme", paramLabel = "TEMA", description = "auto (predefinito, segue il visualizzatore), light, dark.")
+	@Option(names = "--theme", paramLabel = "TEMA", completionCandidates = Completions.RenderThemes.class, description = "auto (predefinito, segue il visualizzatore), light, dark.")
 	private GraphRenderOptions.Theme theme;
 
 	@Option(names = "--title", paramLabel = "TITOLO", description = "Titolo del disegno.")
@@ -252,8 +252,7 @@ public class RenderCommand extends ClientCommand {
 		}
 		final byte[] data = rendering.data();
 		if (toStdout()) {
-			final OutputStream stdout = new FileOutputStream(
-					FileDescriptor.out);
+			final OutputStream stdout = rawStdout();
 			stdout.write(data);
 			stdout.flush();
 			logger.info("drawn {} vertices and {} edges ({} bytes, {})",

@@ -7,6 +7,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
 
 import net.rossonet.waldot.cli.support.CliException;
+import net.rossonet.waldot.cli.support.Completions;
 import net.rossonet.waldot.cli.support.ClientCommand;
 import net.rossonet.waldot.cli.support.Json;
 import net.rossonet.waldot.cli.support.Printer;
@@ -17,7 +18,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot write}: writes the value of a variable.
+ * {@code wotctl write}: writes the value of a variable.
  */
 @Command(name = "write", header = "Scrive il valore di una variabile OPC UA.", mixinStandardHelpOptions = true, description = {
 		"Scrive l'attributo Value di una variabile OPC UA. Senza --type il valore è",
@@ -30,9 +31,9 @@ import picocli.CommandLine.Parameters;
 		"il codice di uscita 1."}, footer = {"Output:",
 				"  text : '<nodeId> <- <valore> (<stato>)';",
 				"  value: lo stato (Good); json/jsonl: {\"nodeId\",\"value\",\"status\"}.",
-				"", "Esempi:", "  waldot write sensor-1/setpoint 21.5",
-				"  waldot write 'ns=2;s=pump-3/enabled' true --type bool",
-				"  waldot write valve-2/position 75 -o json"})
+				"", "Esempi:", "  wotctl write sensor-1/setpoint 21.5",
+				"  wotctl write 'ns=2;s=pump-3/enabled' true --type bool",
+				"  wotctl write valve-2/position 75 -o json"})
 public class WriteCommand extends ClientCommand {
 
 	private static final Map<Class<?>, String> TYPE_OF = Map.ofEntries(
@@ -79,7 +80,7 @@ public class WriteCommand extends ClientCommand {
 	private String node;
 
 	@Option(names = {"-t",
-			"--type"}, paramLabel = "TIPO", description = "Tipo del valore (predefinito: quello della variabile).")
+			"--type"}, paramLabel = "TIPO", completionCandidates = Completions.ValueTypes.class, description = "Tipo del valore (predefinito: quello della variabile).")
 	private String type;
 
 	@Parameters(index = "1", paramLabel = "VALORE", description = "Valore da scrivere.")

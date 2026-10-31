@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.rossonet.waldot.cli.support.CliException;
+import net.rossonet.waldot.cli.support.Completions;
 import net.rossonet.waldot.cli.support.ClientCommand;
 import net.rossonet.waldot.cli.support.CommandGroup;
 import net.rossonet.waldot.cli.support.Json;
@@ -17,14 +18,14 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * {@code waldot property get|set}.
+ * {@code wotctl property get|set}.
  */
 @Command(name = "property", header = "Legge o imposta le proprietà di vertici e archi.", mixinStandardHelpOptions = true, description = {
 		"Legge o imposta una proprietà di un vertice o di un arco."}, subcommands = {
 				PropertyCommand.GetCommand.class,
 				PropertyCommand.SetCommand.class}, footer = {"Esempi:",
-						"  waldot property set sensor-1 setpoint 21.5",
-						"  waldot property get sensor-1 setpoint -o value"})
+						"  wotctl property set sensor-1 setpoint 21.5",
+						"  wotctl property get sensor-1 setpoint -o value"})
 public class PropertyCommand extends CommandGroup {
 
 	@Command(name = "get", header = "Legge una proprietà.", mixinStandardHelpOptions = true, description = {
@@ -32,8 +33,8 @@ public class PropertyCommand extends CommandGroup {
 			"Se la proprietà non esiste il codice di uscita è 1."}, footer = {
 					"Output:",
 					"  text, value: il valore; json/jsonl: {\"element\",\"key\",\"value\",\"valueType\",\"nodeId\"}.",
-					"", "Esempi:", "  waldot property get sensor-1 temperature",
-					"  if [ \"$(waldot property get pump-3 state -o value)\" = on ]; then echo accesa; fi"})
+					"", "Esempi:", "  wotctl property get sensor-1 temperature",
+					"  if [ \"$(wotctl property get pump-3 state -o value)\" = on ]; then echo accesa; fi"})
 	public static class GetCommand extends ClientCommand {
 
 		@Parameters(index = "0", paramLabel = "ELEMENTO", description = "Id del vertice o dell'arco.")
@@ -70,9 +71,9 @@ public class PropertyCommand extends CommandGroup {
 			"double, nodeid, text)."}, footer = {"Output:",
 					"  text : '<elemento>/<chiave> = <valore>'; value: il valore;",
 					"  json/jsonl: {\"element\",\"key\",\"value\"}.", "",
-					"Esempi:", "  waldot property set sensor-1 unit C",
-					"  waldot property set pump-3 speed 1450 --type int32",
-					"  waldot property set valve-2 open true --type bool -o json"})
+					"Esempi:", "  wotctl property set sensor-1 unit C",
+					"  wotctl property set pump-3 speed 1450 --type int32",
+					"  wotctl property set valve-2 open true --type bool -o json"})
 	public static class SetCommand extends ClientCommand {
 
 		private Object converted;
@@ -84,7 +85,7 @@ public class PropertyCommand extends CommandGroup {
 		private String key;
 
 		@Option(names = {"-t",
-				"--type"}, paramLabel = "TIPO", description = "Tipo in cui convertire il valore prima dell'invio.")
+				"--type"}, paramLabel = "TIPO", completionCandidates = Completions.ValueTypes.class, description = "Tipo in cui convertire il valore prima dell'invio.")
 		private String type;
 
 		@Parameters(index = "2", paramLabel = "VALORE", description = "Nuovo valore.")

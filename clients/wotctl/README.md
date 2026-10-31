@@ -1,9 +1,9 @@
-# wotctl – `waldot`, la riga di comando di WaldOT
+# wotctl – la riga di comando di WaldOT
 
-`wotctl` contiene `waldot`, l'interfaccia a riga di comando di WaldOT. Non è
-interattiva ed è pensata per gli script bash, le pipe e i container. Si collega
-a un server WaldOT via OPC UA con il client v2 (`waldot-client`) e ne espone
-tutte le funzioni:
+`wotctl` è l'interfaccia a riga di comando di WaldOT. Non è interattiva ed è
+pensata per gli script bash, le pipe e i container. Si collega a un server
+WaldOT via OPC UA con il client v2 (`waldot-client`) e ne espone tutte le
+funzioni:
 
 | Area                    | Comandi                                                        |
 |-------------------------|----------------------------------------------------------------|
@@ -15,26 +15,59 @@ tutte le funzioni:
 | disegno del grafo       | `render` (SVG o Graphviz DOT, con filtri e layout)             |
 | spazio degli indirizzi  | `browse`, `read`, `write`, `call`, `resolve`                   |
 | sottoscrizioni          | `subscribe` (proprietà `-p`, nodi `-n`, eventi `-e`)           |
+| shell                   | `completion` (script di autocompletamento bash/zsh)            |
 
 La guida completa, in italiano, è integrata nel comando:
 
 ```bash
-waldot --help
-waldot help subscribe
-waldot snapshot import --help
+wotctl --help
+wotctl help subscribe
+wotctl snapshot import --help
 ```
 
 ## Compilazione ed esecuzione
 
 ```bash
 ./gradlew :wotctl:shadowJar                     # fat jar eseguibile
-java -jar waldot/clients/wotctl/build/libs/waldot-cli.jar --help
+java -jar waldot/clients/wotctl/build/libs/wotctl.jar --help
 
-./gradlew :wotctl:installDist                   # distribuzione con lo script 'waldot'
-waldot/clients/wotctl/build/install/waldot/bin/waldot about
+./gradlew :wotctl:installDist                   # distribuzione con lo script 'wotctl'
+waldot/clients/wotctl/build/install/wotctl/bin/wotctl about
 ```
 
-Un alias comodo: `alias waldot='java -jar /percorso/waldot-cli.jar'`.
+Un alias comodo: `alias wotctl='java -jar /percorso/wotctl.jar'`.
+
+Per un eseguibile che non richiede Java vedi [Binario nativo](#binario-nativo).
+
+## Autocompletamento
+
+`wotctl completion` scrive su stdout lo script di autocompletamento, generato da
+picocli a partire dai comandi. Completa:
+- comandi, sottocomandi e opzioni;
+- i valori delle opzioni con un insieme fisso di valori (`-o`,
+  `--security-policy`, `--security-mode`, `--type`, le opzioni di `render`,
+  `--trigger`, `--attribute`, …);
+- i nomi dei file.
+
+```bash
+# solo nella shell corrente
+source <(wotctl completion)
+
+# per l'utente corrente (bash)
+mkdir -p ~/.local/share/bash-completion/completions
+wotctl completion > ~/.local/share/bash-completion/completions/wotctl
+
+# zsh (in ~/.zshrc)
+autoload -U +X compinit && compinit
+autoload -U +X bashcompinit && bashcompinit
+source <(wotctl completion)
+```
+
+Lo script si trova già pronto anche nelle distribuzioni:
+- `completion/wotctl_completion` in `installDist`/`distZip`;
+- `completion/wotctl_completion` nell'archivio del binario nativo.
+
+Il task `./gradlew :wotctl:completionScript` lo genera in `build/completion/`.
 
 ## Regole per gli script
 
@@ -54,7 +87,7 @@ Un alias comodo: `alias waldot='java -jar /percorso/waldot-cli.jar'`.
   |--------|--------------------------------------------------------------|
   | 0      | successo, anche se il processo a valle ha chiuso la pipe     |
   | 1      | errore del comando sul server                                |
-  | 2      | uso errato                                                   |
+  | 2      | uso errato (rilevato prima di collegarsi al server)          |
   | 3      | connessione fallita, persa o scaduta                         |
   | 130    | interrotto con SIGINT (Ctrl-C)                               |
 
@@ -64,8 +97,8 @@ Un alias comodo: `alias waldot='java -jar /percorso/waldot-cli.jar'`.
 ## Connessione
 
 Le opzioni di connessione vanno dopo il nome del comando. Ognuna ha anche una
-variabile d'ambiente, usata quando l'opzione non è indicata (comodo con
-`docker run -e`):
+variabile d'ambiente `WALDOT_*`, usata quando l'opzione non è indicata (comodo
+con `docker run -e`):
 
 | Opzione | Variabile | Note |
 |---|---|---|
@@ -91,48 +124,48 @@ Altre variabili:
 
 ```bash
 # interrogazioni
-waldot query "g.V().count()" -o value
-waldot query -o jsonl "g.V().hasLabel('sensor')" | jq -r .id
-waldot describe sensor-1 -o json
+wotctl query "g.V().count()" -o value
+wotctl query -o jsonl "g.V().hasLabel('sensor')" | jq -r .id
+wotctl describe sensor-1 -o json
 
 # modifica del grafo
-waldot vertex add --id sensor-1 --label sensor -P zone=A
-waldot edge add --label feeds --from pump-3 --to tank-1
-waldot property set sensor-1 setpoint 21.5
-waldot property get sensor-1 setpoint -o value
-waldot vertex delete sensor-1
+wotctl vertex add --id sensor-1 --label sensor -P zone=A
+wotctl edge add --label feeds --from pump-3 --to tank-1
+wotctl property set sensor-1 setpoint 21.5
+wotctl property get sensor-1 setpoint -o value
+wotctl vertex delete sensor-1
 
 # backup e ripristino
-waldot snapshot export -f grafo.json.gz
-waldot snapshot import --clear -f grafo.json.gz
+wotctl snapshot export -f grafo.json.gz
+wotctl snapshot import --clear -f grafo.json.gz
 
 # disegno del grafo (SVG con layout Eclipse ELK calcolato dal server)
-waldot render -f impianto.svg --group-by directory
-waldot render -f plc.svg --root plc-1 --depth 2 --include-runtime --include-ephemeral
-waldot render -f regole.svg --edge-label fire --edge-label link-to --no-isolated
-waldot render -f grafo.dot && dot -Tpng grafo.dot -o grafo.png
+wotctl render -f impianto.svg --group-by directory
+wotctl render -f plc.svg --root plc-1 --depth 2 --include-runtime --include-ephemeral
+wotctl render -f regole.svg --edge-label fire --edge-label link-to --no-isolated
+wotctl render -f grafo.dot && dot -Tpng grafo.dot -o grafo.png
 
 # spazio degli indirizzi OPC UA
-waldot browse --depth 2
-waldot read sensor-1/temperature -o value
-waldot write sensor-1/setpoint 22
-waldot resolve Server ServerStatus CurrentTime
+wotctl browse --depth 2
+wotctl read sensor-1/temperature -o value
+wotctl write sensor-1/setpoint 22
+wotctl resolve Server ServerStatus CurrentTime
 
 # sottoscrizioni verso MQTT (mosquitto_pub -l pubblica una riga di stdin per messaggio)
-waldot subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l
-waldot subscribe -p s1:value -p s2:value -e s1 -o topic --topic-prefix waldot \
+wotctl subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l
+wotctl subscribe -p s1:value -p s2:value -e s1 -o topic --topic-prefix waldot \
   | while read -r t p; do mosquitto_pub -t "$t" -m "$p"; done
 
 # fine dopo 10 notifiche o dopo un'ora
-waldot subscribe -p s1:value --count 10 -o jsonl
-waldot subscribe -p s1:value --duration 1h -o jsonl >> registro.jsonl
+wotctl subscribe -p s1:value --count 10 -o jsonl
+wotctl subscribe -p s1:value --duration 1h -o jsonl >> registro.jsonl
 ```
 
 ## Docker
 
 L'immagine si costruisce dalla radice del repository con
 [`docker/Dockerfile.waldot-client`](../../../docker/Dockerfile.waldot-client).
-L'`ENTRYPOINT` è `java -jar /app/waldot-cli.jar`, quindi gli argomenti di
+L'`ENTRYPOINT` è `java -jar /app/wotctl.jar`, quindi gli argomenti di
 `docker run` arrivano direttamente alla CLI:
 
 ```bash
@@ -142,19 +175,63 @@ docker run --rm -v "$PWD:/data" -e WALDOT_ENDPOINT=opc.tcp://server:12686/waldot
   rossonet/waldot-client snapshot export -f /data/grafo.json.gz
 ```
 
+## Binario nativo
+
+`wotctl` si può compilare con GraalVM Native Image in un eseguibile che non
+richiede Java. Analisi, alternative e misure sono in
+[docs/native-image.md](docs/native-image.md).
+
+Prerequisito: GraalVM per JDK 25, **25.0.2 o successivo**, indicato con
+`GRAALVM_HOME`. La build normale e i test non richiedono GraalVM.
+
+```bash
+export GRAALVM_HOME=~/.local/jvm/graalvm-jdk-25.0.4+7.1
+./gradlew --max-workers=1 :wotctl:nativeCompile     # build/native/nativeCompile/wotctl
+./gradlew --max-workers=1 :wotctl:nativeSmokeTest   # test sul binario prodotto
+./gradlew --max-workers=1 :wotctl:nativeDist        # build/distributions/wotctl-<versione>-linux-<arch>.tar.gz
+
+# test anche contro un server WaldOT reale
+WOTCTL_SMOKE_ENDPOINT=opc.tcp://localhost:12686/waldot ./gradlew :wotctl:nativeSmokeTest
+```
+
+Senza GraalVM sulla macchina, con Docker (binario statico per amd64, dinamico
+glibc per arm64), dalla radice del repository:
+
+```bash
+docker buildx build --platform linux/amd64 -f docker/Dockerfile.build-wotctl \
+  --output type=local,dest=./output .
+```
+
+Il workflow GitHub `publish-wotctl-release.yml` (avvio manuale) compila con lo
+stesso Dockerfile i binari amd64 e arm64 e li pubblica come artifact.
+
+Aggiornamento dei metadati di reflection dopo modifiche al codice, raccolti con
+il tracing agent di GraalVM durante i test unitari:
+
+```bash
+./gradlew :wotctl:test -Pagent --rerun-tasks
+./gradlew :wotctl:nativeMetadata   # src/main/resources/META-INF/native-image/net.rossonet.waldot/wotctl/
+```
+
 ## Struttura del codice
 
 - `net.rossonet.waldot.cli.WaldotCli`: main, gestione degli errori e dei codici di
   uscita, configurazione del log (slf4j-simple su stderr).
-- `net.rossonet.waldot.cli.support`: opzioni di connessione (`ConnectionOptions`,
-  mappate su `WaldotClientConfigurationBuilder`), output (`Printer`, `Json`), durate,
-  PEM, valori tipizzati.
+- `net.rossonet.waldot.cli.support`:
+  - opzioni di connessione (`ConnectionOptions`, mappate su
+    `WaldotClientConfigurationBuilder`);
+  - output (`Printer`, `Json`);
+  - durate, PEM, valori tipizzati;
+  - candidati dell'autocompletamento (`Completions`).
 - `net.rossonet.waldot.cli.commands`: un comando picocli per classe.
 
 Test:
-- i test unitari sono in questo modulo (`./gradlew :wotctl:test`);
+- i test unitari sono in questo modulo (`./gradlew :wotctl:test`). I comandi
+  girano su un client Mockito (`MockClient`, `CommandTestBase`); il report di
+  copertura JaCoCo è in `build/reports/jacoco/test/html/`;
 - quelli con il server embedded sono in `waldot-namespace`
-  (`net.rossonet.waldot.client.integration.WaldotCliIntegrationTest`).
+  (`net.rossonet.waldot.client.integration.WaldotCliIntegrationTest`);
+- quelli sul binario nativo sono in `src/nativeSmokeTest` (task `nativeSmokeTest`).
 
 Il modulo dipende solo da `waldot-client` (e da `waldot-deps`). Non deve
 dipendere da `waldot-namespace`: Eclipse segnalerebbe un ciclo, perché

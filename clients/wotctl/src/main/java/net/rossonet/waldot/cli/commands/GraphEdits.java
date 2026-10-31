@@ -77,7 +77,7 @@ final class GraphEdits {
 					throw new ParameterException(spec.commandLine(),
 							"le chiavi e i valori delle proprietà non possono "
 									+ "contenere virgole ('" + part
-									+ "'): usare poi 'waldot property set'");
+									+ "'): usare poi 'wotctl property set'");
 				}
 			}
 			keyValues.add(property.getKey().trim());
