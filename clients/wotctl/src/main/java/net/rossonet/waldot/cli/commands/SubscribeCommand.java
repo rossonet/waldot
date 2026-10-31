@@ -60,7 +60,7 @@ import picocli.CommandLine.Option;
 		"Subito dopo la sottoscrizione il server invia il valore corrente di ogni variabile,",
 		"poi solo le variazioni secondo --trigger e l'eventuale deadband. Se la connessione",
 		"cade il client si riconnette da solo (vedi --reconnect-*) e ricrea le",
-		"sottoscrizioni; se rinuncia il comando termina con codice 3." }, footer = {
+		"sottoscrizioni; se rinuncia il comando termina con codice 3."}, footer = {
 				"Formati di output:",
 				"  jsonl (o json): un oggetto JSON per notifica, per esempio",
 				"    {\"type\":\"data\",\"vertex\":\"s1\",\"key\":\"value\",\"nodeId\":\"ns=2;s=s1/value\",",
@@ -74,15 +74,11 @@ import picocli.CommandLine.Option;
 				"         spazi, '+' e '#' nei nomi diventano '_' (topic MQTT validi);",
 				"  text : '<ora> <vertice>/<chiave> = <valore>' leggibile.",
 				"  I valori con a capo sono scritti come stringhe JSON, così ogni notifica resta",
-				"  su una sola riga.",
-				"",
-				"Pubblicazione su MQTT:",
+				"  su una sola riga.", "", "Pubblicazione su MQTT:",
 				"  mosquitto_pub -l legge stdin e pubblica una riga per messaggio sullo stesso",
 				"  topic; per un topic diverso per ogni riga si usa il formato topic con un ciclo",
 				"  'while read'. (mosquitto_sub serve invece a ricevere, non a pubblicare.)",
-				"",
-				"Esempi:",
-				"  waldot subscribe -p sensor-1:value",
+				"", "Esempi:", "  waldot subscribe -p sensor-1:value",
 				"  waldot subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l",
 				"  waldot subscribe -p s1:value -p s2:value -e s1 -o topic --topic-prefix waldot \\",
 				"    | while read -r t p; do mosquitto_pub -t \"$t\" -m \"$p\"; done",
@@ -92,11 +88,12 @@ import picocli.CommandLine.Option;
 				"  waldot subscribe -p s1:value --duration 1h -o jsonl >> registro.jsonl",
 				"  waldot subscribe -p s1:value -o value | head -n 1        # primo valore e uscita",
 				"  docker run --rm -e WALDOT_ENDPOINT=opc.tcp://server:12686/waldot \\",
-				"    rossonet/waldot-client subscribe -p s1:value" })
+				"    rossonet/waldot-client subscribe -p s1:value"})
 public class SubscribeCommand extends ClientCommand {
 
 	/** A subscribed source. */
-	record Source(String vertex, String key, NodeId nodeId, boolean event, String topic) {
+	record Source(String vertex, String key, NodeId nodeId, boolean event,
+			String topic) {
 
 		String label() {
 			if (vertex != null && key != null) {
@@ -106,83 +103,135 @@ public class SubscribeCommand extends ClientCommand {
 		}
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(SubscribeCommand.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(SubscribeCommand.class);
 
 	/** Makes a valid MQTT topic level (no spaces, wildcards). */
 	public static String topicLevel(final String text) {
 		return text == null ? "_" : text.replaceAll("[\\s+#]", "_");
 	}
 
-	@Option(names = { "-p", "--property" }, paramLabel = "VERTICE:CHIAVE", description = "Proprietà di un vertice o di un arco da sottoscrivere (ripetibile).")
-	private List<String> properties = new ArrayList<>();
-
-	@Option(names = { "-n", "--node" }, paramLabel = "NODO", description = "Variabile OPC UA da sottoscrivere, per NodeId (ripetibile).")
-	private List<String> nodes = new ArrayList<>();
-
-	@Option(names = { "-e", "--events" }, paramLabel = "VERTICE", description = "Vertice o nodo di cui ricevere gli eventi (ripetibile).")
-	private List<String> eventSources = new ArrayList<>();
-
-	@Option(names = "--sampling", paramLabel = "MS", description = {
-			"Intervallo di campionamento richiesto in millisecondi (-1 = uguale al",
-			"publishing; predefinito: quello della configurazione del client)." })
-	private Double sampling;
-
-	@Option(names = "--publishing", paramLabel = "MS", description = {
-			"Intervallo di pubblicazione della sottoscrizione OPC UA in millisecondi",
-			"(predefinito: quello della configurazione del client)." })
-	private Double publishing;
-
-	@Option(names = "--queue", paramLabel = "N", description = "Dimensione della coda sul server (predefinita 10 per i valori, 100 per gli eventi).")
-	private Integer queue;
-
-	@Option(names = "--discard-oldest", negatable = true, defaultValue = "true", fallbackValue = "true", description = {
-			"Con la coda piena scarta la notifica più vecchia (predefinito);",
-			"--no-discard-oldest scarta invece la più recente." })
-	private boolean discardOldest = true;
-
-	@Option(names = "--trigger", paramLabel = "TRIGGER", description = {
-			"Cosa genera una notifica: Status (solo lo stato), StatusValue (stato o valore,",
-			"predefinito), StatusValueTimestamp (anche il solo timestamp)." })
-	private DataChangeTrigger trigger = DataChangeTrigger.StatusValue;
+	@Option(names = {"-c",
+			"--count"}, paramLabel = "N", description = "Termina dopo N notifiche (valori ed eventi insieme).")
+	private Integer count;
 
 	@Option(names = "--deadband-absolute", paramLabel = "DELTA", description = {
 			"Notifica solo le variazioni maggiori di DELTA (variabili numeriche). Le proprietà",
 			"di WaldOT sono variabili BaseDataType e il server può rifiutare il filtro",
-			"(Bad_FilterNotAllowed, codice di uscita 1)." })
+			"(Bad_FilterNotAllowed, codice di uscita 1)."})
 	private Double deadbandAbsolute;
 
 	@Option(names = "--deadband-percent", paramLabel = "PERCENTO", description = "Notifica solo le variazioni maggiori della percentuale dell'intervallo EURange (solo AnalogItem).")
 	private Double deadbandPercent;
 
+	private double defaultSampling;
+
+	@Option(names = "--discard-oldest", negatable = true, defaultValue = "true", fallbackValue = "true", description = {
+			"Con la coda piena scarta la notifica più vecchia (predefinito);",
+			"--no-discard-oldest scarta invece la più recente."})
+	private final boolean discardOldest = true;
+
+	private final CountDownLatch done = new CountDownLatch(1);
+
+	@Option(names = {"-d",
+			"--duration"}, paramLabel = "DURATA", converter = Durations.class, description = "Termina dopo questo tempo (es. 30s, 5m, 1h).")
+	private Duration duration;
+
 	@Option(names = "--event-fields", split = ",", paramLabel = "CAMPO", description = {
 			"Campi degli eventi da ricevere, separati da virgole (browse name di",
 			"BaseEventType, es. Message,Severity,Time). Predefiniti: EventId, EventType,",
-			"SourceNode, SourceName, Time, ReceiveTime, Message, Severity." })
-	private List<String> eventFields = new ArrayList<>();
+			"SourceNode, SourceName, Time, ReceiveTime, Message, Severity."})
+	private final List<String> eventFields = new ArrayList<>();
+
+	@Option(names = {"-e",
+			"--events"}, paramLabel = "VERTICE", description = "Vertice o nodo di cui ricevere gli eventi (ripetibile).")
+	private final List<String> eventSources = new ArrayList<>();
 
 	@Option(names = "--event-type", paramLabel = "NODO", description = "Consegna solo gli eventi di questo tipo (NodeId, ripetibile).")
-	private List<String> eventTypes = new ArrayList<>();
+	private final List<String> eventTypes = new ArrayList<>();
 
-	@Option(names = { "-c", "--count" }, paramLabel = "N", description = "Termina dopo N notifiche (valori ed eventi insieme).")
-	private Integer count;
-
-	@Option(names = { "-d", "--duration" }, paramLabel = "DURATA", converter = Durations.class, description = "Termina dopo questo tempo (es. 30s, 5m, 1h).")
-	private Duration duration;
-
-	@Option(names = "--topic-prefix", paramLabel = "PREFISSO", description = "Prefisso dei topic del formato topic (predefinito ${DEFAULT-VALUE}).")
-	private String topicPrefix = "waldot";
-
-	private double defaultSampling;
-	private final CountDownLatch done = new CountDownLatch(1);
 	private final AtomicInteger exitCode = new AtomicInteger(ExitCodes.OK);
+
 	private volatile String failure;
+
 	private final Object lock = new Object();
+
+	@Option(names = {"-n",
+			"--node"}, paramLabel = "NODO", description = "Variabile OPC UA da sottoscrivere, per NodeId (ripetibile).")
+	private final List<String> nodes = new ArrayList<>();
+
+	@Option(names = {"-p",
+			"--property"}, paramLabel = "VERTICE:CHIAVE", description = "Proprietà di un vertice o di un arco da sottoscrivere (ripetibile).")
+	private final List<String> properties = new ArrayList<>();
+
+	@Option(names = "--publishing", paramLabel = "MS", description = {
+			"Intervallo di pubblicazione della sottoscrizione OPC UA in millisecondi",
+			"(predefinito: quello della configurazione del client)."})
+	private Double publishing;
+	@Option(names = "--queue", paramLabel = "N", description = "Dimensione della coda sul server (predefinita 10 per i valori, 100 per gli eventi).")
+	private Integer queue;
 	private int received;
+	@Option(names = "--sampling", paramLabel = "MS", description = {
+			"Intervallo di campionamento richiesto in millisecondi (-1 = uguale al",
+			"publishing; predefinito: quello della configurazione del client)."})
+	private Double sampling;
 	private boolean stopped;
+	@Option(names = "--topic-prefix", paramLabel = "PREFISSO", description = "Prefisso dei topic del formato topic (predefinito ${DEFAULT-VALUE}).")
+	private final String topicPrefix = "waldot";
+	@Option(names = "--trigger", paramLabel = "TRIGGER", description = {
+			"Cosa genera una notifica: Status (solo lo stato), StatusValue (stato o valore,",
+			"predefinito), StatusValueTimestamp (anche il solo timestamp)."})
+	private final DataChangeTrigger trigger = DataChangeTrigger.StatusValue;
 
 	@Override
-	protected void configure(final WaldOTAgentClientConfiguration configuration) {
+	protected void configure(
+			final WaldOTAgentClientConfiguration configuration) {
 		defaultSampling = configuration.getDefaultSamplingInterval();
+	}
+
+	private String dataLine(final Printer printer, final Source source,
+			final DataValue value) {
+		return switch (printer.format()) {
+			case json, jsonl -> {
+				final Map<String, Object> json = new LinkedHashMap<>();
+				json.put("type", "data");
+				json.put("vertex", source.vertex());
+				json.put("key", source.key());
+				json.put("nodeId", source.nodeId());
+				json.put("value", value.getValue());
+				json.put("status", value.getStatusCode());
+				json.put("sourceTime", value.getSourceTime());
+				json.put("serverTime", value.getServerTime());
+				yield Json.compact(Json.toNode(json));
+			}
+			case value -> Json.scalarLine(value.getValue());
+			case topic ->
+				source.topic() + " " + Json.scalarLine(value.getValue());
+			default -> {
+				final StatusCode status = value.getStatusCode();
+				yield time(value.getSourceTime()) + " " + source.label() + " = "
+						+ Json.scalarLine(value.getValue())
+						+ (status == null || status.isGood()
+								? ""
+								: "   (" + Json.statusName(status) + ")");
+			}
+		};
+	}
+
+	private DataItemOptions dataOptions() {
+		DeadbandType deadbandType = DeadbandType.None;
+		double deadbandValue = 0;
+		if (deadbandAbsolute != null) {
+			deadbandType = DeadbandType.Absolute;
+			deadbandValue = deadbandAbsolute;
+		} else if (deadbandPercent != null) {
+			deadbandType = DeadbandType.Percent;
+			deadbandValue = deadbandPercent;
+		}
+		return new DataItemOptions(
+				sampling == null ? defaultSampling : sampling,
+				queue == null ? 10 : queue, discardOldest, trigger,
+				deadbandType, deadbandValue, MonitoringMode.Reporting);
 	}
 
 	private void deliver(final Printer printer, final String line) {
@@ -204,91 +253,88 @@ public class SubscribeCommand extends ClientCommand {
 		}
 	}
 
-	private String dataLine(final Printer printer, final Source source, final DataValue value) {
+	private String eventLine(final Printer printer, final Source source,
+			final WaldotEvent event) {
 		return switch (printer.format()) {
-		case json, jsonl -> {
-			final Map<String, Object> json = new LinkedHashMap<>();
-			json.put("type", "data");
-			json.put("vertex", source.vertex());
-			json.put("key", source.key());
-			json.put("nodeId", source.nodeId());
-			json.put("value", value.getValue());
-			json.put("status", value.getStatusCode());
-			json.put("sourceTime", value.getSourceTime());
-			json.put("serverTime", value.getServerTime());
-			yield Json.compact(Json.toNode(json));
-		}
-		case value -> Json.scalarLine(value.getValue());
-		case topic -> source.topic() + " " + Json.scalarLine(value.getValue());
-		default -> {
-			final StatusCode status = value.getStatusCode();
-			yield time(value.getSourceTime()) + " " + source.label() + " = " + Json.scalarLine(value.getValue())
-					+ (status == null || status.isGood() ? "" : "   (" + Json.statusName(status) + ")");
-		}
-		};
-	}
-
-	private String eventLine(final Printer printer, final Source source, final WaldotEvent event) {
-		return switch (printer.format()) {
-		case json, jsonl -> {
-			final Map<String, Object> json = new LinkedHashMap<>();
-			json.put("type", "event");
-			json.put("vertex", source.vertex());
-			json.put("nodeId", source.nodeId());
-			json.put("fields", event.fields());
-			yield Json.compact(Json.toNode(json));
-		}
-		case value -> event.message() != null ? Json.scalarLine(event.message())
-				: Json.compact(Json.toNode(event.fields()));
-		case topic -> source.topic() + " " + Json.compact(Json.toNode(event.fields()));
-		default -> time(event.time()) + " " + source.label() + " [evento] "
-				+ (event.message() == null ? "" : Json.scalarLine(event.message()))
-				+ (event.severity() >= 0 ? "   (severity " + event.severity() + ")" : "");
+			case json, jsonl -> {
+				final Map<String, Object> json = new LinkedHashMap<>();
+				json.put("type", "event");
+				json.put("vertex", source.vertex());
+				json.put("nodeId", source.nodeId());
+				json.put("fields", event.fields());
+				yield Json.compact(Json.toNode(json));
+			}
+			case value -> event.message() != null
+					? Json.scalarLine(event.message())
+					: Json.compact(Json.toNode(event.fields()));
+			case topic -> source.topic() + " "
+					+ Json.compact(Json.toNode(event.fields()));
+			default -> time(event.time()) + " " + source.label() + " [evento] "
+					+ (event.message() == null
+							? ""
+							: Json.scalarLine(event.message()))
+					+ (event.severity() >= 0
+							? "   (severity " + event.severity() + ")"
+							: "");
 		};
 	}
 
 	@Override
-	protected int execute(final WaldotClient client, final Printer printer) throws Exception {
+	protected int execute(final WaldotClient client, final Printer printer)
+			throws Exception {
 		client.addListener(new WaldotClientListener() {
 			@Override
-			public void onReconnectScheduled(final int attempt, final Duration delay) {
-				logger.warn("connection lost, reconnection attempt {} in {} ms", attempt, delay.toMillis());
+			public void onReconnectScheduled(final int attempt,
+					final Duration delay) {
+				logger.warn("connection lost, reconnection attempt {} in {} ms",
+						attempt, delay.toMillis());
 			}
 
 			@Override
-			public void onStatusChanged(final Status previous, final Status current) {
+			public void onStatusChanged(final Status previous,
+					final Status current) {
 				logger.info("client status {} -> {}", previous, current);
 				if (current == Status.UNRECOVERABLE_FAULTED) {
-					stop(ExitCodes.CONNECTION, "connessione persa: il client ha rinunciato a riconnettersi");
+					stop(ExitCodes.CONNECTION,
+							"connessione persa: il client ha rinunciato a riconnettersi");
 				}
 			}
 
 			@Override
 			public void onSubscriptionGroupRecreated(final String groupName) {
-				logger.info("subscription group {} recreated after the reconnection", groupName);
+				logger.info(
+						"subscription group {} recreated after the reconnection",
+						groupName);
 			}
 		});
-		final SubscriptionGroup group = publishing == null ? client.subscriptions().defaultGroup()
+		final SubscriptionGroup group = publishing == null
+				? client.subscriptions().defaultGroup()
 				: client.subscriptions().createGroup("waldot-cli",
-						SubscriptionGroupOptions.withPublishingInterval(publishing));
+						SubscriptionGroupOptions
+								.withPublishingInterval(publishing));
 		final DataItemOptions dataOptions = dataOptions();
 		final EventItemOptions eventOptions = new EventItemOptions(eventFields,
-				eventTypes.stream().map(type -> nodeId(client, type)).collect(java.util.stream.Collectors.toSet()),
-				queue == null ? 100 : queue, discardOldest, MonitoringMode.Reporting);
+				eventTypes.stream().map(type -> nodeId(client, type))
+						.collect(java.util.stream.Collectors.toSet()),
+				queue == null ? 100 : queue, discardOldest,
+				MonitoringMode.Reporting);
 		for (final Source source : sources(client)) {
 			final MonitoredItemHandle item;
 			if (source.event()) {
 				item = group.subscribeEvents(source.nodeId(), eventOptions,
-						(handle, event) -> deliver(printer, eventLine(printer, source, event)));
+						(handle, event) -> deliver(printer,
+								eventLine(printer, source, event)));
 			} else {
 				item = group.subscribeData(source.nodeId(), dataOptions,
-						(handle, value) -> deliver(printer, dataLine(printer, source, value)));
+						(handle, value) -> deliver(printer,
+								dataLine(printer, source, value)));
 			}
 			item.status().filter(StatusCode::isBad).ifPresent(status -> {
-				throw CliException.server("sottoscrizione di " + source.label() + " rifiutata dal server: "
-						+ Json.statusName(status));
+				throw CliException.server("sottoscrizione di " + source.label()
+						+ " rifiutata dal server: " + Json.statusName(status));
 			});
-			logger.info("subscribed {} ({})", source.label(), Json.id(source.nodeId()));
+			logger.info("subscribed {} ({})", source.label(),
+					Json.id(source.nodeId()));
 		}
 		if (duration != null) {
 			if (!done.await(duration.toNanos(), TimeUnit.NANOSECONDS)) {
@@ -306,29 +352,18 @@ public class SubscribeCommand extends ClientCommand {
 		return exitCode.get();
 	}
 
-	private DataItemOptions dataOptions() {
-		DeadbandType deadbandType = DeadbandType.None;
-		double deadbandValue = 0;
-		if (deadbandAbsolute != null) {
-			deadbandType = DeadbandType.Absolute;
-			deadbandValue = deadbandAbsolute;
-		} else if (deadbandPercent != null) {
-			deadbandType = DeadbandType.Percent;
-			deadbandValue = deadbandPercent;
-		}
-		return new DataItemOptions(sampling == null ? defaultSampling : sampling, queue == null ? 10 : queue,
-				discardOldest, trigger, deadbandType, deadbandValue, MonitoringMode.Reporting);
-	}
-
 	private List<Source> sources(final WaldotClient client) {
-		final String prefix = topicPrefix == null ? "" : topicPrefix.replaceAll("/+$", "");
+		final String prefix = topicPrefix == null
+				? ""
+				: topicPrefix.replaceAll("/+$", "");
 		final String base = prefix.isEmpty() ? "" : prefix + "/";
 		final Set<Source> sources = new LinkedHashSet<>();
 		for (final String property : properties) {
 			final int separator = property.lastIndexOf(':');
 			final String vertex = property.substring(0, separator);
 			final String key = property.substring(separator + 1);
-			final NodeId variable = client.graph().propertyNodeId(nodeId(client, vertex), key);
+			final NodeId variable = client.graph()
+					.propertyNodeId(nodeId(client, vertex), key);
 			sources.add(new Source(vertex, key, variable, false,
 					base + topicLevel(vertex) + "/" + topicLevel(key)));
 		}
@@ -338,7 +373,8 @@ public class SubscribeCommand extends ClientCommand {
 					base + topicLevel(String.valueOf(nodeId.getIdentifier()))));
 		}
 		for (final String vertex : eventSources) {
-			sources.add(new Source(vertex, null, nodeId(client, vertex), true, base + topicLevel(vertex) + "/events"));
+			sources.add(new Source(vertex, null, nodeId(client, vertex), true,
+					base + topicLevel(vertex) + "/events"));
 		}
 		return new ArrayList<>(sources);
 	}
@@ -361,24 +397,30 @@ public class SubscribeCommand extends ClientCommand {
 	}
 
 	private String time(final DateTime time) {
-		return time == null || time.isNull() ? Instant.now().toString() : time.getJavaInstant().toString();
+		return time == null || time.isNull()
+				? Instant.now().toString()
+				: time.getJavaInstant().toString();
 	}
 
 	@Override
 	protected void validate() {
 		if (properties.isEmpty() && nodes.isEmpty() && eventSources.isEmpty()) {
-			throw usage("indicare almeno una sorgente: -p VERTICE:CHIAVE, -n NODO oppure -e VERTICE");
+			throw usage(
+					"indicare almeno una sorgente: -p VERTICE:CHIAVE, -n NODO oppure -e VERTICE");
 		}
 		for (final String property : properties) {
 			final int separator = property.lastIndexOf(':');
 			if (separator <= 0 || separator == property.length() - 1) {
-				throw usage("-p richiede la forma VERTICE:CHIAVE, ricevuto '" + property + "'");
+				throw usage("-p richiede la forma VERTICE:CHIAVE, ricevuto '"
+						+ property + "'");
 			}
 		}
 		if (deadbandAbsolute != null && deadbandPercent != null) {
-			throw usage("--deadband-absolute e --deadband-percent sono alternativi");
+			throw usage(
+					"--deadband-absolute e --deadband-percent sono alternativi");
 		}
-		if (deadbandAbsolute != null && deadbandAbsolute < 0 || deadbandPercent != null && deadbandPercent < 0) {
+		if (deadbandAbsolute != null && deadbandAbsolute < 0
+				|| deadbandPercent != null && deadbandPercent < 0) {
 			throw usage("il deadband non può essere negativo");
 		}
 		if (count != null && count < 1) {

@@ -44,18 +44,22 @@ final class GraphEdits {
 	}
 
 	/** Deletes the elements and prints a line for each. */
-	static int delete(final WaldotClient client, final Printer printer, final List<String> ids,
-			final Function<String, NodeId> parser) {
+	static int delete(final WaldotClient client, final Printer printer,
+			final List<String> ids, final Function<String, NodeId> parser) {
 		final List<Deleted> results = new ArrayList<>();
 		for (final String id : ids) {
-			final CommandResult result = client.commands().deleteElement(parser.apply(id));
+			final CommandResult result = client.commands()
+					.deleteElement(parser.apply(id));
 			if (!result.isSuccess()) {
-				throw CliException.server("eliminazione di '" + id + "' non riuscita: "
-						+ result.error().orElse("errore sconosciuto"));
+				throw CliException
+						.server("eliminazione di '" + id + "' non riuscita: "
+								+ result.error().orElse("errore sconosciuto"));
 			}
-			results.add(new Deleted(id, true, Json.scalar(result.get("output"))));
+			results.add(
+					new Deleted(id, true, Json.scalar(result.get("output"))));
 		}
-		printer.list(results, deleted -> deleted, deleted -> "eliminato " + deleted.id(), Deleted::id);
+		printer.list(results, deleted -> deleted,
+				deleted -> "eliminato " + deleted.id(), Deleted::id);
 		return 0;
 	}
 
@@ -63,13 +67,17 @@ final class GraphEdits {
 	 * Joins the properties {@code chiave=valore} in the comma separated list of
 	 * the server.
 	 */
-	static String[] keyValues(final CommandSpec spec, final Map<String, String> properties) {
+	static String[] keyValues(final CommandSpec spec,
+			final Map<String, String> properties) {
 		final List<String> keyValues = new ArrayList<>();
 		for (final Map.Entry<String, String> property : properties.entrySet()) {
-			for (final String part : new String[] { property.getKey(), property.getValue() }) {
+			for (final String part : new String[]{property.getKey(),
+					property.getValue()}) {
 				if (part.indexOf(',') >= 0) {
-					throw new ParameterException(spec.commandLine(), "le chiavi e i valori delle proprietà non possono "
-							+ "contenere virgole ('" + part + "'): usare poi 'waldot property set'");
+					throw new ParameterException(spec.commandLine(),
+							"le chiavi e i valori delle proprietà non possono "
+									+ "contenere virgole ('" + part
+									+ "'): usare poi 'waldot property set'");
 				}
 			}
 			keyValues.add(property.getKey().trim());

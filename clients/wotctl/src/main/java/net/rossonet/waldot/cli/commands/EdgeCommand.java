@@ -18,39 +18,48 @@ import picocli.CommandLine.Parameters;
  * {@code waldot edge add|delete}.
  */
 @Command(name = "edge", header = "Aggiunge o elimina archi.", mixinStandardHelpOptions = true, description = {
-		"Aggiunge o elimina archi del grafo." }, subcommands = { EdgeCommand.AddCommand.class,
-				EdgeCommand.DeleteCommand.class }, footer = { "Esempi:",
+		"Aggiunge o elimina archi del grafo."}, subcommands = {
+				EdgeCommand.AddCommand.class,
+				EdgeCommand.DeleteCommand.class}, footer = {"Esempi:",
 						"  waldot edge add --label feeds --from pump-3 --to tank-1 -P weight=0.5",
-						"  waldot edge delete e-17" })
+						"  waldot edge delete e-17"})
 public class EdgeCommand extends CommandGroup {
 
 	@Command(name = "add", header = "Aggiunge un arco tra due vertici.", mixinStandardHelpOptions = true, description = {
 			"Aggiunge un arco tra due vertici esistenti con il comando 'add edge' del server.",
 			"Le proprietà iniziali si indicano con -P chiave=valore (ripetibile, niente",
-			"virgole in chiavi e valori)." }, footer = { "Output:",
+			"virgole in chiavi e valori)."}, footer = {"Output:",
 					"  text, value: la risposta del server (descrizione dell'arco creato);",
-					"  json/jsonl: {\"kind\":\"edge\",\"id\":null,\"output\"}.", "", "Esempi:",
+					"  json/jsonl: {\"kind\":\"edge\",\"id\":null,\"output\"}.",
+					"", "Esempi:",
 					"  waldot edge add --label knows --from marko --to vadas -P weight=0.5",
-					"  waldot edge add -l feeds -s pump-3 -d tank-1 -o json" })
+					"  waldot edge add -l feeds -s pump-3 -d tank-1 -o json"})
 	public static class AddCommand extends ClientCommand {
 
-		@Option(names = { "-l", "--label" }, required = true, paramLabel = "LABEL", description = "Label (tipo di relazione) dell'arco, obbligatoria.")
-		private String label;
-
-		@Option(names = { "-s", "--from" }, required = true, paramLabel = "VERTICE", description = "Vertice di origine.")
+		@Option(names = {"-s",
+				"--from"}, required = true, paramLabel = "VERTICE", description = "Vertice di origine.")
 		private String from;
 
-		@Option(names = { "-d", "--to" }, required = true, paramLabel = "VERTICE", description = "Vertice di destinazione.")
+		@Option(names = {"-l",
+				"--label"}, required = true, paramLabel = "LABEL", description = "Label (tipo di relazione) dell'arco, obbligatoria.")
+		private String label;
+
+		@Option(names = {"-P",
+				"--property"}, paramLabel = "CHIAVE=VALORE", description = "Proprietà iniziale (ripetibile).")
+		private final Map<String, String> properties = new LinkedHashMap<>();
+
+		@Option(names = {"-d",
+				"--to"}, required = true, paramLabel = "VERTICE", description = "Vertice di destinazione.")
 		private String to;
 
-		@Option(names = { "-P", "--property" }, paramLabel = "CHIAVE=VALORE", description = "Proprietà iniziale (ripetibile).")
-		private Map<String, String> properties = new LinkedHashMap<>();
-
 		@Override
-		protected int execute(final WaldotClient client, final Printer printer) throws Exception {
+		protected int execute(final WaldotClient client, final Printer printer)
+				throws Exception {
 			final String output = GraphEdits.checkAnswer(
-					client.createEdge(label, nodeId(client, from).toParseableString(),
-							nodeId(client, to).toParseableString(), GraphEdits.keyValues(spec, properties)),
+					client.createEdge(label,
+							nodeId(client, from).toParseableString(),
+							nodeId(client, to).toParseableString(),
+							GraphEdits.keyValues(spec, properties)),
 					"aggiunta dell'arco");
 			final Created created = new Created("edge", null, output);
 			printer.single(created, c -> c, Created::output, Created::output);
@@ -60,18 +69,22 @@ public class EdgeCommand extends CommandGroup {
 
 	@Command(name = "delete", header = "Elimina uno o più archi.", mixinStandardHelpOptions = true, description = {
 			"Elimina uno o più archi (comando 'delete' dell'elemento). Gli id degli archi si",
-			"ottengono con 'describe' sui vertici o con una query su g.E()." }, footer = {
-					"Output:", "  text : 'eliminato <id>' per ogni arco; value: gli id;",
-					"  json/jsonl: {\"id\",\"deleted\",\"output\"}.", "", "Esempi:",
-					"  waldot query -o value \"g.V('marko').outE('knows')\" | xargs -r waldot edge delete" })
+			"ottengono con 'describe' sui vertici o con una query su g.E()."}, footer = {
+					"Output:",
+					"  text : 'eliminato <id>' per ogni arco; value: gli id;",
+					"  json/jsonl: {\"id\",\"deleted\",\"output\"}.", "",
+					"Esempi:",
+					"  waldot query -o value \"g.V('marko').outE('knows')\" | xargs -r waldot edge delete"})
 	public static class DeleteCommand extends ClientCommand {
 
 		@Parameters(arity = "1..*", paramLabel = "ID", description = "Id degli archi da eliminare.")
-		private List<String> ids = new ArrayList<>();
+		private final List<String> ids = new ArrayList<>();
 
 		@Override
-		protected int execute(final WaldotClient client, final Printer printer) {
-			return GraphEdits.delete(client, printer, ids, id -> nodeId(client, id));
+		protected int execute(final WaldotClient client,
+				final Printer printer) {
+			return GraphEdits.delete(client, printer, ids,
+					id -> nodeId(client, id));
 		}
 	}
 }

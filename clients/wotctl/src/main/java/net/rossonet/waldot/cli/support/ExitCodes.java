@@ -5,6 +5,12 @@ package net.rossonet.waldot.cli.support;
  */
 public final class ExitCodes {
 
+	/** Connection failed, lost or timed out. */
+	public static final int CONNECTION = 3;
+
+	/** Interrupted by SIGINT (Ctrl-C), 128 + 2. */
+	public static final int INTERRUPTED = 130;
+
 	/** Success (also when the downstream pipe was closed). */
 	public static final int OK = 0;
 
@@ -13,12 +19,6 @@ public final class ExitCodes {
 
 	/** Wrong usage: unknown option, missing or invalid argument. */
 	public static final int USAGE = 2;
-
-	/** Connection failed, lost or timed out. */
-	public static final int CONNECTION = 3;
-
-	/** Interrupted by SIGINT (Ctrl-C), 128 + 2. */
-	public static final int INTERRUPTED = 130;
 
 	private ExitCodes() {
 	}

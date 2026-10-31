@@ -8,7 +8,8 @@ public class CliException extends RuntimeException {
 	private static final long serialVersionUID = -1735024961012449587L;
 
 	/** Connection failed or lost (exit code {@value ExitCodes#CONNECTION}). */
-	public static CliException connection(final String message, final Throwable cause) {
+	public static CliException connection(final String message,
+			final Throwable cause) {
 		return new CliException(ExitCodes.CONNECTION, message, cause);
 	}
 
@@ -19,7 +20,8 @@ public class CliException extends RuntimeException {
 
 	private final int exitCode;
 
-	public CliException(final int exitCode, final String message, final Throwable cause) {
+	public CliException(final int exitCode, final String message,
+			final Throwable cause) {
 		super(message, cause);
 		this.exitCode = exitCode;
 	}

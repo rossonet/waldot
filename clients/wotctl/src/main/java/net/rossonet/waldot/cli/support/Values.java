@@ -51,14 +51,16 @@ public final class Values {
 		final String name = type.trim().toLowerCase(Locale.ROOT);
 		final NodeId dataType = TYPES.get(name);
 		if (dataType == null) {
-			throw new IllegalArgumentException("tipo '" + type + "' sconosciuto (tipi: " + TYPES.keySet() + ")");
+			throw new IllegalArgumentException("tipo '" + type
+					+ "' sconosciuto (tipi: " + TYPES.keySet() + ")");
 		}
 		if (dataType.equals(NodeIds.Boolean)) {
 			final String text = value.trim().toLowerCase(Locale.ROOT);
 			return switch (text) {
-			case "true", "1", "yes", "si", "sì" -> Boolean.TRUE;
-			case "false", "0", "no" -> Boolean.FALSE;
-			default -> throw new IllegalArgumentException("valore booleano non valido: '" + value + "'");
+				case "true", "1", "yes", "si", "sì" -> Boolean.TRUE;
+				case "false", "0", "no" -> Boolean.FALSE;
+				default -> throw new IllegalArgumentException(
+						"valore booleano non valido: '" + value + "'");
 			};
 		}
 		return ArgumentConverter.convertScalar(value, dataType);
@@ -68,7 +70,8 @@ public final class Values {
 	public static Object literal(final String literal) {
 		final int separator = literal.indexOf(':');
 		if (separator > 0) {
-			final String prefix = literal.substring(0, separator).toLowerCase(Locale.ROOT);
+			final String prefix = literal.substring(0, separator)
+					.toLowerCase(Locale.ROOT);
 			if (TYPES.containsKey(prefix)) {
 				return convert(literal.substring(separator + 1), prefix);
 			}

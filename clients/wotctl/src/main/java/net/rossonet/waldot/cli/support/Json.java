@@ -71,7 +71,8 @@ public final class Json {
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 	private static final int MAX_DEPTH = 64;
 
-	private static ArrayNode array(final Iterator<?> iterator, final int depth) {
+	private static ArrayNode array(final Iterator<?> iterator,
+			final int depth) {
 		final ArrayNode array = FACTORY.arrayNode();
 		while (iterator.hasNext()) {
 			array.add(toNode(iterator.next(), depth + 1));
@@ -88,7 +89,8 @@ public final class Json {
 		}
 	}
 
-	private static ObjectNode dataValue(final DataValue value, final int depth) {
+	private static ObjectNode dataValue(final DataValue value,
+			final int depth) {
 		final ObjectNode node = FACTORY.objectNode();
 		node.set("value", toNode(value.getValue(), depth + 1));
 		node.set("status", toNode(value.getStatusCode(), depth + 1));
@@ -114,7 +116,9 @@ public final class Json {
 
 	/** @return the id of an element as text (parseable NodeId) */
 	public static String id(final Object id) {
-		return id instanceof NodeId nodeId ? nodeId.toParseableString() : String.valueOf(id);
+		return id instanceof final NodeId nodeId
+				? nodeId.toParseableString()
+				: String.valueOf(id);
 	}
 
 	private static String keyText(final Object key) {
@@ -125,19 +129,22 @@ public final class Json {
 	/** Indented JSON. */
 	public static String pretty(final JsonNode node) {
 		try {
-			return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+			return MAPPER.writerWithDefaultPrettyPrinter()
+					.writeValueAsString(node);
 		} catch (final JsonProcessingException e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	private static ObjectNode properties(final Iterator<? extends Property<?>> iterator, final int depth) {
+	private static ObjectNode properties(
+			final Iterator<? extends Property<?>> iterator, final int depth) {
 		final Map<String, List<Object>> values = new LinkedHashMap<>();
 		try {
 			while (iterator.hasNext()) {
 				final Property<?> property = iterator.next();
 				if (property.isPresent()) {
-					values.computeIfAbsent(property.key(), k -> new ArrayList<>()).add(property.value());
+					values.computeIfAbsent(property.key(),
+							k -> new ArrayList<>()).add(property.value());
 				}
 			}
 		} catch (final RuntimeException e) {
@@ -145,15 +152,19 @@ public final class Json {
 		}
 		final ObjectNode node = FACTORY.objectNode();
 		values.forEach((key, list) -> node.set(key,
-				list.size() == 1 ? toNode(list.get(0), depth + 1) : toNode(list, depth + 1)));
+				list.size() == 1
+						? toNode(list.get(0), depth + 1)
+						: toNode(list, depth + 1)));
 		return node;
 	}
 
 	private static ObjectNode record(final Record record, final int depth) {
 		final ObjectNode node = FACTORY.objectNode();
-		for (final RecordComponent component : record.getClass().getRecordComponents()) {
+		for (final RecordComponent component : record.getClass()
+				.getRecordComponents()) {
 			try {
-				node.set(component.getName(), toNode(component.getAccessor().invoke(record), depth + 1));
+				node.set(component.getName(), toNode(
+						component.getAccessor().invoke(record), depth + 1));
 			} catch (final ReflectiveOperationException | RuntimeException e) {
 				node.put(component.getName(), "?");
 			}
@@ -200,18 +211,20 @@ public final class Json {
 
 	/** Human readable text of a value (vertices and edges on one line). */
 	public static String text(final Object value) {
-		if (value instanceof Vertex vertex) {
+		if (value instanceof final Vertex vertex) {
 			return "v[" + id(vertex.id()) + "] " + vertex.label() + " "
 					+ compact(properties(vertex.properties(), 0));
 		}
-		if (value instanceof Edge edge) {
+		if (value instanceof final Edge edge) {
 			String ends = "";
 			try {
-				ends = " " + id(edge.outVertex().id()) + " -> " + id(edge.inVertex().id());
+				ends = " " + id(edge.outVertex().id()) + " -> "
+						+ id(edge.inVertex().id());
 			} catch (final RuntimeException e) {
 				// reference edge
 			}
-			return "e[" + id(edge.id()) + "] " + edge.label() + ends + " " + compact(properties(edge.properties(), 0));
+			return "e[" + id(edge.id()) + "] " + edge.label() + ends + " "
+					+ compact(properties(edge.properties(), 0));
 		}
 		return scalar(value);
 	}
@@ -243,17 +256,22 @@ public final class Json {
 		if (value instanceof final UNumber number) {
 			return FACTORY.numberNode(number.longValue());
 		}
-		if (value instanceof Integer || value instanceof Short || value instanceof Byte) {
+		if (value instanceof Integer || value instanceof Short
+				|| value instanceof Byte) {
 			return FACTORY.numberNode(((Number) value).intValue());
 		}
 		if (value instanceof final Long number) {
 			return FACTORY.numberNode(number);
 		}
 		if (value instanceof final Float number) {
-			return Float.isFinite(number) ? FACTORY.numberNode(number) : FACTORY.textNode(number.toString());
+			return Float.isFinite(number)
+					? FACTORY.numberNode(number)
+					: FACTORY.textNode(number.toString());
 		}
 		if (value instanceof final Double number) {
-			return Double.isFinite(number) ? FACTORY.numberNode(number) : FACTORY.textNode(number.toString());
+			return Double.isFinite(number)
+					? FACTORY.numberNode(number)
+					: FACTORY.textNode(number.toString());
 		}
 		if (value instanceof final BigInteger number) {
 			return FACTORY.numberNode(number);
@@ -261,8 +279,10 @@ public final class Json {
 		if (value instanceof final BigDecimal number) {
 			return FACTORY.numberNode(number);
 		}
-		if (value instanceof Number || value instanceof Character || value instanceof UUID || value instanceof URI
-				|| value instanceof Path || value instanceof File || value instanceof Duration
+		if (value instanceof Number || value instanceof Character
+				|| value instanceof UUID || value instanceof URI
+				|| value instanceof Path || value instanceof File
+				|| value instanceof Duration
 				|| value instanceof TemporalAccessor) {
 			return FACTORY.textNode(value.toString());
 		}
@@ -279,17 +299,23 @@ public final class Json {
 			return FACTORY.textNode(name.toParseableString());
 		}
 		if (value instanceof final LocalizedText text) {
-			return text.getText() == null ? FACTORY.nullNode() : FACTORY.textNode(text.getText());
+			return text.getText() == null
+					? FACTORY.nullNode()
+					: FACTORY.textNode(text.getText());
 		}
 		if (value instanceof final DateTime time) {
-			return time.isNull() ? FACTORY.nullNode() : FACTORY.textNode(time.getJavaInstant().toString());
+			return time.isNull()
+					? FACTORY.nullNode()
+					: FACTORY.textNode(time.getJavaInstant().toString());
 		}
 		if (value instanceof final StatusCode status) {
 			return FACTORY.textNode(statusName(status));
 		}
 		if (value instanceof final ByteString bytes) {
-			return bytes.isNull() ? FACTORY.nullNode()
-					: FACTORY.textNode(Base64.getEncoder().encodeToString(bytes.bytesOrEmpty()));
+			return bytes.isNull()
+					? FACTORY.nullNode()
+					: FACTORY.textNode(Base64.getEncoder()
+							.encodeToString(bytes.bytesOrEmpty()));
 		}
 		if (value instanceof final byte[] bytes) {
 			return FACTORY.textNode(Base64.getEncoder().encodeToString(bytes));
@@ -304,7 +330,9 @@ public final class Json {
 			return FACTORY.textNode(value.toString());
 		}
 		if (value instanceof final Optional<?> optional) {
-			return optional.isPresent() ? toNode(optional.get(), depth + 1) : FACTORY.nullNode();
+			return optional.isPresent()
+					? toNode(optional.get(), depth + 1)
+					: FACTORY.nullNode();
 		}
 		if (value instanceof final GraphSnapshot snapshot) {
 			final ObjectNode node = FACTORY.objectNode();
@@ -329,13 +357,19 @@ public final class Json {
 		if (value instanceof final VertexProperty<?> property) {
 			final ObjectNode node = FACTORY.objectNode();
 			node.put("key", property.key());
-			node.set("value", property.isPresent() ? toNode(property.value(), depth + 1) : FACTORY.nullNode());
+			node.set("value",
+					property.isPresent()
+							? toNode(property.value(), depth + 1)
+							: FACTORY.nullNode());
 			return node;
 		}
 		if (value instanceof final Property<?> property) {
 			final ObjectNode node = FACTORY.objectNode();
 			node.put("key", property.key());
-			node.set("value", property.isPresent() ? toNode(property.value(), depth + 1) : FACTORY.nullNode());
+			node.set("value",
+					property.isPresent()
+							? toNode(property.value(), depth + 1)
+							: FACTORY.nullNode());
 			return node;
 		}
 		if (value instanceof final org.apache.tinkerpop.gremlin.process.traversal.Path path) {
@@ -347,7 +381,8 @@ public final class Json {
 		}
 		if (value instanceof final Map<?, ?> map) {
 			final ObjectNode node = FACTORY.objectNode();
-			map.forEach((key, item) -> node.set(keyText(key), toNode(item, depth + 1)));
+			map.forEach((key, item) -> node.set(keyText(key),
+					toNode(item, depth + 1)));
 			return node;
 		}
 		if (value instanceof final Iterable<?> iterable) {

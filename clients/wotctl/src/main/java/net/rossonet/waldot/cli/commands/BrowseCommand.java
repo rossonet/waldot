@@ -28,75 +28,88 @@ import picocli.CommandLine.Parameters;
 		"cartella Objects, i=85) e scrive i nodi collegati. Normalmente segue solo i",
 		"riferimenti gerarchici in avanti (figli); --references all li segue tutti.",
 		"Con --depth N scende ricorsivamente fino a N livelli (solo in avanti, ogni nodo",
-		"è visitato una sola volta)." }, footer = { "Output:",
+		"è visitato una sola volta)."}, footer = {"Output:",
 				"  text : una riga per nodo, rientrata secondo la profondità:",
 				"         '<classe> <browseName> <nodeId>  (<displayName>)';",
 				"  value: i NodeId, uno per riga;",
 				"  json/jsonl: {\"depth\",\"parent\",\"referenceTypeId\",\"forward\",\"targetId\",",
-				"              \"browseName\",\"displayName\",\"nodeClass\",\"typeDefinitionId\"}.", "",
-				"Esempi:", "  waldot browse", "  waldot browse --depth 3",
+				"              \"browseName\",\"displayName\",\"nodeClass\",\"typeDefinitionId\"}.",
+				"", "Esempi:", "  waldot browse", "  waldot browse --depth 3",
 				"  waldot browse sensor-1 --node-class Variable -o value",
-				"  waldot browse i=2253 --references all --direction both -o json" })
+				"  waldot browse i=2253 --references all --direction both -o json"})
 public class BrowseCommand extends ClientCommand {
 
 	/** A reference found at a depth. */
-	public record Entry(int depth, NodeId parent, NodeId referenceTypeId, boolean forward, NodeId targetId,
-			String browseName, String displayName, NodeClass nodeClass, NodeId typeDefinitionId) {
+	public record Entry(int depth, NodeId parent, NodeId referenceTypeId,
+			boolean forward, NodeId targetId, String browseName,
+			String displayName, NodeClass nodeClass, NodeId typeDefinitionId) {
 
-		static Entry of(final int depth, final NodeId parent, final ReferenceInfo reference) {
-			return new Entry(depth, parent, reference.referenceTypeId(), reference.forward(), reference.targetId(),
-					reference.browseName(), reference.displayName(), reference.nodeClass(),
-					reference.typeDefinitionId());
+		static Entry of(final int depth, final NodeId parent,
+				final ReferenceInfo reference) {
+			return new Entry(depth, parent, reference.referenceTypeId(),
+					reference.forward(), reference.targetId(),
+					reference.browseName(), reference.displayName(),
+					reference.nodeClass(), reference.typeDefinitionId());
 		}
 
 		String text() {
-			return "  ".repeat(Math.max(0, depth - 1)) + (nodeClass == null ? "?" : nodeClass.name()) + " "
+			return "  ".repeat(Math.max(0, depth - 1))
+					+ (nodeClass == null ? "?" : nodeClass.name()) + " "
 					+ browseName + " " + Json.id(targetId)
-					+ (displayName != null && !displayName.equals(browseName) && !displayName.isBlank()
-							? "  (" + displayName + ")"
-							: "")
+					+ (displayName != null && !displayName.equals(browseName)
+							&& !displayName.isBlank()
+									? "  (" + displayName + ")"
+									: "")
 					+ (forward ? "" : "  [inverso]");
 		}
 	}
 
 	/** References to follow. */
 	public enum References {
-		hierarchical, all
+		all, hierarchical
 	}
+
+	@Option(names = "--depth", paramLabel = "N", description = "Profondità della visita (predefinita 1, solo i figli diretti).")
+	private final int depth = 1;
+
+	@Option(names = "--direction", paramLabel = "DIREZIONE", description = "Direzione dei riferimenti: ${COMPLETION-CANDIDATES} (predefinita Forward).")
+	private final BrowseDirection direction = BrowseDirection.Forward;
 
 	@Parameters(index = "0", arity = "0..1", paramLabel = "NODO", description = "Nodo di partenza (predefinito i=85, la cartella Objects).")
 	private String node;
 
-	@Option(names = "--direction", paramLabel = "DIREZIONE", description = "Direzione dei riferimenti: ${COMPLETION-CANDIDATES} (predefinita Forward).")
-	private BrowseDirection direction = BrowseDirection.Forward;
+	@Option(names = "--node-class", split = ",", paramLabel = "CLASSE", description = "Solo i nodi di queste classi (Object, Variable, Method, ObjectType, VariableType, ReferenceType, DataType, View), separate da virgole.")
+	private final List<NodeClass> nodeClasses = new ArrayList<>();
 
 	@Option(names = "--references", paramLabel = "TIPO", description = "Riferimenti da seguire: ${COMPLETION-CANDIDATES} (predefinito hierarchical).")
-	private References references = References.hierarchical;
+	private final References references = References.hierarchical;
 
-	@Option(names = "--node-class", split = ",", paramLabel = "CLASSE", description = "Solo i nodi di queste classi (Object, Variable, Method, ObjectType, VariableType, ReferenceType, DataType, View), separate da virgole.")
-	private List<NodeClass> nodeClasses = new ArrayList<>();
-
-	@Option(names = "--depth", paramLabel = "N", description = "Profondità della visita (predefinita 1, solo i figli diretti).")
-	private int depth = 1;
-
-	private void browse(final WaldotClient client, final BrowseFilter filter, final NodeId start, final int level,
-			final Set<NodeId> visited, final List<Entry> entries) {
-		for (final ReferenceInfo reference : client.addressSpace().browse(start, filter)) {
+	private void browse(final WaldotClient client, final BrowseFilter filter,
+			final NodeId start, final int level, final Set<NodeId> visited,
+			final List<Entry> entries) {
+		for (final ReferenceInfo reference : client.addressSpace().browse(start,
+				filter)) {
 			final Entry entry = Entry.of(level, start, reference);
 			entries.add(entry);
-			if (level < depth && reference.forward() && reference.targetId() != null
+			if (level < depth && reference.forward()
+					&& reference.targetId() != null
 					&& visited.add(reference.targetId())) {
-				browse(client, filter, reference.targetId(), level + 1, visited, entries);
+				browse(client, filter, reference.targetId(), level + 1, visited,
+						entries);
 			}
 		}
 	}
 
 	@Override
 	protected int execute(final WaldotClient client, final Printer printer) {
-		final NodeId start = node == null ? NodeIds.ObjectsFolder : nodeId(client, node);
+		final NodeId start = node == null
+				? NodeIds.ObjectsFolder
+				: nodeId(client, node);
 		final BrowseFilter filter = new BrowseFilter(direction,
-				references == References.all ? NodeIds.References : NodeIds.HierarchicalReferences, true,
-				nodeClasses.toArray(new NodeClass[0]));
+				references == References.all
+						? NodeIds.References
+						: NodeIds.HierarchicalReferences,
+				true, nodeClasses.toArray(new NodeClass[0]));
 		final List<Entry> entries = new ArrayList<>();
 		final Set<NodeId> visited = new HashSet<>();
 		visited.add(start);

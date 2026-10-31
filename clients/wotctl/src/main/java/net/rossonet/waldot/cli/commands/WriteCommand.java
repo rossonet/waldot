@@ -27,22 +27,63 @@ import picocli.CommandLine.Parameters;
 		"con --type si sceglie esplicitamente il tipo: string, bool, sbyte, byte, int16,",
 		"uint16, int32, uint32, int64, uint64, float, double, nodeid, text.",
 		"Uno stato di risposta non buono (es. Bad_NotWritable, Bad_TypeMismatch) produce",
-		"il codice di uscita 1." }, footer = { "Output:", "  text : '<nodeId> <- <valore> (<stato>)';",
-				"  value: lo stato (Good); json/jsonl: {\"nodeId\",\"value\",\"status\"}.", "", "Esempi:",
-				"  waldot write sensor-1/setpoint 21.5", "  waldot write 'ns=2;s=pump-3/enabled' true --type bool",
-				"  waldot write valve-2/position 75 -o json" })
+		"il codice di uscita 1."}, footer = {"Output:",
+				"  text : '<nodeId> <- <valore> (<stato>)';",
+				"  value: lo stato (Good); json/jsonl: {\"nodeId\",\"value\",\"status\"}.",
+				"", "Esempi:", "  waldot write sensor-1/setpoint 21.5",
+				"  waldot write 'ns=2;s=pump-3/enabled' true --type bool",
+				"  waldot write valve-2/position 75 -o json"})
 public class WriteCommand extends ClientCommand {
+
+	private static final Map<Class<?>, String> TYPE_OF = Map.ofEntries(
+			Map.entry(Boolean.class, "bool"), Map.entry(Byte.class, "sbyte"),
+			Map.entry(Short.class, "int16"), Map.entry(Integer.class, "int32"),
+			Map.entry(Long.class, "int64"), Map.entry(Float.class, "float"),
+			Map.entry(Double.class, "double"),
+			Map.entry(
+					org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte.class,
+					"byte"),
+			Map.entry(
+					org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort.class,
+					"uint16"),
+			Map.entry(
+					org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger.class,
+					"uint32"),
+			Map.entry(
+					org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.ULong.class,
+					"uint64"),
+			Map.entry(NodeId.class, "nodeid"));
+
+	/**
+	 * Without --type: the type of the current value of the variable (the
+	 * properties of WaldOT are BaseDataType variables, so the declared data
+	 * type is not enough); the text if the conversion is not possible.
+	 */
+	private static Object inferType(final WaldotClient client,
+			final NodeId nodeId, final String text) {
+		try {
+			final Object current = client.addressSpace().readValue(nodeId)
+					.getValue().getValue();
+			final String name = current == null
+					? null
+					: TYPE_OF.get(current.getClass());
+			return name == null ? text : Values.convert(text, name);
+		} catch (final RuntimeException e) {
+			return text;
+		}
+	}
+
+	private Object converted;
 
 	@Parameters(index = "0", paramLabel = "NODO", description = "Variabile da scrivere.")
 	private String node;
 
-	@Parameters(index = "1", paramLabel = "VALORE", description = "Valore da scrivere.")
-	private String value;
-
-	@Option(names = { "-t", "--type" }, paramLabel = "TIPO", description = "Tipo del valore (predefinito: quello della variabile).")
+	@Option(names = {"-t",
+			"--type"}, paramLabel = "TIPO", description = "Tipo del valore (predefinito: quello della variabile).")
 	private String type;
 
-	private Object converted;
+	@Parameters(index = "1", paramLabel = "VALORE", description = "Valore da scrivere.")
+	private String value;
 
 	@Override
 	protected int execute(final WaldotClient client, final Printer printer) {
@@ -50,44 +91,26 @@ public class WriteCommand extends ClientCommand {
 		if (type == null) {
 			converted = inferType(client, nodeId, value);
 		}
-		final StatusCode status = client.addressSpace().writeValue(nodeId, converted);
+		final StatusCode status = client.addressSpace().writeValue(nodeId,
+				converted);
 		if (status != null && !status.isGood()) {
-			throw CliException.server("scrittura di " + Json.id(nodeId) + " non riuscita: " + Json.statusName(status));
+			throw CliException.server("scrittura di " + Json.id(nodeId)
+					+ " non riuscita: " + Json.statusName(status));
 		}
 		final Map<String, Object> json = new LinkedHashMap<>();
 		json.put("nodeId", nodeId);
 		json.put("value", converted);
 		json.put("status", status == null ? StatusCode.GOOD : status);
 		printer.single(json, j -> j,
-				j -> Json.id(nodeId) + " <- " + Json.scalarLine(converted) + " (" + Json.statusName(
-						status == null ? StatusCode.GOOD : status) + ")",
-				j -> Json.statusName(status == null ? StatusCode.GOOD : status));
+				j -> Json.id(nodeId) + " <- " + Json.scalarLine(converted)
+						+ " ("
+						+ Json.statusName(
+								status == null ? StatusCode.GOOD : status)
+						+ ")",
+				j -> Json
+						.statusName(status == null ? StatusCode.GOOD : status));
 		return 0;
 	}
-
-	/**
-	 * Without --type: the type of the current value of the variable (the
-	 * properties of WaldOT are BaseDataType variables, so the declared data
-	 * type is not enough); the text if the conversion is not possible.
-	 */
-	private static Object inferType(final WaldotClient client, final NodeId nodeId, final String text) {
-		try {
-			final Object current = client.addressSpace().readValue(nodeId).getValue().getValue();
-			final String name = current == null ? null : TYPE_OF.get(current.getClass());
-			return name == null ? text : Values.convert(text, name);
-		} catch (final RuntimeException e) {
-			return text;
-		}
-	}
-
-	private static final Map<Class<?>, String> TYPE_OF = Map.ofEntries(Map.entry(Boolean.class, "bool"),
-			Map.entry(Byte.class, "sbyte"), Map.entry(Short.class, "int16"), Map.entry(Integer.class, "int32"),
-			Map.entry(Long.class, "int64"), Map.entry(Float.class, "float"), Map.entry(Double.class, "double"),
-			Map.entry(org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte.class, "byte"),
-			Map.entry(org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort.class, "uint16"),
-			Map.entry(org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger.class, "uint32"),
-			Map.entry(org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.ULong.class, "uint64"),
-			Map.entry(NodeId.class, "nodeid"));
 
 	@Override
 	protected void validate() {

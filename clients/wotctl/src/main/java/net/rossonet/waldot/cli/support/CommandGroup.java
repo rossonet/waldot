@@ -18,7 +18,8 @@ public abstract class CommandGroup implements Callable<Integer> {
 	@Override
 	public Integer call() {
 		throw new ParameterException(spec.commandLine(),
-				"specificare un sottocomando di '" + spec.qualifiedName() + "' (sottocomandi: "
+				"specificare un sottocomando di '" + spec.qualifiedName()
+						+ "' (sottocomandi: "
 						+ String.join(", ", spec.subcommands().keySet()) + ")");
 	}
 }

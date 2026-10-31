@@ -53,15 +53,22 @@ public abstract class ClientCommand implements Callable<Integer> {
 
 	@Override
 	public final Integer call() throws Exception {
-		final ConnectionOptions connectionOptions = connection == null ? new ConnectionOptions() : connection;
-		final OutputOptions outputOptions = output == null ? new OutputOptions() : output;
+		final ConnectionOptions connectionOptions = connection == null
+				? new ConnectionOptions()
+				: connection;
+		final OutputOptions outputOptions = output == null
+				? new OutputOptions()
+				: output;
 		final OutputFormat format = outputOptions.format();
 		if (format == OutputFormat.topic && !supportsTopicFormat()) {
-			throw usage("il formato 'topic' è disponibile solo con il comando subscribe");
+			throw usage(
+					"il formato 'topic' è disponibile solo con il comando subscribe");
 		}
 		validate();
-		final Printer printer = new Printer(spec.commandLine().getOut(), format);
-		final WaldOTAgentClientConfiguration configuration = connectionOptions.toConfiguration(spec.commandLine());
+		final Printer printer = new Printer(spec.commandLine().getOut(),
+				format);
+		final WaldOTAgentClientConfiguration configuration = connectionOptions
+				.toConfiguration(spec.commandLine());
 		configure(configuration);
 		final WaldotClient client = WaldotClient.create(configuration);
 		final Closer closer = new Closer(client);
@@ -69,10 +76,16 @@ public abstract class ClientCommand implements Callable<Integer> {
 		Runtime.getRuntime().addShutdownHook(hook);
 		try {
 			try {
-				client.connect(connectionOptions.connectTimeout(spec.commandLine()));
+				client.connect(
+						connectionOptions.connectTimeout(spec.commandLine()));
 			} catch (final WaldotClientException e) {
-				throw CliException.connection("connessione a " + configuration.getBaseWaldOTOpcEndpoint()
-						+ " non riuscita: " + e.getMessage(), e);
+				throw CliException
+						.connection(
+								"connessione a "
+										+ configuration
+												.getBaseWaldOTOpcEndpoint()
+										+ " non riuscita: " + e.getMessage(),
+								e);
 			}
 			return execute(client, printer);
 		} finally {
@@ -86,7 +99,8 @@ public abstract class ClientCommand implements Callable<Integer> {
 	}
 
 	/** Customizes the configuration before the connection. */
-	protected void configure(final WaldOTAgentClientConfiguration configuration) {
+	protected void configure(
+			final WaldOTAgentClientConfiguration configuration) {
 		// nothing by default
 	}
 
@@ -95,7 +109,8 @@ public abstract class ClientCommand implements Callable<Integer> {
 	 *
 	 * @return the exit code
 	 */
-	protected abstract int execute(WaldotClient client, Printer printer) throws Exception;
+	protected abstract int execute(WaldotClient client, Printer printer)
+			throws Exception;
 
 	/** Parses a node id ({@code ns=2;s=x}, {@code i=85} or a WaldOT identifier). */
 	protected NodeId nodeId(final WaldotClient client, final String value) {

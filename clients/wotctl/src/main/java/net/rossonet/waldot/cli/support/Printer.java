@@ -20,28 +20,6 @@ public final class Printer {
 		this.format = format == null ? OutputFormat.text : format;
 	}
 
-	/** Prints a single object. */
-	public <T> void single(final T item, final Function<? super T, Object> json,
-			final Function<? super T, String> text, final Function<? super T, Object> value) {
-		switch (format) {
-		case json -> line(Json.pretty(Json.toNode(json.apply(item))));
-		case jsonl -> line(Json.compact(Json.toNode(json.apply(item))));
-		case value -> line(Json.scalar(value.apply(item)));
-		default -> line(text.apply(item));
-		}
-	}
-
-	/** Prints a list: a JSON array, a JSON line per item or a line per item. */
-	public <T> void list(final List<T> items, final Function<? super T, Object> json,
-			final Function<? super T, String> text, final Function<? super T, Object> value) {
-		switch (format) {
-		case json -> line(Json.pretty(Json.toNode(items.stream().map(item -> json.apply(item)).toList())));
-		case jsonl -> items.forEach(item -> line(Json.compact(Json.toNode(json.apply(item)))));
-		case value -> items.forEach(item -> line(Json.scalar(value.apply(item))));
-		default -> items.forEach(item -> line(text.apply(item)));
-		}
-	}
-
 	public OutputFormat format() {
 		return format;
 	}
@@ -57,6 +35,34 @@ public final class Printer {
 		out.flush();
 		if (out.checkError()) {
 			throw new OutputClosedException();
+		}
+	}
+
+	/** Prints a list: a JSON array, a JSON line per item or a line per item. */
+	public <T> void list(final List<T> items,
+			final Function<? super T, Object> json,
+			final Function<? super T, String> text,
+			final Function<? super T, Object> value) {
+		switch (format) {
+			case json -> line(Json.pretty(Json.toNode(
+					items.stream().map(item -> json.apply(item)).toList())));
+			case jsonl -> items.forEach(
+					item -> line(Json.compact(Json.toNode(json.apply(item)))));
+			case value ->
+				items.forEach(item -> line(Json.scalar(value.apply(item))));
+			default -> items.forEach(item -> line(text.apply(item)));
+		}
+	}
+
+	/** Prints a single object. */
+	public <T> void single(final T item, final Function<? super T, Object> json,
+			final Function<? super T, String> text,
+			final Function<? super T, Object> value) {
+		switch (format) {
+			case json -> line(Json.pretty(Json.toNode(json.apply(item))));
+			case jsonl -> line(Json.compact(Json.toNode(json.apply(item))));
+			case value -> line(Json.scalar(value.apply(item)));
+			default -> line(text.apply(item));
 		}
 	}
 }

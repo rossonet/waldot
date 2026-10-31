@@ -14,8 +14,22 @@ import picocli.CommandLine.ITypeConverter;
  */
 public final class Durations implements ITypeConverter<Duration> {
 
-	private static final Pattern PART = Pattern.compile("(\\d+(?:\\.\\d+)?)(ms|s|m|h|d)");
+	private static final Pattern PART = Pattern
+			.compile("(\\d+(?:\\.\\d+)?)(ms|s|m|h|d)");
 	private static final Pattern PLAIN = Pattern.compile("\\d+(?:\\.\\d+)?");
+
+	private static Duration nanos(final double value) {
+		return Duration.ofNanos((long) Math.min(Long.MAX_VALUE, value));
+	}
+
+	private static Duration nonNegative(final Duration duration,
+			final String text) {
+		if (duration.isNegative()) {
+			throw new IllegalArgumentException(
+					"durata negativa: '" + text + "'");
+		}
+		return duration;
+	}
 
 	/**
 	 * @throws IllegalArgumentException if the text is not a valid positive or
@@ -28,9 +42,11 @@ public final class Durations implements ITypeConverter<Duration> {
 		final String value = text.trim().toLowerCase(Locale.ROOT);
 		if (value.startsWith("p")) {
 			try {
-				return nonNegative(Duration.parse(value.toUpperCase(Locale.ROOT)), text);
+				return nonNegative(
+						Duration.parse(value.toUpperCase(Locale.ROOT)), text);
 			} catch (final RuntimeException e) {
-				throw new IllegalArgumentException("durata non valida: '" + text + "'", e);
+				throw new IllegalArgumentException(
+						"durata non valida: '" + text + "'", e);
 			}
 		}
 		if (PLAIN.matcher(value).matches()) {
@@ -46,26 +62,15 @@ public final class Durations implements ITypeConverter<Duration> {
 			}
 			final double amount = Double.parseDouble(matcher.group(1));
 			totalNanos += amount * switch (matcher.group(2)) {
-			case "ms" -> 1e6;
-			case "s" -> 1e9;
-			case "m" -> 60e9;
-			case "h" -> 3600e9;
-			default -> 86400e9;
+				case "ms" -> 1e6;
+				case "s" -> 1e9;
+				case "m" -> 60e9;
+				case "h" -> 3600e9;
+				default -> 86400e9;
 			};
 			position = matcher.end();
 		}
 		return nanos(totalNanos);
-	}
-
-	private static Duration nanos(final double value) {
-		return Duration.ofNanos((long) Math.min(Long.MAX_VALUE, value));
-	}
-
-	private static Duration nonNegative(final Duration duration, final String text) {
-		if (duration.isNegative()) {
-			throw new IllegalArgumentException("durata negativa: '" + text + "'");
-		}
-		return duration;
 	}
 
 	@Override

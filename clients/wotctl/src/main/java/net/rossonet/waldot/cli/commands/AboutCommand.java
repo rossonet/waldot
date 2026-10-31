@@ -13,11 +13,13 @@ import picocli.CommandLine.Command;
 @Command(name = "about", header = "Informazioni sul server WaldOT (anche verifica della connessione).", mixinStandardHelpOptions = true, description = {
 		"Mostra le informazioni sul server WaldOT (comando 'about': versione, namespace,",
 		"plugin e configurazione principale). Utile anche come verifica della connessione:",
-		"il codice di uscita è 0 se il server risponde, 3 se non è raggiungibile." }, footer = {
-				"Output:", "  text, value: una riga per ogni riga della risposta;",
-				"  json: array di stringhe; jsonl: una stringa JSON per riga.", "", "Esempi:",
-				"  waldot about", "  waldot about --endpoint opc.tcp://192.168.1.10:12686/waldot",
-				"  waldot about --connect-timeout 3s >/dev/null && echo raggiungibile" })
+		"il codice di uscita è 0 se il server risponde, 3 se non è raggiungibile."}, footer = {
+				"Output:",
+				"  text, value: una riga per ogni riga della risposta;",
+				"  json: array di stringhe; jsonl: una stringa JSON per riga.",
+				"", "Esempi:", "  waldot about",
+				"  waldot about --endpoint opc.tcp://192.168.1.10:12686/waldot",
+				"  waldot about --connect-timeout 3s >/dev/null && echo raggiungibile"})
 public class AboutCommand extends ClientCommand {
 
 	@Override
