@@ -177,6 +177,9 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	 */
 	private static final class PropertyBag<P> {
 		private final Map<String, P> items = new LinkedHashMap<>();
+		// una chiave con prefisso ("1:name") ha browse name diverso dalla
+		// chiave: solo allora una ricerca mancata va ripetuta per browse name
+		private boolean prefixedKeys = false;
 
 		synchronized List<P> drain() {
 			final List<P> result = new ArrayList<>(items.values());
@@ -194,8 +197,15 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			if (value == null) {
 				value = factory.get();
 				items.put(key, value);
+				if (key.indexOf(':') >= 0) {
+					prefixedKeys = true;
+				}
 			}
 			return value;
+		}
+
+		synchronized boolean hasPrefixedKeys() {
+			return prefixedKeys;
 		}
 
 		synchronized void removeIf(
@@ -1145,6 +1155,12 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			final OpcProperty<?> property = bag.get(key);
 			if (property != null) {
 				return (WaldotProperty<DATA_TYPE>) property;
+			}
+			// absent key, the common case for the optional edge settings read
+			// at every notification (active, deadband, ...): without prefixed
+			// keys the browse names equal the keys and the scan finds nothing
+			if (!bag.hasPrefixedKeys()) {
+				return null;
 			}
 		}
 		// not found by key: a key with a namespace prefix ("1:name") is stored

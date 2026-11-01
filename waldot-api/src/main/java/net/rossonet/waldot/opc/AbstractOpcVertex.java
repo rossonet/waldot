@@ -154,6 +154,15 @@ public abstract class AbstractOpcVertex extends GremlinElement
 		}
 	}
 
+	// chiavi delle proprieta' gestite, in minuscolo: calcolate una volta sola
+	// perche' notifyPropertyValueChanging gira a ogni valore ricevuto
+	private static final String LABEL_KEY = MiloStrategy.LABEL_FIELD.toLowerCase();
+	private static final String TYPE_KEY = MiloStrategy.TYPE_FIELD.toLowerCase();
+	private static final String HISTORY_KEY = MiloStrategy.HISTORY_FIELD.toLowerCase();
+	private static final String HISTORY_CONTEXT_KEY = MiloStrategy.HISTORY_CONTEXT_FIELD.toLowerCase();
+	private static final String NAME_KEY = MiloStrategy.NAME_FIELD.toLowerCase();
+	private static final String DESCRIPTION_KEY = MiloStrategy.DESCRIPTION_PARAMETER.toLowerCase();
+
 	private boolean activeHistory = false;
 
 	protected boolean allowNullPropertyValues = false;
@@ -542,7 +551,7 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	@Override
 	public void notifyPropertyValueChanging(String label, DataValue value) {
-		if (label.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {
+		if (label.equals(LABEL_KEY)) {
 			final String originalLabel;
 			try {
 				originalLabel = getProperty(labelProperty)
@@ -553,14 +562,14 @@ public abstract class AbstractOpcVertex extends GremlinElement
 							"Changing label from {} to {} is not allowed, reverting to original value",
 							originalLabel,
 							value.getValue().getValue().toString());
-					property(MiloStrategy.LABEL_FIELD.toLowerCase(),
+					property(LABEL_KEY,
 							originalLabel);
 				}
 			} catch (final Throwable e) {
 				logger.warn("Error retrieving original label property", e);
 			}
 		}
-		if (label.equals(MiloStrategy.TYPE_FIELD.toLowerCase())) {
+		if (label.equals(TYPE_KEY)) {
 			final String originalType;
 			try {
 				originalType = getProperty(typeProperty).orElseGet(() -> null);
@@ -573,10 +582,10 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				logger.warn(
 						"Changing type from {} to {} is not allowed, reverting to original value",
 						originalType, value.getValue().getValue().toString());
-				property(MiloStrategy.TYPE_FIELD.toLowerCase(), originalType);
+				property(TYPE_KEY, originalType);
 			}
 		}
-		if (label.equals(MiloStrategy.HISTORY_FIELD.toLowerCase())) {
+		if (label.equals(HISTORY_KEY)) {
 			final boolean newHistory = Boolean
 					.parseBoolean(String.valueOf(value.getValue().getValue()));
 			if (newHistory) {
@@ -591,14 +600,14 @@ public abstract class AbstractOpcVertex extends GremlinElement
 				property.setHistorizing(activeHistory);
 			}
 		}
-		if (label.equals(MiloStrategy.HISTORY_CONTEXT_FIELD.toLowerCase())) {
+		if (label.equals(HISTORY_CONTEXT_KEY)) {
 			final String newContext = String
 					.valueOf(value.getValue().getValue());
 			if (newContext != null && !newContext.isEmpty()) {
 				historyContext = newContext;
 			}
 		}
-		if (label.equals(MiloStrategy.NAME_FIELD.toLowerCase())) {
+		if (label.equals(NAME_KEY)) {
 			final QualifiedName browseName = graph.getWaldotNamespace()
 					.generateQualifiedName(
 							(String) value.getValue().getValue());
@@ -607,7 +616,7 @@ public abstract class AbstractOpcVertex extends GremlinElement
 			setBrowseName(browseName);
 			setDisplayName(displayName);
 		}
-		if (label.equals(MiloStrategy.DESCRIPTION_PARAMETER.toLowerCase())) {
+		if (label.equals(DESCRIPTION_KEY)) {
 			final LocalizedText description = new LocalizedText(
 					(String) value.getValue().getValue());
 			setDescription(description);
