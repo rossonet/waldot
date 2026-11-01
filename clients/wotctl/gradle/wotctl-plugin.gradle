@@ -51,3 +51,28 @@ jar {
 test {
     useJUnitPlatform()
 }
+
+// Eclipse: the plugin eclipse of Gradle marks wotctl and its dependencies as
+// test-only (attribute "test"), because they are compileOnly and also
+// testImplementation: the main code would not see them. The entries on the
+// compile classpath of main become visible from main again.
+plugins.withType(EclipsePlugin).configureEach {
+    eclipse.classpath.file.whenMerged { classpath ->
+        def compileClasspath = configurations.compileClasspath
+        def mainProjects = compileClasspath.incoming.resolutionResult.allComponents
+                .collect { it.id }
+                .findAll { it instanceof ProjectComponentIdentifier && it.projectPath != project.path }
+                .collect { "/${rootProject.project(it.projectPath).eclipse.project.name}".toString() } as Set
+        def mainLibraries = compileClasspath.files.collect { it.absolutePath } as Set
+        classpath.entries.findAll {
+            (it instanceof org.gradle.plugins.ide.eclipse.model.ProjectDependency && it.path in mainProjects) ||
+                    (it instanceof org.gradle.plugins.ide.eclipse.model.Library && it.path in mainLibraries)
+        }.each { entry ->
+            entry.entryAttributes.remove('test')
+            def scopes = entry.entryAttributes['gradle_used_by_scope']
+            if (scopes && !scopes.split(',').contains('main')) {
+                entry.entryAttributes['gradle_used_by_scope'] = "main,${scopes}".toString()
+            }
+        }
+    }
+}
