@@ -9,7 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Property;
+import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
+import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
@@ -41,7 +44,7 @@ import net.rossonet.waldot.utils.LogHelper;
  * @author Andrea Ambrosini - Zona Autonoma srl
  */
 public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DATA_TYPE>
-		implements WaldotProperty<DATA_TYPE> {
+		implements WaldotProperty<DATA_TYPE>, AttributeObserver {
 	protected boolean allowNullPropertyValues = false;
 
 	protected final List<EventObserver> eventObservers = new java.util.concurrent.CopyOnWriteArrayList<>();
@@ -74,6 +77,17 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 			setValue(errorDataValue);
 			edge.addComponent(this);
 			logger.error(LogHelper.stackTraceToString(a));
+		}
+		// notifica all'edge dopo il salvataggio del valore, anche per le
+		// scritture dei client OPC UA (setAttribute non passa da setValue)
+		addAttributeObserver(this);
+	}
+
+	@Override
+	public void attributeChanged(final UaNode node, final AttributeId attributeId,
+			final Object value) {
+		if (AttributeId.Value.equals(attributeId) && value instanceof DataValue) {
+			referenceEdge.notifyPropertyValueChanging(key(), (DataValue) value);
 		}
 	}
 
@@ -139,11 +153,6 @@ public abstract class AbstractOpcProperty<DATA_TYPE> extends GremlinProperty<DAT
 
 	}
 
-	@Override
-	public void setValue(DataValue value) {
-		referenceEdge.notifyPropertyValueChanging(key(), value);
-		super.setValue(value);
-	}
 
 	@Override
 	public String toString() {

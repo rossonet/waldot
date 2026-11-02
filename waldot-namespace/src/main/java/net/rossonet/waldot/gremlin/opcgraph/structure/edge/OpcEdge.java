@@ -51,7 +51,7 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private MonitoredEdge monitoredEdge;
+	private volatile MonitoredEdge monitoredEdge;
 	private final Object monitorLock = new Object();
 
 	private final Set<WaldotProperty<?>> propertiesToDelete = new HashSet<>();
@@ -155,6 +155,12 @@ public class OpcEdge extends GremlinElement implements WaldotEdge {
 
 	@Override
 	public void notifyPropertyValueChanging(final String label, final DataValue value) {
+		// le impostazioni del monitor (active, deadband, ...) sono in cache:
+		// qualunque proprieta' dell'edge cambi, la cache va riletta
+		final MonitoredEdge monitor = monitoredEdge;
+		if (monitor != null) {
+			monitor.invalidateSettings();
+		}
 		if (label.equals(MiloStrategy.LABEL_FIELD.toLowerCase())) {
 			final String originalLabel = getProperty(labelProperty).get();
 			if (!originalLabel.equals(String.valueOf(value.getValue().getValue().toString()))) {

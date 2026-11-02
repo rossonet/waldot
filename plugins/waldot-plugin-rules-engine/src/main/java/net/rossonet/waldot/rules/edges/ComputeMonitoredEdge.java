@@ -166,5 +166,6 @@ public class ComputeMonitoredEdge extends MonitoredEdge {
 			((ComputeVertex) getSourceVertex())
 					.forget(getTargetVertex().getNodeId());
 		}
+		super.remove();
 	}
 }

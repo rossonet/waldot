@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.models.MonitoredEdge;
+import net.rossonet.waldot.api.models.WaldotEdge;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.client.utils.WaldotTestClientHandler;
 import net.rossonet.waldot.gremlin.opcgraph.strategies.opcua.history.LoggerHistoryStrategy;
@@ -772,6 +773,45 @@ public class LinkAndFireTests {
 		assert waldotTestClientHandler.checkVertexValueEquals("destination", "c", 356);
 		assert waldotTestClientHandler.checkOpcUaVertexValueEquals("destination", "c", 356);
 
+	}
+
+	/**
+	 * Un'impostazione dell'edge scritta da un client OPC UA (non via Gremlin)
+	 * arriva alla cache delle impostazioni del link.
+	 */
+	@Test
+	public void runLinkToActiveWrittenByOpcUaClientTest() throws Exception {
+		simpleServerInit();
+		final Vertex source = g.addVertex("id", "source", "name", "source vertex", "a", "1");
+		final Vertex destination = g.addVertex("id", "destination", "name", "destination vertex", "a", "3");
+		final Edge e = source.addEdge("link to test", destination, "type", "link-to");
+		e.property(MonitoredEdge.ACTIVE_LABEL, "true");
+		final String edgeId = ((WaldotEdge) e).getNodeId().getIdentifier().toString();
+		source.property("a", 10);
+		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
+		waldotTestClientHandler.writeOpcUaVertexValue(edgeId, MonitoredEdge.ACTIVE_LABEL, "false");
+		assert waldotTestClientHandler.checkOpcUaVertexValueEquals(edgeId, MonitoredEdge.ACTIVE_LABEL, "false");
+		source.property("a", 12);
+		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
+		waldotTestClientHandler.writeOpcUaVertexValue(edgeId, MonitoredEdge.ACTIVE_LABEL, "true");
+		assert waldotTestClientHandler.checkOpcUaVertexValueEquals(edgeId, MonitoredEdge.ACTIVE_LABEL, "true");
+		source.property("a", 14);
+		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 14);
+	}
+
+	/** Un link rimosso non propaga piu' i valori della sorgente. */
+	@Test
+	public void runLinkToRemovedEdgeTest() throws Exception {
+		simpleServerInit();
+		final Vertex source = g.addVertex("id", "source", "name", "source vertex", "a", "1");
+		final Vertex destination = g.addVertex("id", "destination", "name", "destination vertex", "a", "3");
+		final Edge e = source.addEdge("link to test", destination, "type", "link-to");
+		source.property("a", 10);
+		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
+		e.remove();
+		source.property("a", 12);
+		Thread.sleep(500);
+		assert waldotTestClientHandler.checkVertexValueEquals("destination", "a", 10);
 	}
 
 	private void simpleServerInit() throws ConfigurationException, InterruptedException, ExecutionException {

@@ -1,6 +1,5 @@
 package net.rossonet.waldot.api.models;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -37,8 +36,23 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 	public static final String PROPERTY_EDGE_INVERTED_DESCRIPTION = "false: link-to (source writes into target), true: link-from (source reads from target)";
 	public static final String PROPERTY_EDGE_INVERTED_LABEL = "inverted";
 	public static final String SEPARATOR = ",";
+	/** Valore di una proprieta' dell'edge in cache (present = false: assente). */
+	private record CachedValue(boolean present, Object value) {
+		private static final CachedValue ABSENT = new CachedValue(false, null);
+	}
+
+	private static final String PRIORITY_KEY = MiloStrategy.MONITOR_EDGE_PRIORITY_FIELD
+			.toLowerCase();
+
 	private final WaldotEdge edge;
 	private final WaldotNamespace engine;
+	// impostazioni dell'edge lette a ogni notifica: valori grezzi e liste gia'
+	// separate in cache, svuotate da invalidateSettings() quando una proprieta'
+	// dell'edge cambia (OpcEdge.notifyPropertyValueChanging)
+	private final java.util.concurrent.ConcurrentHashMap<String, CachedValue> settings = new java.util.concurrent.ConcurrentHashMap<>();
+	private final java.util.concurrent.ConcurrentHashMap<String, List<String>> settingLists = new java.util.concurrent.ConcurrentHashMap<>();
+	private final java.util.concurrent.atomic.AtomicLong settingsGeneration = new java.util.concurrent.atomic.AtomicLong();
+	private volatile boolean removed = false;
 	private final WaldotVertex sourceVertex;
 	private final WaldotVertex targetVertex;
 
@@ -50,10 +64,62 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		this.targetVertex = targetVertex;
 	}
 
+	/**
+	 * Valore di una proprieta' dell'edge, dalla cache. Un valore letto mentre
+	 * l'edge cambia (generazione diversa) non resta in cache.
+	 */
+	private CachedValue cachedSetting(final String label) {
+		final CachedValue cached = settings.get(label);
+		if (cached != null) {
+			return cached;
+		}
+		final long generation = settingsGeneration.get();
+		final Property<Object> property = edge.property(label);
+		final CachedValue read = property.isPresent()
+				? new CachedValue(true, property.value())
+				: CachedValue.ABSENT;
+		if (settingsGeneration.get() == generation) {
+			settings.putIfAbsent(label, read);
+			if (settingsGeneration.get() != generation) {
+				settings.remove(label, read);
+			}
+		}
+		return read;
+	}
+
+	/**
+	 * Valore di una proprieta' dell'edge dalla cache, def se assente: per le
+	 * sottoclassi che leggono impostazioni proprie.
+	 */
+	protected Object getSettingValue(final String label, final Object def) {
+		final CachedValue value = cachedSetting(label);
+		return value.present() ? value.value() : def;
+	}
+
+	/** true se la proprieta' dell'edge esiste (dalla cache). */
+	protected boolean hasSetting(final String label) {
+		return cachedSetting(label).present();
+	}
+
+	/**
+	 * Svuota la cache delle impostazioni: da chiamare quando una proprieta'
+	 * dell'edge cambia o viene creata.
+	 */
+	public void invalidateSettings() {
+		settingsGeneration.incrementAndGet();
+		settings.clear();
+		settingLists.clear();
+	}
+
+	/** true dopo remove(): l'edge non propaga piu'. */
+	protected boolean isRemoved() {
+		return removed;
+	}
+
 	protected boolean checkBinaryInProperty(final String propertyLabel) {
 		try {
-			final Property<Object> property = edge.property(propertyLabel);
-			if (property.isPresent()) {
+			final CachedValue property = cachedSetting(propertyLabel);
+			if (property.present()) {
 				final Object value = property.value();
 				if (value instanceof Boolean) {
 					return (Boolean) value;
@@ -94,12 +160,12 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 			return true;
 		}
 		try {
-			final Property<Object> property = edge.property(propertyLabel);
-			if (property.isPresent()) {
+			final CachedValue property = cachedSetting(propertyLabel);
+			if (property.present()) {
 				final Object value = property.value();
 				if (value instanceof String && !((String) value).isEmpty()) {
-					final List<String> values = Arrays
-							.asList(((String) value).split(SEPARATOR));
+					final List<String> values = settingList(propertyLabel,
+							(String) value);
 					if (values.contains(JOLLY_LABEL)
 							|| values.contains(label)) {
 						return true;
@@ -130,8 +196,8 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
 	protected long checkLongInProperty(final String propertyLabel) {
 		try {
-			final Property<Object> property = edge.property(propertyLabel);
-			if (property.isPresent()) {
+			final CachedValue property = cachedSetting(propertyLabel);
+			if (property.present()) {
 				final Object value = property.value();
 				if (value instanceof Number) {
 					return ((Number) value).longValue();
@@ -167,9 +233,8 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 
 	protected int getPriority() {
 		int calcolatedPriority = MiloStrategy.MONITOR_EDGE_DEFAULT_PRIORITY_VALUE;
-		final Property<Object> priorityValue = getEdge().property(
-				MiloStrategy.MONITOR_EDGE_PRIORITY_FIELD.toLowerCase());
-		if (priorityValue.isPresent()) {
+		final CachedValue priorityValue = cachedSetting(PRIORITY_KEY);
+		if (priorityValue.present()) {
 			final Object priority = priorityValue.value();
 			if (priority instanceof Integer) {
 				calcolatedPriority = (Integer) priority;
@@ -182,7 +247,7 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 				}
 			} else {
 				logger.warn("Unsupported priority value type: {}",
-						priorityValue.getClass());
+						priority == null ? null : priority.getClass());
 				calcolatedPriority = MiloStrategy.MONITOR_EDGE_DEFAULT_PRIORITY_VALUE;
 			}
 		}
@@ -205,12 +270,11 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		return checkBinaryInProperty(ACTIVE_LABEL);
 	}
 
-	// attenzione alle performance di questa logica, se è necessario potrebbe
-	// essere utile implementare un sistema di caching del valore del deadband
+	// le impostazioni del deadband vengono dalla cache (cachedSetting)
 	protected boolean isDeadBandExceeded(final String propertyLabel,
 			final DataValue dataValue) {
-		final Property<Object> deadBandValue = edge.property(DEADBAND_LABEL);
-		if (deadBandValue.isPresent()) {
+		final CachedValue deadBandValue = cachedSetting(DEADBAND_LABEL);
+		if (deadBandValue.present()) {
 			if (dataValue == null) {
 				logger.warn(
 						"DataValue is null for property '{}', cannot check deadband",
@@ -239,10 +303,10 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 				}
 			}
 			if (dbValue instanceof Number) {
-				final Property<Object> deadBandType = edge
-						.property(DEADBAND_TYPE_LABEL);
+				final CachedValue deadBandType = cachedSetting(
+						DEADBAND_TYPE_LABEL);
 				// se il tipo non è specificato si usa il deadband assoluto
-				final Object dbType = deadBandType.isPresent()
+				final Object dbType = deadBandType.present()
 						? deadBandType.value()
 						: ABSOLUTE;
 				{
@@ -313,8 +377,30 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		return checkBinaryInProperty(PROPERTY_ACTIVE_LABEL);
 	}
 
+	/**
+	 * Rimozione dell'edge: da qui in poi non propaga piu'. Le sottoclassi
+	 * staccano i propri osservatori e chiamano super.remove().
+	 */
 	public void remove() {
-		// implementare le logiche di pulizia prima di rimuovere l'arco
+		removed = true;
+		invalidateSettings();
+	}
+
+	/** Lista separata da virgole di una proprieta', in cache. */
+	private List<String> settingList(final String label, final String raw) {
+		final List<String> cached = settingLists.get(label);
+		if (cached != null) {
+			return cached;
+		}
+		final long generation = settingsGeneration.get();
+		final List<String> parsed = List.of(raw.split(SEPARATOR));
+		if (settingsGeneration.get() == generation) {
+			settingLists.putIfAbsent(label, parsed);
+			if (settingsGeneration.get() != generation) {
+				settingLists.remove(label, parsed);
+			}
+		}
+		return parsed;
 	}
 
 	protected void sendFireWithDelay(final WaldotVertex destinationVertex,

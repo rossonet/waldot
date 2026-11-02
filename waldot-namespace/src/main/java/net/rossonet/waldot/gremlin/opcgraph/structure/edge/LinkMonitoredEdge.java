@@ -37,6 +37,19 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 	}
 
 	@Override
+	public void remove() {
+		if (direction == LinkDirection.TO) {
+			getSourceVertex().removeEventObserver(this);
+			getSourceVertex().removePropertyObserver(this);
+		}
+		if (direction == LinkDirection.FROM) {
+			getTargetVertex().removeEventObserver(this);
+			getTargetVertex().removePropertyObserver(this);
+		}
+		super.remove();
+	}
+
+	@Override
 	public void fireEvent(final UaNode node, final BaseEventType event) {
 		// per ora non faccio nulla, ma in futuro potrei voler propagare eventi anche
 		// con questo tipo di edge
@@ -44,12 +57,10 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 	}
 
 	private String getDestinationLabel(final String propertyLabel) {
-		final Property<Object> destinationProperty = getEdge().property(propertyLabel);
-		if (destinationProperty.isPresent() && destinationProperty.value() instanceof String) {
-			return (String) destinationProperty.value();
-		} else {
-			return propertyLabel;
-		}
+		// proprieta' dell'edge con il nome della sorgente: dalla cache delle
+		// impostazioni, letta a ogni notifica
+		final Object destination = getSettingValue(propertyLabel, null);
+		return destination instanceof String ? (String) destination : propertyLabel;
 	}
 
 	@Override
@@ -68,6 +79,9 @@ public class LinkMonitoredEdge extends MonitoredEdge {
 
 	@Override
 	public void propertyChanged(final UaNode sourceNode, final String propertyLabel, final DataValue value) {
+		if (isRemoved()) {
+			return;
+		}
 		if (isActive() && isPropertyNotificationActive() && isMonitoredProperty(propertyLabel)) {
 		final String destinationLabel = getDestinationLabel(propertyLabel);
 			if (isDeadBandExceeded(propertyLabel, value)) {

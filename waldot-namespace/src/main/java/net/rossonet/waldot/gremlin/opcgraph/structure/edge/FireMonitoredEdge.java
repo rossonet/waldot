@@ -33,7 +33,17 @@ public class FireMonitoredEdge extends MonitoredEdge {
 	}
 
 	@Override
+	public void remove() {
+		getSourceVertex().removeEventObserver(this);
+		getSourceVertex().removePropertyObserver(this);
+		super.remove();
+	}
+
+	@Override
 	public void fireEvent(final UaNode node, final BaseEventType event) {
+		if (isRemoved()) {
+			return;
+		}
 		if (isActive() && isEventNotificationActive()) {
 			final int calcolatedPriority = getPriority();
 			if (isDelayProperty()) {
@@ -70,6 +80,9 @@ public class FireMonitoredEdge extends MonitoredEdge {
 
 	@Override
 	public void propertyChanged(final UaNode node, final String label, final DataValue value) {
+		if (isRemoved()) {
+			return;
+		}
 		if (isActive() && isPropertyNotificationActive() && isMonitoredProperty(label)) {
 			// the check and the cache update share the map lock, otherwise two
 			// notifications can both pass against the same baseline
