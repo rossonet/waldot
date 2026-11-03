@@ -15,7 +15,9 @@ import net.rossonet.waldot.commands.exchange.GraphSnapshotCodec;
  * Runs a JEXL expression like {@code query} but returns the result serialized
  * as typed GraphSON v3 (vertices, edges, paths, maps, lists, NodeIds...), so
  * that the clients can rebuild structured objects instead of parsing
- * {@code toString()}. Traversals and iterators are drained into lists; a null
+ * {@code toString()}. Besides the core types it uses the TinkerPop extended
+ * ones ({@code gx:Int16}, {@code gx:Byte}, {@code gx:BigDecimal}, ...) and the
+ * OPC UA ones ({@code opc:UInt16}, {@code opc:ByteString}, ...). Traversals and iterators are drained into lists; a null
  * result is the JSON {@code null}.
  */
 public class QueryJsonCommand extends AbstractExchangeCommand {

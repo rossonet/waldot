@@ -30,6 +30,7 @@ import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.api.exchange.OpcUaGraphSonModule;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.strategies.MiloStrategy;
@@ -68,8 +69,14 @@ public final class GraphSnapshotCodec {
 
 	private static final int MAX_REPORTED_ERRORS = 20;
 
+	/*
+	 * the extended module (gx:Int16, gx:Byte, gx:BigDecimal, ...) and the OPC UA
+	 * built-in types (opc:UInt16, opc:ByteString, ...) are needed by the property
+	 * values of the WaldOT vertices: without them the serialization fails
+	 */
 	private static final GraphSONMapper MAPPER = GraphSONMapper.build().version(GraphSONVersion.V3_0)
-			.addRegistry(OpcIoRegistryV3.instance()).create();
+			.addDefaultXModule(true).addRegistry(OpcIoRegistryV3.instance())
+			.addCustomModule(new OpcUaGraphSonModule()).create();
 
 	/** Compresses with gzip. */
 	public static byte[] compress(final byte[] data) throws IOException {
@@ -265,7 +272,11 @@ public final class GraphSnapshotCodec {
 		}
 	}
 
-	/** Serializes any value (also elements and traversal results) as typed GraphSON v3. */
+	/**
+	 * Serializes any value (also elements and traversal results) as typed
+	 * GraphSON v3, with the TinkerPop extended types ({@code gx:*}) and the OPC
+	 * UA ones of {@link OpcUaGraphSonModule} ({@code opc:*}).
+	 */
 	public static String toGraphSon(final Object value) throws IOException {
 		return MAPPER.createMapper().writeValueAsString(normalizeResult(value));
 	}

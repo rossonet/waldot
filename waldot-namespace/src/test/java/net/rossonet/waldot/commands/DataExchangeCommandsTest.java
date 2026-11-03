@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.util.Base64;
 import java.util.List;
@@ -18,7 +19,9 @@ import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONMapper;
 import org.apache.tinkerpop.gremlin.structure.io.graphson.GraphSONVersion;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -335,6 +338,47 @@ class DataExchangeCommandsTest {
 		assertEquals("null", nullResult[0]);
 		final Object[] error = call(DataExchangeProtocol.QUERY_JSON_COMMAND, "g.V(");
 		assertFalse(((String) error[1]).isBlank());
+	}
+
+	/**
+	 * Regression: "Could not find a type identifier for the class : class
+	 * java.lang.Short" with g.V().valueMap(true) on vertices with Short, UShort,
+	 * ... properties (Gremlin query of the WaldOT console). The same types are
+	 * restored by an export/import of the graph.
+	 */
+	@Test
+	void queryJsonAndSnapshotSupportExtendedAndOpcUaTypes() throws Exception {
+		graph.addVertex(T.id, "x-types", T.label, "types", "name", "types", "int16", (short) -3, "byte",
+				(byte) 7, "decimal", new BigDecimal("1.25"), "uint8", Unsigned.ubyte(200), "uint16",
+				Unsigned.ushort(65000), "uint32", Unsigned.uint(4_000_000_000L), "uint64",
+				Unsigned.ulong(new java.math.BigInteger("18446744073709551615")), "bytes",
+				ByteString.of(new byte[] { 1, 2, 3 }));
+		final Object[] result = call(DataExchangeProtocol.QUERY_JSON_COMMAND,
+				"g.V().has('name','types').valueMap(true)");
+		assertEquals("", result[1], java.util.Arrays.toString(result));
+		final String json = (String) result[0];
+		for (final String type : List.of("gx:Int16", "gx:Byte", "gx:BigDecimal", "opc:UByte", "opc:UInt16",
+				"opc:UInt32", "opc:UInt64", "opc:ByteString")) {
+			assertTrue(json.contains("\"" + type + "\""), type + " missing in " + json);
+		}
+		final Object[] all = call(DataExchangeProtocol.QUERY_JSON_COMMAND, "g.V().limit(20).valueMap(true)");
+		assertEquals("", all[1], java.util.Arrays.toString(all));
+		final Object[] vertices = call(DataExchangeProtocol.QUERY_JSON_COMMAND, "g.V()");
+		assertEquals("", vertices[1], java.util.Arrays.toString(vertices));
+
+		final String data = exportSingleBlock(false);
+		call(DataExchangeProtocol.CLEAR_GRAPH_COMMAND);
+		final Object[] imported = call(DataExchangeProtocol.IMPORT_GRAPH_COMMAND, "", data, "true", "false");
+		assertEquals("", imported[3], java.util.Arrays.toString(imported));
+		final Vertex restored = g().V().has("name", "types").next();
+		assertEquals(Short.valueOf((short) -3), restored.<Object>value("int16"));
+		assertEquals(Byte.valueOf((byte) 7), restored.<Object>value("byte"));
+		assertEquals(new BigDecimal("1.25"), restored.value("decimal"));
+		assertEquals(Unsigned.ubyte(200), restored.value("uint8"));
+		assertEquals(Unsigned.ushort(65000), restored.value("uint16"));
+		assertEquals(Unsigned.uint(4_000_000_000L), restored.value("uint32"));
+		assertEquals(Unsigned.ulong(new java.math.BigInteger("18446744073709551615")), restored.value("uint64"));
+		assertEquals(ByteString.of(new byte[] { 1, 2, 3 }), restored.value("bytes"));
 	}
 
 	@Test

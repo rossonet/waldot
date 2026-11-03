@@ -23,10 +23,14 @@ import org.apache.tinkerpop.shaded.jackson.databind.SerializerProvider;
 import org.apache.tinkerpop.shaded.jackson.databind.jsontype.TypeSerializer;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
+import net.rossonet.waldot.api.exchange.OpcUaGraphSonModule;
+
 /**
  * Typed GraphSON v3 as written by the {@code query json} command of the
  * server: the ids of the WaldOT elements are OPC UA {@link NodeId}s with type
- * {@code tinker:nodeId}.
+ * {@code tinker:nodeId}; the other values use also the TinkerPop extended
+ * types ({@code gx:Int16}, {@code gx:Byte}, ...) and the OPC UA ones of
+ * {@link OpcUaGraphSonModule} ({@code opc:UInt16}, {@code opc:ByteString}, ...).
  */
 public final class GraphSonSupport {
 
@@ -74,8 +78,10 @@ public final class GraphSonSupport {
 		}
 	}
 
+	/* same types of the server: gx:* (Short, Byte, BigDecimal, ...) and opc:* */
 	private static final ObjectMapper MAPPER = GraphSONMapper.build().version(GraphSONVersion.V3_0)
-			.addCustomModule(new NodeIdModule()).create().createMapper();
+			.addDefaultXModule(true).addCustomModule(new NodeIdModule()).addCustomModule(new OpcUaGraphSonModule())
+			.create().createMapper();
 
 	/**
 	 * Parses typed GraphSON v3.

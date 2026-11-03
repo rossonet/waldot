@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,7 @@ import org.apache.tinkerpop.gremlin.structure.util.detached.DetachedProperty;
 import org.apache.tinkerpop.gremlin.structure.util.detached.DetachedVertex;
 import org.apache.tinkerpop.gremlin.structure.util.detached.DetachedVertexProperty;
 import org.eclipse.milo.opcua.stack.core.NodeIds;
+import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
@@ -177,5 +180,17 @@ class SupportTest {
 		assertNull(GraphSonSupport.read(" "));
 		assertTrue(GraphSonSupport.toList(null).isEmpty());
 		assertEquals(List.of("x"), GraphSonSupport.toList("x"));
+	}
+
+	/** The extended (gx:*) and OPC UA (opc:*) types written by query json. */
+	@Test
+	void graphSonRoundTripWithExtendedAndOpcUaTypes() throws IOException {
+		final List<Object> source = List.of((short) -3, (byte) 7, new BigDecimal("1.25"), BigInteger.TEN,
+				ubyte(200), ushort(65000), uint(4_000_000_000L), ulong(new BigInteger("18446744073709551615")),
+				ByteString.of(new byte[] { 1, 2, 3 }));
+		final String json = GraphSonSupport.write(source);
+		assertTrue(json.contains("gx:Int16") && json.contains("opc:UInt64") && json.contains("opc:ByteString"),
+				json);
+		assertEquals(source, GraphSonSupport.read(json));
 	}
 }
