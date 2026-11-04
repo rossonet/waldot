@@ -9,6 +9,8 @@ import java.util.Set;
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.slf4j.Logger;
@@ -63,6 +65,11 @@ public class JexlExecutor implements BaseExecutor {
 	}
 
 	@Override
+	public ClonableMapContext copyBaseContext() {
+		return new ClonableMapContext(baseJexlContext);
+	}
+
+	@Override
 	public void close() throws Exception {
 		closed = true;
 		if (jexl != null) {
@@ -81,9 +88,15 @@ public class JexlExecutor implements BaseExecutor {
 			throw new IllegalStateException("JexlExecutor is closed: " + name);
 		}
 		try {
-			final JexlScript compiled = jexl.createScript(expression);
+			// a JexlInfo with the executor name: without it JEXL in debug mode reports the
+			// Java location of this call (JexlExecutor.execute:84) instead of the script
+			final JexlScript compiled = jexl.createScript(new JexlInfo(name, 1, 1), expression);
 			return compiled.execute(jexlContext);
-		} catch (final Exception e) {
+		} catch (final JexlException e) {
+			final WaldotJexlException readable = new WaldotJexlException(expression, e);
+			LOGGER.error("Unable to execute expression: '" + expression + "' > " + readable.getMessage());
+			throw readable;
+		} catch (final RuntimeException e) {
 			LOGGER.error("Unable to execute expression: '" + expression + "' > " + e.getMessage() + "\n"
 					+ LogHelper.stackTraceToString(e, 4));
 			throw e;

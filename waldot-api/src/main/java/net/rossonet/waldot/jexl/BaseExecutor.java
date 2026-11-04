@@ -89,4 +89,14 @@ public interface BaseExecutor extends AutoCloseable {
 	 */
 	void setFunctionObject(String label, Object functionalObject);
 
+
+	/**
+	 * Returns a copy of the base context of the executor: changes to the copy do
+	 * not reach the base context (a script cannot leave variables behind).
+	 *
+	 * @return a new context with the same variables
+	 */
+	default ClonableMapContext copyBaseContext() {
+		throw new UnsupportedOperationException("copyBaseContext not supported by " + getClass().getName());
+	}
 }

@@ -202,4 +202,17 @@ public interface ConsoleStrategy extends AutoCloseable {
 	 */
 	Object runExpression(String expression, JexlContext jexlContext);
 
+
+	/**
+	 * Runs a script in a copy of the console context: the variables of the map
+	 * are added (and replace the console ones with the same name), and the
+	 * variables assigned by the script do not remain in the console.
+	 *
+	 * @param expression the script
+	 * @param variables  extra variables, may be empty
+	 * @return the value of the last expression
+	 */
+	default Object runIsolated(final String expression, final java.util.Map<String, Object> variables) {
+		throw new UnsupportedOperationException("runIsolated not supported by " + getClass().getName());
+	}
 }
