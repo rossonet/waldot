@@ -62,14 +62,14 @@ public final class GeneratorConstants {
 	public static final String DEFAULT_EVENT_TYPE = "system";
 
 	/** Default maximum value: 20000 */
-	public static final Long DEFAULT_MAX_VALUE = 20000L;
+	public static final Double DEFAULT_MAX_VALUE = 20000.0;
 
 	// ---------------------------------------------------------------------
 	// event generator (sim:event-generator)
 	// ---------------------------------------------------------------------
 
 	/** Default minimum value: 0 */
-	public static final Long DEFAULT_MIN_VALUE = 0L;
+	public static final Double DEFAULT_MIN_VALUE = 0.0;
 
 	public static final String DEFAULT_POST_NODE_ID_DATA = null;
 	public static final String DELAY_DESCRIPTION = "Interval in milliseconds between two generated values, "
@@ -155,11 +155,11 @@ public final class GeneratorConstants {
 			+ "(ProgressEventType) or system-status (SystemStatusChangeEventType). Default: system";
 
 	public static final String EVENT_TYPE_FIELD = "event-type";
-	public static final String MAX_VALUE_DESCRIPTION = "Upper bound (integer) of the generated values. Default: 20000";
+	public static final String MAX_VALUE_DESCRIPTION = "Upper bound of the generated values, a decimal number (for example 21.5); it must not be lower than Min. Default: 20000";
 
 	/** Property name for maximum value */
 	public static final String MAX_VALUE_FIELD = "Max";
-	public static final String MIN_VALUE_DESCRIPTION = "Lower bound (integer) of the generated values. Default: 0";
+	public static final String MIN_VALUE_DESCRIPTION = "Lower bound of the generated values, a decimal number (for example 20.6); it must not be greater than Max. Default: 0";
 
 	/** Property name for minimum value */
 	public static final String MIN_VALUE_FIELD = "Min";

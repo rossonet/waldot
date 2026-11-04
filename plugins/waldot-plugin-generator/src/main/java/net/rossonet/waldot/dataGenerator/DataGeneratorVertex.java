@@ -153,10 +153,10 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 				NodeIds.UInt64, GeneratorConstants.DELAY_DESCRIPTION);
 		PluginListener.addParameterToTypeNode(waldotNamespace,
 				dataGeneratorTypeNode, GeneratorConstants.MIN_VALUE_FIELD,
-				NodeIds.UInt64, GeneratorConstants.MIN_VALUE_DESCRIPTION);
+				NodeIds.Double, GeneratorConstants.MIN_VALUE_DESCRIPTION);
 		PluginListener.addParameterToTypeNode(waldotNamespace,
 				dataGeneratorTypeNode, GeneratorConstants.MAX_VALUE_FIELD,
-				NodeIds.UInt64, GeneratorConstants.MAX_VALUE_DESCRIPTION);
+				NodeIds.Double, GeneratorConstants.MAX_VALUE_DESCRIPTION);
 		PluginListener.addParameterToTypeNode(waldotNamespace,
 				dataGeneratorTypeNode,
 				GeneratorConstants.POST_NODE_ID_DATA_FIELD, NodeIds.String,
@@ -189,16 +189,16 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	// Valore massimo
-	private long max;
+	private double max;
 
 	// Proprietà OPC-UA per il massimo
-	private final QualifiedProperty<Long> maxProperty;
+	private final QualifiedProperty<Double> maxProperty;
 
 	// Valore minimo
-	private long min;
+	private double min;
 
 	// Proprietà OPC-UA per il minimo
-	private final QualifiedProperty<Long> minProperty;
+	private final QualifiedProperty<Double> minProperty;
 	private String postNodeIdData = null;
 
 	private final QualifiedProperty<String> postNodeIdDataProperty;
@@ -326,65 +326,39 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 				labelType,
 				ValueRanks.Scalar, Long.class);
 		setProperty(delayProperty, delay);
-		final String keyValuesPropertyMin = MiloStrategy.getKeyValuesProperty(
-				propertyKeyValues,
-				GeneratorConstants.MIN_VALUE_FIELD.toLowerCase());
-		min = GeneratorConstants.DEFAULT_MIN_VALUE;
-		if (keyValuesPropertyMin != null && !keyValuesPropertyMin.isEmpty()) {
-			try {
-				min = Long.valueOf(keyValuesPropertyMin);
-			} catch (final Exception e) {
-				logger.info("min value is not a number, using default {} '{}'",
-						GeneratorConstants.MIN_VALUE_FIELD,
-						GeneratorConstants.DEFAULT_MIN_VALUE);
-				min = GeneratorConstants.DEFAULT_MIN_VALUE;
-			}
-		} else {
-			logger.info(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase()
-					+ " not found in propertyKeyValues, using default {} '{}'",
-					GeneratorConstants.MIN_VALUE_FIELD,
-					GeneratorConstants.DEFAULT_MIN_VALUE);
-		}
-		minProperty = new QualifiedProperty<Long>(
+		min = parseBound(MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+				GeneratorConstants.MIN_VALUE_FIELD.toLowerCase()),
+				GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(),
+				GeneratorConstants.DEFAULT_MIN_VALUE);
+		minProperty = new QualifiedProperty<Double>(
 				getNamespace().getNamespaceUri(),
 				GeneratorConstants.MIN_VALUE_FIELD,
 				labelType,
-				ValueRanks.Scalar, Long.class);
+				ValueRanks.Scalar, Double.class);
 		setProperty(minProperty, min);
-
-		final String keyValuesPropertyMax = MiloStrategy.getKeyValuesProperty(
-				propertyKeyValues,
-				GeneratorConstants.MAX_VALUE_FIELD.toLowerCase());
-		max = GeneratorConstants.DEFAULT_MAX_VALUE;
-		if (keyValuesPropertyMax != null && !keyValuesPropertyMax.isEmpty()) {
-			try {
-				max = Long.valueOf(keyValuesPropertyMax);
-			} catch (final Exception e) {
-				logger.info("max value is not a number, using default {} '{}'",
-						GeneratorConstants.MAX_VALUE_FIELD,
-						GeneratorConstants.DEFAULT_MAX_VALUE);
-				max = GeneratorConstants.DEFAULT_MAX_VALUE;
-			}
-		} else {
-			logger.info(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase()
-					+ " not found in propertyKeyValues, using default {} '{}'",
-					GeneratorConstants.MAX_VALUE_FIELD,
-					GeneratorConstants.DEFAULT_MAX_VALUE);
-		}
-		maxProperty = new QualifiedProperty<Long>(
+		max = parseBound(MiloStrategy.getKeyValuesProperty(propertyKeyValues,
+				GeneratorConstants.MAX_VALUE_FIELD.toLowerCase()),
+				GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(),
+				GeneratorConstants.DEFAULT_MAX_VALUE);
+		maxProperty = new QualifiedProperty<Double>(
 				getNamespace().getNamespaceUri(),
 				GeneratorConstants.MAX_VALUE_FIELD,
 				labelType,
-				ValueRanks.Scalar, Long.class);
+				ValueRanks.Scalar, Double.class);
 		setProperty(maxProperty, max);
 		if (min > max) {
 			logger.warn("{} ({}) is greater than {} ({}), restoring defaults",
 					GeneratorConstants.MIN_VALUE_FIELD, min,
 					GeneratorConstants.MAX_VALUE_FIELD, max);
+			publishLastError("min (" + min + ") maggiore di max (" + max
+					+ "): uso i default " + GeneratorConstants.DEFAULT_MIN_VALUE
+					+ " e " + GeneratorConstants.DEFAULT_MAX_VALUE);
 			min = GeneratorConstants.DEFAULT_MIN_VALUE;
 			max = GeneratorConstants.DEFAULT_MAX_VALUE;
 			setProperty(minProperty, min);
 			setProperty(maxProperty, max);
+			property(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(), min);
+			property(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(), max);
 		}
 
 		final String keyValuesPropertypostNodeId = MiloStrategy
@@ -429,8 +403,10 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 		setProperty(algorithmProperty, algorithm.name());
 
 		// Inizializza seed con valore casuale nel range
-		seed = (long) (Math.random() * (max - min)) + min;
-		actualValue = seed;
+		// offset intero da min: con min e max interi i valori restano interi
+		// (incremental/decremental avanzano di 1)
+		actualValue = min + Math.floor(Math.random() * (max - min));
+		seed = (long) actualValue;
 		if (postNodeIdData != null && !postNodeIdData.isEmpty()) {
 			preparePostNodeIdData();
 		}
@@ -523,41 +499,29 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 	 * @return true if algorithm valid and set, false otherwise
 	 */
 	private boolean checkAlgorithm(final String keyValuesNewAlgorithm) {
-		boolean ok = false;
-		if (keyValuesNewAlgorithm != null && !keyValuesNewAlgorithm.isEmpty()) {
-			if (EnumUtils.isValidEnum(Algorithm.class, keyValuesNewAlgorithm)) {
-				try {
-					final Algorithm targetAlgorithm = Algorithm
-							.valueOf(keyValuesNewAlgorithm);
-					if (targetAlgorithm != null) {
-						algorithm = targetAlgorithm;
-						ok = true;
-					} else {
-						logger.info("Algorithm {} not found",
-								keyValuesNewAlgorithm);
-						ok = false;
-					}
-				} catch (final Exception e) {
-					logger.info("Algorithm {} not found",
-							keyValuesNewAlgorithm);
-					ok = false;
-				}
-			} else {
-				logger.info("Algorithm {} not found, using {} '{}'",
-						keyValuesNewAlgorithm,
-						GeneratorConstants.ALGORITHM_FIELD, algorithm);
-				logger.info("Available algorithms are: {}",
-						EnumUtils.getEnumList(Algorithm.class).toString());
-				ok = false;
-			}
-		} else {
+		if (keyValuesNewAlgorithm == null || keyValuesNewAlgorithm.isBlank()) {
 			logger.info(
 					GeneratorConstants.ALGORITHM_FIELD.toLowerCase()
 							+ " not found in propertyKeyValues, using {} '{}'",
 					GeneratorConstants.ALGORITHM_FIELD, algorithm);
-			ok = false;
+			return false;
 		}
-		return ok;
+		final Algorithm target = EnumUtils.getEnumIgnoreCase(Algorithm.class,
+				keyValuesNewAlgorithm.trim());
+		if (target == null) {
+			logger.info("Algorithm {} not found, using {} '{}'; available: {}",
+					keyValuesNewAlgorithm, GeneratorConstants.ALGORITHM_FIELD,
+					algorithm, EnumUtils.getEnumList(Algorithm.class));
+			publishLastError("proprietà '"
+					+ GeneratorConstants.ALGORITHM_FIELD.toLowerCase()
+					+ "': valore '" + keyValuesNewAlgorithm
+					+ "' rifiutato (algoritmi: "
+					+ EnumUtils.getEnumList(Algorithm.class) + "), resta "
+					+ algorithm);
+			return false;
+		}
+		algorithm = target;
+		return true;
 	}
 
 	/**
@@ -575,11 +539,16 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 		if (keyValuesNewDelay != null && !keyValuesNewDelay.isEmpty()) {
 			long targetDelay = 0L;
 			try {
-				targetDelay = Long.valueOf(keyValuesNewDelay);
+				targetDelay = Long.valueOf(keyValuesNewDelay.trim());
 			} catch (final Exception e) {
 				logger.info("delay is not a number");
 			}
 			if (targetDelay < MIN_DELAY) {
+				publishLastError("proprietà '"
+						+ GeneratorConstants.DELAY_FIELD.toLowerCase()
+						+ "': valore '" + keyValuesNewDelay
+						+ "' rifiutato (intero di almeno " + MIN_DELAY
+						+ " ms), resta " + delay);
 				logger.info(
 						GeneratorConstants.DELAY_FIELD.toLowerCase()
 								+ " is less than {}ms, using {} '{}'",
@@ -765,53 +734,35 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 
 		// Gestisce modifica del Min
 		if (label.equals(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase())) {
-			final long previous = min;
-			try {
-				final long target = Long
-						.valueOf(value.getValue().getValue().toString());
-				if (target <= max) {
-					min = target;
-					setProperty(minProperty, min);
-				} else {
-					logger.warn(
-							"Changing min from {} to {} is not allowed because {} is {}",
-							previous, target,
-							GeneratorConstants.MAX_VALUE_FIELD, max);
-					property(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(),
-							previous);
-				}
-			} catch (final NumberFormatException e) {
-				logger.warn(
-						"Changing min from {} to {} is not allowed (not a number)",
-						previous, value.getValue().getValue());
-				property(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(),
-						previous);
+			final double previous = min;
+			final String text = value.getValue().getValue().toString();
+			final Double target = toDouble(text);
+			if (target == null) {
+				refuseBound(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(),
+						text, "non è un numero", previous);
+			} else if (target > max) {
+				refuseBound(GeneratorConstants.MIN_VALUE_FIELD.toLowerCase(),
+						text, "è maggiore di max (" + max + ")", previous);
+			} else {
+				min = target;
+				setProperty(minProperty, min);
 			}
 		}
 
 		// Gestisce modifica del Max
 		if (label.equals(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase())) {
-			final long previous = max;
-			try {
-				final long target = Long
-						.valueOf(value.getValue().getValue().toString());
-				if (target >= min) {
-					max = target;
-					setProperty(maxProperty, max);
-				} else {
-					logger.warn(
-							"Changing max from {} to {} is not allowed because {} is {}",
-							previous, target,
-							GeneratorConstants.MIN_VALUE_FIELD, min);
-					property(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(),
-							previous);
-				}
-			} catch (final NumberFormatException e) {
-				logger.warn(
-						"Changing max from {} to {} is not allowed (not a number)",
-						previous, value.getValue().getValue());
-				property(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(),
-						previous);
+			final double previous = max;
+			final String text = value.getValue().getValue().toString();
+			final Double target = toDouble(text);
+			if (target == null) {
+				refuseBound(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(),
+						text, "non è un numero", previous);
+			} else if (target < min) {
+				refuseBound(GeneratorConstants.MAX_VALUE_FIELD.toLowerCase(),
+						text, "è minore di min (" + min + ")", previous);
+			} else {
+				max = target;
+				setProperty(maxProperty, max);
 			}
 		}
 
@@ -823,6 +774,51 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 					postNodeIdData, value.getValue().getValue().toString());
 			property(GeneratorConstants.POST_NODE_ID_DATA_FIELD.toLowerCase(),
 					postNodeIdData);
+		}
+	}
+
+	/**
+	 * Parses a bound (min or max) given at creation; a value that is not a
+	 * number is refused in run!last-error and the default is used.
+	 */
+	private double parseBound(final String text, final String field,
+			final double defaultValue) {
+		if (text == null || text.isBlank()) {
+			return defaultValue;
+		}
+		final Double parsed = toDouble(text);
+		if (parsed == null) {
+			logger.warn("{} '{}' is not a number, using the default {}", field,
+					text, defaultValue);
+			publishConfigurationError(field, text, "non è un numero",
+					defaultValue);
+			return defaultValue;
+		}
+		return parsed;
+	}
+
+	/** Refuses a runtime change of a bound and restores the previous value. */
+	private void refuseBound(final String field, final String text,
+			final String reason, final double previous) {
+		logger.warn("Changing {} to {} is not allowed: {}", field, text, reason);
+		publishLastError("proprietà '" + field + "': valore '" + text
+				+ "' rifiutato (" + reason + "), resta " + plainNumber(previous));
+		property(field, plainNumber(previous));
+	}
+
+	/** A whole double as Long (0 and not 0.0), the others as they are. */
+	private static Number plainNumber(final double value) {
+		return value == Math.rint(value) && Math.abs(value) < 9.0E15
+				? (Number) Long.valueOf((long) value)
+				: (Number) Double.valueOf(value);
+	}
+
+	private static Double toDouble(final String text) {
+		try {
+			final double d = Double.parseDouble(text.trim().replace(',', '.'));
+			return Double.isFinite(d) ? d : null;
+		} catch (final RuntimeException e) {
+			return null;
 		}
 	}
 

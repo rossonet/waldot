@@ -38,12 +38,12 @@ public class CreateSimulatorCommand extends AbstractCreateVertexCommand {
 						VertexParameter.optional(
 								GeneratorConstants.MIN_VALUE_FIELD
 										.toLowerCase(),
-								VariableNodeTypes.Int64,
+								VariableNodeTypes.Double,
 								GeneratorConstants.MIN_VALUE_DESCRIPTION),
 						VertexParameter.optional(
 								GeneratorConstants.MAX_VALUE_FIELD
 										.toLowerCase(),
-								VariableNodeTypes.Int64,
+								VariableNodeTypes.Double,
 								GeneratorConstants.MAX_VALUE_DESCRIPTION),
 						VertexParameter.optional(
 								GeneratorConstants.POST_NODE_ID_DATA_FIELD
@@ -57,7 +57,7 @@ public class CreateSimulatorCommand extends AbstractCreateVertexCommand {
 		final String algorithm = findValue(keyValues,
 				GeneratorConstants.ALGORITHM_FIELD.toLowerCase());
 		if (algorithm != null
-				&& !EnumUtils.isValidEnum(Algorithm.class, algorithm)) {
+				&& EnumUtils.getEnumIgnoreCase(Algorithm.class, algorithm.trim()) == null) {
 			return "unknown algorithm '" + algorithm + "', valid values are "
 					+ Arrays.toString(Algorithm.values());
 		}
@@ -70,11 +70,11 @@ public class CreateSimulatorCommand extends AbstractCreateVertexCommand {
 				GeneratorConstants.MIN_VALUE_FIELD.toLowerCase());
 		final String max = findValue(keyValues,
 				GeneratorConstants.MAX_VALUE_FIELD.toLowerCase());
-		final long minValue = min != null
-				? Long.parseLong(min.trim())
+		final double minValue = min != null
+				? Double.parseDouble(min.trim())
 				: GeneratorConstants.DEFAULT_MIN_VALUE;
-		final long maxValue = max != null
-				? Long.parseLong(max.trim())
+		final double maxValue = max != null
+				? Double.parseDouble(max.trim())
 				: GeneratorConstants.DEFAULT_MAX_VALUE;
 		if (minValue > maxValue) {
 			return "Min (" + minValue + ") must not be greater than Max ("
