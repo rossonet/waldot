@@ -524,7 +524,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	}
 
 	@Override
-	public String deleteDirectory(String directoryNodeId) {
+	public String deleteDirectory(String requestedDirectory) {
+		final String directoryNodeId = resolveDirectory(requestedDirectory);
 		if (GraphChangeRecorder.isRecording()) {
 			// the strategy removes the content directly: describe it before
 			for (final NodeId id : directoryContent(directoryNodeId)) {
@@ -544,7 +545,27 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public java.util.List<NodeId> directoryContent(final String directoryNodeId) {
-		return opcMappingStrategy.directoryContent(directoryNodeId);
+		return opcMappingStrategy.directoryContent(resolveDirectory(directoryNodeId));
+	}
+
+	/**
+	 * A folder can be given as its NodeId ({@code v:impianto/zona}) or as the
+	 * value of the 'directory' property ({@code impianto/zona}): when the text is
+	 * not a node, the folder of the vertices with that path is used.
+	 */
+	private String resolveDirectory(final String requested) {
+		if (requested == null) {
+			return null;
+		}
+		final String text = requested.strip();
+		final NodeId direct = MiloStrategy.getNodeIdManager().convert(getGremlinGraph(), text);
+		if (direct != null && hasNodeId(direct) || text.startsWith("ns=") || text.startsWith("v:")
+				|| text.startsWith("e:")) {
+			return text;
+		}
+		final String folder = "v:" + text.replaceAll("^/+|/+$", "");
+		final NodeId folderId = MiloStrategy.getNodeIdManager().convert(getGremlinGraph(), folder);
+		return folderId != null && hasNodeId(folderId) ? folder : text;
 	}
 
 	@Override

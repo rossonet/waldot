@@ -78,6 +78,18 @@ class DirectoryContentCommandTest {
 	}
 
 	@Test
+	void plainPathOfTheFolder() throws Exception {
+		// the value of the 'directory' property works as well as the folder NodeId
+		assertEquals(content("v:plant/area-1").get("count").asInt(), content("plant/area-1").get("count").asInt());
+		assertEquals(2, content("/plant/area-1/").get("vertices").size());
+		final Object[] deleted = call(graph.getWaldotNamespace().getConfiguration().getDeleteDirectoryLabel(),
+				"plant/area-2");
+		assertEquals("", deleted[1], String.valueOf(deleted[1]));
+		assertTrue(!graph.traversal().V(new org.eclipse.milo.opcua.stack.core.types.builtin.NodeId(2, "tank-1"))
+				.hasNext());
+	}
+
+	@Test
 	void singleVertex() throws Exception {
 		final JsonNode content = content("other-1");
 		assertEquals(1, content.get("vertices").size(), content.toString());
