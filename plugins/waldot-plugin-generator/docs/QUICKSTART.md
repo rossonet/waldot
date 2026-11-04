@@ -122,8 +122,8 @@ constant = graph.addVertex(
 |------------|--------|---------|--------------|----------------------------|
 | Algorithm  | String | incremental | See above | Generation algorithm       |
 | Delay      | Long   | 1000    | >= 10 ms     | Update interval (ms)       |
-| Min        | Long   | 0       | Any          | Minimum value              |
-| Max        | Long   | 20000   | > Min        | Maximum value              |
+| Min        | Double | 0       | Any (decimals allowed) | Minimum value    |
+| Max        | Double | 20000   | >= Min       | Maximum value              |
 | data       | Double | (random)| [Min, Max]   | Generated value (read-only)|
 
 ## OPC-UA Integration

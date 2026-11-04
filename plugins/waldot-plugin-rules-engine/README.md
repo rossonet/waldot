@@ -56,6 +56,12 @@ Tutte le etichette sono minuscole e coincidono con le chiavi passate ad `addVert
 | `total` | Int64 | 0 | no | Eventi valutati |
 | `executed` | Int64 | 0 | no | Azioni eseguite con successo |
 | `errors` | Int64 | 0 | no | Errori (compilazione, eccezioni, condizione non booleana) |
+| `last-error` | String | vuoto | no | Ultimo errore: fase e messaggio JEXL con riga, colonna ed estratto |
+| `last-error-time` | String | vuoto | no | Istante (ISO-8601, UTC) dell'ultimo errore |
+
+Comandi di vertice: `reset-counters` (azzera contatori e ultimo errore) e
+`run-once` (esegue subito condizione e azione; uscite `status`, `condition`,
+`action`, `error`).
 
 ### `rules:compute`
 
@@ -93,7 +99,7 @@ I comandi `show case` creano grafi "vivi" (generatori `sim:generator` + edge `li
 
 Ogni esecuzione ha un contesto proprio: le variabili assegnate non passano alla successiva.
 
-`log`, `g` (traversal), `graph`, `cmd`, `self` (la regola), `math`, `rand` (`java.util.Random`) e tutti i comandi console, per nome (inclusi quelli dei plugin caricati dopo).
+`log`, `g` (traversal), `graph`, `cmd`, `self` (la regola), `math`, `rand` (`java.util.Random`) e tutti i comandi console, per nome (inclusi quelli dei plugin caricati dopo). È il contesto `rule` di `jexl check`; contesti, messaggi d'errore e trappole del linguaggio sono in [Espressioni JEXL](docs/JEXL_EXPRESSIONS.md).
 
 ## Debug
 

@@ -55,11 +55,21 @@ tempSensor.property("Algorithm", "random")
 
 | Property  | Type   | Default | Description             |
 |-----------|--------|---------|-------------------------|
-| Algorithm | String | incremental | Generation algorithm |
-| Delay     | Long   | 1000    | Update interval (ms)    |
-| Min       | Long   | 0       | Minimum value           |
-| Max       | Long   | 20000   | Maximum value           |
+| Algorithm | String | incremental | Generation algorithm (case insensitive) |
+| Delay     | Long   | 1000    | Update interval (ms, at least 10) |
+| Min       | Double | 0       | Minimum value (decimals allowed, e.g. 20.6; also 20,6) |
+| Max       | Double | 20000   | Maximum value, not lower than Min |
 | data      | Double | (random)| Generated value (read-only) |
+
+With whole Min and Max the values stay whole: `incremental` and `decremental`
+move by 1 and wrap around (`incremental` restarts from Min after Max). With
+decimal bounds the step is still 1 (20.6, 21.6, ...).
+
+Invalid values are not silently replaced: a bound that is not a number, Min
+greater than Max, an unknown algorithm or a delay below 10 ms are reported in
+`run!last-error` (with `run!last-error-time`), with the value refused and the
+one used instead. `wotctl type describe sim:generator` lists the parameters
+with their types, defaults and allowed values.
 
 ## Examples
 
