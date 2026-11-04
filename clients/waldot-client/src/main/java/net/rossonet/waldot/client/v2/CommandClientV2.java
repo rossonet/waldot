@@ -45,6 +45,12 @@ final class CommandClientV2 implements WaldotCommandClient {
 	private static final int MAX_FOLDER_DEPTH = 16;
 
 	private volatile List<CommandDescriptor> globalCommands;
+	/**
+	 * Comandi globali gia' cercati per nome: {@link #globalCommand(String)} non
+	 * descrive tutti i comandi (due richieste per comando, oltre 150 richieste
+	 * su un server con molti plugin), ma solo quello cercato.
+	 */
+	private final java.util.concurrent.ConcurrentHashMap<String, CommandDescriptor> globalByName = new java.util.concurrent.ConcurrentHashMap<>();
 	private final WaldotClientImplV2 owner;
 
 	CommandClientV2(final WaldotClientImplV2 owner) {
@@ -148,14 +154,60 @@ final class CommandClientV2 implements WaldotCommandClient {
 		return commands;
 	}
 
-	@Override
-	public Optional<CommandDescriptor> globalCommand(final String name) {
-		for (final CommandDescriptor command : globalCommands()) {
-			if (command.name() != null && command.name().equals(name)) {
-				return Optional.of(command);
+	/**
+	 * Primo metodo con quel nome nell'ordine di {@link #discover}, descritto da
+	 * solo: si visitano le cartelle ma si leggono gli argomenti del solo
+	 * comando trovato.
+	 */
+	private CommandDescriptor find(final NodeId folder, final String path, final int depth, final String name) {
+		if (depth > MAX_FOLDER_DEPTH) {
+			return null;
+		}
+		for (final ReferenceInfo reference : owner.browser().browse(folder,
+				BrowseFilter.children().withNodeClasses(NodeClass.Object, NodeClass.Method))) {
+			if (reference.targetId() == null) {
+				continue;
+			}
+			if (reference.nodeClass() == NodeClass.Method) {
+				if (name.equals(reference.browseName())) {
+					return describe(folder, reference, path);
+				}
+			} else if (reference.nodeClass() == NodeClass.Object) {
+				final CommandDescriptor found = find(reference.targetId(),
+						path.isEmpty() ? reference.browseName() : path + "/" + reference.browseName(), depth + 1,
+						name);
+				if (found != null) {
+					return found;
+				}
 			}
 		}
-		return Optional.empty();
+		return null;
+	}
+
+	@Override
+	public Optional<CommandDescriptor> globalCommand(final String name) {
+		if (name == null) {
+			return Optional.empty();
+		}
+		final List<CommandDescriptor> all = globalCommands;
+		if (all != null) {
+			for (final CommandDescriptor command : all) {
+				if (name.equals(command.name())) {
+					return Optional.of(command);
+				}
+			}
+			return Optional.empty();
+		}
+		final CommandDescriptor cached = globalByName.get(name);
+		if (cached != null) {
+			return Optional.of(cached);
+		}
+		final CommandDescriptor found = find(
+				owner.browser().waldotNodeId(owner.getConfiguration().getCommandsRootNodeId()), "", 0, name);
+		if (found != null) {
+			globalByName.put(name, found);
+		}
+		return Optional.ofNullable(found);
 	}
 
 	@Override
@@ -208,6 +260,7 @@ final class CommandClientV2 implements WaldotCommandClient {
 	@Override
 	public void refresh() {
 		globalCommands = null;
+		globalByName.clear();
 	}
 
 	@Override
