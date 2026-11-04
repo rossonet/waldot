@@ -75,6 +75,7 @@ import net.rossonet.waldot.commands.ImportGraphCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.commands.QueryJsonCommand;
 import net.rossonet.waldot.commands.ReadGraphBlockCommand;
+import net.rossonet.waldot.commands.FileCommands;
 import net.rossonet.waldot.commands.JexlCheckCommand;
 import net.rossonet.waldot.commands.RenderGraphCommand;
 import net.rossonet.waldot.commands.RunScriptCommand;
@@ -231,6 +232,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		registerCommand(new RunScriptCommand(this));
 		registerCommand(new TypeCommands.List(this));
 		registerCommand(new TypeCommands.Describe(this));
+		registerCommand(new FileCommands.ListFiles(this));
+		registerCommand(new FileCommands.Get(this, graphTransfers));
 	}
 
 	@Override

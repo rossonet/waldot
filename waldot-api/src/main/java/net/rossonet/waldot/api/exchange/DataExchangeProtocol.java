@@ -70,6 +70,15 @@ public final class DataExchangeProtocol {
 	/** Describes the properties of a vertex type as a schema (folder information). */
 	public static final String TYPE_DESCRIBE_COMMAND = "type describe";
 	public static final String ARG_TYPE = "type";
+	/** Lists the server file roots or the files of a root (folder information). */
+	public static final String FILE_LIST_COMMAND = "file list";
+	/**
+	 * Reads a file of a server file root: inline base64 or a transferId for
+	 * {@value #READ_GRAPH_BLOCK_COMMAND} (folder manage).
+	 */
+	public static final String FILE_GET_COMMAND = "file get";
+	public static final String ARG_ROOT = "root";
+	public static final String ARG_PATH = "path";
 
 	/** Input/output argument names. */
 	public static final String ARG_COMMAND = "command";
