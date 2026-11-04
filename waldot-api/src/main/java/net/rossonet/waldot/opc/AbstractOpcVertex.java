@@ -283,6 +283,8 @@ public abstract class AbstractOpcVertex extends GremlinElement
 						logger.warn(
 								"Error executing callback for property {} with value {}",
 								label, convertedValue, e);
+						publishConfigurationError(label, value,
+								e.getMessage(), defaultValue);
 						if (defaultValue != null) {
 							logger.info(
 									"because of the error, using default value {} for property {} of type {}",
@@ -301,6 +303,9 @@ public abstract class AbstractOpcVertex extends GremlinElement
 					}
 				}
 			} else {
+				publishConfigurationError(label, value,
+						"non convertibile in " + javaType.getSimpleName(),
+						defaultValue);
 				if (defaultValue != null) {
 					logger.warn(
 							"Property {} value {} is not valid for type {}, using default value {}",
@@ -421,6 +426,9 @@ public abstract class AbstractOpcVertex extends GremlinElement
 							logger.warn(
 									"Error executing callback for property {} with value {}",
 									changedPropertyLabel, value, e);
+							publishConfigurationError(changedPropertyLabel,
+									String.valueOf(value), e.getMessage(),
+									null);
 							return false;
 						}
 					} else {
@@ -847,9 +855,17 @@ public abstract class AbstractOpcVertex extends GremlinElement
 			if (entry != null && opcDataValue != null
 					&& opcDataValue.getValue() != null
 					&& opcDataValue.getValue().getValue() != null) {
+				final String text = opcDataValue.getValue().getValue()
+						.toString();
 				final Object convertedValue = valueConversion(label,
-						entry.getJavaType(),
-						opcDataValue.getValue().getValue().toString());
+						entry.getJavaType(), text);
+				if (convertedValue == null && !text.isEmpty()) {
+					publishConfigurationError(label, text,
+							"non convertibile in "
+									+ entry.getJavaType().getSimpleName(),
+							null);
+					return;
+				}
 				final boolean isDirty = checkPropertyValueChange(label,
 						entry.getJavaType().cast(convertedValue),
 						entry.getQualifiedProperty(),
@@ -889,13 +905,14 @@ public abstract class AbstractOpcVertex extends GremlinElement
 					convertedValue = (DATA_TYPE) value;
 					break;
 				case "Integer" :
-					convertedValue = (DATA_TYPE) Integer.valueOf(value);
+					convertedValue = (DATA_TYPE) Integer
+							.valueOf(Math.toIntExact(parseWhole(value)));
 					break;
 				case "Long" :
-					convertedValue = (DATA_TYPE) Long.valueOf(value);
+					convertedValue = (DATA_TYPE) Long.valueOf(parseWhole(value));
 					break;
 				case "Boolean" :
-					convertedValue = (DATA_TYPE) Boolean.valueOf(value);
+					convertedValue = (DATA_TYPE) parseBoolean(value);
 					break;
 				case "Double" :
 					convertedValue = (DATA_TYPE) Double.valueOf(value);
@@ -917,10 +934,85 @@ public abstract class AbstractOpcVertex extends GremlinElement
 							javaType.getSimpleName(), label);
 			}
 		} catch (final Throwable e) {
-			logger.error("Error converting value {} to type {} for property {}",
-					value, javaType.getSimpleName(), label, e);
+			logger.warn("Error converting value {} to type {} for property {}: {}",
+					value, javaType.getSimpleName(), label, e.toString());
 		}
 		return convertedValue;
+	}
+
+	/**
+	 * Parses a whole number; "5000.0" is accepted, "20.6" is not.
+	 */
+	static long parseWhole(final String value) {
+		final String text = value.trim();
+		try {
+			return Long.parseLong(text);
+		} catch (final NumberFormatException e) {
+			final double d = Double.parseDouble(text);
+			if (Double.isFinite(d) && d == Math.rint(d)
+					&& Math.abs(d) < 9.007199254740992E15) {
+				return (long) d;
+			}
+			throw new NumberFormatException(
+					"'" + value + "' non è un numero intero");
+		}
+	}
+
+	/**
+	 * Parses a boolean: true/false, 1/0, yes/no, on/off (any case); anything
+	 * else is an error instead of a silent false.
+	 */
+	static Boolean parseBoolean(final String value) {
+		switch (value.trim().toLowerCase(java.util.Locale.ROOT)) {
+			case "true", "1", "yes", "on", "si", "sì" :
+				return Boolean.TRUE;
+			case "false", "0", "no", "off" :
+				return Boolean.FALSE;
+			default :
+				throw new IllegalArgumentException(
+						"'" + value + "' non è un booleano");
+		}
+	}
+
+	/** Runtime property with the last configuration or execution error. */
+	public static final String LAST_ERROR_PROPERTY = MiloStrategy.RUNTIME_DATA_PREFIX
+			+ "last-error";
+
+	/** Time (ISO-8601) of {@link #LAST_ERROR_PROPERTY}. */
+	public static final String LAST_ERROR_TIME_PROPERTY = MiloStrategy.RUNTIME_DATA_PREFIX
+			+ "last-error-time";
+
+	/**
+	 * Publishes in {@code run!last-error} that a configuration value has been
+	 * refused, so that the error is visible on the vertex and not only in the log.
+	 *
+	 * @param label        the property
+	 * @param value        the refused value
+	 * @param reason       why it is refused
+	 * @param defaultValue the value used instead, null if none
+	 */
+	protected void publishConfigurationError(final String label,
+			final String value, final String reason,
+			final Object defaultValue) {
+		publishLastError("proprietà '" + label + "': valore '" + value
+				+ "' rifiutato (" + reason + ")"
+				+ (defaultValue == null
+						? ""
+						: ", uso il default " + defaultValue));
+	}
+
+	/**
+	 * Publishes a message in {@code run!last-error} with its time in
+	 * {@code run!last-error-time}.
+	 */
+	protected void publishLastError(final String message) {
+		try {
+			property(LAST_ERROR_PROPERTY, message);
+			property(LAST_ERROR_TIME_PROPERTY, Instant.now().toString());
+		} catch (final RuntimeException e) {
+			logger.warn("Cannot publish {} on {}: {}", LAST_ERROR_PROPERTY,
+					getNodeId(), message, e);
+		}
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
