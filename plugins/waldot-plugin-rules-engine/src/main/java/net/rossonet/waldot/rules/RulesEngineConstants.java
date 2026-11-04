@@ -45,6 +45,15 @@ public final class RulesEngineConstants {
 	public static final String EXECUTION_TIMEOUT_MS_FIELD_DESCRIPTION = "Maximum duration in milliseconds of an action executed by the compute vertex; after that the action is cancelled and counted as an error of the rule. Default: 120000 (2 minutes)";
 	public static final String FIRE_EDGE_PARAMETER = "fire";
 	public static final String HYSTERESIS_LABEL = "hysteresis";
+	public static final String LAST_ERROR_LABEL = "last-error";
+	public static final String LAST_ERROR_LABEL_DESCRIPTION = "Message of the last failure of the rule: phase (condition or action, compilation or execution, timeout) and the JEXL error with line, column and excerpt of the script. Empty after reset-counters. Maintained by the engine.";
+	public static final String LAST_ERROR_TIME_LABEL = "last-error-time";
+	public static final String LAST_ERROR_TIME_LABEL_DESCRIPTION = "Time (ISO-8601, UTC) of the last failure of the rule. Empty after reset-counters. Maintained by the engine.";
+	public static final String RESET_COUNTERS_COMMAND = "reset-counters";
+	public static final String RESET_COUNTERS_COMMAND_DESCRIPTION = "Sets total, executed and errors to 0 and clears last-error and last-error-time.";
+	public static final String RUN_ONCE_COMMAND = "run-once";
+	public static final String RUN_ONCE_COMMAND_DESCRIPTION = "Runs the rule now, in its own context (self is the rule): evaluates the condition and, when true, the action. Returns the outcome, the results and the error; the run is counted like the others.";
+	public static final long RUN_ONCE_TIMEOUT_MS = 30_000L;
 	public static final String HYSTERESIS_LABEL_DESCRIPTION = "Time window in milliseconds in which repeated notifications from the same source (same vertex and property) are discarded. 0 = disabled (default).";
 	public static final String PRIORITY_FACTOR_FIELD = "factor";
 	public static final String PRIORITY_FACTOR_FIELD_DESCRIPTION = "Multiplier of the edge priority in the weight of a rule: weight = priority * factor + queue size. Rules with higher weight are executed first. Default: 100.0";

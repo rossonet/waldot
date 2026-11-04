@@ -2,11 +2,19 @@ package net.rossonet.waldot.rules.vertices;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ushort;
 
+import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BooleanSupplier;
 
 import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlInfo;
 import org.apache.commons.jexl3.JexlScript;
+import org.eclipse.milo.opcua.sdk.core.ValueRanks;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventType;
 import org.eclipse.milo.opcua.sdk.server.model.objects.BaseEventTypeNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
@@ -27,6 +35,8 @@ import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.jexl.ClonableMapContext;
+import net.rossonet.waldot.jexl.JexlErrorFormatter;
+import net.rossonet.waldot.opc.AbstractOpcCommand;
 import net.rossonet.waldot.rules.RulesEngineConstants;
 import net.rossonet.waldot.rules.WaldotRulesEnginePlugin;
 import net.rossonet.waldot.rules.events.FireableAction;
@@ -139,6 +149,26 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 		AFTER_ACTION_COMPILE, AFTER_ACTION_COMPILE_EXCEPTION, AFTER_ACTION_EXECUTION, AFTER_ACTION_EXECUTION_EXCEPTION, AFTER_CONDITION_COMPILE, AFTER_CONDITION_COMPILE_EXCEPTION, AFTER_CONDITION_EXECUTION, AFTER_CONDITION_EXECUTION_EXCEPTION, BEFORE_ACTION_COMPILE, BEFORE_ACTION_EXECUTION, BEFORE_CONDITION_COMPILE, BEFORE_CONDITION_EXECUTION
 	}
 
+	/**
+	 * Outcome of one execution of the rule.
+	 *
+	 * @param status          {@code executed} (condition true, action done),
+	 *                        {@code skipped} (condition false), {@code error},
+	 *                        {@code closed}, {@code running} (run-once still in
+	 *                        progress after its timeout)
+	 * @param conditionResult value returned by the condition, may be null
+	 * @param actionResult    value returned by the action, may be null
+	 * @param error           message of the error, null without errors
+	 */
+	public record Execution(String status, Object conditionResult, Object actionResult, String error) {
+
+		/** Output of the run-once command: status, condition, action, error. */
+		public String[] toCommandOutput() {
+			return new String[] { status, String.valueOf(conditionResult), String.valueOf(actionResult),
+					error == null ? "" : error };
+		}
+	}
+
 	public final class RuleVertexFireableAction extends FireableAction {
 
 		@Override
@@ -146,119 +176,13 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 			sendDebugEvent(DebugEventType.AFTER_ACTION_EXECUTION_EXCEPTION,
 					"Action cancelled: execution timeout reached");
 			logger.warn("Rule action timed out for {}", getNodeId());
-			updateThrowable();
+			recordError("timeout dell'azione: esecuzione annullata dal compute vertex");
 		}
 
 		@Override
 		public void run() {
 			Thread.currentThread().setName(getNodeId().toParseableString());
-			if (closed) {
-				return;
-			}
-			try {
-				updateTotal();
-				final String conditionSource = getCondition();
-				CompiledScript condition = compiledCondition;
-				if (condition == null
-						|| !condition.source.equals(conditionSource)) {
-					try {
-						sendDebugEvent(DebugEventType.BEFORE_CONDITION_COMPILE,
-								null);
-						condition = new CompiledScript(conditionSource,
-								engine().createScript(conditionSource));
-						compiledCondition = condition;
-						sendDebugEvent(DebugEventType.AFTER_CONDITION_COMPILE,
-								null);
-					} catch (final Throwable e) {
-						sendDebugEvent(
-								DebugEventType.AFTER_CONDITION_COMPILE_EXCEPTION,
-								LogHelper.stackTraceToString(e,
-										2 + getDebug()));
-						logger.error("Error compiling rule vertex condition",
-								e);
-						updateThrowable();
-						return;
-					}
-				}
-				final ClonableMapContext context = newContext();
-				boolean conditionResult = false;
-				try {
-					sendDebugEvent(DebugEventType.BEFORE_CONDITION_EXECUTION,
-							null);
-					final Object conditionResultObject = condition.script
-							.execute(context);
-					if (conditionResultObject instanceof Boolean) {
-						conditionResult = (Boolean) conditionResultObject;
-						sendDebugEvent(DebugEventType.AFTER_CONDITION_EXECUTION,
-								conditionResultObject.toString());
-					} else {
-						logger.warn(
-								"Condition script did not return a boolean value, result: '{}'",
-								conditionResultObject);
-						sendDebugEvent(
-								DebugEventType.AFTER_CONDITION_EXECUTION_EXCEPTION,
-								"Condition script did not return a boolean value, result: '"
-										+ conditionResultObject + "'");
-						updateThrowable();
-						return;
-					}
-				} catch (final Throwable e) {
-					sendDebugEvent(
-							DebugEventType.AFTER_CONDITION_EXECUTION_EXCEPTION,
-							LogHelper.stackTraceToString(e, 2 + getDebug()));
-					logger.error("Error executing rule vertex condition", e);
-					updateThrowable();
-					return;
-				}
-				if (!conditionResult) {
-					return;
-				}
-				final String actionSource = getAction();
-				CompiledScript actionScript = compiledAction;
-				if (actionScript == null
-						|| !actionScript.source.equals(actionSource)) {
-					try {
-						sendDebugEvent(DebugEventType.BEFORE_ACTION_COMPILE,
-								null);
-						actionScript = new CompiledScript(actionSource,
-								engine().createScript(actionSource));
-						compiledAction = actionScript;
-						sendDebugEvent(DebugEventType.AFTER_ACTION_COMPILE,
-								null);
-					} catch (final Throwable e) {
-						sendDebugEvent(
-								DebugEventType.AFTER_ACTION_COMPILE_EXCEPTION,
-								LogHelper.stackTraceToString(e,
-										2 + getDebug()));
-						logger.error("Error compiling rule vertex action", e);
-						updateThrowable();
-						return;
-					}
-				}
-				try {
-					sendDebugEvent(DebugEventType.BEFORE_ACTION_EXECUTION,
-							null);
-					final Object actionResultObject = actionScript.script
-							.execute(context);
-					updateExecuted();
-					sendDebugEvent(DebugEventType.AFTER_ACTION_EXECUTION,
-							"Action executed successfully, result: '"
-									+ actionResultObject + "'");
-				} catch (final Throwable e) {
-					sendDebugEvent(
-							DebugEventType.AFTER_ACTION_EXECUTION_EXCEPTION,
-							LogHelper.stackTraceToString(e, 2 + getDebug()));
-					if (!isTimedOut()) {
-						updateThrowable();
-					}
-					logger.error("Error executing rule vertex action", e);
-				}
-			} catch (final Throwable t) {
-				logger.error("Error executing rule vertex", t);
-				if (!isTimedOut()) {
-					updateThrowable();
-				}
-			}
+			execute(this::isTimedOut);
 		}
 
 	}
@@ -292,6 +216,12 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
 				RulesEngineConstants.ERRORS_SIZE_LABEL, NodeIds.Int64,
 				RulesEngineConstants.ERRORS_SIZE_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.LAST_ERROR_LABEL, NodeIds.String,
+				RulesEngineConstants.LAST_ERROR_LABEL_DESCRIPTION);
+		PluginListener.addParameterToTypeNode(waldotNamespace, typeNode,
+				RulesEngineConstants.LAST_ERROR_TIME_LABEL, NodeIds.String,
+				RulesEngineConstants.LAST_ERROR_TIME_LABEL_DESCRIPTION);
 	}
 
 	private volatile boolean closed = false;
@@ -357,6 +287,26 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 		addManagedProperty(RulesEngineConstants.ERRORS_SIZE_LABEL,
 				NodeIds.Int64, Long.class, false, 0L, null, false,
 				propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.LAST_ERROR_LABEL, NodeIds.String,
+				String.class, false, "", null, false, propertyKeyValues);
+		addManagedProperty(RulesEngineConstants.LAST_ERROR_TIME_LABEL,
+				NodeIds.String, String.class, false, "", null, false,
+				propertyKeyValues);
+		addVertexCommand(RulesEngineConstants.RESET_COUNTERS_COMMAND,
+				RulesEngineConstants.RESET_COUNTERS_COMMAND_DESCRIPTION,
+				(ctx, in) -> {
+					resetCounters();
+					return new String[] { "reset" };
+				});
+		final AbstractOpcCommand runOnce = addVertexCommand(
+				RulesEngineConstants.RUN_ONCE_COMMAND,
+				RulesEngineConstants.RUN_ONCE_COMMAND_DESCRIPTION,
+				(ctx, in) -> runOnce().toCommandOutput());
+		for (final String output : new String[] { "status", "condition",
+				"action", "error" }) {
+			runOnce.addOutputArgument(output, NodeIds.String,
+					ValueRanks.Scalar, null, LocalizedText.english(output));
+		}
 		// i contatori ripartono dai valori presenti nelle proprietà (es.
 		// vertice ricreato)
 		total.set(readCounter(RulesEngineConstants.TOTAL_SIZE_LABEL));
@@ -381,6 +331,172 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 					"Hysteresis must be non-negative, but it is " + hysteresis);
 		}
 		setHysteresisTimeMs(hysteresis);
+	}
+
+	/**
+	 * Runs the rule once: condition and, when true, action. Counters, last-error
+	 * and debug events are updated.
+	 *
+	 * @param timedOut tells whether the compute vertex cancelled the execution
+	 *                 (errors after a timeout are already counted)
+	 * @return outcome of the execution
+	 */
+	public Execution execute(final BooleanSupplier timedOut) {
+		if (closed) {
+			return new Execution("closed", null, null, null);
+		}
+		try {
+			updateTotal();
+			final String conditionSource = getCondition();
+			CompiledScript condition = compiledCondition;
+			if (condition == null || !condition.source.equals(conditionSource)) {
+				try {
+					sendDebugEvent(DebugEventType.BEFORE_CONDITION_COMPILE, null);
+					condition = new CompiledScript(conditionSource,
+							engine().createScript(new JexlInfo(RulesEngineConstants.CONDITION_FIELD, 1, 1),
+									conditionSource));
+					compiledCondition = condition;
+					sendDebugEvent(DebugEventType.AFTER_CONDITION_COMPILE, null);
+				} catch (final Throwable e) {
+					sendDebugEvent(DebugEventType.AFTER_CONDITION_COMPILE_EXCEPTION,
+							LogHelper.stackTraceToString(e, 2 + getDebug()));
+					logger.error("Error compiling rule vertex condition", e);
+					return new Execution("error", null, null,
+							recordError("compilazione della condizione", conditionSource, e));
+				}
+			}
+			final ClonableMapContext context = newContext();
+			final Object conditionResultObject;
+			try {
+				sendDebugEvent(DebugEventType.BEFORE_CONDITION_EXECUTION, null);
+				conditionResultObject = condition.script.execute(context);
+			} catch (final Throwable e) {
+				sendDebugEvent(DebugEventType.AFTER_CONDITION_EXECUTION_EXCEPTION,
+						LogHelper.stackTraceToString(e, 2 + getDebug()));
+				logger.error("Error executing rule vertex condition", e);
+				return new Execution("error", null, null,
+						recordError("esecuzione della condizione", conditionSource, e));
+			}
+			if (!(conditionResultObject instanceof Boolean)) {
+				logger.warn("Condition script did not return a boolean value, result: '{}'", conditionResultObject);
+				sendDebugEvent(DebugEventType.AFTER_CONDITION_EXECUTION_EXCEPTION,
+						"Condition script did not return a boolean value, result: '" + conditionResultObject + "'");
+				return new Execution("error", conditionResultObject, null,
+						recordError("la condizione deve restituire un booleano, ha restituito '"
+								+ conditionResultObject + "'"
+								+ (conditionResultObject == null ? "" : " (" + conditionResultObject.getClass().getSimpleName() + ")")));
+			}
+			sendDebugEvent(DebugEventType.AFTER_CONDITION_EXECUTION, conditionResultObject.toString());
+			if (!((Boolean) conditionResultObject)) {
+				return new Execution("skipped", Boolean.FALSE, null, null);
+			}
+			final String actionSource = getAction();
+			CompiledScript actionScript = compiledAction;
+			if (actionScript == null || !actionScript.source.equals(actionSource)) {
+				try {
+					sendDebugEvent(DebugEventType.BEFORE_ACTION_COMPILE, null);
+					actionScript = new CompiledScript(actionSource, engine()
+							.createScript(new JexlInfo(RulesEngineConstants.ACTION_FIELD, 1, 1), actionSource));
+					compiledAction = actionScript;
+					sendDebugEvent(DebugEventType.AFTER_ACTION_COMPILE, null);
+				} catch (final Throwable e) {
+					sendDebugEvent(DebugEventType.AFTER_ACTION_COMPILE_EXCEPTION,
+							LogHelper.stackTraceToString(e, 2 + getDebug()));
+					logger.error("Error compiling rule vertex action", e);
+					return new Execution("error", Boolean.TRUE, null,
+							recordError("compilazione dell'azione", actionSource, e));
+				}
+			}
+			try {
+				sendDebugEvent(DebugEventType.BEFORE_ACTION_EXECUTION, null);
+				final Object actionResultObject = actionScript.script.execute(context);
+				updateExecuted();
+				sendDebugEvent(DebugEventType.AFTER_ACTION_EXECUTION,
+						"Action executed successfully, result: '" + actionResultObject + "'");
+				return new Execution("executed", Boolean.TRUE, actionResultObject, null);
+			} catch (final Throwable e) {
+				sendDebugEvent(DebugEventType.AFTER_ACTION_EXECUTION_EXCEPTION,
+						LogHelper.stackTraceToString(e, 2 + getDebug()));
+				logger.error("Error executing rule vertex action", e);
+				final String message = JexlErrorFormatter.format(actionSource, e);
+				if (!timedOut.getAsBoolean()) {
+					recordError("esecuzione dell'azione: " + message);
+				}
+				return new Execution("error", Boolean.TRUE, null, "esecuzione dell'azione: " + message);
+			}
+		} catch (final Throwable t) {
+			logger.error("Error executing rule vertex", t);
+			final String message = "errore della regola: " + JexlErrorFormatter.format(null, t);
+			if (!timedOut.getAsBoolean()) {
+				recordError(message);
+			}
+			return new Execution("error", null, null, message);
+		}
+	}
+
+	/**
+	 * Runs the rule once on a virtual thread and waits for the outcome up to
+	 * {@link RulesEngineConstants#RUN_ONCE_TIMEOUT_MS}.
+	 */
+	public Execution runOnce() {
+		final CompletableFuture<Execution> future = new CompletableFuture<>();
+		Thread.ofVirtual().name("rule-run-once-" + getNodeId().toParseableString()).start(() -> {
+			try {
+				future.complete(execute(() -> false));
+			} catch (final Throwable e) {
+				future.completeExceptionally(e);
+			}
+		});
+		try {
+			return future.get(RulesEngineConstants.RUN_ONCE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+		} catch (final TimeoutException e) {
+			return new Execution("running", null, null,
+					"esecuzione ancora in corso dopo " + RulesEngineConstants.RUN_ONCE_TIMEOUT_MS + " ms");
+		} catch (final ExecutionException e) {
+			return new Execution("error", null, null, String.valueOf(e.getCause()));
+		} catch (final InterruptedException e) {
+			Thread.currentThread().interrupt();
+			return new Execution("error", null, null, "interrotto");
+		}
+	}
+
+	/**
+	 * Sets the counters to 0 and clears the last error.
+	 */
+	public void resetCounters() {
+		synchronized (counterLock) {
+			total.set(0);
+			executed.set(0);
+			errors.set(0);
+			if (!isRemoved()) {
+				property(RulesEngineConstants.TOTAL_SIZE_LABEL, Long.valueOf(0));
+				property(RulesEngineConstants.ACTION_EXECUTED_SIZE_LABEL, Long.valueOf(0));
+				property(RulesEngineConstants.ERRORS_SIZE_LABEL, Long.valueOf(0));
+				property(RulesEngineConstants.LAST_ERROR_LABEL, "");
+				property(RulesEngineConstants.LAST_ERROR_TIME_LABEL, "");
+			}
+		}
+	}
+
+	private String recordError(final String phase, final String source, final Throwable error) {
+		return recordError(phase + ": " + JexlErrorFormatter.format(source, error));
+	}
+
+	/**
+	 * Counts one failure and publishes its message in last-error.
+	 *
+	 * @return the message
+	 */
+	private String recordError(final String message) {
+		synchronized (counterLock) {
+			final long value = errors.incrementAndGet();
+			if (!isRemoved()) {
+				property(RulesEngineConstants.ERRORS_SIZE_LABEL, Long.valueOf(value));
+				property(RulesEngineConstants.LAST_ERROR_LABEL, message);
+				property(RulesEngineConstants.LAST_ERROR_TIME_LABEL, Instant.now().toString());
+			}
+		}
+		return message;
 	}
 
 	@Override
@@ -566,7 +682,7 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 	 * Counts one failure of the rule.
 	 */
 	public void updateThrowable() {
-		updateCounter(RulesEngineConstants.ERRORS_SIZE_LABEL, errors);
+		recordError("errore della regola");
 	}
 
 	/**

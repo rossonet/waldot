@@ -15,6 +15,7 @@ import net.rossonet.waldot.api.annotation.WaldotPlugin;
 import net.rossonet.waldot.api.models.WaldotCommand;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.api.strategies.ConsoleStrategy;
+import net.rossonet.waldot.jexl.JexlContextRegistry;
 import net.rossonet.waldot.jexl.ClonableMapContext;
 import net.rossonet.waldot.jexl.JexlExecutor;
 import net.rossonet.waldot.plugin.AbstractPluginListener;
@@ -96,6 +97,16 @@ import net.rossonet.waldot.rules.vertices.RuleVertex;
  */
 @WaldotPlugin
 public class WaldotRulesEnginePlugin extends AbstractPluginListener {
+
+	/** Context of the condition and of the action of a rules:rule vertex. */
+	public static final JexlContextRegistry.Context RULE_CONTEXT = new JexlContextRegistry.Context(
+			JexlContextRegistry.RULE,
+			"condizione e azione di un vertice rules:rule (la condizione deve restituire un booleano)",
+			List.of(JexlContextRegistry.g(), JexlContextRegistry.graph(), JexlContextRegistry.cmd(),
+					JexlContextRegistry.log("logger del plugin delle regole"), JexlContextRegistry.math(),
+					JexlContextRegistry.rand(), JexlContextRegistry.self("la regola (RuleVertex) in esecuzione")),
+			true);
+
 
 	private static volatile WaldotRulesEnginePlugin instance;
 	private static final String WALD_OT_COMPUTE_NAME = "Thread Manager";
@@ -243,5 +254,6 @@ public class WaldotRulesEnginePlugin extends AbstractPluginListener {
 			// ThreadLocalRandom must not be shared between threads
 			baseJexlContext.set(ConsoleStrategy.RANDOM, new Random());
 		}
+		JexlContextRegistry.register(RULE_CONTEXT);
 	}
 }
