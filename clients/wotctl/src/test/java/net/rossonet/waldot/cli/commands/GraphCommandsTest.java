@@ -168,11 +168,28 @@ class GraphCommandsTest extends CommandTestBase {
 				"query(expression)   descrizione di query"), text.lines());
 		assertEquals(List.of("about", "query"),
 				run("commands", "list", "-o", "value").lines());
+		// JSON: brief form by default, full objects with --full
 		final JsonNode json = MAPPER
 				.readTree(run("commands", "list", "-o", "json").out());
-		assertEquals("ns=2;s=cmd/about", json.get(0).get("methodId").asText());
+		assertEquals("about", json.get(0).get("name").asText());
+		assertTrue(json.get(0).get("methodId") == null, "brief form: " + json);
+		assertTrue(json.get(1).get("inputs").get(0).asText().startsWith("expression:"), json.toString());
+		final JsonNode full = MAPPER
+				.readTree(run("commands", "list", "--full", "-o", "json").out());
+		assertEquals("ns=2;s=cmd/about", full.get(0).get("methodId").asText());
 		assertEquals("expression",
-				json.get(1).get("inputs").get(0).get("name").asText());
+				full.get(1).get("inputs").get(0).get("name").asText());
+		// filters: name glob (case insensitive) and folder; a single match is complete
+		final JsonNode one = MAPPER
+				.readTree(run("commands", "list", "--name", "QUE*", "-o", "json").out());
+		assertEquals(1, one.size(), one.toString());
+		assertEquals("query", one.get(0).get("name").asText());
+		assertEquals("expression", one.get(0).get("inputs").get(0).get("name").asText(),
+				"a filter with one result shows the full object");
+		assertEquals(List.of(), run("commands", "list", "--name", "nothing*").lines());
+		assertEquals(2, MAPPER.readTree(run("commands", "list", "--name", "*", "-o", "json").out()).size());
+		assertEquals(List.of("about() -> output   descrizione di about"),
+				run("commands", "list", "--name", "ab?ut").lines());
 		when(mock.commands.elementCommands(SENSOR)).thenReturn(
 				List.of(new CommandDescriptor(SENSOR, SENSOR, "delete", null,
 						null, null, null)));

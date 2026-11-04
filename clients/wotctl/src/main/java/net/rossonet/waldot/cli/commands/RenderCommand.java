@@ -123,6 +123,9 @@ public class RenderCommand extends ClientCommand {
 			+ GraphRenderOptions.DEFAULT_MAX_VERTICES + ").")
 	private Integer max;
 
+	@Option(names = "--include-neighbors", description = "Disegna anche i vertici fuori selezione collegati a quelli selezionati (colore neutro, gruppo '(fuori selezione)') invece di omettere gli archi verso di loro.")
+	private boolean includeNeighbors;
+
 	@Option(names = "--no-isolated", description = "Non disegna i vertici senza archi disegnati.")
 	private boolean noIsolated;
 
@@ -199,6 +202,9 @@ public class RenderCommand extends ClientCommand {
 		}
 		if (noIsolated) {
 			vertices.includeIsolated(false);
+		}
+		if (includeNeighbors) {
+			vertices.includeNeighbors(true);
 		}
 		if (max != null) {
 			vertices.max(max);

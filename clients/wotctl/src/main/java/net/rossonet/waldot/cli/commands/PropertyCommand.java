@@ -73,7 +73,9 @@ public class PropertyCommand extends CommandGroup {
 					"  json/jsonl: {\"element\",\"key\",\"value\"}.", "",
 					"Esempi:", "  wotctl property set sensor-1 unit C",
 					"  wotctl property set pump-3 speed 1450 --type int32",
-					"  wotctl property set valve-2 open true --type bool -o json"})
+					"  wotctl property set valve-2 open true --type bool -o json",
+					"  wotctl property set rule-1 action --value-file azione.jexl",
+					"  wotctl property set zona-1 guasto \"\""})
 	public static class SetCommand extends ClientCommand {
 
 		private Object converted;
@@ -88,8 +90,11 @@ public class PropertyCommand extends CommandGroup {
 				"--type"}, paramLabel = "TIPO", completionCandidates = Completions.ValueTypes.class, description = "Tipo in cui convertire il valore prima dell'invio.")
 		private String type;
 
-		@Parameters(index = "2", paramLabel = "VALORE", description = "Nuovo valore.")
+		@Parameters(index = "2", arity = "0..1", paramLabel = "VALORE", description = "Nuovo valore (\"\" per il valore vuoto).")
 		private String value;
+
+		@Option(names = "--value-file", paramLabel = "FILE", description = "Legge il valore da un file (per esempio lo script di un'azione); in alternativa a VALORE.")
+		private java.nio.file.Path valueFile;
 
 		@Override
 		protected int execute(final WaldotClient client,
@@ -113,8 +118,22 @@ public class PropertyCommand extends CommandGroup {
 
 		@Override
 		protected void validate() {
+			if (valueFile != null && value != null) {
+				throw usage("indicare VALORE o --value-file, non entrambi");
+			}
+			if (valueFile == null && value == null) {
+				throw usage("manca il valore: indicare VALORE (anche \"\") o --value-file");
+			}
+			String text = value;
+			if (valueFile != null) {
+				try {
+					text = java.nio.file.Files.readString(valueFile);
+				} catch (final java.io.IOException e) {
+					throw usage("lettura di " + valueFile + " non riuscita: " + e.getMessage());
+				}
+			}
 			try {
-				converted = type == null ? value : Values.convert(value, type);
+				converted = type == null ? text : Values.convert(text, type);
 			} catch (final IllegalArgumentException e) {
 				throw usage(e.getMessage());
 			}

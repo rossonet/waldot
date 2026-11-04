@@ -112,11 +112,14 @@ public class CommandsCommand extends CommandGroup {
 					"Output:",
 					"  text : 'nome(ingressi) -> uscite   descrizione', un comando per riga;",
 					"  value: solo i nomi, uno per riga;",
-					"  json/jsonl: oggetti con objectId, methodId, name, path, description, inputs,",
-					"              outputs (ogni argomento con name, dataType, valueRank, description).",
+					"  json/jsonl: forma breve {name, path, inputs:[\"nome:Tipo\"], outputs:[nome]};",
+					"              con --full (o se il filtro trova un solo comando) oggetti con",
+					"              objectId, methodId, name, path, description, inputs, outputs.",
 					"", "Esempi:", "  wotctl commands list",
 					"  wotctl commands list -o value | sort",
 					"  wotctl commands list --element sensor-1",
+					"  wotctl commands list --path iec60870-5-104 -o json",
+					"  wotctl commands list --name 'create*rule*' -o json",
 					"  wotctl commands list -o json | jq '.[] | select(.name==\"about\")'"})
 	public static class ListCommand extends ClientCommand {
 
@@ -140,19 +143,85 @@ public class CommandsCommand extends CommandGroup {
 			return text.toString();
 		}
 
+		/** Short name of an OPC UA data type (String, Boolean, Int32...). */
+		static String typeName(final org.eclipse.milo.opcua.stack.core.types.builtin.NodeId dataType) {
+			if (dataType == null) {
+				return null;
+			}
+			try {
+				final org.eclipse.milo.opcua.stack.core.OpcUaDataType type = org.eclipse.milo.opcua.stack.core.OpcUaDataType
+						.fromNodeId(dataType);
+				if (type != null) {
+					return type.name();
+				}
+			} catch (final RuntimeException e) {
+				// not a builtin type
+			}
+			return dataType.toParseableString();
+		}
+
+		/** Brief form for JSON: name, folder, arguments with name and type. */
+		static Map<String, Object> brief(final CommandDescriptor command) {
+			final Map<String, Object> m = new LinkedHashMap<>();
+			m.put("name", command.name());
+			m.put("path", command.path());
+			m.put("inputs", command.inputs().stream().map(a -> a.name() + ":" + typeName(a.dataType())).toList());
+			m.put("outputs", command.outputs().stream().map(ArgumentDescriptor::name).toList());
+			return m;
+		}
+
+		/** Glob with * and ? (case insensitive). */
+		static boolean glob(final String pattern, final String text) {
+			if (pattern == null) {
+				return true;
+			}
+			if (text == null) {
+				return false;
+			}
+			final StringBuilder regex = new StringBuilder();
+			for (final char c : pattern.toCharArray()) {
+				switch (c) {
+					case '*' -> regex.append(".*");
+					case '?' -> regex.append('.');
+					default -> regex.append(java.util.regex.Pattern.quote(String.valueOf(c)));
+				}
+			}
+			return java.util.regex.Pattern.compile(regex.toString(),
+					java.util.regex.Pattern.CASE_INSENSITIVE).matcher(text).matches();
+		}
+
 		@Option(names = {"-e",
 				"--element"}, paramLabel = "ELEMENTO", description = "Elenca i comandi di questo vertice o arco invece di quelli globali.")
 		private String element;
 
+		@Option(names = "--full", description = "In JSON l'oggetto completo (NodeId, tipi, descrizioni) invece della forma breve.")
+		private boolean full;
+
+		@Option(names = "--name", paramLabel = "GLOB", description = "Solo i comandi con questo nome (* e ?, senza distinzione di maiuscole).")
+		private String name;
+
+		@Option(names = "--path", paramLabel = "TESTO", description = "Solo i comandi la cui cartella contiene questo testo (per esempio iec60870-5-104).")
+		private String path;
+
 		@Override
 		protected int execute(final WaldotClient client,
 				final Printer printer) {
-			final List<CommandDescriptor> commands = element == null
+			final List<CommandDescriptor> all = element == null
 					? client.commands().globalCommands()
 					: client.commands()
 							.elementCommands(nodeId(client, element));
-			printer.list(commands, command -> command, ListCommand::text,
-					CommandDescriptor::name);
+			final List<CommandDescriptor> commands = all.stream()
+					.filter(c -> glob(name, c.name()))
+					.filter(c -> path == null || c.path() != null && c.path()
+							.toLowerCase(java.util.Locale.ROOT)
+							.contains(path.toLowerCase(java.util.Locale.ROOT)))
+					.toList();
+			// a filter that finds a single command shows it in full
+			final boolean complete = full
+					|| (name != null || path != null) && commands.size() == 1;
+			printer.list(commands,
+					command -> complete ? command : brief(command),
+					ListCommand::text, CommandDescriptor::name);
 			return 0;
 		}
 	}

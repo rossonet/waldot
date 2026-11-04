@@ -21,6 +21,28 @@ public interface WaldotCommandClient {
 	/** Calls {@code about}: server information. */
 	List<String> about();
 
+	/**
+	 * Outputs of the {@code about} command by name ({@code name},
+	 * {@code description}, {@code license}, {@code repository URL} and the
+	 * {@code git.*} properties of the build); an output without a name keeps its
+	 * position as key ({@code output-N}).
+	 *
+	 * @return the outputs in the order of the server
+	 */
+	default java.util.Map<String, Object> aboutInfo() {
+		final CommandResult result = invokeGlobal("about").orThrow();
+		final java.util.Map<String, Object> named = new java.util.LinkedHashMap<>();
+		final List<Object> values = result.values();
+		for (int i = 0; i < values.size(); i++) {
+			final String name = result.command() != null && i < result.command().outputs().size()
+					&& result.command().outputs().get(i).name() != null
+							? result.command().outputs().get(i).name()
+							: "output-" + i;
+			named.put(name, values.get(i));
+		}
+		return named;
+	}
+
 	/** Calls the {@code delete} command of an element (vertex or edge). */
 	CommandResult deleteElement(NodeId element);
 
