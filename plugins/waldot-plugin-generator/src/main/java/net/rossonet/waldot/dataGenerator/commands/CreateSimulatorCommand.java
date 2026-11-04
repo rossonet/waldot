@@ -50,6 +50,8 @@ public class CreateSimulatorCommand extends AbstractCreateVertexCommand {
 										.toLowerCase(),
 								VariableNodeTypes.String,
 								GeneratorConstants.POST_NODE_ID_DATA_DESCRIPTION)));
+		refineParameter(GeneratorConstants.ALGORITHM_FIELD.toLowerCase(), p -> p.withAllowed(java.util.Arrays.stream(Algorithm.values()).map(Enum::name).toList()));
+		refineParameter(GeneratorConstants.DELAY_FIELD.toLowerCase(), p -> p.withRange(10, null));
 	}
 
 	@Override

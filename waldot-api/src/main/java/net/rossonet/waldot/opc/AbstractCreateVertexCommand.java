@@ -58,7 +58,24 @@ public abstract class AbstractCreateVertexCommand extends AbstractOpcCommand {
 	 * @param description accurate description of the parameter
 	 * @param required    true if the parameter must be provided
 	 */
-	public record VertexParameter(String key, VariableNodeTypes type, String description, boolean required) {
+	public record VertexParameter(String key, VariableNodeTypes type, String description, boolean required,
+			String defaultValue, Double min, Double max, List<String> allowedValues) {
+
+		private static final java.util.regex.Pattern DEFAULT_IN_DESCRIPTION = java.util.regex.Pattern
+				.compile("(?i)\\bdefault:?\\s+'?([^\\s';,()]+?)'?(?=[\\s.;,()]|$)");
+
+		public VertexParameter {
+			allowedValues = allowedValues == null ? List.of() : List.copyOf(allowedValues);
+		}
+
+		/**
+		 * Parameter without default, range and allowed values (the default can be
+		 * read from the description, see {@link #effectiveDefault()}).
+		 */
+		public VertexParameter(final String key, final VariableNodeTypes type, final String description,
+				final boolean required) {
+			this(key, type, description, required, null, null, null, List.of());
+		}
 
 		/**
 		 * Optional parameter.
@@ -84,6 +101,82 @@ public abstract class AbstractCreateVertexCommand extends AbstractOpcCommand {
 		public static VertexParameter required(final String key, final VariableNodeTypes type,
 				final String description) {
 			return new VertexParameter(key, type, description, true);
+		}
+
+		/**
+		 * The default value: the declared one or, when missing, the one written in
+		 * the description as {@code Default: X}.
+		 *
+		 * @return the default, null if unknown
+		 */
+		public String effectiveDefault() {
+			if (defaultValue != null) {
+				return defaultValue;
+			}
+			if (description == null) {
+				return null;
+			}
+			final java.util.regex.Matcher m = DEFAULT_IN_DESCRIPTION.matcher(description);
+			return m.find() ? m.group(1) : null;
+		}
+
+		/** Same parameter with the given allowed values. */
+		public VertexParameter withAllowed(final java.util.Collection<String> values) {
+			return new VertexParameter(key, type, description, required, defaultValue, min, max,
+					values == null ? List.of() : List.copyOf(values));
+		}
+
+		/** Same parameter with the given allowed values. */
+		public VertexParameter withAllowed(final String... values) {
+			return withAllowed(List.of(values));
+		}
+
+		/** Same parameter with the given default. */
+		public VertexParameter withDefault(final Object value) {
+			return new VertexParameter(key, type, description, required, value == null ? null : value.toString(), min,
+					max, allowedValues);
+		}
+
+		/** Same parameter with the given range (null for no bound). */
+		public VertexParameter withRange(final Number minimum, final Number maximum) {
+			return new VertexParameter(key, type, description, required, defaultValue,
+					minimum == null ? null : minimum.doubleValue(), maximum == null ? null : maximum.doubleValue(),
+					allowedValues);
+		}
+
+		/** JSON-ready description of the parameter (used by {@code type describe}). */
+		public java.util.Map<String, Object> toSchema() {
+			final java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+			m.put("key", key);
+			m.put("type", schemaType(type));
+			m.put("opcua_type", type.name());
+			m.put("required", required);
+			final String def = effectiveDefault();
+			if (def != null) {
+				m.put("default", def);
+			}
+			if (min != null) {
+				m.put("min", min);
+			}
+			if (max != null) {
+				m.put("max", max);
+			}
+			if (!allowedValues.isEmpty()) {
+				m.put("enum", allowedValues);
+			}
+			m.put("description", description);
+			return m;
+		}
+
+		/** Short type name for the schema: int, long, double, bool, string. */
+		public static String schemaType(final VariableNodeTypes type) {
+			return switch (type) {
+			case Boolean -> "bool";
+			case Byte, Int16, Int32, Integer, SByte, UInt16, UInt32, UInteger -> "int";
+			case Int64, UInt64 -> "long";
+			case Double, Float, Duration -> "double";
+			default -> "string";
+			};
 		}
 	}
 
@@ -120,7 +213,7 @@ public abstract class AbstractCreateVertexCommand extends AbstractOpcCommand {
 
 	private final Language language;
 
-	private final List<VertexParameter> parameters;
+	private volatile List<VertexParameter> parameters;
 
 	private final String vertexType;
 
@@ -172,7 +265,6 @@ public abstract class AbstractCreateVertexCommand extends AbstractOpcCommand {
 			default:
 				break;
 			}
-			return null;
 		} catch (final RuntimeException e) {
 			return language == Language.ITALIAN
 					? "il valore '" + value + "' del parametro " + parameter.key() + " non è di tipo "
@@ -180,6 +272,38 @@ public abstract class AbstractCreateVertexCommand extends AbstractOpcCommand {
 					: "the value '" + value + "' of the parameter " + parameter.key() + " is not of type "
 							+ parameter.type();
 		}
+		if (!parameter.allowedValues().isEmpty()
+				&& parameter.allowedValues().stream().noneMatch(a -> a.equalsIgnoreCase(value.trim()))) {
+			return language == Language.ITALIAN
+					? "il valore '" + value + "' del parametro " + parameter.key() + " non è ammesso; valori: "
+							+ parameter.allowedValues()
+					: "the value '" + value + "' of the parameter " + parameter.key() + " is not allowed; values: "
+							+ parameter.allowedValues();
+		}
+		if (parameter.min() != null || parameter.max() != null) {
+			final double number;
+			try {
+				number = Double.parseDouble(value.trim());
+			} catch (final RuntimeException e) {
+				return null;
+			}
+			if (parameter.min() != null && number < parameter.min()
+					|| parameter.max() != null && number > parameter.max()) {
+				return language == Language.ITALIAN
+						? "il valore " + value + " del parametro " + parameter.key() + " è fuori dall'intervallo ["
+								+ bound(parameter.min()) + ", " + bound(parameter.max()) + "]"
+						: "the value " + value + " of the parameter " + parameter.key() + " is out of the range ["
+								+ bound(parameter.min()) + ", " + bound(parameter.max()) + "]";
+			}
+		}
+		return null;
+	}
+
+	private static String bound(final Double value) {
+		if (value == null) {
+			return "-";
+		}
+		return value == Math.rint(value) ? String.valueOf(value.longValue()) : String.valueOf(value);
 	}
 
 	/**
@@ -197,6 +321,28 @@ public abstract class AbstractCreateVertexCommand extends AbstractOpcCommand {
 
 	private String error(final String message) {
 		return ERROR_PREFIX + message;
+	}
+
+	/**
+	 * Adds schema information (default, range, allowed values) to a parameter;
+	 * for the constructors of the subclasses, after {@code super(...)}. The OPC UA
+	 * input arguments do not change.
+	 *
+	 * @param key    key of the parameter
+	 * @param refine function that returns the refined parameter
+	 * @throws IllegalArgumentException if the parameter does not exist
+	 */
+	protected final void refineParameter(final String key,
+			final java.util.function.UnaryOperator<VertexParameter> refine) {
+		final List<VertexParameter> refined = new ArrayList<>(parameters);
+		for (int i = 0; i < refined.size(); i++) {
+			if (refined.get(i).key().equals(key)) {
+				refined.set(i, refine.apply(refined.get(i)));
+				parameters = Collections.unmodifiableList(refined);
+				return;
+			}
+		}
+		throw new IllegalArgumentException("no parameter " + key + " in " + getClass().getSimpleName());
 	}
 
 	/**

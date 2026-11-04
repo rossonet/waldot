@@ -65,6 +65,11 @@ public final class DataExchangeProtocol {
 	 * result, log lines and the diff of the graph (folder manage).
 	 */
 	public static final String RUN_SCRIPT_COMMAND = "run script";
+	/** Lists the vertex types of the loaded plugins (folder information). */
+	public static final String TYPE_LIST_COMMAND = "type list";
+	/** Describes the properties of a vertex type as a schema (folder information). */
+	public static final String TYPE_DESCRIBE_COMMAND = "type describe";
+	public static final String ARG_TYPE = "type";
 
 	/** Input/output argument names. */
 	public static final String ARG_COMMAND = "command";

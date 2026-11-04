@@ -78,6 +78,7 @@ import net.rossonet.waldot.commands.ReadGraphBlockCommand;
 import net.rossonet.waldot.commands.JexlCheckCommand;
 import net.rossonet.waldot.commands.RenderGraphCommand;
 import net.rossonet.waldot.commands.RunScriptCommand;
+import net.rossonet.waldot.commands.TypeCommands;
 import net.rossonet.waldot.commands.exchange.GraphTransferStore;
 import net.rossonet.waldot.api.exchange.DataExchangeProtocol;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
@@ -228,6 +229,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		registerCommand(new RenderGraphCommand(this, graphTransfers));
 		registerCommand(new JexlCheckCommand(this));
 		registerCommand(new RunScriptCommand(this));
+		registerCommand(new TypeCommands.List(this));
+		registerCommand(new TypeCommands.Describe(this));
 	}
 
 	@Override
