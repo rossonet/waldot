@@ -234,6 +234,9 @@
             "serializable": true
         },
         {
+            "type": "java.lang.Iterable"
+        },
+        {
             "type": "java.lang.Module",
             "methods": [
                 {
@@ -726,6 +729,9 @@
             "serializable": true
         },
         {
+            "type": "java.util.concurrent.Callable"
+        },
+        {
             "type": "java.util.concurrent.locks.AbstractOwnableSynchronizer",
             "serializable": true
         },
@@ -803,6 +809,11 @@
         },
         {
             "type": "net.rossonet.waldot.cli.commands.AboutCommand",
+            "fields": [
+                {
+                    "name": "structured"
+                }
+            ],
             "methods": [
                 {
                     "name": "<init>",
@@ -959,6 +970,15 @@
             "fields": [
                 {
                     "name": "element"
+                },
+                {
+                    "name": "full"
+                },
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "path"
                 }
             ],
             "methods": [
@@ -1144,6 +1164,9 @@
                 },
                 {
                     "name": "value"
+                },
+                {
+                    "name": "valueFile"
                 }
             ],
             "methods": [
@@ -1166,6 +1189,12 @@
                 },
                 {
                     "name": "graphson"
+                },
+                {
+                    "name": "round"
+                },
+                {
+                    "name": "table"
                 },
                 {
                     "name": "text"
@@ -1249,6 +1278,9 @@
                 },
                 {
                     "name": "includeEphemeral"
+                },
+                {
+                    "name": "includeNeighbors"
                 },
                 {
                     "name": "includeRuntime"
@@ -1546,6 +1578,9 @@
                     ]
                 }
             ]
+        },
+        {
+            "type": "net.rossonet.waldot.cli.spi.WotctlPlugin"
         },
         {
             "type": "net.rossonet.waldot.cli.support.ClientCommand",
@@ -4540,7 +4575,13 @@
             "glob": "META-INF/services/java.util.spi.ResourceBundleControlProvider"
         },
         {
+            "glob": "META-INF/services/net.rossonet.waldot.cli.spi.WotctlPlugin"
+        },
+        {
             "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
+        },
+        {
+            "glob": "assente.properties"
         },
         {
             "module": "java.base",
