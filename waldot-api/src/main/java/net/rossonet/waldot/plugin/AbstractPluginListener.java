@@ -154,6 +154,7 @@ public abstract class AbstractPluginListener
 	/**
 	 * @return the type labels of the vertices managed by the plugin
 	 */
+	@Override
 	public Set<String> getManagedVertexTypes() {
 		return Collections.unmodifiableSet(labelTypeNodes.keySet());
 	}

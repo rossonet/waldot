@@ -1289,7 +1289,23 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 					}
 					final String requestType = propertyKeyValues[i + 1]
 							.toString();
-					return NodeId.parse(requestType);
+					try {
+						return NodeId.parse(requestType);
+					} catch (final RuntimeException e) {
+						final java.util.Set<String> known = new java.util.TreeSet<>();
+						for (final PluginListener p : waldotNamespace
+								.getPlugins()) {
+							try {
+								known.addAll(p.getManagedVertexTypes());
+							} catch (final RuntimeException ignored) {
+								// a plugin without the list
+							}
+						}
+						throw new IllegalArgumentException("type '" + requestType
+								+ "' unknown: it is neither a vertex type of a loaded plugin nor a NodeId"
+								+ " (ns=..;s=..). Omit the type for a plain vertex. Known types: "
+								+ (known.isEmpty() ? "none" : String.join(", ", known)), e);
+					}
 				}
 			}
 		}

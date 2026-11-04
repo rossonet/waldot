@@ -346,6 +346,16 @@ public interface PluginListener {
 	}
 
 	/**
+	 * Labels of the vertex types managed by the plugin (for example
+	 * {@code rules:rule}).
+	 *
+	 * @return the type labels, empty by default
+	 */
+	default java.util.Set<String> getManagedVertexTypes() {
+		return java.util.Set.of();
+	}
+
+	/**
 	 * Gets the NodeId for a given vertex type label.
 	 * 
 	 * <p>This method maps a human-readable type label (like "os:processor") to

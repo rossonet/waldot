@@ -58,6 +58,13 @@ public final class DataExchangeProtocol {
 	public static final String IMPORT_GRAPH_COMMAND = "import graph";
 	public static final String CLEAR_GRAPH_COMMAND = "clear graph";
 	public static final String RENDER_GRAPH_COMMAND = "render graph";
+	/** Checks a JEXL script for a context without running it (folder information). */
+	public static final String JEXL_CHECK_COMMAND = "jexl check";
+	/**
+	 * Runs a JEXL script in an isolated copy of the console context and returns
+	 * result, log lines and the diff of the graph (folder manage).
+	 */
+	public static final String RUN_SCRIPT_COMMAND = "run script";
 
 	/** Input/output argument names. */
 	public static final String ARG_COMMAND = "command";
@@ -79,6 +86,8 @@ public final class DataExchangeProtocol {
 	public static final String ARG_OPTIONS = "options";
 	public static final String ARG_FORMAT = "format";
 	public static final String ARG_WARNINGS = "warnings";
+	public static final String ARG_CONTEXT = "context";
+	public static final String ARG_TAG = "tag";
 
 	/** Serialization format of the snapshots (one vertex per line). */
 	public static final String SNAPSHOT_FORMAT = "graphson-v3-adjacency";

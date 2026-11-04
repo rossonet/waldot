@@ -42,6 +42,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.HistoryUpdateResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.rossonet.waldot.api.changes.GraphChangeRecorder;
 import net.rossonet.waldot.api.NamespaceListener;
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.configuration.WaldotConfiguration;
@@ -74,7 +75,9 @@ import net.rossonet.waldot.commands.ImportGraphCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.commands.QueryJsonCommand;
 import net.rossonet.waldot.commands.ReadGraphBlockCommand;
+import net.rossonet.waldot.commands.JexlCheckCommand;
 import net.rossonet.waldot.commands.RenderGraphCommand;
+import net.rossonet.waldot.commands.RunScriptCommand;
 import net.rossonet.waldot.commands.exchange.GraphTransferStore;
 import net.rossonet.waldot.api.exchange.DataExchangeProtocol;
 import net.rossonet.waldot.gremlin.opcgraph.structure.OpcGraph;
@@ -223,10 +226,21 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		registerCommand(new ImportGraphCommand(this, graphTransfers));
 		registerCommand(new ClearGraphCommand(this));
 		registerCommand(new RenderGraphCommand(this, graphTransfers));
+		registerCommand(new JexlCheckCommand(this));
+		registerCommand(new RunScriptCommand(this));
 	}
 
 	@Override
 	public WaldotEdge addEdge(final WaldotVertex sourceVertex,
+			final WaldotVertex targetVertex, final String label,
+			final Object[] keyValues) {
+		final WaldotEdge edge = addEdgeInternal(sourceVertex, targetVertex,
+				label, keyValues);
+		GraphChangeRecorder.onEdgeAdded(edge);
+		return edge;
+	}
+
+	private WaldotEdge addEdgeInternal(final WaldotVertex sourceVertex,
 			final WaldotVertex targetVertex, final String label,
 			final Object[] keyValues) {
 		final Object[] safeKeyValues = keyValues == null
@@ -268,6 +282,13 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public WaldotVertex addVertex(final NodeId nodeId,
+			final Object[] keyValues) {
+		final WaldotVertex vertex = addVertexInternal(nodeId, keyValues);
+		GraphChangeRecorder.onVertexAdded(vertex);
+		return vertex;
+	}
+
+	private WaldotVertex addVertexInternal(final NodeId nodeId,
 			final Object[] keyValues) {
 		if (nodeId == null) {
 			return opcMappingStrategy.addVertex(nodeId, keyValues);
@@ -461,6 +482,10 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	public <DATA_TYPE> WaldotProperty<DATA_TYPE> createOrUpdateWaldotEdgeProperty(
 			final WaldotEdge waldotEdge, final String key,
 			final DATA_TYPE value) {
+		if (GraphChangeRecorder.isRecording()) {
+			GraphChangeRecorder.onPropertyChanging(waldotEdge, key,
+					currentValue(waldotEdge, key), value);
+		}
 		return opcMappingStrategy.createOrUpdateWaldotEdgeProperty(waldotEdge,
 				key, value);
 	}
@@ -469,8 +494,25 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 	public <DATA_TYPE> WaldotVertexProperty<DATA_TYPE> createOrUpdateWaldotVertexProperty(
 			final WaldotVertex opcVertex, final String key,
 			final DATA_TYPE value) {
+		if (GraphChangeRecorder.isRecording()) {
+			GraphChangeRecorder.onPropertyChanging(opcVertex, key,
+					currentValue(opcVertex, key), value);
+		}
 		return opcMappingStrategy.createOrUpdateWaldotVertexProperty(opcVertex,
 				key, value);
+	}
+
+	/** Current value of a property, null if absent or unreadable. */
+	private static Object currentValue(
+			final org.apache.tinkerpop.gremlin.structure.Element element,
+			final String key) {
+		try {
+			final org.apache.tinkerpop.gremlin.structure.Property<Object> p = element
+					.property(key);
+			return p.isPresent() ? p.value() : null;
+		} catch (final RuntimeException e) {
+			return null;
+		}
 	}
 
 	@Override
@@ -891,6 +933,9 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public void removeEdge(final NodeId expandedNodeId) {
+		if (GraphChangeRecorder.isRecording()) {
+			GraphChangeRecorder.onEdgeRemoving(getEdgeNode(expandedNodeId));
+		}
 		opcMappingStrategy.removeEdge(expandedNodeId);
 
 	}
@@ -908,12 +953,23 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public void removeVertex(final NodeId nodeId) {
+		if (GraphChangeRecorder.isRecording()) {
+			GraphChangeRecorder.onVertexRemoving(getVertexNode(nodeId));
+		}
 		opcMappingStrategy.removeVertex(nodeId);
 
 	}
 
 	@Override
 	public void removeVertexProperty(final NodeId nodeId) {
+		if (GraphChangeRecorder.isRecording()) {
+			getStorageManager().getNode(nodeId).ifPresent(node -> {
+				if (node instanceof final org.apache.tinkerpop.gremlin.structure.VertexProperty<?> p) {
+					GraphChangeRecorder.onPropertyChanging(p.element(), p.key(),
+							p.isPresent() ? p.value() : null, null);
+				}
+			});
+		}
 		opcMappingStrategy.removeVertexProperty(nodeId);
 
 	}
