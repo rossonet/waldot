@@ -219,6 +219,18 @@ public interface WaldotNamespace extends AutoCloseable {
 	String deleteDirectory(String directoryNodeId);
 
 	/**
+	 * Elements that {@link #deleteDirectory(String)} would remove (vertices and
+	 * edges of the folder and of its sub-folders, or the element itself).
+	 *
+	 * @param directoryNodeId the NodeId of the folder or of an element
+	 * @return the NodeIds, empty if unknown
+	 */
+	default java.util.List<org.eclipse.milo.opcua.stack.core.types.builtin.NodeId> directoryContent(
+			final String directoryNodeId) {
+		return java.util.List.of();
+	}
+
+	/**
 	 * Drops the current GraphComputer view.
 	 * 
 	 * <p>Releases resources used by the OLAP view and returns to OLTP mode.</p>

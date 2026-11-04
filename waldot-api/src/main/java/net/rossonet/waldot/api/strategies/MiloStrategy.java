@@ -407,6 +407,17 @@ public interface MiloStrategy extends AutoCloseable {
 	String deleteOpcNodeId(String nodeId);
 
 	/**
+	 * Elements that {@link #deleteOpcNodeId(String)} would remove: the element
+	 * itself, or the vertices and edges of a folder and of its sub-folders.
+	 *
+	 * @param nodeId the NodeId string of a folder, vertex or edge
+	 * @return the NodeIds, empty if unknown
+	 */
+	default java.util.List<NodeId> directoryContent(final String nodeId) {
+		return java.util.List.of();
+	}
+
+	/**
 	 * Drops the GraphComputer view.
 	 * 
 	 * @see #createGraphComputerView(WaldotGraph, GraphFilter, Set)

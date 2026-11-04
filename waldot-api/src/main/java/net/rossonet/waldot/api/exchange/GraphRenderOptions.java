@@ -27,7 +27,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *   "format": "svg",
  *   "vertices": { "roots": [], "depth": 1, "direction": "both", "types": [], "excludeTypes": [],
  *                 "labels": [], "directories": [], "match": null, "where": {}, "expression": null,
- *                 "includeEphemeral": false, "includeIsolated": true, "max": 500 },
+ *                 "includeEphemeral": false, "includeIsolated": true, "includeNeighbors": false,
+ *                 "max": 500 },
  *   "edges": { "labels": [], "excludeLabels": [], "types": [] },
  *   "properties": { "vertex": ["*"], "edge": [], "includeRuntime": false, "hideReserved": true,
  *                   "maxValueLength": 40, "tooltips": true },
@@ -313,6 +314,7 @@ public final class GraphRenderOptions {
 		private String expression;
 		private boolean includeEphemeral = false;
 		private boolean includeIsolated = true;
+		private boolean includeNeighbors = false;
 		private List<String> labels = new ArrayList<>();
 		private String match;
 		private int max = DEFAULT_MAX_VERTICES;
@@ -398,6 +400,20 @@ public final class GraphRenderOptions {
 
 		public Vertices includeIsolated(final boolean value) {
 			includeIsolated = value;
+			return this;
+		}
+
+		/**
+		 * @return true to draw, as ghost vertices, the vertices outside the
+		 *         selection connected to the selected ones (instead of omitting
+		 *         those edges)
+		 */
+		public boolean includeNeighbors() {
+			return includeNeighbors;
+		}
+
+		public Vertices includeNeighbors(final boolean value) {
+			includeNeighbors = value;
 			return this;
 		}
 
@@ -565,7 +581,8 @@ public final class GraphRenderOptions {
 		final JsonNode v = root.get("vertices");
 		checkKeys(v, "vertices", "roots", "depth", "direction", "types",
 				"excludeTypes", "labels", "directories", "match", "where",
-				"expression", "includeEphemeral", "includeIsolated", "max");
+				"expression", "includeEphemeral", "includeIsolated",
+				"includeNeighbors", "max");
 		if (v != null && !v.isNull()) {
 			final Vertices vertices = options.vertices();
 			if (v.has("roots")) {
@@ -612,6 +629,10 @@ public final class GraphRenderOptions {
 			if (v.has("includeIsolated")) {
 				vertices.includeIsolated(booleanValue(v.get("includeIsolated"),
 						"vertices.includeIsolated"));
+			}
+			if (v.has("includeNeighbors")) {
+				vertices.includeNeighbors(booleanValue(
+						v.get("includeNeighbors"), "vertices.includeNeighbors"));
 			}
 			if (v.has("max")) {
 				vertices.max(intValue(v.get("max"), "vertices.max"));
@@ -886,6 +907,10 @@ public final class GraphRenderOptions {
 		}
 		v.put("includeEphemeral", vertices.includeEphemeral);
 		v.put("includeIsolated", vertices.includeIsolated);
+		// only when set: older servers reject the unknown key
+		if (vertices.includeNeighbors) {
+			v.put("includeNeighbors", true);
+		}
 		v.put("max", vertices.max);
 		final ObjectNode e = root.putObject("edges");
 		strings(e.putArray("labels"), edges.labels);

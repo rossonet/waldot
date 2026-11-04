@@ -976,12 +976,13 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	 *
 	 * @return the number of removed elements
 	 */
-	private int deleteDirectoryContent(final NodeId folderId) {
+	/** Vertices and edges linked to a folder or to one of its sub-folders. */
+	private List<NodeId> collectDirectoryElements(final NodeId folderId) {
 		final List<NodeId> elements = new ArrayList<>();
 		synchronized (directoryLock) {
 			final DirectoryNode root = directoryNodes.get(folderId);
 			if (root == null) {
-				return 0;
+				return elements;
 			}
 			for (final Map.Entry<NodeId, DirectoryLink> link : directoryLinks
 					.entrySet()) {
@@ -993,6 +994,35 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 					elements.add(link.getKey());
 				}
 			}
+		}
+		return elements;
+	}
+
+	@Override
+	public List<NodeId> directoryContent(final String nodeId) {
+		final NodeId target = MiloStrategy.getNodeIdManager()
+				.convert(waldotNamespace.getGremlinGraph(), nodeId);
+		if (target == null) {
+			return List.of();
+		}
+		if (cachedVertices.containsKey(target) || edgeIndex.containsKey(target)
+				|| cachedEdges.containsKey(target)) {
+			return List.of(target);
+		}
+		final List<NodeId> elements = new ArrayList<>();
+		for (final NodeId id : collectDirectoryElements(target)) {
+			if (cachedVertices.containsKey(id) || edgeIndex.containsKey(id)
+					|| cachedEdges.containsKey(id)) {
+				elements.add(id);
+			}
+		}
+		return elements;
+	}
+
+	private int deleteDirectoryContent(final NodeId folderId) {
+		final List<NodeId> elements = collectDirectoryElements(folderId);
+		if (elements.isEmpty() && !directoryNodes.containsKey(folderId)) {
+			return 0;
 		}
 		int removed = 0;
 		for (final NodeId id : elements) {

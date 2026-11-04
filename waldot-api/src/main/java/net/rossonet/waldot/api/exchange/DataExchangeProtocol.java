@@ -78,6 +78,12 @@ public final class DataExchangeProtocol {
 	 */
 	public static final String FILE_GET_COMMAND = "file get";
 	public static final String ARG_ROOT = "root";
+	/**
+	 * Lists the vertices and edges that 'delete directory' would remove (folder
+	 * information): the dry-run of the deletion.
+	 */
+	public static final String DIRECTORY_CONTENT_COMMAND = "directory content";
+	public static final String ARG_DIRECTORY = "directory";
 	public static final String ARG_PATH = "path";
 
 	/** Input/output argument names. */

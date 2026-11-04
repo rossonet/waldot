@@ -210,6 +210,33 @@ class RenderGraphCommandTest {
 	}
 
 	@Test
+	void neighborsOutsideTheDirectoryAreDrawnAsGhosts() throws Exception {
+		final GraphRenderOptions plain = new GraphRenderOptions();
+		plain.vertices().directories(List.of("plant/line1"));
+		final Rendering without = render(plain, "line1-plain");
+		assertEquals(3, without.vertices());
+		assertTrue(without.warnings().contains("omitted"), "the scada edge is omitted: " + without.warnings());
+
+		final GraphRenderOptions neighbors = new GraphRenderOptions();
+		neighbors.vertices().directories(List.of("plant/line1")).includeNeighbors(true);
+		assertTrue(neighbors.toJson().contains("includeNeighbors"));
+		final Rendering with = render(neighbors, "line1-neighbors");
+		assertEquals(4, with.vertices(), "the SCADA server joins as neighbor");
+		assertTrue(with.edges() > without.edges(), with.edges() + " <= " + without.edges());
+		assertTrue(with.warnings().contains("drawn as neighbors"), with.warnings());
+		assertTrue(hasId(nodeIds(parse(with.text()), "vertex"), "r-scada"));
+		assertTrue(!with.warnings().contains("omitted"), with.warnings());
+	}
+
+	@Test
+	void includeNeighborsIsOmittedFromTheJsonWhenFalse() {
+		final GraphRenderOptions options = new GraphRenderOptions();
+		assertTrue(!options.toJson().contains("includeNeighbors"), "older servers reject unknown keys");
+		assertTrue(GraphRenderOptions.fromJson("{\"vertices\":{\"includeNeighbors\":true}}").vertices()
+				.includeNeighbors());
+	}
+
+	@Test
 	void attributeFilters() throws Exception {
 		final GraphRenderOptions byLabel = new GraphRenderOptions();
 		byLabel.vertices().labels(List.of("sensor"));

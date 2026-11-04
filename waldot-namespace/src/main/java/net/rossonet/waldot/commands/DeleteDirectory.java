@@ -31,6 +31,9 @@ public class DeleteDirectory extends AbstractOpcCommand {
 		super.addOutputArgument("error", VariableNodeTypes.String.getNodeId(),
 				ValueRanks.Scalar, null,
 				LocalizedText.english("operation error"));
+		super.addOutputArgument("removed", VariableNodeTypes.String.getNodeId(),
+				ValueRanks.Scalar, null, LocalizedText.english(
+						"number of vertices and edges removed (see 'directory content' for the list before deleting)"));
 		super.addInputArgument("directory",
 				VariableNodeTypes.String.getNodeId(), ValueRanks.Scalar, null,
 				LocalizedText.english("directory to delete"));
@@ -52,10 +55,12 @@ public class DeleteDirectory extends AbstractOpcCommand {
 	@Override
 	public String[] runCommand(InvocationContext invocationContext,
 			String[] inputValues) {
-		final String[] output = new String[2];
+		final String[] output = new String[3];
+		output[2] = "";
 		try {
-			final Object runExpression = getNamespace()
-					.deleteDirectory(CommandArguments.requireFirst(inputValues, "directory"));
+			final String directory = CommandArguments.requireFirst(inputValues, "directory");
+			output[2] = String.valueOf(DirectoryContentCommand.content(getNamespace(), directory).get("count"));
+			final Object runExpression = getNamespace().deleteDirectory(directory);
 			if (runExpression != null) {
 				output[0] = runExpression.toString();
 				output[1] = "";

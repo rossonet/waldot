@@ -147,6 +147,12 @@ public final class GraphSelector {
 
 	private final List<String> warnings = new ArrayList<>();
 
+	/** Vertices drawn only because they are neighbors of the selection. */
+	private final Set<Object> ghosts = new HashSet<>();
+
+	/** Group and color key of the ghost vertices. */
+	public static final String NEIGHBOR_GROUP = "(fuori selezione)";
+
 	private final Map<String, Pattern> where = new LinkedHashMap<>();
 
 	public GraphSelector(final WaldotNamespace namespace, final GraphRenderOptions options) {
@@ -366,18 +372,26 @@ public final class GraphSelector {
 		final Map<Object, Vertex> drawn = new LinkedHashMap<>();
 		selected.forEach(v -> drawn.put(v.id(), v));
 
+		if (filter.includeNeighbors()) {
+			addNeighbors(drawn, limit);
+		}
 		final List<Edge> edges = new ArrayList<>();
 		int hidden = 0;
 		for (final Vertex vertex : drawn.values()) {
+			// the other edges of a neighbor are outside the drawing by definition
+			final boolean ghost = ghosts.contains(vertex.id());
 			for (final Iterator<Edge> it = vertex.edges(Direction.OUT); it.hasNext();) {
 				final Edge edge = it.next();
 				if (acceptedEdge(edge)) {
 					if (drawn.containsKey(edge.inVertex().id())) {
 						edges.add(edge);
-					} else if (isDrawable(edge.inVertex())) {
+					} else if (!ghost && isDrawable(edge.inVertex())) {
 						hidden++;
 					}
 				}
+			}
+			if (ghost) {
+				continue;
 			}
 			for (final Iterator<Edge> it = vertex.edges(Direction.IN); it.hasNext();) {
 				final Edge edge = it.next();
@@ -400,6 +414,40 @@ public final class GraphSelector {
 			drawn.keySet().retainAll(connected);
 		}
 		return toModel(new ArrayList<>(drawn.values()), edges);
+	}
+
+	/**
+	 * Adds the vertices outside the selection connected by an accepted edge to a
+	 * selected vertex: they are drawn as ghosts (neutral color, group
+	 * "outside").
+	 */
+	private void addNeighbors(final Map<Object, Vertex> drawn, final int limit) {
+		final Map<Object, Vertex> neighbors = new LinkedHashMap<>();
+		for (final Vertex vertex : drawn.values()) {
+			for (final Iterator<Edge> it = vertex.edges(Direction.BOTH); it.hasNext();) {
+				final Edge edge = it.next();
+				if (!acceptedEdge(edge)) {
+					continue;
+				}
+				final Vertex other = edge.outVertex().id().equals(vertex.id()) ? edge.inVertex() : edge.outVertex();
+				if (!drawn.containsKey(other.id()) && isDrawable(other)) {
+					neighbors.putIfAbsent(other.id(), other);
+				}
+			}
+		}
+		int added = 0;
+		for (final Map.Entry<Object, Vertex> e : neighbors.entrySet()) {
+			if (drawn.size() >= limit) {
+				warnings.add((neighbors.size() - added) + " neighbor vertices not drawn (server limit " + limit + ")");
+				break;
+			}
+			drawn.put(e.getKey(), e.getValue());
+			ghosts.add(e.getKey());
+			added++;
+		}
+		if (added > 0) {
+			warnings.add(added + " vertices outside the selection drawn as neighbors");
+		}
 	}
 
 	private List<Vertex> selectAll(final Set<Object> candidates, final int max) {
@@ -436,15 +484,21 @@ public final class GraphSelector {
 			final String id = "v" + ids.size();
 			ids.put(vertex.id(), id);
 			final String type = stringProperty(vertex, TYPE_KEY);
-			final String colorKey = colorKey(vertex);
-			final String group = switch (options.layout().groupBy()) {
-			case DIRECTORY -> path(stringProperty(vertex, MiloStrategy.DIRECTORY_PARAMETER));
-			case TYPE -> typeOrLabel(vertex);
-			case NONE -> "";
-			};
+			final boolean ghost = ghosts.contains(vertex.id());
+			final String colorKey = ghost ? null : colorKey(vertex);
+			final String group = ghost && options.layout().groupBy() != GraphRenderOptions.GroupBy.NONE
+					? NEIGHBOR_GROUP
+					: switch (options.layout().groupBy()) {
+					case DIRECTORY -> path(stringProperty(vertex, MiloStrategy.DIRECTORY_PARAMETER));
+					case TYPE -> typeOrLabel(vertex);
+					case NONE -> "";
+					};
 			final List<RenderModel.Entry> tooltip = new ArrayList<>();
 			tooltip.add(new RenderModel.Entry("nodeId", nodeId(vertex.id())));
 			tooltip.add(new RenderModel.Entry("label", vertex.label()));
+			if (ghost) {
+				tooltip.add(new RenderModel.Entry("selezione", NEIGHBOR_GROUP));
+			}
 			tooltip.addAll(properties(vertex, vertexKeys, true));
 			modelVertices.add(new RenderModel.Vertex(id, nodeId(vertex.id()),
 					truncate(displayName(vertex), Math.max(24, options.properties().maxValueLength())),

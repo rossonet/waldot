@@ -75,6 +75,7 @@ import net.rossonet.waldot.commands.ImportGraphCommand;
 import net.rossonet.waldot.commands.QueryCommand;
 import net.rossonet.waldot.commands.QueryJsonCommand;
 import net.rossonet.waldot.commands.ReadGraphBlockCommand;
+import net.rossonet.waldot.commands.DirectoryContentCommand;
 import net.rossonet.waldot.commands.FileCommands;
 import net.rossonet.waldot.commands.JexlCheckCommand;
 import net.rossonet.waldot.commands.RenderGraphCommand;
@@ -234,6 +235,7 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		registerCommand(new TypeCommands.Describe(this));
 		registerCommand(new FileCommands.ListFiles(this));
 		registerCommand(new FileCommands.Get(this, graphTransfers));
+		registerCommand(new DirectoryContentCommand(this));
 	}
 
 	@Override
@@ -523,7 +525,26 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 
 	@Override
 	public String deleteDirectory(String directoryNodeId) {
+		if (GraphChangeRecorder.isRecording()) {
+			// the strategy removes the content directly: describe it before
+			for (final NodeId id : directoryContent(directoryNodeId)) {
+				final WaldotVertex vertex = getVertexNode(id);
+				if (vertex != null) {
+					GraphChangeRecorder.onVertexRemoving(vertex);
+				} else {
+					final WaldotEdge edge = getEdgeNode(id);
+					if (edge != null) {
+						GraphChangeRecorder.onEdgeRemoving(edge);
+					}
+				}
+			}
+		}
 		return opcMappingStrategy.deleteOpcNodeId(directoryNodeId);
+	}
+
+	@Override
+	public java.util.List<NodeId> directoryContent(final String directoryNodeId) {
+		return opcMappingStrategy.directoryContent(directoryNodeId);
 	}
 
 	@Override
