@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
+import net.rossonet.waldot.cli.spi.CliIdentity;
 import net.rossonet.waldot.cli.support.CliException;
 import net.rossonet.waldot.cli.support.Json;
 import net.rossonet.waldot.cli.support.Printer;
@@ -77,7 +78,8 @@ final class GraphEdits {
 					throw new ParameterException(spec.commandLine(),
 							"le chiavi e i valori delle proprietà non possono "
 									+ "contenere virgole ('" + part
-									+ "'): usare poi 'wotctl property set'");
+									+ "'): usare poi '" + CliIdentity.get().name()
+									+ " property set'");
 				}
 			}
 			keyValues.add(property.getKey().trim());

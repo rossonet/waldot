@@ -30,10 +30,10 @@ import picocli.CommandLine.Parameters;
 				"  text : '<nodeId> = <valore>' (con '[<attributo>]' e lo stato se non Good);",
 				"  value: solo i valori, uno per riga;",
 				"  json/jsonl: {\"nodeId\",\"attribute\",\"value\",\"status\",\"sourceTime\",\"serverTime\"}.",
-				"", "Esempi:", "  wotctl read sensor-1/temperature -o value",
-				"  wotctl read 'ns=2;s=sensor-1/temperature' 'ns=2;s=sensor-2/temperature' -o jsonl",
-				"  wotctl read i=2258 -o value                 # ora corrente del server",
-				"  wotctl read sensor-1 --attribute DisplayName --attribute Description"})
+				"", "Esempi:", "  ${ROOT-COMMAND-NAME} read sensor-1/temperature -o value",
+				"  ${ROOT-COMMAND-NAME} read 'ns=2;s=sensor-1/temperature' 'ns=2;s=sensor-2/temperature' -o jsonl",
+				"  ${ROOT-COMMAND-NAME} read i=2258 -o value                 # ora corrente del server",
+				"  ${ROOT-COMMAND-NAME} read sensor-1 --attribute DisplayName --attribute Description"})
 public class ReadCommand extends ClientCommand {
 
 	/** A value read. */

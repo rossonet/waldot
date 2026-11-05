@@ -26,9 +26,9 @@ import picocli.CommandLine.Parameters;
 				"Output:", "  text, value: i valori di uscita, uno per riga;",
 				"  json: array dei valori; jsonl: un valore JSON per riga.", "",
 				"Esempi:",
-				"  wotctl browse sensor-1 --node-class Method   # trova i metodi di un nodo",
-				"  wotctl call i=2253 i=11492 uint32:1          # GetMonitoredItems del server",
-				"  wotctl call plant-1 plant-1/reset bool:true -o json"})
+				"  ${ROOT-COMMAND-NAME} browse sensor-1 --node-class Method   # trova i metodi di un nodo",
+				"  ${ROOT-COMMAND-NAME} call i=2253 i=11492 uint32:1          # GetMonitoredItems del server",
+				"  ${ROOT-COMMAND-NAME} call plant-1 plant-1/reset bool:true -o json"})
 public class CallCommand extends ClientCommand {
 
 	@Parameters(index = "2..*", arity = "0..*", paramLabel = "ARGOMENTO", description = "Argomenti di ingresso ([tipo:]valore).")

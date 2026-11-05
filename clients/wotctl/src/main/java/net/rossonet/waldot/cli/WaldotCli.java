@@ -33,6 +33,7 @@ import net.rossonet.waldot.cli.commands.SnapshotCommand;
 import net.rossonet.waldot.cli.commands.SubscribeCommand;
 import net.rossonet.waldot.cli.commands.VertexCommand;
 import net.rossonet.waldot.cli.commands.WriteCommand;
+import net.rossonet.waldot.cli.spi.CliIdentity;
 import net.rossonet.waldot.cli.spi.PluginLoader;
 import net.rossonet.waldot.cli.spi.PluginVersion;
 import net.rossonet.waldot.cli.spi.WotctlPlugin;
@@ -75,12 +76,12 @@ import picocli.CommandLine.UnmatchedArgumentException;
 		"Le opzioni di connessione (--endpoint, sicurezza, identità, timeout, riconnessione)",
 		"si indicano dopo il nome del comando e hanno tutte una variabile d'ambiente",
 		"WALDOT_* equivalente: in un container basta 'docker run -e WALDOT_ENDPOINT=...'.",
-		"Per la guida completa di un comando: wotctl help COMANDO oppure wotctl COMANDO --help."}, footer = {
+		"Per la guida completa di un comando: ${ROOT-COMMAND-NAME} help COMANDO oppure ${ROOT-COMMAND-NAME} COMANDO --help."}, footer = {
 				"Identificatori dei nodi:",
 				"  Dove è richiesto un vertice, un arco o un nodo si può usare la forma OPC UA",
 				"  (ns=2;s=sensor-1, i=85, ns=0;i=2253) oppure il solo identificatore stringa",
 				"  nel namespace di WaldOT (sensor-1). Nella shell la forma OPC UA va tra apici",
-				"  perché contiene ';' (wotctl read 'ns=2;s=sensor-1/value').",
+				"  perché contiene ';' (${ROOT-COMMAND-NAME} read 'ns=2;s=sensor-1/value').",
 				"", "Durate:",
 				"  500ms, 10s, 2m, 1h, 1d, combinazioni come 1m30s, ISO-8601 (PT10S) oppure un",
 				"  numero di secondi (10, 2.5).", "", "Variabili d'ambiente:",
@@ -94,20 +95,20 @@ import picocli.CommandLine.UnmatchedArgumentException;
 				"  WALDOT_OUTPUT (formato predefinito), WALDOT_LOG_LEVEL (livello di log).",
 				"  Un'opzione indicata sulla riga di comando prevale sulla variabile.",
 				"", "Esempi:", "  # informazioni sul server",
-				"  wotctl about --endpoint opc.tcp://server:12686/waldot", "",
+				"  ${ROOT-COMMAND-NAME} about --endpoint opc.tcp://server:12686/waldot", "",
 				"  # vertici di tipo sensor in JSON Lines, filtrati con jq",
-				"  wotctl query -o jsonl \"g.V().hasLabel('sensor')\" | jq -r .id",
+				"  ${ROOT-COMMAND-NAME} query -o jsonl \"g.V().hasLabel('sensor')\" | jq -r .id",
 				"", "  # valore di una proprietà in una variabile di shell",
-				"  T=$(wotctl property get sensor-1 temperature -o value)", "",
+				"  T=$(${ROOT-COMMAND-NAME} property get sensor-1 temperature -o value)", "",
 				"  # backup e ripristino del grafo",
-				"  wotctl snapshot export -f grafo.json.gz",
-				"  wotctl snapshot import --clear -f grafo.json.gz", "",
+				"  ${ROOT-COMMAND-NAME} snapshot export -f grafo.json.gz",
+				"  ${ROOT-COMMAND-NAME} snapshot import --clear -f grafo.json.gz", "",
 				"  # disegno SVG dell'impianto, raggruppato per cartella",
-				"  wotctl render -f impianto.svg --group-by directory", "",
+				"  ${ROOT-COMMAND-NAME} render -f impianto.svg --group-by directory", "",
 				"  # inoltro dei valori a un broker MQTT (mosquitto_pub -l legge le righe da stdin)",
-				"  wotctl subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l",
+				"  ${ROOT-COMMAND-NAME} subscribe -p sensor-1:value -o value | mosquitto_pub -t waldot/sensor-1 -l",
 				"", "  # più proprietà ed eventi, un topic MQTT per ogni riga",
-				"  wotctl subscribe -p s1:value -p s2:value -e s1 -o topic --topic-prefix waldot \\",
+				"  ${ROOT-COMMAND-NAME} subscribe -p s1:value -p s2:value -e s1 -o topic --topic-prefix waldot \\",
 				"    | while read -r t p; do mosquitto_pub -t \"$t\" -m \"$p\"; done",
 				"", "  # dal container Docker",
 				"  docker run --rm -e WALDOT_ENDPOINT=opc.tcp://server:12686/waldot \\",
@@ -157,7 +158,15 @@ public class WaldotCli implements Callable<Integer> {
 		public String[] getVersion() {
 			final String version = version();
 			final List<String> lines = new ArrayList<>();
-			lines.add("wotctl " + (version == null ? "(sviluppo)" : version));
+			final CliIdentity identity = CliIdentity.get();
+			final String shown = version == null ? "(sviluppo)" : version;
+			lines.add(identity.name() + " " + shown);
+			if (!identity.description().isEmpty()) {
+				lines.add(identity.description());
+			}
+			if (!CliIdentity.DEFAULT_NAME.equals(identity.name())) {
+				lines.add("basato su " + CliIdentity.DEFAULT_NAME + " " + shown);
+			}
 			for (final WotctlPlugin plugin : plugins) {
 				final String pluginVersion = plugin.version();
 				lines.add("plugin " + plugin.name() + " "
@@ -295,7 +304,7 @@ public class WaldotCli implements Callable<Integer> {
 			commandLine = newCommandLine(out, err);
 		} catch (final IllegalStateException e) {
 			// a plugin that cannot be loaded or uses a name already taken
-			err.println("wotctl: errore: " + message(e));
+			err.println(CliIdentity.get().name() + ": errore: " + message(e));
 			err.flush();
 			System.exit(ExitCodes.SERVER_ERROR);
 			return;
@@ -334,6 +343,14 @@ public class WaldotCli implements Callable<Integer> {
 	public static CommandLine newCommandLine(final PrintWriter out,
 			final PrintWriter err, final List<WotctlPlugin> plugins) {
 		final CommandLine commandLine = new CommandLine(new WaldotCli());
+		// name of the executable (wotctl, or the one of a distribution with
+		// plugins): the texts use ${ROOT-COMMAND-NAME}
+		final CliIdentity identity = CliIdentity.get();
+		commandLine.setCommandName(identity.name());
+		if (!identity.description().isEmpty()) {
+			commandLine.getCommandSpec().usageMessage()
+					.header(identity.description(), "");
+		}
 		// before the settings below, that apply only to the subcommands already
 		// present
 		PluginLoader.register(commandLine, plugins);
@@ -353,7 +370,8 @@ public class WaldotCli implements Callable<Integer> {
 		commandLine.setParameterExceptionHandler((exception, args) -> {
 			final CommandLine failed = exception.getCommandLine();
 			final PrintWriter writer = failed.getErr();
-			writer.println("wotctl: uso errato: " + exception.getMessage());
+			writer.println(CliIdentity.get().name() + ": uso errato: "
+					+ exception.getMessage());
 			UnmatchedArgumentException.printSuggestions(exception, writer);
 			writer.println("Guida: " + failed.getCommandSpec().qualifiedName()
 					+ " --help");
@@ -366,7 +384,7 @@ public class WaldotCli implements Callable<Integer> {
 					if (!(exception instanceof net.rossonet.waldot.cli.support.OutputClosedException)) {
 						final PrintWriter writer = failed.getErr();
 						writer.println(
-								"wotctl: "
+								CliIdentity.get().name() + ": "
 										+ (code == ExitCodes.CONNECTION
 												? "errore di connessione: "
 												: "errore: ")

@@ -31,9 +31,9 @@ import picocli.CommandLine.Parameters;
 		"il codice di uscita 1."}, footer = {"Output:",
 				"  text : '<nodeId> <- <valore> (<stato>)';",
 				"  value: lo stato (Good); json/jsonl: {\"nodeId\",\"value\",\"status\"}.",
-				"", "Esempi:", "  wotctl write sensor-1/setpoint 21.5",
-				"  wotctl write 'ns=2;s=pump-3/enabled' true --type bool",
-				"  wotctl write valve-2/position 75 -o json"})
+				"", "Esempi:", "  ${ROOT-COMMAND-NAME} write sensor-1/setpoint 21.5",
+				"  ${ROOT-COMMAND-NAME} write 'ns=2;s=pump-3/enabled' true --type bool",
+				"  ${ROOT-COMMAND-NAME} write valve-2/position 75 -o json"})
 public class WriteCommand extends ClientCommand {
 
 	private static final Map<Class<?>, String> TYPE_OF = Map.ofEntries(

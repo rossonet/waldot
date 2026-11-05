@@ -24,8 +24,8 @@ import picocli.CommandLine.Parameters;
 		"Legge o imposta una proprietà di un vertice o di un arco."}, subcommands = {
 				PropertyCommand.GetCommand.class,
 				PropertyCommand.SetCommand.class}, footer = {"Esempi:",
-						"  wotctl property set sensor-1 setpoint 21.5",
-						"  wotctl property get sensor-1 setpoint -o value"})
+						"  ${ROOT-COMMAND-NAME} property set sensor-1 setpoint 21.5",
+						"  ${ROOT-COMMAND-NAME} property get sensor-1 setpoint -o value"})
 public class PropertyCommand extends CommandGroup {
 
 	@Command(name = "get", header = "Legge una proprietà.", mixinStandardHelpOptions = true, description = {
@@ -33,8 +33,8 @@ public class PropertyCommand extends CommandGroup {
 			"Se la proprietà non esiste il codice di uscita è 1."}, footer = {
 					"Output:",
 					"  text, value: il valore; json/jsonl: {\"element\",\"key\",\"value\",\"valueType\",\"nodeId\"}.",
-					"", "Esempi:", "  wotctl property get sensor-1 temperature",
-					"  if [ \"$(wotctl property get pump-3 state -o value)\" = on ]; then echo accesa; fi"})
+					"", "Esempi:", "  ${ROOT-COMMAND-NAME} property get sensor-1 temperature",
+					"  if [ \"$(${ROOT-COMMAND-NAME} property get pump-3 state -o value)\" = on ]; then echo accesa; fi"})
 	public static class GetCommand extends ClientCommand {
 
 		@Parameters(index = "0", paramLabel = "ELEMENTO", description = "Id del vertice o dell'arco.")
@@ -71,11 +71,11 @@ public class PropertyCommand extends CommandGroup {
 			"double, nodeid, text)."}, footer = {"Output:",
 					"  text : '<elemento>/<chiave> = <valore>'; value: il valore;",
 					"  json/jsonl: {\"element\",\"key\",\"value\"}.", "",
-					"Esempi:", "  wotctl property set sensor-1 unit C",
-					"  wotctl property set pump-3 speed 1450 --type int32",
-					"  wotctl property set valve-2 open true --type bool -o json",
-					"  wotctl property set rule-1 action --value-file azione.jexl",
-					"  wotctl property set zona-1 guasto \"\""})
+					"Esempi:", "  ${ROOT-COMMAND-NAME} property set sensor-1 unit C",
+					"  ${ROOT-COMMAND-NAME} property set pump-3 speed 1450 --type int32",
+					"  ${ROOT-COMMAND-NAME} property set valve-2 open true --type bool -o json",
+					"  ${ROOT-COMMAND-NAME} property set rule-1 action --value-file azione.jexl",
+					"  ${ROOT-COMMAND-NAME} property set zona-1 guasto \"\""})
 	public static class SetCommand extends ClientCommand {
 
 		private Object converted;

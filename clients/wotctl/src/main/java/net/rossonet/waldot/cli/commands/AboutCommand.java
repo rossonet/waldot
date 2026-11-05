@@ -22,9 +22,9 @@ import picocli.CommandLine.Command;
 				"  --structured: {product, description, version, commit, branch, build_date, license,",
 				"              license_url, repository_url, vertices, edges, start_time, uptime_s,",
 				"              raw:{uscita: valore}} (i valori assenti sono null).",
-				"", "Esempi:", "  wotctl about", "  wotctl about --structured -o json",
-				"  wotctl about --endpoint opc.tcp://192.168.1.10:12686/waldot",
-				"  wotctl about --connect-timeout 3s >/dev/null && echo raggiungibile"})
+				"", "Esempi:", "  ${ROOT-COMMAND-NAME} about", "  ${ROOT-COMMAND-NAME} about --structured -o json",
+				"  ${ROOT-COMMAND-NAME} about --endpoint opc.tcp://192.168.1.10:12686/waldot",
+				"  ${ROOT-COMMAND-NAME} about --connect-timeout 3s >/dev/null && echo raggiungibile"})
 public class AboutCommand extends ClientCommand {
 
 	/**

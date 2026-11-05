@@ -94,11 +94,19 @@ public class AcmePlugin implements WotctlPlugin {
 - **Distribuzione**: il binario nativo non carica jar a runtime, quindi i plugin entrano in build.
   Un modulo di distribuzione dipende da `wotctl` e dai plugin e applica `gradle/wotctl-cli.gradle`,
   ottenendo fat jar, installDist con lo script di completamento, binario nativo e archivio.
+- **Nome dell'eseguibile**: una distribuzione può avere un nome proprio (`ext.cliName`, con
+  `cliDescription` e `cliMcpName`): il build scrive la risorsa
+  `net/rossonet/waldot/cli/cli-identity.properties`, letta da `CliIdentity`
+  (`net.rossonet.waldot.cli.spi`). Guida, esempi, messaggi d'errore, completamento e
+  `--version` usano quel nome; wotctl, senza la risorsa, resta `wotctl`. Nei testi dei comandi
+  il nome si scrive `${ROOT-COMMAND-NAME}` (variabile di picocli), nei messaggi costruiti a
+  runtime `CliIdentity.get().name()`; variabili d'ambiente e stato locale dell'eseguibile si
+  ricavano da `CliIdentity` (`envName`, `cacheDir`), mentre `WALDOT_*` sono comuni a tutti.
 - **Moduli dei plugin**: applicano `gradle/wotctl-plugin.gradle`, che fornisce la dipendenza
   `compileOnly` da wotctl, le test fixtures (`CliTestSupport`, `CommandTestBase`, `MockClient`)
   e il task `nativeMetadata` per i metadati di native-image raccolti con l'agent.
-- **Esempi**: un plugin di riferimento e una distribuzione si trovano in wot-addons
-  (`wotctl-addons/`).
+- **Esempi**: un plugin di riferimento e le distribuzioni si trovano in wot-addons
+  (`wotctl-addons/`, per esempio `wotctl-clarabella` con il binario `muuh`).
 
 ## Regole per gli script
 

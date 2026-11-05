@@ -34,9 +34,9 @@ import picocli.CommandLine.Parameters;
 				"  value: i NodeId, uno per riga;",
 				"  json/jsonl: {\"depth\",\"parent\",\"referenceTypeId\",\"forward\",\"targetId\",",
 				"              \"browseName\",\"displayName\",\"nodeClass\",\"typeDefinitionId\"}.",
-				"", "Esempi:", "  wotctl browse", "  wotctl browse --depth 3",
-				"  wotctl browse sensor-1 --node-class Variable -o value",
-				"  wotctl browse i=2253 --references all --direction both -o json"})
+				"", "Esempi:", "  ${ROOT-COMMAND-NAME} browse", "  ${ROOT-COMMAND-NAME} browse --depth 3",
+				"  ${ROOT-COMMAND-NAME} browse sensor-1 --node-class Variable -o value",
+				"  ${ROOT-COMMAND-NAME} browse i=2253 --references all --direction both -o json"})
 public class BrowseCommand extends ClientCommand {
 
 	/** A reference found at a depth. */

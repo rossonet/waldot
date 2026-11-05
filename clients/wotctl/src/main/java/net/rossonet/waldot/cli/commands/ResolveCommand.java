@@ -28,9 +28,9 @@ import picocli.CommandLine.Parameters;
 				"Output:",
 				"  text, value: il NodeId; json/jsonl: {\"start\",\"path\",\"nodeId\"}.",
 				"", "Esempi:",
-				"  wotctl resolve Server ServerStatus CurrentTime",
-				"  wotctl read \"$(wotctl resolve Server ServerStatus State)\" -o value",
-				"  wotctl resolve --start sensor-1 temperature"})
+				"  ${ROOT-COMMAND-NAME} resolve Server ServerStatus CurrentTime",
+				"  ${ROOT-COMMAND-NAME} read \"$(${ROOT-COMMAND-NAME} resolve Server ServerStatus State)\" -o value",
+				"  ${ROOT-COMMAND-NAME} resolve --start sensor-1 temperature"})
 public class ResolveCommand extends ClientCommand {
 
 	/** Result of the resolution. */

@@ -25,10 +25,10 @@ import picocli.CommandLine.Parameters;
 				"         description, eventNotifier, source, target, properties, outEdges,",
 				"         inEdges, commands; jsonl: lo stesso oggetto su una riga;",
 				"  value: una riga 'chiave=valore' per ogni proprietà.", "",
-				"Esempi:", "  wotctl describe sensor-1",
-				"  wotctl describe 'ns=2;s=sensor-1' -o json   (il ';' va protetto dalla shell)",
-				"  wotctl describe sensor-1 -o json | jq -r '.properties[].key'",
-				"  wotctl describe sensor-1 -o value | grep '^temperature='"})
+				"Esempi:", "  ${ROOT-COMMAND-NAME} describe sensor-1",
+				"  ${ROOT-COMMAND-NAME} describe 'ns=2;s=sensor-1' -o json   (il ';' va protetto dalla shell)",
+				"  ${ROOT-COMMAND-NAME} describe sensor-1 -o json | jq -r '.properties[].key'",
+				"  ${ROOT-COMMAND-NAME} describe sensor-1 -o value | grep '^temperature='"})
 public class DescribeCommand extends ClientCommand {
 
 	private static void edges(final StringBuilder text, final String title,

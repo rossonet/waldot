@@ -28,11 +28,11 @@ import picocli.CommandLine.Option;
 				SnapshotCommand.ExportCommand.class,
 				SnapshotCommand.ImportCommand.class,
 				SnapshotCommand.ClearCommand.class}, footer = {"Esempi:",
-						"  wotctl snapshot export -f backup-$(date +%%F).json.gz",
-						"  wotctl snapshot import --clear -f backup-2026-10-28.json.gz",
-						"  wotctl snapshot export --endpoint opc.tcp://a:12686/waldot \\",
-						"    | wotctl snapshot import --clear --endpoint opc.tcp://b:12686/waldot",
-						"  wotctl snapshot clear --yes"})
+						"  ${ROOT-COMMAND-NAME} snapshot export -f backup-$(date +%%F).json.gz",
+						"  ${ROOT-COMMAND-NAME} snapshot import --clear -f backup-2026-10-28.json.gz",
+						"  ${ROOT-COMMAND-NAME} snapshot export --endpoint opc.tcp://a:12686/waldot \\",
+						"    | ${ROOT-COMMAND-NAME} snapshot import --clear --endpoint opc.tcp://b:12686/waldot",
+						"  ${ROOT-COMMAND-NAME} snapshot clear --yes"})
 public class SnapshotCommand extends CommandGroup {
 
 	@Command(name = "clear", header = "Elimina l'intero grafo (richiede --yes).", mixinStandardHelpOptions = true, description = {
@@ -41,7 +41,7 @@ public class SnapshotCommand extends CommandGroup {
 					"Output:",
 					"  text : 'eliminati V vertici e E archi'; value: 'V E';",
 					"  json/jsonl: {\"vertices\",\"edges\",\"warnings\"}.", "",
-					"Esempi:", "  wotctl snapshot clear --yes"})
+					"Esempi:", "  ${ROOT-COMMAND-NAME} snapshot clear --yes"})
 	public static class ClearCommand extends ClientCommand {
 
 		@Option(names = "--yes", description = "Conferma l'eliminazione dell'intero grafo.")
@@ -73,10 +73,10 @@ public class SnapshotCommand extends CommandGroup {
 					"  text : 'esportati V vertici e E archi (N byte, B blocchi) in FILE';",
 					"  value: il percorso del file;",
 					"  json/jsonl: {\"file\",\"size\",\"compressed\",\"vertices\",\"edges\",\"blocks\"}.",
-					"", "Esempi:", "  wotctl snapshot export -f grafo.json.gz",
-					"  wotctl snapshot export --no-compress -f grafo.json",
-					"  wotctl snapshot export --no-compress | jq '.vertices | length'",
-					"  wotctl snapshot export --include-ephemeral --block-size 262144 -f completo.gz"})
+					"", "Esempi:", "  ${ROOT-COMMAND-NAME} snapshot export -f grafo.json.gz",
+					"  ${ROOT-COMMAND-NAME} snapshot export --no-compress -f grafo.json",
+					"  ${ROOT-COMMAND-NAME} snapshot export --no-compress | jq '.vertices | length'",
+					"  ${ROOT-COMMAND-NAME} snapshot export --include-ephemeral --block-size 262144 -f completo.gz"})
 	public static class ExportCommand extends ClientCommand {
 
 		private static final Logger logger = LoggerFactory
@@ -147,9 +147,9 @@ public class SnapshotCommand extends CommandGroup {
 					"  text : 'importati V vertici e E archi'; value: 'V E';",
 					"  json/jsonl: {\"vertices\",\"edges\",\"warnings\"}.", "",
 					"Esempi:",
-					"  wotctl snapshot import --clear -f grafo.json.gz",
-					"  wotctl snapshot import < aggiunte.json",
-					"  curl -s https://example.org/grafo.json.gz | wotctl snapshot import --clear"})
+					"  ${ROOT-COMMAND-NAME} snapshot import --clear -f grafo.json.gz",
+					"  ${ROOT-COMMAND-NAME} snapshot import < aggiunte.json",
+					"  curl -s https://example.org/grafo.json.gz | ${ROOT-COMMAND-NAME} snapshot import --clear"})
 	public static class ImportCommand extends ClientCommand {
 
 		@Option(names = "--block-size", paramLabel = "BYTE", defaultValue = ""

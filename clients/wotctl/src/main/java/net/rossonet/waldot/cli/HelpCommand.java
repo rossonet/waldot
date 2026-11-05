@@ -14,10 +14,10 @@ import picocli.CommandLine.Parameters;
  */
 @Command(name = "help", header = "Mostra la guida di un comando.", helpCommand = true, mixinStandardHelpOptions = true, description = {
 		"Mostra la guida completa di un comando o di un sottocomando.",
-		"Senza argomenti mostra la guida generale di wotctl.",
+		"Senza argomenti mostra la guida generale di ${ROOT-COMMAND-NAME}.",
 		"Equivale all'opzione -h/--help del comando."}, footer = {"%nEsempi:",
-				"  wotctl help", "  wotctl help subscribe",
-				"  wotctl help snapshot import", "  wotctl subscribe --help"})
+				"  ${ROOT-COMMAND-NAME} help", "  ${ROOT-COMMAND-NAME} help subscribe",
+				"  ${ROOT-COMMAND-NAME} help snapshot import", "  ${ROOT-COMMAND-NAME} subscribe --help"})
 public class HelpCommand implements IHelpCommandInitializable2, Runnable {
 
 	private Help.ColorScheme colorScheme;

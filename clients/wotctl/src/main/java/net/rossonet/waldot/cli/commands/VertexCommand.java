@@ -21,8 +21,8 @@ import picocli.CommandLine.Parameters;
 		"Aggiunge o elimina vertici del grafo."}, subcommands = {
 				VertexCommand.AddCommand.class,
 				VertexCommand.DeleteCommand.class}, footer = {"Esempi:",
-						"  wotctl vertex add --id sensor-1 --label sensor -P zone=A -P unit=C",
-						"  wotctl vertex delete sensor-1"})
+						"  ${ROOT-COMMAND-NAME} vertex add --id sensor-1 --label sensor -P zone=A -P unit=C",
+						"  ${ROOT-COMMAND-NAME} vertex delete sensor-1"})
 public class VertexCommand extends CommandGroup {
 
 	@Command(name = "add", header = "Aggiunge un vertice.", mixinStandardHelpOptions = true, description = {
@@ -35,9 +35,9 @@ public class VertexCommand extends CommandGroup {
 					"  value: l'id del vertice (se indicato con --id) o la risposta del server;",
 					"  json/jsonl: {\"kind\":\"vertex\",\"id\",\"output\"}.",
 					"", "Esempi:",
-					"  wotctl vertex add --id sensor-1 --label sensor --type temperature",
-					"  wotctl vertex add --label person -P name=marko -P age=29",
-					"  wotctl vertex add --id pump-3 --label pump -o json"})
+					"  ${ROOT-COMMAND-NAME} vertex add --id sensor-1 --label sensor --type temperature",
+					"  ${ROOT-COMMAND-NAME} vertex add --label person -P name=marko -P age=29",
+					"  ${ROOT-COMMAND-NAME} vertex add --id pump-3 --label pump -o json"})
 	public static class AddCommand extends ClientCommand {
 
 		@Option(names = "--id", paramLabel = "ID", description = "Identificatore del nuovo vertice (stringa nel namespace di WaldOT).")
@@ -83,8 +83,8 @@ public class VertexCommand extends CommandGroup {
 					"Output:",
 					"  text : 'eliminato <id>' per ogni vertice; value: gli id;",
 					"  json/jsonl: {\"id\",\"deleted\",\"output\"}.", "",
-					"Esempi:", "  wotctl vertex delete sensor-1",
-					"  wotctl query -o value \"g.V().hasLabel('tmp')\" | xargs -r wotctl vertex delete"})
+					"Esempi:", "  ${ROOT-COMMAND-NAME} vertex delete sensor-1",
+					"  ${ROOT-COMMAND-NAME} query -o value \"g.V().hasLabel('tmp')\" | xargs -r ${ROOT-COMMAND-NAME} vertex delete"})
 	public static class DeleteCommand extends ClientCommand {
 
 		@Parameters(arity = "1..*", paramLabel = "ID", description = "Id dei vertici da eliminare.")

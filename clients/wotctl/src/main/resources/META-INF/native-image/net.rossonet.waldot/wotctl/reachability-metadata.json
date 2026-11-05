@@ -4591,6 +4591,9 @@
             "bundle": "net.rossonet.waldot.cli.messages"
         },
         {
+            "glob": "net/rossonet/waldot/cli/cli-identity.properties"
+        },
+        {
             "glob": "net/rossonet/waldot/cli/messages.properties"
         },
         {

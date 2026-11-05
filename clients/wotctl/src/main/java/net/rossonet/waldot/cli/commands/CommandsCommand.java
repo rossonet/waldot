@@ -30,11 +30,11 @@ import picocli.CommandLine.Parameters;
 		"    si indicano con --element."}, subcommands = {
 				CommandsCommand.ListCommand.class,
 				CommandsCommand.CallCommand.class}, footer = {"Esempi:",
-						"  wotctl commands list",
-						"  wotctl commands list --element sensor-1 -o json",
-						"  wotctl commands call about",
-						"  wotctl commands call 'export graph' -o json",
-						"  wotctl commands call property --element sensor-1 setpoint 21.5"})
+						"  ${ROOT-COMMAND-NAME} commands list",
+						"  ${ROOT-COMMAND-NAME} commands list --element sensor-1 -o json",
+						"  ${ROOT-COMMAND-NAME} commands call about",
+						"  ${ROOT-COMMAND-NAME} commands call 'export graph' -o json",
+						"  ${ROOT-COMMAND-NAME} commands call property --element sensor-1 setpoint 21.5"})
 public class CommandsCommand extends CommandGroup {
 
 	@Command(name = "call", header = "Invoca un comando globale o di un elemento.", mixinStandardHelpOptions = true, description = {
@@ -50,10 +50,10 @@ public class CommandsCommand extends CommandGroup {
 					"         altrimenti una riga 'nome: valore' per ogni uscita;",
 					"  value: il valore di ogni uscita (esclusa 'error'), uno per riga;",
 					"  json/jsonl: {\"command\",\"status\",\"outputs\":{nome: valore}}.",
-					"", "Esempi:", "  wotctl commands call about",
-					"  wotctl commands call query \"g.V().count()\"",
-					"  wotctl commands call delete --element sensor-old",
-					"  wotctl commands call property --element sensor-1 unit '°C' -o json"})
+					"", "Esempi:", "  ${ROOT-COMMAND-NAME} commands call about",
+					"  ${ROOT-COMMAND-NAME} commands call query \"g.V().count()\"",
+					"  ${ROOT-COMMAND-NAME} commands call delete --element sensor-old",
+					"  ${ROOT-COMMAND-NAME} commands call property --element sensor-1 unit '°C' -o json"})
 	public static class CallCommand extends ClientCommand {
 
 		@Parameters(index = "1..*", arity = "0..*", paramLabel = "ARGOMENTO", description = "Argomenti del comando, nell'ordine degli ingressi.")
@@ -115,12 +115,12 @@ public class CommandsCommand extends CommandGroup {
 					"  json/jsonl: forma breve {name, path, inputs:[\"nome:Tipo\"], outputs:[nome]};",
 					"              con --full (o se il filtro trova un solo comando) oggetti con",
 					"              objectId, methodId, name, path, description, inputs, outputs.",
-					"", "Esempi:", "  wotctl commands list",
-					"  wotctl commands list -o value | sort",
-					"  wotctl commands list --element sensor-1",
-					"  wotctl commands list --path iec60870-5-104 -o json",
-					"  wotctl commands list --name 'create*rule*' -o json",
-					"  wotctl commands list -o json | jq '.[] | select(.name==\"about\")'"})
+					"", "Esempi:", "  ${ROOT-COMMAND-NAME} commands list",
+					"  ${ROOT-COMMAND-NAME} commands list -o value | sort",
+					"  ${ROOT-COMMAND-NAME} commands list --element sensor-1",
+					"  ${ROOT-COMMAND-NAME} commands list --path iec60870-5-104 -o json",
+					"  ${ROOT-COMMAND-NAME} commands list --name 'create*rule*' -o json",
+					"  ${ROOT-COMMAND-NAME} commands list -o json | jq '.[] | select(.name==\"about\")'"})
 	public static class ListCommand extends ClientCommand {
 
 		private static String arguments(

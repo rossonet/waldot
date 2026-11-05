@@ -44,13 +44,13 @@ import picocli.CommandLine.Option;
 				"  value: il percorso del file;",
 				"  json/jsonl: {\"file\",\"format\",\"size\",\"vertices\",\"edges\",\"blocks\",\"warnings\"}.",
 				"", "Esempi:",
-				"  wotctl render -f impianto.svg --group-by directory",
-				"  wotctl render -f plc.svg --root plc-1 --depth 2 --include-runtime --include-ephemeral",
-				"  wotctl render -f regole.svg --edge-label fire --edge-label link-to --no-isolated",
-				"  wotctl render -f linea1.svg --directory impianto/linea1 --layout mrtree --props unit,status",
-				"  wotctl render -f allarmi.svg --where status=alarm --root sensore-1 --theme dark",
-				"  wotctl render -f grafo.dot && dot -Tpng grafo.dot -o grafo.png",
-				"  wotctl render --options-file vista.json --max 2000 > vista.svg"})
+				"  ${ROOT-COMMAND-NAME} render -f impianto.svg --group-by directory",
+				"  ${ROOT-COMMAND-NAME} render -f plc.svg --root plc-1 --depth 2 --include-runtime --include-ephemeral",
+				"  ${ROOT-COMMAND-NAME} render -f regole.svg --edge-label fire --edge-label link-to --no-isolated",
+				"  ${ROOT-COMMAND-NAME} render -f linea1.svg --directory impianto/linea1 --layout mrtree --props unit,status",
+				"  ${ROOT-COMMAND-NAME} render -f allarmi.svg --where status=alarm --root sensore-1 --theme dark",
+				"  ${ROOT-COMMAND-NAME} render -f grafo.dot && dot -Tpng grafo.dot -o grafo.png",
+				"  ${ROOT-COMMAND-NAME} render --options-file vista.json --max 2000 > vista.svg"})
 public class RenderCommand extends ClientCommand {
 
 	private static final Logger logger = LoggerFactory

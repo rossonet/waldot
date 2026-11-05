@@ -21,8 +21,8 @@ import picocli.CommandLine.Parameters;
 		"Aggiunge o elimina archi del grafo."}, subcommands = {
 				EdgeCommand.AddCommand.class,
 				EdgeCommand.DeleteCommand.class}, footer = {"Esempi:",
-						"  wotctl edge add --label feeds --from pump-3 --to tank-1 -P weight=0.5",
-						"  wotctl edge delete e-17"})
+						"  ${ROOT-COMMAND-NAME} edge add --label feeds --from pump-3 --to tank-1 -P weight=0.5",
+						"  ${ROOT-COMMAND-NAME} edge delete e-17"})
 public class EdgeCommand extends CommandGroup {
 
 	@Command(name = "add", header = "Aggiunge un arco tra due vertici.", mixinStandardHelpOptions = true, description = {
@@ -32,8 +32,8 @@ public class EdgeCommand extends CommandGroup {
 					"  text, value: la risposta del server (descrizione dell'arco creato);",
 					"  json/jsonl: {\"kind\":\"edge\",\"id\":null,\"output\"}.",
 					"", "Esempi:",
-					"  wotctl edge add --label knows --from marko --to vadas -P weight=0.5",
-					"  wotctl edge add -l feeds -s pump-3 -d tank-1 -o json"})
+					"  ${ROOT-COMMAND-NAME} edge add --label knows --from marko --to vadas -P weight=0.5",
+					"  ${ROOT-COMMAND-NAME} edge add -l feeds -s pump-3 -d tank-1 -o json"})
 	public static class AddCommand extends ClientCommand {
 
 		@Option(names = {"-s",
@@ -81,7 +81,7 @@ public class EdgeCommand extends CommandGroup {
 					"  text : 'eliminato <id>' per ogni arco; value: gli id;",
 					"  json/jsonl: {\"id\",\"deleted\",\"output\"}.", "",
 					"Esempi:",
-					"  wotctl query -o value \"g.V('marko').outE('knows')\" | xargs -r wotctl edge delete"})
+					"  ${ROOT-COMMAND-NAME} query -o value \"g.V('marko').outE('knows')\" | xargs -r ${ROOT-COMMAND-NAME} edge delete"})
 	public static class DeleteCommand extends ClientCommand {
 
 		@Parameters(arity = "1..*", paramLabel = "ID", description = "Id degli archi da eliminare.")
