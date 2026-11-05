@@ -69,6 +69,25 @@ public interface SubscriptionGroup extends AutoCloseable {
 	MonitoredDataItem subscribeData(NodeId nodeId, DataItemOptions options, DataChangeListener listener);
 
 	/**
+	 * Monitors many values with a single synchronization: the items are created
+	 * on the server in batches (CreateMonitoredItems split by the server limit
+	 * per call), not one request per item.
+	 *
+	 * <p>
+	 * Unlike {@link #subscribeData(NodeId, DataItemOptions, DataChangeListener)},
+	 * an item refused by the server stays in the group and is created again
+	 * with the backoff of the client, as after a reconnection: a property of
+	 * WaldOT that does not exist yet (written for the first time later) is
+	 * monitored as soon as it appears. The result of the last attempt is in
+	 * {@link MonitoredItemHandle#status()}; the caller that wants to fail on a
+	 * refused node checks it.
+	 *
+	 * @param requests values to monitor, in order
+	 * @return the handles, in the order of the requests
+	 */
+	List<MonitoredDataItem> subscribeData(List<DataItemRequest> requests);
+
+	/**
 	 * Monitors the events of a node (EventNotifier).
 	 *
 	 * @param nodeId   object node (e.g. a vertex or the Server object)

@@ -37,6 +37,11 @@ try (WaldotClient client = WaldotClient.create(configuration)) {
 			DataItemOptions.sampling(50).queue(10, true), (item, dataValue) -> { /* ... */ });
 	value.modify(value.options().trigger(DataChangeTrigger.StatusValueTimestamp));
 	group.subscribeEvents(sensor.id(), EventItemOptions.defaults(), (item, event) -> { /* ... */ });
+	// many values at once: one synchronization (CreateMonitoredItems in batches), the items
+	// refused by the server stay in the group and are retried
+	List<MonitoredDataItem> values = group.subscribeData(List.of(
+			new DataItemRequest(client.graph().propertyNodeId(sensor.id(), "value"), null, listener),
+			new DataItemRequest(client.graph().propertyNodeId(sensor.id(), "status"), null, listener)));
 
 	// snapshots (GraphSON v3, single block or chunked transfer)
 	GraphSnapshot snapshot = client.snapshots().exportGraph();
@@ -60,6 +65,14 @@ exponential backoff of the configuration (`FAULTED`, then `UNRECOVERABLE_FAULTED
 subscription groups that cannot be transferred to the new session are created again
 (`onRecreated`), and the items refused by the server (e.g. nodes not yet created after a
 restart) are retried with the same backoff.
+
+Many items: `subscribeData(List<DataItemRequest>)` creates the items of the list with a single
+synchronization (Milo splits the request by `MaxMonitoredItemsPerCall`), while the method for a
+single item makes a request per item. The batch method does not discard the items refused by the
+server: it retries them with the backoff of the client, so a property of WaldOT written for the
+first time later (a node that does not exist yet) is monitored as soon as it appears; the result
+of the last attempt is in `status()`. The single-item method keeps throwing
+`WaldotClientException` on a refused node.
 
 Note: the properties of the vertices are `BaseDataType` variables, so the server refuses
 absolute/percent deadbands on them (`Bad_FilterNotAllowed`); the deadband works on numeric

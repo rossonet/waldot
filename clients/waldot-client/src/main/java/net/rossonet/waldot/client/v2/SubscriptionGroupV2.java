@@ -28,6 +28,7 @@ import net.rossonet.waldot.client.api.WaldotClientException;
 import net.rossonet.waldot.client.api.WaldotClientListener;
 import net.rossonet.waldot.client.api.subscription.DataChangeListener;
 import net.rossonet.waldot.client.api.subscription.DataItemOptions;
+import net.rossonet.waldot.client.api.subscription.DataItemRequest;
 import net.rossonet.waldot.client.api.subscription.EventItemOptions;
 import net.rossonet.waldot.client.api.subscription.MonitoredDataItem;
 import net.rossonet.waldot.client.api.subscription.MonitoredEventItem;
@@ -473,6 +474,41 @@ final class SubscriptionGroupV2 implements SubscriptionGroup {
 				itemOptions == null ? DataItemOptions.sampling(owner.getConfiguration().getDefaultSamplingInterval())
 						: itemOptions,
 				listener));
+	}
+
+	@Override
+	public List<MonitoredDataItem> subscribeData(final List<DataItemRequest> requests) {
+		checkOpen();
+		final List<MonitoredDataItem> created = new ArrayList<>(requests.size());
+		final List<DataItemV2> pending = new ArrayList<>(requests.size());
+		for (final DataItemRequest request : requests) {
+			final DataItemV2 item = new DataItemV2(this, request.nodeId(),
+					request.options() == null
+							? DataItemOptions.sampling(owner.getConfiguration().getDefaultSamplingInterval())
+							: request.options(),
+					request.listener());
+			pending.add(item);
+			created.add(item);
+		}
+		synchronized (this) {
+			checkOpen();
+			items.addAll(pending);
+			final OpcUaSubscription current = subscription;
+			if (current != null) {
+				// una sola synchronize: Milo crea gli item a lotti (MaxMonitoredItemsPerCall)
+				for (final DataItemV2 item : pending) {
+					current.addMonitoredItem(item.newMonitoredItem());
+				}
+				try {
+					current.synchronizeMonitoredItems();
+				} catch (final MonitoredItemSynchronizationException e) {
+					logger.debug("some items of group '{}' were not created: {}", name, e.getMessage());
+				}
+				// gli item rifiutati restano nel gruppo e si riprovano con il backoff
+				scheduleRetryIfNeeded();
+			}
+		}
+		return created;
 	}
 
 	@Override

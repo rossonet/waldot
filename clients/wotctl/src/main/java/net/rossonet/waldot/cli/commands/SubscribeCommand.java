@@ -34,6 +34,7 @@ import net.rossonet.waldot.client.api.WaldOTAgentClientConfiguration;
 import net.rossonet.waldot.client.api.WaldotClient;
 import net.rossonet.waldot.client.api.WaldotClientListener;
 import net.rossonet.waldot.client.api.subscription.DataItemOptions;
+import net.rossonet.waldot.client.api.subscription.DataItemRequest;
 import net.rossonet.waldot.client.api.subscription.EventItemOptions;
 import net.rossonet.waldot.client.api.subscription.MonitoredItemHandle;
 import net.rossonet.waldot.client.api.subscription.SubscriptionGroup;
@@ -318,23 +319,26 @@ public class SubscribeCommand extends ClientCommand {
 						.collect(java.util.stream.Collectors.toSet()),
 				queue == null ? 100 : queue, discardOldest,
 				MonitoringMode.Reporting);
-		for (final Source source : sources(client)) {
-			final MonitoredItemHandle item;
+		final List<Source> sources = sources(client);
+		// i valori in una sola richiesta (creazione a lotti), gli eventi uno per uno
+		final List<Source> dataSources = sources.stream()
+				.filter(source -> !source.event()).toList();
+		final List<? extends MonitoredItemHandle> dataItems = group
+				.subscribeData(dataSources.stream()
+						.map(source -> new DataItemRequest(source.nodeId(),
+								dataOptions,
+								(handle, value) -> deliver(printer,
+										dataLine(printer, source, value))))
+						.toList());
+		for (int i = 0; i < dataSources.size(); i++) {
+			checkSubscribed(dataSources.get(i), dataItems.get(i));
+		}
+		for (final Source source : sources) {
 			if (source.event()) {
-				item = group.subscribeEvents(source.nodeId(), eventOptions,
-						(handle, event) -> deliver(printer,
-								eventLine(printer, source, event)));
-			} else {
-				item = group.subscribeData(source.nodeId(), dataOptions,
-						(handle, value) -> deliver(printer,
-								dataLine(printer, source, value)));
+				checkSubscribed(source, group.subscribeEvents(source.nodeId(),
+						eventOptions, (handle, event) -> deliver(printer,
+								eventLine(printer, source, event))));
 			}
-			item.status().filter(StatusCode::isBad).ifPresent(status -> {
-				throw CliException.server("sottoscrizione di " + source.label()
-						+ " rifiutata dal server: " + Json.statusName(status));
-			});
-			logger.info("subscribed {} ({})", source.label(),
-					Json.id(source.nodeId()));
 		}
 		if (duration != null) {
 			if (!done.await(duration.toNanos(), TimeUnit.NANOSECONDS)) {
@@ -350,6 +354,20 @@ public class SubscribeCommand extends ClientCommand {
 			throw new CliException(exitCode.get(), failure, null);
 		}
 		return exitCode.get();
+	}
+
+	/**
+	 * Fallisce se il server ha rifiutato la sorgente: un nodo inesistente e' un
+	 * errore dell'utente, anche se il gruppo continuerebbe a riprovarlo.
+	 */
+	private static void checkSubscribed(final Source source,
+			final MonitoredItemHandle item) {
+		item.status().filter(StatusCode::isBad).ifPresent(status -> {
+			throw CliException.server("sottoscrizione di " + source.label()
+					+ " rifiutata dal server: " + Json.statusName(status));
+		});
+		logger.info("subscribed {} ({})", source.label(),
+				Json.id(source.nodeId()));
 	}
 
 	private List<Source> sources(final WaldotClient client) {

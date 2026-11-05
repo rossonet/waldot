@@ -45,6 +45,7 @@ import net.rossonet.waldot.client.api.WaldOTAgentClient.Status;
 import net.rossonet.waldot.client.api.WaldotClientListener;
 import net.rossonet.waldot.client.api.subscription.DataChangeListener;
 import net.rossonet.waldot.client.api.subscription.DataItemOptions;
+import net.rossonet.waldot.client.api.subscription.DataItemRequest;
 import net.rossonet.waldot.client.api.subscription.EventItemOptions;
 import net.rossonet.waldot.client.api.subscription.MonitoredDataItem;
 import net.rossonet.waldot.client.api.subscription.MonitoredEventItem;
@@ -82,6 +83,19 @@ class SubscribeCommandTest extends CommandTestBase {
 
 	private Optional<StatusCode> itemStatus = Optional.empty();
 
+	/** A data item of the mock group: the stored values arrive at once. */
+	private MonitoredDataItem dataItem(final NodeId nodeId,
+			final DataItemOptions options, final DataChangeListener listener) {
+		dataOptions.add(options);
+		final MonitoredDataItem item = mock(MonitoredDataItem.class);
+		when(item.status()).thenReturn(itemStatus);
+		for (final DataValue value : dataValues.getOrDefault(nodeId,
+				List.of())) {
+			listener.onDataChange(item, value);
+		}
+		return item;
+	}
+
 	@BeforeEach
 	void stubGroup() {
 		group = mock(SubscriptionGroup.class);
@@ -93,19 +107,16 @@ class SubscribeCommandTest extends CommandTestBase {
 						invocation.<NodeId>getArgument(0).getIdentifier() + "/"
 								+ invocation.getArgument(1)));
 		when(group.subscribeData(any(NodeId.class), any(DataItemOptions.class),
-				any(DataChangeListener.class))).thenAnswer(invocation -> {
-					final NodeId nodeId = invocation.getArgument(0);
-					dataOptions.add(invocation.getArgument(1));
-					final DataChangeListener listener = invocation
-							.getArgument(2);
-					final MonitoredDataItem item = mock(MonitoredDataItem.class);
-					when(item.status()).thenReturn(itemStatus);
-					for (final DataValue value : dataValues
-							.getOrDefault(nodeId, List.of())) {
-						listener.onDataChange(item, value);
-					}
-					return item;
-				});
+				any(DataChangeListener.class)))
+				.thenAnswer(invocation -> dataItem(invocation.getArgument(0),
+						invocation.getArgument(1), invocation.getArgument(2)));
+		when(group.subscribeData(
+				org.mockito.ArgumentMatchers.<DataItemRequest>anyList()))
+				.thenAnswer(invocation -> invocation
+						.<List<DataItemRequest>>getArgument(0).stream()
+						.map(request -> dataItem(request.nodeId(),
+								request.options(), request.listener()))
+						.toList());
 		when(group.subscribeEvents(any(NodeId.class),
 				any(EventItemOptions.class), any(WaldotEventListener.class)))
 				.thenAnswer(invocation -> {
@@ -206,8 +217,8 @@ class SubscribeCommandTest extends CommandTestBase {
 		org.mockito.Mockito.verify(mock.client,
 				org.mockito.Mockito.timeout(10_000)).addListener(listener.capture());
 		org.mockito.Mockito.verify(group, org.mockito.Mockito.timeout(10_000))
-				.subscribeData(any(NodeId.class), any(DataItemOptions.class),
-						any(DataChangeListener.class));
+				.subscribeData(
+						org.mockito.ArgumentMatchers.<DataItemRequest>anyList());
 		listener.getValue().onReconnectScheduled(1, Duration.ofSeconds(1));
 		listener.getValue().onSubscriptionGroupRecreated("default");
 		listener.getValue().onStatusChanged(Status.RUNNING,

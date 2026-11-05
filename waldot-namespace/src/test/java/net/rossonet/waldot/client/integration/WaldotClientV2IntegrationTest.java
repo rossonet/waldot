@@ -62,6 +62,7 @@ import net.rossonet.waldot.client.api.graph.GraphSnapshot;
 import net.rossonet.waldot.client.api.graph.GraphRendering;
 import net.rossonet.waldot.client.api.graph.QueryResult;
 import net.rossonet.waldot.client.api.subscription.DataItemOptions;
+import net.rossonet.waldot.client.api.subscription.DataItemRequest;
 import net.rossonet.waldot.client.api.subscription.EventItemOptions;
 import net.rossonet.waldot.client.api.subscription.MonitoredDataItem;
 import net.rossonet.waldot.client.api.subscription.MonitoredEventItem;
@@ -389,6 +390,41 @@ class WaldotClientV2IntegrationTest {
 			assertEquals(1, client.subscriptions().defaultGroup().dataItems().size());
 		} finally {
 			item.close();
+		}
+	}
+
+	@Test
+	void batchSubscriptionRetriesMissingNodes() throws Exception {
+		final int count = 300;
+		for (int i = 0; i < count; i++) {
+			graph.addVertex(T.id, "x-batch-" + i, T.label, "batch", "level", i);
+		}
+		final Map<Integer, Integer> levels = new java.util.concurrent.ConcurrentHashMap<>();
+		final List<Object> late = new CopyOnWriteArrayList<>();
+		final List<DataItemRequest> requests = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			final int index = i;
+			requests.add(new DataItemRequest(client.graph().propertyNodeId(id("x-batch-" + i), "level"),
+					DataItemOptions.sampling(10), (item, value) -> levels.put(index, number(value).intValue())));
+		}
+		// una proprieta' non ancora scritta: il nodo nasce piu' tardi
+		requests.add(new DataItemRequest(client.graph().propertyNodeId(id("x-batch-0"), "late"),
+				DataItemOptions.sampling(10), (item, value) -> late.add(value.getValue().getValue())));
+		final SubscriptionGroup group = client.subscriptions().createGroup("batch",
+				SubscriptionGroupOptions.withPublishingInterval(50));
+		try {
+			final List<MonitoredDataItem> items = group.subscribeData(requests);
+			assertEquals(count + 1, items.size());
+			assertEquals(count + 1, group.dataItems().size());
+			await("initial values", () -> levels.size() == count);
+			assertEquals(count - 1, levels.get(count - 1));
+			final MonitoredDataItem missing = items.get(count);
+			assertTrue(missing.status().orElseThrow().isBad(), missing.status().toString());
+			graph.traversal().V(new NodeId(2, "x-batch-0")).next().property("late", "arrived");
+			await("value of the node created later", () -> late.contains("arrived"));
+			assertTrue(missing.status().orElseThrow().isGood());
+		} finally {
+			group.close();
 		}
 	}
 
