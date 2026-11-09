@@ -30,7 +30,7 @@ public @interface ZenohRouter {
 	class Extension extends AbstractSharedContainerExtension implements BeforeAllCallback {
 
 		public static final String ENDPOINT_PROPERTY = "waldot.test.zenoh.endpoint";
-		public static final String IMAGE = System.getProperty("waldot.test.zenoh.image", "eclipse/zenoh:1.10.1");
+		public static final String IMAGE = System.getProperty("waldot.test.zenoh.image", "eclipse/zenoh:1.10.2");
 		private static final String KEY = "zenoh";
 		public static final int ROUTER_PORT = 7447;
 
