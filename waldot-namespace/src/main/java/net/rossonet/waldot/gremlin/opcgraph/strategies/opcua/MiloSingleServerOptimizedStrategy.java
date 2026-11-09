@@ -258,6 +258,12 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 	private final Object parametersLock = new Object();
 	private final Set<NodeId> pendingEdgeIds = ConcurrentHashMap.newKeySet();
 	private final Set<NodeId> pendingVertexIds = ConcurrentHashMap.newKeySet();
+	/**
+	 * Vertices being removed: {@link #addEdge} refuses their edges, otherwise
+	 * an edge added by another thread during {@link #removeVertex} stays in
+	 * the in-edges of the other end only (orphan, never notified as removed).
+	 */
+	private final Set<NodeId> removingVertices = ConcurrentHashMap.newKeySet();
 	private transient final ConcurrentHashMap<String, NodeId> referenceCache = new ConcurrentHashMap<>();
 	private UaFolderNode rootNode;
 	private volatile SharedProperties sharedProperties;
@@ -322,6 +328,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			final Object[] keyValues) {
 		Objects.requireNonNull(sourceVertex, "sourceVertex");
 		Objects.requireNonNull(targetVertex, "targetVertex");
+		checkEdgeEndpoints(sourceVertex, targetVertex);
 		final Object[] propertyKeyValues = keyValues == null
 				? new Object[0]
 				: keyValues;
@@ -363,6 +370,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		final NodeId nodeId = claimEdgeNodeId(
 				MiloStrategy.getIdValue(propertyKeyValues).orElse(null),
 				sourceVertex, targetVertex, elaboratedLabel);
+		boolean pluginsNotified = false;
 		try {
 			final OpcEdge edge = new OpcEdge(waldotNamespace.getGremlinGraph(),
 					nodeId, sourceVertex, targetVertex, elaboratedLabel, name,
@@ -442,6 +450,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			}
 			for (final PluginListener p : waldotNamespace.getPlugins()) {
 				if (p.containsEdgeType(type)) {
+					pluginsNotified = true;
 					try {
 						p.notifyAddEdge(edge, sourceVertex, targetVertex,
 								elaboratedLabel, type, propertyKeyValues);
@@ -459,12 +468,16 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			addDeletedCommand(edge);
 			addPropertyCommand(edge);
 			publishEdge(entry);
+			// an end removed meanwhile: removeVertex may have collected its
+			// edges before this one was published
+			checkEdgeEndpoints(sourceVertex, targetVertex);
 			return edge;
 		} catch (final RuntimeException | Error e) {
 			// complete rollback: nodes, references, properties, monitor, folder
-			// link and indexes created so far
+			// link and indexes created so far; the plugins already told of the
+			// edge are told of its removal too
 			try {
-				removeEdgeInternal(nodeId, false);
+				removeEdgeInternal(nodeId, pluginsNotified);
 			} catch (final Throwable rollbackError) {
 				logger.error("Rollback of edge {} failed", nodeId,
 						rollbackError);
@@ -1739,7 +1752,13 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			final String type = entry != null ? entry.type() : readType(edge);
 			for (final PluginListener p : waldotNamespace.getPlugins()) {
 				if (type != null && p.containsEdgeType(type)) {
-					p.notifyRemoveEdge(edge);
+					// a failing plugin must not stop the others nor the cleanup
+					try {
+						p.notifyRemoveEdge(edge);
+					} catch (final RuntimeException e) {
+						logger.warn("Plugin {} failed on the removal of edge {}",
+								p.getClass().getName(), nodeId, e);
+					}
 				}
 			}
 		}
@@ -1844,7 +1863,41 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			logger.warn("NodeId {} is not a vertex", nodeId);
 			return;
 		}
-		// cascade: the incident edges go first, while the vertex still exists
+		// from here addEdge refuses new edges of this vertex; an edge already
+		// past its first check is published before its second one, so either
+		// a sweep below collects it or addEdge removes it itself
+		removingVertices.add(nodeId);
+		try {
+			// cascade: the incident edges go first, while the vertex still
+			// exists; repeated for the edges added during the previous sweep
+			final Set<NodeId> attempted = new HashSet<>();
+			Set<NodeId> incident = incidentEdges(nodeId);
+			while (!incident.isEmpty()) {
+				for (final NodeId edgeId : incident) {
+					attempted.add(edgeId);
+					try {
+						removeEdgeInternal(edgeId, true);
+					} catch (final RuntimeException e) {
+						logger.error("Error removing edge {} of vertex {}",
+								edgeId, nodeId, e);
+					}
+				}
+				incident = incidentEdges(nodeId);
+				incident.removeAll(attempted);
+			}
+			((WaldotVertex) node).notifyRemoveVertex();
+			((WaldotVertex) node).removeRelatedOpcUaNodes();
+			discardVertexNodes(nodeId);
+			outEdges.remove(nodeId);
+			inEdges.remove(nodeId);
+		} finally {
+			removingVertices.remove(nodeId);
+		}
+		logger.info("Vertex with NodeId {} removed", nodeId);
+	}
+
+	/** Edges entering or leaving the vertex, from the adjacency indexes. */
+	private Set<NodeId> incidentEdges(final NodeId nodeId) {
 		final Set<NodeId> incident = new HashSet<>();
 		for (final Map<NodeId, ConcurrentSkipListMap<Long, EdgeEntry>> adjacency : List
 				.of(outEdges, inEdges)) {
@@ -1856,20 +1909,24 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 				}
 			}
 		}
-		for (final NodeId edgeId : incident) {
-			try {
-				removeEdgeInternal(edgeId, true);
-			} catch (final RuntimeException e) {
-				logger.error("Error removing edge {} of vertex {}", edgeId,
-						nodeId, e);
+		return incident;
+	}
+
+	/**
+	 * Refuses an edge with an end being removed, or already removed (an object
+	 * of a vertex no longer in the graph and not being created): its edge
+	 * would stay in the adjacency of the other end only.
+	 */
+	private void checkEdgeEndpoints(final WaldotVertex sourceVertex,
+			final WaldotVertex targetVertex) {
+		for (final WaldotVertex vertex : List.of(sourceVertex, targetVertex)) {
+			final NodeId id = vertex.getNodeId();
+			if (removingVertices.contains(id) || (vertexById(id) == null
+					&& !pendingVertexIds.contains(id))) {
+				throw new IllegalStateException("Vertex " + id
+						+ " is removed or being removed: edge refused");
 			}
 		}
-		((WaldotVertex) node).notifyRemoveVertex();
-		((WaldotVertex) node).removeRelatedOpcUaNodes();
-		discardVertexNodes(nodeId);
-		outEdges.remove(nodeId);
-		inEdges.remove(nodeId);
-		logger.info("Vertex with NodeId {} removed", nodeId);
 	}
 
 	@Override

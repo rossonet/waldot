@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -59,6 +61,61 @@ public class GraphIntegrityTests {
 		final List<Edge> both = new java.util.ArrayList<>();
 		v.edges(Direction.BOTH).forEachRemaining(both::add);
 		assertEquals(2, both.size());
+	}
+
+	private static int count(final java.util.Iterator<?> iterator) {
+		int n = 0;
+		while (iterator.hasNext()) {
+			iterator.next();
+			n++;
+		}
+		return n;
+	}
+
+	/**
+	 * An edge from a vertex object already removed must be refused: it would
+	 * stay only in the in-edges of the target, never notified as removed
+	 * (trunk VLAN left applied after a configuration switch).
+	 */
+	@Test
+	public void edgeFromRemovedVertexIsRefused() {
+		final Vertex source = g.addVertex("id", 9101, "name", "source");
+		final Vertex target = g.addVertex("id", 9102, "name", "target");
+		source.remove();
+		assertThrows(RuntimeException.class, () -> source.addEdge("e", target));
+		assertEquals(0, count(target.edges(Direction.IN)));
+	}
+
+	/**
+	 * Edges added by another thread while the source is removed: none may
+	 * survive in the in-edges of the target.
+	 */
+	@Test
+	public void edgesAddedDuringVertexRemovalDoNotSurvive() throws Exception {
+		final Vertex target = g.addVertex("id", 9200, "name", "target");
+		for (int i = 0; i < 30; i++) {
+			final Vertex source = g.addVertex("id", 9300 + i, "name", "source" + i);
+			final CountDownLatch start = new CountDownLatch(1);
+			final AtomicInteger added = new AtomicInteger();
+			final Thread adder = new Thread(() -> {
+				try {
+					start.await();
+					for (int k = 0; k < 50; k++) {
+						source.addEdge("e", target);
+						added.incrementAndGet();
+					}
+				} catch (final RuntimeException | InterruptedException e) {
+					// refused once the removal started: expected
+				}
+			});
+			adder.start();
+			start.countDown();
+			Thread.sleep(i % 5);
+			source.remove();
+			adder.join(30_000);
+			assertEquals(0, count(target.edges(Direction.IN)),
+					"round " + i + ", edges added " + added.get());
+		}
 	}
 
 	@Test

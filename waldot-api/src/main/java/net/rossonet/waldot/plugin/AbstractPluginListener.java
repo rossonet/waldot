@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.tinkerpop.gremlin.structure.Direction;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNodeContext;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaObjectNode;
@@ -202,17 +204,30 @@ public abstract class AbstractPluginListener
 
 	@Override
 	public void notifyRemoveEdge(final WaldotEdge edge) {
-		if (edge.outVertex() instanceof EdgeMonitoredVertex) {
+		// each end on its own: an end already gone (outVertex()/inVertex()
+		// throw) must not keep the other one from forgetting the edge
+		final Vertex source = endOrNull(edge, Direction.OUT);
+		if (source instanceof final EdgeMonitoredVertex monitored) {
 			logger.debug("Source vertex {} is EdgeMonitoredVertex, notifying",
-					edge.outVertex());
-			((EdgeMonitoredVertex) edge.outVertex())
-					.notifyRemoveTargetMonitoredEdge(edge);
+					source);
+			monitored.notifyRemoveTargetMonitoredEdge(edge);
 		}
-		if (edge.inVertex() instanceof EdgeMonitoredVertex) {
-			logger.debug("Source vertex {} is EdgeMonitoredVertex, notifying",
-					edge.inVertex());
-			((EdgeMonitoredVertex) edge.inVertex())
-					.notifyRemoveSourceMonitoredEdge(edge);
+		final Vertex target = endOrNull(edge, Direction.IN);
+		if (target instanceof final EdgeMonitoredVertex monitored) {
+			logger.debug("Target vertex {} is EdgeMonitoredVertex, notifying",
+					target);
+			monitored.notifyRemoveSourceMonitoredEdge(edge);
+		}
+	}
+
+	/** End of the edge, null if it can no longer be resolved. */
+	private Vertex endOrNull(final WaldotEdge edge, final Direction direction) {
+		try {
+			return direction == Direction.OUT ? edge.outVertex() : edge.inVertex();
+		} catch (final RuntimeException e) {
+			logger.debug("Cannot resolve the {} vertex of edge {}", direction,
+					edge, e);
+			return null;
 		}
 	}
 
