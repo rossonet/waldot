@@ -99,13 +99,11 @@ Dopo la compilazione il Dockerfile verifica il binario: `--version`, `--help`,
 a runtime Milo, Netty e BouncyCastle.
 
 Il workflow GitHub
-[`publish-wotctl-release.yml`](../../../../.github/workflows/publish-wotctl-release.yml)
-(avvio manuale, *Run workflow*) usa lo stesso Dockerfile con buildx e QEMU per
-le due piattaforme. Pubblica gli artifact `wotctl-linux-amd64` e
-`wotctl-linux-arm64`. Gli artifact di GitHub non conservano il bit di
-esecuzione: dopo il download serve `chmod +x wotctl`. Sotto emulazione QEMU la
-build arm64 è molto più lenta di quella amd64, per questo il job ha un timeout
-di 6 ore.
+[`release-wotctl-native.yml`](../../../../.github/workflows/release-wotctl-native.yml)
+di wot-addons ("Rilascio · wotctl binario nativo", avvio manuale) usa lo stesso
+Dockerfile con buildx. Pubblica l'artifact `wotctl-linux-amd64`; la build arm64 è
+disattivata perché sotto QEMU native-image è molto lenta. Gli artifact di GitHub
+non conservano il bit di esecuzione: dopo il download serve `chmod +x wotctl`.
 
 ## Problemi incontrati e soluzioni
 

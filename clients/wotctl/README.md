@@ -241,8 +241,9 @@ docker buildx build --platform linux/amd64 -f docker/Dockerfile.build-wotctl \
   --output type=local,dest=./output .
 ```
 
-Il workflow GitHub `publish-wotctl-release.yml` (avvio manuale) compila con lo
-stesso Dockerfile i binari amd64 e arm64 e li pubblica come artifact.
+Il workflow GitHub `release-wotctl-native.yml` di wot-addons (avvio manuale)
+compila con lo stesso Dockerfile il binario amd64 e lo pubblica come artifact
+`wotctl-linux-amd64` (la build arm64 è disattivata).
 
 Aggiornamento dei metadati di reflection dopo modifiche al codice, raccolti con
 il tracing agent di GraalVM durante i test unitari:
