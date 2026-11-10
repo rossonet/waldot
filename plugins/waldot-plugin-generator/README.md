@@ -68,10 +68,8 @@ decimal bounds the step is still 1 (20.6, 21.6, ...).
 Invalid values are not silently replaced: a bound that is not a number, Min
 greater than Max, an unknown algorithm or a delay below 10 ms are reported in
 `run!last-error` (with `run!last-error-time`), with the value refused and the
-one used instead. The server command `type describe` with the type
-`sim:generator` (from the command line `wotctl commands call 'type describe'
-sim:generator`) lists the parameters with their types, defaults, ranges and
-allowed values.
+one used instead. `wotctl type describe sim:generator` lists the parameters
+with their types, defaults, ranges and allowed values.
 
 ## Examples
 

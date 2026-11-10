@@ -492,7 +492,6 @@ The rule runs when a `fire` edge notifies it and a `rules:compute` executes it
 
 - **Default Credentials**: MUST be changed in production (`--factory-password`)
 - **Anonymous Access**: Disable in production (`--anonymous-access false`)
-- **Exec Command**: Disable in production (`--exec-command-executable false`)
 - **Network Isolation**: Bind to specific interfaces, use firewalls
 - **Secrets Management**: Use Docker secrets, Kubernetes secrets, or vault
 

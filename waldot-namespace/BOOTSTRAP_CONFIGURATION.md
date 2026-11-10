@@ -57,14 +57,24 @@ The agent status becomes `FAULT` and the success line above is replaced by
 
 The whole file is executed as **one JEXL script**:
 
-- statements **must end with `;`** (a statement that spans several lines
-  without `;` produces `ambiguous statement error`);
+- end every statement with `;`. Without `;` JEXL does not always fail, and
+  when it does not fail the result can be wrong: two `var` declarations on
+  consecutive lines are accepted, and a statement split over several lines
+  (arguments or a method chain) works; two calls on consecutive lines
+  (`log.info('a')` then `log.info('b')`) are rejected with
+  `errore di sintassi: ambiguous statement error in '...'`; a line that
+  starts with `-` continues the previous expression (`var a = 1` followed by
+  `-1` assigns `0`);
 - comments: `//`, `/* ... */` and `##`. A line starting with a single `#` is
-  **not** valid in script mode (`tokenization error in '#'`);
+  **not** valid in script mode
+  (`errore di sintassi: tokenization error in '#'`);
 - variables (`var x = ...;`), functions, loops, conditions, `try/catch`;
-- an error stops the whole script: the vertices already created remain, the
-  following statements are not executed (use `try/catch` around optional
-  parts). The agent status becomes `FAULT` and WaldOT logs
+- a syntax error rejects the whole file before it runs: no statement is
+  executed and no vertex is created;
+- an error while running stops the script: the vertices already created
+  remain, the following statements are not executed (use `try/catch` around
+  optional parts);
+- in both cases the agent status becomes `FAULT` and WaldOT logs
   `Bootstrap procedure completed with 1 error(s).` instead of the success line.
 
 ### Automatic detection
@@ -87,17 +97,20 @@ comment; to force line mode use only `#` comments and one expression per line,
 and do not put `//`, assignments or control structures outside strings.
 
 > **Warning**: detection rule 2 recognizes `def`, but `def` is Groovy syntax
-> and is **rejected by JEXL** (`ambiguous statement error`). Define functions
-> as shown below.
+> and is **rejected by JEXL**
+> (`riga 2, colonna 5: errore di sintassi: ambiguous statement error in 'def f(x) { return x; }'`).
+> Define functions as shown below.
 
-> **Warning (Gremlin terminal steps)**: JEXL does not resolve the terminal
-> methods of a Gremlin traversal (`next()`, `iterate()`, `toList()`,
-> `hasNext()`, ...): they are `default` methods inherited through multiple
-> interfaces and the JEXL uberspect does not find them
-> (`JEXL error : next`). Prefer the `WaldotGraph` API
-> (`graph.addVertex(...)`, `graph.vertices(...)`) or iterate the traversal
-> with `for (var v : g.V()) { ... }`, which works. Do not call `.next()`
-> on a traversal, including inside a rule `condition`.
+> **Gremlin terminal steps**: `next()`, `toList()`, `hasNext()`, `tryNext()`
+> and `iterate()` work in the bootstrap file (script and line mode), in the
+> `query` command, in `run script` and in the `condition` and `action` of a
+> rule: `g.V().has('id','a').next().property('x').value()`,
+> `g.V().count().next()`, `g.V().has('id','a').values('x').next()`.
+> `next()` on an empty traversal fails with
+> `errore nella chiamata di 'next': NoSuchElementException`: when the element
+> may be missing use `hasNext()`, `tryNext().isPresent()` or
+> `for (var v : g.V().has(...)) { ... }`. `iterate()` executes the steps and
+> returns the traversal itself, not a value.
 ---
 
 ## Script context
@@ -105,19 +118,39 @@ and do not put `//`, assignments or control structures outside strings.
 | Name | Object | Use |
 | ---- | ------ | --- |
 | `graph` | `WaldotGraph` | `graph.addVertex('key', 'value', ...)`, vertex/edge lookup |
-| `g` | Gremlin traversal source | `g.V().has('label', 'x')` as the source of `for (var v : ...)`, `g.addV(...)` |
+| `g` | Gremlin traversal source | `g.V().has('id', 'x').next()`, `g.V().count().next()`, `toList()`, `for (var v : g.V()...)`, `g.addV(...)` |
 | `log` | console logger | `log.info(...)`, `log.warn(...)`, `log.error(...)` |
 | `math` | `java.lang.Math` | `math.abs(x)`, `math.max(a, b)`, ... (same name as in the rules) |
 | `rand` | `java.util.Random` | `rand.nextDouble()`, `rand.nextInt(n)` |
 | `cmd` | console helper | `cmd.getVerticesCount()`, `cmd.getEdgesCount()`, `cmd.listCommands()`, `cmd.toNumber(x)`, `cmd.echo(x)`, `cmd.help()` |
-| `<directory>_<command>` | every registered command | invoked with `.exec(...)`, e.g. `simulator_create_generator.exec(...)`, `query.exec(...)`, `about.exec()` |
+| `<command>` or `<directory>_<command>` | every registered command | invoked with `.exec(...)`, e.g. `query.exec(...)`, `about.exec()`, `simulator_create_generator.exec(...)` |
 
 
-The console name is `TextHelper.cleanText(directory + "_" + command)`:
-lower case, and every run of characters other than letters, digits, `_`,
-`;` and `:` becomes a single `_`. `create generator` in the `simulator`
-folder is therefore `simulator_create_generator`. The name is also printed at
-startup as `Registering console command: [...]`. `exec(...)` takes the input
+The console name is `TextHelper.cleanText(directory + "_" + command)` when
+the command was created with a directory, otherwise
+`TextHelper.cleanText(command)`: lower case, and every run of characters
+other than letters, digits, `_`, `;` and `:` becomes a single `_`. The
+directory is the one given to the constructor of the command, not the OPC UA
+folder where the method appears:
+
+- the commands that create a vertex of a plugin type
+  (`AbstractCreateVertexCommand`) have the directory:
+  `simulator_create_generator`, `simulator_create_event_generator`,
+  `rules_create_rule`, `rules_create_compute`,
+  `tinkerpop_create_gremlin_server`;
+- the other commands have only their name, even if their OPC UA method is in
+  a folder: `query`, `help`, `about`, `delete_directory`,
+  `create_link_monitored_edge`, `create_fire_monitored_edge`, `run_script`,
+  `jexl_check`, `type_list`, `type_describe`, `file_list`, `file_get`,
+  `directory_content`, `query_json`, `describe_element`, `render_graph`,
+  `export_graph`, `import_graph`, `read_graph_block`, `clear_graph`,
+  `create_compute_monitored_edge`, `create_show_case_arena`,
+  `create_show_case_evolution`, `create_show_case_gas_grid`.
+
+`cmd.listCommands()` returns the exact names (followed by `cmd`, `log`, `g`,
+`graph`, `math`, `rand`), and each name is printed at startup as
+`Registering console command: [...]`. A wrong name does not raise an error
+when it is called: `information_about.exec()[0]` returns `null`. `exec(...)` takes the input
 arguments of the OPC UA method as strings, in order, and returns an array:
 element `0` is the result (for creation commands the NodeId of the vertex,
 for example `ns=2;s=cmd-gen` when the id is a string, or `error: ...`).
@@ -128,13 +161,17 @@ checks a bootstrap script without running it, and reports compilation errors,
 variables that the context does not provide and some traps of the language.
 
 A JEXL error is reported with line, column, cause and excerpt of the script,
-for example:
+for example for `var value = null;` followed by `var y = value + 2;`:
 
 ```
 riga 2, colonna 9: variabile 'value' nulla
   var y = value + 2;
           ^
 ```
+
+A variable that does not exist gives `variabile 'value' non definita`, a
+syntax error `errore di sintassi: ...` (see the troubleshooting table below)
+and an exception thrown by a method `errore nella chiamata di '<method>': ...`.
 ---
 
 ## Vertex and edge syntax
@@ -314,8 +351,9 @@ WARN BOOT - the bootstrap configuration is empty or null. No commands to execute
 
 | Log message | Cause | Fix |
 | ----------- | ----- | --- |
-| `ambiguous statement error` | missing `;` in script mode, or Groovy `def` | end every statement with `;`, use `var f = function(...) {...};` |
-| `tokenization error in '#'` | `#` comment in script mode | use `//` or `##` |
+| `riga N, colonna M: errore di sintassi: ambiguous statement error in '...'` | two statements on consecutive lines without `;` (for example two calls), or Groovy `def` | end every statement with `;`, use `var f = function(...) {...};` |
+| `riga N, colonna M: errore di sintassi: tokenization error in '#'` | `#` comment in script mode | use `//` or `##` |
+| `errore nella chiamata di 'next': NoSuchElementException` | `next()` on a traversal that finds nothing | check with `hasNext()` or `tryNext().isPresent()`, or use `for (var v : ...)` |
 | `Vertex with id already exists` | duplicated `id` | use unique ids or `try/catch` |
 | `Changing label from X to Y is not allowed` | `g.addV('X').property('label','Y')` | the label of `addV` wins; use `graph.addVertex('label', ...)` |
 | `No valid bootstrap configuration found` | line-mode file with only comments | add expressions or remove the file |

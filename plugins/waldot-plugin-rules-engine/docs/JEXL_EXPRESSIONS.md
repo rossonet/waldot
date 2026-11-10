@@ -80,6 +80,13 @@ g.V().has('id','a').next().property('value').value() == 10
 g.V().hasLabel('sensor').has('status','ERROR').count().next() > 5
 ```
 
+`next()`, `toList()`, `hasNext()` e `tryNext()` funzionano nella condizione e
+nell'azione come nella console. `next()` su un attraversamento vuoto è un errore della regola: la condizione
+`g.V().has('id','missing').next().property('x').value() > 1` dà
+`esecuzione della condizione: riga 1, colonna 26: errore nella chiamata di 'next': NoSuchElementException`.
+Se il vertice può mancare, controlla prima con `hasNext()` o
+`tryNext().isPresent()`.
+
 ## Azioni
 
 Più istruzioni si separano con `;`.

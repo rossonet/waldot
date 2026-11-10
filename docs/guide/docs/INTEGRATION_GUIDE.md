@@ -585,6 +585,15 @@ command is described from the variables of its OPC UA type node.
 | OPC UA | method `Commands/<directory>/<command name>`, e.g. `Commands/example/create threshold` |
 | Bootstrap scripts, rule actions, `query` console | object `<directory>_<command name>` with spaces replaced by `_`, invoked with `.exec(...)`: `example_create_threshold.exec('thr-2', 'example', '50')` |
 
+The OPC UA folder comes from `getDirectory()`, the console name from the
+directory given to the constructor (`TextHelper.cleanText(directory + "_" +
+command)`). `AbstractCreateVertexCommand` passes its directory, so a vertex
+factory is `<directory>_<command name>`. An `AbstractOpcCommand` created with
+the constructor without directory, which only overrides `getDirectory()`, has
+the console name `<command name>`: this is the case of `query`, `about`,
+`delete_directory` and `create_link_monitored_edge` of the namespace.
+`cmd.listCommands()` returns the names actually registered.
+
 For commands that are not vertex factories extend `AbstractOpcCommand` and
 implement `runCommand(InvocationContext, String[])`. Rules for the inputs:
 

@@ -58,7 +58,7 @@ The complete list of options with defaults is maintained in the
 
 > Configuration is done only through command-line options: environment
 > variables are not read. Boolean options accept an optional value
-> (`--anonymous-access false`, `--exec-command-executable false`).
+> (`--anonymous-access false`).
 
 ## Build
 

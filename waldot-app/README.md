@@ -80,14 +80,12 @@ syntax is in
 ## Security
 
 Defaults are meant for development: anonymous access enabled, administrator
-`admin` / `password123`, `exec` command (operating-system commands) enabled.
+`admin` / `password123`.
 In production set at least:
 
 ```
 --anonymous-access false
 --factory-password <secret>
---exec-command-executable false
---exec-command-user-executable false
 ```
 
 and mount the security directory (`/app/.security` in Docker) on a persistent

@@ -76,7 +76,7 @@ Objects
 | vertex `label` | browse name and display name (cannot be changed) |
 | `directory` property | folder under `Vertices` (`plant/pumps` → `Vertices/plant/pumps`) |
 | other properties | variables of the vertex object; writable from a client |
-| edge | reference between the two vertex nodes |
+| edge | reference between the two vertex nodes, and an object node whose variables are the edge properties (writable from a client) |
 | vertex events | OPC UA events emitted by the vertex object |
 
 Any OPC UA client can browse, read, write and subscribe: UaExpert, Prosys
@@ -152,6 +152,16 @@ Properties of `link-to`, `link-from` and `fire`:
 | `active-property` | `true` | `false` stops property notifications |
 | `active-event` | `true` | `false` stops event notifications (`fire`) |
 | `priority` | 10 | priority of the notification (`fire`) |
+
+Edges are OPC UA nodes too, and each edge property is a readable and writable
+variable of the edge node (NodeId `<edge NodeId>/<key>`, for example
+`ns=2;s=pump-1:pump-to-tank:tank-1/active`). A value written by an OPC UA
+client at runtime reaches the edge like a change made with Gremlin: the edge
+re-reads its settings (the properties in the table above) at the next
+notification. For example writing `false` in `active` stops a `link-to`, and
+writing `true` again resumes it. `label` and `type` cannot be changed: the
+original value is restored. A removed `link-to`, `link-from` or `fire` edge
+stops observing its vertices and no longer propagates.
 
 ---
 
@@ -286,12 +296,20 @@ asyncio.run(main())
 
 ### From the bootstrap or the `query` command
 
-All commands are available in JEXL as `<folder>_<name>` objects with an
-`exec(...)` method:
+All commands are available in JEXL as objects with an `exec(...)` method.
+The commands that create a vertex of a plugin type have the name
+`<folder>_<name>` (`simulator_create_generator`, `rules_create_rule`,
+`tinkerpop_create_gremlin_server`); the other commands only `<name>`, with
+spaces replaced by `_`, even if their OPC UA method is in a folder (`query`,
+`about`, `delete_directory`, `run_script`, `jexl_check`,
+`create_link_monitored_edge`, `create_compute_monitored_edge`, ...).
+`cmd.listCommands()` returns the exact names; a wrong name returns `null`
+instead of an error.
 
 ```javascript
 var r = simulator_create_generator.exec('cmd-gen', 'plant/sensors', 'incremental', '1000', '0', '10', '');
 log.info('created ' + r[0]);
+log.info(about.exec()[0]);
 ```
 
 ### From a Gremlin client
@@ -432,7 +450,7 @@ they are also in the bootstrap file.
 
 | Symptom | Cause | Fix |
 | ------- | ----- | --- |
-| `ambiguous statement error` at boot | missing `;` or Groovy syntax in the bootstrap | see [Bootstrap Configuration](https://github.com/rossonet/waldot/blob/master/waldot-namespace/BOOTSTRAP_CONFIGURATION.md#troubleshooting) |
+| `errore di sintassi: ambiguous statement error` at boot | statements on consecutive lines without `;`, or Groovy `def` in the bootstrap | see [Bootstrap Configuration](https://github.com/rossonet/waldot/blob/master/waldot-namespace/BOOTSTRAP_CONFIGURATION.md#troubleshooting) |
 | the target of a `link-to` does not change | wrong `properties-to-monitor`, or deadband too large | check the property names and `deadband-value` |
 | edge command returns `error: ... vertex ... not found` | wrong NodeId of `SourceNode`/`TargetNode` | pass `ns=2;s=<id>` of existing vertices |
 | anonymous client rejected with `BadIdentityTokenInvalid` | server started with `--anonymous-access false` | connect with username/password or a certificate |

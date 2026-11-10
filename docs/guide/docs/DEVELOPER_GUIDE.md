@@ -185,7 +185,7 @@ Variables available in `condition` and `action`:
 | `self` | the rule vertex |
 | `math` | `java.lang.Math` |
 | `rand` | `java.util.Random` |
-| commands | every console command, as `<folder>_<name>` |
+| commands | every console command, as `<name>` or `<folder>_<name>` (`about`, `query`, `rules_create_rule`; the exact names with `cmd.listCommands()`) |
 
 These are the variables of the JEXL context `rule`; the console (`query`,
 `run script`, bootstrap) has the same ones without `self` (context

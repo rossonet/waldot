@@ -79,10 +79,15 @@ with Gremlin appears in the address space.
 
 ## Notes
 
-- Plugin commands are available as `<folder>_<command name>` with spaces
-  replaced by `_`; `exec(...)` takes the OPC UA input arguments as strings.
-- An error in the script stops it: the vertices created before the error
-  remain. Use `try { ... } catch (var e) { ... }` for optional parts.
+- Commands are available with spaces replaced by `_`: the commands that
+  create a vertex of a plugin type as `<folder>_<command name>`
+  (`simulator_create_generator`), the others as `<command name>` (`query`,
+  `about`, `create_link_monitored_edge`); `cmd.listCommands()` returns the
+  exact names. `exec(...)` takes the OPC UA input arguments as strings.
+- An error while the script runs stops it: the vertices created before the
+  error remain. Use `try { ... } catch (var e) { ... }` for optional parts. A
+  syntax error (for example a line starting with `#`) rejects the whole file:
+  nothing is executed.
 - `cmd.reset()` removes every vertex and edge and then runs the file again:
   the graph is rebuilt from scratch, with the same ids. A `cmd.reset()` written
   in the bootstrap file itself is ignored.

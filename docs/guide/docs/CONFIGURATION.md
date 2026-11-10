@@ -72,10 +72,9 @@ for example `opc.tcp://127.0.0.1:12686/waldot`.
 | `--factory-password` | `-fp` | `password123` | Initial administrator password. **Change it in production.** |
 
 !!! danger "Production hardening"
-    With the default values anonymous access is enabled, the administrator
-    password is public and the `exec` command (which runs operating-system
-    commands) is enabled. Always override `--anonymous-access`,
-    `--factory-password` and `--exec-command-executable` outside development.
+    With the default values anonymous access is enabled and the administrator
+    password is public. Always override `--anonymous-access` and
+    `--factory-password` outside development.
 
 !!! note "Anonymous access disabled"
     With `--anonymous-access false` the endpoints no longer advertise the
@@ -124,15 +123,8 @@ configured by four options with the same pattern:
 | `about` | `about` | `info about this software` | Software information. |
 | `help` | `help` | `list available commands` | Lists available commands / help files. |
 | `waldot` | `query` | `run Gremlin query` | Executes a JEXL expression (with `g`, `graph`, `log`, `cmd`) on the graph. |
-| `exec` | `exec` | `run system command` | Executes an operating-system command. |
 
 All `*-executable` and `*-user-executable` flags default to `true`.
-
-Example: disable the `exec` command entirely
-
-```bash
---exec-command-executable false --exec-command-user-executable false
-```
 
 The other base commands have no command-line options. `delete directory`
 (folder `manage`), `create link monitored edge` and `create fire monitored edge`
@@ -295,8 +287,7 @@ docker run -p 4840:4840 \
   rossonet/waldot:latest \
   --tcp-port 4840 \
   --anonymous-access false \
-  --factory-password 'S3cure!' \
-  --exec-command-executable false
+  --factory-password 'S3cure!'
 ```
 
 The same applies to `command:` in Docker Compose:
