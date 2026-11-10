@@ -26,6 +26,11 @@ try (WaldotClient client = WaldotClient.create(configuration)) {
 	List<Vertex> sensors = client.graph().vertices("g.V().hasLabel('sensor')");
 	ElementDescription sensor = client.graph().describe("sensor-1");
 
+	// outputs of "about" by name (name, description, license, git.* of the build)
+	Map<String, Object> about = client.commands().aboutInfo();
+	// any global command by name, e.g. the schema of a vertex type
+	CommandResult schema = client.commands().invokeGlobal("type describe", "sim:generator");
+
 	// base and plugin commands (input arguments converted to the declared types)
 	client.commands().setProperty(sensor.id(), "color", "red");
 	client.commands().invokeOnElement(sensor.id(), "delete");

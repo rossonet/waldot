@@ -134,6 +134,29 @@ Example: disable the `exec` command entirely
 --exec-command-executable false --exec-command-user-executable false
 ```
 
+The other base commands have no command-line options. `delete directory`
+(folder `manage`), `create link monitored edge` and `create fire monitored edge`
+(folder `manage/edges`) are registered by default. The data exchange commands are registered unless
+`-Dwaldot.commands.exchange.enabled=false` (see
+[Java system properties](#java-system-properties)):
+
+| Command | Folder | Purpose |
+| ------- | ------ | ------- |
+| `query json` | `information` | JEXL expression, result as typed GraphSON v3 |
+| `describe element` | `information` | description of a vertex or an edge as JSON |
+| `render graph` | `information` | drawing of the graph (SVG or Graphviz DOT) |
+| `type list` | `information` | vertex types of the loaded plugins with their creation command |
+| `type describe` | `information` | schema of the properties of a vertex type |
+| `jexl check` | `information` | check of a JEXL script for a context, without running it |
+| `file list` | `information` | file roots registered by the plugins, or the files of a root |
+| `directory content` | `information` | what `delete directory` would remove (dry run) |
+| `export graph`, `read graph block`, `import graph`, `clear graph` | `manage` | snapshots of the graph, block transfers |
+| `run script` | `manage` | JEXL script with result, log lines and diff of the graph |
+| `file get` | `manage` | content of a file of a registered root |
+
+Arguments and outputs are described in the
+[User Guide](USER_GUIDE.md#5-creating-elements-at-runtime).
+
 ## Java system properties
 
 | Property | Default | Description |
@@ -143,6 +166,10 @@ Example: disable the `exec` command entirely
 | `waldot.boot.connect-timeout-ms` | `10000` | Connect timeout for a remote `--boot-url`. `file:` URLs ignore it. A value `<= 0` or not numeric keeps the default. |
 | `waldot.boot.read-timeout-ms` | `30000` | Read timeout for a remote `--boot-url`. |
 | `waldot.gremlin.commands.enabled` | `false` | Enables the Gremlin service `waldot.command`, which runs OPC UA commands from Gremlin queries (see [OPC UA commands from Gremlin](#opc-ua-commands-from-gremlin)). Also read from the namespace configuration map, which takes precedence. |
+| `waldot.commands.exchange.enabled` | `true` | `false` does not register the data exchange commands (`query json`, `describe element`, snapshots, `render graph`, `run script`, `jexl check`, `type list`/`type describe`, `file list`/`file get`, `directory content`). |
+| `waldot.commands.exchange.max-import-size` | `268435456` (256 MiB) | Maximum size in bytes of a snapshot uploaded with `import graph`. |
+| `waldot.commands.exchange.transfer-ttl-msec` | `600000` (10 minutes) | Time to live in milliseconds of a pending block transfer. |
+| `waldot.commands.exchange.max-render-vertices` | `50000` | Most vertices drawn by `render graph`, whatever the requested `vertices.max`. |
 
 ## OPC UA commands from Gremlin
 

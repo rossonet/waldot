@@ -49,7 +49,8 @@ WaldOT documentation is organized by user role to provide targeted, relevant inf
 - Start the server, OPC UA address space
 - Vertices, active edges (`link-to`, `link-from`, `fire`), plugin types
 - Bootstrap file, commands, Gremlin Server
-- Rules engine, monitoring, operations, troubleshooting
+- Server commands for clients and agents: type schemas, `run script`, `jexl check`, server files, `directory content`
+- Rules engine (`last-error`, `reset-counters`, `run-once`), monitoring, operations, troubleshooting
 
 **[Examples](examples/README.md)** - Step-by-step pages verified on the Docker image
 

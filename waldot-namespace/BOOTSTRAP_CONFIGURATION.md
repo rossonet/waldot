@@ -107,6 +107,8 @@ and do not put `//`, assignments or control structures outside strings.
 | `graph` | `WaldotGraph` | `graph.addVertex('key', 'value', ...)`, vertex/edge lookup |
 | `g` | Gremlin traversal source | `g.V().has('label', 'x')` as the source of `for (var v : ...)`, `g.addV(...)` |
 | `log` | console logger | `log.info(...)`, `log.warn(...)`, `log.error(...)` |
+| `math` | `java.lang.Math` | `math.abs(x)`, `math.max(a, b)`, ... (same name as in the rules) |
+| `rand` | `java.util.Random` | `rand.nextDouble()`, `rand.nextInt(n)` |
 | `cmd` | console helper | `cmd.getVerticesCount()`, `cmd.getEdgesCount()`, `cmd.listCommands()`, `cmd.toNumber(x)`, `cmd.echo(x)`, `cmd.help()` |
 | `<directory>_<command>` | every registered command | invoked with `.exec(...)`, e.g. `simulator_create_generator.exec(...)`, `query.exec(...)`, `about.exec()` |
 
@@ -119,6 +121,20 @@ startup as `Registering console command: [...]`. `exec(...)` takes the input
 arguments of the OPC UA method as strings, in order, and returns an array:
 element `0` is the result (for creation commands the NodeId of the vertex,
 for example `ns=2;s=cmd-gen` when the id is a string, or `error: ...`).
+
+This is the JEXL context `console`, the same of the `query` and `run script`
+commands: the server command `jexl check` (context `console`, the default)
+checks a bootstrap script without running it, and reports compilation errors,
+variables that the context does not provide and some traps of the language.
+
+A JEXL error is reported with line, column, cause and excerpt of the script,
+for example:
+
+```
+riga 2, colonna 9: variabile 'value' nulla
+  var y = value + 2;
+          ^
+```
 ---
 
 ## Vertex and edge syntax

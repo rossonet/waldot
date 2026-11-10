@@ -49,15 +49,14 @@ docker run -p 12686:12686 -p 8443:8443 rossonet/waldot:latest
 The main interface combining TinkerPop Graph with OPC UA integration.
 
 ```java
-// Open graph
+// Open graph (the first argument is the URL of the bootstrap file)
 WaldotGraph graph = OpcFactory.getOpcGraph(
-    "file:///tmp/waldot.db",
+    "file:///tmp/boot.conf",
     new LoggerHistoryStrategy()
 );
 
-// Add vertex
-Vertex v = graph.addVertex();
-v.property("label", "sensor1");
+// Add vertex (the label is given at creation: it cannot be changed later)
+Vertex v = graph.addVertex("label", "sensor1");
 v.property("temperature", 25.5);
 
 // Query
@@ -75,18 +74,16 @@ graph.close();
 Represents both a TinkerPop Vertex and an OPC UA Object.
 
 ```java
-WaldotVertex sensor = (WaldotVertex) graph.addVertex();
-sensor.property("label", "temp-sensor");
+WaldotVertex sensor = (WaldotVertex) graph.addVertex("label", "temp-sensor");
 sensor.property("value", 20.0);
 
 // Add edge
-WaldotVertex zone = (WaldotVertex) graph.addVertex();
-zone.property("label", "production-zone");
+WaldotVertex zone = (WaldotVertex) graph.addVertex("label", "production-zone");
 sensor.addEdge("located-in", zone);
 
-// Observe property changes
-sensor.addPropertyObserver((vertex, key, oldValue, newValue) -> {
-    System.out.println(key + " changed: " + oldValue + " → " + newValue);
+// Observe property changes (PropertyObserver: source node, property label, new DataValue)
+sensor.addPropertyObserver((node, key, value) -> {
+    System.out.println(key + " changed: " + value.getValue().getValue());
 });
 ```
 
@@ -189,6 +186,11 @@ Variables available in `condition` and `action`:
 | `math` | `java.lang.Math` |
 | `rand` | `java.util.Random` |
 | commands | every console command, as `<folder>_<name>` |
+
+These are the variables of the JEXL context `rule`; the console (`query`,
+`run script`, bootstrap) has the same ones without `self` (context
+`console`). The server command `jexl check` lists the registered contexts and
+checks a script for one of them without running it.
 
 Properties, weights, counters and debug:
 [rules engine README](https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine)
@@ -327,8 +329,9 @@ public void close() throws Exception {
 
 ```java
 // ✅ GOOD: React to property changes
-vertex.addPropertyObserver((v, key, oldValue, newValue) -> {
-    if ("temperature".equals(key) && (Double)newValue > 80.0) {
+vertex.addPropertyObserver((node, key, value) -> {
+    if ("temperature".equals(key) && value.getValue().getValue() instanceof Number n
+            && n.doubleValue() > 80.0) {
         logger.warn("High temperature detected");
     }
 });
@@ -361,7 +364,26 @@ g.V().has('id', 'temp-alarm').next().property('debug', 2);
 var rule = g.V().has('id', 'temp-alarm').next();
 log.info('queue=' + rule.value('queue') + ' total=' + rule.value('total')
     + ' executed=' + rule.value('executed') + ' errors=' + rule.value('errors'));
+
+// last failure: phase and JEXL message with line, column and excerpt
+log.info('last error: ' + rule.value('last-error') + ' at ' + rule.value('last-error-time'));
 ```
+
+The rule vertex also has the methods `reset-counters` (counters and last error
+to zero) and `run-once` (runs condition and action now and returns `status`,
+`condition`, `action`, `error`).
+
+### Diagnostics from the server
+
+| What | Where |
+| ---- | ----- |
+| value refused by an active vertex | `run!last-error`, `run!last-error-time` of the vertex |
+| properties, types, defaults, ranges and allowed values of a vertex type | command `type describe` |
+| errors and unknown variables of a script, before running it | command `jexl check` |
+| result, log lines and changes of the graph of a script | command `run script` |
+| what a `delete directory` would remove | command `directory content` |
+
+Arguments and JSON outputs: [User Guide](USER_GUIDE.md#5-creating-elements-at-runtime).
 
 ### Connect with OPC UA Client
 
@@ -382,8 +404,16 @@ log.info('queue=' + rule.value('queue') + ' total=' + rule.value('total')
 
 ### Key Classes
 
-- `AbstractOpcVertex` - Base class for custom vertices
-- `AbstractOpcEdge` - Base class for custom edges
+- `AbstractOpcVertex` - Base class for custom vertices (managed properties,
+  `publishLastError(...)` for `run!last-error`)
+- `AbstractPluginListener` - Base class of the plugins (`registerTypeNode`,
+  `registerTypeEdge` for custom edge types, `registerCommand`)
+- `AbstractCreateVertexCommand` - Vertex creation commands; `VertexParameter`
+  with default, range and allowed values, `refineParameter(...)`
+- `JexlContextRegistry` - Description of the JEXL contexts, read by `jexl check`
+- `ServerFileRoots` - Server directories readable with `file list` / `file get`
+- `GraphChangeRecorder`, `GraphChangeDiff` - Changes of the graph made by a
+  script, as used by `run script`
 - `ThreadHelper` - Virtual thread utilities
 - `OpcFactory` - Graph factory
 

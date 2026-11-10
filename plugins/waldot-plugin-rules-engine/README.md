@@ -86,7 +86,7 @@ Peso di una regola: `weight = priority * factor + queue`. La regola con **peso p
 
 | Comando | Descrizione |
 |---------|-------------|
-| `create rule` | Crea un vertice `rules:rule` (label, condition, action, debug, hysteresis) |
+| `create rule` | Crea un vertice `rules:rule` (label, directory, condition, action, debug, hysteresis) |
 | `create compute` | Crea un vertice `rules:compute` (label, directory, threads, execution-timeout-ms, factor) |
 | `create compute monitored edge` | Crea un edge `rules:execute` dal compute alla regola |
 | `create show case arena` | Crea l'esempio "Dungeon Arena" (16 vertici, argomento `delay-ms`) |

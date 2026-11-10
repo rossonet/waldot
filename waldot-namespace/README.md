@@ -6,8 +6,11 @@ The `waldot-namespace` module is the runtime bridge between OPC UA and the in-me
 
 - exposes graph vertices, edges, properties, and commands as OPC UA nodes;
 - executes bootstrap scripts at startup;
-- manages graph mutation commands (`query`, `help`, `about`, edge helpers);
+- manages graph mutation commands (`query`, `help`, `about`, `delete directory`, edge helpers);
 - exchanges structured data with the clients (JSON queries, snapshots, SVG/DOT drawings of the graph);
+- describes itself to clients and agents: schemas of the vertex types, JEXL
+  check and isolated script runs with the diff of the graph, server files,
+  content of a folder (see [Commands for clients and agents](#commands-for-clients-and-agents));
 - provides two Milo strategies:
   - `base`: legacy implementation;
   - `optimized`: hardened implementation with better consistency and indexing.
@@ -112,8 +115,49 @@ is needed on the server. `-Dwaldot.commands.exchange.max-render-vertices`
 (default 50000) caps `vertices.max`. A drawing bigger than `blockSize` is
 downloaded with `read graph block`, like a snapshot.
 
+With `vertices.includeNeighbors` the vertices outside the selection that are
+connected to the selected ones are drawn too, with a neutral colour and the
+group `(fuori selezione)`, instead of omitting the edges towards them.
+
 From the client: `client.graph().render(options)`; from the command line:
-`waldot render -f graph.svg ...`.
+`wotctl render -f graph.svg ...` (`--include-neighbors`).
+
+## Commands for clients and agents
+
+Data exchange commands registered with the others (same
+`waldot.commands.exchange.enabled` switch); all the arguments are strings,
+the outputs are `json` and `error` (empty on success):
+
+| Command | Folder | Inputs | Result |
+|---------|--------|--------|--------|
+| `type list` | `information` | none | `{types: [{type, plugin, create_command, parameters}]}`, from `PluginListener.getManagedVertexTypes()` |
+| `type describe` | `information` | `type` | `{type, plugin, create_command, source, properties, runtime}`: `properties` from the `VertexParameter`s of the creation command (`source` = `create-command`) or, without one, from the variables of the OPC UA type node (`source` = `type-node`); the `run!...` variables of the type node in `runtime` |
+| `jexl check` | `information` | `command`, `context` (empty = `console`) | `{ok, context, errors, warnings, available, used, locals}`; with an empty script `{contexts: [{name, description, variables, console_commands}]}` |
+| `run script` | `manage` | `command`, `tag` | `{ok, result \| error, log, diff, duration_ms}` (`RunScriptCommand`) |
+| `file list` | `information` | `root`, `path` | `{roots: [{root, path, exists}]}` or `{root, path, files: [{name, directory, size, modified}]}` |
+| `file get` | `manage` | `root`, `path`, `blockSize` | outputs `data` (base64), `transferId` (read with `read graph block`), `blocks`, `size`, `path`, `error`; at most 64 MiB |
+| `directory content` | `information` | `directory` | `{directory, count, vertices, edges}`; edges removed together with their vertex have `with_vertex: true` |
+
+- `run script` runs the script with `ConsoleStrategy.runIsolated(...)` (a copy
+  of the console context, with `log` replaced by a logger that captures the
+  lines) while `GraphChangeRecorder` records the changes that pass through the
+  namespace (`addVertex`, `addEdge`, removals, properties, `delete directory`).
+  `GraphChangeDiff` turns them into the diff: only the changes of the script
+  thread, the others counted in `async`; at most 200000 changes
+  (`truncated`). With `tag` the created elements get `created-by`.
+- `jexl check` uses the contexts of `JexlContextRegistry`: the console strategy
+  registers `console`, the plugins their own (for example `rule`).
+- `delete directory` and `directory content` accept the NodeId of the folder
+  (`v:plant/zone`) or the value of the `directory` property (`plant/zone`).
+  `delete directory` also returns `removed`, the number of vertices and edges
+  removed.
+- The file roots are those registered in `ServerFileRoots` by the plugins; the
+  namespace registers none.
+- With the `optimized` strategy, `addVertex` with a `type` that no plugin
+  manages fails with a message that lists the known types (`type '<x>'
+  unknown: ... Known types: ...`).
+- The console has `math` and `rand`, like the rules, and the JEXL errors
+  report line, column, cause and excerpt of the script (`WaldotJexlException`).
 
 ## Closing the namespace, the plugins and the vertices
 

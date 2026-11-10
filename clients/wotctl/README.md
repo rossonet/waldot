@@ -7,12 +7,12 @@ funzioni:
 
 | Area                    | Comandi                                                        |
 |-------------------------|----------------------------------------------------------------|
-| server                  | `about`                                                        |
-| grafo                   | `query` (`--text`, `--graphson`), `describe`                   |
-| comandi WaldOT          | `commands list`, `commands call` (globali o `--element`)       |
-| modifica del grafo      | `vertex add/delete`, `edge add/delete`, `property get/set`     |
+| server                  | `about` (`--structured`: campi nominati, dimensione del grafo, uptime) |
+| grafo                   | `query` (`--text`, `--graphson`, `--table`, `--round N`), `describe` |
+| comandi WaldOT          | `commands list` (`--name GLOB`, `--path TESTO`, `--full`), `commands call` (globali o `--element`) |
+| modifica del grafo      | `vertex add/delete`, `edge add/delete`, `property get/set` (`set --value-file FILE`) |
 | backup                  | `snapshot export`, `snapshot import [--clear]`, `snapshot clear --yes` |
-| disegno del grafo       | `render` (SVG o Graphviz DOT, con filtri e layout)             |
+| disegno del grafo       | `render` (SVG o Graphviz DOT, con filtri e layout; `--include-neighbors`) |
 | spazio degli indirizzi  | `browse`, `read`, `write`, `call`, `resolve`                   |
 | sottoscrizioni          | `subscribe` (proprietà `-p`, nodi `-n`, eventi `-e`)           |
 | shell                   | `completion` (script di autocompletamento bash/zsh)            |
@@ -107,6 +107,10 @@ public class AcmePlugin implements WotctlPlugin {
   e il task `nativeMetadata` per i metadati di native-image raccolti con l'agent.
 - **Esempi**: un plugin di riferimento e le distribuzioni si trovano in wot-addons
   (`wotctl-addons/`, per esempio `wotctl-clarabella` con il binario `muuh`).
+  Il core di wotctl non ha comandi propri per `type list/describe`, `file list/get`,
+  `run script`, `jexl check` e `directory content` del server: li aggiunge il plugin
+  `wotctl-plugin-tools` di wot-addons (`type`, `file`, `script run`, `jexl check`,
+  `jexl contexts`, `directory content`, `rules`); dal core si chiamano con `commands call`.
 
 ## Regole per gli script
 
@@ -162,15 +166,28 @@ Altre variabili:
 ## Esempi
 
 ```bash
+# server
+wotctl about --structured -o json     # {product, version, commit, branch, build_date, ..., vertices, edges, start_time, uptime_s, raw}
+
 # interrogazioni
 wotctl query "g.V().count()" -o value
 wotctl query -o jsonl "g.V().hasLabel('sensor')" | jq -r .id
+wotctl query --table --round 2 "g.V().has('type','zona').valueMap('t-ambiente','setpoint')" -o json   # {columns, rows}
 wotctl describe sensor-1 -o json
+
+# comandi del server: forma breve {name, path, inputs:["nome:Tipo"], outputs} in JSON,
+# oggetto completo con --full o quando il filtro trova un solo comando
+wotctl commands list --path iec60870-5-104 -o json
+wotctl commands list --name 'create*rule*' -o json
+wotctl commands call 'type describe' sim:generator -o value | jq .   # schema delle proprietà del tipo
+wotctl commands call run-once --element rule-1 -o json               # comando di vertice di una regola
 
 # modifica del grafo
 wotctl vertex add --id sensor-1 --label sensor -P zone=A
 wotctl edge add --label feeds --from pump-3 --to tank-1
 wotctl property set sensor-1 setpoint 21.5
+wotctl property set rule-1 action --value-file azione.jexl   # valore letto da un file
+wotctl property set zona-1 guasto ""                         # valore vuoto
 wotctl property get sensor-1 setpoint -o value
 wotctl vertex delete sensor-1
 
@@ -182,6 +199,7 @@ wotctl snapshot import --clear -f grafo.json.gz
 wotctl render -f impianto.svg --group-by directory
 wotctl render -f plc.svg --root plc-1 --depth 2 --include-runtime --include-ephemeral
 wotctl render -f regole.svg --edge-label fire --edge-label link-to --no-isolated
+wotctl render -f linea1.svg --directory impianto/linea1 --include-neighbors   # anche i vertici collegati fuori selezione
 wotctl render -f grafo.dot && dot -Tpng grafo.dot -o grafo.png
 
 # spazio degli indirizzi OPC UA

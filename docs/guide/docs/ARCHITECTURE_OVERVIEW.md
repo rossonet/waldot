@@ -132,6 +132,9 @@ Gremlin Query → Modify Graph → WaldOT Sync
 - Implement custom behaviors (polling, event processing, calculations)
 - Integrate external systems (MQTT, Modbus, REST APIs, databases)
 - Provide reusable commands accessible via OPC UA methods
+- Describe their vertex types as a schema (`type list`, `type describe`) and
+  their JEXL contexts (`jexl check`), so that clients and agents can check a
+  configuration or a script before using it
 
 **Development Effort**:
 

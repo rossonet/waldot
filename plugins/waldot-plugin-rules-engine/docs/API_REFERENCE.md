@@ -11,8 +11,12 @@ Estende `AbstractPluginListener`. Annotato `@WaldotPlugin`.
 | `getJexlEngine()` | Motore JEXL condiviso |
 | `baseJexlContext()` | Contesto base (`log`, `g`, `graph`, `cmd`, `math`, `rand`) |
 | `newJexlContext(Object self)` | Copia del contesto base con `self` e i comandi console aggiornati |
-| `initialize(WaldotNamespace)` | Registra tipi, edge e comandi |
+| `initialize(WaldotNamespace)` | Registra tipi, edge e comandi e il contesto JEXL `rule` (`RULE_CONTEXT`) in `JexlContextRegistry` |
 | `close()` | Azzera l'istanza statica e chiude la classe base |
+
+`RULE_CONTEXT` (statico) descrive le variabili di condizione e azione (`g`,
+`graph`, `cmd`, `log`, `math`, `rand`, `self` e i comandi della console): è il
+contesto `rule` del comando `jexl check`.
 
 ### Costanti
 
@@ -30,6 +34,11 @@ Estende `AbstractPluginListener`. Annotato `@WaldotPlugin`.
 | `TOTAL_SIZE_LABEL` | `total` |
 | `ACTION_EXECUTED_SIZE_LABEL` | `executed` |
 | `ERRORS_SIZE_LABEL` | `errors` |
+| `LAST_ERROR_LABEL` | `last-error` |
+| `LAST_ERROR_TIME_LABEL` | `last-error-time` |
+| `RESET_COUNTERS_COMMAND` | `reset-counters` (comando di vertice) |
+| `RUN_ONCE_COMMAND` | `run-once` (comando di vertice) |
+| `RUN_ONCE_TIMEOUT_MS` | `30000` |
 | `THREAD_POOL_SIZE_FIELD` | `threads` |
 | `EXECUTION_TIMEOUT_MS_FIELD` | `execution-timeout-ms` |
 | `PRIORITY_FACTOR_FIELD` | `factor` |
@@ -52,8 +61,25 @@ Estende `ComputableFireableAbstractOpcVertex`.
 | `total` | Int64 | 0 | sola lettura |
 | `executed` | Int64 | 0 | sola lettura |
 | `errors` | Int64 | 0 | sola lettura |
+| `last-error` | String | vuoto | sola lettura: fase (condizione o azione, compilazione o esecuzione, timeout) e messaggio JEXL con riga, colonna ed estratto |
+| `last-error-time` | String | vuoto | sola lettura: istante (ISO-8601, UTC) dell'ultimo errore |
 
 Un cambio di `condition` o `action` invalida lo script compilato. Un valore non numerico per `debug` o `hysteresis` è rifiutato.
+
+Gli script sono compilati con il nome `condition` o `action`, che compare nei
+messaggi d'errore.
+
+### Comandi di vertice
+
+| Comando | Uscite | Descrizione |
+|---------|--------|-------------|
+| `reset-counters` | nessuna uscita dichiarata; restituisce il valore `reset` | Azzera `total`, `executed` ed `errors` e svuota `last-error` e `last-error-time` |
+| `run-once` | `status`, `condition`, `action`, `error` | Esegue subito la regola nel suo contesto (`self` è la regola): condizione e, se vera, azione. L'esecuzione è contata come le altre |
+
+`status` di `run-once`: `executed` (azione eseguita), `skipped` (condizione
+falsa), `error`, `running` (ancora in corso dopo `RUN_ONCE_TIMEOUT_MS`),
+`closed` (regola chiusa). `condition` e `action` sono i risultati dei due
+script.
 
 | Metodo | Descrizione |
 |--------|-------------|
@@ -88,10 +114,14 @@ Sorgente: `rules:compute`. Destinazione: `rules:rule`. Proprietà: `priority` (d
 
 | Comando | Argomenti |
 |---------|-----------|
-| `create rule` | label, condition, action, debug, hysteresis |
+| `create rule` | label, directory, condition, action, debug, hysteresis |
 | `create compute` | label, directory, threads, execution-timeout-ms, factor |
 | `create compute monitored edge` | label, source (compute), target (regola), directory, priority |
 
 Directory dei comandi: `rules` (e `rules/edges` per l'edge). Il risultato è l'id del vertice o dell'edge creato.
 
 Quando un'azione supera `execution-timeout-ms` viene annullata e conteggiata in `errors` della regola.
+
+Gli argomenti dei comandi di creazione sono controllati con lo schema dei
+parametri (tipo, valori ammessi, intervallo), lo stesso pubblicato dal comando
+del server `type describe` per `rules:rule` e `rules:compute`.

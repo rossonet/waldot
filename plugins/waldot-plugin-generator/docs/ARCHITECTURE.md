@@ -44,22 +44,22 @@ The main plugin class that integrates with the WaldOT framework.
 
 **Responsibilities:**
 - Plugin lifecycle management (initialize, close)
-- Registration of "sim:generator" vertex type in OPC-UA address space
+- Registration of the "sim:generator" and "sim:event-generator" vertex types in OPC-UA address space
 - Creation of DataGeneratorVertex instances when requested by framework
 - Management of shared virtual thread executor service
-- No custom console commands (returns empty collection)
+- Commands `create generator` and `create event generator` (folder `simulator`)
 
 **Key Methods:**
 - `initialize()`: Creates OPC-UA type node for generators
 - `createVertex()`: Factory method for DataGeneratorVertex instances
 - `close()`: Shuts down executor and stops all generators
 
-**Constants:**
+**Constants** (in `GeneratorConstants`):
 - `DATA_GENERATOR_OBJECT_TYPE_LABEL = "sim:generator"`: Vertex type label
-- `DEFAULT_ALGORITHM_FIELD = "incremental"`: Default algorithm
-- `DEFAULT_DELAY_FIELD = 1000L`: Default 1 second update interval
-- `DEFAULT_MIN_VALUE_FIELD = 0L`: Default minimum value
-- `DEFAULT_MAX_VALUE_FIELD = 20000L`: Default maximum value
+- `DEFAULT_ALGORITHM = "incremental"`: Default algorithm
+- `DEFAULT_DELAY = 1000L`: Default 1 second update interval
+- `DEFAULT_MIN_VALUE = 0.0`: Default minimum value (decimal)
+- `DEFAULT_MAX_VALUE = 20000.0`: Default maximum value (decimal)
 
 ### 2. DataGeneratorVertex
 
@@ -72,8 +72,8 @@ DataGeneratorVertex
 ├── Properties (OPC-UA + TinkerPop)
 │   ├── Algorithm: enum { incremental, decremental, random, sinusoidal, triangular, stopped }
 │   ├── Delay: update interval (ms, minimum 10ms)
-│   ├── Min: minimum value boundary
-│   ├── Max: maximum value boundary
+│   ├── Min: minimum value boundary (decimal)
+│   ├── Max: maximum value boundary (decimal)
 │   └── data: current generated value (read-only)
 ├── Internal State
 │   ├── actualValue: current double value
@@ -90,7 +90,9 @@ DataGeneratorVertex
 
 1. **Construction**:
    - Parse property key-value pairs for Algorithm, Delay, Min, Max
-   - Validate values (delay >= 10ms, algorithm exists, etc.)
+   - Validate values (delay >= 10ms, algorithm exists ignoring case, Min and Max
+     numbers with Min <= Max); a refused value is written in `run!last-error`
+     (with `run!last-error-time`) together with the value used instead
    - Initialize seed with random value in [min, max]
    - Submit runner to virtual thread executor
    - Thread starts immediately
@@ -113,8 +115,10 @@ DataGeneratorVertex
 
 3. **Property Updates**:
    - Algorithm/Delay changes validated before applying
-   - Min/Max changes applied immediately (no validation)
-   - Invalid changes rejected and original value restored
+   - Min/Max changes applied immediately when they are numbers and Min stays
+     not greater than Max
+   - Invalid changes rejected, original value restored and the reason written
+     in `run!last-error`
    - Changes synchronized to OPC-UA address space
 
 4. **Termination**:
@@ -193,8 +197,8 @@ Root
         └── [generator-label]
             ├── Algorithm (String, read/write)
             ├── Delay (UInt64, read/write)
-            ├── Min (UInt64, read/write)
-            ├── Max (UInt64, read/write)
+            ├── Min (Double, read/write)
+            ├── Max (Double, read/write)
             └── data (Double, read-only)
 ```
 
@@ -335,7 +339,7 @@ Algorithm complexity:
 
 Property update latency:
 - Algorithm/Delay change: Applied on next loop iteration (< delay)
-- Min/Max change: Applied immediately (no delay)
+- Min/Max change: Applied immediately (no delay) when valid
 - OPC-UA synchronization: ~1-10ms depending on server load
 
 Value generation latency:
@@ -520,6 +524,8 @@ void test1000Generators() {
 - Check `active` flag (may be closed)
 - Verify `Algorithm` not "stopped"
 - Check `Delay` >= 10ms
+- Read `run!last-error`: a refused algorithm, delay, Min or Max is reported
+  there with the value kept
 - Verify executor not shut down
 
 **High CPU usage:**

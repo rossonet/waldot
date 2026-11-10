@@ -13,6 +13,20 @@ WaldOT runtimes and plugins, including:
 - JEXL execution helpers;
 - security/network/system helper utilities.
 
+Contracts shared by the server commands and the clients:
+
+| Class | Package | Use |
+| ----- | ------- | --- |
+| `DataExchangeProtocol` | `net.rossonet.waldot.api.exchange` | names, folders and arguments of the data exchange commands (`query json`, snapshots, `render graph`, `run script`, `jexl check`, `type list`/`type describe`, `file list`/`file get`, `directory content`), block sizes and system properties |
+| `GraphRenderOptions` | `net.rossonet.waldot.api.exchange` | JSON options of `render graph` (also `vertices.includeNeighbors`) |
+| `AbstractCreateVertexCommand.VertexParameter` | `net.rossonet.waldot.opc` | parameter of a creation command with default, range and allowed values (`withDefault`, `withRange`, `withAllowed`, `refineParameter` in the subclasses); `toSchema()` is the entry of `type describe` |
+| `PluginListener.getManagedVertexTypes()` | `net.rossonet.waldot.api` | vertex types of a plugin, listed by `type list` |
+| `AbstractOpcVertex` | `net.rossonet.waldot.opc` | refused values of the managed properties in `run!last-error` / `run!last-error-time` (`publishLastError`, `publishConfigurationError`) |
+| `JexlContextRegistry`, `JexlChecker`, `JexlErrorFormatter`, `WaldotJexlException` | `net.rossonet.waldot.jexl` | JEXL contexts of the server, static check of a script, readable errors (line, column, cause, excerpt) |
+| `ConsoleStrategy.runIsolated(script, variables)` | `net.rossonet.waldot.api.strategies` | runs a script in a copy of the console context (used by `run script`) |
+| `GraphChangeRecorder`, `GraphChangeDiff` | `net.rossonet.waldot.api.changes` | changes of the graph recorded during a script and their diff (created, removed, modified, `async`, `truncated`) |
+| `ServerFileRoots` | `net.rossonet.waldot.api.files` | server directories readable by the clients; a path cannot leave its root |
+
 ## Build and test
 
 From the repository root:

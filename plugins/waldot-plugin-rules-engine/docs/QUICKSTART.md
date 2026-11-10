@@ -40,7 +40,12 @@ rule.property("total").value();     // eventi valutati
 rule.property("executed").value();  // azioni riuscite
 rule.property("errors").value();    // errori
 rule.property("queue").value();     // eventi in attesa
+rule.property("last-error").value(); // ultimo errore (riga, colonna, estratto), vuoto se nessuno
 ```
+
+I comandi di vertice della regola `reset-counters` (azzera contatori e ultimo
+errore) e `run-once` (esegue subito condizione e azione e restituisce esito,
+risultati ed errore) servono per provarla senza attendere una notifica.
 
 ## 6. Modifiche a runtime
 
@@ -55,6 +60,6 @@ Comandi: `create compute`, `create rule`, `create compute monitored edge` (param
 | Sintomo | Causa |
 |---------|-------|
 | `queue` cresce e `executed` no | Manca l'edge `rules:execute` o ha direzione inversa |
-| `errors` cresce | Script non compilabile, eccezione o condizione non booleana: usa `debug` ≥ 1 |
+| `errors` cresce | Script non compilabile, eccezione o condizione non booleana: leggi `last-error`, controlla lo script con `jexl check` (contesto `rule`), usa `debug` ≥ 1 |
 | Eventi ripetuti scartati | `hysteresis` troppo alto |
 | Regola sempre in coda | `threads` troppo basso o azioni lente (vedi `execution-timeout-ms`) |

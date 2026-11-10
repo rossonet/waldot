@@ -61,8 +61,10 @@ Objects
 │   ├── Edges
 │   └── Variables
 └── Commands                         OPC UA methods, grouped by folder
-    ├── manage        query, delete directory, edges/...
-    ├── information   help, about
+    ├── manage        query, delete directory, run script, export graph, import graph,
+    │                 read graph block, clear graph, file get, edges/...
+    ├── information   help, about, query json, describe element, render graph,
+    │                 type list, type describe, jexl check, file list, directory content
     ├── simulator     create generator, create event generator
     ├── rules         create rule, create compute, edges/..., showcase/...
     └── tinkerpop     create gremlin server
@@ -102,6 +104,13 @@ Browser, `asyncua` (Python), Eclipse Milo, Node-RED.
 | `type` | active type: `sim:generator`, `sim:event-generator`, `rules:rule`, `rules:compute`, `gremlin` |
 | `directory` | OPC UA folder, levels separated by `/` |
 | any other key | property: string, number or boolean. Use lowercase keys. |
+
+The properties declared by an active type are converted to their type. A value
+that cannot be converted (`20.6` for an integer, `maybe` for a boolean) or that
+the vertex refuses is not applied silently: the vertex writes the reason in
+`run!last-error` and the time in `run!last-error-time` (at creation the default
+is used, and named in the message). Integers accept `5000.0` but not `20.6`;
+booleans accept `true`/`false`, `1`/`0`, `yes`/`no`, `on`/`off`, `si`.
 
 ### Active types of the base distribution
 
@@ -174,7 +183,14 @@ Syntax, detection of the format, available variables and errors:
 | Command | Folder | Input arguments |
 | ------- | ------ | --------------- |
 | `query` | `manage` | JEXL expression, e.g. `graph.addVertex('id','v1','label','v1')` |
-| `delete directory` | `manage` | folder NodeId (`v:<directory>`, also `ns=2;s=v:<directory>`): removes the vertices and edges of the folder and of its sub folders, then the folder |
+| `delete directory` | `manage` | folder NodeId (`v:<directory>`, also `ns=2;s=v:<directory>`) or the value of the `directory` property (`plant/pumps`): removes the vertices and edges of the folder and of its sub folders, then the folder. Outputs `output`, `error`, `removed` (number of vertices and edges removed) |
+| `directory content` | `information` | `directory` (same forms as `delete directory`): lists, as JSON, the vertices and edges that `delete directory` would remove, without removing anything |
+| `type list` | `information` | none: the vertex types of the loaded plugins with their creation command, as JSON |
+| `type describe` | `information` | `type` (for example `sim:generator`): schema of the properties of the type as JSON (key, type, required, default, min/max, allowed values, description; `run!...` properties in `runtime`) |
+| `run script` | `manage` | `command` (JEXL script of several statements), `tag`: runs the script and returns, as JSON, result, log lines, diff of the graph and duration |
+| `jexl check` | `information` | `command` (script), `context`: checks a script for a context without running it; with an empty script lists the contexts and their variables |
+| `file list`, `file get` | `information`, `manage` | read the files of the server directories registered by the plugins (see below) |
+| `query json`, `describe element`, `render graph`, `export graph`, `import graph`, `read graph block`, `clear graph` | `information`, `manage` | structured data for the clients (JSON query results, element descriptions, drawings, snapshots); see [waldot-namespace](https://github.com/rossonet/waldot/tree/master/waldot-namespace) |
 | `create link monitored edge` | `manage/edges` | label, SourceNode, TargetNode, directory, properties-to-monitor, active-property, inverted, deadband-type, deadband-value, active-event |
 | `create fire monitored edge` | `manage/edges` | label, SourceNode, TargetNode, directory, properties-to-monitor, active-property, deadband-type, deadband-value, active-event |
 | `create compute monitored edge` | `rules/edges` | label, SourceNode (compute), TargetNode (rule), directory, priority |
@@ -188,7 +204,39 @@ Syntax, detection of the format, available variables and errors:
 
 Empty arguments take the default value. Creation commands return the NodeId
 of the new vertex or edge, or a text starting with `error:` (for example
-`error: target vertex 'ns=2;s=missing' not found`).
+`error: target vertex 'ns=2;s=missing' not found`). The arguments of the vertex
+creation commands are checked against the schema shown by `type describe`: a
+value of the wrong type, not among the allowed values (compared ignoring case)
+or out of the range returns an `error:` that names the allowed values or the
+range.
+
+The commands that return JSON (`type list`, `type describe`, `run script`,
+`jexl check`, `file list`, `directory content`, `query json`, `describe
+element`) have the outputs `json` and `error`; an empty `error` means success.
+
+- `run script` runs the script in a copy of the console context: the
+  variables it assigns do not remain in the console. The JSON has `ok`,
+  `result` (value of the last expression), `log` (lines written with
+  `log.info/warn/...`), `diff` (vertices and edges created and removed,
+  properties changed with first old and last new value, grouped by type;
+  changes made meanwhile by other threads, for example rules, are only counted
+  in `async`), `duration_ms` and, on failure, `error` (`kind`, `message`,
+  `line`, `column`, `excerpt`). With `tag` every vertex and edge created by the
+  script gets the property `created-by` with that value.
+- `jexl check` reports compilation errors (with line, column and excerpt),
+  variables that the context does not provide and some traps of the language.
+  The contexts of the base distribution are `console` (query, run script,
+  bootstrap file) and `rule` (condition and action of `rules:rule`); other
+  plugins add their own. Contexts, error messages and traps:
+  [JEXL expressions](https://github.com/rossonet/waldot/tree/master/plugins/waldot-plugin-rules-engine/docs/JEXL_EXPRESSIONS.md).
+- `file list` without `root` lists the registered roots (`root`, `path`,
+  `exists`); with a `root` (and an optional relative `path`) its files
+  (`name`, `directory`, `size`, `modified`). `file get` (`root`, `path`,
+  `blockSize`) returns the file in base64 in `data`, or a `transferId` to read
+  with `read graph block` when it is bigger than `blockSize`; files over
+  64 MiB are refused. A path cannot leave its root, not even through a
+  symbolic link. The roots are registered by the plugins: the base distribution
+  registers none.
 
 Edge commands:
 
@@ -301,11 +349,26 @@ tank.addEdge('watch-level', high, 'type', 'fire', 'properties-to-monitor', 'leve
 | `queue` | notifications waiting | grows continuously → compute too slow (raise `threads`) or hysteresis too low |
 | `total` | evaluations | does not grow → the `fire` edge or the `rules:execute` edge is missing |
 | `executed` | actions completed | stays at 0 with `total` growing → condition always false |
-| `errors` | compilation or runtime errors | grows → read the log, set `debug` to 2 |
+| `errors` | compilation or runtime errors | grows → read `last-error`, set `debug` to 2 |
+| `last-error` | last failure: phase (condition or action, compilation or execution, timeout) and JEXL message with line, column and excerpt | the cause of the errors, without reading the log |
+| `last-error-time` | time (ISO-8601, UTC) of `last-error` | |
 
 `condition` and `action` can be changed at runtime from a client: the script is
 compiled again. With `debug` = 1 every phase is published as an OPC UA event,
 with `debug` = 2 it is also written in the log.
+
+Each rule vertex has two methods:
+
+- `reset-counters`: sets `total`, `executed` and `errors` to 0 and clears
+  `last-error` and `last-error-time`;
+- `run-once`: runs the rule now in its own context (`self` is the rule):
+  evaluates the condition and, when true, the action. Outputs `status`
+  (`executed`, `skipped` when the condition is false, `error`, `running` when
+  still running after 30 s, `closed` for a removed rule), `condition`,
+  `action` (results) and `error`; the run is counted like the others.
+
+A script can be checked before writing it in the rule with `jexl check`
+(context `rule`).
 
 ---
 
@@ -315,7 +378,9 @@ with `debug` = 2 it is also written in the log.
 | ---- | ----- |
 | values of the plant | variables of the vertices, OPC UA subscription |
 | simulated alarms | events of `sim:event-generator` vertices (subscribe to events of the vertex or of the server) |
-| rules health | `queue`, `total`, `executed`, `errors` of each rule; `queue` of each compute |
+| rules health | `queue`, `total`, `executed`, `errors`, `last-error` of each rule; `queue` of each compute |
+| refused configuration values | `run!last-error` and `run!last-error-time` of the active vertex |
+| properties accepted by a type | `type describe` command |
 | software version | `about` command (name, license, git commit, version, branch) |
 | server log | `docker logs waldot`; categories `BOOT`, `CONSOLE`, `WaldOT runner` |
 
@@ -337,7 +402,7 @@ cmd.listCommands()
 | ---- | --- |
 | change the graph at startup | edit `boot.conf`, restart the container |
 | rebuild the graph | restart the container |
-| remove a group of vertices | `delete directory` on their folder, or `query` with a loop, see below |
+| remove a group of vertices | `delete directory` on their folder (preview with `directory content`), or `query` with a loop, see below |
 | run the bootstrap again | `cmd.reset()`: every vertex and edge is removed (generators, rules and monitors stop), the plugins are reset and the bootstrap runs again |
 | keep the OPC UA certificate | mount a volume on `/app/.security` |
 | restrict access | `--anonymous-access false` (only username/password or certificate sessions), `--factory-password ...` |
@@ -349,6 +414,7 @@ the Arena showcase, from the console:
 ```javascript
 graph.getWaldotNamespace().deleteDirectory('v:rules/showcase/arena')
 // returns 'ns=2;s=v:rules/showcase/arena'; the showcase can be created again
+// the folder can also be given as the value of the 'directory' property: 'rules/showcase/arena'
 ```
 
 or remove all the vertices whose id starts with `arena-`:
@@ -371,7 +437,9 @@ they are also in the bootstrap file.
 | edge command returns `error: ... vertex ... not found` | wrong NodeId of `SourceNode`/`TargetNode` | pass `ns=2;s=<id>` of existing vertices |
 | anonymous client rejected with `BadIdentityTokenInvalid` | server started with `--anonymous-access false` | connect with username/password or a certificate |
 | rule `total` stays at 0 | missing `fire` or `rules:execute` edge | check edges with `g.V().has('id','<rule>').inE().toList()` |
-| rule `errors` grows | JEXL error in condition/action | set `debug` to 2 and read the log |
+| rule `errors` grows | JEXL error in condition/action | read `last-error` of the rule (line, column, excerpt), check the script with `jexl check` (context `rule`), `debug` = 2 for the log |
+| `type '<x>' unknown: it is neither a vertex type of a loaded plugin nor a NodeId ... Known types: ...` | `type` of `addVertex` not handled by any plugin | use one of the listed types (`type list`), or omit `type` for a plain vertex |
+| an active vertex ignores a written value | value not convertible or refused | read `run!last-error` of the vertex; `type describe <type>` shows types, ranges and allowed values |
 | `Vertex with id already exists` | duplicated id | use unique ids |
 | `already exists` from a showcase command | the scenario is already in the graph | `delete directory` on `v:rules/showcase/<arena\|evolution\|gas-grid>` (see [Operations](#8-operations)), `cmd.reset()` or restart |
 | client cannot connect | port not published, or wrong host in the endpoint | publish `-p 12686:12686`, set `--bind-hostname` |

@@ -7,7 +7,8 @@
 - `registerTypeNode(RuleVertex.class, "WaldOTRuleObjectType", "Rule", "rules:rule")`
 - `registerTypeNode(ComputeVertex.class, "WaldOTComputeObjectType", "Thread Manager", "rules:compute")`
 - `registerTypeEdge("rules:execute")`
-- `registerCommand(...)` per i comandi di creazione (`create rule`, `create compute`, `create compute monitored edge`) e i tre comandi show case.
+- `registerCommand(...)` per i comandi di creazione (`create rule`, `create compute`, `create compute monitored edge`) e i tre comandi show case;
+- `JexlContextRegistry.register(RULE_CONTEXT)`: il contesto `rule` di `jexl check`, con le variabili di condizione e azione.
 
 La creazione dei vertici avviene per reflection dalla classe base, con il costruttore standard a 11 argomenti. Per questo i vertici non ricevono il plugin: lo ottengono con `WaldotRulesEnginePlugin.getInstance()` (come `LinuxOsPlugin`).
 
@@ -36,9 +37,15 @@ Per ogni evento viene creata una `RuleVertexFireableAction` che:
 1. compila la condizione (script in cache, invalidato quando cambia `condition`);
 2. valuta la condizione con un contesto proprio; un risultato non booleano è un errore;
 3. se vera, compila ed esegue l'azione e poi incrementa `executed`;
-4. aggiorna `total` ed `errors`.
+4. aggiorna `total` ed `errors`; ogni errore scrive anche `last-error` (fase e messaggio di `JexlErrorFormatter`, con riga, colonna ed estratto) e `last-error-time`.
 
 Con `debug > 0` pubblica un evento per ogni fase (vedi `DebugEventType`).
+
+La stessa esecuzione (`RuleVertex.execute`, risultato `Execution`: stato,
+risultato della condizione, risultato dell'azione, errore) è usata dal comando
+di vertice `run-once`, che la lancia in un virtual thread e attende al massimo
+`RUN_ONCE_TIMEOUT_MS` (30 s). Il comando di vertice `reset-counters` azzera i
+contatori (anche gli `AtomicLong` interni) e l'ultimo errore.
 
 ### `ComputeVertex`
 

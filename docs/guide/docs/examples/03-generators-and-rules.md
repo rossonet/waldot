@@ -53,7 +53,7 @@ Counters of `tank-high` after about 20 seconds:
 | write `condition` = `false` on `tank-high` | `executed` stops growing; the script is compiled again |
 | write `debug` = 2 | every phase of the rule is published as an OPC UA event and logged |
 | write `threads` = 4 on `plant-compute` | up to 4 rules of the compute run at the same time |
-| write an invalid condition (`g.V(`) | `errors` grows |
+| write an invalid condition (`g.V(`) | `errors` grows; `last-error` holds the compilation error of the condition, `last-error-time` its time |
 
 ## Event generator
 

@@ -72,7 +72,8 @@ Values after about one minute:
 - `fire-spell` has half the evaluations of `spawn-wave` although both follow a
   generator with the same period: the 300 ms hysteresis discards notifications.
 - `arena-rule-broken` shows how a failing rule looks: `errors` = `total`,
-  `executed` = 0, a JEXL exception in the log.
+  `executed` = 0, a JEXL exception in the log and its message in
+  `last-error` of the rule.
 - `arena-rule-level-up` (`debug` = 1) publishes an OPC UA event for each phase:
   subscribe to the events of the vertex.
 

@@ -69,6 +69,7 @@ INFO net.rossonet.waldot.namespaces.HomunculusNamespace - Registering commands f
 | Command registration | `getCommands()` | Returns the commands to publish (filled by `registerCommand(...)`). Read right after `initialize`. |
 | Start | `start()` | Called just before the bootstrap file is executed (and again after a namespace reset). |
 | Vertex creation | `containsVertexType(label)`, `getVertexTypeNode(label)`, `containsVertexTypeNode(nodeId)`, `createVertex(...)` | Handled by `AbstractPluginListener` once the type is registered. |
+| Type listing | `getManagedVertexTypes()` | Labels of the vertex types of the plugin, read by `type list`, `type describe` and by the error for an unknown `type`. `AbstractPluginListener` returns the types registered with `registerTypeNode(...)`; the default of the interface is an empty set. |
 | Edge creation / removal | `containsEdgeType(label)`, `notifyAddEdge(...)`, `notifyRemoveEdge(...)` | Called only for the edge types you registered. Throw `PluginBlockingException` to refuse an edge. |
 | Reset | `reset()` | Namespace reset (`cmd.reset()`): every vertex and edge has already been removed (your vertices received `notifyRemoveVertex()`, your edges `notifyRemoveEdge(...)`); clear the remaining plugin state. `start()` and the bootstrap run again afterwards. |
 | Shutdown | `stop()` | Stop background activity of the plugin. |
@@ -444,9 +445,19 @@ addManagedProperty(label, opcUaDataType, javaType, isRequired, defaultValue,
 - The initial value is taken from `propertyKeyValues` and converted to
   `javaType` (`String`, `Integer`, `Long`, `Boolean`, `Double`, `Float`, `Byte`,
   `Instant`, `JSONObject`); if absent or not convertible the default is used.
+  `Integer` and `Long` accept `5000.0` but refuse `20.6`; `Boolean` accepts only
+  `true`/`false`, `1`/`0`, `yes`/`no`, `on`/`off`, `si` (any case): another value
+  is an error, not `false`.
 - Every later write (OPC UA client, Gremlin `property(...)`, rule, link edge)
   goes through the conversion and, if present, through `callbackOnChange`;
   throwing `PropertyChangeException` rejects the value.
+- A refused value (not convertible, or rejected by the callback) is published
+  on the vertex: `run!last-error` gets the property, the value, the reason and
+  the default used instead, `run!last-error-time` the time (ISO-8601). The
+  vertex can publish its own errors in the same properties with
+  `publishLastError(message)` (or `publishConfigurationError(label, value,
+  reason, defaultValue)`), so that they are visible from OPC UA and not only in
+  the log.
 - `getRuntimeParameter(label)` returns the current typed value;
   `setRuntimeParameter(label, value)` updates it without notifications.
 - `property(key, value)` / `updatePropertyIfChanged(key, value)` write a graph
@@ -541,8 +552,31 @@ public void notifyAddTargetMonitoredEdge(WaldotEdge edge, WaldotVertex targetVer
 - output: `result`, the NodeId of the new vertex or a message starting with
   `error: `;
 - empty inputs are skipped (the vertex uses its defaults), numeric and boolean
-  values are checked, then `validate(keyValues)` runs your own checks;
+  values are checked, then the allowed values and the range of the parameter,
+  then `validate(keyValues)` runs your own checks;
 - `clone()` uses the constructor with the `WaldotNamespace` as only argument.
+
+A `VertexParameter` can declare a default, a range and the allowed values
+(`withDefault(value)`, `withRange(min, max)`, `withAllowed(values...)`; `null`
+for an open bound). Without a declared default, `effectiveDefault()` reads the
+one written in the description as `Default: X`. Allowed values are compared
+ignoring case. To add them to the parameters given to `super(...)`, call
+`refineParameter(key, p -> ...)` in the constructor; the OPC UA input arguments
+do not change. The generator does so:
+
+```java
+refineParameter("algorithm", p -> p.withAllowed(
+		Arrays.stream(Algorithm.values()).map(Enum::name).toList()));
+refineParameter("delay", p -> p.withRange(10, null));
+```
+
+The server commands `type list` and `type describe` publish this schema
+(`VertexParameter.toSchema()`: `key`, `type` among `int`, `long`, `double`,
+`bool`, `string`, `opcua_type`, `required`, `default`, `min`, `max`, `enum`,
+`description`). `type list` lists the types returned by
+`PluginListener.getManagedVertexTypes()` (in `AbstractPluginListener`, the
+types registered with `registerTypeNode(...)`); a type without a creation
+command is described from the variables of its OPC UA type node.
 
 ### Where commands appear
 
@@ -578,6 +612,51 @@ public String[] runCommand(final InvocationContext context, final String[] input
 	}
 }
 ```
+
+### JEXL contexts of the plugin
+
+A plugin that runs JEXL scripts of its own (for example an action property of
+its vertices) builds its own `JexlContext`, and should describe it in
+`JexlContextRegistry` (`net.rossonet.waldot.jexl`, waldot-api), so that the
+command `jexl check` can check scripts for it and list its variables. The
+registry only describes the contexts, it does not build them: the descriptor
+must match the context the plugin creates. Registration is idempotent (a
+context with the same name is replaced); the rules engine registers `rule` in
+`initialize(...)`:
+
+```java
+public static final JexlContextRegistry.Context RULE_CONTEXT = new JexlContextRegistry.Context(
+		JexlContextRegistry.RULE,
+		"condizione e azione di un vertice rules:rule (la condizione deve restituire un booleano)",
+		List.of(JexlContextRegistry.g(), JexlContextRegistry.graph(), JexlContextRegistry.cmd(),
+				JexlContextRegistry.log("logger del plugin delle regole"), JexlContextRegistry.math(),
+				JexlContextRegistry.rand(), JexlContextRegistry.self("la regola (RuleVertex) in esecuzione")),
+		true); // true: every console command is also a variable
+
+JexlContextRegistry.register(RULE_CONTEXT);
+```
+
+`JexlContextRegistry.Variable(name, type, description)` declares other
+variables. The scripts run with `JexlExecutor` raise `WaldotJexlException`,
+whose message gives line, column, cause and excerpt of the script
+(`getInfo()` returns the same data as fields); `JexlErrorFormatter.format(source,
+error)` builds the same message for an exception caught by the plugin.
+
+### Files written by the plugin
+
+The clients can read only the files of the directories registered in
+`ServerFileRoots` (`net.rossonet.waldot.api.files`), with the commands
+`file list` and `file get`. A plugin that writes files for the clients (dumps,
+saved configurations) registers its directory with a name:
+
+```java
+ServerFileRoots.register("dtml", Path.of("/storage/dtml"));   // replaces a root with the same name
+// ...
+ServerFileRoots.unregister("dtml");
+```
+
+`ServerFileRoots.resolve(root, path)` refuses absolute paths and paths that
+leave the root, also through a symbolic link.
 
 ---
 
