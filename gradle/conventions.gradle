@@ -45,6 +45,10 @@ allprojects {
 	tasks.withType(Test).configureEach {
 		systemProperty 'junit.jupiter.execution.timeout.default', '900s'
 		systemProperty 'junit.jupiter.execution.timeout.lifecycle.method.default', '600s'
+		// un test fermo in un'attesa non interrompibile (monitor, join senza
+		// limite) fallisce allo scadere con lo stack trace invece di bloccare
+		// il task fino al suo timeout
+		systemProperty 'junit.jupiter.execution.timeout.thread.mode.default', 'SEPARATE_THREAD'
 		timeout = java.time.Duration.ofMinutes(15)
 	}
 }

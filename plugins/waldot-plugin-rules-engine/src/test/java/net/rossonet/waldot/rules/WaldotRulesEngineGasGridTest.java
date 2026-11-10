@@ -219,7 +219,11 @@ public class WaldotRulesEngineGasGridTest {
 				((Number) outEdge(v("gas-demand-gen-0"), "demand-to-consumer-0")
 						.property("deadband-value").value()).doubleValue(),
 				1e-9);
-		assertEquals(0.0, num(v("gas-trunk"), "pressure") - 24.0, 1e-9);
+		// the trunk starts at the nominal supply, but the city gate generator
+		// (sinusoidal 22-26 with a random seed) may have already moved it
+		assertEquals(24.0, num(network, "supply-bar"), 1e-9);
+		final double trunk = num(v("gas-trunk"), "pressure");
+		assertTrue(trunk >= 22.0 && trunk <= 26.0, "trunk pressure " + trunk);
 	}
 
 	@Test

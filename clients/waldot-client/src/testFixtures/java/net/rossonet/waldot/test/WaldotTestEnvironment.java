@@ -42,12 +42,56 @@ public final class WaldotTestEnvironment {
 	private static volatile boolean initialized = false;
 	private static Path tmpDir;
 
+	/** Lowest port used by {@link #allocateFreePort()}. */
+	private static final int FIRST_TEST_PORT = 20_000;
+
+	/**
+	 * Allocates a port for the whole life of the JVM: every server started by
+	 * the tests (one after the other) binds it again. A port of the ephemeral
+	 * range (the one of <code>new ServerSocket(0)</code>) can be taken
+	 * meanwhile as source port by an outgoing connection of another process
+	 * (e.g. the other Gradle fork) and the next bind fails with "Address
+	 * already in use": the port is chosen at random below that range, where
+	 * the kernel does not choose source ports.
+	 */
 	private static int allocateFreePort() {
+		final int ephemeralStart = ephemeralPortStart();
+		if (ephemeralStart - FIRST_TEST_PORT >= 1000) {
+			final java.util.concurrent.ThreadLocalRandom random = java.util.concurrent.ThreadLocalRandom
+					.current();
+			for (int i = 0; i < 200; i++) {
+				final int port = random.nextInt(FIRST_TEST_PORT, ephemeralStart);
+				try {
+					if (NetworkHelper.checkLocalPortAvailable(port)) {
+						return port;
+					}
+				} catch (final IOException e) {
+					// next candidate
+				}
+			}
+		}
 		try (ServerSocket socket = new ServerSocket(0)) {
 			socket.setReuseAddress(true);
 			return socket.getLocalPort();
 		} catch (final IOException e) {
 			throw new UncheckedIOException("unable to allocate a free port", e);
+		}
+	}
+
+	/**
+	 * @return first port of the ephemeral range of the kernel (Linux), 32768
+	 *         when it cannot be read
+	 */
+	private static int ephemeralPortStart() {
+		try {
+			// line by line: Files.readString trusts the size of the file, 0 in
+			// procfs, and reads only the first byte
+			final String range = Files
+					.readAllLines(Path.of("/proc/sys/net/ipv4/ip_local_port_range"))
+					.get(0).trim();
+			return Integer.parseInt(range.split("\\s+")[0]);
+		} catch (final IOException | RuntimeException e) {
+			return 32_768;
 		}
 	}
 
