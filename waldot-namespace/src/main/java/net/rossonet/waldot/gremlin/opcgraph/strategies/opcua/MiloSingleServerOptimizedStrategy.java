@@ -371,6 +371,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 				MiloStrategy.getIdValue(propertyKeyValues).orElse(null),
 				sourceVertex, targetVertex, elaboratedLabel);
 		boolean pluginsNotified = false;
+		EdgeEntry built = null;
 		try {
 			final OpcEdge edge = new OpcEdge(waldotNamespace.getGremlinGraph(),
 					nodeId, sourceVertex, targetVertex, elaboratedLabel, name,
@@ -389,6 +390,7 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 					edgeSequence.incrementAndGet(), edge, nodeId,
 					sourceVertex.getNodeId(), targetVertex.getNodeId(),
 					elaboratedLabel, type);
+			built = entry;
 			edgeIndex.put(nodeId, entry);
 			edgeProperties.put(nodeId, new PropertyBag<>());
 			waldotNamespace.getStorageManager().addNode(edge);
@@ -481,6 +483,13 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 			} catch (final Throwable rollbackError) {
 				logger.error("Rollback of edge {} failed", nodeId,
 						rollbackError);
+			}
+			// a removeVertex running meanwhile may have removed the edge
+			// between the two adjacency updates of publishEdge: then the
+			// rollback above finds no edgeIndex entry and the in-edges of the
+			// target (or the out-edges of the source) would keep it
+			if (built != null) {
+				unpublishEdge(built);
 			}
 			throw e;
 		} finally {
@@ -1665,6 +1674,19 @@ public class MiloSingleServerOptimizedStrategy implements MiloStrategy {
 		outEdges.compute(entry.source(), (k, m) -> withEntry(m, entry));
 		inEdges.compute(entry.target(), (k, m) -> withEntry(m, entry));
 		cachedEdges.put(entry.nodeId(), entry.edge());
+	}
+
+	/**
+	 * Removes a published edge from the adjacency indexes and from the public
+	 * cache. Idempotent; it removes exactly this entry, not another edge
+	 * created again with the same id.
+	 */
+	private void unpublishEdge(final EdgeEntry entry) {
+		outEdges.computeIfPresent(entry.source(),
+				(k, m) -> withoutEntry(m, entry));
+		inEdges.computeIfPresent(entry.target(),
+				(k, m) -> withoutEntry(m, entry));
+		cachedEdges.remove(entry.nodeId(), entry.edge());
 	}
 
 	private String readType(final WaldotEdge edge) {
