@@ -24,10 +24,12 @@ class OtpHelperTest {
 	@Test
 	void testGenerateAndCheckTOTPWithAllAlgorithms() {
 		final String seed = OtpHelper.getRandomHexString(32); // Generate a random seed
-		final long currentTimeMillis = System.currentTimeMillis();
 
 		for (final OtpHelper.Algorithm algorithm : OtpHelper.Algorithm.values()) {
 			for (final String returnDigits : new String[] { "6", "8" }) {
+				// checkTOTP accepts +-1.5 s around now (window 3): one timestamp
+				// for all the algorithms is out of the window on a slow runner
+				final long currentTimeMillis = System.currentTimeMillis();
 				// Generate OTP
 				final String otp = OtpHelper.generateTOTP(algorithm, seed, currentTimeMillis, returnDigits);
 				assertNotNull(otp, "Generated OTP should not be null");
