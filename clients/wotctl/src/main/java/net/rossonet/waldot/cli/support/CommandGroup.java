@@ -20,6 +20,6 @@ public abstract class CommandGroup implements Callable<Integer> {
 		throw new ParameterException(spec.commandLine(),
 				"specificare un sottocomando di '" + spec.qualifiedName()
 						+ "' (sottocomandi: "
-						+ String.join(", ", spec.subcommands().keySet()) + ")");
+						+ VisibleSubcommands.of(spec) + ")");
 	}
 }

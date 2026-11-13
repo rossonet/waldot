@@ -17,6 +17,9 @@
 // resource net/rossonet/waldot/cli/cli-identity.properties (CliIdentity): the
 // texts, the completion, the version and the messages use the name of the
 // executable, the variables and the cache of the executable take its name.
+// The resource also has the commit of the repository of the distribution
+// (git.commit.id, git.commit.id.abbrev, git.commit.time): shown by --version
+// and found in the binary by test_demo_lab/dist/build-packages.sh.
 // wotctl itself has no such resource and keeps its identity.
 // A source set 'nativeSmokeTest', if present, is run on the binary by the task
 // nativeSmokeTest.
@@ -38,20 +41,107 @@ def nativeDistName = project.ext.has('nativeDistName') ? project.ext.nativeDistN
 def cliDescription = project.ext.has('cliDescription') ? project.ext.cliDescription : ''
 def cliMcpName = project.ext.has('cliMcpName') ? project.ext.cliMcpName : cliName
 
+// nearest git directory going up from a directory (".git" directory, or the
+// "gitdir:" file of a submodule or worktree), null without a repository
+def cliGitDirectory = { File start ->
+    for (File dir = start.canonicalFile; dir != null; dir = dir.parentFile) {
+        def dotGit = new File(dir, '.git')
+        if (dotGit.isDirectory()) {
+            return dotGit
+        }
+        if (dotGit.isFile()) {
+            def line = dotGit.readLines().find { it.startsWith('gitdir:') }
+            if (line != null) {
+                def gitDir = new File(line.substring('gitdir:'.length()).trim())
+                gitDir = (gitDir.absolute ? gitDir : new File(dir, gitDir.path)).canonicalFile
+                return gitDir.isDirectory() ? gitDir : null
+            }
+        }
+    }
+    return null
+}
+
+// commit of HEAD read from the git directory (also worktrees, packed-refs),
+// without the git program: the build in a container may not have it
+def cliHeadCommit = { File gitDir ->
+    def common = gitDir
+    def commondir = new File(gitDir, 'commondir')
+    if (commondir.isFile()) {
+        def path = new File(commondir.text.trim())
+        common = (path.absolute ? path : new File(gitDir, path.path)).canonicalFile
+    }
+    def head = new File(gitDir, 'HEAD')
+    if (!head.isFile()) {
+        return null
+    }
+    def value = head.text.trim()
+    if (!value.startsWith('ref:')) {
+        return value ==~ /[0-9a-f]{40,64}/ ? value : null
+    }
+    def ref = value.substring('ref:'.length()).trim()
+    for (base in [gitDir, common]) {
+        def file = new File(base, ref)
+        if (file.isFile()) {
+            return file.text.trim()
+        }
+    }
+    def packed = new File(common, 'packed-refs')
+    if (packed.isFile()) {
+        def line = packed.readLines().find { it.endsWith(' ' + ref) }
+        if (line != null) {
+            return line.split(' ')[0]
+        }
+    }
+    return null
+}
+
+// commit of the repository of the distribution: GIT_COMMIT / -PgitCommit
+// (builds without .git), otherwise the nearest git directory; commit time
+// only with the git program
+def cliGitInfo = { ->
+    def info = [:]
+    def gitDir = cliGitDirectory(projectDir)
+    def commit = System.getenv('GIT_COMMIT') ?: findProperty('gitCommit')?.toString()
+    if (!commit && gitDir != null) {
+        commit = cliHeadCommit(gitDir)
+    }
+    if (commit && commit ==~ /[0-9a-f]{7,64}/) {
+        info['git.commit.id'] = commit
+        info['git.commit.id.abbrev'] = commit.substring(0, 7)
+        try {
+            def result = providers.exec {
+                commandLine 'git', '--git-dir', (gitDir ?: new File(projectDir, '.git')).path,
+                        'show', '-s', '--format=%cI', commit
+                ignoreExitValue = true
+            }
+            def time = result.standardOutput.asText.get().trim()
+            if (result.result.get().exitValue == 0 && time) {
+                info['git.commit.time'] = time
+            }
+        } catch (Exception ignored) {
+            // without the git program: commit without its time
+        }
+    }
+    return info
+}
+
 // identity of a distribution (CliIdentity), only when it differs from wotctl
 if (cliName != 'wotctl' || cliDescription) {
+    def cliGit = cliGitInfo()
     def generateCliIdentity = tasks.register('generateCliIdentity') {
-        description = "Writes the identity of ${cliName} (name, description, MCP server)."
+        description = "Writes the identity of ${cliName} (name, description, MCP server, commit)."
         def output = layout.buildDirectory.file('generated/cli-identity/cli-identity.properties')
         inputs.property('name', cliName)
         inputs.property('description', cliDescription)
         inputs.property('mcpName', cliMcpName)
+        inputs.property('git', cliGit)
         outputs.file(output)
         doLast {
             def properties = new Properties()
             properties.setProperty('name', cliName)
             properties.setProperty('description', cliDescription)
             properties.setProperty('mcp-name', cliMcpName)
+            cliGit.each { key, value -> properties.setProperty(key, value) }
             def file = output.get().asFile
             file.parentFile.mkdirs()
             file.withWriter('UTF-8') { properties.store(it, null) }

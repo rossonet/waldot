@@ -55,6 +55,22 @@ class CliIdentityTest {
 	}
 
 	@Test
+	void commitOfTheDistributionInTheVersion() {
+		assertEquals("", CliIdentity.get().commit());
+		final Result core = CliTestSupport.run("--version");
+		assertFalse(core.out().contains("commit "), core.out());
+		CliIdentity.set(CliIdentity.of("muuh", null, null, "50bab69",
+				"2026-11-13T20:05:00+01:00"));
+		final Result version = CliTestSupport.run("--version");
+		final String[] lines = version.out().split("\\R");
+		assertTrue(lines[0].startsWith("muuh "), version.out());
+		assertEquals("commit 50bab69 del 2026-11-13T20:05:00+01:00", lines[1]);
+		CliIdentity.set(CliIdentity.of("muuh", null, null, "50bab69", null));
+		assertTrue(CliTestSupport.run("--version").out()
+				.contains("\ncommit 50bab69\n"));
+	}
+
+	@Test
 	void environmentAndCacheOfTheExecutable() {
 		final CliIdentity identity = CliIdentity.of("muuh", null, null);
 		assertEquals("muuh", identity.mcpName());

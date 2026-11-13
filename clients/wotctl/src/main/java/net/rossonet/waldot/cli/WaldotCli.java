@@ -39,6 +39,7 @@ import net.rossonet.waldot.cli.spi.PluginVersion;
 import net.rossonet.waldot.cli.spi.WotctlPlugin;
 import net.rossonet.waldot.cli.support.CliException;
 import net.rossonet.waldot.cli.support.ExitCodes;
+import net.rossonet.waldot.cli.support.VisibleSubcommands;
 import net.rossonet.waldot.client.api.WaldotClientException;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -161,6 +162,12 @@ public class WaldotCli implements Callable<Integer> {
 			final CliIdentity identity = CliIdentity.get();
 			final String shown = version == null ? "(sviluppo)" : version;
 			lines.add(identity.name() + " " + shown);
+			if (!identity.commit().isEmpty()) {
+				lines.add("commit " + identity.commit()
+						+ (identity.commitTime().isEmpty()
+								? ""
+								: " del " + identity.commitTime()));
+			}
 			if (!identity.description().isEmpty()) {
 				lines.add(identity.description());
 			}
@@ -452,6 +459,6 @@ public class WaldotCli implements Callable<Integer> {
 	public Integer call() {
 		throw new ParameterException(spec.commandLine(),
 				"specificare un comando (comandi: "
-						+ String.join(", ", spec.subcommands().keySet()) + ")");
+						+ VisibleSubcommands.of(spec) + ")");
 	}
 }

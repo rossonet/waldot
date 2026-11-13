@@ -12,8 +12,10 @@ import java.util.Properties;
  * Identity of the executable: the core builds {@code wotctl}, a distribution
  * with plugins (for example {@code wotctl-clarabella}) builds an executable
  * with another name. The distribution writes the resource {@link #RESOURCE}
- * at build time (keys {@code name}, {@code description}, {@code mcp-name});
- * without the resource the identity is the one of {@code wotctl}.
+ * at build time (keys {@code name}, {@code description}, {@code mcp-name},
+ * and the commit of the repository of the distribution:
+ * {@code git.commit.id.abbrev}, {@code git.commit.time}); without the resource
+ * the identity is the one of {@code wotctl}.
  *
  * <p>
  * The texts of the commands use the picocli variable
@@ -59,7 +61,9 @@ public final class CliIdentity {
 		}
 		return of(properties.getProperty("name"),
 				properties.getProperty("description"),
-				properties.getProperty("mcp-name"));
+				properties.getProperty("mcp-name"),
+				properties.getProperty("git.commit.id.abbrev"),
+				properties.getProperty("git.commit.time"));
 	}
 
 	/**
@@ -68,6 +72,16 @@ public final class CliIdentity {
 	 */
 	public static CliIdentity of(final String name, final String description,
 			final String mcpName) {
+		return of(name, description, mcpName, null, null);
+	}
+
+	/**
+	 * Identity with the given values and the commit of the build (blank =
+	 * unknown).
+	 */
+	public static CliIdentity of(final String name, final String description,
+			final String mcpName, final String commit,
+			final String commitTime) {
 		final String cleanName = name == null || name.isBlank()
 				? DEFAULT_NAME
 				: name.trim();
@@ -75,7 +89,9 @@ public final class CliIdentity {
 				description == null ? "" : description.trim(),
 				mcpName == null || mcpName.isBlank()
 						? cleanName
-						: mcpName.trim());
+						: mcpName.trim(),
+				commit == null ? "" : commit.trim(),
+				commitTime == null ? "" : commitTime.trim());
 	}
 
 	/**
@@ -86,6 +102,10 @@ public final class CliIdentity {
 		current = identity;
 	}
 
+	private final String commit;
+
+	private final String commitTime;
+
 	private final String description;
 
 	private final String mcpName;
@@ -93,10 +113,13 @@ public final class CliIdentity {
 	private final String name;
 
 	private CliIdentity(final String name, final String description,
-			final String mcpName) {
+			final String mcpName, final String commit,
+			final String commitTime) {
 		this.name = name;
 		this.description = description;
 		this.mcpName = mcpName;
+		this.commit = commit;
+		this.commitTime = commitTime;
 	}
 
 	/**
@@ -105,6 +128,19 @@ public final class CliIdentity {
 	 */
 	public Path cacheDir() {
 		return Path.of(System.getProperty("user.home"), ".cache", name);
+	}
+
+	/**
+	 * Short commit of the repository of the distribution at build time, empty
+	 * if unknown (the core, builds without git).
+	 */
+	public String commit() {
+		return commit;
+	}
+
+	/** Time of the commit (ISO 8601), empty if unknown. */
+	public String commitTime() {
+		return commitTime;
 	}
 
 	/** One-line description of the distribution, empty for the core. */
