@@ -22,6 +22,14 @@ public final class LogEventSeverity {
 	 * indisponibile, health DOWN).
 	 */
 	public static final int CRITICAL = 850;
+	/**
+	 * Proprieta' dei vertici di punto (registri, comandi, ingressi): se
+	 * {@code true} il vertice manda un evento di log NOTICE a ogni cambio di
+	 * valore (con il limite di frequenza del plugin). Si attiva su richiesta,
+	 * insieme a un arco fire verso un mittente syslog (muuh clarabella mp104
+	 * syslog link).
+	 */
+	public static final String EVENT_ON_DATA_CHANGE_LABEL = "set!event-on-data-change";
 	/** Valore di debug (non arriva al syslog di clarabella). */
 	public static final int DEBUG = 50;
 	/**
