@@ -186,6 +186,16 @@ public abstract class AbstractOpcVertex extends GremlinElement
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
+	/**
+	 * Ultima signature per chiave di {@link #sendLogEventOnChange}; creata al
+	 * primo uso (i punti sono migliaia e quasi tutti non la usano mai).
+	 */
+	private volatile Map<String, String> logEventSignatures;
+
+	@SuppressWarnings("rawtypes")
+	private static final java.util.concurrent.atomic.AtomicReferenceFieldUpdater<AbstractOpcVertex, Map> LOG_EVENT_SIGNATURES = java.util.concurrent.atomic.AtomicReferenceFieldUpdater
+			.newUpdater(AbstractOpcVertex.class, Map.class, "logEventSignatures");
+
 	@SuppressWarnings("rawtypes")
 	private final Map<String, MetaDataProperty> managedProperties = new java.util.concurrent.ConcurrentHashMap<>();
 
@@ -820,10 +830,91 @@ public abstract class AbstractOpcVertex extends GremlinElement
 			eventNode.setReceiveTime(DateTime.NULL_VALUE);
 			eventNode.setMessage(LocalizedText.english(message));
 			eventNode.setSeverity(ushort(severity));
-			postEvent(eventNode);
+			try {
+				postEvent(eventNode);
+			} finally {
+				deleteEventNode(eventNode);
+			}
 		} catch (final Throwable e) {
 			logger.error("Error sending log event", e);
 		}
+	}
+
+	/**
+	 * Il factory registra il nodo evento nel suo node manager: senza delete
+	 * resta in memoria (come in
+	 * MiloSingleServerBaseStrategy.updateEventGenerator). Dopo delete i campi
+	 * dell'evento non sono piu' leggibili: se un arco fire inoltra con
+	 * ritardo, la cancellazione aspetta il ritardo piu' lungo.
+	 */
+	private void deleteEventNode(final BaseEventTypeNode eventNode) {
+		long maxDelay = 0L;
+		for (final EventObserver observer : eventObservers) {
+			if (observer instanceof final net.rossonet.waldot.api.models.MonitoredEdge edge) {
+				maxDelay = Math.max(maxDelay, edge.getEventDelayMs());
+			}
+		}
+		if (maxDelay <= 0L) {
+			eventNode.delete();
+			return;
+		}
+		try {
+			getNamespace().getTimer().schedule(eventNode::delete,
+					maxDelay + 1000L,
+					java.util.concurrent.TimeUnit.MILLISECONDS);
+		} catch (final RuntimeException e) {
+			eventNode.delete();
+		}
+	}
+
+	/**
+	 * Manda l'evento di log solo se la signature e' diversa dall'ultima
+	 * registrata per la stessa chiave: serve per le condizioni che si
+	 * ripresentano a ogni ciclo (errore di connessione, servizio non
+	 * disponibile) senza produrre un evento per ciclo.
+	 *
+	 * @param key       chiave della condizione (es. "docker-inspect")
+	 * @param signature descrizione stabile della condizione (es. il testo
+	 *                  dell'errore senza parti che cambiano a ogni ciclo)
+	 * @return true se l'evento e' stato mandato
+	 */
+	public boolean sendLogEventOnChange(String key, String signature,
+			String category, String message, int severity) {
+		if (key == null || signature == null) {
+			return false;
+		}
+		Map<String, String> signatures = logEventSignatures;
+		while (signatures == null) {
+			LOG_EVENT_SIGNATURES.compareAndSet(this, null,
+					new java.util.concurrent.ConcurrentHashMap<String, String>());
+			signatures = logEventSignatures;
+		}
+		final String previous = signatures.put(key, signature);
+		if (signature.equals(previous)) {
+			return false;
+		}
+		sendLogEvent(category, message, severity);
+		return true;
+	}
+
+	/**
+	 * Cancella la condizione registrata con {@link #sendLogEventOnChange}.
+	 *
+	 * @return true se la condizione era presente: il chiamante manda allora
+	 *         l'evento di ripristino
+	 */
+	public boolean clearLogEventCondition(String key) {
+		final Map<String, String> signatures = logEventSignatures;
+		if (key == null || signatures == null) {
+			return false;
+		}
+		final boolean present = signatures.remove(key) != null;
+		if (signatures.isEmpty()) {
+			// libera la mappa (i punti sono migliaia): una put concorrente
+			// persa al massimo ripete un evento
+			LOG_EVENT_SIGNATURES.compareAndSet(this, signatures, null);
+		}
+		return present;
 	}
 
 	protected <DATA_TYPE> void setRuntimeParameter(String label, Object value) {

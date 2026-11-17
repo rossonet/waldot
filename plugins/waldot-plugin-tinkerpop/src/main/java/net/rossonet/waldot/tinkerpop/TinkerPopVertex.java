@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import net.rossonet.waldot.api.PluginListener;
 import net.rossonet.waldot.api.models.WaldotGraph;
+import net.rossonet.waldot.api.models.LogEventSeverity;
 import net.rossonet.waldot.api.models.WaldotNamespace;
 import net.rossonet.waldot.opc.AbstractOpcVertex;
 
@@ -60,7 +61,8 @@ import net.rossonet.waldot.opc.AbstractOpcVertex;
 public class TinkerPopVertex extends AbstractOpcVertex
 		implements
 			AutoCloseable {
-	private static final String DEFAULT_CATEGORY_EVENT = "TinkerPopVertex";
+	/** Category degli eventi di log (regola in LogEventSeverity). */
+	private static final String DEFAULT_CATEGORY_EVENT = "tinkerpop";
 
 	/**
 	 * Registers OPC-UA properties for Gremlin Server type node.
@@ -209,7 +211,8 @@ public class TinkerPopVertex extends AbstractOpcVertex
 				updatePropertyIfChanged(STATUS_FIELD.toLowerCase(),
 						_STATUS_RUNNING);
 				sendLogEvent(DEFAULT_CATEGORY_EVENT,
-						"Gremlin Server started: " + server.toString(), 0);
+						"Gremlin Server started: " + server.toString(),
+						LogEventSeverity.NOTICE);
 			} catch (final Exception e) {
 				if (e instanceof InterruptedException) {
 					Thread.currentThread().interrupt();
@@ -228,7 +231,7 @@ public class TinkerPopVertex extends AbstractOpcVertex
 						STATUS_FAILED);
 				sendLogEvent(DEFAULT_CATEGORY_EVENT,
 						"Failed to start Gremlin Server: " + e.getMessage(),
-						100);
+						LogEventSeverity.ERROR);
 			}
 		}
 	}
@@ -292,11 +295,18 @@ public class TinkerPopVertex extends AbstractOpcVertex
 					updatePropertyIfChanged(STATUS_FIELD.toLowerCase(),
 							_STATUS_STOPPED);
 					logger.info("Gremlin Server stopped");
+					if (!closed) {
+						sendLogEvent(DEFAULT_CATEGORY_EVENT,
+								"Gremlin Server stopped", LogEventSeverity.NOTICE);
+					}
 				} catch (final Exception e) {
 					if (e instanceof InterruptedException) {
 						Thread.currentThread().interrupt();
 					}
 					logger.error("Failed to stop Gremlin Server", e);
+					sendLogEvent(DEFAULT_CATEGORY_EVENT,
+							"Failed to stop Gremlin Server: " + e.getMessage(),
+							LogEventSeverity.ERROR);
 					updatePropertyIfChanged(STATUS_FIELD.toLowerCase(),
 							STATUS_FAILED);
 				} finally {

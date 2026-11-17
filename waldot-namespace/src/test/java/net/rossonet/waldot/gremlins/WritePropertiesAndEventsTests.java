@@ -218,6 +218,36 @@ public class WritePropertiesAndEventsTests {
 	}
 
 	@Test
+	public void testSendLogEventOnChange() throws Exception {
+		simpleServerInit();
+		final AbstractOpcVertex v = (AbstractOpcVertex) g.addVertex("id", "log-id", "label", "log-node",
+				"event-notifier", "true");
+		final java.util.List<String> received = new java.util.concurrent.CopyOnWriteArrayList<>();
+		final java.util.List<Integer> severities = new java.util.concurrent.CopyOnWriteArrayList<>();
+		v.addEventObserver((node, event) -> {
+			received.add(event.getBrowseName().getName() + ":" + event.getMessage().getText());
+			severities.add(event.getSeverity().intValue());
+		});
+		// stessa condizione ripetuta a ogni ciclo: un solo evento
+		for (int i = 0; i < 5; i++) {
+			v.sendLogEventOnChange("conn", "refused", "test", "connection refused",
+					net.rossonet.waldot.api.models.LogEventSeverity.ERROR);
+		}
+		// condizione diversa: nuovo evento
+		v.sendLogEventOnChange("conn", "timeout", "test", "connection timeout",
+				net.rossonet.waldot.api.models.LogEventSeverity.ERROR);
+		// ripristino: solo la prima volta
+		assert v.clearLogEventCondition("conn");
+		assert !v.clearLogEventCondition("conn");
+		// dopo il ripristino la stessa condizione torna a produrre un evento
+		v.sendLogEventOnChange("conn", "refused", "test", "connection refused",
+				net.rossonet.waldot.api.models.LogEventSeverity.ERROR);
+		assert received.equals(java.util.List.of("test:connection refused", "test:connection timeout",
+				"test:connection refused")) : received;
+		assert severities.stream().allMatch(s -> s == 650) : severities;
+	}
+
+	@Test
 	public void testOpcUaEvent() throws Exception {
 		simpleServerInit();
 		final AbstractOpcVertex v = (AbstractOpcVertex) g.addVertex("id", "test-id", "label", "test-node",

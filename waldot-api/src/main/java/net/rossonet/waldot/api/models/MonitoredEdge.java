@@ -360,6 +360,20 @@ public abstract class MonitoredEdge implements EventObserver, PropertyObserver {
 		}
 	}
 
+	/**
+	 * Ritardo (ms) con cui questo arco inoltra gli eventi, 0 se li inoltra
+	 * subito: chi crea il nodo evento non deve cancellarlo prima.
+	 */
+	public long getEventDelayMs() {
+		try {
+			return isActive() && isEventNotificationActive() && isDelayProperty()
+					? Math.max(0L, checkLongInProperty(DELAY_LABEL))
+					: 0L;
+		} catch (final RuntimeException e) {
+			return 0L;
+		}
+	}
+
 	protected boolean isDelayProperty() {
 		final long checkLongInProperty = checkLongInProperty(DELAY_LABEL);
 		return checkLongInProperty > 0;
