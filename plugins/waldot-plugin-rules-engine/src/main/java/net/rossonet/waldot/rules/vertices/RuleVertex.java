@@ -513,7 +513,13 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 		super.close();
 	}
 
-	private JexlEngine engine() {
+	/**
+	 * JEXL engine that compiles condition and action. Subclasses can return a
+	 * restricted engine (for example scripts read from a configuration file).
+	 *
+	 * @return the engine of the rules engine plugin
+	 */
+	protected JexlEngine engine() {
 		if (waldotRulesEnginePlugin == null
 				|| waldotRulesEnginePlugin.getJexlEngine() == null) {
 			throw new IllegalStateException(
@@ -598,7 +604,14 @@ public class RuleVertex extends ComputableFireableAbstractOpcVertex {
 		return (ChangedPropertyCallback) callback;
 	}
 
-	private ClonableMapContext newContext() {
+	/**
+	 * Context of one execution, shared by condition and action. Subclasses can
+	 * return a context with only their own variables, without the graph and
+	 * the console commands of the plugin base context.
+	 *
+	 * @return a new context copied from the plugin base context, with self
+	 */
+	protected ClonableMapContext newContext() {
 		if (waldotRulesEnginePlugin == null) {
 			throw new IllegalStateException(
 					"The rules engine plugin is not initialized");

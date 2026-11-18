@@ -69,3 +69,22 @@ Un thread gestore:
 - ogni esecuzione ha un `ClonableMapContext` proprio;
 - `compiledCondition`, `compiledAction`, `closed` e `active` sono `volatile`;
 - il contesto base usa un `java.util.Random` (thread-safe) al posto di `ThreadLocalRandom`, che non può essere condiviso tra thread.
+
+## Estensione di `RuleVertex`
+
+Una sottoclasse può sostituire il motore JEXL (`engine()`) e il contesto di
+ogni esecuzione (`newContext()`), entrambi `protected`: serve quando le
+regole arrivano da una sorgente non fidata e devono girare in una sandbox,
+senza `g`, `graph` e comandi della console. Le sottoclassi possono anche
+avvolgere `execute(BooleanSupplier)` per leggere gli ingressi prima della
+condizione e usare il risultato dopo l'azione; contatori, `last-error` ed
+eventi di debug restano quelli di `RuleVertex`. Il `ComputeVertex` può
+eseguire più eventi della stessa regola in parallelo se `threads` > 1: una
+sottoclasse con stato deve serializzare le proprie esecuzioni.
+
+Esempio: le logiche degli XML della macchina MP104 (`mp104:logic`, motori
+`mp104:rule-engine` sottoclassi di `ComputeVertex`), con blocchi
+dichiarativi ed espressioni in una sandbox, descritte in
+`waldot-plugin-mp104/docs/logiche.md` del repository wot-addons; lo show
+case XML (`esempi/rules`) riprende le idee del Gas Grid (soglie di
+pressione, blocco di emergenza, regolazione PI).
