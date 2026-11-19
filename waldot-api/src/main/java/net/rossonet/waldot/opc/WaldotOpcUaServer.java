@@ -280,6 +280,13 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		if (!Files.exists(securityTempDir)) {
 			throw new Exception("unable to create security temp dir: " + securityTempDir);
 		}
+		// trust list delle identita' utente X.509 (user token X509)
+		if (x509IdentityValidator instanceof final net.rossonet.waldot.api.auth.WaldotX509IdentityValidator waldotX509) {
+			final Path users = securityTempDir.resolve(
+					net.rossonet.waldot.api.auth.WaldotX509IdentityValidator.USERS_TRUSTED_DIRECTORY);
+			Files.createDirectories(users);
+			waldotX509.setTrustedDirectory(users);
+		}
 		final File pkiDir = securityTempDir.resolve("pki").toFile();
 		final File issuerDir = securityTempDir.resolve("store").toFile();
 		Files.createDirectories(issuerDir.toPath());
