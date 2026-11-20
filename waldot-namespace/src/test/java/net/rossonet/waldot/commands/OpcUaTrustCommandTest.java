@@ -12,6 +12,10 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.milo.opcua.stack.core.UaException;
+import org.eclipse.milo.opcua.stack.core.security.DefaultServerCertificateValidator;
+import org.eclipse.milo.opcua.stack.core.security.FileBasedCertificateQuarantine;
+import org.eclipse.milo.opcua.stack.core.security.FileBasedTrustListManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -51,5 +55,39 @@ class OpcUaTrustCommandTest {
 		assertEquals(1, ((List<?>) OpcUaTrustCommand.list(dir).get("certificates")).size());
 		assertEquals(List.of(), OpcUaTrustCommand.remove(dir, "user", (String) client.get("sha1")).get("removed"));
 		assertThrows(IllegalArgumentException.class, () -> OpcUaTrustCommand.add(dir, "admin", der));
+	}
+
+	/** Validazione del SecureChannel con la trust list della cartella, come il server. */
+	private void validate(final String clientPem) throws Exception {
+		final Path store = dir.resolve("store");
+		Files.createDirectories(store);
+		try (FileBasedTrustListManager trust = FileBasedTrustListManager.createAndInitialize(store)) {
+			new DefaultServerCertificateValidator(trust,
+					FileBasedCertificateQuarantine.create(store.resolve("rejected").resolve("certs")))
+					.validateCertificateChain(List.of(OpcUaTrustCommand.parse(clientPem)), null, null);
+		}
+	}
+
+	/**
+	 * Certificato client firmato da una CA (mu-field del laboratorio): senza la
+	 * CA tra gli emittenti il server lo rifiuta anche se fidato
+	 * (Bad_SecurityChecksFailed); con la CA (issuer) e il client fidato passa;
+	 * tolto il client dai fidati e' di nuovo rifiutato.
+	 */
+	@Test
+	void caSignedClientNeedsTheIssuer() throws Exception {
+		final String client = pem("client-of-ca.pem");
+		final Map<String, Object> trusted = OpcUaTrustCommand.add(dir, "client", client);
+		assertThrows(UaException.class, () -> validate(client), "without the CA");
+		final Map<String, Object> issuer = OpcUaTrustCommand.add(dir, "issuer", pem("ca.pem"));
+		assertTrue(Files.exists(dir.resolve("store/issuer/certs").resolve((String) issuer.get("file"))));
+		assertEquals("issuer", issuer.get("kind"));
+		validate(client);
+		assertEquals(2, ((List<?>) OpcUaTrustCommand.list(dir).get("certificates")).size(),
+				"client and issuer listed");
+		// rimozione senza tipo: il client dai fidati, la CA resta
+		assertEquals(List.of("client/" + trusted.get("file")),
+				OpcUaTrustCommand.remove(dir, "", (String) trusted.get("sha1")).get("removed"));
+		assertThrows(UaException.class, () -> validate(client), "client no longer trusted");
 	}
 }

@@ -34,7 +34,14 @@ import net.rossonet.waldot.opc.WaldotOpcUaServer;
  * SecureChannel ({@code store/trusted/certs}, reloaded by Milo when the
  * directory changes);</li>
  * <li>{@code user}: certificates of the X.509 user identities
- * ({@code users/trusted}, read at every activation of a session).</li>
+ * ({@code users/trusted}, read at every activation of a session);</li>
+ * <li>{@code issuer}: CA certificates that issued the client certificates
+ * ({@code store/issuer/certs}, layout of Milo FileBasedTrustListManager).
+ * Milo builds the chain of a client certificate up to a self-signed CA: a client certificate signed by a CA
+ * is accepted only with the CA among the issuers and the client
+ * certificate (or the CA itself) among the trusted ones. Without the CA a
+ * CA-signed client certificate is always refused with
+ * Bad_SecurityChecksFailed, even when trusted (lab of 20/11/2026).</li>
  * </ul>
  * Actions: {@code list}, {@code add} (certificate in PEM or Base64 of DER),
  * {@code remove} (SHA-1 or SHA-256 thumbprint, hex with or without colons),
@@ -53,8 +60,9 @@ public final class OpcUaTrustCommand extends AbstractExchangeCommand {
 		return switch (kind) {
 			case "client" -> securityDir.resolve("store").resolve("trusted").resolve("certs");
 			case "user" -> securityDir.resolve(WaldotX509IdentityValidator.USERS_TRUSTED_DIRECTORY);
+			case "issuer" -> securityDir.resolve("store").resolve("issuer").resolve("certs");
 			default -> throw new IllegalArgumentException(
-					"kind must be client or user: " + kind);
+					"kind must be client, user or issuer: " + kind);
 		};
 	}
 
@@ -86,10 +94,13 @@ public final class OpcUaTrustCommand extends AbstractExchangeCommand {
 		return m;
 	}
 
-	/** Trust lists of the directory (both kinds). */
+	/** Kinds of certificates, in listing order. */
+	static final List<String> KINDS = List.of("client", "user", "issuer");
+
+	/** Trust lists of the directory (every kind). */
 	static Map<String, Object> list(final Path securityDir) throws Exception {
 		final List<Map<String, Object>> list = new ArrayList<>();
-		for (final String kind : List.of("client", "user")) {
+		for (final String kind : KINDS) {
 			final Path dir = directory(securityDir, kind);
 			if (!Files.isDirectory(dir)) {
 				continue;
@@ -133,7 +144,7 @@ public final class OpcUaTrustCommand extends AbstractExchangeCommand {
 		return out;
 	}
 
-	/** Removes the certificates with the thumbprint (one kind or both). */
+	/** Removes the certificates with the thumbprint (one kind or every kind). */
 	static Map<String, Object> remove(final Path securityDir, final String kind,
 			final String value) throws Exception {
 		final String wanted = value.replace(":", "").strip().toLowerCase(Locale.ROOT);
@@ -141,7 +152,7 @@ public final class OpcUaTrustCommand extends AbstractExchangeCommand {
 			throw new IllegalArgumentException("thumbprint missing");
 		}
 		final List<String> removed = new ArrayList<>();
-		for (final String k : kind.isBlank() ? List.of("client", "user") : List.of(kind)) {
+		for (final String k : kind.isBlank() ? KINDS : List.of(kind)) {
 			final Path dir = directory(securityDir, k);
 			if (!Files.isDirectory(dir)) {
 				continue;
@@ -170,7 +181,7 @@ public final class OpcUaTrustCommand extends AbstractExchangeCommand {
 	public OpcUaTrustCommand(final WaldotNamespace namespace) {
 		super(namespace, NAME,
 				"trust lists of the OPC UA server: action list | add | remove | server-certificate, kind client"
-						+ " (SecureChannel) or user (X.509 identity), value = certificate (PEM or Base64 of DER)"
+						+ " (SecureChannel), user (X.509 identity) or issuer (CA of the clients), value = certificate (PEM or Base64 of DER)"
 						+ " or thumbprint (SHA-1/SHA-256); JSON output",
 				MiloStrategy.MANAGE_CMD_DIRECTORY, new String[]{"action", "kind", "value"},
 				new String[]{"json", "error"});
