@@ -137,6 +137,12 @@ public class WaldotOpcUaServer implements AutoCloseable {
 
 	private FileBasedTrustListManager trustListManager;
 
+	/** Security directory of the server (keystore, trust lists). */
+	private Path securityDir;
+
+	/** Certificate of the server (SecureChannel). */
+	private X509Certificate serverCertificate;
+
 	private final WaldotConfiguration waldotConfiguration;
 
 	private final X509IdentityValidator x509IdentityValidator;
@@ -277,6 +283,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		this.configuration = configuration;
 		final Path securityTempDir = Paths.get(configuration.getSecurityTempDir());
 		Files.createDirectories(securityTempDir);
+		this.securityDir = securityTempDir.toAbsolutePath();
 		if (!Files.exists(securityTempDir)) {
 			throw new Exception("unable to create security temp dir: " + securityTempDir);
 		}
@@ -308,6 +315,7 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		};
 
 		final X509Certificate certificate = loader.getServerCertificate();
+		this.serverCertificate = certificate;
 
 		final KeyStoreCertificateStore certificateStore = KeyStoreCertificateStore
 				.createAndInitialize(new KeyStoreCertificateStore.Settings(securityTempDir.resolve("pki"),
@@ -628,6 +636,22 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		final CompletableFuture<Void> future = new CompletableFuture<>();
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> future.complete(null)));
 		future.get();
+	}
+
+
+	/**
+	 * Security directory of the server: keystore of the server
+	 * (example-server.pfx), trust list of the client certificates
+	 * ({@code store/trusted/certs}, reloaded by Milo when it changes) and of
+	 * the X.509 users ({@code users/trusted}); null before the start.
+	 */
+	public Path getSecurityDir() {
+		return securityDir;
+	}
+
+	/** Certificate of the server (SecureChannel), null before the start. */
+	public X509Certificate getServerCertificate() {
+		return serverCertificate;
 	}
 
 }

@@ -236,6 +236,8 @@ public class HomunculusNamespace extends ManagedNamespaceWithLifecycle
 		registerCommand(new FileCommands.ListFiles(this));
 		registerCommand(new FileCommands.Get(this, graphTransfers));
 		registerCommand(new DirectoryContentCommand(this));
+		// trust lists e certificato del server OPC UA (muuh opcua trust)
+		registerCommand(new net.rossonet.waldot.commands.OpcUaTrustCommand(this));
 	}
 
 	@Override

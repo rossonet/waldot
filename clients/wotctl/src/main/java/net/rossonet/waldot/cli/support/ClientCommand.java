@@ -66,6 +66,11 @@ public abstract class ClientCommand implements Callable<Integer> {
 		clientFactory = Objects.requireNonNull(factory, "factory");
 	}
 
+	/** The current factory of the clients (to restore it after a change). */
+	public static Function<WaldOTAgentClientConfiguration, WaldotClient> clientFactory() {
+		return clientFactory;
+	}
+
 	/** Restores the default factory and standard output. */
 	public static void resetTestHooks() {
 		clientFactory = DEFAULT_CLIENT_FACTORY;
