@@ -331,8 +331,15 @@ public class TinkerPopVertex extends AbstractOpcVertex
 			}
 		}
 		final var stopped = gremlinServer.stop();
-		if (wait) {
+		// GremlinServer.stop() chiude i grafi dal suo thread: se arriva qui da
+		// li' (chiusura del namespace durante lo stop del server) l'attesa e'
+		// su se stessa e finisce solo con il timeout, a ogni riavvio di
+		// clarabella (FAT-7.27-ST-04a, 15 s in piu' dopo un C_RP)
+		if (wait && !GREMLIN_STOP_THREAD.equals(Thread.currentThread().getName())) {
 			stopped.get(STOP_TIMEOUT_SEC, TimeUnit.SECONDS);
 		}
 	}
+
+	/** Nome del thread con cui GremlinServer.stop() chiude il server. */
+	static final String GREMLIN_STOP_THREAD = "gremlin-server-stop";
 }
