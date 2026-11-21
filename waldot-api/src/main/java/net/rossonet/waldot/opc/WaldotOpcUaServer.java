@@ -328,8 +328,9 @@ public class WaldotOpcUaServer implements AutoCloseable {
 		final FileBasedCertificateQuarantine certificateQuarantine = FileBasedCertificateQuarantine
 				.create(issuerDir.toPath().resolve("rejected").resolve("certs"));
 
-		final DefaultServerCertificateValidator certificateValidator = new DefaultServerCertificateValidator(
-				trustListManager, certificateQuarantine);
+		// motivo del rifiuto dei certificati client a livello warn (Milo: debug)
+		final LoggingCertificateValidator certificateValidator = new LoggingCertificateValidator(
+				new DefaultServerCertificateValidator(trustListManager, certificateQuarantine));
 
 		final DefaultApplicationGroup defaultGroup = DefaultApplicationGroup.createAndInitialize(trustListManager,
 				certificateStore, certificateFactory, certificateValidator);
