@@ -120,6 +120,11 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 		incremental,
 		/** Random value between min and max */
 		random,
+		/**
+		 * Linear ramp up from min to max and back down, in {@link #RAMP_STEPS} steps per
+		 * direction (one step per delay)
+		 */
+		ramp,
 		/** Smooth sine wave pattern */
 		sinusoidal,
 		/** No generation, value stays constant */
@@ -127,6 +132,12 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 		/** Triangle wave pattern */
 		triangular
 	}
+
+	/** Steps of the ramp algorithm from min to max (and back). */
+	public static final int RAMP_STEPS = 60;
+
+	/** Direction of the ramp algorithm: up towards max, down towards min. */
+	private boolean rampUp = true;
 
 	/** Minimum allowed delay between updates (10ms) */
 	private static final long MIN_DELAY = 10L;
@@ -243,6 +254,9 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 						break;
 					case random :
 						generateNextRandom();
+						break;
+					case ramp :
+						generateNextRamp();
 						break;
 					case sinusoidal :
 						generateNextSinusoidal();
@@ -638,6 +652,28 @@ public class DataGeneratorVertex extends AbstractOpcVertex
 	 * Formula: random() * (max - min) + min
 	 * </p>
 	 */
+	/**
+	 * Rampa lineare: sale da min a max e ridiscende in {@link #RAMP_STEPS} passi per verso,
+	 * un passo a ogni intervallo; un valore fuori dal campo (impostato da fuori) riparte dal
+	 * bordo piu' vicino.
+	 */
+	protected void generateNextRamp() {
+		final double step = (max - min) / RAMP_STEPS;
+		if (step <= 0 || Double.isNaN(actualValue)) {
+			actualValue = min;
+		} else {
+			actualValue += rampUp ? step : -step;
+			if (actualValue >= max) {
+				actualValue = max;
+				rampUp = false;
+			} else if (actualValue <= min) {
+				actualValue = min;
+				rampUp = true;
+			}
+		}
+		assignValue();
+	}
+
 	protected void generateNextRandom() {
 		actualValue = Math.random() * (max - min) + min;
 		assignValue();

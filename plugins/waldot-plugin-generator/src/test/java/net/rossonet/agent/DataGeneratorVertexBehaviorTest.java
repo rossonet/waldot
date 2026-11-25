@@ -82,6 +82,25 @@ public class DataGeneratorVertexBehaviorTest {
 		return Double.parseDouble(p.value().toString());
 	}
 
+	/**
+	 * Rampa: sale da min a max in passi di (max - min) / RAMP_STEPS e poi ridiscende, anche su un
+	 * campo piccolo (0..1).
+	 */
+	@Test
+	public void rampGoesUpToMaxAndBackDownInSteps() throws Exception {
+		final DataGeneratorVertex generator = create("label", "ramp-test",
+				"algorithm", "ramp", "delay", "10", "min", "0", "max", "1");
+		waitFor("ramp at max", () -> Math.abs(data(generator) - 1.0) < 1e-9);
+		waitFor("ramp going down", () -> {
+			final double value = data(generator);
+			return value > 0.0 && value < 1.0 - 1e-9;
+		});
+		final double step = 1.0 / DataGeneratorVertex.RAMP_STEPS;
+		final double value = data(generator);
+		// sempre un multiplo del passo
+		assertEquals(0.0, Math.abs(value / step - Math.rint(value / step)), 1e-6);
+	}
+
 	@Test
 	public void runtimeMinMaxUpdatesRejectInvalidRanges() throws Exception {
 		final DataGeneratorVertex generator = create("label", "range-test",
